@@ -299,6 +299,13 @@
       line-height: 1.5;
     }
 
+    .search-trend-date {
+      color: #8a96a6;
+      font-size: 11px;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
     .search-history-clear {
       padding: 3px 0;
       color: #697990;
@@ -402,6 +409,10 @@
       line-height: 1;
       white-space: nowrap;
       transition: color 150ms ease, background-color 150ms ease;
+    }
+
+    a.nav-trigger {
+      cursor: pointer;
     }
 
     .nav-trigger::after {
@@ -1755,9 +1766,217 @@
       padding-left: 32px;
     }
 
+    .business-panorama {
+      position: relative;
+      overflow: hidden;
+      padding: 82px 0 88px;
+      border-bottom: 1px solid #e2e9f2;
+      background:
+        linear-gradient(rgba(219, 230, 242, 0.28) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(219, 230, 242, 0.28) 1px, transparent 1px),
+        #fbfdff;
+      background-size: 36px 36px;
+    }
+
+    .business-panorama::before {
+      position: absolute;
+      top: -260px;
+      right: -180px;
+      width: 640px;
+      height: 640px;
+      border: 1px solid rgba(0, 110, 255, 0.08);
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+
+    .panorama-header {
+      position: relative;
+      display: grid;
+      align-items: end;
+      gap: 48px;
+      margin-bottom: 36px;
+      grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+    }
+
+    .panorama-title {
+      max-width: 760px;
+      margin: 0;
+      color: #172333;
+      font-size: clamp(32px, 2.45vw, 42px);
+      font-weight: 650;
+      line-height: 1.28;
+      letter-spacing: -0.018em;
+    }
+
+    .panorama-summary {
+      margin: 0;
+      color: #66758a;
+      font-size: 15px;
+      line-height: 1.78;
+    }
+
+    .panorama-grid {
+      position: relative;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .panorama-card {
+      --panorama-accent: #0877e8;
+      --panorama-soft: #eaf4ff;
+      position: relative;
+      display: flex;
+      min-width: 0;
+      min-height: 286px;
+      flex-direction: column;
+      border: 1px solid #dde6f0;
+      border-top: 3px solid var(--panorama-accent);
+      border-radius: 8px;
+      padding: 27px 25px 24px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 12px 28px rgba(39, 64, 96, 0.07);
+    }
+
+    .panorama-card--strategy {
+      --panorama-accent: #5368d8;
+      --panorama-soft: #eef0ff;
+    }
+
+    .panorama-card--education {
+      --panorama-accent: #0b958a;
+      --panorama-soft: #e8f8f5;
+    }
+
+    .panorama-card--evaluation {
+      --panorama-accent: #6b62cf;
+      --panorama-soft: #f0efff;
+    }
+
+    .panorama-icon {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      margin-bottom: 20px;
+      place-items: center;
+      border-radius: 7px;
+      color: var(--panorama-accent);
+      background: var(--panorama-soft);
+    }
+
+    .panorama-icon svg {
+      width: 23px;
+      height: 23px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.65;
+    }
+
+    .panorama-index {
+      position: absolute;
+      top: 25px;
+      right: 24px;
+      color: #a0acba;
+      font-size: 11px;
+      font-weight: 650;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .panorama-name {
+      margin: 0;
+      color: #243144;
+      font-size: 22px;
+      font-weight: 620;
+      line-height: 1.4;
+    }
+
+    .panorama-role {
+      margin: 9px 0 0;
+      color: #66758a;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .panorama-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 17px 0 22px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .panorama-tags li {
+      border-radius: 4px;
+      padding: 4px 7px;
+      color: #526277;
+      background: #f2f5f9;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .panorama-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      color: var(--panorama-accent);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .panorama-link:hover,
+    .panorama-link:focus-visible {
+      outline: none;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .panorama-link svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.7;
+    }
+
+    .panorama-foundation {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 24px;
+      border: 1px solid #dfe7f0;
+      border-radius: 7px;
+      padding: 16px 22px;
+      color: #4f6075;
+      background: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .panorama-foundation strong {
+      color: #27364a;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .panorama-foundation i {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #9aacc0;
+    }
+
     .business-module {
       position: relative;
       overflow: hidden;
+      scroll-margin-top: var(--header-height);
       border-bottom: 1px solid #e2eaf4;
       background:
         radial-gradient(circle at 82% 14%, rgba(111, 182, 255, 0.11), transparent 27%),
@@ -1788,9 +2007,9 @@
     .overview-inner {
       display: grid;
       align-items: center;
-      gap: 72px;
-      padding-top: 70px;
-      padding-bottom: 40px;
+      gap: clamp(64px, 7vw, 108px);
+      padding-top: 88px;
+      padding-bottom: 54px;
       grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
     }
 
@@ -1828,18 +2047,18 @@
     }
 
     .overview-lead {
-      max-width: 760px;
-      margin: 24px 0 0;
+      max-width: 680px;
+      margin: 22px 0 0;
       color: #526174;
       font-size: 16px;
-      line-height: 1.9;
+      line-height: 1.82;
     }
 
     .trust-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px 24px;
-      margin: 28px 0 0;
+      gap: 12px 30px;
+      margin: 26px 0 0;
       padding: 0;
       list-style: none;
     }
@@ -1888,9 +2107,7 @@
     }
 
     .path-note {
-      color: var(--ink-muted);
-      font-size: 12px;
-      white-space: nowrap;
+      display: none;
     }
 
     .path-step {
@@ -1932,30 +2149,21 @@
     }
 
     .path-step-detail {
-      margin: 3px 0 0;
-      color: #6c7889;
-      font-size: 13px;
-      line-height: 1.55;
+      display: none;
     }
 
     .path-feedback {
-      border-left: 3px solid var(--blue);
-      border-radius: 0 6px 6px 0;
-      padding: 11px 14px;
-      color: #38506f;
-      background: #f1f7ff;
-      font-size: 13px;
-      line-height: 1.55;
+      display: none;
     }
 
     .systems-section {
-      padding: 24px 0 88px;
+      padding: 20px 0 96px;
       background: transparent;
     }
 
     .systems-header {
-      max-width: 860px;
-      margin-bottom: 34px;
+      max-width: 900px;
+      margin-bottom: 30px;
     }
 
     .systems-title {
@@ -1968,16 +2176,13 @@
     }
 
     .systems-summary {
-      margin: 17px 0 0;
-      color: #627083;
-      font-size: 15px;
-      line-height: 1.8;
+      display: none;
     }
 
     .systems-grid {
       display: grid;
       align-items: stretch;
-      gap: 24px;
+      gap: 28px;
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
@@ -2007,10 +2212,10 @@
 
     .system-card-copy {
       display: flex;
-      min-height: 330px;
+      min-height: 250px;
       flex: 1;
       flex-direction: column;
-      padding: 25px 25px 22px;
+      padding: 28px 27px 25px;
     }
 
     .system-number {
@@ -2031,18 +2236,14 @@
     }
 
     .system-description {
-      margin: 13px 0 0;
+      margin: 14px 0 26px;
       color: #617084;
       font-size: 14px;
-      line-height: 1.75;
+      line-height: 1.72;
     }
 
     .system-features {
-      display: grid;
-      gap: 9px;
-      margin: 19px 0 24px;
-      padding: 0;
-      list-style: none;
+      display: none;
     }
 
     .system-features li {
@@ -2114,13 +2315,423 @@
     .system-visual img {
       display: block;
       width: 100%;
-      aspect-ratio: 2 / 1;
+      aspect-ratio: 2.25 / 1;
       object-fit: cover;
       object-position: top center;
       border: 1px solid rgba(198, 210, 226, 0.9);
       border-bottom: 0;
       border-radius: 6px 6px 0 0;
       background: #ffffff;
+    }
+
+    .business-module--research {
+      --module-accent: #006eff;
+      --module-accent-strong: #0052d9;
+      --module-soft: #eaf3ff;
+      background:
+        radial-gradient(circle at 78% 12%, rgba(60, 166, 255, 0.13), transparent 29%),
+        linear-gradient(180deg, #f6faff 0%, #fbfdff 100%);
+    }
+
+    .business-module--education {
+      --module-accent: #078f86;
+      --module-accent-strong: #08756f;
+      --module-soft: #e7f7f5;
+      background:
+        radial-gradient(circle at 16% 8%, rgba(41, 177, 162, 0.11), transparent 28%),
+        linear-gradient(180deg, #f6fbfb 0%, #fbfdfd 100%);
+    }
+
+    .business-module--evaluation {
+      --module-accent: #4c66cf;
+      --module-accent-strong: #3853b8;
+      --module-soft: #edf0ff;
+      background:
+        radial-gradient(circle at 84% 8%, rgba(91, 115, 216, 0.11), transparent 28%),
+        linear-gradient(180deg, #f7f8fd 0%, #fcfcfe 100%);
+    }
+
+    .core-module-overview {
+      display: grid;
+      align-items: center;
+      gap: clamp(64px, 7vw, 108px);
+      padding-top: 88px;
+      padding-bottom: 54px;
+      grid-template-columns: minmax(0, 1.08fr) minmax(390px, 0.92fr);
+    }
+
+    .core-module-copy {
+      max-width: 780px;
+    }
+
+    .core-module-copy .section-eyebrow {
+      color: var(--module-accent-strong);
+    }
+
+    .core-module-copy .section-eyebrow::before {
+      background: var(--module-accent);
+    }
+
+    .core-module-title {
+      margin: 0;
+      color: #172231;
+      font-size: clamp(34px, 2.7vw, 45px);
+      font-weight: 650;
+      line-height: 1.26;
+      letter-spacing: -0.02em;
+    }
+
+    .core-module-title span {
+      color: var(--module-accent);
+    }
+
+    .core-module-lead {
+      max-width: 680px;
+      margin: 21px 0 0;
+      color: #576679;
+      font-size: 16px;
+      line-height: 1.82;
+    }
+
+    .core-module-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 25px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .core-module-tags li {
+      border-left: 2px solid var(--module-accent);
+      padding: 3px 14px;
+      color: #35465b;
+      background: rgba(255, 255, 255, 0.58);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .capability-panel {
+      border: 1px solid rgba(199, 213, 230, 0.95);
+      border-radius: 8px;
+      padding: 28px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 20px 48px rgba(50, 76, 112, 0.1);
+    }
+
+    .capability-panel-title {
+      margin: 0 0 5px;
+      color: #263448;
+      font-size: 18px;
+      font-weight: 620;
+      line-height: 1.5;
+    }
+
+    .capability-panel-note {
+      display: none;
+    }
+
+    .capability-flow {
+      display: grid;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .capability-flow li {
+      position: relative;
+      display: grid;
+      min-height: 76px;
+      align-items: center;
+      gap: 13px;
+      border-top: 1px solid #e8edf3;
+      border-left: 1px solid #e8edf3;
+      padding: 14px;
+      color: #2c3a4c;
+      font-size: 14px;
+      font-weight: 560;
+      line-height: 1.5;
+      grid-template-columns: 34px minmax(0, 1fr);
+    }
+
+    .capability-flow li:first-child {
+      border-top: 0;
+    }
+
+    .capability-flow li:nth-child(2) {
+      border-top: 0;
+    }
+
+    .capability-flow li:nth-child(odd) {
+      border-left: 0;
+    }
+
+    .capability-flow-index {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--module-accent-strong);
+      background: var(--module-soft);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .capability-flow-copy span {
+      display: block;
+    }
+
+    .capability-flow-copy small {
+      display: none;
+    }
+
+    .core-services-section {
+      padding: 18px 0 96px;
+    }
+
+    .core-services-header {
+      max-width: 920px;
+      margin-bottom: 30px;
+    }
+
+    .core-services-title {
+      margin: 0;
+      color: #1c2736;
+      font-size: clamp(28px, 2.1vw, 36px);
+      font-weight: 640;
+      line-height: 1.35;
+      letter-spacing: -0.012em;
+    }
+
+    .core-services-summary {
+      display: none;
+    }
+
+    .core-service-grid {
+      display: grid;
+      gap: 28px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .core-service-grid--two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .core-service-card {
+      position: relative;
+      display: flex;
+      min-height: 250px;
+      min-width: 0;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #dfe7f0;
+      border-top: 3px solid var(--module-accent);
+      border-radius: 8px;
+      padding: 29px 27px 26px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 14px 32px rgba(38, 61, 91, 0.07);
+    }
+
+    .core-service-icon {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 23px;
+      place-items: center;
+      border-radius: 7px;
+      color: var(--module-accent-strong);
+      background: var(--module-soft);
+    }
+
+    .core-service-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.6;
+    }
+
+    .core-service-kicker {
+      display: none;
+    }
+
+    .core-service-name {
+      margin: 0;
+      color: #202c3c;
+      font-size: 22px;
+      font-weight: 620;
+      line-height: 1.4;
+    }
+
+    .core-service-description {
+      margin: 13px 0 26px;
+      color: #647286;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .core-service-features {
+      display: none;
+    }
+
+    .core-service-features li {
+      position: relative;
+      padding-left: 15px;
+      color: #3d4b5f;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .core-service-features li::before {
+      position: absolute;
+      top: 0.7em;
+      left: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--module-accent);
+      content: "";
+      transform: translateY(-50%);
+    }
+
+    .core-service-entry {
+      display: inline-flex;
+      min-height: 40px;
+      align-self: flex-start;
+      align-items: center;
+      gap: 9px;
+      margin-top: auto;
+      border: 1px solid var(--module-accent);
+      border-radius: 6px;
+      padding: 0 15px;
+      color: #ffffff;
+      background: var(--module-accent);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 560;
+      transition: filter 150ms ease, transform 150ms ease;
+    }
+
+    .core-service-entry:hover,
+    .core-service-entry:focus-visible {
+      filter: brightness(0.95);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .core-service-entry svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.7;
+    }
+
+    .core-service-entry.is-disabled {
+      border-color: #d8e0e9;
+      color: #7f8c9c;
+      background: #f1f4f7;
+      cursor: default;
+    }
+
+    .core-service-entry.is-disabled:hover {
+      filter: none;
+      transform: none;
+    }
+
+    .partner-section {
+      padding: 58px 0 70px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #ffffff;
+    }
+
+    .partner-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 27px;
+    }
+
+    .partner-title {
+      margin: 0;
+      color: #1d2938;
+      font-size: 28px;
+      font-weight: 620;
+      line-height: 1.4;
+    }
+
+    .partner-summary {
+      max-width: 600px;
+      margin: 0;
+      color: #748194;
+      font-size: 14px;
+      line-height: 1.7;
+      text-align: right;
+    }
+
+    .partner-grid {
+      display: grid;
+      border-top: 1px solid #e3e8ef;
+      border-left: 1px solid #e3e8ef;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .partner-item {
+      display: flex;
+      min-height: 116px;
+      align-items: center;
+      gap: 15px;
+      border-right: 1px solid #e3e8ef;
+      border-bottom: 1px solid #e3e8ef;
+      padding: 22px 24px;
+      background: #ffffff;
+    }
+
+    .partner-mark {
+      display: grid;
+      width: 46px;
+      min-width: 46px;
+      height: 46px;
+      place-items: center;
+      border: 1px solid #cdd9e7;
+      border-radius: 50%;
+      color: #315d96;
+      background: #f5f9fe;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .partner-mark svg {
+      width: 23px;
+      height: 23px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.6;
+    }
+
+    .partner-name {
+      margin: 0;
+      color: #273448;
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .partner-role {
+      margin: 4px 0 0;
+      color: #8390a1;
+      font-size: 12px;
+      line-height: 1.5;
     }
 
     .search-results-page {
@@ -2459,6 +3070,40 @@
         align-items: flex-end;
         padding: 18px 18px 0;
       }
+
+      .core-module-overview {
+        gap: 38px;
+        grid-template-columns: 1fr;
+      }
+
+      .core-module-copy,
+      .capability-panel {
+        max-width: 820px;
+      }
+
+      .core-services-header {
+        align-items: start;
+        gap: 14px;
+        grid-template-columns: 1fr;
+      }
+
+      .partner-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .panorama-header {
+        align-items: start;
+        gap: 18px;
+        grid-template-columns: 1fr;
+      }
+
+      .panorama-summary {
+        max-width: 760px;
+      }
+
+      .panorama-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 720px) {
@@ -2473,6 +3118,74 @@
       .content-shell {
         padding-right: 20px;
         padding-left: 20px;
+      }
+
+      .business-panorama {
+        padding: 54px 0 60px;
+        background-size: 28px 28px;
+      }
+
+      .panorama-header {
+        margin-bottom: 25px;
+      }
+
+      .panorama-title {
+        font-size: 29px;
+      }
+
+      .panorama-summary {
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .panorama-grid {
+        gap: 12px;
+      }
+
+      .panorama-card {
+        min-height: 232px;
+        padding: 18px 16px 17px;
+      }
+
+      .panorama-icon {
+        width: 38px;
+        height: 38px;
+        margin-bottom: 15px;
+      }
+
+      .panorama-index {
+        top: 17px;
+        right: 15px;
+      }
+
+      .panorama-name {
+        font-size: 19px;
+      }
+
+      .panorama-role {
+        display: -webkit-box;
+        overflow: hidden;
+        margin-top: 7px;
+        font-size: 13px;
+        line-height: 1.58;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+      }
+
+      .panorama-tags {
+        display: none;
+      }
+
+      .panorama-link {
+        margin-top: 17px;
+        font-size: 13px;
+      }
+
+      .panorama-foundation {
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        margin-top: 16px;
+        padding: 14px 16px;
       }
 
       .feature-carousel {
@@ -2577,8 +3290,8 @@
 
       .overview-inner {
         gap: 32px;
-        padding-top: 48px;
-        padding-bottom: 30px;
+        padding-top: 52px;
+        padding-bottom: 25px;
       }
 
       .overview-title {
@@ -2637,6 +3350,156 @@
       .system-visual {
         padding: 12px 12px 0;
       }
+
+      .core-module-overview {
+        gap: 28px;
+        padding-top: 52px;
+        padding-bottom: 25px;
+      }
+
+      .core-module-title {
+        font-size: 31px;
+        line-height: 1.31;
+      }
+
+      .core-module-lead {
+        margin-top: 18px;
+        font-size: 15px;
+        line-height: 1.72;
+      }
+
+      .core-module-tags,
+      .trust-list,
+      .capability-panel,
+      .strategy-path {
+        display: none;
+      }
+
+      .capability-panel {
+        padding: 22px 20px 20px;
+      }
+
+      .core-services-section {
+        padding: 8px 0 58px;
+      }
+
+      .core-services-header {
+        margin-bottom: 19px;
+      }
+
+      .core-services-header .section-eyebrow,
+      .systems-header .section-eyebrow {
+        display: none;
+      }
+
+      .core-services-title {
+        font-size: 23px;
+      }
+
+      .core-service-grid,
+      .core-service-grid--two {
+        gap: 18px;
+        grid-template-columns: 1fr;
+      }
+
+      .core-service-card {
+        min-height: 0;
+        padding: 22px 20px 20px;
+      }
+
+      .core-service-icon {
+        width: 38px;
+        height: 38px;
+        margin-bottom: 15px;
+      }
+
+      .core-service-name {
+        font-size: 20px;
+      }
+
+      .core-service-description,
+      .system-description {
+        display: -webkit-box;
+        overflow: hidden;
+        margin-top: 9px;
+        margin-bottom: 18px;
+        font-size: 13px;
+        line-height: 1.62;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .core-service-entry,
+      .system-entry {
+        width: 100%;
+        min-height: 44px;
+        align-self: stretch;
+        margin-top: 2px;
+      }
+
+      .partner-section {
+        padding: 48px 0 56px;
+      }
+
+      .partner-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 9px;
+      }
+
+      .partner-title {
+        font-size: 25px;
+      }
+
+      .partner-summary {
+        text-align: left;
+      }
+
+      .systems-section {
+        padding: 8px 0 58px;
+      }
+
+      .systems-header {
+        margin-bottom: 19px;
+      }
+
+      .systems-title {
+        font-size: 23px;
+      }
+
+      .system-card-copy {
+        min-height: 0;
+        padding: 22px 20px 20px;
+      }
+
+      .system-number {
+        display: none;
+      }
+
+      .system-visual {
+        display: none;
+      }
+
+      .partner-summary,
+      .partner-role {
+        display: none;
+      }
+
+      .partner-item {
+        min-height: 84px;
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .partner-mark {
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
+      }
+
+      .partner-name {
+        font-size: 15px;
+      }
     }
 
     @media (max-width: 420px) {
@@ -2688,6 +3551,10 @@
 
       .resource-node {
         width: 70px;
+      }
+
+      .partner-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -2780,17 +3647,20 @@
 
           <section class="search-panel" id="searchPanel" aria-label="搜索建议" hidden>
             <div class="search-section">
-              <div class="search-section-heading">
-                <h2 class="search-section-title">近期搜索热词</h2>
-              </div>
-              <div class="search-word-list" aria-label="近期搜索热词">
-                <button class="search-word is-hot" type="button" data-search-word="AI 战略咨询">AI 战略咨询</button>
-                <button class="search-word is-hot" type="button" data-search-word="新型高端智库">新型高端智库</button>
-                <button class="search-word is-hot" type="button" data-search-word="科技专题服务">科技专题服务</button>
-                <button class="search-word is-hot" type="button" data-search-word="科技信息展示">科技信息展示</button>
-                <button class="search-word is-hot" type="button" data-search-word="智慧人才">智慧人才</button>
-                <button class="search-word is-hot" type="button" data-search-word="科学数据库">科学数据库</button>
-              </div>
+            <div class="search-section-heading">
+              <h2 class="search-section-title">近期搜索热词</h2>
+              <span class="search-trend-date">更新于 2026.07.18</span>
+            </div>
+            <div class="search-word-list" aria-label="近期搜索热词">
+                <button class="search-word is-hot" type="button" data-search-word="AI for Science">AI for Science</button>
+                <button class="search-word is-hot" type="button" data-search-word="科研智能体">科研智能体</button>
+                <button class="search-word is-hot" type="button" data-search-word="具身智能">具身智能</button>
+                <button class="search-word is-hot" type="button" data-search-word="开源大模型">开源大模型</button>
+                <button class="search-word is-hot" type="button" data-search-word="智能体互联">智能体互联</button>
+                <button class="search-word is-hot" type="button" data-search-word="词元经济">词元经济</button>
+                <button class="search-word is-hot" type="button" data-search-word="AI+教育">AI+教育</button>
+                <button class="search-word is-hot" type="button" data-search-word="全球AI治理">全球AI治理</button>
+            </div>
             </div>
 
             <div class="search-section">
@@ -2859,75 +3729,75 @@
   <main class="site-main" id="mainContent">
     <div class="home-content" id="homeContent">
       <section class="feature-carousel" id="featureCarousel" aria-labelledby="featureCarouselTitle">
-        <h1 class="sr-only" id="featureCarouselTitle">AI 战略咨询智能服务</h1>
+        <h1 class="sr-only" id="featureCarouselTitle">国科信四大核心业务与近期运营活动</h1>
         <div class="feature-carousel-inner">
-          <div class="feature-tabs" role="tablist" aria-label="AI 战略咨询核心能力">
+          <div class="feature-tabs" role="tablist" aria-label="四大核心业务与近期运营活动">
             <button class="feature-tab" id="featureTab1" type="button" role="tab" aria-selected="true" aria-controls="featureSlide1" tabindex="0" data-slide-index="0">
               <span class="feature-tab-index">01</span>
-              <span class="feature-tab-label">高端智库AI战略报告</span>
+              <span class="feature-tab-label">AI 科研</span>
               <span class="feature-tab-badge">核心</span>
             </button>
             <button class="feature-tab" id="featureTab2" type="button" role="tab" aria-selected="false" aria-controls="featureSlide2" tabindex="-1" data-slide-index="1">
               <span class="feature-tab-index">02</span>
-              <span class="feature-tab-label">全球科技前沿监测</span>
-              <span class="feature-tab-badge">前沿</span>
+              <span class="feature-tab-label">战略咨询</span>
+              <span class="feature-tab-badge">智库</span>
             </button>
             <button class="feature-tab" id="featureTab3" type="button" role="tab" aria-selected="false" aria-controls="featureSlide3" tabindex="-1" data-slide-index="2">
               <span class="feature-tab-index">03</span>
-              <span class="feature-tab-label">产业链技术链研判</span>
-              <span class="feature-tab-badge">重磅</span>
+              <span class="feature-tab-label">未来教育</span>
+              <span class="feature-tab-badge">教育</span>
             </button>
             <button class="feature-tab" id="featureTab4" type="button" role="tab" aria-selected="false" aria-controls="featureSlide4" tabindex="-1" data-slide-index="3">
               <span class="feature-tab-index">04</span>
-              <span class="feature-tab-label">全球科技态势洞察</span>
-              <span class="feature-tab-badge">态势</span>
+              <span class="feature-tab-label">科技评价</span>
+              <span class="feature-tab-badge">评价</span>
             </button>
             <button class="feature-tab" id="featureTab5" type="button" role="tab" aria-selected="false" aria-controls="featureSlide5" tabindex="-1" data-slide-index="4">
               <span class="feature-tab-index">05</span>
-              <span class="feature-tab-label">企业智能诊断</span>
-              <span class="feature-tab-badge">智配</span>
+              <span class="feature-tab-label">近期首推活动</span>
+              <span class="feature-tab-badge">进行中</span>
             </button>
           </div>
 
           <div class="feature-stage">
             <article class="feature-slide is-active" id="featureSlide1" role="tabpanel" aria-labelledby="featureTab1" aria-hidden="false">
               <div class="feature-copy">
-                <p class="feature-kicker">高端智库 AI 战略报告 · 核心</p>
-                <h2 class="feature-title">高端智库AI报告正式上线<br>从海量数据到可信战略判断</h2>
-                <p class="feature-description">融合论文、专利、政策、企业、人才和产业等多源科技数据，围绕技术趋势、产业布局、竞争格局和发展建议，智能生成结构化战略咨询报告。关键结论保留数据来源与引用依据，支持人工复核和持续更新。</p>
-                <p class="feature-highlight">贯通资料汇集、分析研判与报告输出全过程</p>
-                <a class="feature-cta" href="https://effortless-licorice-cdaa9f.netlify.app" target="_blank" rel="noopener noreferrer">
-                  <span>生成战略报告</span>
+                <p class="feature-kicker">AI 科研 · 核心业务</p>
+                <h2 class="feature-title">AI 驱动科研全流程提效<br>从资源发现到研究协同</h2>
+                <p class="feature-description">面向科研机构、高校与科技团队，汇聚人才、论文、数据库、预印本与科学数据资源，以智能检索、科研智能体和专题知识库支撑选题发现、资料研读、分析验证与成果沉淀。</p>
+                <p class="feature-highlight">贯通科研发现、智能阅读、研究分析与数据协同</p>
+                <a class="feature-cta" href="ai-research.html">
+                  <span>了解 AI 科研</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
                 </a>
               </div>
               <div class="feature-visual" aria-hidden="true">
                 <div class="visual-window">
                   <div class="visual-topbar">
-                    <span>战略报告智能生成工作台</span>
-                    <span class="visual-status">分析完成</span>
+                    <span>AI 科研协同工作台</span>
+                    <span class="visual-status">研究任务就绪</span>
                   </div>
                   <div class="report-workspace">
                     <div class="report-panel">
-                      <p class="mini-label">咨询主题</p>
-                      <div class="topic-input">低空经济产业发展战略与关键技术布局</div>
+                      <p class="mini-label">研究主题</p>
+                      <div class="topic-input">具身智能关键技术与科研趋势分析</div>
                       <div class="source-tags">
-                        <span>论文 12,846</span><span>专利 8,219</span><span>政策 326</span><span>企业 1,064</span><span>人才 4,517</span>
+                        <span>论文 28,460</span><span>专利 8,219</span><span>数据集 326</span><span>机构 1,064</span><span>人才 4,517</span>
                       </div>
                     </div>
                     <div class="report-panel">
-                      <p class="mini-label">AI 分析流程</p>
+                      <p class="mini-label">智能研究流程</p>
                       <div class="flow-stack">
-                        <div class="flow-item">多源数据汇集</div>
-                        <div class="flow-item">趋势与格局研判</div>
-                        <div class="flow-item">证据交叉校验</div>
-                        <div class="flow-item">建议智能生成</div>
+                        <div class="flow-item">文献与数据发现</div>
+                        <div class="flow-item">多源证据梳理</div>
+                        <div class="flow-item">科研任务协同</div>
+                        <div class="flow-item">成果沉淀复用</div>
                       </div>
                     </div>
                     <div class="report-page">
                       <div class="report-paper">
-                        <h4>低空经济产业战略研究报告</h4>
-                        <div class="paper-meta">可信数据底座 · 42 条关键引用 · 7 项行动建议</div>
+                        <h4>具身智能前沿研究专题</h4>
+                        <div class="paper-meta">可信来源 · 研究脉络 · 前沿问题</div>
                         <div class="paper-chart">
                           <i style="height:34%"></i><i style="height:49%"></i><i style="height:42%"></i><i style="height:68%"></i><i style="height:74%"></i><i style="height:91%"></i>
                         </div>
@@ -2941,36 +3811,36 @@
 
             <article class="feature-slide" id="featureSlide2" role="tabpanel" aria-labelledby="featureTab2" aria-hidden="true">
               <div class="feature-copy">
-                <p class="feature-kicker">全球科技前沿监测 · 前沿</p>
-                <h2 class="feature-title">全球科技前沿持续监测<br>提前发现颠覆性技术信号</h2>
-                <p class="feature-description">持续追踪全球论文、专利、科研项目、企业、投融资及科技资讯，识别快速增长的研究主题、关键技术突破和潜在颠覆性方向，帮助用户及时掌握技术发展趋势与重点投入机会。</p>
-                <p class="feature-highlight">判断未来往哪里走，识别值得提前布局的技术</p>
-                <a class="feature-cta" href="https://future_industry.itic-sci.com/index/" target="_blank" rel="noopener noreferrer" tabindex="-1">
-                  <span>查看前沿动态</span>
+                <p class="feature-kicker">AI 战略咨询 · 核心业务</p>
+                <h2 class="feature-title">让科技战略咨询走向<br>持续决策支持</h2>
+                <p class="feature-description">以可信科技数据为基础，贯通宏观趋势判断、中观产业研判与微观主体诊断，结合智库方法、专家能力和智能分析工具，为政府、科研机构与科技企业提供可追溯、可复核、可持续更新的决策支持。</p>
+                <p class="feature-highlight">从一次性报告升级为持续更新的智能咨询服务</p>
+                <a class="feature-cta" href="strategy.html" tabindex="-1">
+                  <span>了解战略咨询</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
                 </a>
               </div>
               <div class="feature-visual" aria-hidden="true">
                 <div class="visual-window">
                   <div class="visual-topbar">
-                    <span>颠覆性技术信号监测</span>
-                    <span class="visual-status">全球数据持续更新</span>
+                    <span>宏观—中观—微观一体化研判</span>
+                    <span class="visual-status">持续更新</span>
                   </div>
                   <div class="frontier-grid">
                     <div class="dash-card signal-map">
-                      <span class="dash-card-title">全球前沿信号分布</span>
+                      <span class="dash-card-title">重点赛道信号分布</span>
                       <div class="signal-orbit"></div>
                       <span class="signal-dot"></span><span class="signal-dot is-teal"></span><span class="signal-dot"></span><span class="signal-dot is-teal"></span><span class="signal-dot"></span>
                     </div>
                     <div class="dash-card">
-                      <span class="dash-card-title">技术热度增速</span>
+                      <span class="dash-card-title">战略趋势增速</span>
                       <div class="trend-line"><i style="height:24%"></i><i style="height:38%"></i><i style="height:35%"></i><i style="height:52%"></i><i style="height:63%"></i><i style="height:81%"></i><i style="height:94%"></i></div>
                     </div>
                     <div class="dash-card">
-                      <span class="dash-card-title">潜力排行</span>
-                      <div class="rank-row"><span>01</span><span class="rank-bar"><i style="width:92%"></i></span><span>神经形态</span></div>
+                      <span class="dash-card-title">机会赛道</span>
+                      <div class="rank-row"><span>01</span><span class="rank-bar"><i style="width:92%"></i></span><span>具身智能</span></div>
                       <div class="rank-row"><span>02</span><span class="rank-bar"><i style="width:78%"></i></span><span>合成生物</span></div>
-                      <div class="rank-row"><span>03</span><span class="rank-bar"><i style="width:65%"></i></span><span>量子传感</span></div>
+                      <div class="rank-row"><span>03</span><span class="rank-bar"><i style="width:65%"></i></span><span>量子科技</span></div>
                     </div>
                   </div>
                 </div>
@@ -2979,35 +3849,35 @@
 
             <article class="feature-slide" id="featureSlide3" role="tabpanel" aria-labelledby="featureTab3" aria-hidden="true">
               <div class="feature-copy">
-                <p class="feature-kicker">产业链技术链研判 · 重磅</p>
-                <h2 class="feature-title">产业链技术链全景研判<br>强在哪、卡在哪，一图看清</h2>
-                <p class="feature-description">将复杂的产业链、技术链转化为直观可交互的图谱，集中展示上下游环节、关键技术、重点企业、科研机构和人才资源，智能识别产业优势、技术短板与关键瓶颈，为补链强链、招商引资和技术攻关提供依据。</p>
-                <p class="feature-highlight">回答强在哪、卡在哪、该招谁、该扶谁</p>
-                <a class="feature-cta" href="https://itic-sci.com/sso/user/login?back_url=https://itic-sci.com/brain-graph/" target="_blank" rel="noopener noreferrer" tabindex="-1">
-                  <span>进入专题研判</span>
+                <p class="feature-kicker">未来教育 · 核心业务</p>
+                <h2 class="feature-title">让 AI 成为学习与教学的<br>长期智能伙伴</h2>
+                <p class="feature-description">面向学生、教师与教育机构，提供学伴智能体、信息素养教育和智能教学支持，以个性化学习路径、任务实践和持续反馈提升学习效率、教学质量与数字时代的综合能力。</p>
+                <p class="feature-highlight">连接学伴智能体、信息素养与教学创新场景</p>
+                <a class="feature-cta" href="education.html" tabindex="-1">
+                  <span>了解未来教育</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
                 </a>
               </div>
               <div class="feature-visual" aria-hidden="true">
                 <div class="visual-window">
                   <div class="visual-topbar">
-                    <span>产业链 · 技术链双链全景图谱</span>
-                    <span class="visual-status">研判就绪</span>
+                    <span>AI 教育与能力成长路径</span>
+                    <span class="visual-status">因材施教</span>
                   </div>
                   <div class="chain-workspace">
                     <div class="chain-lane">
-                      <span class="chain-label">产业链</span>
+                      <span class="chain-label">学习链</span>
                       <div class="chain-nodes">
-                        <span class="chain-node">上游材料</span><span class="chain-node is-strong">核心部件</span><span class="chain-node">系统集成</span><span class="chain-node is-risk">关键装备</span><span class="chain-node">场景应用</span>
+                        <span class="chain-node">目标诊断</span><span class="chain-node is-strong">智能陪伴</span><span class="chain-node">任务实践</span><span class="chain-node is-risk">反馈评价</span><span class="chain-node">能力成长</span>
                       </div>
                     </div>
                     <div class="chain-lane is-tech">
-                      <span class="chain-label">技术链</span>
+                      <span class="chain-label">教学链</span>
                       <div class="chain-nodes">
-                        <span class="chain-node">基础研究</span><span class="chain-node is-strong">关键技术</span><span class="chain-node is-risk">工程验证</span><span class="chain-node">中试转化</span><span class="chain-node">规模应用</span>
+                        <span class="chain-node">课程设计</span><span class="chain-node is-strong">资源生成</span><span class="chain-node is-risk">课堂互动</span><span class="chain-node">学情分析</span><span class="chain-node">教学改进</span>
                       </div>
                     </div>
-                    <div class="chain-legend"><span><i></i>优势环节</span><span><i></i>薄弱环节 / 待突破技术</span></div>
+                    <div class="chain-legend"><span><i></i>学习者路径</span><span><i></i>教师智能支持</span></div>
                   </div>
                 </div>
               </div>
@@ -3015,38 +3885,38 @@
 
             <article class="feature-slide" id="featureSlide4" role="tabpanel" aria-labelledby="featureTab4" aria-hidden="true">
               <div class="feature-copy">
-                <p class="feature-kicker">全球科技态势洞察 · 态势</p>
-                <h2 class="feature-title">全球科技态势一屏掌握<br>看得全、比得清、判得准</h2>
-                <p class="feature-description">整合全球创新动态、区域创新能力、科研机构、科技企业、人才团队、政策资源和科技指数，通过地图、榜单、趋势图及关系网络集中呈现，支持跨区域、跨领域和跨主体对比分析。</p>
-                <p class="feature-highlight">从单一人才分析升级为科技创新全局研判</p>
-                <button class="feature-cta" type="button" data-carousel-action="open-situation" tabindex="-1">
-                  <span>查看科技态势</span>
+                <p class="feature-kicker">科技评价 · 核心业务</p>
+                <h2 class="feature-title">以多源数据支撑人才与<br>创新能力评价</h2>
+                <p class="feature-description">围绕人才、科研机构、创新资源与区域科技能力，整合科研产出、学术影响、技术转化和产业贡献等多维数据，形成可解释、可比较、可持续更新的评价与决策支持。</p>
+                <p class="feature-highlight">让评价依据更完整、评价过程更透明、评价结果可追溯</p>
+                <a class="feature-cta" href="evaluation.html" tabindex="-1">
+                  <span>了解科技评价</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
-                </button>
+                </a>
               </div>
               <div class="feature-visual" aria-hidden="true">
                 <div class="visual-window">
                   <div class="visual-topbar">
-                    <span>全球科技创新态势总览</span>
-                    <span class="visual-status">实时洞察</span>
+                    <span>科技评价与创新决策总览</span>
+                    <span class="visual-status">多维评价</span>
                   </div>
                   <div class="situation-grid">
                     <div class="dash-card situation-map">
-                      <span class="dash-card-title">全球创新网络</span>
+                      <span class="dash-card-title">创新主体分布</span>
                       <div class="globe"><i class="map-marker"></i><i class="map-marker"></i><i class="map-marker"></i><i class="map-marker"></i></div>
                     </div>
                     <div class="dash-card">
                       <span class="dash-card-title">核心指标</span>
                       <div class="kpi-stack">
-                        <div class="kpi-item"><div class="kpi-value">128</div><div class="kpi-label">监测国家</div></div>
-                        <div class="kpi-item"><div class="kpi-value">4,860</div><div class="kpi-label">重点机构</div></div>
-                        <div class="kpi-item"><div class="kpi-value">32.6万</div><div class="kpi-label">科技企业</div></div>
-                        <div class="kpi-item"><div class="kpi-value">1,204</div><div class="kpi-label">前沿主题</div></div>
+                        <div class="kpi-item"><div class="kpi-value">128</div><div class="kpi-label">评价指标</div></div>
+                        <div class="kpi-item"><div class="kpi-value">4,860</div><div class="kpi-label">人才样本</div></div>
+                        <div class="kpi-item"><div class="kpi-value">32.6万</div><div class="kpi-label">数据记录</div></div>
+                        <div class="kpi-item"><div class="kpi-value">1,204</div><div class="kpi-label">创新机构</div></div>
                       </div>
                     </div>
                     <div class="dash-card">
-                      <span class="dash-card-title">人才净流入趋势</span>
-                      <div class="talent-flow"><span>深圳<i style="width:94%"></i>+18%</span><span>新加坡<i style="width:78%"></i>+14%</span><span>慕尼黑<i style="width:61%"></i>+9%</span></div>
+                      <span class="dash-card-title">人才评价维度</span>
+                      <div class="talent-flow"><span>科研产出<i style="width:94%"></i>94</span><span>创新影响<i style="width:78%"></i>78</span><span>产业贡献<i style="width:61%"></i>61</span></div>
                     </div>
                   </div>
                 </div>
@@ -3055,28 +3925,28 @@
 
             <article class="feature-slide" id="featureSlide5" role="tabpanel" aria-labelledby="featureTab5" aria-hidden="true">
               <div class="feature-copy">
-                <p class="feature-kicker">企业智能诊断 · 智配</p>
-                <h2 class="feature-title">企业智能诊断与资源匹配<br>让发展问题对应具体行动方案</h2>
-                <p class="feature-description">结合企业产品、技术、团队和项目等授权数据，以及外部产业、市场和政策信息，形成企业能力画像与发展诊断，智能匹配适用政策、申报项目、科研机构、合作伙伴和人才资源，并生成可执行的行动清单。</p>
-                <p class="feature-highlight">明确企业缺什么、能申请什么、该与谁合作、下一步怎么做</p>
-                <a class="feature-cta" href="https://skxdemo.unicomcn.tech:30999/development/search" target="_blank" rel="noopener noreferrer" tabindex="-1">
-                  <span>开始企业诊断</span>
+                <p class="feature-kicker">近期首推运营活动 · 07.18—07.20</p>
+                <h2 class="feature-title">2026 世界人工智能大会<br>聚焦智能体与前沿科研</h2>
+                <p class="feature-description">世界人工智能大会·学术于 7 月 18—20 日在上海举行，集中呈现智能体、具身智能、AI for Science、国产大模型与全球 AI 治理等前沿议题，为科研与产业用户提供了解最新技术趋势的窗口。</p>
+                <p class="feature-highlight">近期热点：科研智能体、具身智能、开源大模型</p>
+                <a class="feature-cta" href="https://waica2026.worldaic.com.cn/" target="_blank" rel="noopener noreferrer" tabindex="-1">
+                  <span>查看大会日程</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
                 </a>
               </div>
               <div class="feature-visual" aria-hidden="true">
                 <div class="visual-window">
                   <div class="visual-topbar">
-                    <span>企业能力画像与资源智能匹配</span>
-                    <span class="visual-status">已生成行动清单</span>
+                    <span>近期首推 · 世界人工智能大会</span>
+                    <span class="visual-status">进行中</span>
                   </div>
                   <div class="diagnosis-workspace">
-                    <div class="diagnosis-core"><div><strong>86</strong><span>企业创新能力评分</span></div></div>
-                    <div class="resource-node is-left">适用政策<br>12 项</div>
-                    <div class="resource-node is-left">申报项目<br>6 项</div>
-                    <div class="resource-node is-right">科研机构<br>18 家</div>
-                    <div class="resource-node is-right">关键人才<br>32 位</div>
-                    <div class="resource-node is-right">合作企业<br>24 家</div>
+                    <div class="diagnosis-core"><div><strong>07.18</strong><span>WAIC 2026</span></div></div>
+                    <div class="resource-node is-left">AI 智能体<br>企业应用</div>
+                    <div class="resource-node is-left">AI for Science<br>科研突破</div>
+                    <div class="resource-node is-right">具身智能<br>空间交互</div>
+                    <div class="resource-node is-right">国产模型<br>开放生态</div>
+                    <div class="resource-node is-right">全球治理<br>前沿议题</div>
                   </div>
                 </div>
               </div>
@@ -3095,7 +3965,128 @@
         </div>
       </section>
 
-      <section class="business-module business-module--strategy" id="aiStrategyModule" aria-labelledby="strategyTitle">
+      <section class="business-panorama" id="businessPanorama" aria-labelledby="panoramaTitle">
+        <div class="content-shell">
+          <div class="panorama-header">
+            <div>
+              <p class="section-eyebrow">四大核心业务</p>
+              <h2 class="panorama-title" id="panoramaTitle">从科研发现到战略决策、能力成长与价值评价</h2>
+            </div>
+            <p class="panorama-summary">四项业务共享可信数据、AI 能力与专家方法，分别服务知识生产、决策支持、人才成长和价值判断。</p>
+          </div>
+
+          <div class="panorama-grid">
+            <article class="panorama-card panorama-card--research">
+              <span class="panorama-index">01</span>
+              <span class="panorama-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4.5h10a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2z"></path><path d="M7 19.5a2 2 0 0 1 2-2h8M9 8h5M9 11h5"></path></svg></span>
+              <h3 class="panorama-name">AI 科研</h3>
+              <p class="panorama-role">连接科研资源、智能研读与数据协同，提升研究推进效率。</p>
+              <ul class="panorama-tags"><li>科研发现</li><li>智能协同</li></ul>
+              <a class="panorama-link" href="ai-research.html">了解业务<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg></a>
+            </article>
+
+            <article class="panorama-card panorama-card--strategy">
+              <span class="panorama-index">02</span>
+              <span class="panorama-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19.5h16M6 16l4-4 3 2 5-7"></path><path d="M14 7h4v4"></path></svg></span>
+              <h3 class="panorama-name">战略咨询</h3>
+              <p class="panorama-role">以科技数据和产业分析支撑持续更新的战略判断与行动。</p>
+              <ul class="panorama-tags"><li>趋势研判</li><li>决策支持</li></ul>
+              <a class="panorama-link" href="strategy.html">了解业务<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg></a>
+            </article>
+
+            <article class="panorama-card panorama-card--education">
+              <span class="panorama-index">03</span>
+              <span class="panorama-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3.5 9 8.5-4 8.5 4-8.5 4z"></path><path d="M7 11v4.5c2.7 2 7.3 2 10 0V11M20.5 9v6"></path></svg></span>
+              <h3 class="panorama-name">未来教育</h3>
+              <p class="panorama-role">用智能陪伴和信息素养教育支持个性化学习与能力成长。</p>
+              <ul class="panorama-tags"><li>智能学伴</li><li>信息素养</li></ul>
+              <a class="panorama-link" href="education.html">了解业务<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg></a>
+            </article>
+
+            <article class="panorama-card panorama-card--evaluation">
+              <span class="panorama-index">04</span>
+              <span class="panorama-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6M18 5.5l1 1 2-2"></path></svg></span>
+              <h3 class="panorama-name">科技评价</h3>
+              <p class="panorama-role">用多源证据和透明指标支持人才发现、资源配置与科技决策。</p>
+              <ul class="panorama-tags"><li>证据评价</li><li>资源配置</li></ul>
+              <a class="panorama-link" href="evaluation.html">了解业务<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg></a>
+            </article>
+          </div>
+
+          <div class="panorama-foundation" aria-label="四大业务共享能力底座">
+            <strong>共享能力底座</strong><i></i><span>可信科技数据</span><i></i><span>AI 模型与智能体</span><i></i><span>专家与咨询方法</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="business-module business-module--research" id="aiResearchModule" aria-labelledby="researchTitle" hidden>
+        <div class="content-shell core-module-overview">
+          <div class="core-module-copy">
+            <p class="section-eyebrow">AI 科研</p>
+            <h2 class="core-module-title" id="researchTitle">让科研资源、智能工具与研究过程形成<span>协同工作流</span></h2>
+            <p class="core-module-lead">面向高校、科研院所与科技企业，连接科研资源、智能研读、研究分析和数据协同，让研究者更快找到可信资料并沉淀可复用成果。</p>
+            <ul class="core-module-tags" aria-label="AI 科研核心价值">
+              <li>资源统一发现</li>
+              <li>智能研读分析</li>
+              <li>数据成果复用</li>
+            </ul>
+          </div>
+
+          <div class="capability-panel" aria-label="AI 科研工作流">
+            <h3 class="capability-panel-title">面向研究全过程的智能支持</h3>
+            <p class="capability-panel-note">资源发现 → 内容研读 → 分析验证 → 知识沉淀</p>
+            <ol class="capability-flow">
+              <li><span class="capability-flow-index">01</span><span class="capability-flow-copy"><span>科研资源发现</span><small>从论文、期刊、人才、数据库和预印本中快速定位可信资料</small></span></li>
+              <li><span class="capability-flow-index">02</span><span class="capability-flow-copy"><span>智能研读与梳理</span><small>围绕研究问题提炼观点、证据、方法与关键关联</small></span></li>
+              <li><span class="capability-flow-index">03</span><span class="capability-flow-copy"><span>研究任务协同</span><small>让科研智能体参与检索、整理、比较与专题分析</small></span></li>
+              <li><span class="capability-flow-index">04</span><span class="capability-flow-copy"><span>数据与知识沉淀</span><small>将研究过程转化为可追溯、可复核、可继续利用的资产</small></span></li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="core-services-section" aria-labelledby="researchServicesTitle">
+          <div class="content-shell">
+            <div class="core-services-header">
+              <div>
+                <p class="section-eyebrow">AI 科研 · 核心服务</p>
+                <h3 class="core-services-title" id="researchServicesTitle">科研服务入口</h3>
+              </div>
+              <p class="core-services-summary">以现有科研服务入口为基础，优先呈现研究者最常用的资源发现、智能分析和数据协同能力。</p>
+            </div>
+
+            <div class="core-service-grid">
+              <article class="core-service-card">
+                <span class="core-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4.5h10a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2z"></path><path d="M7 19.5a2 2 0 0 1 2-2h8M9 8h5M9 11h5"></path></svg></span>
+                <p class="core-service-kicker">SERVICE 01</p>
+                <h4 class="core-service-name">科研文献与资源发现</h4>
+                <p class="core-service-description">聚合论文、期刊与相关资源，快速建立可信的主题资料基础。</p>
+                <ul class="core-service-features"><li>多源文献快速检索</li><li>研究主题资料聚合</li><li>可信来源便捷访问</li></ul>
+                <a class="core-service-entry" href="https://itic-sci.com/paper-link/" target="_blank" rel="noopener noreferrer">进入 PaperLink<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5h8.5V13M15.2 4.8 5 15"></path></svg></a>
+              </article>
+
+              <article class="core-service-card">
+                <span class="core-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 7h8a4 4 0 0 1 4 4v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-5a4 4 0 0 1 4-4z"></path><path d="M9 12h.01M15 12h.01M9 16h6M12 7V4M10 4h4"></path></svg></span>
+                <p class="core-service-kicker">SERVICE 02</p>
+                <h4 class="core-service-name">科研智能体</h4>
+                <p class="core-service-description">将检索、阅读和归纳组织为连续研究任务，沉淀可追溯结果。</p>
+                <ul class="core-service-features"><li>自然语言研究任务</li><li>多步骤资料研读</li><li>过程结果持续沉淀</li></ul>
+                <a class="core-service-entry" href="https://itic-sci.com/ai-agent/" target="_blank" rel="noopener noreferrer">进入探微<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5h8.5V13M15.2 4.8 5 15"></path></svg></a>
+              </article>
+
+              <article class="core-service-card">
+                <span class="core-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"></ellipse><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"></path></svg></span>
+                <p class="core-service-kicker">SERVICE 03</p>
+                <h4 class="core-service-name">科学数据与知识协同</h4>
+                <p class="core-service-description">组织跨来源科学数据与领域知识，支撑专题分析和成果复用。</p>
+                <ul class="core-service-features"><li>科学数据统一组织</li><li>专题知识关联检索</li><li>研究成果协同复用</li></ul>
+                <a class="core-service-entry" href="https://kg-cg.itic-sci.com/ChatSearch" target="_blank" rel="noopener noreferrer">进入科学数据中心<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5h8.5V13M15.2 4.8 5 15"></path></svg></a>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="business-module business-module--strategy" id="aiStrategyModule" aria-labelledby="strategyTitle" hidden>
         <div class="strategy-overview">
           <div class="content-shell overview-inner">
           <div class="overview-copy">
@@ -3103,12 +4094,9 @@
             <h2 class="overview-title" id="strategyTitle">
               让科技战略咨询从一次性交付，走向<span class="overview-title-accent">持续决策支持</span>
             </h2>
-            <p class="overview-lead">
-              AI 战略咨询板块定位为科技战略智能服务基础设施，以可信数据底座为基础，贯通情报挖掘、分析洞察、决策推演、报告输出与持续监测。它不是单一的 AI 报告工具，而是以数据、模型、专家和咨询方法共同支撑政府、科研机构与科技企业的战略判断和行动落地。
-            </p>
+            <p class="overview-lead">以可信科技数据为基础，连接趋势研判、产业分析和主体诊断，为政府、科研机构与科技企业提供可追溯、可持续更新的决策支持。</p>
             <ul class="trust-list" aria-label="可信战略咨询特征">
-              <li class="trust-item">数据有来源</li>
-              <li class="trust-item">指标有血缘</li>
+              <li class="trust-item">数据可追溯</li>
               <li class="trust-item">结论可复核</li>
               <li class="trust-item">服务可持续</li>
             </ul>
@@ -3140,7 +4128,7 @@
                 <p class="path-step-detail">做诊断、强匹配、促落地，形成企业与项目行动清单。</p>
               </div>
             </div>
-            <div class="path-feedback">执行数据持续回流，动态修正宏观与中观判断，让咨询从一次报告转化为可更新的服务体系。</div>
+            <div class="path-feedback">执行数据持续回流，让咨询结论随业务进展持续更新。</div>
           </div>
           </div>
         </div>
@@ -3149,7 +4137,7 @@
           <div class="content-shell">
             <div class="systems-header">
               <p class="section-eyebrow">AI 战略咨询 · 三大核心系统</p>
-              <h2 class="systems-title" id="systemsTitle">以智库研判、专题分析与态势展示支撑完整决策链</h2>
+              <h2 class="systems-title" id="systemsTitle">三大核心系统</h2>
               <p class="systems-summary">三套系统分别承接战略研判、产业与技术链分析、科技态势展示，协同形成“看方向、拆链条、跟变化”的智能服务能力。</p>
             </div>
 
@@ -3158,7 +4146,7 @@
               <div class="system-card-copy">
                 <p class="system-number">SYSTEM 01</p>
                 <h3 class="system-name">新型高端智库</h3>
-                <p class="system-description">面向政府、科研机构及企业，融合 AI 算力与专家脑力，提供战略分析研判、报告自动生成与专家智库服务，形成一站式智能化高端智库支撑能力。</p>
+                <p class="system-description">融合科技数据、AI 工具与专家研判，支持前沿监测、战略分析和研究报告生成。</p>
                 <ul class="system-features">
                   <li>前沿技术监测与战略研判</li>
                   <li>可复用、可校验的高质量研究报告</li>
@@ -3178,7 +4166,7 @@
               <div class="system-card-copy">
                 <p class="system-number">SYSTEM 02</p>
                 <h3 class="system-name">科技专题服务系统</h3>
-                <p class="system-description">面向未来产业与科技成果转化，聚焦产业链、技术链、技术生命周期与瓶颈识别，支撑科技专项规划、产业布局和招商引资决策。</p>
+                <p class="system-description">聚焦产业链、技术链与瓶颈识别，支撑科技专项规划、产业布局和招商决策。</p>
                 <ul class="system-features">
                   <li>产业链与技术链的系统扫描</li>
                   <li>技术生命周期定位与瓶颈识别</li>
@@ -3198,7 +4186,7 @@
               <div class="system-card-copy">
                 <p class="system-number">SYSTEM 03</p>
                 <h3 class="system-name">科技信息展示系统</h3>
-                <p class="system-description">面向政府和科研院所，整合全球创新监测、区域创新监测、科技指数与政策资源等科技要素，形成一屏可视化的科技态势研判入口。</p>
+                <p class="system-description">整合创新监测、科技指数与政策资源，以可视化方式呈现科技态势。</p>
                 <ul class="system-features">
                   <li>跨区域、跨维度科技要素对比</li>
                   <li>复杂信息一屏组织与动态监测</li>
@@ -3216,6 +4204,149 @@
           </div>
         </div>
       </section>
+      </section>
+
+      <section class="business-module business-module--education" id="educationModule" aria-labelledby="educationTitle" hidden>
+        <div class="content-shell core-module-overview">
+          <div class="core-module-copy">
+            <p class="section-eyebrow">未来教育</p>
+            <h2 class="core-module-title" id="educationTitle">以智能陪伴与信息素养，支持<span>面向未来的能力成长</span></h2>
+            <p class="core-module-lead">面向学生、教师与教育机构，将学伴智能体和信息素养课程融入真实学习任务，支持个性化学习与持续成长。</p>
+            <ul class="core-module-tags" aria-label="未来教育核心价值">
+              <li>智能学习陪伴</li>
+              <li>信息判断素养</li>
+              <li>过程反馈成长</li>
+            </ul>
+          </div>
+
+          <div class="capability-panel" aria-label="未来教育能力路径">
+            <h3 class="capability-panel-title">连接学习、实践与能力评价</h3>
+            <p class="capability-panel-note">目标诊断 → 智能陪伴 → 任务实践 → 成长反馈</p>
+            <ol class="capability-flow">
+              <li><span class="capability-flow-index">01</span><span class="capability-flow-copy"><span>理解学习目标</span><small>识别已有基础、学习需求与需要解决的真实问题</small></span></li>
+              <li><span class="capability-flow-index">02</span><span class="capability-flow-copy"><span>提供智能陪伴</span><small>根据学习进度给予启发、解释、示范与阶段性反馈</small></span></li>
+              <li><span class="capability-flow-index">03</span><span class="capability-flow-copy"><span>完成任务实践</span><small>在检索、分析、表达和协作中形成可迁移的方法能力</small></span></li>
+              <li><span class="capability-flow-index">04</span><span class="capability-flow-copy"><span>形成成长档案</span><small>记录学习过程和能力变化，为后续教学改进提供依据</small></span></li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="core-services-section" aria-labelledby="educationServicesTitle">
+          <div class="content-shell">
+            <div class="core-services-header">
+              <div>
+                <p class="section-eyebrow">未来教育 · 核心服务</p>
+                <h3 class="core-services-title" id="educationServicesTitle">教育服务入口</h3>
+              </div>
+              <p class="core-services-summary">两类服务分别面向持续学习支持与信息能力培养，共同覆盖“会学习、会判断、会实践”的能力成长路径。</p>
+            </div>
+
+            <div class="core-service-grid core-service-grid--two">
+              <article class="core-service-card">
+                <span class="core-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3.5 9 8.5-4 8.5 4-8.5 4z"></path><path d="M7 11v4.5c2.7 2 7.3 2 10 0V11M20.5 9v6"></path></svg></span>
+                <p class="core-service-kicker">SERVICE 01</p>
+                <h4 class="core-service-name">学伴智能体平台</h4>
+                <p class="core-service-description">根据学习目标提供个性化陪伴、任务实践与及时反馈。</p>
+                <ul class="core-service-features"><li>个性化学习路径建议</li><li>多轮启发式学习陪伴</li><li>学习过程与成果沉淀</li></ul>
+                <a class="core-service-entry" href="https://edu.itic-sci.com/" target="_blank" rel="noopener noreferrer">进入学伴智能体平台<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5h8.5V13M15.2 4.8 5 15"></path></svg></a>
+              </article>
+
+              <article class="core-service-card">
+                <span class="core-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"></circle><path d="m15 15 4.5 4.5M8 10.5h5M10.5 8v5"></path></svg></span>
+                <p class="core-service-kicker">SERVICE 02</p>
+                <h4 class="core-service-name">信息素养教育</h4>
+                <p class="core-service-description">通过课程与案例培养检索、判断、引用及负责任使用 AI 的能力。</p>
+                <ul class="core-service-features"><li>检索策略与来源判断</li><li>证据分析与规范表达</li><li>AI 时代的信息伦理</li></ul>
+                <a class="core-service-entry" href="https://xxsy.itic-sci.com/" target="_blank" rel="noopener noreferrer">进入信息素养教育<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5h8.5V13M15.2 4.8 5 15"></path></svg></a>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="business-module business-module--evaluation" id="evaluationModule" aria-labelledby="evaluationTitle" hidden>
+        <div class="content-shell core-module-overview">
+          <div class="core-module-copy">
+            <p class="section-eyebrow">科技评价</p>
+            <h2 class="core-module-title" id="evaluationTitle">以多源证据与透明规则，提升<span>科技评价可信度</span></h2>
+            <p class="core-module-lead">汇聚人才、机构和区域创新的多维证据，以可解释指标支撑人才发现、资源配置和科技决策。</p>
+            <ul class="core-module-tags" aria-label="科技评价核心价值">
+              <li>多源证据验证</li>
+              <li>评价指标可解释</li>
+              <li>过程依据可追溯</li>
+            </ul>
+          </div>
+
+          <div class="capability-panel" aria-label="科技评价工作路径">
+            <h3 class="capability-panel-title">从评价对象到决策支持的证据链</h3>
+            <p class="capability-panel-note">对象识别 → 数据汇聚 → 指标计算 → 结果应用</p>
+            <ol class="capability-flow">
+              <li><span class="capability-flow-index">01</span><span class="capability-flow-copy"><span>明确评价对象与场景</span><small>面向人才、科研机构、创新资源或区域能力定义评价问题</small></span></li>
+              <li><span class="capability-flow-index">02</span><span class="capability-flow-copy"><span>汇聚多维证据</span><small>连接科研、技术、产业及组织等不同来源的数据线索</small></span></li>
+              <li><span class="capability-flow-index">03</span><span class="capability-flow-copy"><span>形成可解释指标</span><small>展示指标口径、数据来源和结果形成过程</small></span></li>
+              <li><span class="capability-flow-index">04</span><span class="capability-flow-copy"><span>服务资源配置决策</span><small>将评价结果用于人才发现、机构比较与科技决策支持</small></span></li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="core-services-section" aria-labelledby="evaluationServicesTitle">
+          <div class="content-shell">
+            <div class="core-services-header">
+              <div>
+                <p class="section-eyebrow">科技评价 · 核心服务</p>
+                <h3 class="core-services-title" id="evaluationServicesTitle">科技评价入口</h3>
+              </div>
+              <p class="core-services-summary">已开放智慧人才服务；科技资源服务与科技决策支持保留为后续建设入口，当前不产生跳转。</p>
+            </div>
+
+            <div class="core-service-grid">
+              <article class="core-service-card">
+                <span class="core-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6M18 5.5l1 1 2-2"></path></svg></span>
+                <p class="core-service-kicker">SERVICE 01</p>
+                <h4 class="core-service-name">智慧人才</h4>
+                <p class="core-service-description">以多维科研信息支持人才发现、画像与科研能力研判。</p>
+                <ul class="core-service-features"><li>多维人才信息画像</li><li>科研能力与方向识别</li><li>人才检索与比较分析</li></ul>
+                <a class="core-service-entry" href="https://vip.itic-sci.com/talent/index/" target="_blank" rel="noopener noreferrer">进入智慧人才<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5h8.5V13M15.2 4.8 5 15"></path></svg></a>
+              </article>
+
+              <article class="core-service-card">
+                <span class="core-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V9h4v9M14 18V5h4v13"></path><path d="m6 6 4-2 4 2 4-3"></path></svg></span>
+                <p class="core-service-kicker">SERVICE 02</p>
+                <h4 class="core-service-name">科技资源服务</h4>
+                <p class="core-service-description">规划科技资源盘点、供需匹配和使用成效分析。</p>
+                <ul class="core-service-features"><li>科技资源统一盘点</li><li>能力供需匹配分析</li><li>资源使用成效评价</li></ul>
+                <span class="core-service-entry is-disabled" aria-disabled="true">建设中</span>
+              </article>
+
+              <article class="core-service-card">
+                <span class="core-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19.5h16M6 16l4-4 3 2 5-7"></path><path d="M14 7h4v4"></path></svg></span>
+                <p class="core-service-kicker">SERVICE 03</p>
+                <h4 class="core-service-name">科技决策支持</h4>
+                <p class="core-service-description">规划指标监测、横向对标和资源配置评价。</p>
+                <ul class="core-service-features"><li>指标监测与趋势判断</li><li>区域及机构横向对标</li><li>资源配置评价支撑</li></ul>
+                <span class="core-service-entry is-disabled" aria-disabled="true">建设中</span>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="partner-section" id="partnerSection" aria-labelledby="partnerTitle">
+        <div class="content-shell">
+          <div class="partner-heading">
+            <div>
+              <p class="section-eyebrow">合作生态</p>
+              <h2 class="partner-title" id="partnerTitle">与高校、模型及算力伙伴共建生态</h2>
+            </div>
+            <p class="partner-summary">通过学术研究、人工智能技术与算力资源协同，持续完善面向科研、咨询、教育与评价的服务生态。</p>
+          </div>
+          <div class="partner-grid" aria-label="合作伙伴">
+            <div class="partner-item"><span class="partner-mark" aria-hidden="true">THU</span><div><p class="partner-name">清华大学</p><p class="partner-role">学术与科研合作</p></div></div>
+            <div class="partner-item"><span class="partner-mark" aria-hidden="true">ZP</span><div><p class="partner-name">智谱 AI</p><p class="partner-role">大模型技术生态</p></div></div>
+            <div class="partner-item"><span class="partner-mark" aria-hidden="true">GS</span><div><p class="partner-name">高算</p><p class="partner-role">算力与技术支持</p></div></div>
+            <div class="partner-item"><span class="partner-mark partner-mark--default" data-icon="default" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="10" r="2.5"></circle><path d="M3.5 19c.4-3.5 2.2-5.3 5.5-5.3s5.1 1.8 5.5 5.3M14.5 14.5c3.3-.6 5.4.9 6 4.5"></path></svg></span><div><p class="partner-name">更多合作伙伴</p><p class="partner-role">开放合作与生态共建</p></div></div>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -3259,6 +4390,7 @@
       const NAVIGATION = [
         {
           label: "科学研究",
+          page: "ai-research.html",
           description: "汇聚科研人才、文献资源、学术数据库与智能科研工具，为科研创新提供一站式信息服务。",
           items: [
             { label: "深圳人才宇宙", url: "https://ai4s.itic-sci.com/talent" },
@@ -3277,6 +4409,7 @@
         },
         {
           label: "未来教育",
+          page: "education.html",
           description: "聚焦智能教育与信息素养培养，提供面向学习、教学与能力提升的数字化服务。",
           items: [
             { label: "学伴智能体平台", url: "https://edu.itic-sci.com/" },
@@ -3285,6 +4418,7 @@
         },
         {
           label: "科技评价",
+          page: "evaluation.html",
           description: "围绕人才、资源与决策评价场景，提供科学、专业的科技评价支撑服务。",
           items: [
             { label: "智慧人才", url: "https://vip.itic-sci.com/talent/index/" },
@@ -3294,6 +4428,7 @@
         },
         {
           label: "战略咨询",
+          page: "strategy.html",
           description: "面向产业发展与科技创新决策，汇聚智库研究、专题服务和产业洞察。",
           items: [
             { label: "战略咨询总体" },
@@ -3344,6 +4479,11 @@
       const embedIcon = `
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <path d="m7.2 6.1-3.8 3.9 3.8 3.9M12.8 6.1l3.8 3.9-3.8 3.9"></path>
+        </svg>`;
+
+      const internalIcon = `
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M4 10h11M11 6l4 4-4 4"></path>
         </svg>`;
 
       const siteHeader = document.getElementById("siteHeader");
@@ -3666,7 +4806,7 @@
         window.scrollTo({ top: 0, behavior: "auto" });
       }
 
-      homeInfoEntry.addEventListener("click", () => {
+      homeInfoEntry?.addEventListener("click", () => {
         activateEmbeddedSystem({ url: "https://skxrules.unicomcn.tech:30999/" });
       });
       brandHome.addEventListener("click", showHome);
@@ -3688,8 +4828,12 @@
           entry = document.createElement("a");
           entry.className = "menu-entry";
           entry.href = item.url;
-          entry.target = "_blank";
-          entry.rel = "noopener noreferrer";
+          if (item.internal) {
+            entry.target = "_self";
+          } else {
+            entry.target = "_blank";
+            entry.rel = "noopener noreferrer";
+          }
           entry.addEventListener("click", () => {
             closeDesktopMenu();
             closeMobileDrawer();
@@ -3702,7 +4846,7 @@
         entry.appendChild(label);
 
         if (item.url) {
-          entry.appendChild(createIcon(item.action === "embed" ? embedIcon : externalIcon));
+          entry.appendChild(createIcon(item.action === "embed" ? embedIcon : item.internal ? internalIcon : externalIcon));
         }
 
         return entry;
@@ -3881,8 +5025,12 @@
           return;
         }
 
-        const trigger = document.createElement("button");
-        trigger.type = "button";
+        const trigger = document.createElement(group.page ? "a" : "button");
+        if (group.page) {
+          trigger.href = group.page;
+        } else {
+          trigger.type = "button";
+        }
         trigger.className = "nav-trigger";
         trigger.textContent = group.label;
         trigger.setAttribute("aria-haspopup", "true");
@@ -3895,9 +5043,11 @@
           }
           openDesktopMenu(index);
         });
-        trigger.addEventListener("click", () => openDesktopMenu(index));
+        if (!group.page) {
+          trigger.addEventListener("click", () => openDesktopMenu(index));
+        }
         trigger.addEventListener("keydown", (event) => {
-          if (["Enter", " ", "ArrowDown"].includes(event.key)) {
+          if (event.key === "ArrowDown" || (!group.page && ["Enter", " "].includes(event.key))) {
             event.preventDefault();
             openDesktopMenu(index, true);
           }
@@ -3981,7 +5131,10 @@
         const submenu = document.createElement("div");
         submenu.className = "mobile-submenu";
         submenu.hidden = true;
-        submenu.replaceChildren(...group.items.map(createMenuEntry));
+        const mobileItems = group.page
+          ? [{ label: `${group.label}主页`, url: group.page, internal: true }, ...group.items]
+          : group.items;
+        submenu.replaceChildren(...mobileItems.map(createMenuEntry));
 
         primary.addEventListener("click", () => toggleMobileGroup(index));
         section.append(primary, submenu);
