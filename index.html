@@ -3158,13 +3158,6 @@
 
           <div class="recommendation-grid" id="recommendationGrid" role="tabpanel" aria-live="polite"></div>
 
-          <div class="recommendation-note">
-            <div>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h16v10H4zM8 9.5V7a4 4 0 0 1 8 0v2.5M9 14h6"></path></svg>
-              <p><strong>当前展示公开来源与编辑精选内容。</strong>完善兴趣画像后，可获得更贴合研究方向的持续推荐。</p>
-            </div>
-            <button class="recommendation-profile-button" id="manageRecommendationProfile" type="button">完善兴趣画像</button>
-          </div>
         </div>
       </section>
 
@@ -3853,8 +3846,8 @@
             </button>
           </div>`;
         article.querySelector(".recommendation-card-action")?.addEventListener("click", () => {
-          manageRecommendationProfile.textContent = "登录后可收藏";
-          window.setTimeout(() => { manageRecommendationProfile.textContent = "完善兴趣画像"; }, 1800);
+          if (manageRecommendationProfile) manageRecommendationProfile.textContent = "登录后可收藏";
+          window.setTimeout(() => { if (manageRecommendationProfile) manageRecommendationProfile.textContent = "完善兴趣画像"; }, 1800);
         });
         return article;
       }
@@ -4224,7 +4217,7 @@
         recommendationBatch = (recommendationBatch + 1) % 2;
         setRecommendationType("为你推荐");
       });
-      manageRecommendationProfile.addEventListener("click", () => showSurface("profile", { focusTarget: document.getElementById("profilePageTitle") }));
+      manageRecommendationProfile?.addEventListener("click", () => showSurface("profile", { focusTarget: document.getElementById("profilePageTitle") }));
 
       portalResultSearchForm.addEventListener("submit", (event) => {
         event.preventDefault();
