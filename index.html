@@ -3560,6 +3560,7 @@
         {
           label: "工作台",
           description: "整合智能科研、智能阅读与专题工单，提供便捷高效的个人工作入口。",
+          url: "https://gig-excel-heat-chest.trycloudflare.com/",
           items: [
             { label: "智能科研" },
             { label: "智能阅读" },
@@ -4555,7 +4556,7 @@
 
       NAVIGATION.forEach((group, index) => {
         if (group.label === "工作台") {
-          createUtilityDropdown(group);
+          createUtilityLink(group);
           return;
         }
 
