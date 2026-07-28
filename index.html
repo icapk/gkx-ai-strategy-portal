@@ -2253,6 +2253,7 @@
       height: calc(100vh - var(--header-height));
       min-height: 560px;
       background: var(--surface);
+      overflow: hidden;
     }
 
     .iframe-shell iframe {
@@ -2261,6 +2262,12 @@
       height: 100%;
       border: 0;
       background: var(--surface);
+    }
+
+    /* 外部系统仅在门户嵌入时隐藏其重复顶部栏，不影响系统独立访问。 */
+    .iframe-shell.is-header-cropped iframe {
+      height: calc(100% + 98px);
+      transform: translateY(-98px);
     }
 
     @media (max-width: 1279px) {
@@ -3831,7 +3838,7 @@
             { label: "战略咨询总体" },
             { label: "新型高端智库", url: "https://effortless-licorice-cdaa9f.netlify.app" },
             { label: "科技专题服务系统", url: "https://skxdemo.unicomcn.tech:30999/development/search" },
-            { label: "科技信息展示系统", url: "https://skxrules.unicomcn.tech:30999/", action: "embed" },
+            { label: "科技信息展示系统", url: "https://skxrules.unicomcn.tech:30999/", action: "embed", hideEmbeddedHeader: true },
             { label: "未来产业概述", url: "https://future_industry.itic-sci.com/index/" },
             { label: "未来产业图谱", url: "https://itic-sci.com/sso/user/login?back_url=https://itic-sci.com/brain-graph/" }
           ]
@@ -3841,7 +3848,7 @@
           description: "集中展示科技服务与信息展示类应用，支持页内嵌入与专题系统快速访问。",
           items: [
             { label: "科技专题服务系统", url: "https://skxdemo.unicomcn.tech:30999/development/search" },
-            { label: "科技信息展示系统", url: "https://skxrules.unicomcn.tech:30999/", action: "embed" },
+            { label: "科技信息展示系统", url: "https://skxrules.unicomcn.tech:30999/", action: "embed", hideEmbeddedHeader: true },
             { label: "AI 分析与智能分发工作台", url: "apps/ai-distribution/" },
             { label: "语音增强与适配工作台", url: "apps/voice-enhancement/" },
             { label: "示例系统" },
@@ -4273,9 +4280,13 @@
         stopCarousel();
         if (name === "home") startCarousel();
         if (name === "iframe" && options.iframeUrl) {
+          iframeShell.classList.toggle("is-header-cropped", Boolean(options.hideEmbeddedHeader));
           if (embeddedSystem.getAttribute("src") !== options.iframeUrl) embeddedSystem.src = options.iframeUrl;
         } else if (embeddedSystem.getAttribute("src") !== "about:blank") {
+          iframeShell.classList.remove("is-header-cropped");
           embeddedSystem.src = "about:blank";
+        } else {
+          iframeShell.classList.remove("is-header-cropped");
         }
         closeSearchPanel();
         closeDesktopMenu();
@@ -4629,7 +4640,7 @@
       }
 
       function activateEmbeddedSystem(item) {
-        showSurface("iframe", { iframeUrl: item.url });
+        showSurface("iframe", { iframeUrl: item.url, hideEmbeddedHeader: item.hideEmbeddedHeader });
       }
 
       function showHome() {
