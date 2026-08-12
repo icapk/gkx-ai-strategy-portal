@@ -166,6 +166,40 @@
       cursor: pointer;
     }
 
+    .legacy-link {
+      display: inline-flex;
+      height: 34px;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid #c9d8ee;
+      border-radius: 6px;
+      padding: 0 11px;
+      color: #43536a;
+      background: rgba(255, 255, 255, 0.78);
+      font-size: 13px;
+      white-space: nowrap;
+      transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    }
+
+    .legacy-link:hover,
+    .legacy-link:focus-visible {
+      border-color: #8ab8ff;
+      color: var(--blue-strong);
+      background: #ffffff;
+      outline: none;
+    }
+
+    .legacy-link svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
+
     .utility-menu {
       width: 204px;
     }
@@ -407,6 +441,10 @@
       line-height: 1;
       white-space: nowrap;
       transition: color 150ms ease, background-color 150ms ease;
+    }
+
+    .home-nav-trigger {
+      cursor: pointer;
     }
 
     .nav-trigger::after {
@@ -726,6 +764,69 @@
       border-left: 1px solid var(--line);
       background: var(--surface);
       box-shadow: -18px 0 42px rgba(26, 43, 72, 0.14);
+    }
+
+    .announcement-bar {
+      position: relative;
+      z-index: 900;
+      border-bottom: 1px solid #d9e8fb;
+      background: linear-gradient(90deg, #f2f7ff 0%, #eef7ff 52%, #f5f9ff 100%);
+    }
+
+    .announcement-inner {
+      display: flex;
+      width: min(calc(100% - 48px), var(--content-width));
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 0 auto;
+      padding: 8px 44px;
+      color: #43536a;
+      font-size: 13px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .announcement-label {
+      flex: none;
+      border-radius: 4px;
+      padding: 1px 7px;
+      color: #ffffff;
+      background: var(--blue);
+      font-size: 12px;
+    }
+
+    .announcement-close {
+      position: absolute;
+      top: 50%;
+      right: max(20px, calc((100% - var(--content-width)) / 2 + 20px));
+      display: grid;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      place-items: center;
+      border-radius: 5px;
+      color: #6a7890;
+      background: transparent;
+      cursor: pointer;
+      transform: translateY(-50%);
+    }
+
+    .announcement-close:hover,
+    .announcement-close:focus-visible {
+      color: var(--blue-strong);
+      background: rgba(0, 82, 217, 0.07);
+      outline: none;
+    }
+
+    .announcement-close svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-width: 1.8;
     }
 
     .mobile-nav {
@@ -2249,11 +2350,40 @@
     }
 
     .iframe-shell {
+      display: flex;
       width: 100%;
       height: calc(100vh - var(--header-height));
       min-height: 560px;
+      flex-direction: column;
       background: var(--surface);
       overflow: hidden;
+    }
+
+    .embedded-toolbar {
+      display: flex;
+      min-height: 50px;
+      flex: 0 0 50px;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--line);
+      padding: 0 22px;
+      background: #ffffff;
+    }
+
+    .embedded-title {
+      overflow: hidden;
+      color: #344154;
+      font-size: 14px;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .iframe-viewport {
+      min-height: 0;
+      flex: 1;
+      overflow: hidden;
+      background: var(--surface);
     }
 
     .iframe-shell iframe {
@@ -2283,6 +2413,11 @@
       .header-actions {
         gap: 6px;
         margin-left: auto;
+      }
+
+      .legacy-link {
+        height: 32px;
+        padding: 0 9px;
       }
 
       .search-wrap {
@@ -2361,6 +2496,17 @@
 
       .iframe-shell {
         min-height: calc(100vh - var(--header-height));
+      }
+
+      .announcement-inner {
+        width: calc(100% - 32px);
+        padding-right: 36px;
+        padding-left: 8px;
+        text-align: left;
+      }
+
+      .announcement-close {
+        right: 10px;
       }
 
       .search-results-page {
@@ -2484,6 +2630,21 @@
     }
 
     @media (max-width: 720px) {
+      .legacy-link {
+        display: none;
+      }
+
+      .announcement-inner {
+        width: 100%;
+        min-height: 46px;
+        gap: 8px;
+        padding: 7px 44px 7px 12px;
+        font-size: 12px;
+      }
+
+      .embedded-toolbar {
+        padding: 0 12px;
+      }
       .search-results-inner {
         width: calc(100% - 40px);
       }
@@ -2774,7 +2935,9 @@
         </button>
       </div>
 
-      <nav class="desktop-nav" id="desktopNav" aria-label="主导航"></nav>
+      <nav class="desktop-nav" id="desktopNav" aria-label="主导航">
+        <button class="nav-trigger home-nav-trigger is-active" id="homeNavTab" type="button" aria-current="page">首页</button>
+      </nav>
 
       <div class="header-actions">
         <div class="search-wrap" id="searchWrap">
@@ -2831,6 +2994,11 @@
           </section>
         </div>
 
+        <a class="legacy-link" href="https://itic-sci.com/" aria-label="在当前页面回到旧版门户">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5 3 10l5 5M3.5 10H12a4.5 4.5 0 0 1 4.5 4.5"></path></svg>
+          <span>回到旧版</span>
+        </a>
+
         <nav class="utility-nav" id="utilityNav" aria-label="快捷导航"></nav>
 
         <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mobileDrawer">
@@ -2876,6 +3044,16 @@
     </section>
   </header>
 
+  <aside class="announcement-bar" id="announcementBar" aria-label="平台公告">
+    <div class="announcement-inner">
+      <span class="announcement-label">公告</span>
+      <span>门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。</span>
+    </div>
+    <button class="announcement-close" id="announcementClose" type="button" aria-label="关闭公告">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"></path></svg>
+    </button>
+  </aside>
+
   <div class="mobile-backdrop" id="mobileBackdrop" hidden></div>
   <aside class="mobile-drawer" id="mobileDrawer" aria-label="移动端导航" hidden>
     <nav class="mobile-nav" id="mobileNav"></nav>
@@ -2917,10 +3095,10 @@
               </button>
             </form>
 
-            <button class="mg-more-search" id="mgHeroDiscover" type="button">
+            <a class="mg-more-search" id="mgHeroDiscover" href="https://www.figma.com/make/3FgvXef3dnCHETZCGrg3FO/%E6%99%BA%E6%85%A7%E9%97%A8%E6%88%B7%E7%B3%BB%E7%BB%9F---%E5%9F%BA%E7%A1%80%E6%9C%8D%E5%8A%A1?p=f&amp;t=Wf3EVxsEfXQKstZb-0&amp;fullscreen=1">
               <span id="mgSearchHint">更多搜索与热门推荐</span>
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
-            </button>
+            </a>
 
             <div class="mg-simulation-strip" aria-label="热门仿真实例">
               <a class="mg-simulation-card mg-simulation-card--biology" href="https://itic-sci.bohrium.com/" target="_blank" rel="noopener noreferrer">
@@ -3217,7 +3395,7 @@
                 <h2 class="feature-title">把分散的科研线索<br>组织成可推进的研究</h2>
                 <p class="feature-description">连接论文、期刊、数据库与智能科研工具，围绕研究问题完成资料发现、智能研读和成果沉淀，让研究者把更多精力留给问题本身。</p>
                 <p class="feature-highlight">来源可追溯，研读有结构，成果可继续复用</p>
-                <a class="feature-cta" href="ai-research.html">
+                <a class="feature-cta" href="ai-research.html" data-portal-landing="AI 科研">
                   <span>了解详情</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
                 </a>
@@ -3266,7 +3444,7 @@
                 <h2 class="feature-title">让科技战略咨询<br>从一次报告走向持续决策</h2>
                 <p class="feature-description">以可信数据底座连接趋势识别、产业与技术链研判、报告输出和持续监测，支撑政府、科研机构与科技企业把战略判断转化为行动。</p>
                 <p class="feature-highlight">看方向、拆链条、配资源，并持续跟踪变化</p>
-                <a class="feature-cta" href="strategy.html" tabindex="-1">
+                <a class="feature-cta" href="strategy.html" data-portal-landing="战略咨询" tabindex="-1">
                   <span>了解详情</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
                 </a>
@@ -3304,7 +3482,7 @@
                 <h2 class="feature-title">在真实任务中<br>培养会学习、会判断、会创造的人</h2>
                 <p class="feature-description">把智能学习伙伴、任务化学习与信息素养培养融入真实过程，让学生获得方法，让教师看见进展，让机构沉淀可持续的育人能力。</p>
                 <p class="feature-highlight">目标可落地，过程有反馈，成长能够持续看见</p>
-                <a class="feature-cta" href="education.html" tabindex="-1">
+                <a class="feature-cta" href="education.html" data-portal-landing="未来教育" tabindex="-1">
                   <span>了解详情</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
                 </a>
@@ -3340,7 +3518,7 @@
                 <h2 class="feature-title">让每一个评价结论<br>都能回到证据与规则</h2>
                 <p class="feature-description">围绕人才、机构与科技资源建立清晰的评价口径和可追溯证据链，让结果能够被理解、被核验，并服务人才发现、机构比较与科技决策。</p>
                 <p class="feature-highlight">口径可解释，证据可核验，结论可比较</p>
-                <a class="feature-cta" href="evaluation.html" tabindex="-1">
+                <a class="feature-cta" href="evaluation.html" data-portal-landing="科技评价" tabindex="-1">
                   <span>了解详情</span>
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
                 </a>
@@ -3641,11 +3819,6 @@
 
     <section class="search-results-page portal-search-page" id="searchResultsPage" aria-labelledby="searchResultsTitle" hidden>
       <div class="portal-search-shell portal-search-inner">
-        <button class="portal-search-back" id="searchBackHome" type="button">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 5-5 5 5 5"></path></svg>
-          返回门户
-        </button>
-
         <header class="portal-search-header">
           <p class="portal-search-eyebrow">P03 / P04 · 智能搜索</p>
           <h1 class="portal-search-title" id="searchResultsTitle">综合资源检索</h1>
@@ -3746,7 +3919,7 @@
 
     <section class="account-page" id="profilePage" aria-labelledby="profilePageTitle" hidden>
       <div class="account-shell">
-        <div class="account-topbar"><button class="page-back-button" type="button" data-page-back-home><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 5-5 5 5 5"></path></svg>返回首页</button><span>账户服务</span></div>
+        <div class="account-topbar"><span>账户服务</span></div>
         <header class="account-hero">
           <div class="account-hero-main"><div class="account-hero-avatar account-avatar" aria-hidden="true">科</div>
           <div class="account-hero-copy"><p class="account-eyebrow">个人中心</p><h1 class="account-title" id="profilePageTitle" tabindex="-1">科技用户</h1><p class="account-subtitle">管理个人资料、研究兴趣与账户安全信息。</p></div></div>
@@ -3767,7 +3940,7 @@
 
     <section class="account-page message-page" id="messagePage" aria-labelledby="messagePageTitle" hidden>
       <div class="account-shell">
-        <div class="account-topbar"><button class="page-back-button" type="button" data-page-back-home><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 5-5 5 5 5"></path></svg>返回首页</button><span>账户服务</span></div>
+        <div class="account-topbar"><span>账户服务</span></div>
         <header class="message-header"><div><p class="account-eyebrow">消息中心</p><h1 class="message-title" id="messagePageTitle" tabindex="-1">通知与动态</h1><p class="message-lead">集中查看内容更新、收藏动态与会议提醒。</p></div><span class="message-unread-summary message-unread-count"><strong id="messagePageUnreadCount">3</strong>&nbsp;条未读</span></header>
         <div class="message-toolbar" id="messageFilters" role="tablist" aria-label="消息筛选"><button class="is-active" type="button" role="tab" aria-selected="true" data-message-filter="all">全部消息</button><button type="button" role="tab" aria-selected="false" data-message-filter="unread">未读消息 <span>3</span></button></div>
         <div class="message-list" id="messageList">
@@ -3780,14 +3953,19 @@
       </div>
     </section>
 
-    <section class="iframe-shell" id="iframeShell" aria-label="科技信息展示系统" hidden>
-      <iframe
-        id="embeddedSystem"
-        title="科技信息展示系统"
-        src="about:blank"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allow="clipboard-read; clipboard-write; fullscreen"
-      ></iframe>
+    <section class="iframe-shell" id="iframeShell" aria-label="内嵌服务" hidden>
+      <div class="embedded-toolbar">
+        <strong class="embedded-title" id="embeddedTitle">内嵌服务</strong>
+      </div>
+      <div class="iframe-viewport">
+        <iframe
+          id="embeddedSystem"
+          title="内嵌服务"
+          src="about:blank"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="clipboard-read; clipboard-write; fullscreen"
+        ></iframe>
+      </div>
     </section>
   </main>
 
@@ -3849,8 +4027,8 @@
           items: [
             { label: "科技专题服务系统", url: "https://skxdemo.unicomcn.tech:30999/development/search", action: "embed", hideEmbeddedHeader: true },
             { label: "科技信息展示系统", url: "https://skxrules.unicomcn.tech:30999/", action: "embed", hideEmbeddedHeader: true },
-            { label: "AI 分析与智能分发工作台", url: "apps/ai-distribution/" },
-            { label: "语音增强与适配工作台", url: "apps/voice-enhancement/" },
+            { label: "AI 分析与智能分发工作台", url: "apps/ai-distribution/index.html", action: "embed", embedTitle: "AI 分析与智能分发工作台" },
+            { label: "语音增强与适配工作台", url: "apps/voice-enhancement/index.html", action: "embed", embedTitle: "语音增强与适配工作台" },
             { label: "示例系统" },
             { label: "示例系统" },
             { label: "示例系统" }
@@ -3859,7 +4037,10 @@
         {
           label: "工作台",
           description: "整合智能科研、智能阅读与专题工单，提供便捷高效的个人工作入口。",
-          url: "https://intelligent-research-reading-portal.thechosenonekk07.chatgpt.site"
+          items: [
+            { label: "智能科研", url: "workbench-bridge.html?view=research", action: "embed", embedTitle: "智能科研" },
+            { label: "智能阅读", url: "workbench-bridge.html?view=reading", action: "embed", embedTitle: "智能阅读" }
+          ]
         },
         {
           label: "管理后台",
@@ -3881,6 +4062,7 @@
 
       const siteHeader = document.getElementById("siteHeader");
       const desktopNav = document.getElementById("desktopNav");
+      const homeNavTab = document.getElementById("homeNavTab");
       const utilityNav = document.getElementById("utilityNav");
       const megaMenu = document.getElementById("megaMenu");
       const megaTitle = document.getElementById("megaTitle");
@@ -3888,6 +4070,9 @@
       const megaGrid = document.getElementById("megaGrid");
       const iframeShell = document.getElementById("iframeShell");
       const embeddedSystem = document.getElementById("embeddedSystem");
+      const embeddedTitle = document.getElementById("embeddedTitle");
+      const announcementBar = document.getElementById("announcementBar");
+      const announcementClose = document.getElementById("announcementClose");
       const homeContent = document.getElementById("homeContent");
       const brandHome = document.getElementById("brandHome");
       const mobileMenuButton = document.getElementById("mobileMenuButton");
@@ -3908,7 +4093,6 @@
       const clearSearchHistory = document.getElementById("clearSearchHistory");
       const searchResultsPage = document.getElementById("searchResultsPage");
       const searchResultQuery = document.getElementById("searchResultQuery");
-      const searchBackHome = document.getElementById("searchBackHome");
       const featureCarousel = document.getElementById("featureCarousel");
       const featureTabs = featureCarousel ? [...featureCarousel.querySelectorAll("[role='tab']")] : [];
       const featureSlides = featureCarousel ? [...featureCarousel.querySelectorAll("[role='tabpanel']")] : [];
@@ -3965,8 +4149,14 @@
       let activeSearchType = "全部";
       let activeSearchMode = "关键词";
       let activeSearchPage = 1;
+      let announcementDismissed = false;
       const SEARCH_PAGE_SIZE = 3;
       const reduceCarouselMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      try {
+        announcementDismissed = sessionStorage.getItem("gkx-announcement-closed") === "1";
+      } catch (error) { /* keep the announcement available */ }
+      announcementBar.hidden = announcementDismissed;
 
       const RECOMMENDATION_ITEMS = [
         {
@@ -4277,10 +4467,19 @@
         Object.entries(SURFACES).forEach(([key, node]) => {
           node.hidden = key !== name;
         });
+        const isHome = name === "home";
+        homeNavTab.classList.toggle("is-active", isHome);
+        if (isHome) homeNavTab.setAttribute("aria-current", "page");
+        else homeNavTab.removeAttribute("aria-current");
+        announcementBar.hidden = !isHome || announcementDismissed;
         stopCarousel();
         if (name === "home") startCarousel();
         if (name === "iframe" && options.iframeUrl) {
           iframeShell.classList.toggle("is-header-cropped", Boolean(options.hideEmbeddedHeader));
+          const title = options.embedTitle || "内嵌服务";
+          embeddedTitle.textContent = title;
+          embeddedSystem.title = title;
+          iframeShell.setAttribute("aria-label", title);
           if (embeddedSystem.getAttribute("src") !== options.iframeUrl) embeddedSystem.src = options.iframeUrl;
         } else if (embeddedSystem.getAttribute("src") !== "about:blank") {
           iframeShell.classList.remove("is-header-cropped");
@@ -4528,9 +4727,6 @@
           }
         });
       });
-      mgHeroDiscover?.addEventListener("click", () => performSearch("AI for Science"));
-      searchBackHome.addEventListener("click", showHome);
-
       recommendationTabs.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-recommendation-type]");
         if (!tab) return;
@@ -4540,7 +4736,11 @@
         recommendationBatch = (recommendationBatch + 1) % 2;
         setRecommendationType("为你推荐");
       });
-      manageRecommendationProfile?.addEventListener("click", () => showSurface("profile", { focusTarget: document.getElementById("profilePageTitle") }));
+      const openPersonalCenter = () => showSurface("iframe", {
+        iframeUrl: "https://edu.itic-sci.com/uc/portal/my-account",
+        embedTitle: "个人中心"
+      });
+      manageRecommendationProfile?.addEventListener("click", openPersonalCenter);
 
       portalResultSearchForm.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -4604,9 +4804,8 @@
       messagePageUnreadCount.textContent = String(unreadCount);
       profileButton.setAttribute("aria-label", `用户菜单，${unreadCount} 条未读消息`);
 
-      openProfilePage.addEventListener("click", () => showSurface("profile", { focusTarget: document.getElementById("profilePageTitle") }));
+      openProfilePage.addEventListener("click", openPersonalCenter);
       openMessagePage.addEventListener("click", () => showSurface("messages", { focusTarget: document.getElementById("messagePageTitle") }));
-      document.querySelectorAll("[data-page-back-home]").forEach((button) => button.addEventListener("click", showHome));
       messageFilters.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-message-filter]");
         if (!tab) return;
@@ -4640,7 +4839,7 @@
       }
 
       function activateEmbeddedSystem(item) {
-        showSurface("iframe", { iframeUrl: item.url, hideEmbeddedHeader: item.hideEmbeddedHeader });
+        showSurface("iframe", { iframeUrl: item.url, hideEmbeddedHeader: item.hideEmbeddedHeader, embedTitle: item.embedTitle || item.label });
       }
 
       function showHome() {
@@ -4648,6 +4847,21 @@
       }
 
       brandHome.addEventListener("click", showHome);
+      homeNavTab.addEventListener("click", showHome);
+      document.querySelectorAll("[data-portal-landing]").forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          showSurface("iframe", {
+            iframeUrl: link.getAttribute("href"),
+            embedTitle: link.dataset.portalLanding
+          });
+        });
+      });
+      announcementClose.addEventListener("click", () => {
+        announcementDismissed = true;
+        announcementBar.hidden = true;
+        try { sessionStorage.setItem("gkx-announcement-closed", "1"); } catch (error) { /* storage may be unavailable */ }
+      });
       initializeFeatureCarousel();
 
       function createMenuEntry(item) {
@@ -4689,7 +4903,14 @@
       function createUtilityMenuEntry(item) {
         let entry;
 
-        if (item.url) {
+        if (item.url && item.action === "embed") {
+          entry = document.createElement("button");
+          entry.type = "button";
+          entry.addEventListener("click", () => {
+            activateEmbeddedSystem(item);
+            closeUtilityMenu();
+          });
+        } else if (item.url) {
           entry = document.createElement("a");
           entry.href = item.url;
           entry.target = "_blank";
@@ -4869,9 +5090,22 @@
         profileCloseTimer = window.setTimeout(() => closeProfileMenu(), 130);
       }
 
+      const mobileHomeSection = document.createElement("section");
+      mobileHomeSection.className = "mobile-group";
+      const mobileHomeLink = document.createElement("a");
+      mobileHomeLink.className = "mobile-primary mobile-primary--link";
+      mobileHomeLink.href = "#";
+      mobileHomeLink.textContent = "首页";
+      mobileHomeLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        showHome();
+      });
+      mobileHomeSection.appendChild(mobileHomeLink);
+      mobileNav.appendChild(mobileHomeSection);
+
       NAVIGATION.forEach((group, index) => {
         if (group.label === "工作台") {
-          createUtilityLink(group);
+          createUtilityDropdown(group);
           return;
         }
 
