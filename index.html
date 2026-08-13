@@ -2940,60 +2940,6 @@
       </nav>
 
       <div class="header-actions">
-        <div class="search-wrap" id="searchWrap">
-          <form class="search-shell" id="siteSearch" role="search" novalidate>
-            <button class="search-submit" id="searchSubmit" type="submit" aria-label="搜索">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="11" cy="11" r="6.5"></circle>
-                <path d="m16 16 4 4M11 6.5V4M6.5 11H4"></path>
-              </svg>
-            </button>
-            <label class="sr-only" for="searchInput">搜索平台内容</label>
-            <input
-              class="search-input"
-              id="searchInput"
-              type="search"
-              inputmode="search"
-              autocomplete="off"
-              placeholder="搜索平台内容"
-              aria-expanded="false"
-              aria-controls="searchPanel"
-            >
-            <button class="search-dismiss" id="searchDismiss" type="button" aria-label="关闭搜索">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m7 7 10 10M17 7 7 17"></path>
-              </svg>
-            </button>
-          </form>
-
-          <section class="search-panel" id="searchPanel" aria-label="搜索建议" hidden>
-            <div class="search-section">
-              <div class="search-section-heading">
-                <h2 class="search-section-title">近期搜索热词</h2>
-              </div>
-              <div class="search-word-list" aria-label="近期搜索热词">
-                <button class="search-word is-hot" type="button" data-search-word="AI for Science">AI for Science</button>
-                <button class="search-word is-hot" type="button" data-search-word="具身智能">具身智能</button>
-                <button class="search-word is-hot" type="button" data-search-word="低空经济">低空经济</button>
-                <button class="search-word is-hot" type="button" data-search-word="固态电池">固态电池</button>
-                <button class="search-word is-hot" type="button" data-search-word="量子传感">量子传感</button>
-                <button class="search-word is-hot" type="button" data-search-word="AI 智能体">AI 智能体</button>
-              </div>
-            </div>
-
-            <div class="search-section">
-              <div class="search-section-heading">
-                <h2 class="search-section-title">搜索历史</h2>
-                <button class="search-history-clear" id="clearSearchHistory" type="button">清除</button>
-              </div>
-              <div class="search-word-list" id="searchHistoryList" aria-label="搜索历史"></div>
-              <p class="search-history-empty" id="searchHistoryEmpty" hidden>暂无搜索历史</p>
-            </div>
-
-            <p class="search-panel-footnote"><kbd>Enter</kbd><span>搜索论文、专利、报告、人才、资讯与项目</span></p>
-          </section>
-        </div>
-
         <a class="legacy-link" href="https://itic-sci.com/" aria-label="在当前页面回到旧版门户">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5 3 10l5 5M3.5 10H12a4.5 4.5 0 0 1 4.5 4.5"></path></svg>
           <span>回到旧版</span>
@@ -3065,14 +3011,20 @@
         <section class="mg-hero" aria-labelledby="mgHeroTitle">
           <div class="mg-shell mg-hero-inner">
             <header class="mg-section-heading mg-hero-heading">
-              <h1 id="mgHeroTitle">AI仿真实例</h1>
-              <p>以虚拟实验打破边界，用智能交互深化知识理解</p>
+              <h1 id="mgHeroTitle">科研知识智能搜索</h1>
+              <p>跨论文、专利、专家与科技报告，快速发现可信科研知识</p>
             </header>
 
-            <form class="mg-search-card" id="mgHeroSearchForm" role="search">
+            <form class="mg-search-card" id="mgHeroSearchForm" role="search" data-search-mode="fulltext">
+              <div class="mg-search-mode-tabs" id="mgHeroSearchModes" role="tablist" aria-label="搜索方式">
+                <button class="mg-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-hero-search-mode="fulltext">全文搜索</button>
+                <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="association">关联搜索</button>
+                <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="ai">AI搜索</button>
+                <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="keyword">关键词搜索</button>
+              </div>
               <label class="sr-only" for="mgHeroSearchInput">搜索科研资源与智能服务</label>
-              <input id="mgHeroSearchInput" type="search" autocomplete="off" placeholder="搜一搜..." aria-describedby="mgSearchHint">
-              <div class="mg-search-intents" aria-label="快捷搜索">
+              <input id="mgHeroSearchInput" type="search" autocomplete="off" placeholder="输入关键词，检索论文、专利、报告、专家等资源全文" aria-describedby="mgSearchHint">
+              <div class="mg-search-intents" id="mgFulltextShortcuts" aria-label="全文搜索快捷入口">
                 <button class="is-active" type="button" data-mg-query="AI 仿真实验">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h10v4l-3 4v4.5a2 2 0 0 1-4 0V13L7 9Z"></path><path d="M9 3h6M8.5 15h7"></path></svg>
                   练仿真
@@ -3090,15 +3042,27 @@
                   看战略
                 </button>
               </div>
-              <button class="mg-search-submit" type="submit" aria-label="开始搜索">
+              <div class="mg-ai-search-guide" id="mgAiSearchGuide" hidden>
+                <span class="mg-ai-search-guide-icon" aria-hidden="true">AI</span>
+                <span>输入关键词或完整研究问题，系统将进行语义检索并生成带引用的AI解读</span>
+              </div>
+              <div class="mg-ai-search-guide" id="mgAssociationSearchGuide" hidden>
+                <span class="mg-ai-search-guide-icon" aria-hidden="true">联</span>
+                <span>从当前问题出发，发现相似主题、上下游成果、相关专家与机构，并说明推荐理由</span>
+              </div>
+              <div class="mg-ai-search-guide" id="mgKeywordSearchGuide" hidden>
+                <span class="mg-ai-search-guide-icon" aria-hidden="true">词</span>
+                <span>支持单个或多个关键词、精确匹配、AND/OR组合，以及翻译和上下位词扩展</span>
+              </div>
+              <button class="mg-search-submit" type="submit" aria-label="开始全文搜索">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4.5 14-3-5.5Z"></path><path d="m11.5 13.5 3-3"></path></svg>
               </button>
             </form>
 
-            <a class="mg-more-search" id="mgHeroDiscover" href="https://www.figma.com/make/3FgvXef3dnCHETZCGrg3FO/%E6%99%BA%E6%85%A7%E9%97%A8%E6%88%B7%E7%B3%BB%E7%BB%9F---%E5%9F%BA%E7%A1%80%E6%9C%8D%E5%8A%A1?p=f&amp;t=Wf3EVxsEfXQKstZb-0&amp;fullscreen=1">
-              <span id="mgSearchHint">更多搜索与热门推荐</span>
+            <button class="mg-more-search" id="mgHeroDiscover" type="button">
+              <span id="mgSearchHint">高级检索 · 精确/模糊 · 作者/机构 · IPC</span>
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
-            </a>
+            </button>
 
             <div class="mg-simulation-strip" aria-label="热门仿真实例">
               <a class="mg-simulation-card mg-simulation-card--biology" href="https://itic-sci.bohrium.com/" target="_blank" rel="noopener noreferrer">
@@ -3826,11 +3790,11 @@
           <span class="sr-only" id="searchResultQuery"></span>
         </header>
 
-        <div class="portal-search-modes portal-search-mode-tabs" id="portalSearchModes" role="tablist" aria-label="搜索模式">
-          <button class="portal-search-mode portal-search-mode-tab is-active" type="button" role="tab" aria-selected="true" data-search-mode="关键词">关键词</button>
-          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" data-search-mode="全文">全文</button>
-          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" data-search-mode="关联">关联</button>
-          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" data-search-mode="AI 搜索">AI 搜索</button>
+        <div class="portal-search-modes portal-search-mode-tabs" id="portalSearchModes" role="tablist" aria-label="搜索方式">
+          <button class="portal-search-mode portal-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-search-mode="全文">全文搜索</button>
+          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="关联">关联搜索</button>
+          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="AI 搜索">AI搜索</button>
+          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="关键词">关键词搜索</button>
         </div>
 
         <div class="portal-search-toolbar">
@@ -3852,16 +3816,158 @@
           </div>
         </div>
 
+        <section class="portal-query-understanding" id="portalQueryUnderstanding" aria-labelledby="portalQueryUnderstandingTitle" hidden>
+          <div>
+            <p class="portal-query-understanding-eyebrow">语义检索 · 查询理解</p>
+            <h2 id="portalQueryUnderstandingTitle">正在解析研究问题</h2>
+          </div>
+          <div class="portal-query-entities" id="portalQueryEntities"></div>
+        </section>
+
+        <section class="portal-ai-overview" id="portalAiOverview" aria-labelledby="portalAiOverviewTitle" hidden>
+          <div class="portal-ai-overview-header">
+            <div>
+              <p class="portal-ai-overview-eyebrow">AI解读</p>
+              <h2 id="portalAiOverviewTitle">基于检索结果的结构化知识摘要</h2>
+            </div>
+            <span class="portal-ai-status" id="portalAiStatus">正在分析证据</span>
+          </div>
+          <div class="portal-ai-overview-body" id="portalAiOverviewBody"></div>
+          <p class="portal-mock-note">演示数据 · AI解读、引用关系、检索结果及接口时延均为模拟内容，不代表真实模型与数据源能力。</p>
+        </section>
+
+        <section class="portal-association-panel" id="portalAssociationPanel" aria-labelledby="portalAssociationTitle" hidden>
+          <div class="portal-mode-panel-header">
+            <div>
+              <p class="portal-mode-panel-eyebrow">智能关联 · 四步可追溯</p>
+              <h2 id="portalAssociationTitle">从检索问题到关联知识推荐</h2>
+            </div>
+            <div class="portal-mode-panel-actions">
+              <button class="portal-personalization-toggle" id="portalPersonalizationToggle" type="button" aria-pressed="false">个性化关联：关闭</button>
+              <button class="portal-panel-disclosure" id="portalAssociationDetailsToggle" type="button" aria-expanded="true" aria-controls="portalAssociationDetails">收起过程</button>
+            </div>
+          </div>
+          <div class="portal-association-details" id="portalAssociationDetails">
+          <div class="portal-association-workflow">
+            <article>
+              <span class="portal-workflow-step">01 · 用户搜索</span>
+              <strong>解析并细化检索提问</strong>
+              <p id="portalAssociationOriginalQuery">原始问题：—</p>
+              <code id="portalAssociationNormalizedQuery">主题:(—)</code>
+            </article>
+            <article>
+              <span class="portal-workflow-step">02 · 行为分析</span>
+              <strong id="portalBehaviorAnalysisTitle">仅使用当前问题</strong>
+              <p id="portalBehaviorAnalysisText">默认不使用历史行为；开启后仅在本次演示中使用模拟的检索、查看与收藏信号。</p>
+              <small>模拟数据 · 可随时关闭，不含受限资源行为</small>
+            </article>
+            <article>
+              <span class="portal-workflow-step">03 · 信息处理</span>
+              <strong>兴趣模型动态维护</strong>
+              <div class="portal-interest-profile" id="portalInterestProfile"></div>
+              <p id="portalProfileUpdateStatus">未启用行为画像，结果不受长期兴趣影响。</p>
+            </article>
+            <article>
+              <span class="portal-workflow-step">04 · 知识检索</span>
+              <strong>规范化、过滤与推荐</strong>
+              <p>在主题、成果、专家和机构中查找相关内容；结果卡片展示关联类型与推荐依据。</p>
+              <div class="portal-related-terms">
+                <button type="button" data-related-query="AI for Science">相关主题</button>
+                <button type="button" data-related-query="生成式智能体">相似成果</button>
+                <button type="button" data-related-query="科研专家">专家与机构</button>
+              </div>
+            </article>
+          </div>
+          <p class="portal-mock-note">演示数据 · 行为信号、兴趣程度、关系类型与推荐理由均为模拟内容，用于验证可解释、可关闭的关联检索流程。</p>
+          </div>
+        </section>
+
+        <section class="portal-keyword-panel" id="portalKeywordPanel" aria-labelledby="portalKeywordTitle" hidden>
+          <div class="portal-mode-panel-header">
+            <div>
+              <p class="portal-mode-panel-eyebrow">关键词检索 · 检索式可复现</p>
+              <h2 id="portalKeywordTitle">组合关键词并控制匹配范围</h2>
+            </div>
+            <div class="portal-keyword-controls" aria-label="关键词组合方式">
+              <button class="is-active" type="button" data-keyword-logic="AND" aria-pressed="true">全部包含 AND</button>
+              <button type="button" data-keyword-logic="OR" aria-pressed="false">任一包含 OR</button>
+              <button type="button" id="portalKeywordExactToggle" aria-pressed="false">精确短语</button>
+              <button type="button" id="portalExpansionToggle" aria-expanded="false" aria-controls="portalSearchCapabilities">词位扩展</button>
+            </div>
+          </div>
+          <div class="portal-query-expression">
+            <span>当前检索式</span>
+            <code id="portalKeywordExpression">—</code>
+            <button id="portalCopyExpression" type="button">复制</button>
+            <button id="portalRestoreKeywordQuery" type="button">恢复原始词</button>
+          </div>
+          <p class="portal-keyword-status" id="portalKeywordStatus">多个关键词默认全部包含；扩展词需由用户确认后才加入检索。</p>
+        </section>
+
+        <section class="portal-search-capabilities" id="portalSearchCapabilities" aria-label="关键词词位扩展" hidden>
+          <div class="portal-capability-block portal-keyword-expansion-panel">
+            <div class="portal-capability-heading"><strong>词位扩展建议</strong><span>按概念建立查询空间，选择后生效，随时可撤销</span></div>
+            <div class="portal-expansion-groups" id="portalExpansionTerms">
+              <div><span>自动扩展<small>主题词表</small></span><div class="portal-expansion-terms" data-expansion-group="automatic"></div></div>
+              <div><span>自动翻译<small>术语库／机器翻译</small></span><div class="portal-expansion-terms" data-expansion-group="translation"></div></div>
+              <div><span>上位词扩展<small>扩大主题外延</small></span><div class="portal-expansion-terms" data-expansion-group="broader"></div></div>
+              <div><span>下位词扩展<small>细化研究方向</small></span><div class="portal-expansion-terms" data-expansion-group="narrower"></div></div>
+            </div>
+            <p class="portal-expansion-note" id="portalExpansionNote">扩展词仅作为建议，不会静默改变原始检索式。</p>
+          </div>
+        </section>
+
+        <div class="portal-source-ledger" id="portalSourceLedger" aria-label="数据来源状态">
+          <span><i class="is-complete"></i>本地知识库 · 已完成</span>
+          <span><i class="is-complete"></i>论文数据库 · 已完成</span>
+          <span><i class="is-loading"></i>外部专利API · 查询中</span>
+          <span><i class="is-restricted"></i>受限资源 · 权限过滤</span>
+        </div>
+        <p class="portal-mock-banner">本原型使用模拟数据与模拟接口时延，用于验证页面和交互流程，不代表真实资源覆盖、检索准确率、系统性能、权限结果或AI结论质量。</p>
+
         <div class="portal-search-layout">
-          <aside class="portal-search-sidebar" aria-label="搜索筛选">
-            <div class="portal-search-filter-heading"><h2 class="portal-search-filter-title">筛选条件</h2><button class="portal-search-reset" id="portalSearchReset" type="button">重置</button></div>
+          <aside class="portal-search-sidebar" id="portalSearchSidebar" aria-label="搜索筛选">
+            <div class="portal-filter-panel-header">
+              <div><span>缩小结果范围</span><h2 class="portal-search-filter-title">筛选条件</h2></div>
+              <div class="portal-filter-panel-actions">
+                <button class="portal-search-reset" id="portalSearchReset" type="button">重置</button>
+                <button class="portal-filter-close" id="portalFilterClose" type="button" aria-label="关闭筛选">×</button>
+              </div>
+            </div>
             <form id="portalSearchFilters">
-              <fieldset class="portal-search-filter-group">
+              <fieldset class="portal-search-filter-group" data-filter-mode="all">
                 <legend class="portal-search-filter-heading">资源范围</legend>
                 <label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="全部资源" checked><span>全部资源</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="仅标题"><span>仅标题</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="标题与摘要"><span>标题与摘要</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="全文"><span>全文</span></label>
+              </fieldset>
+              <fieldset class="portal-search-filter-group" data-filter-mode="keyword">
+                <legend class="portal-search-filter-heading">匹配方式</legend>
+                <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="智能匹配" checked><span>智能匹配</span></label>
+                <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="精确匹配"><span>精确匹配</span></label>
+                <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="模糊匹配"><span>模糊匹配</span></label>
+              </fieldset>
+              <fieldset class="portal-search-filter-group portal-search-filter-fields" data-filter-mode="all">
+                <legend class="portal-search-filter-heading">二次筛选</legend>
+                <p class="portal-resource-filter-hint" id="portalResourceFilterHint">选择“论文、专利或人才”资源类型后，展示对应的专业筛选项。</p>
+                <div class="portal-resource-filter" data-filter-resource="人才" hidden>
+                  <label><span>学者姓名</span><input type="search" name="personNameFilter" placeholder="学者姓名"></label>
+                  <label><span>机构名称</span><input type="search" name="institutionFilter" placeholder="机构名称"></label>
+                </div>
+                <div class="portal-resource-filter" data-filter-resource="论文" hidden>
+                  <label><span>作者</span><input type="search" name="authorFilter" placeholder="作者姓名"></label>
+                  <label><span>会议／期刊</span><input type="search" name="venueFilter" placeholder="会议或期刊名称"></label>
+                </div>
+                <div class="portal-resource-filter" data-filter-resource="专利" hidden>
+                  <label><span>IPC 分类</span><input type="search" name="ipcFilter" placeholder="例如 G16B"></label>
+                  <label><span>申请人</span><input type="search" name="applicantFilter" placeholder="申请人名称"></label>
+                  <label><span>发明人</span><input type="search" name="inventorFilter" placeholder="发明人姓名"></label>
+                  <label><span>申请时间（起）</span><input type="date" name="applicationStart"></label>
+                  <label><span>申请时间（止）</span><input type="date" name="applicationEnd"></label>
+                  <label><span>公布时间（起）</span><input type="date" name="publicationStart"></label>
+                  <label><span>公布时间（止）</span><input type="date" name="publicationEnd"></label>
+                </div>
               </fieldset>
               <fieldset class="portal-search-filter-group">
                 <legend class="portal-search-filter-heading">发表时间</legend>
@@ -3872,14 +3978,14 @@
               </fieldset>
               <fieldset class="portal-search-filter-group">
                 <legend class="portal-search-filter-heading">学科领域</legend>
-                <label class="portal-search-filter-option"><input type="checkbox" name="discipline" value="人工智能" checked><span>人工智能</span></label>
+                <label class="portal-search-filter-option"><input type="checkbox" name="discipline" value="人工智能"><span>人工智能</span></label>
                 <label class="portal-search-filter-option"><input type="checkbox" name="discipline" value="先进材料"><span>先进材料</span></label>
                 <label class="portal-search-filter-option"><input type="checkbox" name="discipline" value="生命科学"><span>生命科学</span></label>
                 <label class="portal-search-filter-option"><input type="checkbox" name="discipline" value="绿色能源"><span>绿色能源</span></label>
               </fieldset>
               <fieldset class="portal-search-filter-group">
                 <legend class="portal-search-filter-heading">来源</legend>
-                <label class="portal-search-filter-option"><input type="checkbox" name="source" value="学术期刊" checked><span>学术期刊</span></label>
+                <label class="portal-search-filter-option"><input type="checkbox" name="source" value="学术期刊"><span>学术期刊</span></label>
                 <label class="portal-search-filter-option"><input type="checkbox" name="source" value="专利数据库"><span>专利数据库</span></label>
                 <label class="portal-search-filter-option"><input type="checkbox" name="source" value="智库报告"><span>智库报告</span></label>
                 <label class="portal-search-filter-option"><input type="checkbox" name="source" value="平台资讯"><span>平台资讯</span></label>
@@ -3887,25 +3993,46 @@
               <label class="portal-search-accessible-only portal-search-filter-option"><input type="checkbox" id="accessibleOnly"><span>仅显示当前可访问资源</span></label>
             </form>
           </aside>
+          <button class="portal-filter-backdrop" id="portalFilterBackdrop" type="button" aria-label="点击遮罩关闭筛选" hidden></button>
 
           <div class="portal-search-results">
-            <div class="portal-search-result-tabs portal-search-type-tabs" id="portalSearchTypeTabs" role="tablist" aria-label="资源类型">
-              <button class="portal-search-type-tab is-active" type="button" role="tab" aria-selected="true" data-search-type="全部">全部</button>
-              <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" data-search-type="论文">论文</button>
-              <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" data-search-type="专利">专利</button>
-              <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" data-search-type="报告">报告</button>
-              <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" data-search-type="人才">人才</button>
-              <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" data-search-type="资讯">资讯</button>
-              <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" data-search-type="项目">项目</button>
-            </div>
+            <header class="portal-results-header">
+              <div class="portal-results-heading-row">
+                <div>
+                  <p class="portal-results-eyebrow">检索结果</p>
+                  <h2 id="portalSearchResultCount">0 条结果</h2>
+                  <p class="portal-results-range" id="portalSearchResultRange">正在准备结果</p>
+                </div>
+                <div class="portal-results-controls">
+                  <button class="portal-mobile-filter-toggle" id="portalMobileFilterToggle" type="button" aria-controls="portalSearchSidebar" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
+                    <span>筛选</span><b id="portalActiveFilterCount" hidden>0</b>
+                  </button>
+                  <label class="portal-sort-control"><span>排序</span><select class="portal-search-sort" id="portalSearchSort"><option value="relevance">综合相关性</option><option value="latest">最新发布</option><option value="title">标题排序</option></select></label>
+                </div>
+              </div>
 
-            <div class="portal-search-result-meta portal-search-meta">
-              <p id="portalSearchResultCount">找到 0 条结果</p>
-              <div><span>示例数据 · 更新于 2026-07-17</span><label><span class="sr-only">排序方式</span><select class="portal-search-sort" id="portalSearchSort"><option value="relevance">综合排序</option><option value="latest">最新发布</option><option value="title">标题排序</option></select></label></div>
-            </div>
+              <div class="portal-search-result-tabs portal-search-type-tabs" id="portalSearchTypeTabs" role="tablist" aria-label="资源类型">
+                <button class="portal-search-type-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-search-type="全部"><span>全部</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="论文"><span>论文</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="专利"><span>专利</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="报告"><span>报告</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="人才"><span>人才</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="资讯"><span>资讯</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="项目"><span>项目</span><small data-search-type-count>0</small></button>
+              </div>
 
-            <div class="portal-search-result-list" id="portalSearchResultList" aria-live="polite"></div>
-            <div class="portal-search-empty" id="portalSearchEmpty" hidden><h2>暂未找到匹配内容</h2><p>请尝试更换关键词、资源类型或重置筛选条件。</p></div>
+              <div class="portal-active-filters" id="portalActiveFilters" aria-label="当前筛选条件" hidden></div>
+              <div class="portal-results-note"><span>按资源类型统一展示，优先呈现可判断相关性的证据与元数据</span><small>模拟数据 · 更新于 2026-07-17</small></div>
+            </header>
+
+            <div class="portal-search-result-list" id="portalSearchResultList" aria-live="polite" aria-busy="false"></div>
+            <div class="portal-search-empty" id="portalSearchEmpty" hidden>
+              <span class="portal-empty-icon" aria-hidden="true">⌕</span>
+              <h2>没有找到符合当前条件的结果</h2>
+              <p>可尝试减少关键词、切换资源范围，或清除筛选条件后重新检索。</p>
+              <button id="portalEmptyReset" type="button">清除筛选条件</button>
+            </div>
             <nav class="portal-search-pagination" id="portalSearchPagination" aria-label="搜索结果分页"></nav>
           </div>
         </div>
@@ -3916,6 +4043,26 @@
         <span>AI 助手</span>
       </button>
     </section>
+
+    <div class="portal-document-viewer" id="portalDocumentViewer" role="dialog" aria-modal="true" aria-labelledby="portalDocumentTitle" hidden>
+      <div class="portal-document-backdrop" data-close-document-viewer></div>
+      <section class="portal-document-panel">
+        <header class="portal-document-header">
+          <div>
+            <p>全文定位 · 模拟预览</p>
+            <h2 id="portalDocumentTitle">原文定位</h2>
+          </div>
+          <button class="portal-document-close" type="button" data-close-document-viewer aria-label="关闭全文预览">×</button>
+        </header>
+        <div class="portal-document-toolbar">
+          <button type="button" id="portalPreviousMatch">上一处</button>
+          <strong id="portalDocumentMatchCount">第 1/1 处命中</strong>
+          <button type="button" id="portalNextMatch">下一处</button>
+          <span id="portalDocumentPage">第 1 页</span>
+        </div>
+        <div class="portal-document-page" id="portalDocumentPageContent"></div>
+      </section>
+    </div>
 
     <section class="account-page" id="profilePage" aria-labelledby="profilePageTitle" hidden>
       <div class="account-shell">
@@ -4082,16 +4229,8 @@
       const profileWrap = document.getElementById("profileWrap");
       const profileButton = document.getElementById("profileButton");
       const profileMenu = document.getElementById("profileMenu");
-      const searchWrap = document.getElementById("searchWrap");
-      const siteSearch = document.getElementById("siteSearch");
-      const searchSubmit = document.getElementById("searchSubmit");
-      const searchInput = document.getElementById("searchInput");
-      const searchDismiss = document.getElementById("searchDismiss");
-      const searchPanel = document.getElementById("searchPanel");
-      const searchHistoryList = document.getElementById("searchHistoryList");
-      const searchHistoryEmpty = document.getElementById("searchHistoryEmpty");
-      const clearSearchHistory = document.getElementById("clearSearchHistory");
       const searchResultsPage = document.getElementById("searchResultsPage");
+      const searchResultsTitle = document.getElementById("searchResultsTitle");
       const searchResultQuery = document.getElementById("searchResultQuery");
       const featureCarousel = document.getElementById("featureCarousel");
       const featureTabs = featureCarousel ? [...featureCarousel.querySelectorAll("[role='tab']")] : [];
@@ -4106,6 +4245,11 @@
       const manageRecommendationProfile = document.getElementById("manageRecommendationProfile");
       const mgHeroSearchForm = document.getElementById("mgHeroSearchForm");
       const mgHeroSearchInput = document.getElementById("mgHeroSearchInput");
+      const mgHeroSearchModes = document.getElementById("mgHeroSearchModes");
+      const mgFulltextShortcuts = document.getElementById("mgFulltextShortcuts");
+      const mgAiSearchGuide = document.getElementById("mgAiSearchGuide");
+      const mgAssociationSearchGuide = document.getElementById("mgAssociationSearchGuide");
+      const mgKeywordSearchGuide = document.getElementById("mgKeywordSearchGuide");
       const mgHeroDiscover = document.getElementById("mgHeroDiscover");
       const profilePage = document.getElementById("profilePage");
       const messagePage = document.getElementById("messagePage");
@@ -4125,9 +4269,73 @@
       const portalSearchReset = document.getElementById("portalSearchReset");
       const portalSearchResultList = document.getElementById("portalSearchResultList");
       const portalSearchResultCount = document.getElementById("portalSearchResultCount");
+      const portalSearchResultRange = document.getElementById("portalSearchResultRange");
       const portalSearchPagination = document.getElementById("portalSearchPagination");
       const portalSearchEmpty = document.getElementById("portalSearchEmpty");
+      const portalEmptyReset = document.getElementById("portalEmptyReset");
+      const portalSearchSidebar = document.getElementById("portalSearchSidebar");
+      const portalMobileFilterToggle = document.getElementById("portalMobileFilterToggle");
+      const portalFilterClose = document.getElementById("portalFilterClose");
+      const portalFilterBackdrop = document.getElementById("portalFilterBackdrop");
+      const portalActiveFilters = document.getElementById("portalActiveFilters");
+      const portalActiveFilterCount = document.getElementById("portalActiveFilterCount");
       const portalSearchAssistant = document.getElementById("portalSearchAssistant");
+      const portalQueryUnderstanding = document.getElementById("portalQueryUnderstanding");
+      const portalQueryEntities = document.getElementById("portalQueryEntities");
+      const portalAiOverview = document.getElementById("portalAiOverview");
+      const portalAiStatus = document.getElementById("portalAiStatus");
+      const portalAiOverviewBody = document.getElementById("portalAiOverviewBody");
+      const portalAssociationPanel = document.getElementById("portalAssociationPanel");
+      const portalAssociationDetails = document.getElementById("portalAssociationDetails");
+      const portalAssociationDetailsToggle = document.getElementById("portalAssociationDetailsToggle");
+      const portalAssociationOriginalQuery = document.getElementById("portalAssociationOriginalQuery");
+      const portalAssociationNormalizedQuery = document.getElementById("portalAssociationNormalizedQuery");
+      const portalBehaviorAnalysisTitle = document.getElementById("portalBehaviorAnalysisTitle");
+      const portalBehaviorAnalysisText = document.getElementById("portalBehaviorAnalysisText");
+      const portalInterestProfile = document.getElementById("portalInterestProfile");
+      const portalProfileUpdateStatus = document.getElementById("portalProfileUpdateStatus");
+      const portalPersonalizationToggle = document.getElementById("portalPersonalizationToggle");
+      const portalKeywordPanel = document.getElementById("portalKeywordPanel");
+      const portalKeywordExpression = document.getElementById("portalKeywordExpression");
+      const portalKeywordStatus = document.getElementById("portalKeywordStatus");
+      const portalKeywordExactToggle = document.getElementById("portalKeywordExactToggle");
+      const portalExpansionToggle = document.getElementById("portalExpansionToggle");
+      const portalCopyExpression = document.getElementById("portalCopyExpression");
+      const portalRestoreKeywordQuery = document.getElementById("portalRestoreKeywordQuery");
+      const portalSearchCapabilities = document.getElementById("portalSearchCapabilities");
+      const portalExpansionTerms = document.getElementById("portalExpansionTerms");
+      const portalExpansionNote = document.getElementById("portalExpansionNote");
+      const portalResourceFilterHint = document.getElementById("portalResourceFilterHint");
+      const portalDocumentViewer = document.getElementById("portalDocumentViewer");
+      const portalDocumentTitle = document.getElementById("portalDocumentTitle");
+      const portalDocumentPageContent = document.getElementById("portalDocumentPageContent");
+      const portalDocumentPage = document.getElementById("portalDocumentPage");
+      const portalDocumentMatchCount = document.getElementById("portalDocumentMatchCount");
+      const portalPreviousMatch = document.getElementById("portalPreviousMatch");
+      const portalNextMatch = document.getElementById("portalNextMatch");
+
+      const SEARCH_MODE_CONFIG = {
+        "全文": {
+          title: "全文资源检索",
+          placeholder: "输入关键词或短语，检索正文并定位命中页码",
+          description: "逐字检索论文、专利、报告等资源，展示命中句、页码与原文位置。"
+        },
+        "关联": {
+          title: "智能关联搜索",
+          placeholder: "输入研究主题、论文、专利、专家或机构，发现关联知识",
+          description: "解析并细化问题，结合可控的兴趣信号推荐相似主题、成果、专家与机构。"
+        },
+        "AI 搜索": {
+          title: "AI科研搜索",
+          placeholder: "输入关键词或描述研究问题，例如：大模型在药物靶点发现中有哪些作用与限制",
+          description: "通过语义理解检索异构资源，并生成带证据引用与局限说明的结构化解读。"
+        },
+        "关键词": {
+          title: "关键词精准检索",
+          placeholder: "输入单个或多个关键词，使用空格分隔，例如：大语言模型 药物靶点",
+          description: "支持精确、模糊、AND/OR、多字段二次筛选，以及可选择的词位扩展。"
+        }
+      };
 
       const desktopTriggers = [];
       const utilityDropdowns = [];
@@ -4138,17 +4346,30 @@
       let activeUtilityIndex = -1;
       let activeMobileIndex = -1;
       let suppressNextDesktopFocus = false;
-      const SEARCH_HISTORY_KEY = "gkx-search-history";
-      const DEFAULT_SEARCH_HISTORY = ["AI 战略咨询", "产业链图谱", "创新监测"];
-      let searchHistory = loadSearchHistory();
       let activeCarouselIndex = 0;
       let carouselTimer = null;
       let carouselPointerStart = null;
       let activeRecommendationType = "为你推荐";
       let recommendationBatch = 0;
       let activeSearchType = "全部";
-      let activeSearchMode = "关键词";
+      let activeHeroSearchMode = "fulltext";
+      let activeSearchMode = "全文";
       let activeSearchPage = 1;
+      const activeExpansionTerms = new Set();
+      let keywordLogic = "AND";
+      let keywordExact = false;
+      let keywordExpansionOpen = false;
+      let associationDetailsOpen = true;
+      let originalKeywordQuery = "";
+      let personalizationEnabled = false;
+      const associationInterests = new Map([
+        ["AI for Science", 86],
+        ["智能体", 74],
+        ["低空经济", 52]
+      ]);
+      let activeDocumentItem = null;
+      let activeDocumentMatchIndex = 0;
+      let activeDocumentTrigger = null;
       let announcementDismissed = false;
       const SEARCH_PAGE_SIZE = 3;
       const reduceCarouselMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -4248,7 +4469,46 @@
           summary: "研究提出一套可验证、可追溯的多智能体科学发现工作流，并通过材料发现任务进行系统评测。",
           tags: ["AI for Science", "智能体", "可验证推理"],
           source: "Nature Machine Intelligence", meta: "被引 38 · 相关文献 126", accessible: true,
-          detail: "覆盖任务拆解、工具调用、证据校验与研究过程回溯，适合用于智能科研工作流设计参考。"
+          author: "陈晓岚 王祺", venue: "Nature Machine Intelligence",
+          detail: "覆盖任务拆解、工具调用、证据校验与研究过程回溯，适合用于智能科研工作流设计参考。",
+          fulltextStatus: "可定位", matchField: "正文", matches: [
+            { page: 12, paragraph: 3, text: "多智能体协作框架通过检索、证据校验和冲突识别，使科学发现过程能够被追溯与复核。" },
+            { page: 18, paragraph: 2, text: "在材料发现任务中，语义检索与关键词召回互补，有效提升了候选证据的覆盖率。" },
+            { page: 27, paragraph: 5, text: "研究同时指出，智能体结论必须绑定原始文献证据，避免生成内容替代可核验事实。" }
+          ]
+        },
+        {
+          type: "论文", status: "可访问", date: "2026-05-21",
+          title: "大语言模型驱动的药物靶点发现：方法、证据与验证边界",
+          summary: "综述大语言模型在靶点识别、知识关联、候选优先级排序和实验假设生成中的应用，并讨论数据偏差与验证限制。",
+          tags: ["大语言模型", "药物靶点发现", "语义检索", "生命科学"],
+          source: "Journal of Biomedical Discovery", meta: "综述论文 · 被引 16", accessible: true,
+          author: "李铭 周明远", venue: "Journal of Biomedical Discovery",
+          detail: "文章将药物靶点发现拆分为证据检索、关系推断、候选排序和实验验证四个环节。",
+          fulltextStatus: "可定位", matchField: "正文", matches: [
+            { page: 8, paragraph: 2, text: "大语言模型可融合文献、组学数据与知识图谱，为潜在药物靶点建立可追溯的候选证据链。" },
+            { page: 19, paragraph: 4, text: "模型生成的靶点假设仍需通过独立数据与湿实验验证，训练数据偏差可能放大既有研究热点。" }
+          ]
+        },
+        {
+          type: "专利", status: "可访问", date: "2026-04-18",
+          title: "基于知识图谱与语言模型的药物靶点候选排序方法",
+          summary: "公开一种结合生物医学知识图谱与语言模型进行候选靶点召回、评分和解释的方法。",
+          tags: ["药物靶点", "知识图谱", "语言模型", "专利"],
+          source: "全球专利数据库", meta: "IPC G16B · 发明专利", accessible: true,
+          ipc: "G16B", applicant: "深圳生物智能研究院", inventor: "周明远 李铭", applicationDate: "2025-10-18", publicationDate: "2026-04-18",
+          detail: "专利元数据包含IPC分类、申请人、发明人和申请时间，正文授权状态待数据源确认。",
+          fulltextStatus: "仅摘要", matchField: "摘要", matches: []
+        },
+        {
+          type: "人才", status: "公开", date: "2026-03-30",
+          title: "周明远 · AI药物发现与生物医学知识图谱",
+          summary: "研究方向包括大语言模型辅助药物发现、生物医学实体关系抽取与可解释靶点优先级排序。",
+          tags: ["AI药物发现", "生物医学", "科研专家"],
+          source: "科研人才库", meta: "代表成果 23 · 合作机构 11", accessible: true,
+          personName: "周明远", institution: "深圳生物智能研究院",
+          detail: "专家关联来自公开成果、机构与合作网络的模拟数据。",
+          fulltextStatus: "实体资源", matchField: "研究方向", matches: []
         },
         {
           type: "报告", status: "登录可见", date: "2026-07-08",
@@ -4256,7 +4516,8 @@
           summary: "系统梳理基础模型、智能体、具身智能与 AI for Science 的技术进展、区域格局和政策方向。",
           tags: ["人工智能", "战略咨询", "全球趋势", "新型高端智库"],
           source: "深圳国际科技信息中心", meta: "研究报告 · 86 页", accessible: false,
-          detail: "报告由全球创新信号、关键技术赛道、区域竞争格局与行动建议四部分构成。"
+          detail: "报告由全球创新信号、关键技术赛道、区域竞争格局与行动建议四部分构成。",
+          fulltextStatus: "无权限", matchField: "元数据", matches: []
         },
         {
           type: "专利", status: "可访问", date: "2026-06-26",
@@ -4264,7 +4525,9 @@
           summary: "面向全固态电池的复合电解质材料方案，聚焦界面稳定性、离子传导与规模化制备工艺。",
           tags: ["固态电池", "先进材料", "专利"],
           source: "全球专利数据库", meta: "发明专利 · 18 项权利要求", accessible: true,
-          detail: "包含材料组成、制备参数、性能验证与可实施例信息，支持进一步开展专利对比分析。"
+          ipc: "H01M", applicant: "先进材料技术中心", inventor: "赵宁", applicationDate: "2025-12-09", publicationDate: "2026-06-26",
+          detail: "包含材料组成、制备参数、性能验证与可实施例信息，支持进一步开展专利对比分析。",
+          fulltextStatus: "仅摘要", matchField: "摘要", matches: []
         },
         {
           type: "人才", status: "公开", date: "2026-07-01",
@@ -4272,7 +4535,9 @@
           summary: "聚焦多模态感知、世界模型与灵巧操作，在顶级会议发表论文 38 篇。",
           tags: ["具身智能", "机器人学习", "青年人才", "智慧人才"],
           source: "未来智能研究院", meta: "代表成果 12 · 合作网络 46", accessible: true,
-          detail: "画像由公开科研成果、机构经历与合作网络生成，评价结论可回溯至对应证据。"
+          personName: "林知远", institution: "未来智能研究院",
+          detail: "画像由公开科研成果、机构经历与合作网络生成，评价结论可回溯至对应证据。",
+          fulltextStatus: "实体资源", matchField: "研究方向", matches: []
         },
         {
           type: "资讯", status: "公开", date: "2026-07-16",
@@ -4280,7 +4545,10 @@
           summary: "从飞控、感知、通信、动力与运营服务等环节更新低空经济产业链和区域创新信号。",
           tags: ["低空经济", "产业链", "创新监测", "科技信息展示"],
           source: "科技信息交流中心", meta: "专题资讯 · 数据更新", accessible: true,
-          detail: "可进一步进入科技信息展示系统查看区域分布、产业链节点和动态监测数据。"
+          detail: "可进一步进入科技信息展示系统查看区域分布、产业链节点和动态监测数据。",
+          fulltextStatus: "可定位", matchField: "正文", matches: [
+            { page: 6, paragraph: 4, text: "低空经济技术图谱覆盖飞控、感知、通信、动力和运营服务等关键技术环节。" }
+          ]
         },
         {
           type: "项目", status: "公开", date: "2026-06-18",
@@ -4288,7 +4556,8 @@
           summary: "围绕高灵敏测量、器件集成与工程验证开展跨机构协同研究，开放项目方向与合作需求。",
           tags: ["量子传感", "协同攻关", "科研项目"],
           source: "项目资源库", meta: "参与机构 8 · 任务方向 5", accessible: true,
-          detail: "项目详情包含研究方向、能力需求、阶段目标和合作联络方式。"
+          detail: "项目详情包含研究方向、能力需求、阶段目标和合作联络方式。",
+          fulltextStatus: "仅详情", matchField: "项目描述", matches: []
         },
         {
           type: "报告", status: "公开", date: "2026-07-03",
@@ -4296,7 +4565,10 @@
           summary: "综合论文、专利、政策与企业信息，识别未来产业关键技术链、潜在瓶颈与近期布局窗口。",
           tags: ["战略研判", "科技专题服务", "产业链"],
           source: "战略咨询研究团队", meta: "专题报告 · 持续更新", accessible: true,
-          detail: "支持从技术节点、区域资源和重点主体三个维度继续追踪专题变化。"
+          detail: "支持从技术节点、区域资源和重点主体三个维度继续追踪专题变化。",
+          fulltextStatus: "可定位", matchField: "正文", matches: [
+            { page: 36, paragraph: 2, text: "未来产业机会窗口的判断需要综合论文、专利、政策与企业信号，并持续校验信号之间的冲突。" }
+          ]
         },
         {
           type: "资讯", status: "公开", date: "2026-07-14",
@@ -4304,7 +4576,8 @@
           summary: "汇总近期开放的科研智能体、文献研读工具与高质量科学数据库入口。",
           tags: ["科学数据库", "AI 科研", "资源导航"],
           source: "平台资讯", meta: "资源导航 · 32 个入口", accessible: true,
-          detail: "所有入口均标注资源类型、访问条件与适用学科，便于研究者快速筛选。"
+          detail: "所有入口均标注资源类型、访问条件与适用学科，便于研究者快速筛选。",
+          fulltextStatus: "解析中", matchField: "标题与摘要", matches: []
         }
       ];
 
@@ -4319,6 +4592,103 @@
       function formatDate(date) {
         const [year, month, day] = String(date).split("-");
         return `${year}-${month}-${day}`;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
+        })[character]);
+      }
+
+      function getResultTypeIcon(type) {
+        const icons = {
+          "论文": `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h9l3 3V20H6Z"></path><path d="M15 3.5V7h3M9 11h6M9 15h6"></path></svg>`,
+          "专利": `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6.5v5c0 4.2 2.8 7.2 7 9.5 4.2-2.3 7-5.3 7-9.5v-5Z"></path><path d="m9 12 2 2 4-4"></path></svg>`,
+          "人才": `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5.5 20c.6-4 2.8-6 6.5-6s5.9 2 6.5 6"></path></svg>`,
+          "报告": `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5Z"></path><path d="M8.5 15.5v-3M12 15.5V9M15.5 15.5v-5"></path></svg>`,
+          "资讯": `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4Z"></path><path d="M7.5 9h4M7.5 12h9M7.5 15h7"></path></svg>`,
+          "项目": `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h6l2 2h8v10H4Z"></path><path d="M4 7V5h6l2 2"></path></svg>`
+        };
+        return icons[type] || icons["报告"];
+      }
+
+      function getResultMetadata(item) {
+        const metadata = [];
+        if (item.type === "论文") {
+          if (item.author) metadata.push(["作者", item.author]);
+          metadata.push(["期刊／会议", item.venue || item.source]);
+        } else if (item.type === "专利") {
+          if (item.ipc) metadata.push(["IPC", item.ipc]);
+          if (item.applicant) metadata.push(["申请人", item.applicant]);
+          if (item.inventor) metadata.push(["发明人", item.inventor]);
+        } else if (item.type === "人才") {
+          if (item.institution) metadata.push(["机构", item.institution]);
+          metadata.push(["研究方向", item.tags.slice(0, 2).join("、")]);
+        } else {
+          metadata.push(["来源", item.source]);
+          metadata.push(["资源信息", item.meta.split("·")[0].trim()]);
+        }
+        return metadata.slice(0, 3);
+      }
+
+      function getMatchFieldLabel(item, query) {
+        const lowerQuery = String(query || "").toLocaleLowerCase("zh-CN");
+        if (lowerQuery && item.title.toLocaleLowerCase("zh-CN").includes(lowerQuery)) return "题名";
+        if (item.tags.some((tag) => lowerQuery.includes(tag.toLocaleLowerCase("zh-CN")))) return "关键词";
+        if (item.summary.toLocaleLowerCase("zh-CN").includes(getQueryTerms(lowerQuery)[0] || "__none__")) return "摘要";
+        return item.matchField || "元数据";
+      }
+
+      function escapeRegExp(value) {
+        return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }
+
+      function highlightResultText(value, query) {
+        const terms = [...getQueryTerms(query), ...activeExpansionTerms]
+          .map((term) => String(term).trim())
+          .filter((term) => term.length >= 2)
+          .sort((a, b) => b.length - a.length)
+          .slice(0, 8);
+        if (!terms.length) return escapeHtml(value);
+        const pattern = new RegExp(`(${terms.map(escapeRegExp).join("|")})`, "gi");
+        return String(value).split(pattern).map((part, index) => index % 2
+          ? `<mark>${escapeHtml(part)}</mark>`
+          : escapeHtml(part)).join("");
+      }
+
+      function getKeywordHitDetails(item, query) {
+        const originalTerms = getQueryTerms(query).map((term) => ({ term, expanded: false }));
+        const expansionTerms = [...activeExpansionTerms].map((term) => ({ term, expanded: true }));
+        return [...originalTerms, ...expansionTerms].slice(0, 6).map(({ term, expanded }) => {
+          const lower = term.toLocaleLowerCase("zh-CN");
+          const findField = (candidate) => String(candidate || "").toLocaleLowerCase("zh-CN").includes(lower);
+          let field = "";
+          let normalized = "";
+          if (findField(item.title)) field = "题名";
+          else if (item.tags.some(findField)) field = "关键词";
+          else if (findField(item.summary)) field = "摘要";
+          else if ((item.matches || []).some((match) => findField(match.text))) {
+            const match = item.matches.find((entry) => findField(entry.text));
+            field = `正文第 ${match.page} 页`;
+          } else {
+            const structuredFields = [
+              ["作者", item.author], ["期刊／会议", item.venue], ["机构", item.institution],
+              ["IPC", item.ipc], ["申请人", item.applicant], ["发明人", item.inventor]
+            ];
+            field = structuredFields.find(([, value]) => findField(value))?.[0] || "";
+          }
+          if (!field && !expanded) {
+            const candidate = normalizeKeywordMatchMode(term).find((alias) => alias !== lower);
+            if (candidate) {
+              const aliasFind = (value) => String(value || "").toLocaleLowerCase("zh-CN").includes(candidate);
+              if (aliasFind(item.title)) field = "题名";
+              else if (item.tags.some(aliasFind)) field = "关键词";
+              else if (aliasFind(item.summary)) field = "摘要";
+              if (field) normalized = candidate;
+            }
+          }
+          return { term, expanded, field: field || "未直接命中", normalized };
+        });
       }
 
       function createRecommendationCard(item) {
@@ -4369,31 +4739,417 @@
       }
 
       function setSearchMode(mode) {
-        activeSearchMode = mode;
+        const previousMode = activeSearchMode;
+        activeSearchMode = SEARCH_MODE_CONFIG[mode] ? mode : "全文";
+        if (activeSearchMode === "关键词" && previousMode !== "关键词") keywordExpansionOpen = false;
+        if (activeSearchMode === "关联" && previousMode !== "关联") associationDetailsOpen = !window.matchMedia("(max-width: 720px)").matches;
         portalSearchModes.querySelectorAll("[data-search-mode]").forEach((tab) => {
-          const active = tab.dataset.searchMode === mode;
+          const active = tab.dataset.searchMode === activeSearchMode;
           tab.classList.toggle("is-active", active);
           tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
         });
-        portalResultSearchInput.placeholder = mode === "AI 搜索"
-          ? "描述你的研究问题，例如：梳理低空经济关键技术与区域布局"
-          : "搜索论文、专利、报告、人才、资讯、项目";
+        portalResultSearchInput.placeholder = SEARCH_MODE_CONFIG[activeSearchMode].placeholder;
+        searchResultsTitle.textContent = SEARCH_MODE_CONFIG[activeSearchMode].title;
+        document.querySelector(".portal-search-lead").textContent = SEARCH_MODE_CONFIG[activeSearchMode].description;
+        portalSearchAssistant.hidden = activeSearchMode === "AI 搜索";
+        portalSearchFilters.querySelectorAll("[data-filter-mode='keyword']").forEach((group) => {
+          group.hidden = activeSearchMode !== "关键词";
+          group.querySelectorAll("input").forEach((input) => { input.disabled = activeSearchMode !== "关键词"; });
+        });
+        updateSearchModePanels();
       }
 
-      function getFilteredSearchItems() {
-        const query = portalResultSearchInput.value.trim().toLocaleLowerCase("zh-CN");
+      function setHeroSearchMode(mode, focusInput = true) {
+        const modes = {
+          fulltext: {
+            placeholder: "输入关键词，检索论文、专利、报告、专家等资源全文",
+            label: "开始全文搜索"
+          },
+          association: {
+            placeholder: "输入研究主题、论文、专利、专家或机构，发现关联知识",
+            label: "开始关联搜索"
+          },
+          ai: {
+            placeholder: "输入关键词或完整研究问题，AI将检索并解读相关科技资源",
+            label: "开始AI搜索"
+          },
+          keyword: {
+            placeholder: "输入单个或多个关键词，进行精确查找与词位扩展",
+            label: "开始关键词搜索"
+          }
+        };
+        activeHeroSearchMode = modes[mode] ? mode : "fulltext";
+        mgHeroSearchForm.dataset.searchMode = activeHeroSearchMode;
+        mgHeroSearchModes.querySelectorAll("[data-hero-search-mode]").forEach((tab) => {
+          const active = tab.dataset.heroSearchMode === activeHeroSearchMode;
+          tab.classList.toggle("is-active", active);
+          tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+        mgFulltextShortcuts.hidden = activeHeroSearchMode !== "fulltext";
+        mgAssociationSearchGuide.hidden = activeHeroSearchMode !== "association";
+        mgAiSearchGuide.hidden = activeHeroSearchMode !== "ai";
+        mgKeywordSearchGuide.hidden = activeHeroSearchMode !== "keyword";
+        mgHeroSearchInput.placeholder = modes[activeHeroSearchMode].placeholder;
+        const submit = mgHeroSearchForm.querySelector(".mg-search-submit");
+        submit.setAttribute("aria-label", modes[activeHeroSearchMode].label);
+        if (focusInput) mgHeroSearchInput.focus();
+      }
+
+      function deriveQueryUnderstanding(query) {
+        const text = String(query || "");
+        const entities = [];
+        if (/AI|人工智能|大模型|智能体/i.test(text)) entities.push(["技术", /大模型/.test(text) ? "大模型" : /智能体/.test(text) ? "智能体" : "人工智能"]);
+        if (/药物|靶点/.test(text)) entities.push(["研究对象", "药物靶点发现"]);
+        if (/低空/.test(text)) entities.push(["主题", "低空经济"]);
+        if (/固态|电池/.test(text)) entities.push(["主题", "固态电池"]);
+        if (/专家|学者|人才/.test(text)) entities.push(["资源", "专家"]);
+        if (/限制|风险|问题/.test(text)) entities.push(["意图", "作用与限制分析"]);
+        if (!entities.length) entities.push(["主题", text.slice(0, 18) || "科研问题"]);
+        return entities.slice(0, 4);
+      }
+
+      function getQueryTerms(query) {
+        return String(query || "")
+          .split(/[\s,，;；、]+/)
+          .map((term) => term.trim())
+          .filter(Boolean);
+      }
+
+      function getSemanticTerms(query) {
+        const text = String(query || "");
+        const terms = getQueryTerms(text);
+        if (/AI|人工智能|大模型|智能体/i.test(text)) terms.push("人工智能", "AI", "大模型", "语言模型", "智能体", "AI for Science");
+        if (/药物|靶点|生物医药/.test(text)) terms.push("药物", "靶点", "生物医学", "知识图谱");
+        if (/低空/.test(text)) terms.push("低空经济", "飞控", "产业链");
+        if (/固态|电池/.test(text)) terms.push("固态电池", "固态电解质", "先进材料");
+        if (/专家|学者|人才/.test(text)) terms.push("科研专家", "科研人才", "研究方向");
+        return [...new Set(terms)].filter(Boolean);
+      }
+
+      function getExpansionSuggestions(query) {
+        const text = String(query || "");
+        if (/药物|靶点|生物医药/.test(text)) {
+          return {
+            automatic: ["靶点识别", "药物发现"],
+            translation: ["Drug target discovery"],
+            broader: ["生物医药", "计算生物学"],
+            narrower: ["靶点优先级排序", "生物医学知识图谱"]
+          };
+        }
+        if (/固态|电池/.test(text)) {
+          return {
+            automatic: ["全固态电池", "固态电解质"],
+            translation: ["Solid-state battery"],
+            broader: ["先进储能", "新能源材料"],
+            narrower: ["复合固态电解质", "界面稳定性"]
+          };
+        }
+        return {
+          automatic: ["人工智能", "生成式AI"],
+          translation: ["Artificial Intelligence"],
+          broader: ["计算机科学", "智能技术"],
+          narrower: ["大语言模型", "智能体", "机器学习"]
+        };
+      }
+
+      function renderAssociationPanel(query) {
+        const safeQuery = query || "当前科研主题";
+        const entities = deriveQueryUnderstanding(safeQuery).map(([, value]) => value);
+        portalAssociationOriginalQuery.textContent = `原始问题：${safeQuery}`;
+        portalAssociationNormalizedQuery.textContent = `主题:(\"${entities.join("\" OR \"")}\") AND 资源:(论文 OR 专利 OR 专家 OR 机构)`;
+        portalPersonalizationToggle.textContent = `个性化关联：${personalizationEnabled ? "开启" : "关闭"}`;
+        portalPersonalizationToggle.setAttribute("aria-pressed", String(personalizationEnabled));
+        portalBehaviorAnalysisTitle.textContent = personalizationEnabled ? "使用本次会话的模拟兴趣信号" : "仅使用当前问题";
+        portalBehaviorAnalysisText.textContent = personalizationEnabled
+          ? "综合本次演示中的检索、查看与收藏次数计算兴趣程度，并参与关联结果排序。"
+          : "默认不使用历史行为；开启后仅在本次演示中使用模拟的检索、查看与收藏信号。";
+        portalInterestProfile.innerHTML = [...associationInterests.entries()].map(([label, score]) => `
+          <span><b>${escapeHtml(label)}</b><i><em style="width:${score}%"></em></i><small>${score}</small></span>`).join("");
+        portalProfileUpdateStatus.textContent = personalizationEnabled
+          ? "本次会话画像已动态更新；关闭后不再参与推荐排序。"
+          : "模拟画像未参与当前排序，关联结果仅依据当前问题与知识关系。";
+      }
+
+      function updateAssociationProfileFromQuery(query) {
+        if (!personalizationEnabled) return;
+        const text = String(query || "");
+        const topic = /药物|靶点/.test(text) ? "药物靶点" : /低空/.test(text) ? "低空经济" : /智能体/.test(text) ? "智能体" : /AI|人工智能|大模型/i.test(text) ? "AI for Science" : text.slice(0, 8);
+        if (!topic) return;
+        associationInterests.set(topic, Math.min(96, (associationInterests.get(topic) || 48) + 4));
+      }
+
+      function renderKeywordExpansionSuggestions(query) {
+        const suggestions = getExpansionSuggestions(query);
+        const availableTerms = new Set(Object.values(suggestions).flat());
+        [...activeExpansionTerms].forEach((term) => {
+          if (!availableTerms.has(term) || keywordExact) activeExpansionTerms.delete(term);
+        });
+        Object.entries(suggestions).forEach(([group, terms]) => {
+          const container = portalExpansionTerms.querySelector(`[data-expansion-group="${group}"]`);
+          if (!container) return;
+          container.innerHTML = terms.map((term) => {
+            const selected = activeExpansionTerms.has(term);
+            return `<button type="button" class="${selected ? "is-selected" : ""}" data-expansion-term="${escapeHtml(term)}" ${keywordExact ? "disabled" : ""}>${selected ? "✓" : "+"} ${escapeHtml(term)}</button>`;
+          }).join("");
+        });
+        portalExpansionNote.textContent = keywordExact
+          ? "精确短语已开启：翻译、同义词和上下位词扩展已停用。"
+          : "扩展词来自模拟主题词表、术语库和模型建议；选择后生效，取消即可撤销。";
+      }
+
+      function normalizeKeywordMatchMode(query) {
+        const terms = getQueryTerms(query).map((term) => term.toLocaleLowerCase("zh-CN"));
+        const knownTerms = [...new Set(SEARCH_ITEMS.flatMap((item) => [item.title, ...item.tags, item.personName, item.author, item.institution, item.venue, item.ipc, item.applicant, item.inventor].filter(Boolean)))]
+          .map((term) => String(term).toLocaleLowerCase("zh-CN"));
+        const normalized = terms.map((term) => {
+          if (knownTerms.some((known) => known.includes(term))) return term;
+          let best = term;
+          let bestScore = 0;
+          knownTerms.forEach((known) => {
+            const shared = [...term].filter((character) => known.includes(character)).length;
+            const score = shared / Math.max(term.length, known.length, 1);
+            if (score > bestScore) {
+              bestScore = score;
+              best = known;
+            }
+          });
+          return bestScore >= 0.45 ? best : term;
+        });
+        return [...new Set(normalized)];
+      }
+
+      function updateKeywordPanel(query) {
+        const terms = getQueryTerms(query);
+        const separator = ` ${keywordLogic} `;
+        const baseExpression = terms.length ? terms.map((term) => `\"${term}\"`).join(separator) : "—";
+        const expansionExpression = [...activeExpansionTerms].map((term) => `\"${term}\"`).join(" OR ");
+        portalKeywordExpression.textContent = expansionExpression ? `(${baseExpression}) OR (${expansionExpression})` : baseExpression;
+        portalKeywordStatus.textContent = keywordExact
+          ? "精确短语匹配已开启，不进行词义扩展；结果必须包含完整词项。"
+          : `原始关键词按 ${keywordLogic} 组合；扩展词作为可撤销的召回补充。`;
+        portalKeywordExactToggle.classList.toggle("is-active", keywordExact);
+        portalKeywordExactToggle.setAttribute("aria-pressed", String(keywordExact));
+        document.querySelectorAll("[data-keyword-logic]").forEach((button) => {
+          const active = button.dataset.keywordLogic === keywordLogic;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        renderKeywordExpansionSuggestions(query);
+      }
+
+      function updateSecondaryFilterVisibility() {
+        const supportedType = ["人才", "论文", "专利"].includes(activeSearchType) ? activeSearchType : "";
+        portalResourceFilterHint.hidden = Boolean(supportedType);
+        portalSearchFilters.querySelectorAll("[data-filter-resource]").forEach((group) => {
+          const visible = group.dataset.filterResource === supportedType;
+          group.hidden = !visible;
+          group.querySelectorAll("input").forEach((input) => { input.disabled = !visible; });
+        });
+      }
+
+      function getActiveFilterDescriptors() {
+        const data = new FormData(portalSearchFilters);
+        const descriptors = [];
+        const scope = String(data.get("resourceScope") || "全部资源");
+        const matchMode = String(data.get("matchMode") || "智能匹配");
+        const publishTime = String(data.get("publishTime") || "近一年");
+        if (scope !== "全部资源") descriptors.push({ key: "resourceScope", label: scope, kind: "radio" });
+        if (activeSearchMode === "关键词" && matchMode !== "智能匹配") descriptors.push({ key: "matchMode", label: matchMode, kind: "radio" });
+        if (publishTime !== "近一年") descriptors.push({ key: "publishTime", label: publishTime, kind: "radio" });
+        if (document.getElementById("accessibleOnly").checked) descriptors.push({ key: "accessibleOnly", label: "仅可访问", kind: "checkbox" });
+        portalSearchFilters.querySelectorAll("input[type='search']:not(:disabled),input[type='date']:not(:disabled)").forEach((input) => {
+          if (input.value.trim()) descriptors.push({ key: input.name, label: `${input.previousElementSibling?.textContent || "条件"}：${input.value.trim()}`, kind: "value" });
+        });
+        portalSearchFilters.querySelectorAll("input[type='checkbox'][name]:checked").forEach((input) => {
+          descriptors.push({ key: input.name, value: input.value, label: input.value, kind: "namedCheckbox" });
+        });
+        if (activeSearchType !== "全部") descriptors.unshift({ key: "searchType", label: activeSearchType, kind: "type" });
+        return descriptors;
+      }
+
+      function updateActiveFilters() {
+        const descriptors = getActiveFilterDescriptors();
+        portalActiveFilters.hidden = descriptors.length === 0;
+        portalActiveFilterCount.hidden = descriptors.length === 0;
+        portalActiveFilterCount.textContent = String(descriptors.length);
+        portalActiveFilters.innerHTML = descriptors.map((descriptor, index) => `
+          <button type="button" data-remove-filter="${index}" aria-label="移除筛选 ${escapeHtml(descriptor.label)}">
+            <span>${escapeHtml(descriptor.label)}</span><b aria-hidden="true">×</b>
+          </button>`).join("") + (descriptors.length ? `<button class="portal-clear-filters" type="button" data-clear-all-filters>清除全部</button>` : "");
+        portalActiveFilters._descriptors = descriptors;
+      }
+
+      function clearFilterDescriptor(descriptor) {
+        if (!descriptor) return;
+        if (descriptor.kind === "type") {
+          activeSearchType = "全部";
+          portalSearchTypeTabs.querySelectorAll("[data-search-type]").forEach((tab) => {
+            const active = tab.dataset.searchType === "全部";
+            tab.classList.toggle("is-active", active);
+            tab.setAttribute("aria-selected", String(active));
+            tab.tabIndex = active ? 0 : -1;
+          });
+          updateSecondaryFilterVisibility();
+        } else if (descriptor.kind === "radio") {
+          const fallback = descriptor.key === "resourceScope" ? "全部资源" : descriptor.key === "publishTime" ? "近一年" : "智能匹配";
+          portalSearchFilters.querySelector(`input[name="${descriptor.key}"][value="${fallback}"]`).checked = true;
+          if (descriptor.key === "matchMode") keywordExact = false;
+        } else if (descriptor.kind === "checkbox") {
+          document.getElementById(descriptor.key).checked = false;
+        } else if (descriptor.kind === "namedCheckbox") {
+          const input = [...portalSearchFilters.querySelectorAll(`input[name="${descriptor.key}"]`)].find((item) => item.value === descriptor.value);
+          if (input) input.checked = false;
+        } else {
+          const input = portalSearchFilters.querySelector(`[name="${descriptor.key}"]`);
+          if (input) input.value = "";
+        }
+        activeSearchPage = 1;
+        renderSearchResults();
+      }
+
+      function setFilterDrawer(open) {
+        portalSearchSidebar.classList.toggle("is-open", open);
+        portalFilterBackdrop.hidden = !open;
+        portalMobileFilterToggle.setAttribute("aria-expanded", String(open));
+        document.body.classList.toggle("has-filter-drawer", open);
+        if (open) portalFilterClose.focus();
+        else portalMobileFilterToggle.focus();
+      }
+
+      function updateSearchModePanels() {
+        const query = portalResultSearchInput.value.trim();
+        const isAi = activeSearchMode === "AI 搜索";
+        const isAssociation = activeSearchMode === "关联";
+        const isKeyword = activeSearchMode === "关键词";
+        portalQueryUnderstanding.hidden = !isAi;
+        portalAiOverview.hidden = !isAi;
+        portalAssociationPanel.hidden = !isAssociation;
+        portalKeywordPanel.hidden = !isKeyword;
+        portalSearchCapabilities.hidden = !isKeyword || !keywordExpansionOpen;
+        portalExpansionToggle.setAttribute("aria-expanded", String(keywordExpansionOpen));
+        portalExpansionToggle.classList.toggle("is-active", keywordExpansionOpen);
+        portalExpansionToggle.textContent = keywordExpansionOpen ? "收起扩展" : "词位扩展";
+        portalAssociationDetails.hidden = !associationDetailsOpen;
+        portalAssociationDetailsToggle.setAttribute("aria-expanded", String(associationDetailsOpen));
+        portalAssociationDetailsToggle.textContent = associationDetailsOpen ? "收起过程" : "查看过程";
+        if (isAssociation) renderAssociationPanel(query);
+        if (isKeyword) updateKeywordPanel(query);
+        if (!isAi) return;
+
+        const entities = deriveQueryUnderstanding(query);
+        portalQueryEntities.innerHTML = entities.map(([label, value]) => `<span><small>${label}</small>${value}</span>`).join("");
+        const isDrugQuery = /药物|靶点/.test(query);
+        const findings = isDrugQuery
+          ? [
+              "大模型可联合文献、组学数据与知识图谱，辅助发现潜在靶点及其作用关系。",
+              "语义检索能召回未直接包含原词但研究问题高度相关的成果，补充传统关键词检索。",
+              "当前证据仍受训练数据时效、实验验证不足与机制可解释性限制，不能替代湿实验验证。"
+            ]
+          : [
+              "相关成果普遍将语义检索、结构化知识与任务型智能体结合，以提升跨来源证据发现效率。",
+              "高价值结论需要同时保留原始结果、命中片段和来源位置，便于研究者复核。",
+              "外部数据源覆盖与访问权限存在差异，当前只基于已返回且有权访问的模拟证据生成解读。"
+            ];
+        const evidenceStart = (activeSearchPage - 1) * SEARCH_PAGE_SIZE;
+        const evidenceItems = getFilteredSearchItems().slice(evidenceStart, evidenceStart + findings.length);
+        const supportedFindings = findings.slice(0, evidenceItems.length);
+        portalAiStatus.textContent = evidenceItems.length
+          ? `解读完成 · ${evidenceItems.length}条证据`
+          : "暂无可引用证据";
+        portalAiOverviewBody.innerHTML = `
+          <p class="portal-ai-answer-lead">针对“${escapeHtml(query || "当前问题")}”，AI从语义相关结果中归纳出以下要点：</p>
+          ${supportedFindings.length
+            ? `<ol>${supportedFindings.map((finding, index) => `<li><span>${finding}</span><button type="button" data-ai-citation data-ai-result-id="result-${SEARCH_ITEMS.indexOf(evidenceItems[index])}">证据 ${index + 1}</button></li>`).join("")}</ol>`
+            : `<p class="portal-ai-empty-evidence">当前筛选条件下没有可引用结果，请调整筛选条件后重新检索。</p>`}
+          <div class="portal-ai-limit"><strong>边界说明</strong><span>部分外部来源仍在查询或受权限限制；结论仅基于当前可用证据，建议结合全文与实验数据复核。</span></div>`;
+      }
+
+      function getFilteredSearchItems(options = {}) {
+        const rawQuery = portalResultSearchInput.value.trim();
+        const query = rawQuery.toLocaleLowerCase("zh-CN");
+        const filterValues = new FormData(portalSearchFilters);
+        const matchMode = String(filterValues.get("matchMode") || "智能匹配");
+        const originalTerms = (activeSearchMode === "关键词" && matchMode !== "精确匹配"
+          ? normalizeKeywordMatchMode(query)
+          : getQueryTerms(query).map((term) => term.toLocaleLowerCase("zh-CN")));
+        const expansionTerms = [...activeExpansionTerms].map((term) => term.toLocaleLowerCase("zh-CN"));
+        const semanticTerms = getSemanticTerms(query).map((term) => term.toLocaleLowerCase("zh-CN"));
+        const scope = String(filterValues.get("resourceScope") || "全部资源");
+        const fieldValue = (name) => String(filterValues.get(name) || "").trim().toLocaleLowerCase("zh-CN");
+        const selectedDisciplines = filterValues.getAll("discipline").map((value) => String(value).toLocaleLowerCase("zh-CN"));
+        const selectedSources = filterValues.getAll("source").map((value) => String(value));
+        const sourceGroups = {
+          "学术期刊": ["论文"],
+          "专利数据库": ["专利"],
+          "智库报告": ["报告"],
+          "平台资讯": ["资讯"]
+        };
+        const disciplineAliases = {
+          "人工智能": ["人工智能", "ai", "智能体", "大模型", "语言模型", "具身智能", "机器人学习", "ai for science"],
+          "先进材料": ["先进材料", "固态电池", "固态电解质"],
+          "生命科学": ["生命科学", "生物医学", "药物", "靶点"],
+          "绿色能源": ["绿色能源", "新能源", "储能", "电池"]
+        };
+        const withinDateRange = (date, start, end) => {
+          if (!date) return !start && !end;
+          return (!start || date >= start) && (!end || date <= end);
+        };
         let items = SEARCH_ITEMS.filter((item) => {
-          const searchable = [item.title, item.summary, item.type, item.source, ...item.tags].join(" ").toLocaleLowerCase("zh-CN");
-          const queryMatch = !query || searchable.includes(query);
-          const typeMatch = activeSearchType === "全部" || item.type === activeSearchType;
+          const fullSearchable = [item.title, item.summary, item.detail, item.type, item.source, item.meta, item.author, item.venue, item.personName, item.institution, item.ipc, item.applicant, item.inventor, ...item.tags, ...(item.matches || []).map((match) => match.text)].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN");
+          const scopedSearchable = scope === "仅标题"
+            ? item.title.toLocaleLowerCase("zh-CN")
+            : scope === "标题与摘要"
+              ? `${item.title} ${item.summary}`.toLocaleLowerCase("zh-CN")
+              : scope === "全文"
+                ? (item.matches || []).map((match) => match.text).join(" ").toLocaleLowerCase("zh-CN")
+                : fullSearchable;
+          const exactFields = [item.title, ...item.tags, item.personName, item.author, item.institution, item.venue, item.ipc, item.applicant, item.inventor]
+            .filter(Boolean)
+            .map((field) => String(field).toLocaleLowerCase("zh-CN"));
+          const exactTermMatches = originalTerms.map((term) => exactFields.some((field) => field === term || field.includes(term)));
+          const exactPhraseMatch = !originalTerms.length || (keywordLogic === "AND" ? exactTermMatches.every(Boolean) : exactTermMatches.some(Boolean));
+          const originalMatch = !originalTerms.length || (activeSearchMode === "关键词" && keywordLogic === "AND"
+            ? originalTerms.every((term) => scopedSearchable.includes(term))
+            : originalTerms.some((term) => scopedSearchable.includes(term)));
+          const expansionMatch = activeSearchMode === "关键词" && !keywordExact && expansionTerms.some((term) => scopedSearchable.includes(term));
+          const semanticMatch = (activeSearchMode === "AI 搜索" || activeSearchMode === "关联")
+            && semanticTerms.some((term) => fullSearchable.includes(term));
+          const queryMatch = activeSearchMode === "关键词" && (keywordExact || matchMode === "精确匹配")
+            ? exactPhraseMatch
+            : originalMatch || expansionMatch || semanticMatch;
+          const typeMatch = options.ignoreType || activeSearchType === "全部" || item.type === activeSearchType;
           const accessMatch = !document.getElementById("accessibleOnly").checked || item.accessible;
-          return queryMatch && typeMatch && accessMatch;
+          const scopeMatch = scope !== "全文" || Boolean(item.matches?.length);
+          const publishTime = String(filterValues.get("publishTime") || "近一年");
+          const yearThreshold = publishTime === "近一年" ? 2025 : publishTime === "近三年" ? 2023 : publishTime === "近五年" ? 2021 : 0;
+          const timeMatch = !yearThreshold || Number(String(item.date).slice(0, 4)) >= yearThreshold;
+          const disciplineText = [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN");
+          const disciplineMatch = !selectedDisciplines.length || selectedDisciplines.some((discipline) => (disciplineAliases[discipline] || [discipline]).some((alias) => disciplineText.includes(alias)));
+          const sourceMatch = !selectedSources.length || selectedSources.some((source) => (sourceGroups[source] || []).includes(item.type));
+          const secondaryMatch = (!fieldValue("personNameFilter") || String(item.personName || "").toLocaleLowerCase("zh-CN").includes(fieldValue("personNameFilter")))
+            && (!fieldValue("institutionFilter") || String(item.institution || "").toLocaleLowerCase("zh-CN").includes(fieldValue("institutionFilter")))
+            && (!fieldValue("authorFilter") || String(item.author || "").toLocaleLowerCase("zh-CN").includes(fieldValue("authorFilter")))
+            && (!fieldValue("venueFilter") || String(item.venue || "").toLocaleLowerCase("zh-CN").includes(fieldValue("venueFilter")))
+            && (!fieldValue("ipcFilter") || String(item.ipc || "").toLocaleLowerCase("zh-CN").includes(fieldValue("ipcFilter")))
+            && (!fieldValue("applicantFilter") || String(item.applicant || "").toLocaleLowerCase("zh-CN").includes(fieldValue("applicantFilter")))
+            && (!fieldValue("inventorFilter") || String(item.inventor || "").toLocaleLowerCase("zh-CN").includes(fieldValue("inventorFilter")))
+            && withinDateRange(item.applicationDate, String(filterValues.get("applicationStart") || ""), String(filterValues.get("applicationEnd") || ""))
+            && withinDateRange(item.publicationDate, String(filterValues.get("publicationStart") || ""), String(filterValues.get("publicationEnd") || ""));
+          return queryMatch && typeMatch && accessMatch && scopeMatch && timeMatch && disciplineMatch && sourceMatch && secondaryMatch;
         });
 
         if (portalSearchSort.value === "latest") {
           items = items.sort((a, b) => b.date.localeCompare(a.date));
         } else if (portalSearchSort.value === "title") {
           items = items.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
+        } else if (activeSearchMode === "关联" && personalizationEnabled) {
+          const interestScore = (item) => [...associationInterests.entries()].reduce((score, [topic, weight]) => {
+            const text = [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN");
+            return score + (text.includes(topic.toLocaleLowerCase("zh-CN")) ? weight : 0);
+          }, 0);
+          items = items.sort((a, b) => interestScore(b) - interestScore(a));
         }
         return items;
       }
@@ -4403,39 +5159,152 @@
         article.className = "portal-search-card";
         article.dataset.type = item.type;
         article.dataset.date = item.date;
+        article.dataset.resultId = `result-${SEARCH_ITEMS.indexOf(item)}`;
         const detailId = `searchResultDetail${activeSearchPage}_${index}`;
+        const firstMatch = item.matches?.[0];
+        const query = portalResultSearchInput.value.trim();
+        const sharedTerms = getSemanticTerms(query).filter((term) => [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN").includes(term.toLocaleLowerCase("zh-CN"))).slice(0, 3);
+        const metadata = getResultMetadata(item);
+        const detailActionLabel = item.type === "人才"
+          ? "查看专家档案"
+          : item.fulltextStatus === "无权限"
+            ? "查看权限说明"
+            : item.type === "专利"
+              ? "查看专利详情"
+              : "查看资源详情";
+        const statusMessage = item.fulltextStatus === "无权限"
+          ? "当前账号无全文权限"
+          : item.fulltextStatus === "解析中"
+            ? "原文解析中，可检索题名与摘要"
+            : item.fulltextStatus === "仅摘要"
+              ? "当前仅提供摘要"
+              : item.fulltextStatus === "实体资源"
+                ? "实体信息，不提供页码"
+                : item.fulltextStatus === "仅详情"
+                  ? "项目详情可查看"
+                  : "支持原文定位";
+        let evidenceBlock = "";
+        if (activeSearchMode === "关联") {
+          const relationText = sharedTerms.length
+            ? `与当前问题共享“${sharedTerms.join("、")}”等主题概念`
+            : `与当前主题存在${item.type === "人才" ? "研究方向与成果" : item.type === "专利" ? "技术主题与分类" : "主题与引证"}关系`;
+          evidenceBlock = `<div class="portal-result-evidence is-association" data-evidence-snippet><span class="portal-evidence-label">为什么相关</span><p>${relationText}${personalizationEnabled ? "，并与你的模拟兴趣画像相关" : "；当前未使用个性化画像"}</p></div>`;
+        } else if (activeSearchMode === "关键词") {
+          const keywordHits = getKeywordHitDetails(item, query);
+          evidenceBlock = `<div class="portal-result-evidence is-keyword" data-evidence-snippet><div><span class="portal-evidence-label">${keywordExact ? "精确命中" : `关键词命中 · ${keywordLogic}`}</span><small>${activeExpansionTerms.size ? `采用 ${activeExpansionTerms.size} 个扩展词` : "仅使用原始词"}</small></div><ul>${keywordHits.map((hit) => `<li class="${hit.field === "未直接命中" ? "is-missing" : ""}"><b>${hit.field === "未直接命中" ? "—" : "✓"}</b><span>“${escapeHtml(hit.term)}”${hit.expanded ? " <em>扩展词</em>" : ""}</span><small>${hit.normalized ? `规范为“${escapeHtml(hit.normalized)}” · ` : ""}${hit.field}</small></li>`).join("")}</ul></div>`;
+        } else if (firstMatch) {
+          evidenceBlock = `<div class="portal-result-evidence is-fulltext" data-evidence-snippet><div><span class="portal-evidence-label">${activeSearchMode === "AI 搜索" ? "AI引用证据" : "正文命中"}</span><button type="button" data-open-fulltext>第 ${firstMatch.page} 页 · 第 ${firstMatch.paragraph} 段<i>查看原文</i></button></div><p>“${highlightResultText(firstMatch.text, query)}”</p><small>共命中 ${item.matches.length} 处，可在原文中逐条定位</small></div>`;
+        } else {
+          evidenceBlock = `<div class="portal-result-evidence is-unavailable"><span class="portal-evidence-label">可用状态</span><p>${statusMessage}</p></div>`;
+        }
         article.innerHTML = `
-          <div class="portal-search-card-top portal-search-card-topline"><div><span class="portal-search-card-type">${item.type}</span><span class="portal-search-card-status${item.accessible ? "" : " is-restricted"}">${item.status}</span></div><time class="portal-search-card-date" datetime="${item.date}">${formatDate(item.date)}</time></div>
-          <h2 class="portal-search-card-title">${item.title}</h2>
-          <p class="portal-search-card-summary">${item.summary}</p>
-          <div class="portal-search-card-tags">${item.tags.map((tag) => `<span class="portal-search-card-tag">${tag}</span>`).join("")}</div>
-          <div class="portal-search-card-detail" id="${detailId}" hidden><strong>内容定位</strong><p>${item.detail}</p></div>
-          <div class="portal-search-card-footer"><p><strong>${item.source}</strong><span>${item.meta}</span></p><div class="portal-search-card-actions"><button class="portal-search-card-action" type="button" data-search-save>收藏</button><button class="portal-search-card-action is-primary" type="button" data-search-detail aria-expanded="false" aria-controls="${detailId}">查看详情</button></div></div>`;
-        const detail = article.querySelector("[data-search-detail]");
-        detail.addEventListener("click", () => {
+          <div class="portal-result-rail">
+            <span class="portal-result-type-icon" data-result-type="${item.type}">${getResultTypeIcon(item.type)}</span>
+            <span class="portal-result-index">${String((activeSearchPage - 1) * SEARCH_PAGE_SIZE + index + 1).padStart(2, "0")}</span>
+          </div>
+          <div class="portal-result-content">
+            <div class="portal-result-kicker"><span>${item.type}</span><span class="portal-search-card-status${item.accessible ? "" : " is-restricted"}">${item.status}</span><time datetime="${item.date}">${formatDate(item.date)}</time></div>
+            <h3 class="portal-search-card-title"><button type="button" data-search-detail aria-expanded="false" aria-controls="${detailId}">${highlightResultText(item.title, query)}</button></h3>
+            <dl class="portal-result-metadata">${metadata.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>
+            <p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>
+            ${evidenceBlock}
+            <div class="portal-result-bottomline">
+              <div class="portal-search-card-tags">${item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag">${tag}</span>`).join("")}</div>
+              <div class="portal-search-card-actions">
+                <button class="portal-icon-action" type="button" data-search-save aria-label="收藏 ${item.title}" title="收藏">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4Z"></path></svg><span>收藏</span>
+                </button>
+                ${firstMatch
+                  ? `<button class="portal-icon-action" type="button" data-search-detail data-closed-label="展开详情" aria-expanded="false" aria-controls="${detailId}"><span data-detail-label>展开详情</span></button><button class="portal-search-card-action is-primary" type="button" data-open-fulltext>定位原文</button>`
+                  : `<button class="portal-search-card-action is-primary" type="button" data-search-detail data-closed-label="${detailActionLabel}" aria-expanded="false" aria-controls="${detailId}"><span data-detail-label>${detailActionLabel}</span></button>`}
+              </div>
+            </div>
+            <div class="portal-search-card-detail" id="${detailId}" hidden>
+              <div><strong>资源详情</strong><span>${item.source} · ${item.meta}</span></div>
+              <p>${item.detail}</p>
+            </div>
+          </div>`;
+        const detailButtons = article.querySelectorAll("[data-search-detail]");
+        const toggleDetail = () => {
           const panel = article.querySelector(`#${detailId}`);
           const open = panel.hidden;
           panel.hidden = !open;
-          detail.setAttribute("aria-expanded", String(open));
-          detail.textContent = open ? "收起详情" : "查看详情";
-        });
+          article.classList.toggle("is-expanded", open);
+          detailButtons.forEach((button) => {
+            button.setAttribute("aria-expanded", String(open));
+            const label = button.querySelector("[data-detail-label]");
+            if (label) label.textContent = open ? "收起详情" : button.dataset.closedLabel;
+          });
+        };
+        detailButtons.forEach((button) => button.addEventListener("click", toggleDetail));
         article.querySelector("[data-search-save]").addEventListener("click", (event) => {
-          event.currentTarget.textContent = "登录后可收藏";
-          window.setTimeout(() => { event.currentTarget.textContent = "收藏"; }, 1800);
+          const label = event.currentTarget.querySelector("span");
+          label.textContent = "登录后收藏";
+          window.setTimeout(() => { label.textContent = "收藏"; }, 1800);
         });
+        article.querySelectorAll("[data-open-fulltext]").forEach((button) => button.addEventListener("click", () => openDocumentViewer(item, 0, button)));
         return article;
+      }
+
+      function renderDocumentMatch() {
+        if (!activeDocumentItem?.matches?.length) return;
+        const matches = activeDocumentItem.matches;
+        activeDocumentMatchIndex = (activeDocumentMatchIndex + matches.length) % matches.length;
+        const match = matches[activeDocumentMatchIndex];
+        portalDocumentTitle.textContent = activeDocumentItem.title;
+        portalDocumentPage.textContent = `第 ${match.page} 页 · 第 ${match.paragraph} 段`;
+        portalDocumentMatchCount.textContent = `第 ${activeDocumentMatchIndex + 1}/${matches.length} 处命中`;
+        portalPreviousMatch.disabled = matches.length < 2;
+        portalNextMatch.disabled = matches.length < 2;
+        portalDocumentPageContent.innerHTML = `
+          <span class="portal-document-page-number">${match.page}</span>
+          <p>研究背景与相关工作表明，跨来源科技信息需要在统一检索入口下保持原始证据位置。</p>
+          <p class="portal-document-highlight">${match.text}</p>
+          <p>本段内容为静态原型中的模拟原文，用于演示页码、段落锚点、高亮和多处命中导航。</p>`;
+      }
+
+      function openDocumentViewer(item, matchIndex = 0, trigger = null) {
+        if (!item?.matches?.length) return;
+        activeDocumentItem = item;
+        activeDocumentMatchIndex = matchIndex;
+        activeDocumentTrigger = trigger || document.activeElement;
+        renderDocumentMatch();
+        portalDocumentViewer.hidden = false;
+        document.body.style.overflow = "hidden";
+        portalDocumentViewer.querySelector(".portal-document-close").focus();
+      }
+
+      function closeDocumentViewer() {
+        if (portalDocumentViewer.hidden) return;
+        portalDocumentViewer.hidden = true;
+        document.body.style.overflow = "";
+        activeDocumentItem = null;
+        const trigger = activeDocumentTrigger;
+        activeDocumentTrigger = null;
+        trigger?.focus?.();
       }
 
       function renderSearchResults() {
         const items = getFilteredSearchItems();
+        const allTypeItems = getFilteredSearchItems({ ignoreType: true });
         const totalPages = Math.max(1, Math.ceil(items.length / SEARCH_PAGE_SIZE));
         activeSearchPage = Math.min(activeSearchPage, totalPages);
         const start = (activeSearchPage - 1) * SEARCH_PAGE_SIZE;
         const visibleItems = items.slice(start, start + SEARCH_PAGE_SIZE);
-        portalSearchResultCount.textContent = `找到 ${items.length} 条示例结果`;
+        portalSearchResultCount.textContent = `${items.length} 条结果`;
+        portalSearchResultRange.textContent = items.length
+          ? `当前显示第 ${start + 1}–${start + visibleItems.length} 条 · ${activeSearchType === "全部" ? "全部资源" : activeSearchType}`
+          : `当前条件下没有${activeSearchType === "全部" ? "" : activeSearchType}结果`;
+        portalSearchTypeTabs.querySelectorAll("[data-search-type]").forEach((tab) => {
+          const type = tab.dataset.searchType;
+          const count = type === "全部" ? allTypeItems.length : allTypeItems.filter((item) => item.type === type).length;
+          tab.querySelector("[data-search-type-count]").textContent = String(count);
+        });
+        updateActiveFilters();
         portalSearchResultList.replaceChildren(...visibleItems.map(createSearchResultCard));
         portalSearchResultList.hidden = visibleItems.length === 0;
         portalSearchEmpty.hidden = visibleItems.length !== 0;
+        updateSearchModePanels();
 
         if (items.length <= SEARCH_PAGE_SIZE) {
           portalSearchPagination.replaceChildren();
@@ -4615,108 +5484,68 @@
         startCarousel();
       }
 
-      function loadSearchHistory() {
-        try {
-          const stored = window.localStorage.getItem(SEARCH_HISTORY_KEY);
-          if (stored === null) return [...DEFAULT_SEARCH_HISTORY];
-          const parsed = JSON.parse(stored);
-          return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string").slice(0, 6) : [...DEFAULT_SEARCH_HISTORY];
-        } catch (error) {
-          return [...DEFAULT_SEARCH_HISTORY];
-        }
-      }
+      function closeSearchPanel() {}
 
-      function saveSearchHistory() {
-        try {
-          window.localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(searchHistory));
-        } catch (error) {
-          // Local files or privacy settings may disable storage; search still works without persistence.
-        }
-      }
-
-      function renderSearchHistory() {
-        const entries = searchHistory.map((query) => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "search-word";
-          button.textContent = query;
-          button.addEventListener("click", () => performSearch(query));
-          return button;
-        });
-
-        searchHistoryList.replaceChildren(...entries);
-        searchHistoryEmpty.hidden = entries.length > 0;
-        clearSearchHistory.hidden = entries.length === 0;
-      }
-
-      function openSearchPanel(focusInput = false) {
-        closeDesktopMenu();
-        closeUtilityMenu();
-        closeProfileMenu();
-        closeMobileDrawer();
-        searchWrap.classList.add("is-open");
-        searchPanel.hidden = false;
-        searchInput.setAttribute("aria-expanded", "true");
-        if (focusInput) {
-          requestAnimationFrame(() => searchInput.focus());
-        }
-      }
-
-      function closeSearchPanel(restoreFocus = false) {
-        if (!searchWrap.classList.contains("is-open")) return;
-        searchWrap.classList.remove("is-open");
-        searchPanel.hidden = true;
-        searchInput.setAttribute("aria-expanded", "false");
-        if (restoreFocus) searchSubmit.focus();
-      }
-
-      function addSearchHistory(query) {
-        searchHistory = [query, ...searchHistory.filter((item) => item !== query)].slice(0, 6);
-        saveSearchHistory();
-        renderSearchHistory();
-      }
-
-      function performSearch(rawQuery) {
+      function performSearch(rawQuery, options = {}) {
         const query = String(rawQuery || "").trim();
         if (!query) {
-          openSearchPanel(true);
+          (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
           return;
         }
 
-        searchInput.value = query;
+        if (options.mode) setSearchMode(options.mode);
+        if (activeSearchMode === "关键词") originalKeywordQuery = query;
+        if (activeSearchMode === "关联") updateAssociationProfileFromQuery(query);
         portalResultSearchInput.value = query;
-        addSearchHistory(query);
         activeSearchPage = 1;
         searchResultQuery.textContent = `“${query}”`;
         renderSearchResults();
         showSurface("search", { focusTarget: portalResultSearchInput });
       }
 
-      renderSearchHistory();
+      setHeroSearchMode(activeHeroSearchMode, false);
+      setSearchMode(activeSearchMode);
       renderRecommendations();
+      updateSecondaryFilterVisibility();
       renderSearchResults();
 
-      searchInput.addEventListener("focus", () => openSearchPanel());
-      searchInput.addEventListener("click", () => openSearchPanel());
-      siteSearch.addEventListener("submit", (event) => {
-        event.preventDefault();
-        performSearch(searchInput.value);
-      });
-      searchDismiss.addEventListener("click", () => {
-        searchInput.value = "";
-        closeSearchPanel(true);
-      });
-      clearSearchHistory.addEventListener("click", () => {
-        searchHistory = [];
-        saveSearchHistory();
-        renderSearchHistory();
-      });
-      searchPanel.querySelectorAll("[data-search-word]").forEach((button) => {
-        button.addEventListener("click", () => performSearch(button.dataset.searchWord));
-      });
       mgHeroSearchForm?.addEventListener("submit", (event) => {
         event.preventDefault();
-        performSearch(mgHeroSearchInput?.value || "AI for Science");
+        const heroToResultMode = {
+          fulltext: "全文",
+          association: "关联",
+          ai: "AI 搜索",
+          keyword: "关键词"
+        };
+        performSearch(mgHeroSearchInput?.value, {
+          mode: heroToResultMode[activeHeroSearchMode],
+          focusTarget: mgHeroSearchInput
+        });
+      });
+      mgHeroSearchModes?.addEventListener("click", (event) => {
+        const tab = event.target.closest("[data-hero-search-mode]");
+        if (tab) setHeroSearchMode(tab.dataset.heroSearchMode);
+      });
+      mgHeroSearchModes?.addEventListener("keydown", (event) => {
+        const tabs = [...mgHeroSearchModes.querySelectorAll("[data-hero-search-mode]")];
+        const currentIndex = tabs.findIndex((tab) => tab.dataset.heroSearchMode === activeHeroSearchMode);
+        let nextIndex = currentIndex;
+        if (event.key === "ArrowRight") nextIndex += 1;
+        else if (event.key === "ArrowLeft") nextIndex -= 1;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        const target = tabs[(nextIndex + tabs.length) % tabs.length];
+        setHeroSearchMode(target.dataset.heroSearchMode);
+        target.focus();
+      });
+      mgHeroDiscover?.addEventListener("click", () => {
+        const heroToResultMode = { fulltext: "全文", association: "关联", ai: "AI 搜索", keyword: "关键词" };
+        performSearch(mgHeroSearchInput?.value || "AI for Science", {
+          mode: heroToResultMode[activeHeroSearchMode]
+        });
+        requestAnimationFrame(() => portalSearchFilters.querySelector("input, select")?.focus());
       });
       document.querySelectorAll(".mg-search-intents [data-mg-query]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -4758,7 +5587,26 @@
         const tab = event.target.closest("[data-search-mode]");
         if (!tab) return;
         setSearchMode(tab.dataset.searchMode);
+        if (activeSearchMode === "关键词" && portalResultSearchInput.value.trim()) originalKeywordQuery = portalResultSearchInput.value.trim();
+        activeSearchPage = 1;
+        renderSearchResults();
         portalResultSearchInput.focus();
+      });
+      portalSearchModes.addEventListener("keydown", (event) => {
+        const tabs = [...portalSearchModes.querySelectorAll("[data-search-mode]")];
+        const currentIndex = tabs.findIndex((tab) => tab.dataset.searchMode === activeSearchMode);
+        let nextIndex = currentIndex;
+        if (event.key === "ArrowRight") nextIndex += 1;
+        else if (event.key === "ArrowLeft") nextIndex -= 1;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        const target = tabs[(nextIndex + tabs.length) % tabs.length];
+        setSearchMode(target.dataset.searchMode);
+        activeSearchPage = 1;
+        renderSearchResults();
+        target.focus();
       });
       portalSearchTypeTabs.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-search-type]");
@@ -4769,34 +5617,168 @@
           const active = item === tab;
           item.classList.toggle("is-active", active);
           item.setAttribute("aria-selected", String(active));
+          item.tabIndex = active ? 0 : -1;
         });
+        updateSecondaryFilterVisibility();
         renderSearchResults();
+      });
+      portalSearchTypeTabs.addEventListener("keydown", (event) => {
+        const tabs = [...portalSearchTypeTabs.querySelectorAll("[data-search-type]")];
+        const currentIndex = tabs.findIndex((tab) => tab.dataset.searchType === activeSearchType);
+        let nextIndex = currentIndex;
+        if (event.key === "ArrowRight") nextIndex += 1;
+        else if (event.key === "ArrowLeft") nextIndex -= 1;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        const target = tabs[(nextIndex + tabs.length) % tabs.length];
+        target.click();
+        target.focus();
+        target.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
       });
       portalSearchSort.addEventListener("change", () => {
         activeSearchPage = 1;
         renderSearchResults();
       });
-      portalSearchFilters.addEventListener("change", () => {
+      portalSearchFilters.addEventListener("change", (event) => {
+        if (activeSearchMode === "关键词" && event.target.name === "matchMode") {
+          keywordExact = event.target.value === "精确匹配";
+          if (keywordExact) activeExpansionTerms.clear();
+        }
+        activeSearchPage = 1;
+        renderSearchResults();
+      });
+      portalSearchFilters.addEventListener("input", (event) => {
+        if (!event.target.matches("input[type='search']")) return;
         activeSearchPage = 1;
         renderSearchResults();
       });
       portalSearchReset.addEventListener("click", () => {
         portalSearchFilters.reset();
+        activeExpansionTerms.clear();
+        portalExpansionTerms.querySelectorAll("button").forEach((button) => {
+          button.classList.remove("is-selected");
+          button.textContent = `+ ${button.dataset.expansionTerm}`;
+        });
         activeSearchType = "全部";
         activeSearchPage = 1;
         portalSearchTypeTabs.querySelectorAll("[data-search-type]").forEach((item) => {
           const active = item.dataset.searchType === "全部";
           item.classList.toggle("is-active", active);
           item.setAttribute("aria-selected", String(active));
+          item.tabIndex = active ? 0 : -1;
         });
+        keywordLogic = "AND";
+        keywordExact = false;
+        updateSecondaryFilterVisibility();
         renderSearchResults();
       });
+      portalEmptyReset.addEventListener("click", () => portalSearchReset.click());
+      portalActiveFilters.addEventListener("click", (event) => {
+        if (event.target.closest("[data-clear-all-filters]")) {
+          portalSearchReset.click();
+          return;
+        }
+        const button = event.target.closest("[data-remove-filter]");
+        if (!button) return;
+        clearFilterDescriptor(portalActiveFilters._descriptors?.[Number(button.dataset.removeFilter)]);
+      });
+      portalMobileFilterToggle.addEventListener("click", () => setFilterDrawer(true));
+      portalFilterClose.addEventListener("click", () => setFilterDrawer(false));
+      portalFilterBackdrop.addEventListener("click", () => setFilterDrawer(false));
       searchResultsPage.querySelectorAll("[data-result-hot-word]").forEach((button) => {
         button.addEventListener("click", () => performSearch(button.dataset.resultHotWord));
       });
       portalSearchAssistant.addEventListener("click", () => {
         setSearchMode("AI 搜索");
+        activeSearchPage = 1;
+        renderSearchResults();
         portalResultSearchInput.focus();
+      });
+      portalExpansionTerms.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-expansion-term]");
+        if (!button) return;
+        button.classList.toggle("is-selected");
+        const selected = button.classList.contains("is-selected");
+        if (selected) activeExpansionTerms.add(button.dataset.expansionTerm);
+        else activeExpansionTerms.delete(button.dataset.expansionTerm);
+        button.textContent = selected ? `✓ ${button.dataset.expansionTerm}` : `+ ${button.dataset.expansionTerm}`;
+        activeSearchPage = 1;
+        renderSearchResults();
+      });
+      portalPersonalizationToggle.addEventListener("click", () => {
+        personalizationEnabled = !personalizationEnabled;
+        if (personalizationEnabled) updateAssociationProfileFromQuery(portalResultSearchInput.value.trim());
+        activeSearchPage = 1;
+        renderSearchResults();
+      });
+      portalKeywordPanel.addEventListener("click", (event) => {
+        const logicButton = event.target.closest("[data-keyword-logic]");
+        if (logicButton) {
+          keywordLogic = logicButton.dataset.keywordLogic;
+          activeSearchPage = 1;
+          renderSearchResults();
+        }
+      });
+      portalKeywordExactToggle.addEventListener("click", () => {
+        keywordExact = !keywordExact;
+        if (keywordExact) activeExpansionTerms.clear();
+        const exactRadio = portalSearchFilters.querySelector(`input[name="matchMode"][value="精确匹配"]`);
+        const intelligentRadio = portalSearchFilters.querySelector(`input[name="matchMode"][value="智能匹配"]`);
+        (keywordExact ? exactRadio : intelligentRadio).checked = true;
+        activeSearchPage = 1;
+        renderSearchResults();
+      });
+      portalExpansionToggle.addEventListener("click", () => {
+        keywordExpansionOpen = !keywordExpansionOpen;
+        updateSearchModePanels();
+      });
+      portalAssociationDetailsToggle.addEventListener("click", () => {
+        associationDetailsOpen = !associationDetailsOpen;
+        updateSearchModePanels();
+      });
+      portalCopyExpression.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(portalKeywordExpression.textContent);
+          portalCopyExpression.textContent = "已复制";
+        } catch (error) {
+          portalCopyExpression.textContent = "请手动复制";
+        }
+        window.setTimeout(() => { portalCopyExpression.textContent = "复制"; }, 1600);
+      });
+      portalRestoreKeywordQuery.addEventListener("click", () => {
+        activeExpansionTerms.clear();
+        if (originalKeywordQuery) portalResultSearchInput.value = originalKeywordQuery;
+        keywordLogic = "AND";
+        keywordExact = false;
+        portalSearchFilters.querySelector(`input[name="matchMode"][value="智能匹配"]`).checked = true;
+        activeSearchPage = 1;
+        renderSearchResults();
+      });
+      document.querySelectorAll("[data-related-query]").forEach((button) => {
+        button.addEventListener("click", () => performSearch(button.dataset.relatedQuery, { mode: activeSearchMode }));
+      });
+      portalAiOverviewBody.addEventListener("click", (event) => {
+        const citation = event.target.closest("[data-ai-citation]");
+        if (!citation) return;
+        const cards = portalSearchResultList.querySelectorAll(".portal-search-card");
+        const card = [...cards].find((item) => item.dataset.resultId === citation.dataset.aiResultId);
+        card?.scrollIntoView({ behavior: "smooth", block: "center" });
+        const snippet = card?.querySelector("[data-evidence-snippet]");
+        snippet?.classList.add("is-cited");
+        window.setTimeout(() => snippet?.classList.remove("is-cited"), 1800);
+      });
+      portalDocumentViewer.querySelectorAll("[data-close-document-viewer]").forEach((button) => {
+        button.addEventListener("click", closeDocumentViewer);
+      });
+      portalPreviousMatch.addEventListener("click", () => {
+        activeDocumentMatchIndex -= 1;
+        renderDocumentMatch();
+      });
+      portalNextMatch.addEventListener("click", () => {
+        activeDocumentMatchIndex += 1;
+        renderDocumentMatch();
       });
 
       const unreadCount = messageList.querySelectorAll(".message-item.is-unread").length;
@@ -5169,7 +6151,6 @@
       profileButton.addEventListener("click", openProfileMenu);
       document.addEventListener("pointerdown", (event) => {
         if (!profileWrap.contains(event.target)) closeProfileMenu();
-        if (!searchWrap.contains(event.target)) closeSearchPanel();
         if (!utilityNav.contains(event.target)) closeUtilityMenu();
       });
 
@@ -5275,8 +6256,10 @@
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape") return;
 
-        if (searchWrap.classList.contains("is-open")) {
-          closeSearchPanel(true);
+        if (!portalDocumentViewer.hidden) {
+          closeDocumentViewer();
+        } else if (portalSearchSidebar.classList.contains("is-open")) {
+          setFilterDrawer(false);
         } else if (!mobileDrawer.hidden) {
           closeMobileDrawer(true);
         } else if (!profileMenu.hidden) {
@@ -5298,6 +6281,12 @@
         closeSearchPanel();
         closeProfileMenu();
         closeUtilityMenu();
+        if (!window.matchMedia("(max-width: 860px)").matches && portalSearchSidebar.classList.contains("is-open")) {
+          portalSearchSidebar.classList.remove("is-open");
+          portalFilterBackdrop.hidden = true;
+          portalMobileFilterToggle.setAttribute("aria-expanded", "false");
+          document.body.classList.remove("has-filter-drawer");
+        }
         if (!window.matchMedia("(max-width: 1279px)").matches) {
           closeMobileDrawer();
         } else {
