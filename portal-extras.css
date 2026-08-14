@@ -1,3 +1,639 @@
+/* V2.0 intelligent Q&A evidence workbench */
+.portal-qa-page {
+  --qa-ink: #1f2938;
+  --qa-line: #dfe5ee;
+  --qa-blue: #5267d9;
+  min-height: calc(100svh - var(--header-height, 68px));
+  padding: 22px 0 172px;
+  color: var(--qa-ink);
+  background: #f5f7fa;
+}
+
+.portal-qa-page[hidden],
+.portal-qa-answer[hidden],
+.portal-qa-loading[hidden],
+.portal-qa-answer-actions[hidden],
+.portal-qa-followups[hidden],
+.portal-qa-progress-details[hidden] {
+  display: none;
+}
+
+.portal-qa-shell {
+  width: min(calc(100% - 48px), 1240px);
+  margin: 0 auto;
+}
+
+.portal-qa-toolbar,
+.portal-qa-toolbar-actions,
+.portal-qa-toolbar button,
+.portal-qa-question-meta,
+.portal-qa-progress-summary,
+.portal-qa-evidence-card header,
+.portal-qa-evidence-card footer,
+.portal-qa-answer-actions,
+.portal-qa-followup-suggestions,
+.portal-qa-composer-meta,
+.portal-qa-source-status span {
+  display: flex;
+  align-items: center;
+}
+
+.portal-qa-toolbar {
+  min-height: 44px;
+  justify-content: space-between;
+}
+
+.portal-qa-toolbar-actions {
+  gap: 6px;
+}
+
+.portal-qa-toolbar button {
+  min-height: 40px;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #566274;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.portal-qa-toolbar button:hover,
+.portal-qa-toolbar button:focus-visible {
+  border-color: #d7deea;
+  color: #4155c4;
+  background: #fff;
+  outline: none;
+}
+
+.portal-qa-toolbar svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.portal-qa-question {
+  max-width: 930px;
+  margin: 18px auto 24px;
+}
+
+.portal-qa-eyebrow,
+.portal-qa-question h1,
+.portal-qa-question-text,
+.portal-qa-evidence-header p,
+.portal-qa-evidence-header h2,
+.portal-qa-followups p,
+.portal-qa-followups h2,
+.portal-qa-answer h2,
+.portal-qa-answer h3,
+.portal-qa-answer p,
+.portal-qa-answer ul,
+.portal-qa-evidence-card h3,
+.portal-qa-evidence-card p,
+.portal-qa-source-snippet p,
+.portal-qa-mock-note {
+  margin: 0;
+}
+
+.portal-qa-eyebrow {
+  color: var(--qa-blue);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.portal-qa-question h1 {
+  margin-top: 7px;
+  color: #7d8898;
+  font-size: 13px;
+  font-weight: 560;
+}
+
+.portal-qa-question h1:focus {
+  outline: none;
+}
+
+.portal-qa-question-text {
+  max-width: 880px;
+  margin-top: 6px;
+  color: #202735;
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.portal-qa-question-meta {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.portal-qa-question-meta span {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid #e1e6ee;
+  border-radius: 6px;
+  color: #697588;
+  background: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
+}
+
+.portal-qa-question-meta i,
+.portal-qa-composer-meta i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6173de;
+  box-shadow: 0 0 0 3px #e9ecff;
+}
+
+.portal-qa-workspace {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 350px;
+}
+
+.portal-qa-answer-surface,
+.portal-qa-evidence {
+  border: 1px solid var(--qa-line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 6px 22px rgba(38, 52, 79, 0.05);
+}
+
+.portal-qa-answer-surface {
+  min-width: 0;
+  min-height: 620px;
+  overflow: hidden;
+}
+
+.portal-qa-progress {
+  margin: 22px 26px 0;
+  overflow: hidden;
+  border: 1px solid #e3e4f8;
+  border-radius: 7px;
+  background: #f6f4ff;
+}
+
+.portal-qa-progress-summary {
+  width: 100%;
+  min-height: 44px;
+  gap: 8px;
+  padding: 0 12px;
+  color: #4e5264;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.portal-qa-progress-summary:hover,
+.portal-qa-progress-summary:focus-visible {
+  background: #f1effc;
+  outline: none;
+}
+
+.portal-qa-progress-icon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  border: 1px solid #8c83cf;
+  border-radius: 50%;
+  color: #786fb9;
+  font-size: 11px;
+}
+
+.portal-qa-progress-summary strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.portal-qa-progress-summary > span:nth-of-type(2) {
+  color: #8178b3;
+  font-size: 12px;
+}
+
+.portal-qa-progress-summary svg {
+  width: 17px;
+  height: 17px;
+  margin-left: auto;
+  fill: none;
+  stroke: #6d6f7d;
+  stroke-width: 1.6;
+  transition: transform 160ms ease;
+}
+
+.portal-qa-progress-summary[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.portal-qa-progress-details {
+  display: grid;
+  gap: 8px;
+  padding: 4px 14px 14px 40px;
+  color: #74798b;
+  font-size: 12px;
+  line-height: 1.5;
+  list-style: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.portal-qa-progress-details li {
+  position: relative;
+}
+
+.portal-qa-progress-details li::before {
+  position: absolute;
+  top: 6px;
+  left: -14px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c2c7d2;
+  content: "";
+}
+
+.portal-qa-progress-details li.is-active::before {
+  background: #6677dc;
+  box-shadow: 0 0 0 3px #e4e7fb;
+}
+
+.portal-qa-progress-details li.is-complete::before {
+  background: #55a676;
+}
+
+.portal-qa-loading {
+  padding: 42px 30px;
+}
+
+.portal-qa-loading span {
+  display: block;
+  width: 82%;
+  height: 11px;
+  margin-bottom: 14px;
+  border-radius: 4px;
+  background: #edf0f5;
+  animation: qa-pulse 1.25s ease-in-out infinite alternate;
+}
+
+.portal-qa-loading span:nth-child(2) { width: 94%; }
+.portal-qa-loading span:nth-child(3) { width: 67%; }
+
+.portal-qa-loading p {
+  margin-top: 26px;
+  color: #8995a5;
+  font-size: 13px;
+}
+
+@keyframes qa-pulse { to { opacity: 0.46; } }
+
+.portal-qa-answer {
+  max-width: 840px;
+  padding: 28px 34px 36px;
+}
+
+.portal-qa-answer h2 {
+  margin-top: 28px;
+  color: #202735;
+  font-size: 18px;
+  font-weight: 680;
+  line-height: 1.5;
+}
+
+.portal-qa-answer h2:first-child { margin-top: 0; }
+
+.portal-qa-answer h3 {
+  margin-top: 21px;
+  color: #303847;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.portal-qa-answer > p,
+.portal-qa-answer li {
+  margin-top: 10px;
+  color: #3f4858;
+  font-size: 14px;
+  line-height: 1.95;
+}
+
+.portal-qa-answer ul { padding-left: 20px; }
+
+.portal-qa-citation {
+  display: inline-grid;
+  width: 21px;
+  height: 21px;
+  margin: 0 2px;
+  padding: 0;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #8379bb;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: super;
+}
+
+.portal-qa-citation:hover,
+.portal-qa-citation:focus-visible {
+  background: #596bd4;
+  box-shadow: 0 0 0 3px #e5e8fb;
+  outline: none;
+}
+
+.portal-qa-boundary {
+  display: grid;
+  gap: 5px;
+  margin-top: 28px;
+  padding: 14px 16px;
+  border-left: 3px solid #d5aa55;
+  border-radius: 4px;
+  color: #5d574d;
+  background: #fffaf0;
+}
+
+.portal-qa-boundary strong { font-size: 13px; }
+.portal-qa-boundary p { color: #6e6658; font-size: 13px; line-height: 1.7; }
+
+.portal-qa-answer-actions {
+  min-height: 58px;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 24px;
+  border-top: 1px solid #edf0f4;
+  color: #8590a0;
+  font-size: 12px;
+}
+
+.portal-qa-answer-actions button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid #dfe4ec;
+  border-radius: 6px;
+  color: #59677a;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.portal-qa-answer-actions button:hover,
+.portal-qa-answer-actions button:focus-visible,
+.portal-qa-answer-actions button.is-selected {
+  border-color: #9daae5;
+  color: #4c5fc6;
+  background: #f5f7ff;
+  outline: none;
+}
+
+.portal-qa-answer-actions svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.portal-qa-answer-actions > span { margin-left: auto; }
+.portal-qa-answer-actions .is-icon { min-width: 34px; justify-content: center; padding: 0 7px; }
+
+.portal-qa-evidence {
+  position: sticky;
+  top: calc(var(--header-height, 68px) + 16px);
+  max-height: calc(100svh - var(--header-height, 68px) - 32px);
+  overflow-y: auto;
+}
+
+.portal-qa-evidence-header {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e8ecf2;
+}
+
+.portal-qa-evidence-header p { color: #8a95a5; font-size: 11px; }
+.portal-qa-evidence-header h2 { margin-top: 3px; color: #2b3443; font-size: 15px; font-weight: 650; }
+.portal-qa-evidence-header h2 span { color: var(--qa-blue); }
+.portal-qa-evidence-header > span { color: #8b7351; font-size: 11px; text-align: right; }
+
+.portal-qa-source-status {
+  display: grid;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #edf0f4;
+  background: #fafbfc;
+}
+
+.portal-qa-source-status span { gap: 7px; color: #778294; font-size: 11px; }
+.portal-qa-source-status i { width: 7px; height: 7px; border-radius: 50%; background: #aeb7c4; }
+.portal-qa-source-status i.is-complete { background: #54a373; }
+.portal-qa-source-status i.is-warning { background: #d69b39; }
+.portal-qa-source-status i.is-loading { background: #6075db; box-shadow: 0 0 0 3px #e8ecff; }
+
+.portal-qa-evidence-list { display: grid; }
+
+.portal-qa-evidence-card {
+  padding: 16px;
+  border-bottom: 1px solid #edf0f4;
+  outline: none;
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.portal-qa-evidence-card:last-child { border-bottom: 0; }
+.portal-qa-evidence-card.is-highlighted,
+.portal-qa-evidence-card:focus { background: #f6f8ff; box-shadow: inset 3px 0 #6476db; }
+.portal-qa-evidence-card header { gap: 7px; color: #718095; font-size: 11px; }
+
+.portal-qa-source-number {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #7d75b5;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.portal-qa-evidence-card header span:last-child { margin-left: auto; padding: 3px 6px; border-radius: 4px; }
+.portal-qa-evidence-card header .is-accessible { color: #267148; background: #eaf7ef; }
+.portal-qa-evidence-card header .is-restricted { color: #8c6632; background: #fff5e5; }
+.portal-qa-evidence-card h3 { margin-top: 10px; color: #2e3746; font-size: 13px; font-weight: 650; line-height: 1.55; }
+.portal-qa-source-meta { margin-top: 7px !important; color: #8792a1; font-size: 11px; line-height: 1.6; }
+
+.portal-qa-source-snippet {
+  margin-top: 11px;
+  padding: 10px;
+  border-left: 2px solid #c3caee;
+  background: #f8f9fc;
+}
+
+.portal-qa-source-snippet > span { color: #65728a; font-size: 10px; font-weight: 650; }
+.portal-qa-source-snippet p { display: -webkit-box; margin-top: 4px; overflow: hidden; color: #606b7c; font-size: 11px; line-height: 1.65; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.portal-qa-evidence-card footer { justify-content: space-between; gap: 10px; margin-top: 11px; color: #8390a0; font-size: 10px; }
+
+.portal-qa-evidence-card footer button {
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid #ccd4e3;
+  border-radius: 6px;
+  color: #5265c8;
+  background: #fff;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.portal-qa-evidence-card footer button:hover,
+.portal-qa-evidence-card footer button:focus-visible { border-color: #8f9de0; background: #f4f6ff; outline: none; }
+
+.portal-qa-followups {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 870px;
+  margin: 24px 0 0;
+}
+
+.portal-qa-followups p { color: #8b96a5; font-size: 11px; }
+.portal-qa-followups h2 { margin-top: 3px; color: #344052; font-size: 15px; }
+.portal-qa-followup-suggestions { flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+.portal-qa-followup-suggestions button {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid #d9dfe9;
+  border-radius: 7px;
+  color: #5f6c7d;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.portal-qa-followup-suggestions button:hover,
+.portal-qa-followup-suggestions button:focus-visible { border-color: #98a6e4; color: #4e61ca; outline: none; }
+
+.portal-qa-composer {
+  position: fixed;
+  z-index: 45;
+  right: 0;
+  bottom: 16px;
+  left: 50%;
+  display: grid;
+  width: min(calc(100% - 48px), 900px);
+  min-height: 94px;
+  padding: 13px 62px 11px 16px;
+  border: 1px solid #dce2eb;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 14px 34px rgba(37, 50, 76, 0.14);
+  transform: translateX(-50%);
+  backdrop-filter: blur(12px);
+}
+
+.portal-qa-composer textarea {
+  width: 100%;
+  max-height: 112px;
+  min-height: 34px;
+  resize: none;
+  border: 0;
+  outline: none;
+  color: #303949;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.portal-qa-composer textarea::placeholder { color: #9aa4b2; }
+.portal-qa-composer-meta { align-self: end; gap: 12px; color: #7f8a9a; font-size: 11px; }
+.portal-qa-composer-meta > span { display: inline-flex; align-items: center; gap: 7px; }
+
+.portal-qa-depth {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid #b7c0e7;
+  border-radius: 999px;
+  color: #596bc8;
+  background: #f7f8ff;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.portal-qa-depth[aria-pressed="false"] { border-color: #d8dee8; color: #7e8997; background: #fff; }
+
+.portal-qa-send {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 7px;
+  color: #fff;
+  background: #5d70d8;
+  cursor: pointer;
+}
+
+.portal-qa-send:disabled { color: #9aa3af; background: #edf0f3; cursor: not-allowed; }
+.portal-qa-send:not(:disabled):hover,
+.portal-qa-send:not(:disabled):focus-visible { background: #465bc9; outline: none; }
+.portal-qa-send svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+
+.portal-qa-mock-note { max-width: 900px; margin-top: 18px; color: #919ba8; font-size: 11px; line-height: 1.6; }
+
+@media (max-width: 980px) {
+  .portal-qa-workspace { grid-template-columns: minmax(0, 1fr); }
+  .portal-qa-evidence { position: static; max-height: none; }
+  .portal-qa-followups { max-width: none; }
+}
+
+@media (max-width: 720px) {
+  .portal-qa-page { padding: 12px 0 154px; }
+  .portal-qa-shell { width: min(calc(100% - 24px), 1240px); }
+  .portal-qa-toolbar button { min-height: 44px; padding: 0 8px; }
+  .portal-qa-question { margin: 12px 2px 18px; }
+  .portal-qa-question-text { font-size: 20px; line-height: 1.5; }
+  .portal-qa-question-meta { gap: 6px; }
+  .portal-qa-workspace { gap: 14px; }
+  .portal-qa-answer-surface { min-height: 520px; }
+  .portal-qa-progress { margin: 14px 14px 0; }
+  .portal-qa-progress-summary { min-height: 50px; flex-wrap: wrap; padding: 8px 10px; }
+  .portal-qa-progress-summary > span:nth-of-type(2) { order: 4; width: 100%; padding-left: 28px; }
+  .portal-qa-progress-details { padding: 5px 14px 14px 38px; grid-template-columns: 1fr; }
+  .portal-qa-answer { padding: 24px 18px 30px; }
+  .portal-qa-answer h2 { font-size: 17px; }
+  .portal-qa-answer > p, .portal-qa-answer li { font-size: 14px; line-height: 1.85; }
+  .portal-qa-citation { width: 24px; height: 24px; font-size: 11px; }
+  .portal-qa-answer-actions { padding: 10px 14px; }
+  .portal-qa-answer-actions button,
+  .portal-qa-evidence-card footer button,
+  .portal-qa-followup-suggestions button { min-height: 44px; }
+  .portal-qa-answer-actions > span { width: 100%; margin-left: 0; }
+  .portal-qa-followups { flex-direction: column; gap: 12px; margin-top: 18px; }
+  .portal-qa-followup-suggestions { width: 100%; justify-content: flex-start; }
+  .portal-qa-followup-suggestions button { width: 100%; justify-content: flex-start; text-align: left; }
+  .portal-qa-composer { bottom: 8px; width: calc(100% - 20px); min-height: 106px; padding: 12px 56px 10px 13px; }
+  .portal-qa-composer-meta { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .portal-qa-send { right: 10px; bottom: 10px; width: 44px; height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-qa-loading span { animation: none; }
+}
+
 .recommendation-section {
   --recommend-blue: #006eff;
   --recommend-blue-strong: #0052d9;
@@ -374,7 +1010,7 @@
 }
 
 .portal-search-header {
-  padding-bottom: 24px;
+  padding-bottom: 10px;
 }
 
 .portal-search-back,
@@ -421,7 +1057,7 @@
 .portal-search-title {
   margin: 0;
   color: var(--portal-search-ink);
-  font-size: clamp(30px, 3vw, 40px);
+  font-size: clamp(28px, 3vw, 34px);
   font-weight: 650;
   line-height: 1.28;
   letter-spacing: -0.02em;
@@ -429,16 +1065,16 @@
 
 .portal-search-lead {
   max-width: 760px;
-  margin: 12px 0 0;
+  margin: 6px 0 0;
   color: var(--portal-search-secondary);
   font-size: 14px;
-  line-height: 1.75;
+  line-height: 1.6;
 }
 
 .portal-search-mode-tabs {
   display: inline-flex;
   gap: 4px;
-  margin-top: 24px;
+  margin-top: 12px;
   border: 1px solid #d8e2ed;
   border-radius: 7px;
   padding: 3px;
@@ -476,9 +1112,9 @@
 .portal-search-toolbar {
   border: 1px solid #d8e3ee;
   border-radius: 8px;
-  padding: 18px;
+  padding: 14px;
   background: #ffffff;
-  box-shadow: 0 8px 24px rgba(36, 65, 99, 0.05);
+  box-shadow: none;
 }
 
 .portal-search-form {
@@ -1151,7 +1787,7 @@
   display: grid;
   align-items: start;
   gap: 24px;
-  margin-top: 24px;
+  margin-top: 16px;
   grid-template-columns: 230px minmax(0, 1fr);
 }
 
@@ -2870,7 +3506,7 @@
   flex-wrap: wrap;
   gap: 6px;
   border-top: 1px solid #eef1f5;
-  padding: 10px 0 0;
+  padding: 10px 0 12px;
 }
 
 .portal-active-filters[hidden] {
@@ -3032,7 +3668,11 @@
   line-height: 1.45;
 }
 
-.portal-search-card-title button {
+.portal-search-card-title button,
+.portal-search-card-title .portal-result-detail-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
   padding: 0;
   color: #22364c;
   background: transparent;
@@ -3043,9 +3683,28 @@
 }
 
 .portal-search-card-title button:hover,
-.portal-search-card-title button:focus-visible {
+.portal-search-card-title button:focus-visible,
+.portal-search-card-title .portal-result-detail-link:hover,
+.portal-search-card-title .portal-result-detail-link:focus-visible {
   color: #4156c9;
   outline: none;
+}
+
+.portal-title-external-mark {
+  color: #5265d6;
+  font-size: 13px;
+}
+
+.portal-search-card-title .portal-result-detail-link small {
+  border: 1px solid #dce3f7;
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: #71809a;
+  background: #f7f8ff;
+  font-size: 9px;
+  font-weight: 560;
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
 .portal-search-card-title mark,

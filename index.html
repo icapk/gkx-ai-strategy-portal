@@ -3015,29 +3015,41 @@
               <p>跨论文、专利、专家与科技报告，快速发现可信科研知识</p>
             </header>
 
-            <form class="mg-search-card" id="mgHeroSearchForm" role="search" data-search-mode="fulltext">
-              <div class="mg-search-mode-tabs" id="mgHeroSearchModes" role="tablist" aria-label="搜索方式">
-                <button class="mg-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-hero-search-mode="fulltext">全文搜索</button>
-                <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="association">关联搜索</button>
-                <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="ai">AI搜索</button>
-                <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="keyword">关键词搜索</button>
+            <form class="mg-search-card" id="mgHeroSearchForm" role="search" data-search-mode="fulltext" data-search-experience="classic">
+              <div class="mg-search-mode-row" id="mgClassicSearchModeRow">
+                <div class="mg-search-mode-tabs" id="mgHeroSearchModes" role="tablist" aria-label="搜索方式">
+                  <button class="mg-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-hero-search-mode="fulltext">全文搜索</button>
+                  <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="association">关联搜索</button>
+                  <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="ai">AI搜索</button>
+                  <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="keyword">关键词搜索</button>
+                </div>
+                <button class="mg-v2-badge" id="mgV2ExperienceSwitch" type="button" aria-expanded="false" aria-controls="mgV2SearchModeRow" aria-label="体验 V2.0 智能搜索与智能问答">V2.0</button>
+              </div>
+              <div class="mg-search-mode-row mg-v2-mode-row" id="mgV2SearchModeRow" hidden>
+                <div class="mg-search-mode-tabs mg-v2-mode-tabs" id="mgV2HeroModes" role="tablist" aria-label="V2.0 智能服务方式">
+                  <button class="mg-search-mode-tab is-active" id="mgV2SmartSearchTab" type="button" role="tab" aria-selected="true" tabindex="0" data-v2-hero-mode="search">智能搜索</button>
+                  <button class="mg-search-mode-tab" id="mgV2QaTab" type="button" role="tab" aria-selected="false" tabindex="-1" data-v2-hero-mode="qa">智能问答</button>
+                </div>
+                <button class="mg-v2-return" id="mgClassicExperienceSwitch" type="button" aria-label="返回当前版" title="返回当前版">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m11.5 5.5-4 4 4 4"></path></svg>
+                </button>
               </div>
               <label class="sr-only" for="mgHeroSearchInput">搜索科研资源与智能服务</label>
-              <input id="mgHeroSearchInput" type="search" autocomplete="off" placeholder="输入关键词，检索论文、专利、报告、专家等资源全文" aria-describedby="mgSearchHint">
-              <div class="mg-search-intents" id="mgFulltextShortcuts" aria-label="全文搜索快捷入口">
-                <button class="is-active" type="button" data-mg-query="AI 仿真实验">
+              <input id="mgHeroSearchInput" type="search" autocomplete="off" placeholder="输入关键词，检索论文、专利、报告、专家等资源全文">
+              <div class="mg-search-intents" id="mgFulltextShortcuts" role="tablist" aria-label="全文搜索快捷入口">
+                <button class="is-active" id="mgRecommendationTabSimulation" type="button" role="tab" aria-selected="true" aria-controls="mgRecommendationPreview" tabindex="0" data-mg-query="AI 仿真实验" data-recommendation-group="simulation">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h10v4l-3 4v4.5a2 2 0 0 1-4 0V13L7 9Z"></path><path d="M9 3h6M8.5 15h7"></path></svg>
                   练仿真
                 </button>
-                <button type="button" data-mg-query="论文">
+                <button id="mgRecommendationTabPaper" type="button" role="tab" aria-selected="false" aria-controls="mgRecommendationPreview" tabindex="-1" data-mg-query="论文" data-recommendation-group="paper">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h9l3 3V20H6Z"></path><path d="M15 3.5V7h3M9 11h6M9 15h6"></path></svg>
                   搜论文
                 </button>
-                <button type="button" data-mg-query="科研专家">
+                <button id="mgRecommendationTabExpert" type="button" role="tab" aria-selected="false" aria-controls="mgRecommendationPreview" tabindex="-1" data-mg-query="科研专家" data-recommendation-group="expert">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8.5 9-5 9 5-9 5Z"></path><path d="M7 11v5.5c3.3 2 6.7 2 10 0V11M20 10v5"></path></svg>
                   找专家
                 </button>
-                <button type="button" data-mg-query="战略咨询">
+                <button id="mgRecommendationTabStrategy" type="button" role="tab" aria-selected="false" aria-controls="mgRecommendationPreview" tabindex="-1" data-mg-query="战略咨询" data-recommendation-group="strategy">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4Z"></path><path d="m8 15 2.8-3 2.4 2 3.8-5M8 8h3"></path></svg>
                   看战略
                 </button>
@@ -3054,46 +3066,62 @@
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">词</span>
                 <span>支持单个或多个关键词、精确匹配、AND/OR组合，以及翻译和上下位词扩展</span>
               </div>
+              <div class="mg-ai-search-guide" id="mgV2QaSearchGuide" hidden>
+                <span class="mg-ai-search-guide-icon" aria-hidden="true">问</span>
+                <span>从可访问的论文、专利、专家与报告中检索证据，生成带编号引用和边界说明的回答</span>
+              </div>
               <button class="mg-search-submit" type="submit" aria-label="开始全文搜索">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4.5 14-3-5.5Z"></path><path d="m11.5 13.5 3-3"></path></svg>
               </button>
+              <p class="sr-only" id="mgSearchExperienceStatus" aria-live="polite"></p>
             </form>
 
-            <button class="mg-more-search" id="mgHeroDiscover" type="button">
-              <span id="mgSearchHint">高级检索 · 精确/模糊 · 作者/机构 · IPC</span>
-              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
-            </button>
+            <section class="mg-smart-recommendations" id="mgSmartRecommendations" aria-labelledby="mgSmartRecommendationTitle">
+              <header class="mg-smart-recommendation-header">
+                <div>
+                  <div class="mg-smart-recommendation-title-row">
+                    <h2 id="mgSmartRecommendationTitle">智能推荐</h2>
+                    <span id="mgSmartRecommendationContext">练仿真</span>
+                  </div>
+                  <p>基于当前场景推荐可追溯的科研资源</p>
+                </div>
+                <button class="mg-smart-recommendation-more" id="mgRecommendationMore" type="button" aria-label="查看更多仿真实例">
+                  <span>查看更多</span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>
+                </button>
+              </header>
 
-            <div class="mg-simulation-strip" aria-label="热门仿真实例">
-              <a class="mg-simulation-card mg-simulation-card--biology" href="https://itic-sci.bohrium.com/" target="_blank" rel="noopener noreferrer">
+              <div class="mg-simulation-strip" id="mgRecommendationPreview" role="tabpanel" aria-labelledby="mgRecommendationTabSimulation" aria-live="polite" aria-label="练仿真智能推荐，共 4 项">
+              <a class="mg-simulation-card mg-simulation-card--biology" href="https://edu.itic-sci.com/sim-lab" target="_blank" rel="noopener noreferrer">
                 <img class="mg-original-media" src="assets/mastergo-v2/sim-number-pairs.png" alt="Number Pairs 数字配对仿真实验界面">
                 <span class="mg-simulation-label">生物结构仿真</span>
                 <span class="mg-use-same">用同款</span>
                 <span class="mg-sim-toolbar" aria-hidden="true"></span>
                 <span class="mg-sim-cells" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
               </a>
-              <a class="mg-simulation-card mg-simulation-card--quantum" href="https://itic-sci.bohrium.com/" target="_blank" rel="noopener noreferrer">
+              <a class="mg-simulation-card mg-simulation-card--quantum" href="https://edu.itic-sci.com/sim-lab" target="_blank" rel="noopener noreferrer">
                 <img class="mg-original-media" src="assets/mastergo-v2/sim-quantum-coin.png" alt="Quantum Coin Toss 量子抛硬币仿真实验界面">
                 <span class="mg-simulation-label">量子测量实验</span>
                 <span class="mg-sim-toolbar" aria-hidden="true"></span>
                 <span class="mg-coin" aria-hidden="true">↓</span>
                 <span class="mg-quantum-grid" aria-hidden="true"></span>
               </a>
-              <a class="mg-simulation-card mg-simulation-card--material" href="https://itic-sci.bohrium.com/" target="_blank" rel="noopener noreferrer">
+              <a class="mg-simulation-card mg-simulation-card--material" href="https://edu.itic-sci.com/sim-lab" target="_blank" rel="noopener noreferrer">
                 <img class="mg-original-media" src="assets/mastergo-v2/sim-membrane-transport.png" alt="Membrane Transport 膜运输仿真实验界面">
                 <span class="mg-simulation-label">材料微观模拟</span>
                 <span class="mg-sim-toolbar" aria-hidden="true"></span>
                 <span class="mg-particles" aria-hidden="true"></span>
                 <span class="mg-sim-controls" aria-hidden="true"></span>
               </a>
-              <a class="mg-simulation-card mg-simulation-card--atom" href="https://itic-sci.bohrium.com/" target="_blank" rel="noopener noreferrer">
+              <a class="mg-simulation-card mg-simulation-card--atom" href="https://edu.itic-sci.com/sim-lab" target="_blank" rel="noopener noreferrer">
                 <img class="mg-original-media" src="assets/mastergo-v2/sim-hydrogen-atom.png" alt="Models of the Hydrogen Atom 氢原子模型仿真实验界面">
                 <span class="mg-simulation-label">原子光谱分析</span>
                 <span class="mg-sim-toolbar" aria-hidden="true"></span>
                 <span class="mg-orbits" aria-hidden="true"><i></i><i></i><i></i></span>
                 <span class="mg-spectrum" aria-hidden="true"></span>
               </a>
-            </div>
+              </div>
+            </section>
           </div>
         </section>
 
@@ -3592,17 +3620,18 @@
           </header>
 
           <div class="recommendation-tabs" id="recommendationTabs" role="tablist" aria-label="推荐内容分类">
-            <button class="recommendation-tab is-active" type="button" role="tab" aria-selected="true" data-recommendation-type="为你推荐">为你推荐</button>
-            <button class="recommendation-tab" type="button" role="tab" aria-selected="false" data-recommendation-type="资讯">资讯</button>
-            <button class="recommendation-tab" type="button" role="tab" aria-selected="false" data-recommendation-type="文献">文献</button>
-            <button class="recommendation-tab" type="button" role="tab" aria-selected="false" data-recommendation-type="报告">报告</button>
-            <button class="recommendation-tab" type="button" role="tab" aria-selected="false" data-recommendation-type="人才">人才</button>
-            <button class="recommendation-tab" type="button" role="tab" aria-selected="false" data-recommendation-type="会议">会议</button>
-            <button class="recommendation-tab" type="button" role="tab" aria-selected="false" data-recommendation-type="课程">课程</button>
-            <button class="recommendation-tab" type="button" role="tab" aria-selected="false" data-recommendation-type="活动">活动</button>
+            <button class="recommendation-tab is-active" id="recommendationTabAll" type="button" role="tab" aria-selected="true" aria-controls="recommendationGrid" tabindex="0" data-recommendation-type="为你推荐">为你推荐</button>
+            <button class="recommendation-tab" id="recommendationTabSimulation" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="仿真">仿真</button>
+            <button class="recommendation-tab" id="recommendationTabInfo" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="资讯">资讯</button>
+            <button class="recommendation-tab" id="recommendationTabPaper" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="文献">文献</button>
+            <button class="recommendation-tab" id="recommendationTabReport" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="报告">报告</button>
+            <button class="recommendation-tab" id="recommendationTabTalent" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="人才">人才</button>
+            <button class="recommendation-tab" id="recommendationTabMeeting" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="会议">会议</button>
+            <button class="recommendation-tab" id="recommendationTabCourse" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="课程">课程</button>
+            <button class="recommendation-tab" id="recommendationTabEvent" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="活动">活动</button>
           </div>
 
-          <div class="recommendation-grid" id="recommendationGrid" role="tabpanel" aria-live="polite"></div>
+          <div class="recommendation-grid" id="recommendationGrid" role="tabpanel" aria-labelledby="recommendationTabAll" aria-live="polite"></div>
 
         </div>
       </section>
@@ -3784,9 +3813,8 @@
     <section class="search-results-page portal-search-page" id="searchResultsPage" aria-labelledby="searchResultsTitle" hidden>
       <div class="portal-search-shell portal-search-inner">
         <header class="portal-search-header">
-          <p class="portal-search-eyebrow">P03 / P04 · 智能搜索</p>
-          <h1 class="portal-search-title" id="searchResultsTitle">综合资源检索</h1>
-          <p class="portal-search-lead">在论文、专利、报告、人才、资讯与项目之间检索，并保持筛选上下文进入全文阅读。</p>
+          <h1 class="portal-search-title" id="searchResultsTitle">搜索结果</h1>
+          <p class="portal-search-lead">查看并筛选符合条件的资源。</p>
           <span class="sr-only" id="searchResultQuery"></span>
         </header>
 
@@ -3804,16 +3832,6 @@
             <input class="portal-search-input" id="portalResultSearchInput" type="search" autocomplete="off" placeholder="搜索论文、专利、报告、人才、资讯、项目">
             <button class="portal-search-button" type="submit">搜索</button>
           </form>
-
-          <div class="portal-search-hot" aria-label="热门搜索">
-            <span class="portal-search-hot-label">热门：</span>
-            <div class="portal-search-hot-list">
-              <button class="portal-search-hot-button" type="button" data-result-hot-word="AI for Science">AI for Science</button>
-              <button class="portal-search-hot-button" type="button" data-result-hot-word="低空经济">低空经济</button>
-              <button class="portal-search-hot-button" type="button" data-result-hot-word="固态电池">固态电池</button>
-              <button class="portal-search-hot-button" type="button" data-result-hot-word="量子传感">量子传感</button>
-            </div>
-          </div>
         </div>
 
         <section class="portal-query-understanding" id="portalQueryUnderstanding" aria-labelledby="portalQueryUnderstandingTitle" hidden>
@@ -3917,14 +3935,6 @@
           </div>
         </section>
 
-        <div class="portal-source-ledger" id="portalSourceLedger" aria-label="数据来源状态">
-          <span><i class="is-complete"></i>本地知识库 · 已完成</span>
-          <span><i class="is-complete"></i>论文数据库 · 已完成</span>
-          <span><i class="is-loading"></i>外部专利API · 查询中</span>
-          <span><i class="is-restricted"></i>受限资源 · 权限过滤</span>
-        </div>
-        <p class="portal-mock-banner">本原型使用模拟数据与模拟接口时延，用于验证页面和交互流程，不代表真实资源覆盖、检索准确率、系统性能、权限结果或AI结论质量。</p>
-
         <div class="portal-search-layout">
           <aside class="portal-search-sidebar" id="portalSearchSidebar" aria-label="搜索筛选">
             <div class="portal-filter-panel-header">
@@ -3971,7 +3981,8 @@
               </fieldset>
               <fieldset class="portal-search-filter-group">
                 <legend class="portal-search-filter-heading">发表时间</legend>
-                <label class="portal-search-filter-option"><input type="radio" name="publishTime" value="近一年" checked><span>近一年</span></label>
+                <label class="portal-search-filter-option"><input type="radio" name="publishTime" value="不限时间" checked><span>不限时间</span></label>
+                <label class="portal-search-filter-option"><input type="radio" name="publishTime" value="近一年"><span>近一年</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="publishTime" value="近三年"><span>近三年</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="publishTime" value="近五年"><span>近五年</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="publishTime" value="自定义"><span>自定义</span></label>
@@ -3990,7 +4001,6 @@
                 <label class="portal-search-filter-option"><input type="checkbox" name="source" value="智库报告"><span>智库报告</span></label>
                 <label class="portal-search-filter-option"><input type="checkbox" name="source" value="平台资讯"><span>平台资讯</span></label>
               </fieldset>
-              <label class="portal-search-accessible-only portal-search-filter-option"><input type="checkbox" id="accessibleOnly"><span>仅显示当前可访问资源</span></label>
             </form>
           </aside>
           <button class="portal-filter-backdrop" id="portalFilterBackdrop" type="button" aria-label="点击遮罩关闭筛选" hidden></button>
@@ -4023,7 +4033,6 @@
               </div>
 
               <div class="portal-active-filters" id="portalActiveFilters" aria-label="当前筛选条件" hidden></div>
-              <div class="portal-results-note"><span>按资源类型统一展示，优先呈现可判断相关性的证据与元数据</span><small>模拟数据 · 更新于 2026-07-17</small></div>
             </header>
 
             <div class="portal-search-result-list" id="portalSearchResultList" aria-live="polite" aria-busy="false"></div>
@@ -4038,10 +4047,106 @@
         </div>
       </div>
 
-      <button class="portal-search-assistant" id="portalSearchAssistant" type="button" aria-label="切换到 AI 搜索并输入问题">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 0 0-7 7v3a4 4 0 0 0 4 4h1v-5H7v-2a5 5 0 0 1 10 0v2h-3v5h1a4 4 0 0 0 4-4v-3a7 7 0 0 0-7-7Z"></path><path d="M10 20h4"></path></svg>
-        <span>AI 助手</span>
-      </button>
+    </section>
+
+    <section class="portal-qa-page" id="qaPage" aria-labelledby="qaPageTitle" hidden>
+      <div class="portal-qa-shell">
+        <header class="portal-qa-toolbar">
+          <button class="portal-qa-back" id="qaBackHome" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg>
+            <span>返回首页</span>
+          </button>
+          <div class="portal-qa-toolbar-actions">
+            <button id="qaViewSearchResults" type="button">查看搜索结果</button>
+            <button id="qaNewQuestion" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              <span>新建问题</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="portal-qa-question" aria-label="当前研究问题">
+          <p class="portal-qa-eyebrow">V2.0 智能问答 · 基于检索证据回答</p>
+          <h1 id="qaPageTitle" tabindex="-1">研究问题</h1>
+          <p class="portal-qa-question-text" id="qaQuestion">—</p>
+          <div class="portal-qa-question-meta">
+            <span><i class="is-thinking"></i>深度思考</span>
+            <span>论文、专利与科技报告</span>
+            <span id="qaCoverage">正在准备数据源</span>
+          </div>
+        </section>
+
+        <div class="portal-qa-workspace">
+          <article class="portal-qa-answer-surface" aria-label="智能问答回答">
+            <div class="portal-qa-progress" id="qaProgress">
+              <button class="portal-qa-progress-summary" id="qaProgressToggle" type="button" aria-expanded="true" aria-controls="qaProgressDetails">
+                <span class="portal-qa-progress-icon" aria-hidden="true">✓</span>
+                <strong id="qaProgressLabel">正在深度思考</strong>
+                <span id="qaProgressTime">预计需要数秒</span>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"></path></svg>
+              </button>
+              <ol class="portal-qa-progress-details" id="qaProgressDetails">
+                <li class="is-active">理解问题与研究范围</li>
+                <li>检索论文、专利与报告</li>
+                <li>提取支持证据与限制</li>
+                <li>核验引用并形成回答</li>
+              </ol>
+            </div>
+
+            <div class="portal-qa-loading" id="qaLoading" role="status" aria-live="polite">
+              <span></span><span></span><span></span>
+              <p>正在检索并核验相关证据，请稍候……</p>
+            </div>
+
+            <div class="portal-qa-answer" id="qaAnswerBody" aria-live="polite" hidden>
+              <h2>结构化回答</h2>
+            </div>
+
+            <footer class="portal-qa-answer-actions" id="qaAnswerActions" hidden>
+              <button id="qaCopyAnswer" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h11v12H8Z"></path><path d="M5 16H4V4h11v1"></path></svg>
+                <span>复制回答</span>
+              </button>
+              <span>回答是否有帮助？</span>
+              <button class="is-icon" type="button" data-qa-feedback="helpful" aria-pressed="false" aria-label="有帮助">赞</button>
+              <button class="is-icon" type="button" data-qa-feedback="unhelpful" aria-pressed="false" aria-label="需改进">改</button>
+            </footer>
+          </article>
+
+          <aside class="portal-qa-evidence" aria-labelledby="qaEvidenceTitle">
+            <header class="portal-qa-evidence-header">
+              <div><p>引用与核验</p><h2 id="qaEvidenceTitle">证据来源 <span id="qaEvidenceCount">0</span></h2></div>
+              <span id="qaEvidenceCoverage">等待检索</span>
+            </header>
+            <div class="portal-qa-source-status" id="qaSourceStatus">
+              <span><i class="is-loading"></i>正在连接数据源</span>
+            </div>
+            <div class="portal-qa-evidence-list" id="qaEvidenceList"></div>
+          </aside>
+        </div>
+
+        <section class="portal-qa-followups" id="qaFollowups" aria-labelledby="qaFollowupsTitle" hidden>
+          <div><p>基于本轮证据继续</p><h2 id="qaFollowupsTitle">你还可以追问</h2></div>
+          <div class="portal-qa-followup-suggestions">
+            <button type="button" data-qa-followup="比较这些方法的实验验证情况">比较这些方法的实验验证情况</button>
+            <button type="button" data-qa-followup="哪些证据支持相反结论">哪些证据支持相反结论</button>
+            <button type="button" data-qa-followup="按发表时间梳理技术演进">按发表时间梳理技术演进</button>
+          </div>
+        </section>
+
+        <form class="portal-qa-composer" id="qaFollowupForm">
+          <label class="sr-only" for="qaFollowupInput">继续提问</label>
+          <textarea id="qaFollowupInput" rows="1" placeholder="基于本轮证据继续提问……"></textarea>
+          <div class="portal-qa-composer-meta">
+            <span><i></i>继承本轮问题与证据</span>
+            <button class="portal-qa-depth" type="button" aria-pressed="true">深度思考</button>
+          </div>
+          <button class="portal-qa-send" id="qaFollowupSubmit" type="submit" disabled aria-label="发送问题">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4.5 14-3-5.5Z"></path><path d="m11.5 13.5 3-3"></path></svg>
+          </button>
+        </form>
+        <p class="portal-qa-mock-note">本页面使用模拟答案、模拟引用和模拟处理进度，仅用于验证智能问答交互，不代表真实数据覆盖、检索质量、模型能力或引用准确率。</p>
+      </div>
     </section>
 
     <div class="portal-document-viewer" id="portalDocumentViewer" role="dialog" aria-modal="true" aria-labelledby="portalDocumentTitle" hidden>
@@ -4232,6 +4337,30 @@
       const searchResultsPage = document.getElementById("searchResultsPage");
       const searchResultsTitle = document.getElementById("searchResultsTitle");
       const searchResultQuery = document.getElementById("searchResultQuery");
+      const qaPage = document.getElementById("qaPage");
+      const qaPageTitle = document.getElementById("qaPageTitle");
+      const qaQuestion = document.getElementById("qaQuestion");
+      const qaCoverage = document.getElementById("qaCoverage");
+      const qaProgress = document.getElementById("qaProgress");
+      const qaProgressToggle = document.getElementById("qaProgressToggle");
+      const qaProgressDetails = document.getElementById("qaProgressDetails");
+      const qaProgressLabel = document.getElementById("qaProgressLabel");
+      const qaProgressTime = document.getElementById("qaProgressTime");
+      const qaLoading = document.getElementById("qaLoading");
+      const qaAnswerBody = document.getElementById("qaAnswerBody");
+      const qaAnswerActions = document.getElementById("qaAnswerActions");
+      const qaEvidenceCount = document.getElementById("qaEvidenceCount");
+      const qaEvidenceCoverage = document.getElementById("qaEvidenceCoverage");
+      const qaSourceStatus = document.getElementById("qaSourceStatus");
+      const qaEvidenceList = document.getElementById("qaEvidenceList");
+      const qaFollowups = document.getElementById("qaFollowups");
+      const qaFollowupForm = document.getElementById("qaFollowupForm");
+      const qaFollowupInput = document.getElementById("qaFollowupInput");
+      const qaFollowupSubmit = document.getElementById("qaFollowupSubmit");
+      const qaBackHome = document.getElementById("qaBackHome");
+      const qaNewQuestion = document.getElementById("qaNewQuestion");
+      const qaCopyAnswer = document.getElementById("qaCopyAnswer");
+      const qaViewSearchResults = document.getElementById("qaViewSearchResults");
       const featureCarousel = document.getElementById("featureCarousel");
       const featureTabs = featureCarousel ? [...featureCarousel.querySelectorAll("[role='tab']")] : [];
       const featureSlides = featureCarousel ? [...featureCarousel.querySelectorAll("[role='tabpanel']")] : [];
@@ -4246,11 +4375,21 @@
       const mgHeroSearchForm = document.getElementById("mgHeroSearchForm");
       const mgHeroSearchInput = document.getElementById("mgHeroSearchInput");
       const mgHeroSearchModes = document.getElementById("mgHeroSearchModes");
+      const mgClassicSearchModeRow = document.getElementById("mgClassicSearchModeRow");
+      const mgV2SearchModeRow = document.getElementById("mgV2SearchModeRow");
+      const mgV2HeroModes = document.getElementById("mgV2HeroModes");
+      const mgV2ExperienceSwitch = document.getElementById("mgV2ExperienceSwitch");
+      const mgClassicExperienceSwitch = document.getElementById("mgClassicExperienceSwitch");
+      const mgSearchExperienceStatus = document.getElementById("mgSearchExperienceStatus");
       const mgFulltextShortcuts = document.getElementById("mgFulltextShortcuts");
+      const mgSmartRecommendations = document.getElementById("mgSmartRecommendations");
+      const mgSmartRecommendationContext = document.getElementById("mgSmartRecommendationContext");
+      const mgRecommendationPreview = document.getElementById("mgRecommendationPreview");
+      const mgRecommendationMore = document.getElementById("mgRecommendationMore");
       const mgAiSearchGuide = document.getElementById("mgAiSearchGuide");
       const mgAssociationSearchGuide = document.getElementById("mgAssociationSearchGuide");
       const mgKeywordSearchGuide = document.getElementById("mgKeywordSearchGuide");
-      const mgHeroDiscover = document.getElementById("mgHeroDiscover");
+      const mgV2QaSearchGuide = document.getElementById("mgV2QaSearchGuide");
       const profilePage = document.getElementById("profilePage");
       const messagePage = document.getElementById("messagePage");
       const openProfilePage = document.getElementById("openProfilePage");
@@ -4316,26 +4455,28 @@
 
       const SEARCH_MODE_CONFIG = {
         "全文": {
-          title: "全文资源检索",
-          placeholder: "输入关键词或短语，检索正文并定位命中页码",
-          description: "逐字检索论文、专利、报告等资源，展示命中句、页码与原文位置。"
+          title: "搜索结果",
+          placeholder: "输入关键词、题名、作者或机构",
+          description: "查看并筛选符合条件的论文、专利、报告等资源。"
         },
         "关联": {
-          title: "智能关联搜索",
-          placeholder: "输入研究主题、论文、专利、专家或机构，发现关联知识",
-          description: "解析并细化问题，结合可控的兴趣信号推荐相似主题、成果、专家与机构。"
+          title: "关联搜索结果",
+          placeholder: "输入研究主题、论文、专家或机构",
+          description: "查看并筛选与当前主题相关的资源。"
         },
         "AI 搜索": {
-          title: "AI科研搜索",
-          placeholder: "输入关键词或描述研究问题，例如：大模型在药物靶点发现中有哪些作用与限制",
-          description: "通过语义理解检索异构资源，并生成带证据引用与局限说明的结构化解读。"
+          title: "AI搜索结果",
+          placeholder: "输入关键词或研究问题",
+          description: "查看与当前问题相关的检索结果。"
         },
         "关键词": {
-          title: "关键词精准检索",
-          placeholder: "输入单个或多个关键词，使用空格分隔，例如：大语言模型 药物靶点",
-          description: "支持精确、模糊、AND/OR、多字段二次筛选，以及可选择的词位扩展。"
+          title: "关键词搜索结果",
+          placeholder: "输入一个或多个关键词",
+          description: "按关键词和筛选条件查看资源。"
         }
       };
+      // Advanced result summaries stay hidden until real APIs and acceptance evidence exist.
+      const RESULT_MODE_PANELS_ENABLED = false;
 
       const desktopTriggers = [];
       const utilityDropdowns = [];
@@ -4353,6 +4494,11 @@
       let recommendationBatch = 0;
       let activeSearchType = "全部";
       let activeHeroSearchMode = "fulltext";
+      let activeHeroExperience = "classic";
+      let activeV2HeroMode = "search";
+      let lastClassicHeroMode = "fulltext";
+      let returnHeroExperience = "classic";
+      let activeHeroRecommendation = "simulation";
       let activeSearchMode = "全文";
       let activeSearchPage = 1;
       const activeExpansionTerms = new Set();
@@ -4361,6 +4507,8 @@
       let keywordExpansionOpen = false;
       let associationDetailsOpen = true;
       let originalKeywordQuery = "";
+      let activeQaQuestion = "";
+      let qaAnswerTimer = null;
       let personalizationEnabled = false;
       const associationInterests = new Map([
         ["AI for Science", 86],
@@ -4376,6 +4524,16 @@
 
       try {
         announcementDismissed = sessionStorage.getItem("gkx-announcement-closed") === "1";
+        const storedHeroRecommendation = sessionStorage.getItem("portal-active-hero-recommendation");
+        if (["simulation", "paper", "expert", "strategy"].includes(storedHeroRecommendation)) {
+          activeHeroRecommendation = storedHeroRecommendation;
+        }
+        const storedReturnExperience = sessionStorage.getItem("portal-return-search-experience");
+        sessionStorage.removeItem("portal-return-search-experience");
+        if (storedReturnExperience === "v2-search" || storedReturnExperience === "v2-qa") {
+          returnHeroExperience = "v2";
+          activeV2HeroMode = storedReturnExperience === "v2-qa" ? "qa" : "search";
+        }
       } catch (error) { /* keep the announcement available */ }
       announcementBar.hidden = announcementDismissed;
 
@@ -4462,7 +4620,158 @@
         }
       ];
 
+      const HERO_RECOMMENDATION_GROUPS = {
+        simulation: {
+          label: "练仿真",
+          itemLabel: "仿真实例",
+          landingType: "仿真",
+          tabId: "mgRecommendationTabSimulation",
+          items: [
+            {
+              type: "仿真", access: "可直接使用", title: "生物结构仿真",
+              summary: "通过数字配对与结构交互观察生物体系中的组合规律。",
+              tags: ["生命科学", "交互实验"], source: "玻尔科研空间", dateLabel: "在线运行",
+              image: "assets/mastergo-v2/sim-number-pairs.png", alt: "Number Pairs 数字配对仿真实验界面",
+              url: "https://edu.itic-sci.com/sim-lab"
+            },
+            {
+              type: "仿真", access: "可直接使用", title: "量子测量实验",
+              summary: "用量子抛硬币实验理解测量、概率与量子态变化。",
+              tags: ["量子科学", "概念验证"], source: "玻尔科研空间", dateLabel: "在线运行",
+              image: "assets/mastergo-v2/sim-quantum-coin.png", alt: "Quantum Coin Toss 量子抛硬币仿真实验界面",
+              url: "https://edu.itic-sci.com/sim-lab"
+            },
+            {
+              type: "仿真", access: "可直接使用", title: "材料微观模拟",
+              summary: "观察膜运输过程中的粒子迁移与材料微观行为。",
+              tags: ["材料科学", "微观模拟"], source: "玻尔科研空间", dateLabel: "在线运行",
+              image: "assets/mastergo-v2/sim-membrane-transport.png", alt: "Membrane Transport 膜运输仿真实验界面",
+              url: "https://edu.itic-sci.com/sim-lab"
+            },
+            {
+              type: "仿真", access: "可直接使用", title: "原子光谱分析",
+              summary: "借助氢原子模型理解能级、跃迁与原子光谱。",
+              tags: ["原子物理", "光谱分析"], source: "玻尔科研空间", dateLabel: "在线运行",
+              image: "assets/mastergo-v2/sim-hydrogen-atom.png", alt: "Models of the Hydrogen Atom 氢原子模型仿真实验界面",
+              url: "https://edu.itic-sci.com/sim-lab"
+            }
+          ]
+        },
+        paper: {
+          label: "搜论文",
+          itemLabel: "论文",
+          landingType: "文献",
+          tabId: "mgRecommendationTabPaper",
+          items: [
+            {
+              type: "文献", access: "公开摘要",
+              title: "Accurate structure prediction of biomolecular interactions with AlphaFold 3",
+              summary: "介绍 AlphaFold 3 对蛋白质、核酸、小分子复合体结构与相互作用的预测能力。",
+              tags: ["AI for Science", "结构预测"], source: "Nature", date: "2024-05-08",
+              meta: "Jumper 等 · Nature", url: "https://www.nature.com/articles/s41586-024-07487-w"
+            },
+            {
+              type: "文献", access: "原型数据", title: "面向科学发现的生成式智能体协作框架",
+              summary: "研究多智能体在任务拆解、工具调用、证据校验与过程回溯中的协作机制。",
+              tags: ["科学智能体", "可验证推理"], source: "Nature Machine Intelligence", date: "2026-07-12",
+              meta: "陈晓岚、王祺 · 2026", query: "面向科学发现的生成式智能体协作框架", searchMode: "全文"
+            },
+            {
+              type: "文献", access: "原型数据", title: "大语言模型驱动的药物靶点发现：方法、证据与验证边界",
+              summary: "梳理大语言模型在靶点识别、证据组织与实验验证中的应用边界。",
+              tags: ["药物发现", "大语言模型"], source: "Journal of Biomedical Discovery", date: "2026-05-21",
+              meta: "李铭、周明远 · 2026", query: "大语言模型驱动的药物靶点发现", searchMode: "全文"
+            },
+            {
+              type: "文献", access: "原型数据", title: "固态电池界面稳定性的多尺度建模研究",
+              summary: "从材料计算与实验表征两个层面分析固态电池界面的稳定性问题。",
+              tags: ["固态电池", "多尺度建模"], source: "材料计算专题库（原型）", date: "2026-05-18",
+              meta: "材料计算专题 · 2026", query: "固态电池 界面稳定性", searchMode: "全文"
+            }
+          ]
+        },
+        expert: {
+          label: "找专家",
+          itemLabel: "专家",
+          landingType: "人才",
+          tabId: "mgRecommendationTabExpert",
+          items: [
+            {
+              type: "人才", access: "公开", title: "Demis Hassabis",
+              summary: "聚焦人工智能驱动的科学发现与蛋白质结构预测。",
+              tags: ["AI for Science", "机器学习"], source: "Nobel Prize", date: "2024-10-09",
+              meta: "Google DeepMind · AI 科学发现", initials: "DH",
+              url: "https://www.nobelprize.org/prizes/chemistry/2024/hassabis/facts/"
+            },
+            {
+              type: "人才", access: "原型数据", title: "周明远",
+              summary: "研究方向覆盖 AI 药物发现、生物医学知识图谱与证据推理。",
+              tags: ["AI 药物发现", "知识图谱"], source: "深圳生物智能研究院", dateLabel: "近期更新",
+              meta: "深圳生物智能研究院 · 研究员", initials: "周", query: "周明远", searchMode: "关联"
+            },
+            {
+              type: "人才", access: "原型数据", title: "林知远",
+              summary: "聚焦多模态感知、世界模型、灵巧操作与机器人学习。",
+              tags: ["具身智能", "机器人学习"], source: "未来智能研究院", dateLabel: "近期更新",
+              meta: "未来智能研究院 · 研究员", initials: "林", query: "林知远", searchMode: "关联"
+            },
+            {
+              type: "人才", access: "原型数据", title: "陈晓岚",
+              summary: "关注生成式智能体、科学工作流与可验证科研推理。",
+              tags: ["科学智能体", "科研工作流"], source: "未来科学智能实验室（原型）", dateLabel: "近期更新",
+              meta: "未来科学智能实验室（原型） · 研究员", initials: "陈", query: "陈晓岚", searchMode: "关联"
+            }
+          ]
+        },
+        strategy: {
+          label: "看战略",
+          itemLabel: "战略报告",
+          landingType: "报告",
+          tabId: "mgRecommendationTabStrategy",
+          items: [
+            {
+              type: "报告", access: "公开", title: "Stanford 2026 AI Index Report",
+              summary: "从研发、技术表现、经济影响、教育与治理等维度观察全球人工智能年度进展。",
+              tags: ["人工智能", "全球趋势"], source: "Stanford HAI", date: "2026-04-13",
+              meta: "全球人工智能年度趋势", url: "https://hai.stanford.edu/ai-index/2026-ai-index-report"
+            },
+            {
+              type: "报告", access: "公开", title: "International AI Safety Report 2026",
+              summary: "汇总通用人工智能能力、风险与风险管理技术的国际科学证据。",
+              tags: ["AI 安全", "国际治理"], source: "International AI Safety Report", date: "2026-02-03",
+              meta: "能力、风险与治理证据", url: "https://internationalaisafetyreport.org/publication/international-ai-safety-report-2026"
+            },
+            {
+              type: "报告", access: "登录可见", title: "2026 全球人工智能科技创新态势报告",
+              summary: "分析全球基础模型、科学智能与产业应用的热点方向及区域竞争态势。",
+              tags: ["科技情报", "产业趋势"], source: "深圳国际科技信息中心", date: "2026-07-08",
+              meta: "全球态势 · 区域竞争", query: "全球人工智能 科技创新态势", searchMode: "关键词"
+            },
+            {
+              type: "报告", access: "公开", title: "未来产业技术链与机会窗口研判",
+              summary: "围绕低空经济、具身智能与未来材料梳理技术链和潜在机会窗口。",
+              tags: ["未来产业", "机会识别"], source: "战略咨询研究团队", date: "2026-07-03",
+              meta: "低空经济 · 具身智能 · 新材料", query: "未来产业 技术链 机会窗口", searchMode: "关键词"
+            }
+          ]
+        }
+      };
+
+      const PAPER_DETAIL_URL = "https://sz-gkx-aminer.aiworkflow.cn/timks/paper/60f6a2de5244ab9dcbcd920c";
+
       const SEARCH_ITEMS = [
+        {
+          type: "论文", status: "可访问", date: "2021-07-01",
+          title: "Deep Learning for AI",
+          summary: "How can neural networks learn the rich internal representations required for difficult tasks such as recognizing objects or understanding language?",
+          tags: ["Representation Learning", "Deep Learning", "Neural Networks"],
+          source: "Communications of the ACM", meta: "64(7): 58-65 · 被引 994", accessible: true,
+          author: "Yoshua Bengio · Yann LeCun · Geoffrey Hinton", venue: "Communications of the ACM",
+          detail: "论文详情页提供摘要、关键词、DOI、原文链接及登录后可用的AI智能解析等能力。",
+          detailUrl: PAPER_DETAIL_URL,
+          doi: "10.1145/3448250",
+          fulltextStatus: "仅详情", matchField: "摘要", matches: []
+        },
         {
           type: "论文", status: "可访问", date: "2026-07-12",
           title: "面向科学发现的生成式智能体协作框架",
@@ -4488,6 +4797,18 @@
           fulltextStatus: "可定位", matchField: "正文", matches: [
             { page: 8, paragraph: 2, text: "大语言模型可融合文献、组学数据与知识图谱，为潜在药物靶点建立可追溯的候选证据链。" },
             { page: 19, paragraph: 4, text: "模型生成的靶点假设仍需通过独立数据与湿实验验证，训练数据偏差可能放大既有研究热点。" }
+          ]
+        },
+        {
+          type: "论文", status: "原型数据", date: "2026-05-18",
+          title: "固态电池界面稳定性的多尺度建模研究",
+          summary: "从材料计算、界面反应与实验表征三个层面分析固态电池界面的稳定性及失效机制。",
+          tags: ["固态电池", "多尺度建模", "界面稳定性"],
+          source: "材料计算专题库（原型）", meta: "原型文献 · 待接真实数据", accessible: true,
+          author: "原型作者", venue: "材料计算专题库",
+          detail: "该条用于演示论文类型推荐与检索落地，正式上线前需由真实文献数据替换。",
+          fulltextStatus: "原型可定位", matchField: "正文", matches: [
+            { page: 9, paragraph: 2, text: "多尺度建模能够连接原子尺度界面反应与宏观电化学性能，为固态电池界面稳定性分析提供统一框架。" }
           ]
         },
         {
@@ -4540,6 +4861,16 @@
           fulltextStatus: "实体资源", matchField: "研究方向", matches: []
         },
         {
+          type: "人才", status: "原型数据", date: "2026-07-12",
+          title: "陈晓岚 · 科学智能体与可验证科研工作流",
+          summary: "关注生成式智能体、科学工作流、证据校验与可验证科研推理。",
+          tags: ["科学智能体", "科研工作流", "可验证推理"],
+          source: "未来科学智能实验室（原型）", meta: "原型人才 · 待接真实数据", accessible: true,
+          personName: "陈晓岚", institution: "未来科学智能实验室（原型）",
+          detail: "该条用于演示专家推荐与关联检索，正式上线前需由真实人才数据替换。",
+          fulltextStatus: "实体资源", matchField: "研究方向", matches: []
+        },
+        {
           type: "资讯", status: "公开", date: "2026-07-16",
           title: "低空经济技术图谱与区域创新格局更新",
           summary: "从飞控、感知、通信、动力与运营服务等环节更新低空经济产业链和区域创新信号。",
@@ -4584,6 +4915,7 @@
       const SURFACES = {
         home: homeContent,
         search: searchResultsPage,
+        qa: qaPage,
         profile: profilePage,
         messages: messagePage,
         iframe: iframeShell
@@ -4691,24 +5023,111 @@
         });
       }
 
+      function getRecommendationSearchType(type) {
+        return ({ 文献: "论文", 人才: "人才", 报告: "报告" })[type] || "全部";
+      }
+
+      function createHeroRecommendationCard(item, groupKey, index) {
+        if (groupKey === "simulation") {
+          const link = document.createElement("a");
+          link.className = `mg-simulation-card mg-simulation-card--${["biology", "quantum", "material", "atom"][index]}`;
+          link.href = item.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.setAttribute("aria-label", `${item.title}，打开仿真平台（新窗口）`);
+          link.innerHTML = `
+            <img class="mg-original-media" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.alt)}">
+            <span class="mg-preview-simulation-caption"><strong>${escapeHtml(item.title)}</strong><small>开始仿真</small></span>`;
+          return link;
+        }
+
+        const control = document.createElement(item.url ? "a" : "button");
+        control.className = `mg-recommendation-preview-card mg-recommendation-preview-card--${groupKey}`;
+        if (item.url) {
+          control.href = item.url;
+          control.target = "_blank";
+          control.rel = "noopener noreferrer";
+          control.setAttribute("aria-label", `${item.title}（新窗口）`);
+        } else {
+          control.type = "button";
+          control.setAttribute("aria-label", `检索 ${item.title}`);
+          control.addEventListener("click", () => performSearch(item.query || item.title, {
+            mode: item.searchMode || "全文",
+            resourceType: getRecommendationSearchType(item.type)
+          }));
+        }
+
+        const marker = groupKey === "expert" ? (item.initials || item.title.slice(0, 1)) : String(index + 1).padStart(2, "0");
+        const actionLabel = groupKey === "paper" ? "查看论文" : groupKey === "expert" ? "查看专家" : "查看报告";
+        const prototypeAccessClass = item.access === "原型数据" ? " is-prototype" : "";
+        control.innerHTML = `
+          <span class="mg-preview-card-visual" aria-hidden="true">
+            <span class="mg-preview-card-marker">${escapeHtml(marker)}</span>
+            <span class="mg-preview-card-lines"><i></i><i></i><i></i></span>
+          </span>
+          <span class="mg-preview-card-content">
+            <span class="mg-preview-card-topline"><span>${escapeHtml(item.type)}</span><em class="${prototypeAccessClass.trim()}">${escapeHtml(item.access)}</em></span>
+            <strong class="mg-preview-card-title">${escapeHtml(item.title)}</strong>
+            <span class="mg-preview-card-meta">${escapeHtml(item.meta || `${item.source} · ${item.dateLabel || formatDate(item.date)}`)}</span>
+            <span class="mg-preview-card-summary">${escapeHtml(item.summary)}</span>
+            <span class="mg-preview-card-action">${actionLabel}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg></span>
+          </span>`;
+        return control;
+      }
+
+      function renderHeroRecommendations(groupKey) {
+        const group = HERO_RECOMMENDATION_GROUPS[groupKey] || HERO_RECOMMENDATION_GROUPS.simulation;
+        activeHeroRecommendation = groupKey in HERO_RECOMMENDATION_GROUPS ? groupKey : "simulation";
+        try {
+          sessionStorage.setItem("portal-active-hero-recommendation", activeHeroRecommendation);
+        } catch (error) { /* keep the current page state when storage is unavailable */ }
+        mgSmartRecommendationContext.textContent = group.label;
+        mgRecommendationMore.setAttribute("aria-label", `查看更多${group.itemLabel}`);
+        mgRecommendationPreview.setAttribute("aria-labelledby", group.tabId);
+        mgRecommendationPreview.setAttribute("aria-label", `${group.label}智能推荐，共 ${group.items.length} 项`);
+        mgRecommendationPreview.dataset.recommendationGroup = activeHeroRecommendation;
+        mgRecommendationPreview.replaceChildren(...group.items.map((item, index) => createHeroRecommendationCard(item, activeHeroRecommendation, index)));
+        mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]").forEach((button) => {
+          const active = button.dataset.recommendationGroup === activeHeroRecommendation;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-selected", String(active));
+          button.tabIndex = active ? 0 : -1;
+        });
+      }
+
       function createRecommendationCard(item) {
         const article = document.createElement("article");
         article.className = "recommendation-card";
         article.dataset.type = item.type;
+        const titleAttributes = item.url
+          ? `href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer"`
+          : `href="#searchResultsPage" data-recommendation-query="${escapeHtml(item.query || item.title)}" data-recommendation-mode="${escapeHtml(item.searchMode || "全文")}" data-recommendation-resource-type="${escapeHtml(getRecommendationSearchType(item.type))}"`;
+        const dateMarkup = item.date
+          ? `<time class="recommendation-card-date" datetime="${escapeHtml(item.date)}">${formatDate(item.date)}</time>`
+          : `<span class="recommendation-card-date">${escapeHtml(item.dateLabel || "持续更新")}</span>`;
+        const accessClass = item.access === "原型数据" ? " is-restricted" : "";
         article.innerHTML = `
           <div class="recommendation-card-top recommendation-card-topline">
-            <span class="recommendation-card-type">${item.type}</span>
-            <span class="recommendation-card-access">${item.access}</span>
+            <span class="recommendation-card-type">${escapeHtml(item.type)}</span>
+            <span class="recommendation-card-access${accessClass}">${escapeHtml(item.access)}</span>
           </div>
-          <h3 class="recommendation-card-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
-          <p class="recommendation-card-summary">${item.summary}</p>
-          <div class="recommendation-card-tags">${item.tags.map((tag) => `<span class="recommendation-card-tag">${tag}</span>`).join("")}</div>
+          <h3 class="recommendation-card-title"><a ${titleAttributes}>${escapeHtml(item.title)}</a></h3>
+          <p class="recommendation-card-summary">${escapeHtml(item.summary)}</p>
+          <div class="recommendation-card-tags">${item.tags.map((tag) => `<span class="recommendation-card-tag">${escapeHtml(tag)}</span>`).join("")}</div>
           <div class="recommendation-card-footer">
-            <p><span class="recommendation-card-source">${item.source}</span><time class="recommendation-card-date" datetime="${item.date}">${formatDate(item.date)}</time></p>
-            <button class="recommendation-card-action" type="button" aria-label="收藏 ${item.title}" title="登录后可收藏">
+            <p><span class="recommendation-card-source">${escapeHtml(item.source)}</span>${dateMarkup}</p>
+            <button class="recommendation-card-action" type="button" aria-label="收藏 ${escapeHtml(item.title)}" title="登录后可收藏">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.7 13.6a4.7 4.7 0 0 1 6.6-6.7l.7.7.7-.7a4.7 4.7 0 0 1 6.6 6.7Z"></path></svg>
             </button>
           </div>`;
+        article.querySelector("[data-recommendation-query]")?.addEventListener("click", (event) => {
+          event.preventDefault();
+          const link = event.currentTarget;
+          performSearch(link.dataset.recommendationQuery, {
+            mode: link.dataset.recommendationMode,
+            resourceType: link.dataset.recommendationResourceType
+          });
+        });
         article.querySelector(".recommendation-card-action")?.addEventListener("click", () => {
           if (manageRecommendationProfile) manageRecommendationProfile.textContent = "登录后可收藏";
           window.setTimeout(() => { if (manageRecommendationProfile) manageRecommendationProfile.textContent = "完善兴趣画像"; }, 1800);
@@ -4722,7 +5141,8 @@
           const start = (recommendationBatch % 2) * 4;
           items = RECOMMENDATION_ITEMS.slice(start, start + 4);
         } else {
-          items = RECOMMENDATION_ITEMS.filter((item) => item.type === activeRecommendationType);
+          const heroGroup = Object.values(HERO_RECOMMENDATION_GROUPS).find((group) => group.landingType === activeRecommendationType);
+          items = heroGroup ? heroGroup.items : RECOMMENDATION_ITEMS.filter((item) => item.type === activeRecommendationType);
         }
         recommendationGrid.replaceChildren(...items.map(createRecommendationCard));
         recommendationGrid.setAttribute("aria-label", `${activeRecommendationType}，共 ${items.length} 条`);
@@ -4730,12 +5150,32 @@
 
       function setRecommendationType(type) {
         activeRecommendationType = type;
+        let activeTabId = "recommendationTabAll";
         recommendationTabs.querySelectorAll("[data-recommendation-type]").forEach((tab) => {
           const active = tab.dataset.recommendationType === type;
           tab.classList.toggle("is-active", active);
           tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+          if (active) activeTabId = tab.id;
         });
+        recommendationGrid.setAttribute("aria-labelledby", activeTabId);
         renderRecommendations();
+      }
+
+      function openHeroRecommendationLanding() {
+        const recommendationRoutes = {
+          simulation: "recommendations.html?source=home&from=simulation#hot",
+          paper: "recommendations.html?source=home#papers",
+          expert: "recommendations.html?source=home#talent",
+          strategy: "recommendations.html?source=home#reports"
+        };
+        const fallbackRoute = "recommendations.html?source=home#hot";
+        const route = recommendationRoutes[activeHeroRecommendation] || fallbackRoute;
+        try {
+          const returnExperience = activeHeroExperience === "v2" ? `v2-${activeV2HeroMode}` : "classic";
+          sessionStorage.setItem("portal-return-search-experience", returnExperience);
+        } catch (error) { /* navigation still works when storage is unavailable */ }
+        window.location.href = route;
       }
 
       function setSearchMode(mode) {
@@ -4752,12 +5192,24 @@
         portalResultSearchInput.placeholder = SEARCH_MODE_CONFIG[activeSearchMode].placeholder;
         searchResultsTitle.textContent = SEARCH_MODE_CONFIG[activeSearchMode].title;
         document.querySelector(".portal-search-lead").textContent = SEARCH_MODE_CONFIG[activeSearchMode].description;
-        portalSearchAssistant.hidden = activeSearchMode === "AI 搜索";
+        if (portalSearchAssistant) portalSearchAssistant.hidden = activeSearchMode === "AI 搜索";
         portalSearchFilters.querySelectorAll("[data-filter-mode='keyword']").forEach((group) => {
           group.hidden = activeSearchMode !== "关键词";
           group.querySelectorAll("input").forEach((input) => { input.disabled = activeSearchMode !== "关键词"; });
         });
         updateSearchModePanels();
+      }
+
+      function setSearchType(type) {
+        const tabs = [...portalSearchTypeTabs.querySelectorAll("[data-search-type]")];
+        activeSearchType = tabs.some((tab) => tab.dataset.searchType === type) ? type : "全部";
+        tabs.forEach((tab) => {
+          const active = tab.dataset.searchType === activeSearchType;
+          tab.classList.toggle("is-active", active);
+          tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+        updateSecondaryFilterVisibility();
       }
 
       function setHeroSearchMode(mode, focusInput = true) {
@@ -4780,6 +5232,7 @@
           }
         };
         activeHeroSearchMode = modes[mode] ? mode : "fulltext";
+        lastClassicHeroMode = activeHeroSearchMode;
         mgHeroSearchForm.dataset.searchMode = activeHeroSearchMode;
         mgHeroSearchModes.querySelectorAll("[data-hero-search-mode]").forEach((tab) => {
           const active = tab.dataset.heroSearchMode === activeHeroSearchMode;
@@ -4787,14 +5240,64 @@
           tab.setAttribute("aria-selected", String(active));
           tab.tabIndex = active ? 0 : -1;
         });
-        mgFulltextShortcuts.hidden = activeHeroSearchMode !== "fulltext";
+        mgFulltextShortcuts.hidden = activeHeroExperience === "v2" ? activeV2HeroMode !== "search" : activeHeroSearchMode !== "fulltext";
+        mgSmartRecommendations.hidden = activeHeroExperience === "classic" && activeHeroSearchMode !== "fulltext";
         mgAssociationSearchGuide.hidden = activeHeroSearchMode !== "association";
         mgAiSearchGuide.hidden = activeHeroSearchMode !== "ai";
         mgKeywordSearchGuide.hidden = activeHeroSearchMode !== "keyword";
+        mgV2QaSearchGuide.hidden = true;
         mgHeroSearchInput.placeholder = modes[activeHeroSearchMode].placeholder;
         const submit = mgHeroSearchForm.querySelector(".mg-search-submit");
         submit.setAttribute("aria-label", modes[activeHeroSearchMode].label);
         if (focusInput) mgHeroSearchInput.focus();
+      }
+
+      function setV2HeroMode(mode, focusInput = true) {
+        const modes = {
+          search: {
+            placeholder: "输入关键词、论文题名、专家或研究主题",
+            label: "开始智能搜索"
+          },
+          qa: {
+            placeholder: "请输入完整问题，例如：近三年具身智能在工业质检中的研究进展有哪些？",
+            label: "提交智能问答"
+          }
+        };
+        activeV2HeroMode = modes[mode] ? mode : "search";
+        mgHeroSearchForm.dataset.searchMode = activeV2HeroMode;
+        mgV2HeroModes.querySelectorAll("[data-v2-hero-mode]").forEach((tab) => {
+          const active = tab.dataset.v2HeroMode === activeV2HeroMode;
+          tab.classList.toggle("is-active", active);
+          tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+        mgFulltextShortcuts.hidden = activeV2HeroMode !== "search";
+        mgSmartRecommendations.hidden = false;
+        mgAssociationSearchGuide.hidden = true;
+        mgAiSearchGuide.hidden = true;
+        mgKeywordSearchGuide.hidden = true;
+        mgV2QaSearchGuide.hidden = activeV2HeroMode !== "qa";
+        mgHeroSearchInput.placeholder = modes[activeV2HeroMode].placeholder;
+        mgHeroSearchForm.querySelector(".mg-search-submit").setAttribute("aria-label", modes[activeV2HeroMode].label);
+        mgSearchExperienceStatus.textContent = `已切换至 V2.0 ${activeV2HeroMode === "search" ? "智能搜索" : "智能问答"}`;
+        if (focusInput) mgHeroSearchInput.focus();
+      }
+
+      function setHeroExperience(experience, focusTarget = true) {
+        activeHeroExperience = experience === "v2" ? "v2" : "classic";
+        const isV2 = activeHeroExperience === "v2";
+        mgHeroSearchForm.dataset.searchExperience = activeHeroExperience;
+        mgClassicSearchModeRow.hidden = isV2;
+        mgV2SearchModeRow.hidden = !isV2;
+        mgV2ExperienceSwitch.setAttribute("aria-expanded", String(isV2));
+        if (isV2) {
+          setV2HeroMode(activeV2HeroMode, false);
+          if (focusTarget) mgV2HeroModes.querySelector("[aria-selected='true']")?.focus();
+        } else {
+          setHeroSearchMode(lastClassicHeroMode, false);
+          mgSearchExperienceStatus.textContent = "已返回当前版搜索";
+          if (focusTarget) mgV2ExperienceSwitch.focus();
+        }
       }
 
       function deriveQueryUnderstanding(query) {
@@ -4821,6 +5324,7 @@
         const text = String(query || "");
         const terms = getQueryTerms(text);
         if (/AI|人工智能|大模型|智能体/i.test(text)) terms.push("人工智能", "AI", "大模型", "语言模型", "智能体", "AI for Science");
+        if (/具身|机器人|工业质检/.test(text)) terms.push("具身智能", "机器人学习", "人工智能", "产业应用");
         if (/药物|靶点|生物医药/.test(text)) terms.push("药物", "靶点", "生物医学", "知识图谱");
         if (/低空/.test(text)) terms.push("低空经济", "飞控", "产业链");
         if (/固态|电池/.test(text)) terms.push("固态电池", "固态电解质", "先进材料");
@@ -4954,11 +5458,11 @@
         const descriptors = [];
         const scope = String(data.get("resourceScope") || "全部资源");
         const matchMode = String(data.get("matchMode") || "智能匹配");
-        const publishTime = String(data.get("publishTime") || "近一年");
+        const publishTime = String(data.get("publishTime") || "不限时间");
         if (scope !== "全部资源") descriptors.push({ key: "resourceScope", label: scope, kind: "radio" });
         if (activeSearchMode === "关键词" && matchMode !== "智能匹配") descriptors.push({ key: "matchMode", label: matchMode, kind: "radio" });
-        if (publishTime !== "近一年") descriptors.push({ key: "publishTime", label: publishTime, kind: "radio" });
-        if (document.getElementById("accessibleOnly").checked) descriptors.push({ key: "accessibleOnly", label: "仅可访问", kind: "checkbox" });
+        if (publishTime !== "不限时间") descriptors.push({ key: "publishTime", label: publishTime, kind: "radio" });
+        if (document.getElementById("accessibleOnly")?.checked) descriptors.push({ key: "accessibleOnly", label: "仅可访问", kind: "checkbox" });
         portalSearchFilters.querySelectorAll("input[type='search']:not(:disabled),input[type='date']:not(:disabled)").forEach((input) => {
           if (input.value.trim()) descriptors.push({ key: input.name, label: `${input.previousElementSibling?.textContent || "条件"}：${input.value.trim()}`, kind: "value" });
         });
@@ -4993,7 +5497,7 @@
           });
           updateSecondaryFilterVisibility();
         } else if (descriptor.kind === "radio") {
-          const fallback = descriptor.key === "resourceScope" ? "全部资源" : descriptor.key === "publishTime" ? "近一年" : "智能匹配";
+          const fallback = descriptor.key === "resourceScope" ? "全部资源" : descriptor.key === "publishTime" ? "不限时间" : "智能匹配";
           portalSearchFilters.querySelector(`input[name="${descriptor.key}"][value="${fallback}"]`).checked = true;
           if (descriptor.key === "matchMode") keywordExact = false;
         } else if (descriptor.kind === "checkbox") {
@@ -5020,9 +5524,9 @@
 
       function updateSearchModePanels() {
         const query = portalResultSearchInput.value.trim();
-        const isAi = activeSearchMode === "AI 搜索";
-        const isAssociation = activeSearchMode === "关联";
-        const isKeyword = activeSearchMode === "关键词";
+        const isAi = RESULT_MODE_PANELS_ENABLED && activeSearchMode === "AI 搜索";
+        const isAssociation = RESULT_MODE_PANELS_ENABLED && activeSearchMode === "关联";
+        const isKeyword = RESULT_MODE_PANELS_ENABLED && activeSearchMode === "关键词";
         portalQueryUnderstanding.hidden = !isAi;
         portalAiOverview.hidden = !isAi;
         portalAssociationPanel.hidden = !isAssociation;
@@ -5120,9 +5624,9 @@
             ? exactPhraseMatch
             : originalMatch || expansionMatch || semanticMatch;
           const typeMatch = options.ignoreType || activeSearchType === "全部" || item.type === activeSearchType;
-          const accessMatch = !document.getElementById("accessibleOnly").checked || item.accessible;
+          const accessMatch = !document.getElementById("accessibleOnly")?.checked || item.accessible;
           const scopeMatch = scope !== "全文" || Boolean(item.matches?.length);
-          const publishTime = String(filterValues.get("publishTime") || "近一年");
+          const publishTime = String(filterValues.get("publishTime") || "不限时间");
           const yearThreshold = publishTime === "近一年" ? 2025 : publishTime === "近三年" ? 2023 : publishTime === "近五年" ? 2021 : 0;
           const timeMatch = !yearThreshold || Number(String(item.date).slice(0, 4)) >= yearThreshold;
           const disciplineText = [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN");
@@ -5160,89 +5664,35 @@
         article.dataset.type = item.type;
         article.dataset.date = item.date;
         article.dataset.resultId = `result-${SEARCH_ITEMS.indexOf(item)}`;
-        const detailId = `searchResultDetail${activeSearchPage}_${index}`;
-        const firstMatch = item.matches?.[0];
         const query = portalResultSearchInput.value.trim();
-        const sharedTerms = getSemanticTerms(query).filter((term) => [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN").includes(term.toLocaleLowerCase("zh-CN"))).slice(0, 3);
         const metadata = getResultMetadata(item);
-        const detailActionLabel = item.type === "人才"
-          ? "查看专家档案"
-          : item.fulltextStatus === "无权限"
-            ? "查看权限说明"
-            : item.type === "专利"
-              ? "查看专利详情"
-              : "查看资源详情";
-        const statusMessage = item.fulltextStatus === "无权限"
-          ? "当前账号无全文权限"
-          : item.fulltextStatus === "解析中"
-            ? "原文解析中，可检索题名与摘要"
-            : item.fulltextStatus === "仅摘要"
-              ? "当前仅提供摘要"
-              : item.fulltextStatus === "实体资源"
-                ? "实体信息，不提供页码"
-                : item.fulltextStatus === "仅详情"
-                  ? "项目详情可查看"
-                  : "支持原文定位";
-        let evidenceBlock = "";
-        if (activeSearchMode === "关联") {
-          const relationText = sharedTerms.length
-            ? `与当前问题共享“${sharedTerms.join("、")}”等主题概念`
-            : `与当前主题存在${item.type === "人才" ? "研究方向与成果" : item.type === "专利" ? "技术主题与分类" : "主题与引证"}关系`;
-          evidenceBlock = `<div class="portal-result-evidence is-association" data-evidence-snippet><span class="portal-evidence-label">为什么相关</span><p>${relationText}${personalizationEnabled ? "，并与你的模拟兴趣画像相关" : "；当前未使用个性化画像"}</p></div>`;
-        } else if (activeSearchMode === "关键词") {
-          const keywordHits = getKeywordHitDetails(item, query);
-          evidenceBlock = `<div class="portal-result-evidence is-keyword" data-evidence-snippet><div><span class="portal-evidence-label">${keywordExact ? "精确命中" : `关键词命中 · ${keywordLogic}`}</span><small>${activeExpansionTerms.size ? `采用 ${activeExpansionTerms.size} 个扩展词` : "仅使用原始词"}</small></div><ul>${keywordHits.map((hit) => `<li class="${hit.field === "未直接命中" ? "is-missing" : ""}"><b>${hit.field === "未直接命中" ? "—" : "✓"}</b><span>“${escapeHtml(hit.term)}”${hit.expanded ? " <em>扩展词</em>" : ""}</span><small>${hit.normalized ? `规范为“${escapeHtml(hit.normalized)}” · ` : ""}${hit.field}</small></li>`).join("")}</ul></div>`;
-        } else if (firstMatch) {
-          evidenceBlock = `<div class="portal-result-evidence is-fulltext" data-evidence-snippet><div><span class="portal-evidence-label">${activeSearchMode === "AI 搜索" ? "AI引用证据" : "正文命中"}</span><button type="button" data-open-fulltext>第 ${firstMatch.page} 页 · 第 ${firstMatch.paragraph} 段<i>查看原文</i></button></div><p>“${highlightResultText(firstMatch.text, query)}”</p><small>共命中 ${item.matches.length} 处，可在原文中逐条定位</small></div>`;
-        } else {
-          evidenceBlock = `<div class="portal-result-evidence is-unavailable"><span class="portal-evidence-label">可用状态</span><p>${statusMessage}</p></div>`;
-        }
+        const resultDetailUrl = item.type === "论文"
+          ? item.detailUrl || PAPER_DETAIL_URL
+          : item.detailUrl || item.url || "";
+        const resultDetailLabel = item.type === "论文" ? "查看论文详情" : "查看资源详情";
+        const resultTitle = highlightResultText(item.title, query);
+        const titleControl = resultDetailUrl
+          ? `<a class="portal-result-detail-link" data-result-detail-link href="${escapeHtml(resultDetailUrl)}" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开 ${escapeHtml(item.title)}${item.type === "论文" ? " 论文详情" : " 资源详情"}">${resultTitle}<span class="portal-title-external-mark" aria-hidden="true">↗</span><small>新标签页</small></a>`
+          : `<span>${resultTitle}</span>`;
         article.innerHTML = `
           <div class="portal-result-rail">
             <span class="portal-result-type-icon" data-result-type="${item.type}">${getResultTypeIcon(item.type)}</span>
             <span class="portal-result-index">${String((activeSearchPage - 1) * SEARCH_PAGE_SIZE + index + 1).padStart(2, "0")}</span>
           </div>
           <div class="portal-result-content">
-            <div class="portal-result-kicker"><span>${item.type}</span><span class="portal-search-card-status${item.accessible ? "" : " is-restricted"}">${item.status}</span><time datetime="${item.date}">${formatDate(item.date)}</time></div>
-            <h3 class="portal-search-card-title"><button type="button" data-search-detail aria-expanded="false" aria-controls="${detailId}">${highlightResultText(item.title, query)}</button></h3>
+            <div class="portal-result-kicker"><span>${item.type}</span><time datetime="${item.date}">${formatDate(item.date)}</time></div>
+            <h3 class="portal-search-card-title">${titleControl}</h3>
             <dl class="portal-result-metadata">${metadata.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>
             <p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>
-            ${evidenceBlock}
             <div class="portal-result-bottomline">
               <div class="portal-search-card-tags">${item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag">${tag}</span>`).join("")}</div>
               <div class="portal-search-card-actions">
-                <button class="portal-icon-action" type="button" data-search-save aria-label="收藏 ${item.title}" title="收藏">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4Z"></path></svg><span>收藏</span>
-                </button>
-                ${firstMatch
-                  ? `<button class="portal-icon-action" type="button" data-search-detail data-closed-label="展开详情" aria-expanded="false" aria-controls="${detailId}"><span data-detail-label>展开详情</span></button><button class="portal-search-card-action is-primary" type="button" data-open-fulltext>定位原文</button>`
-                  : `<button class="portal-search-card-action is-primary" type="button" data-search-detail data-closed-label="${detailActionLabel}" aria-expanded="false" aria-controls="${detailId}"><span data-detail-label>${detailActionLabel}</span></button>`}
+                ${resultDetailUrl
+                  ? `<a class="portal-search-card-action is-primary" data-result-detail-link href="${escapeHtml(resultDetailUrl)}" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开 ${escapeHtml(item.title)}${item.type === "论文" ? " 论文详情" : " 资源详情"}">${resultDetailLabel}&nbsp;↗</a>`
+                  : ""}
               </div>
             </div>
-            <div class="portal-search-card-detail" id="${detailId}" hidden>
-              <div><strong>资源详情</strong><span>${item.source} · ${item.meta}</span></div>
-              <p>${item.detail}</p>
-            </div>
           </div>`;
-        const detailButtons = article.querySelectorAll("[data-search-detail]");
-        const toggleDetail = () => {
-          const panel = article.querySelector(`#${detailId}`);
-          const open = panel.hidden;
-          panel.hidden = !open;
-          article.classList.toggle("is-expanded", open);
-          detailButtons.forEach((button) => {
-            button.setAttribute("aria-expanded", String(open));
-            const label = button.querySelector("[data-detail-label]");
-            if (label) label.textContent = open ? "收起详情" : button.dataset.closedLabel;
-          });
-        };
-        detailButtons.forEach((button) => button.addEventListener("click", toggleDetail));
-        article.querySelector("[data-search-save]").addEventListener("click", (event) => {
-          const label = event.currentTarget.querySelector("span");
-          label.textContent = "登录后收藏";
-          window.setTimeout(() => { label.textContent = "收藏"; }, 1800);
-        });
-        article.querySelectorAll("[data-open-fulltext]").forEach((button) => button.addEventListener("click", () => openDocumentViewer(item, 0, button)));
         return article;
       }
 
@@ -5333,6 +5783,7 @@
       }
 
       function showSurface(name, options = {}) {
+        if (name !== "qa") window.clearTimeout(qaAnswerTimer);
         Object.entries(SURFACES).forEach(([key, node]) => {
           node.hidden = key !== name;
         });
@@ -5486,6 +5937,123 @@
 
       function closeSearchPanel() {}
 
+      function getQaSources(question) {
+        const terms = getSemanticTerms(question).map((term) => term.toLocaleLowerCase("zh-CN"));
+        const scored = SEARCH_ITEMS.map((item) => {
+          const searchable = [item.title, item.summary, item.source, item.author, item.personName, ...item.tags].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN");
+          const score = terms.reduce((total, term) => total + (searchable.includes(term) ? 1 : 0), 0);
+          return { item, score };
+        }).sort((a, b) => b.score - a.score || Number(b.item.accessible) - Number(a.item.accessible));
+        return scored.slice(0, 4).map(({ item }) => item);
+      }
+
+      function getQaSourceId(item) {
+        return `qa-source-${SEARCH_ITEMS.indexOf(item)}`;
+      }
+
+      function getQaCitation(sources, index) {
+        const item = sources[index];
+        if (!item) return "";
+        return `<button class="portal-qa-citation" type="button" data-qa-citation="${getQaSourceId(item)}" aria-label="查看证据 ${index + 1}">${index + 1}</button>`;
+      }
+
+      function renderQaEvidence(sources) {
+        const accessibleCount = sources.filter((item) => item.accessible).length;
+        qaEvidenceCount.textContent = String(sources.length);
+        qaEvidenceCoverage.textContent = `${accessibleCount}/${sources.length}条可访问`;
+        qaSourceStatus.innerHTML = `
+          <span><i class="is-complete"></i>内部知识库与论文数据库已完成</span>
+          <span><i class="is-warning"></i>外部接口部分返回或受权限限制</span>`;
+        qaEvidenceList.innerHTML = sources.map((item, index) => {
+          const match = item.matches?.[0];
+          const position = match ? `第 ${match.page} 页 · 第 ${match.paragraph} 段` : item.accessible ? "依据题录与摘要" : "无全文权限";
+          const author = item.author || item.personName || item.institution || item.applicant || item.source;
+          return `
+            <article class="portal-qa-evidence-card" id="${getQaSourceId(item)}" tabindex="-1">
+              <header><span class="portal-qa-source-number">${index + 1}</span><span>${escapeHtml(item.type)}</span><span class="${item.accessible ? "is-accessible" : "is-restricted"}">${item.accessible ? "可访问" : "受限"}</span></header>
+              <h3>${escapeHtml(item.title)}</h3>
+              <p class="portal-qa-source-meta">${escapeHtml(author)} · ${escapeHtml(item.source)} · ${formatDate(item.date)}</p>
+              <div class="portal-qa-source-snippet"><span>支持内容</span><p>“${escapeHtml(match?.text || item.summary)}”</p></div>
+              <footer><span>${position}</span><button type="button" data-qa-open-source="${SEARCH_ITEMS.indexOf(item)}">${match ? "定位证据" : "查看摘要"}</button></footer>
+            </article>`;
+        }).join("");
+      }
+
+      function getQaAnswerMarkup(question, sources) {
+        const safeQuestion = escapeHtml(question);
+        const cite = (index) => getQaCitation(sources, index);
+        const isSpecific = /药物|靶点|人工智能|AI|大模型|智能体|具身|工业|质检|电池|材料/i.test(question);
+        return `
+          <h2>直接回答</h2>
+          <p>围绕“${safeQuestion}”，当前模拟证据显示，研究通常通过语义检索、结构化知识和任务型智能体协作来整合跨来源信息${cite(0)}${cite(1)}。高价值结论需要同时保留原始资源、支持片段和来源位置，并单独说明尚未覆盖或受限的数据${cite(2)}${cite(3)}。</p>
+          <h2>1 主要研究线索</h2>
+          <h3>1.1 证据发现与组织</h3>
+          <p>系统可先从论文、专利、报告和专家信息中定位相关实体与主题，再按来源质量、时间与可访问状态组织证据，减少单一关键词造成的漏检${cite(0)}${cite(2)}。</p>
+          <h3>1.2 分析与验证</h3>
+          <p>${isSpecific ? "对于当前具体问题，应继续比较方法、实验对象、评价指标与复现条件。" : "当前问题范围较宽，建议补充研究对象、时间范围或应用场景。"} 生成的归纳不能替代原文阅读和实验验证${cite(1)}${cite(3)}。</p>
+          <h2>2 反证与信息缺口</h2>
+          <ul>
+            <li>外部系统可能尚未返回，或因权限只能使用题录与摘要。</li>
+            <li>来源对同一结论的支持强度可能不同，不能把相关性当作因果性。</li>
+            <li>正式结论应补充相反证据、失效条件和最新数据核验。</li>
+          </ul>
+          <aside class="portal-qa-boundary"><strong>结论边界</strong><p>以上为原型模拟答案，仅展示“问题—答案—引用—原文定位”的交互闭环，不代表真实检索覆盖、模型能力或引用准确率。</p></aside>`;
+      }
+
+      function renderQaAnswer(question) {
+        const sources = getQaSources(question);
+        renderQaEvidence(sources);
+        qaAnswerBody.innerHTML = getQaAnswerMarkup(question, sources);
+        qaLoading.hidden = true;
+        qaAnswerBody.hidden = false;
+        qaAnswerActions.hidden = false;
+        qaFollowups.hidden = false;
+        qaCoverage.textContent = `${sources.filter((item) => item.accessible).length}/${sources.length}条证据可访问`;
+        qaProgressLabel.textContent = "已完成深度思考";
+        qaProgressTime.textContent = "模拟用时 18.7 秒";
+        qaProgress.classList.add("is-complete");
+        qaProgressDetails.querySelectorAll("li").forEach((item) => {
+          item.classList.remove("is-active");
+          item.classList.add("is-complete");
+        });
+        qaProgressDetails.hidden = true;
+        qaProgressToggle.setAttribute("aria-expanded", "false");
+      }
+
+      function performQuestion(rawQuestion) {
+        const question = String(rawQuestion || "").trim();
+        if (!question) {
+          (qaPage.hidden ? mgHeroSearchInput : qaFollowupInput)?.focus();
+          return;
+        }
+        window.clearTimeout(qaAnswerTimer);
+        activeQaQuestion = question;
+        mgHeroSearchInput.value = question;
+        qaQuestion.textContent = question;
+        qaCoverage.textContent = "正在检索多源数据";
+        qaProgress.classList.remove("is-complete");
+        qaProgressLabel.textContent = "正在深度思考";
+        qaProgressTime.textContent = "预计需要数秒";
+        qaProgressDetails.hidden = false;
+        qaProgressToggle.setAttribute("aria-expanded", "true");
+        qaProgressDetails.querySelectorAll("li").forEach((item, index) => {
+          item.classList.toggle("is-active", index === 0);
+          item.classList.remove("is-complete");
+        });
+        qaLoading.hidden = false;
+        qaAnswerBody.hidden = true;
+        qaAnswerActions.hidden = true;
+        qaFollowups.hidden = true;
+        qaEvidenceCount.textContent = "0";
+        qaEvidenceCoverage.textContent = "检索中";
+        qaEvidenceList.replaceChildren();
+        qaSourceStatus.innerHTML = `<span><i class="is-loading"></i>正在连接内部与外部数据源</span>`;
+        qaFollowupInput.value = "";
+        qaFollowupSubmit.disabled = true;
+        showSurface("qa", { focusTarget: qaPageTitle });
+        qaAnswerTimer = window.setTimeout(() => renderQaAnswer(question), 900);
+      }
+
       function performSearch(rawQuery, options = {}) {
         const query = String(rawQuery || "").trim();
         if (!query) {
@@ -5494,6 +6062,7 @@
         }
 
         if (options.mode) setSearchMode(options.mode);
+        if (options.resourceType) setSearchType(options.resourceType);
         if (activeSearchMode === "关键词") originalKeywordQuery = query;
         if (activeSearchMode === "关联") updateAssociationProfileFromQuery(query);
         portalResultSearchInput.value = query;
@@ -5504,13 +6073,31 @@
       }
 
       setHeroSearchMode(activeHeroSearchMode, false);
+      setHeroExperience(returnHeroExperience, false);
       setSearchMode(activeSearchMode);
+      renderHeroRecommendations(activeHeroRecommendation);
       renderRecommendations();
       updateSecondaryFilterVisibility();
       renderSearchResults();
 
+      const entrySearchParams = new URLSearchParams(window.location.search);
+      const entryQuery = entrySearchParams.get("query");
+      const entryMode = entrySearchParams.get("mode");
+      const entryType = entrySearchParams.get("type");
+      if (entryQuery) {
+        performSearch(entryQuery, {
+          mode: SEARCH_MODE_CONFIG[entryMode] ? entryMode : "全文",
+          resourceType: entryType || undefined
+        });
+      }
+
       mgHeroSearchForm?.addEventListener("submit", (event) => {
         event.preventDefault();
+        if (activeHeroExperience === "v2") {
+          if (activeV2HeroMode === "qa") performQuestion(mgHeroSearchInput?.value);
+          else performSearch(mgHeroSearchInput?.value, { mode: "全文", focusTarget: mgHeroSearchInput });
+          return;
+        }
         const heroToResultMode = {
           fulltext: "全文",
           association: "关联",
@@ -5521,6 +6108,11 @@
           mode: heroToResultMode[activeHeroSearchMode],
           focusTarget: mgHeroSearchInput
         });
+      });
+      mgHeroSearchInput?.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.isComposing) return;
+        event.preventDefault();
+        mgHeroSearchForm.requestSubmit();
       });
       mgHeroSearchModes?.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-hero-search-mode]");
@@ -5540,26 +6132,148 @@
         setHeroSearchMode(target.dataset.heroSearchMode);
         target.focus();
       });
-      mgHeroDiscover?.addEventListener("click", () => {
-        const heroToResultMode = { fulltext: "全文", association: "关联", ai: "AI 搜索", keyword: "关键词" };
-        performSearch(mgHeroSearchInput?.value || "AI for Science", {
-          mode: heroToResultMode[activeHeroSearchMode]
-        });
-        requestAnimationFrame(() => portalSearchFilters.querySelector("input, select")?.focus());
+      mgV2ExperienceSwitch?.addEventListener("click", () => setHeroExperience("v2"));
+      mgClassicExperienceSwitch?.addEventListener("click", () => setHeroExperience("classic"));
+      mgV2HeroModes?.addEventListener("click", (event) => {
+        const tab = event.target.closest("[data-v2-hero-mode]");
+        if (tab) setV2HeroMode(tab.dataset.v2HeroMode);
       });
-      document.querySelectorAll(".mg-search-intents [data-mg-query]").forEach((button) => {
+      mgV2HeroModes?.addEventListener("keydown", (event) => {
+        const tabs = [...mgV2HeroModes.querySelectorAll("[data-v2-hero-mode]")];
+        const currentIndex = tabs.findIndex((tab) => tab.dataset.v2HeroMode === activeV2HeroMode);
+        let nextIndex = currentIndex;
+        if (event.key === "ArrowRight") nextIndex += 1;
+        else if (event.key === "ArrowLeft") nextIndex -= 1;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        const target = tabs[(nextIndex + tabs.length) % tabs.length];
+        setV2HeroMode(target.dataset.v2HeroMode, false);
+        target.focus();
+      });
+      document.querySelectorAll(".mg-search-intents [data-recommendation-group]").forEach((button) => {
         button.addEventListener("click", () => {
-          button.parentElement?.querySelectorAll("[data-mg-query]").forEach((item) => item.classList.toggle("is-active", item === button));
+          renderHeroRecommendations(button.dataset.recommendationGroup);
           if (mgHeroSearchInput) {
             mgHeroSearchInput.value = button.dataset.mgQuery || "";
-            mgHeroSearchInput.focus();
           }
         });
+      });
+      mgFulltextShortcuts?.addEventListener("keydown", (event) => {
+        const tabs = [...mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]")];
+        const currentIndex = tabs.findIndex((tab) => tab.dataset.recommendationGroup === activeHeroRecommendation);
+        let nextIndex = currentIndex;
+        if (event.key === "ArrowRight") nextIndex += 1;
+        else if (event.key === "ArrowLeft") nextIndex -= 1;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        const target = tabs[(nextIndex + tabs.length) % tabs.length];
+        renderHeroRecommendations(target.dataset.recommendationGroup);
+        if (mgHeroSearchInput) mgHeroSearchInput.value = target.dataset.mgQuery || "";
+        target.focus();
+      });
+      mgRecommendationMore?.addEventListener("click", openHeroRecommendationLanding);
+      qaProgressToggle?.addEventListener("click", () => {
+        const expanded = qaProgressToggle.getAttribute("aria-expanded") === "true";
+        qaProgressToggle.setAttribute("aria-expanded", String(!expanded));
+        qaProgressDetails.hidden = expanded;
+      });
+      qaAnswerBody?.addEventListener("click", (event) => {
+        const citation = event.target.closest("[data-qa-citation]");
+        if (!citation) return;
+        const source = document.getElementById(citation.dataset.qaCitation);
+        if (!source) return;
+        qaEvidenceList.querySelectorAll(".is-highlighted").forEach((item) => item.classList.remove("is-highlighted"));
+        source.classList.add("is-highlighted");
+        source.scrollIntoView({ behavior: reduceCarouselMotion.matches ? "auto" : "smooth", block: "center" });
+        source.focus({ preventScroll: true });
+        window.setTimeout(() => source.classList.remove("is-highlighted"), 2400);
+      });
+      qaEvidenceList?.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-qa-open-source]");
+        if (!button) return;
+        const item = SEARCH_ITEMS[Number(button.dataset.qaOpenSource)];
+        if (item?.matches?.length) openDocumentViewer(item, 0, button);
+        else {
+          button.textContent = item?.accessible ? "已显示摘要" : "当前无权限";
+          window.setTimeout(() => { button.textContent = "查看摘要"; }, 1600);
+        }
+      });
+      qaBackHome?.addEventListener("click", () => {
+        showSurface("home", { focusTarget: mgHeroSearchInput });
+        setHeroExperience("v2", false);
+        setV2HeroMode("qa", false);
+      });
+      qaViewSearchResults?.addEventListener("click", () => performSearch(activeQaQuestion || "AI for Science", { mode: "全文" }));
+      qaNewQuestion?.addEventListener("click", () => {
+        window.clearTimeout(qaAnswerTimer);
+        mgHeroSearchInput.value = "";
+        showSurface("home", { focusTarget: mgHeroSearchInput });
+        setHeroExperience("v2", false);
+        setV2HeroMode("qa", false);
+      });
+      qaCopyAnswer?.addEventListener("click", async () => {
+        const label = qaCopyAnswer.querySelector("span");
+        try {
+          await navigator.clipboard.writeText(qaAnswerBody.innerText.trim());
+          label.textContent = "已复制";
+        } catch (error) {
+          label.textContent = "请手动复制";
+        }
+        window.setTimeout(() => { label.textContent = "复制回答"; }, 1600);
+      });
+      qaAnswerActions?.addEventListener("click", (event) => {
+        const feedback = event.target.closest("[data-qa-feedback]");
+        if (!feedback) return;
+        qaAnswerActions.querySelectorAll("[data-qa-feedback]").forEach((button) => {
+          const selected = button === feedback;
+          button.classList.toggle("is-selected", selected);
+          button.setAttribute("aria-pressed", String(selected));
+        });
+      });
+      qaFollowupInput?.addEventListener("input", () => {
+        qaFollowupSubmit.disabled = !qaFollowupInput.value.trim();
+        qaFollowupInput.style.height = "auto";
+        qaFollowupInput.style.height = `${Math.min(qaFollowupInput.scrollHeight, 112)}px`;
+      });
+      qaFollowupInput?.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.shiftKey) return;
+        event.preventDefault();
+        if (qaFollowupInput.value.trim()) qaFollowupForm.requestSubmit();
+      });
+      qaFollowupForm?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        performQuestion(qaFollowupInput.value);
+      });
+      document.querySelectorAll("[data-qa-followup]").forEach((button) => {
+        button.addEventListener("click", () => performQuestion(button.dataset.qaFollowup));
+      });
+      document.querySelector(".portal-qa-depth")?.addEventListener("click", (event) => {
+        const pressed = event.currentTarget.getAttribute("aria-pressed") === "true";
+        event.currentTarget.setAttribute("aria-pressed", String(!pressed));
       });
       recommendationTabs.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-recommendation-type]");
         if (!tab) return;
         setRecommendationType(tab.dataset.recommendationType);
+      });
+      recommendationTabs.addEventListener("keydown", (event) => {
+        const tabs = [...recommendationTabs.querySelectorAll("[data-recommendation-type]")];
+        const currentIndex = tabs.findIndex((tab) => tab.dataset.recommendationType === activeRecommendationType);
+        let nextIndex = currentIndex;
+        if (event.key === "ArrowRight") nextIndex += 1;
+        else if (event.key === "ArrowLeft") nextIndex -= 1;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        const target = tabs[(nextIndex + tabs.length) % tabs.length];
+        setRecommendationType(target.dataset.recommendationType);
+        target.focus();
+        target.scrollIntoView({ behavior: reduceCarouselMotion.matches ? "auto" : "smooth", inline: "center", block: "nearest" });
       });
       recommendationRefresh.addEventListener("click", () => {
         recommendationBatch = (recommendationBatch + 1) % 2;
@@ -5611,15 +6325,8 @@
       portalSearchTypeTabs.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-search-type]");
         if (!tab) return;
-        activeSearchType = tab.dataset.searchType;
+        setSearchType(tab.dataset.searchType);
         activeSearchPage = 1;
-        portalSearchTypeTabs.querySelectorAll("[data-search-type]").forEach((item) => {
-          const active = item === tab;
-          item.classList.toggle("is-active", active);
-          item.setAttribute("aria-selected", String(active));
-          item.tabIndex = active ? 0 : -1;
-        });
-        updateSecondaryFilterVisibility();
         renderSearchResults();
       });
       portalSearchTypeTabs.addEventListener("keydown", (event) => {
@@ -5687,10 +6394,7 @@
       portalMobileFilterToggle.addEventListener("click", () => setFilterDrawer(true));
       portalFilterClose.addEventListener("click", () => setFilterDrawer(false));
       portalFilterBackdrop.addEventListener("click", () => setFilterDrawer(false));
-      searchResultsPage.querySelectorAll("[data-result-hot-word]").forEach((button) => {
-        button.addEventListener("click", () => performSearch(button.dataset.resultHotWord));
-      });
-      portalSearchAssistant.addEventListener("click", () => {
+      portalSearchAssistant?.addEventListener("click", () => {
         setSearchMode("AI 搜索");
         activeSearchPage = 1;
         renderSearchResults();

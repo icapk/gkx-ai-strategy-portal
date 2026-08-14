@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="科研情报智能推荐中心，集中展示热词、资讯、文献、报告、人才、会议、课程与活动推荐。">
+  <title>科研情报智能推荐｜深圳国际科技信息中心</title>
+  <link rel="stylesheet" href="recommendations.css">
+</head>
+<body>
+  <a class="rec-skip-link" href="#recommendationMain">跳到主要内容</a>
+
+  <svg class="rec-svg-sprite" aria-hidden="true">
+    <symbol id="rec-icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></symbol>
+    <symbol id="rec-icon-spark" viewBox="0 0 24 24"><path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5Z"></path><path d="m18 15 .8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8Z"></path></symbol>
+    <symbol id="rec-icon-link" viewBox="0 0 24 24"><path d="m9.5 14.5 5-5"></path><path d="M7.2 17.8H6a4 4 0 0 1 0-8h3"></path><path d="M16.8 6.2H18a4 4 0 0 1 0 8h-3"></path></symbol>
+    <symbol id="rec-icon-file" viewBox="0 0 24 24"><path d="M6 3.5h9l3 3V20H6Z"></path><path d="M15 3.5V7h3M9 11h6M9 15h6"></path></symbol>
+    <symbol id="rec-icon-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="4"></circle><circle cx="12" cy="12" r="1"></circle></symbol>
+    <symbol id="rec-icon-flame" viewBox="0 0 24 24"><path d="M13 3c.6 3-1.1 4.2-2.5 5.8C9 10.5 8 12 9 14c.8-1.5 1.8-2.2 3-2.8-.2 2.1 1.4 3 2.1 4.4.8 1.7.1 4.4-2.1 5.4-4.5-.7-7-3.5-6.7-7.2.3-3.3 2.8-5.6 5.3-7.6C11.8 5.2 12.5 4.3 13 3Z"></path><path d="M15.5 8.5c2.1 1.7 3.4 3.8 3.2 6.3-.1 2.5-1.5 4.6-3.8 5.7"></path></symbol>
+    <symbol id="rec-icon-news" viewBox="0 0 24 24"><path d="M5 4h14v16H5Z"></path><path d="M8 8h4M8 12h8M8 16h6"></path></symbol>
+    <symbol id="rec-icon-report" viewBox="0 0 24 24"><path d="M5 4h14v16H5Z"></path><path d="M8.5 15.5v-3M12 15.5V9M15.5 15.5v-5"></path></symbol>
+    <symbol id="rec-icon-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19c.5-3.5 2.3-5.2 5.5-5.2s5 1.7 5.5 5.2"></path><circle cx="17" cy="9" r="2.2"></circle><path d="M15.5 14.5c2.8-.5 4.5.8 5 3.6"></path></symbol>
+    <symbol id="rec-icon-trophy" viewBox="0 0 24 24"><path d="M8 4h8v4c0 3-1.5 5-4 6-2.5-1-4-3-4-6Z"></path><path d="M8 6H5v2c0 2 1 3 3 3M16 6h3v2c0 2-1 3-3 3M12 14v4M8.5 20h7"></path></symbol>
+    <symbol id="rec-icon-course" viewBox="0 0 24 24"><path d="m3 8.5 9-5 9 5-9 5Z"></path><path d="M7 11v5.5c3.3 2 6.7 2 10 0V11M20 10v5"></path></symbol>
+    <symbol id="rec-icon-calendar" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M4 9h16"></path></symbol>
+    <symbol id="rec-icon-arrow" viewBox="0 0 20 20"><path d="M4 10h11M11 6l4 4-4 4"></path></symbol>
+    <symbol id="rec-icon-bookmark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3Z"></path></symbol>
+    <symbol id="rec-icon-bell" viewBox="0 0 24 24"><path d="M6 17h12l-1.5-2.5V10a4.5 4.5 0 0 0-9 0v4.5Z"></path><path d="M10 20h4"></path></symbol>
+    <symbol id="rec-icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"></path></symbol>
+  </svg>
+
+  <header class="rec-header" id="recHeader">
+    <div class="rec-header-inner">
+      <a class="rec-brand" href="index.html" aria-label="返回门户首页" data-back-home>
+        <span class="rec-brand-mark" aria-hidden="true">C</span>
+        <span>深圳国际科技信息中心</span>
+      </a>
+      <nav class="rec-main-nav" id="recMainNav" aria-label="主导航">
+        <a href="index.html" data-back-home>首页</a>
+        <a href="ai-research.html">科学研究</a>
+        <a href="education.html">未来教育</a>
+        <a href="evaluation.html">科技评价</a>
+        <a href="strategy.html">战略咨询</a>
+      </nav>
+      <div class="rec-header-actions">
+        <button class="rec-header-action is-message" type="button" data-demo-action="消息中心将在真实账号体系接入后开放">
+          <svg aria-hidden="true"><use href="#rec-icon-bell"></use></svg><span>消息</span><em>5</em>
+        </button>
+        <button class="rec-header-action" type="button" data-demo-action="应用中心为原型入口">应用</button>
+        <button class="rec-login-button" type="button" data-demo-action="登录注册功能将在统一用户中心接入后开放">登录/注册</button>
+        <button class="rec-mobile-menu" id="recMobileMenu" type="button" aria-label="打开导航" aria-expanded="false" aria-controls="recMainNav">
+          <svg aria-hidden="true"><use href="#rec-icon-menu"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="rec-prototype-note" role="note">
+    <span>原型演示</span> 推荐内容、人物、统计数字与时间均为模拟数据，正式上线后由真实数据源替换。
+  </div>
+
+  <nav class="rec-content-nav" id="recContentNav" aria-label="推荐内容导航">
+    <p>内容导航</p>
+    <a class="is-active" href="#hot" data-section-link="hot"><svg aria-hidden="true"><use href="#rec-icon-flame"></use></svg><span>热词推荐</span></a>
+    <a href="#news" data-section-link="news"><svg aria-hidden="true"><use href="#rec-icon-news"></use></svg><span>资讯推荐</span></a>
+    <a href="#papers" data-section-link="papers"><svg aria-hidden="true"><use href="#rec-icon-file"></use></svg><span>文献推荐</span></a>
+    <a href="#reports" data-section-link="reports"><svg aria-hidden="true"><use href="#rec-icon-report"></use></svg><span>报告推荐</span></a>
+    <a href="#talent" data-section-link="talent"><svg aria-hidden="true"><use href="#rec-icon-users"></use></svg><span>人才推荐</span></a>
+    <a href="#conferences" data-section-link="conferences"><svg aria-hidden="true"><use href="#rec-icon-trophy"></use></svg><span>顶会推荐</span></a>
+    <a href="#courses" data-section-link="courses"><svg aria-hidden="true"><use href="#rec-icon-course"></use></svg><span>课程推荐</span></a>
+    <a href="#events" data-section-link="events"><svg aria-hidden="true"><use href="#rec-icon-calendar"></use></svg><span>活动推荐</span></a>
+  </nav>
+
+  <main class="rec-main" id="recommendationMain">
+    <div class="rec-shell">
+      <nav class="rec-breadcrumb" aria-label="页面路径">
+        <a href="index.html" data-back-home>
+          <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg>
+          返回首页
+        </a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">智能推荐中心</span>
+      </nav>
+      <section class="rec-hero" aria-labelledby="recPageTitle">
+        <header class="rec-hero-heading">
+          <h1 id="recPageTitle">科研情报智能搜索</h1>
+          <p>解决科研情报痛点，提供深度学术生涯服务</p>
+        </header>
+
+        <div class="rec-search-card">
+          <div class="rec-search-mode-row">
+            <span>搜索模式：</span>
+            <div class="rec-search-mode-tabs" id="recSearchModeTabs" role="tablist" aria-label="搜索模式">
+              <button class="is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-rec-search-mode="ai"><svg aria-hidden="true"><use href="#rec-icon-spark"></use></svg>AI搜索</button>
+              <button type="button" role="tab" aria-selected="false" tabindex="-1" data-rec-search-mode="association"><svg aria-hidden="true"><use href="#rec-icon-link"></use></svg>智能关联</button>
+              <button type="button" role="tab" aria-selected="false" tabindex="-1" data-rec-search-mode="fulltext"><svg aria-hidden="true"><use href="#rec-icon-file"></use></svg>全文检索</button>
+              <button type="button" role="tab" aria-selected="false" tabindex="-1" data-rec-search-mode="keyword"><svg aria-hidden="true"><use href="#rec-icon-target"></use></svg>关键词检索</button>
+            </div>
+          </div>
+          <form class="rec-search-form" id="recSearchForm" role="search">
+            <label class="rec-sr-only" for="recSearchModeSelect">选择搜索模式</label>
+            <select id="recSearchModeSelect" aria-label="搜索模式">
+              <option value="ai">✨ AI搜索</option>
+              <option value="association">🔗 智能关联</option>
+              <option value="fulltext">📄 全文检索</option>
+              <option value="keyword">🎯 关键词检索</option>
+            </select>
+            <label class="rec-sr-only" for="recSearchInput">输入检索内容</label>
+            <input id="recSearchInput" type="search" autocomplete="off" placeholder="用自然语言描述你想找的内容，AI帮你理解搜索意图...">
+            <button type="submit"><svg aria-hidden="true"><use href="#rec-icon-search"></use></svg><span>搜索</span></button>
+          </form>
+          <p class="rec-search-guide" id="recSearchGuide"><span aria-hidden="true">💡</span><strong>AI搜索：</strong>使用人工智能理解你的搜索意图，找到语义相似和深度相关的内容</p>
+          <div class="rec-hot-searches" aria-label="热门搜索">
+            <span>热门搜索：</span>
+            <button type="button" data-hot-query="人工智能">人工智能</button>
+            <button type="button" data-hot-query="量子计算">量子计算</button>
+            <button type="button" data-hot-query="基因编辑">基因编辑</button>
+            <button type="button" data-hot-query="固态电池">固态电池</button>
+            <button type="button" data-hot-query="科学智能体">科学智能体</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="rec-section-stack">
+        <section class="rec-panel rec-panel--hot" id="hot" data-rec-section="hot" aria-labelledby="hotTitle">
+          <header class="rec-panel-title">
+            <svg aria-hidden="true"><use href="#rec-icon-flame"></use></svg>
+            <h2 id="hotTitle">热词推荐・智能捕捉行业热点</h2>
+          </header>
+          <div class="rec-hot-layout">
+            <div class="rec-hot-main">
+              <h3>🔥 热门词汇</h3>
+              <div class="rec-hot-grid">
+                <button class="rec-hot-card is-top" type="button" data-hot-query="ChatGPT"><strong>ChatGPT</strong><em>#1</em><span>28,500</span><small>+320%</small></button>
+                <button class="rec-hot-card is-top" type="button" data-hot-query="量子纠缠"><strong>量子纠缠</strong><em>#2</em><span>15,600</span><small>+156%</small></button>
+                <button class="rec-hot-card is-top" type="button" data-hot-query="CRISPR"><strong>CRISPR</strong><em>#3</em><span>12,300</span><small>+89%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="碳中和"><strong>碳中和</strong><em>#4</em><span>9,800</span><small>+78%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="元宇宙"><strong>元宇宙</strong><em>#5</em><span>8,900</span><small>+65%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="新能源"><strong>新能源</strong><em>#6</em><span>7,600</span><small>+54%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="脑机接口"><strong>脑机接口</strong><em>#7</em><span>6,800</span><small>+48%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="区块链"><strong>区块链</strong><em>#8</em><span>6,200</span><small>+42%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="5G通信"><strong>5G通信</strong><em>#9</em><span>5,400</span><small>+35%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="基因编辑"><strong>基因编辑</strong><em>#10</em><span>4,900</span><small>+28%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="深度学习"><strong>深度学习</strong><em>#11</em><span>4,200</span><small>+22%</small></button>
+                <button class="rec-hot-card" type="button" data-hot-query="纳米材料"><strong>纳米材料</strong><em>#12</em><span>3,800</span><small>+18%</small></button>
+              </div>
+              <p class="rec-source-note">💡 原型逻辑：综合检索热度、收藏与公开趋势信号生成，真实规则与权重待数据验证。</p>
+              <h3>📌 词汇关注</h3>
+              <div class="rec-follow-grid">
+                <article><strong>人工智能</strong><span>本周热度 +28%</span><button type="button" data-follow-button>关注 <small>(234)</small></button></article>
+                <article><strong>量子计算</strong><span>本周热度 +19%</span><button type="button" data-follow-button>关注 <small>(189)</small></button></article>
+                <article><strong>基因编辑</strong><span>本周热度 +17%</span><button type="button" data-follow-button>关注 <small>(156)</small></button></article>
+                <article><strong>固态电池</strong><span>本周热度 +14%</span><button type="button" data-follow-button>关注 <small>(142)</small></button></article>
+              </div>
+              <p class="rec-source-note">⚡ 关注后可在本页和站内信中接收词条更新；消息能力需接入真实账号体系。</p>
+            </div>
+            <aside class="rec-interest-panel">
+              <h3>🎯 关注领域热词</h3>
+              <article>
+                <div><strong>人工智能</strong><button type="button" aria-label="移除人工智能关注" data-demo-action="原型中不删除关注领域">×</button></div>
+                <p><button type="button" data-hot-query="Transformer">Transformer</button><button type="button" data-hot-query="LLM">LLM</button><button type="button" data-hot-query="GPT-4">GPT-4</button><button type="button" data-hot-query="强化学习">强化学习</button><button type="button" data-hot-query="迁移学习">迁移学习</button></p>
+              </article>
+              <article>
+                <div><strong>量子计算</strong><button type="button" aria-label="移除量子计算关注" data-demo-action="原型中不删除关注领域">×</button></div>
+                <p><button type="button" data-hot-query="量子比特">量子比特</button><button type="button" data-hot-query="量子纠缠">量子纠缠</button><button type="button" data-hot-query="量子算法">量子算法</button><button type="button" data-hot-query="量子通信">量子通信</button></p>
+              </article>
+              <button class="rec-add-interest" type="button" data-demo-action="新增关注领域将在兴趣画像接入后开放">＋ 新增关注领域</button>
+              <p class="rec-interest-note">📧 重大突破与高质量资源可优先推送，推送偏好将在个人中心配置。</p>
+            </aside>
+          </div>
+        </section>
+
+        <section class="rec-panel rec-panel--news" id="news" data-rec-section="news" aria-labelledby="newsTitle">
+          <header class="rec-panel-title">
+            <svg aria-hidden="true"><use href="#rec-icon-news"></use></svg>
+            <h2 id="newsTitle">资讯推荐・个性化精准触达</h2>
+          </header>
+          <div class="rec-panel-tabs" role="tablist" aria-label="资讯推荐排序">
+            <button class="is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-panel-tab>最新资讯</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-panel-tab>热门资讯</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-panel-tab>关注领域资讯</button>
+          </div>
+          <div class="rec-news-grid">
+            <article class="rec-news-card"><div class="rec-news-accent">01</div><div><span class="rec-resource-status">原型资讯</span><h3>清华大学团队在量子计算领域取得新进展</h3><p>聚焦量子计算研究中的关键实验问题与后续验证方向。</p><footer><span>科技日报（原型）</span><time datetime="2026-03-09">2026-03-09</time><em>量子科学</em><small>5,600 阅读</small></footer></div></article>
+            <article class="rec-news-card"><div class="rec-news-accent">02</div><div><span class="rec-resource-status">原型资讯</span><h3>CRISPR 基因编辑技术在疾病治疗中的应用观察</h3><p>梳理基因编辑技术近期研究热点、证据边界与伦理讨论。</p><footer><span>生命科学专题库（原型）</span><time datetime="2026-03-08">2026-03-08</time><em>生物医学</em><small>8,900 阅读</small></footer></div></article>
+            <article class="rec-news-card"><div class="rec-news-accent">03</div><div><span class="rec-resource-status">原型资讯</span><h3>固态电池界面材料研究受到持续关注</h3><p>从材料计算与实验表征角度观察固态电池界面稳定性进展。</p><footer><span>材料科学专题库（原型）</span><time datetime="2026-03-08">2026-03-08</time><em>材料科学</em><small>12,300 阅读</small></footer></div></article>
+            <article class="rec-news-card"><div class="rec-news-accent">04</div><div><span class="rec-resource-status">原型资讯</span><h3>多模态大模型推动科研工作流持续演进</h3><p>观察大模型在文献研读、证据整理与科研协作中的典型实践。</p><footer><span>平台资讯（原型）</span><time datetime="2026-03-07">2026-03-07</time><em>人工智能</em><small>23,400 阅读</small></footer></div></article>
+          </div>
+          <button class="rec-more-link" type="button" data-demo-action="完整资讯列表将在真实数据接口接入后开放">查看更多资讯 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
+        </section>
+
+        <section class="rec-panel rec-panel--papers" id="papers" data-rec-section="papers" aria-labelledby="papersTitle">
+          <header class="rec-panel-title">
+            <svg aria-hidden="true"><use href="#rec-icon-file"></use></svg>
+            <h2 id="papersTitle">文献推荐・紧跟学术前沿</h2>
+          </header>
+          <div class="rec-panel-tabs" role="tablist" aria-label="文献推荐排序">
+            <button class="is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-panel-tab>最新文献推荐</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-panel-tab>热门文献推荐</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-panel-tab>关注作者文献推荐</button>
+          </div>
+          <div class="rec-paper-list">
+            <article class="rec-paper-card">
+              <span class="rec-paper-rank">1</span>
+              <div class="rec-paper-content"><h3>Attention Is All You Need: A Decade of Transformer Architecture</h3><p class="rec-paper-author">Vaswani A., Shazeer N., Parmar N., et al.</p><p class="rec-paper-source">Nature Machine Intelligence <span>·</span> 2026</p><p class="rec-paper-abstract">We revisit the Transformer architecture ten years after its introduction...</p><div class="rec-tags"><span>Deep Learning</span><span>NLP</span><span>Transformer</span></div><div class="rec-paper-stats"><span>引用：158,900</span><span>下载：45,600</span></div><div class="rec-paper-actions"><button type="button" data-demo-action="查阅功能将在文献详情接口接入后开放">查阅</button><button type="button" data-save-button>收藏</button><button type="button" data-demo-action="引用格式导出将在文献接口接入后开放">引用</button><button type="button" data-demo-action="评分功能为原型演示">评分</button><button type="button" data-demo-action="评论功能需登录后使用">评论</button></div></div>
+              <span class="rec-score">★ 4.8</span>
+            </article>
+            <article class="rec-paper-card">
+              <span class="rec-paper-rank">2</span>
+              <div class="rec-paper-content"><h3>Quantum Error Correction in Topological Quantum Computing</h3><p class="rec-paper-author">Zhang L., Wang M., Chen X., et al.</p><p class="rec-paper-source">Physical Review Letters <span>·</span> 2026</p><p class="rec-paper-abstract">We present a novel approach to quantum error correction...</p><div class="rec-tags"><span>Quantum Computing</span><span>Error Correction</span></div><div class="rec-paper-stats"><span>引用：23,400</span><span>下载：8,900</span></div><div class="rec-paper-actions"><button type="button" data-demo-action="查阅功能将在文献详情接口接入后开放">查阅</button><button type="button" data-save-button>收藏</button><button type="button" data-demo-action="引用格式导出将在文献接口接入后开放">引用</button><button type="button" data-demo-action="评分功能为原型演示">评分</button><button type="button" data-demo-action="评论功能需登录后使用">评论</button></div></div>
+              <span class="rec-score">★ 4.6</span>
+            </article>
+            <article class="rec-paper-card">
+              <span class="rec-paper-rank">3</span>
+              <div class="rec-paper-content"><h3>CRISPR-Based Gene Therapy for Rare Genetic Disorders</h3><p class="rec-paper-author">Smith J., Liu Y., Brown A., et al.</p><p class="rec-paper-source">Cell <span>·</span> 2026</p><p class="rec-paper-abstract">This study demonstrates the efficacy of CRISPR gene editing...</p><div class="rec-tags"><span>Gene Therapy</span><span>CRISPR</span><span>Medicine</span></div><div class="rec-paper-stats"><span>引用：12,300</span><span>下载：15,600</span></div><div class="rec-paper-actions"><button type="button" data-demo-action="查阅功能将在文献详情接口接入后开放">查阅</button><button type="button" data-save-button>收藏</button><button type="button" data-demo-action="引用格式导出将在文献接口接入后开放">引用</button><button type="button" data-demo-action="评分功能为原型演示">评分</button><button type="button" data-demo-action="评论功能需登录后使用">评论</button></div></div>
+              <span class="rec-score">★ 4.7</span>
+            </article>
+            <article class="rec-paper-card">
+              <span class="rec-paper-rank">4</span>
+              <div class="rec-paper-content"><h3>Room-Temperature Superconductivity in Carbon-Based Materials</h3><p class="rec-paper-author">Li H., Zhang Y., Wang K., et al.</p><p class="rec-paper-source">Science <span>·</span> 2026</p><p class="rec-paper-abstract">Prototype record for demonstrating literature recommendation layout and interactions...</p><div class="rec-tags"><span>Superconductivity</span><span>Materials Science</span></div><div class="rec-paper-stats"><span>引用：34,500</span><span>下载：23,400</span></div><div class="rec-paper-actions"><button type="button" data-demo-action="查阅功能将在文献详情接口接入后开放">查阅</button><button type="button" data-save-button>收藏</button><button type="button" data-demo-action="引用格式导出将在文献接口接入后开放">引用</button><button type="button" data-demo-action="评分功能为原型演示">评分</button><button type="button" data-demo-action="评论功能需登录后使用">评论</button></div></div>
+              <span class="rec-score">★ 4.9</span>
+            </article>
+          </div>
+          <button class="rec-more-link" type="button" data-demo-action="完整文献列表将在真实文献接口接入后开放">查看更多文献 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
+        </section>
+
+        <section class="rec-panel rec-panel--reports" id="reports" data-rec-section="reports" aria-labelledby="reportsTitle">
+          <header class="rec-panel-title">
+            <svg aria-hidden="true"><use href="#rec-icon-report"></use></svg>
+            <h2 id="reportsTitle">报告推荐・深度战略洞察</h2>
+          </header>
+          <div class="rec-panel-tabs" role="tablist" aria-label="报告推荐排序">
+            <button class="is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-panel-tab>最新报告</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-panel-tab>热门报告</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-panel-tab>专属报告</button>
+          </div>
+          <div class="rec-report-grid">
+            <article class="rec-report-card">
+              <figure><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&amp;h=520&amp;fit=crop" alt="数据分析仪表盘，用作人工智能趋势报告原型封面"><span>TR报告</span></figure>
+              <div><h3>2026年人工智能技术发展趋势报告</h3><p>分析人工智能领域的技术演进、应用场景和未来发展方向。</p><ul><li>浏览 8,900</li><li>下载 2,300</li><li>收藏 456</li></ul><time datetime="2026-03-05">2026-03-05</time><footer><button type="button" data-demo-action="报告详情将在真实报告接口接入后开放">查看详情</button><button type="button" aria-label="收藏报告" data-save-button><svg aria-hidden="true"><use href="#rec-icon-bookmark"></use></svg></button></footer></div>
+            </article>
+            <article class="rec-report-card">
+              <figure><img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&amp;h=520&amp;fit=crop" alt="量子计算公式黑板，用作量子计算洞察月报原型封面"><span>洞察月报</span></figure>
+              <div><h3>量子计算产业洞察月报（2026年2月）</h3><p>梳理量子计算领域的政策动态、技术进展和市场趋势。</p><ul><li>浏览 5,600</li><li>下载 1,200</li><li>收藏 234</li></ul><time datetime="2026-03-01">2026-03-01</time><footer><button type="button" data-demo-action="报告详情将在真实报告接口接入后开放">查看详情</button><button type="button" aria-label="收藏报告" data-save-button><svg aria-hidden="true"><use href="#rec-icon-bookmark"></use></svg></button></footer></div>
+            </article>
+            <article class="rec-report-card">
+              <figure><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&amp;h=520&amp;fit=crop" alt="商业分析屏幕，用作产业集群战略咨询报告原型封面"><span>战略咨询报告</span></figure>
+              <div><h3>深圳“20+8”产业集群战略咨询报告</h3><p>演示产业集群布局与战略咨询报告的推荐呈现方式。</p><ul><li>浏览 12,300</li><li>下载 3,400</li><li>收藏 678</li></ul><time datetime="2026-02-28">2026-02-28</time><footer><button type="button" data-demo-action="报告详情将在真实报告接口接入后开放">查看详情</button><button type="button" aria-label="收藏报告" data-save-button><svg aria-hidden="true"><use href="#rec-icon-bookmark"></use></svg></button></footer></div>
+            </article>
+          </div>
+          <button class="rec-more-link" type="button" data-demo-action="完整报告列表将在真实报告接口接入后开放">查看更多报告 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
+        </section>
+
+        <section class="rec-panel rec-panel--talent" id="talent" data-rec-section="talent" aria-labelledby="talentTitle">
+          <header class="rec-panel-title">
+            <svg aria-hidden="true"><use href="#rec-icon-users"></use></svg>
+            <h2 id="talentTitle">人才推荐・促进学术合作</h2>
+          </header>
+          <div class="rec-talent-layout">
+            <div class="rec-talent-column">
+              <h3>人才库推荐</h3>
+              <article class="rec-person-card"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=160&amp;h=160&amp;fit=crop" alt="张伟原型头像"><div><h4>张伟</h4><p>教授/博导</p><p>清华大学计算机系</p><div class="rec-tags"><span>Transformer</span><span>NLP</span></div><small>论文 234　引用 15,600　H指数 48</small></div><button type="button" aria-label="关注张伟" data-follow-button>＋</button></article>
+              <article class="rec-person-card"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&amp;h=160&amp;fit=crop" alt="李明原型头像"><div><h4>李明</h4><p>研究员</p><p>中科院物理所</p><div class="rec-tags"><span>量子纠缠</span><span>量子算法</span></div><small>论文 189　引用 12,300　H指数 42</small></div><button type="button" aria-label="关注李明" data-follow-button>＋</button></article>
+              <article class="rec-person-card"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&amp;h=160&amp;fit=crop" alt="王芳原型头像"><div><h4>王芳</h4><p>副教授</p><p>复旦大学生命科学学院</p><div class="rec-tags"><span>CRISPR</span><span>基因治疗</span></div><small>论文 156　引用 9,800　H指数 38</small></div><button type="button" aria-label="关注王芳" data-follow-button>＋</button></article>
+            </div>
+            <div class="rec-talent-column rec-author-updates">
+              <h3>作者动态</h3>
+              <article><header><strong>张伟</strong><span>最新论文</span></header><h4>Large Language Models for Scientific Discovery</h4><p>Nature Machine Intelligence　· 2026-03-08</p><i></i></article>
+              <article><header><strong>李明</strong><span>会议报告</span></header><h4>量子计算在药物研发中的应用</h4><p>QIP 2026　· 2026-03-05</p></article>
+              <article><header><strong>王芳</strong><span>预印本</span></header><h4>CRISPR-Based Therapy for Rare Diseases</h4><p>bioRxiv　· 2026-03-07</p></article>
+            </div>
+            <div class="rec-talent-column rec-rising-stars">
+              <h3>领域新星</h3>
+              <article><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&amp;h=120&amp;fit=crop" alt="陈晓原型头像"><div><header><h4>陈晓</h4><em>+156%</em></header><p>北京大学</p><p>学术年龄：3年</p><small>论文 45　引用 2,300　H指数 18</small></div></article>
+              <article><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&amp;h=120&amp;fit=crop" alt="刘洋原型头像"><div><header><h4>刘洋</h4><em>+189%</em></header><p>上海交通大学</p><p>学术年龄：2年</p><small>论文 38　引用 1,890　H指数 15</small></div></article>
+              <article><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&amp;h=120&amp;fit=crop" alt="赵敏原型头像"><div><header><h4>赵敏</h4><em>+134%</em></header><p>浙江大学</p><p>学术年龄：4年</p><small>论文 52　引用 2,890　H指数 21</small></div></article>
+            </div>
+          </div>
+          <button class="rec-more-link" type="button" data-demo-action="完整人才列表将在真实人才库接入后开放">查看更多人才 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
+        </section>
+
+        <section class="rec-panel rec-panel--conferences" id="conferences" data-rec-section="conferences" aria-labelledby="conferenceTitle">
+          <header class="rec-panel-title">
+            <svg aria-hidden="true"><use href="#rec-icon-trophy"></use></svg>
+            <h2 id="conferenceTitle">顶会推荐・掌握学术会议动态</h2>
+          </header>
+          <div class="rec-panel-tabs" role="tablist" aria-label="会议推荐排序">
+            <button class="is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-panel-tab>最近会议</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-panel-tab>热门会议</button>
+          </div>
+          <div class="rec-conference-grid">
+            <article class="rec-conference-card"><header><span>CCF-A</span><em>征稿中</em></header><h3>ICML 2026</h3><p>International Conference on Machine Learning</p><dl><div><dt>日期</dt><dd>2026-07-15 至 2026-07-21</dd></div><div><dt>地点</dt><dd>维也纳，奥地利</dd></div><div><dt>截稿</dt><dd>2026-02-01</dd></div></dl><div class="rec-tags"><span>Machine Learning</span><span>Deep Learning</span><span>AI Applications</span></div><footer><button type="button" data-demo-action="会议详情将在会议数据接口接入后开放">查看详情</button><button type="button" data-demo-action="投稿入口为原型演示">投稿</button></footer></article>
+            <article class="rec-conference-card"><header><span>国际</span><em>即将开始</em></header><h3>QIP 2026</h3><p>Conference on Quantum Information Processing</p><dl><div><dt>日期</dt><dd>2026-09-08 至 2026-09-13</dd></div><div><dt>地点</dt><dd>北京，中国</dd></div><div><dt>截稿</dt><dd>2026-04-15</dd></div></dl><div class="rec-tags"><span>Quantum Computing</span><span>Quantum Information</span><span>Quantum Algorithms</span></div><footer><button type="button" data-demo-action="会议详情将在会议数据接口接入后开放">查看详情</button><button type="button" data-demo-action="投稿入口为原型演示">投稿</button></footer></article>
+            <article class="rec-conference-card"><header><span>CCF-A</span><em>筹备中</em></header><h3>NeurIPS 2026</h3><p>Neural Information Processing Systems</p><dl><div><dt>日期</dt><dd>2026-12-06 至 2026-12-12</dd></div><div><dt>地点</dt><dd>新奥尔良，美国</dd></div><div><dt>截稿</dt><dd>2026-05-20</dd></div></dl><div class="rec-tags"><span>Neural Networks</span><span>Optimization</span><span>Reinforcement Learning</span></div><footer><button type="button" data-demo-action="会议详情将在会议数据接口接入后开放">查看详情</button><button type="button" data-demo-action="投稿入口为原型演示">投稿</button></footer></article>
+          </div>
+          <button class="rec-more-link" type="button" data-demo-action="完整会议列表将在会议数据接口接入后开放">查看更多会议 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
+        </section>
+
+        <section class="rec-panel rec-panel--courses" id="courses" data-rec-section="courses" aria-labelledby="coursesTitle">
+          <header class="rec-panel-title">
+            <svg aria-hidden="true"><use href="#rec-icon-course"></use></svg>
+            <h2 id="coursesTitle">课程推荐・技能提升专属学习</h2>
+          </header>
+          <div class="rec-course-grid">
+            <article class="rec-course-card"><figure><img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=900&amp;h=460&amp;fit=crop" alt="人工智能抽象图，用作深度学习课程原型封面"><span>中级</span><em>★ 4.9</em></figure><div><h3>深度学习与神经网络基础</h3><p>系统学习深度学习的核心概念，从基础到高级应用</p><strong>吴恩达　· Stanford University</strong><ul><li>12周</li><li>45,600 学员</li></ul><div class="rec-tags"><span>神经网络</span><span>反向传播</span><span>CNN</span><span>RNN</span></div><small>发布时间：2026-01-15</small><footer><button type="button" data-demo-action="课程详情将在课程平台接入后开放">查看详情</button><button type="button" aria-label="收藏课程" data-save-button><svg aria-hidden="true"><use href="#rec-icon-bookmark"></use></svg></button></footer></div></article>
+            <article class="rec-course-card"><figure><img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=900&amp;h=460&amp;fit=crop" alt="量子公式黑板，用作量子计算课程原型封面"><span>高级</span><em>★ 4.8</em></figure><div><h3>量子计算导论</h3><p>深入理解量子计算原理，掌握量子算法设计</p><strong>原型讲师　· 科研课程平台</strong><ul><li>8周</li><li>12,300 学员</li></ul><div class="rec-tags"><span>量子比特</span><span>量子门</span><span>量子算法</span><span>量子纠错</span></div><small>发布时间：2026-02-20</small><footer><button type="button" data-demo-action="课程详情将在课程平台接入后开放">查看详情</button><button type="button" aria-label="收藏课程" data-save-button><svg aria-hidden="true"><use href="#rec-icon-bookmark"></use></svg></button></footer></div></article>
+            <article class="rec-course-card"><figure><img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=900&amp;h=460&amp;fit=crop" alt="实验室试管，用作基因编辑课程原型封面"><span>中高级</span><em>★ 4.7</em></figure><div><h3>CRISPR基因编辑技术与应用</h3><p>了解 CRISPR 技术原理及其在医学和农业中的应用</p><strong>原型讲师　· 生命科学课程平台</strong><ul><li>6周</li><li>8,900 学员</li></ul><div class="rec-tags"><span>基因编辑</span><span>CRISPR-Cas9</span><span>基因治疗</span><span>伦理问题</span></div><small>发布时间：2026-03-01</small><footer><button type="button" data-demo-action="课程详情将在课程平台接入后开放">查看详情</button><button type="button" aria-label="收藏课程" data-save-button><svg aria-hidden="true"><use href="#rec-icon-bookmark"></use></svg></button></footer></div></article>
+            <article class="rec-course-card"><figure><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&amp;h=460&amp;fit=crop" alt="数据分析仪表盘，用作数据科学课程原型封面"><span>初中级</span><em>★ 4.8</em></figure><div><h3>Python数据科学实战</h3><p>从零开始学习 Python 数据分析和机器学习</p><strong>原型讲师　· 数据科学课程平台</strong><ul><li>10周</li><li>67,800 学员</li></ul><div class="rec-tags"><span>Python</span><span>Pandas</span><span>NumPy</span><span>Scikit-learn</span></div><small>发布时间：2026-01-10</small><footer><button type="button" data-demo-action="课程详情将在课程平台接入后开放">查看详情</button><button type="button" aria-label="收藏课程" data-save-button><svg aria-hidden="true"><use href="#rec-icon-bookmark"></use></svg></button></footer></div></article>
+          </div>
+          <button class="rec-more-link" type="button" data-demo-action="完整课程列表将在课程平台接入后开放">查看更多课程 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
+          <p class="rec-personal-note">💡 原型逻辑：基于研究方向和兴趣标签精选课程，真实个性化需经用户授权并接入兴趣画像。</p>
+        </section>
+
+        <section class="rec-panel rec-panel--events" id="events" data-rec-section="events" aria-labelledby="eventsTitle">
+          <header class="rec-panel-title">
+            <svg aria-hidden="true"><use href="#rec-icon-calendar"></use></svg>
+            <h2 id="eventsTitle">活动推荐・聚焦深圳“20+8”产业集群</h2>
+          </header>
+          <div class="rec-event-grid">
+            <article class="rec-event-card"><header><span>论坛</span><em>报名中</em></header><h3>深圳人工智能产业发展高峰论坛</h3><p>探讨人工智能在制造、医疗、金融等行业的落地路径，促进政产学研交流。</p><dl><div><dt>主办</dt><dd>深圳科技活动平台（原型）</dd></div><div><dt>地点</dt><dd>深圳会展中心</dd></div><div><dt>时间</dt><dd>2026-03-25 09:00-17:00</dd></div></dl><div class="rec-tags"><span>人工智能</span><span>产业应用</span><span>政策解读</span></div><small>名额 500　已报名 342</small><button type="button" data-register-button>立即报名</button></article>
+            <article class="rec-event-card"><header><span>沙龙</span><em>报名中</em></header><h3>量子计算技术创新沙龙</h3><p>交流量子计算在药物研发、金融科技等领域的应用进展。</p><dl><div><dt>主办</dt><dd>量子科学活动平台（原型）</dd></div><div><dt>地点</dt><dd>南山科技园</dd></div><div><dt>时间</dt><dd>2026-03-18 14:00-17:00</dd></div></dl><div class="rec-tags"><span>量子计算</span><span>技术交流</span><span>产学研</span></div><small>名额 80　已报名 65</small><button type="button" data-register-button>立即报名</button></article>
+            <article class="rec-event-card is-ended"><header><span>思辨会</span><em>已结束 · 有回放</em></header><h3>生物医药创新思辨会</h3><p>围绕基因编辑的安全性、监管框架与产业化路径展开讨论。</p><dl><div><dt>主办</dt><dd>生物医药活动平台（原型）</dd></div><div><dt>地点</dt><dd>坪山生物医药产业基地</dd></div><div><dt>时间</dt><dd>2026-03-12 15:00-18:00</dd></div></dl><div class="rec-tags"><span>基因治疗</span><span>创新药</span><span>CRISPR</span></div><small>名额 120</small><button type="button" data-demo-action="回放资源将在活动平台接入后开放">观看回放</button></article>
+            <article class="rec-event-card"><header><span>讲座</span><em>即将开始</em></header><h3>新能源汽车产业链闭门讲座</h3><p>解析动力电池、智能座舱与自动驾驶等产业链环节。</p><dl><div><dt>主办</dt><dd>新能源汽车产业平台（原型）</dd></div><div><dt>地点</dt><dd>宝安智能制造园</dd></div><div><dt>时间</dt><dd>2026-04-08 10:00-12:00</dd></div></dl><div class="rec-tags"><span>新能源汽车</span><span>产业链</span><span>供应链</span></div><small>名额 200　已报名 156</small><button type="button" data-demo-action="活动详情将在活动平台接入后开放">查看详情</button></article>
+            <article class="rec-event-card is-ended"><header><span>论坛</span><em>已结束 · 有回放</em></header><h3>智能制造与工业互联网研讨会</h3><p>交流工业互联网平台建设与制造企业数字化升级实践。</p><dl><div><dt>主办</dt><dd>智能制造活动平台（原型）</dd></div><div><dt>地点</dt><dd>龙华智能制造产业园</dd></div><div><dt>时间</dt><dd>2026-02-28 09:30-16:30</dd></div></dl><div class="rec-tags"><span>工业4.0</span><span>智能制造</span><span>数字化转型</span></div><small>名额 350</small><button type="button" data-demo-action="回放资源将在活动平台接入后开放">观看回放</button></article>
+            <article class="rec-event-card is-planning"><header><span>沙龙</span><em>筹备中</em></header><h3>半导体产业发展战略沙龙</h3><p>聚焦半导体产业链补链强链、先进封装与人才培养。</p><dl><div><dt>主办</dt><dd>半导体活动平台（原型）</dd></div><div><dt>地点</dt><dd>福田CBD国际会议中心</dd></div><div><dt>时间</dt><dd>2026-04-15 14:30-17:30</dd></div></dl><div class="rec-tags"><span>芯片设计</span><span>制造工艺</span><span>产业政策</span></div><small>名额 150</small><button type="button" disabled>敬请期待</button></article>
+          </div>
+          <button class="rec-more-link" type="button" data-demo-action="完整活动列表将在活动平台接入后开放">查看更多活动 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
+          <p class="rec-personal-note">🎯 原型逻辑：聚合热点技术与产业话题形成活动清单，真实推荐需结合用户授权的兴趣信号。</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="rec-footer">
+    <div class="rec-shell"><strong>深圳国际科技信息中心</strong><span>科研情报智能推荐原型</span><a href="index.html" data-back-home>返回门户首页</a></div>
+  </footer>
+
+  <div class="rec-toast" id="recToast" role="status" aria-live="polite" hidden></div>
+  <script src="recommendations.js"></script>
+</body>
+</html>
