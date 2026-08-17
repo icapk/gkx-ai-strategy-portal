@@ -447,6 +447,10 @@
       cursor: pointer;
     }
 
+    .nav-direct-entry {
+      cursor: pointer;
+    }
+
     .nav-trigger::after {
       position: absolute;
       right: 13px;
@@ -2365,6 +2369,10 @@
       background: var(--surface);
     }
 
+    .iframe-shell.is-toolbar-hidden .embedded-toolbar {
+      display: none;
+    }
+
     .iframe-shell iframe {
       display: block;
       width: 100%;
@@ -2375,8 +2383,8 @@
 
     /* 外部系统仅在门户嵌入时隐藏其重复顶部栏，不影响系统独立访问。 */
     .iframe-shell.is-header-cropped iframe {
-      height: calc(100% + 98px);
-      transform: translateY(-98px);
+      height: calc(100% + var(--embedded-header-crop, 98px));
+      transform: translateY(calc(0px - var(--embedded-header-crop, 98px)));
     }
 
     @media (max-width: 1279px) {
@@ -4285,17 +4293,22 @@
           ]
         },
         {
+          label: "管理后台",
+          description: "提供系统、权限与门户内容管理能力，支撑平台安全稳定运行。",
+          url: "https://hungezu.github.io/gkx-portal-admin/",
+          action: "embed",
+          embedTitle: "管理后台",
+          hideEmbeddedToolbar: true,
+          hideEmbeddedHeader: true,
+          headerCropPx: 64
+        },
+        {
           label: "工作台",
           description: "整合智能科研、智能阅读与专题工单，提供便捷高效的个人工作入口。",
           items: [
             { label: "智能科研", url: "workbench-bridge.html?view=research", action: "embed", embedTitle: "智能科研" },
             { label: "智能阅读", url: "workbench-bridge.html?view=reading", action: "embed", embedTitle: "智能阅读" }
           ]
-        },
-        {
-          label: "管理后台",
-          description: "提供系统、权限与门户内容管理能力，支撑平台安全稳定运行。",
-          url: "https://hungezu.github.io/gkx-portal-admin/"
         }
       ];
 
@@ -5931,21 +5944,36 @@
         homeNavTab.classList.toggle("is-active", isHome);
         if (isHome) homeNavTab.setAttribute("aria-current", "page");
         else homeNavTab.removeAttribute("aria-current");
+        desktopNav.querySelectorAll(".nav-direct-entry").forEach((entry) => {
+          const isActive = options.activeNavLabel === entry.dataset.navLabel;
+          entry.classList.toggle("is-active", isActive);
+          if (isActive) entry.setAttribute("aria-current", "page");
+          else entry.removeAttribute("aria-current");
+        });
         announcementBar.hidden = !isHome || announcementDismissed;
         stopCarousel();
         if (name === "home") startCarousel();
         if (name === "iframe" && options.iframeUrl) {
           iframeShell.classList.toggle("is-header-cropped", Boolean(options.hideEmbeddedHeader));
+          iframeShell.classList.toggle("is-toolbar-hidden", Boolean(options.hideEmbeddedToolbar));
+          if (options.hideEmbeddedHeader) {
+            const headerCropPx = Number.isFinite(Number(options.headerCropPx)) ? Math.max(0, Number(options.headerCropPx)) : 98;
+            iframeShell.style.setProperty("--embedded-header-crop", `${headerCropPx}px`);
+          } else {
+            iframeShell.style.removeProperty("--embedded-header-crop");
+          }
           const title = options.embedTitle || "内嵌服务";
           embeddedTitle.textContent = title;
           embeddedSystem.title = title;
           iframeShell.setAttribute("aria-label", title);
           if (embeddedSystem.getAttribute("src") !== options.iframeUrl) embeddedSystem.src = options.iframeUrl;
         } else if (embeddedSystem.getAttribute("src") !== "about:blank") {
-          iframeShell.classList.remove("is-header-cropped");
+          iframeShell.classList.remove("is-header-cropped", "is-toolbar-hidden");
+          iframeShell.style.removeProperty("--embedded-header-crop");
           embeddedSystem.src = "about:blank";
         } else {
-          iframeShell.classList.remove("is-header-cropped");
+          iframeShell.classList.remove("is-header-cropped", "is-toolbar-hidden");
+          iframeShell.style.removeProperty("--embedded-header-crop");
         }
         closeMessageCenter();
         closeSearchPanel();
@@ -6675,7 +6703,14 @@
       }
 
       function activateEmbeddedSystem(item) {
-        showSurface("iframe", { iframeUrl: item.url, hideEmbeddedHeader: item.hideEmbeddedHeader, embedTitle: item.embedTitle || item.label });
+        showSurface("iframe", {
+          iframeUrl: item.url,
+          hideEmbeddedHeader: item.hideEmbeddedHeader,
+          headerCropPx: item.headerCropPx,
+          hideEmbeddedToolbar: item.hideEmbeddedToolbar,
+          embedTitle: item.embedTitle || item.label,
+          activeNavLabel: item.label
+        });
       }
 
       function showHome() {
@@ -6845,20 +6880,29 @@
         utilityNav.appendChild(wrapper);
       }
 
-      function createUtilityLink(group) {
-        const link = document.createElement("a");
-        link.className = "utility-trigger utility-direct-link";
-        link.href = group.url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        link.textContent = group.label;
-        link.addEventListener("click", () => {
-          closeSearchPanel();
-          closeDesktopMenu();
-          closeUtilityMenu();
-          closeProfileMenu();
-        });
-        utilityNav.appendChild(link);
+      function createDesktopDirectEntry(group) {
+        const isEmbedded = group.action === "embed";
+        const entry = document.createElement(isEmbedded ? "button" : "a");
+        entry.className = "nav-trigger nav-direct-entry";
+        entry.dataset.navLabel = group.label;
+        entry.textContent = group.label;
+
+        if (isEmbedded) {
+          entry.type = "button";
+          entry.addEventListener("click", () => activateEmbeddedSystem(group));
+        } else {
+          entry.href = group.url;
+          entry.target = "_blank";
+          entry.rel = "noopener noreferrer";
+          entry.addEventListener("click", () => {
+            closeSearchPanel();
+            closeDesktopMenu();
+            closeUtilityMenu();
+            closeProfileMenu();
+          });
+        }
+
+        desktopNav.appendChild(entry);
       }
 
       function setDesktopTriggerState(activeIndex) {
@@ -6949,7 +6993,7 @@
         }
 
         if (group.label === "管理后台") {
-          createUtilityLink(group);
+          createDesktopDirectEntry(group);
           return;
         }
 
@@ -7035,27 +7079,39 @@
         activeMobileIndex = isClosing ? -1 : index;
       }
 
-      NAVIGATION.forEach((group, index) => {
+      NAVIGATION.forEach((group) => {
         const section = document.createElement("section");
         section.className = "mobile-group";
 
         if (group.url) {
-          const directLink = document.createElement("a");
-          directLink.className = "mobile-primary mobile-primary--link";
-          directLink.href = group.url;
-          directLink.target = "_blank";
-          directLink.rel = "noopener noreferrer";
-          directLink.innerHTML = `
+          const isEmbedded = group.action === "embed";
+          const directEntry = document.createElement(isEmbedded ? "button" : "a");
+          directEntry.className = "mobile-primary mobile-primary--link";
+          directEntry.dataset.navLabel = group.label;
+
+          if (isEmbedded) {
+            directEntry.type = "button";
+          } else {
+            directEntry.href = group.url;
+            directEntry.target = "_blank";
+            directEntry.rel = "noopener noreferrer";
+          }
+
+          directEntry.innerHTML = `
             <span>${group.label}</span>
             <svg class="mobile-direct-icon" viewBox="0 0 20 20" aria-hidden="true">
-              <path d="M7 4.5h8.5V13M15.2 4.8 5 15"></path>
+              ${isEmbedded ? '<path d="m7.5 5.5 4.5 4.5-4.5 4.5"></path>' : '<path d="M7 4.5h8.5V13M15.2 4.8 5 15"></path>'}
             </svg>`;
-          directLink.addEventListener("click", () => closeMobileDrawer());
-          section.appendChild(directLink);
+          directEntry.addEventListener("click", () => {
+            if (isEmbedded) activateEmbeddedSystem(group);
+            else closeMobileDrawer();
+          });
+          section.appendChild(directEntry);
           mobileNav.appendChild(section);
           return;
         }
 
+        const mobileToggleIndex = mobileNav.querySelectorAll("button.mobile-primary").length;
         const primary = document.createElement("button");
         primary.type = "button";
         primary.className = "mobile-primary";
@@ -7071,7 +7127,7 @@
         submenu.hidden = true;
         submenu.replaceChildren(...group.items.map(createMenuEntry));
 
-        primary.addEventListener("click", () => toggleMobileGroup(index));
+        primary.addEventListener("click", () => toggleMobileGroup(mobileToggleIndex));
         section.append(primary, submenu);
         mobileNav.appendChild(section);
       });
