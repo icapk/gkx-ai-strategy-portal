@@ -2926,7 +2926,7 @@ body.has-message-center {
   display: grid;
   margin-top: 18px;
   gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .portal-message-summary-item {
@@ -2955,8 +2955,9 @@ body.has-message-center {
 
 .portal-message-summary-item:nth-child(1) .portal-message-summary-value { color: #c84646; }
 .portal-message-summary-item:nth-child(2) .portal-message-summary-value { color: #2563eb; }
-.portal-message-summary-item:nth-child(3) .portal-message-summary-value { color: #16825d; }
-.portal-message-summary-item:nth-child(4) .portal-message-summary-value { color: #a86409; }
+.portal-message-summary-item:nth-child(3) .portal-message-summary-value { color: #c96817; }
+.portal-message-summary-item:nth-child(4) .portal-message-summary-value { color: #16825d; }
+.portal-message-summary-item:nth-child(5) .portal-message-summary-value { color: #a86409; }
 
 .portal-message-toolbar {
   display: grid;
@@ -3049,14 +3050,17 @@ body.has-message-center {
   border-radius: 8px;
   padding: 14px;
   background: #fff;
+  cursor: pointer;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .portal-message-card:hover,
-.portal-message-card:focus-within {
+.portal-message-card:focus-within,
+.portal-message-card:focus-visible {
   border-color: #bfd0ec;
   box-shadow: 0 6px 18px rgba(44, 73, 118, 0.07);
+  outline: none;
 }
 
 .portal-message-card.is-unread {
@@ -3076,6 +3080,7 @@ body.has-message-center {
 }
 
 .portal-message-type-icon.is-update { background: #2563eb; }
+.portal-message-type-icon.is-todo { background: #c96817; }
 .portal-message-type-icon.is-report { background: #16825d; }
 .portal-message-type-icon.is-policy { background: #c84646; }
 .portal-message-type-icon.is-event { background: #7653d6; }
@@ -3146,6 +3151,33 @@ body.has-message-center {
 .portal-message-tag.is-source {
   color: #687489;
   background: #f1f3f6;
+}
+
+.portal-message-tag.is-due {
+  color: #a64f0b;
+  background: #fff3e8;
+}
+
+.portal-message-jump {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  color: #7a8597;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.portal-message-target-system {
+  color: #315fbd;
+  font-weight: 650;
+}
+
+.portal-message-target-system::after {
+  margin-left: 6px;
+  color: #a4afbd;
+  content: "/";
 }
 
 .portal-message-time {
@@ -3272,9 +3304,13 @@ body.has-message-center {
   }
 }
 
-@media (max-width: 390px) {
+@media (max-width: 560px) {
   .portal-message-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .portal-message-summary-item:nth-child(5) {
+    grid-column: 1 / -1;
   }
 
   .portal-message-title-wrap {
