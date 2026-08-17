@@ -3001,7 +3001,7 @@
             <span class="portal-message-bell" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></span>
             <div>
               <h2 class="portal-message-title" id="portalMessageTitle">消息中心</h2>
-              <p class="portal-message-subtitle">汇总关注对象更新、任务进展和门户服务提醒</p>
+              <p class="portal-message-subtitle">为你汇总关注对象更新、待处理事项、任务进展和服务消息提醒</p>
             </div>
           </div>
           <button class="portal-message-close" id="portalMessageClose" type="button" aria-label="关闭消息中心"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
@@ -4947,20 +4947,109 @@
       const MESSAGE_CATEGORIES = {
         ALL: "全部",
         FOLLOW: "关注更新",
+        TODO: "待办",
         TASK: "任务通知",
         NOTICE: "消息提醒"
       };
-      const MESSAGE_TAB_ORDER = ["ALL", "FOLLOW", "TASK", "NOTICE"];
+      const MESSAGE_TAB_ORDER = ["ALL", "FOLLOW", "TODO", "TASK", "NOTICE"];
       const PORTAL_MESSAGES = [
-        { id: "m001", category: "FOLLOW", iconText: "关", iconClass: "is-update", title: "你关注的“AI 材料设计”有 3 篇新论文", summary: "系统根据你的关键词订阅，匹配到 3 篇高相关论文，已合并为一条更新提醒。", source: "科技情报", time: "2小时前", unread: true, badges: ["NEW"], tags: ["AI材料设计", "论文", "订阅更新"], actions: ["查看论文", "调整订阅"] },
-        { id: "m002", category: "TASK", iconText: "任", iconClass: "is-report", title: "《低空经济产业趋势分析报告》已生成", summary: "你手动创建的报告生成任务已完成，可在线预览或下载 Word/PDF 文件。", source: "新型高端智库", time: "今天 11:20", unread: true, badges: ["NEW"], tags: ["低空经济", "报告生成", "任务完成"], actions: ["在线预览", "下载报告"] },
-        { id: "m003", category: "NOTICE", iconText: "提", iconClass: "is-policy", title: "国家重点研发计划申报通知更新", summary: "2026 年度人工智能与先进制造专项启动申报，系统已为你匹配相关政策服务。", source: "科技专题", time: "今天 09:40", unread: true, badges: ["服务提醒"], tags: ["科技政策", "项目申报", "人工智能"], actions: ["查看政策", "保存到关注"] },
-        { id: "m003b", category: "TASK", iconText: "比", iconClass: "is-report", title: "“深圳人工智能政策对比”任务已完成", summary: "你发起的政策比对任务已生成结果，包含差异摘要、适用主体和申报建议。", source: "科技专题", time: "今天 09:05", unread: true, badges: ["NEW"], tags: ["政策比对", "任务完成", "人工智能"], actions: ["查看结果", "继续分析"] },
-        { id: "m004", category: "FOLLOW", iconText: "技", iconClass: "is-update", title: "半导体产业链出现新的技术动态", summary: "国内 7nm 芯片制程技术取得重要突破，与你关注的产业链专题相关。", source: "科技信息", time: "5小时前", unread: false, badges: [], tags: ["半导体", "芯片制造", "产业链"], actions: ["查看动态"] },
-        { id: "m005", category: "NOTICE", iconText: "提", iconClass: "is-event", title: "深圳人工智能产业对接会开放报名", summary: "活动面向科研院所、科技企业和投资机构开放报名，与你关注的人工智能领域相关。", source: "科技信息", time: "昨天", unread: false, badges: [], tags: ["人工智能", "产业活动", "深圳"], actions: ["查看活动", "立即报名"] },
-        { id: "m006", category: "NOTICE", iconText: "信", iconClass: "is-interaction", title: "你的咨询反馈已有回复", summary: "关于“政策适用范围”的咨询已收到回复，可进入反馈记录查看详情。", source: "门户服务", time: "昨天", unread: false, badges: [], tags: ["咨询反馈", "政策服务"], actions: ["查看回复"] },
-        { id: "m007", category: "FOLLOW", iconText: "关", iconClass: "is-update", title: "你订阅的“量子计算”专题洞察月报已发布", summary: "你关注的量子计算专题有新的洞察月报，本期覆盖量子纠错、云平台和产业化进展。", source: "新型高端智库", time: "2天前", unread: false, badges: [], tags: ["量子计算", "洞察月报", "技术突破"], actions: ["阅读月报"] },
-        { id: "m008", category: "NOTICE", iconText: "提", iconClass: "is-service", title: "有 2 条政策可能适合你的企业", summary: "根据企业画像和关注领域，系统匹配到研发补贴、成果转化相关政策。", source: "科技专题", time: "3天前", unread: false, badges: [], tags: ["科技企业", "政策匹配", "成果转化"], actions: ["查看匹配"] }
+        {
+          id: "m001", category: "FOLLOW", iconText: "关", iconClass: "is-update",
+          title: "你关注的“AI 材料设计”有 3 篇新论文",
+          summary: "系统根据你的关键词订阅，匹配到 3 篇高相关论文，已合并为一条更新提醒。",
+          source: "科技情报", time: "2小时前", unread: true, badges: ["NEW"], tags: ["AI材料设计", "论文", "订阅更新"],
+          actions: [
+            { name: "查看论文", targetSystem: "科技情报挖掘和知识服务系统", targetPage: "订阅结果", url: "/intelligence/subscription/sub_ai_material_001" },
+            { name: "调整订阅", targetSystem: "智慧服务门户系统", targetPage: "我的订阅", url: "/user/subscriptions/sub_ai_material_001" }
+          ]
+        },
+        {
+          id: "m001b", category: "TODO", iconText: "待", iconClass: "is-todo",
+          title: "低空经济专项申报材料待补充",
+          summary: "你提交的申报材料缺少企业研发费用说明，请在 8 月 20 日前补充后重新提交。",
+          source: "科技专题", time: "今天 10:30", unread: true, badges: ["待办"], tags: ["政策申报", "材料补充", "待处理"],
+          due: "截止 2026-08-20 18:00",
+          actions: [
+            { name: "去处理", targetSystem: "科技专题服务系统", targetPage: "申报材料补充", url: "/topic/policy-declare/apply_20260803_001/materials" },
+            { name: "查看要求", targetSystem: "科技专题服务系统", targetPage: "申报要求", url: "/topic/policy-declare/apply_20260803_001/requirements" }
+          ]
+        },
+        {
+          id: "m002", category: "TASK", iconText: "任", iconClass: "is-report",
+          title: "《低空经济产业趋势分析报告》已生成",
+          summary: "你手动创建的报告生成任务已完成，可在线预览或下载 Word/PDF 文件。",
+          source: "新型高端智库", time: "今天 11:20", unread: true, badges: ["NEW"], tags: ["低空经济", "报告生成", "任务完成"],
+          actions: [
+            { name: "在线预览", targetSystem: "新型高端智库", targetPage: "报告预览", url: "/thinktank/report/report_20260803_001" },
+            { name: "下载报告", targetSystem: "新型高端智库", targetPage: "报告下载", url: "/api/thinktank/report/report_20260803_001/download" }
+          ]
+        },
+        {
+          id: "m003", category: "NOTICE", iconText: "提", iconClass: "is-policy",
+          title: "国家重点研发计划申报通知更新",
+          summary: "2026 年度人工智能与先进制造专项启动申报，系统已为你匹配相关政策服务。",
+          source: "科技专题", time: "今天 09:40", unread: true, badges: ["服务提醒"], tags: ["科技政策", "项目申报", "人工智能"],
+          actions: [
+            { name: "查看政策", targetSystem: "科技专题服务系统", targetPage: "政策详情", url: "/topic/policy/policy_2026_ai_manufacturing" },
+            { name: "保存到关注", targetSystem: "智慧服务门户系统", targetPage: "我的关注", url: "/user/follow/policy_2026_ai_manufacturing" }
+          ]
+        },
+        {
+          id: "m003b", category: "TASK", iconText: "比", iconClass: "is-report",
+          title: "“深圳人工智能政策对比”任务已完成",
+          summary: "你发起的政策比对任务已生成结果，包含差异摘要、适用主体和申报建议。",
+          source: "科技专题", time: "今天 09:05", unread: true, badges: ["NEW"], tags: ["政策比对", "任务完成", "人工智能"],
+          actions: [
+            { name: "查看结果", targetSystem: "科技专题服务系统", targetPage: "政策比对结果", url: "/topic/policy-compare/task_policy_compare_20260803_001" },
+            { name: "继续分析", targetSystem: "科技专题服务系统", targetPage: "政策比对分析", url: "/topic/policy-compare/task_policy_compare_20260803_001/analysis" }
+          ]
+        },
+        {
+          id: "m004", category: "FOLLOW", iconText: "技", iconClass: "is-update",
+          title: "半导体产业链出现新的技术动态",
+          summary: "国内 7nm 芯片制程技术取得重要突破，与你关注的产业链专题相关。",
+          source: "科技信息", time: "5小时前", unread: false, badges: [], tags: ["半导体", "芯片制造", "产业链"],
+          actions: [
+            { name: "查看动态", targetSystem: "科技信息展示系统", targetPage: "产业链动态", url: "/info/industry-chain/semiconductor/news" }
+          ]
+        },
+        {
+          id: "m005", category: "NOTICE", iconText: "提", iconClass: "is-event",
+          title: "深圳人工智能产业对接会开放报名",
+          summary: "活动面向科研院所、科技企业和投资机构开放报名，与你关注的人工智能领域相关。",
+          source: "科技信息", time: "昨天", unread: false, badges: [], tags: ["人工智能", "产业活动", "深圳"],
+          actions: [
+            { name: "查看活动", targetSystem: "科技信息展示系统", targetPage: "活动详情", url: "/info/activity/activity_ai_202608" },
+            { name: "立即报名", targetSystem: "科技信息展示系统", targetPage: "活动报名", url: "/info/activity/activity_ai_202608/register" }
+          ]
+        },
+        {
+          id: "m006", category: "NOTICE", iconText: "信", iconClass: "is-interaction",
+          title: "你的咨询反馈已有回复",
+          summary: "关于“政策适用范围”的咨询已收到回复，可进入反馈记录查看详情。",
+          source: "门户服务", time: "昨天", unread: false, badges: [], tags: ["咨询反馈", "政策服务"],
+          actions: [
+            { name: "查看回复", targetSystem: "智慧服务门户系统", targetPage: "咨询反馈详情", url: "/portal/feedback/feedback_20260802_001" }
+          ]
+        },
+        {
+          id: "m007", category: "FOLLOW", iconText: "关", iconClass: "is-update",
+          title: "你订阅的“量子计算”专题洞察月报已发布",
+          summary: "你关注的量子计算专题有新的洞察月报，本期覆盖量子纠错、云平台和产业化进展。",
+          source: "新型高端智库", time: "2天前", unread: false, badges: [], tags: ["量子计算", "洞察月报", "技术突破"],
+          actions: [
+            { name: "阅读月报", targetSystem: "新型高端智库", targetPage: "智库报告详情", url: "/thinktank/report/quantum_monthly_202608" }
+          ]
+        },
+        {
+          id: "m008", category: "NOTICE", iconText: "提", iconClass: "is-service",
+          title: "有 2 条政策可能适合你的企业",
+          summary: "根据企业画像和关注领域，系统匹配到研发补贴、成果转化相关政策。",
+          source: "科技专题", time: "3天前", unread: false, badges: [], tags: ["科技企业", "政策匹配", "成果转化"],
+          actions: [
+            { name: "查看匹配", targetSystem: "科技专题服务系统", targetPage: "政策匹配结果", url: "/topic/policy/match/policy_match_20260803_001" }
+          ]
+        }
       ];
 
       const SURFACES = {
@@ -4986,7 +5075,8 @@
         const keyword = messageKeyword.trim().toLowerCase();
         return PORTAL_MESSAGES.filter((message) => {
           const categoryMatches = activeMessageCategory === "ALL" || message.category === activeMessageCategory;
-          const searchable = [message.title, message.summary, message.source, ...message.tags].join(" ").toLowerCase();
+          const actionDetails = message.actions.flatMap((action) => [action.name, action.targetSystem, action.targetPage, action.url]);
+          const searchable = [message.title, message.summary, message.source, message.due, ...message.tags, ...actionDetails].join(" ").toLowerCase();
           return categoryMatches && (!keyword || searchable.includes(keyword));
         });
       }
@@ -5002,12 +5092,14 @@
         const unread = PORTAL_MESSAGES.filter((message) => message.unread).length;
         const totals = {
           FOLLOW: PORTAL_MESSAGES.filter((message) => message.category === "FOLLOW").length,
+          TODO: PORTAL_MESSAGES.filter((message) => message.category === "TODO").length,
           TASK: PORTAL_MESSAGES.filter((message) => message.category === "TASK").length,
           NOTICE: PORTAL_MESSAGES.filter((message) => message.category === "NOTICE").length
         };
         portalMessageSummary.innerHTML = [
           ["未读消息", unread],
           ["关注更新", totals.FOLLOW],
+          ["待办", totals.TODO],
           ["任务通知", totals.TASK],
           ["消息提醒", totals.NOTICE]
         ].map(([label, value]) => `<div class="portal-message-summary-item"><div class="portal-message-summary-value">${value}</div><div class="portal-message-summary-label">${label}</div></div>`).join("");
@@ -5027,7 +5119,7 @@
       function renderMessageList() {
         const messages = getFilteredPortalMessages();
         portalMessageList.innerHTML = messages.map((message) => `
-          <article class="portal-message-card ${message.unread ? "is-unread" : ""}" data-message-id="${escapeHtml(message.id)}">
+          <article class="portal-message-card ${message.unread ? "is-unread" : ""}" data-message-id="${escapeHtml(message.id)}" tabindex="0" aria-label="${escapeHtml(message.title)}">
             <div class="portal-message-type-icon ${escapeHtml(message.iconClass)}" aria-hidden="true">${escapeHtml(message.iconText)}</div>
             <div class="portal-message-card-main">
               <div class="portal-message-title-row">
@@ -5035,8 +5127,9 @@
                 ${message.badges.map((badge) => `<span class="portal-message-label ${badge === "NEW" ? "is-new" : "is-service"}">${escapeHtml(badge)}</span>`).join("")}
               </div>
               <p class="portal-message-card-summary">${escapeHtml(message.summary)}</p>
-              <div class="portal-message-meta"><span class="portal-message-tag is-source">${escapeHtml(message.source)}</span>${message.tags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}</div>
-              <div class="portal-message-actions">${message.actions.map((action, index) => `<button class="${index === 0 ? "portal-message-primary" : "portal-message-secondary"}" type="button" data-message-action="${index}">${escapeHtml(action)}</button>`).join("")}</div>
+              <div class="portal-message-meta"><span class="portal-message-tag is-source">${escapeHtml(message.source)}</span>${message.tags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}${message.due ? `<span class="portal-message-tag is-due">${escapeHtml(message.due)}</span>` : ""}</div>
+              <div class="portal-message-jump"><span>跳转目标</span><span class="portal-message-target-system">${escapeHtml(message.actions[0].targetSystem)}</span><span>${escapeHtml(message.actions[0].targetPage)}</span></div>
+              <div class="portal-message-actions">${message.actions.map((action, index) => `<button class="${index === 0 ? "portal-message-primary" : "portal-message-secondary"}" type="button" data-message-action="${index}">${escapeHtml(action.name)}</button>`).join("")}</div>
             </div>
             <time class="portal-message-time">${escapeHtml(message.time)}</time>
           </article>
@@ -6727,9 +6820,20 @@
         if (!card) return;
         const actionButton = event.target.closest("[data-message-action]");
         const message = PORTAL_MESSAGES.find((item) => item.id === card.dataset.messageId);
-        const actionLabel = actionButton && message ? message.actions[Number(actionButton.dataset.messageAction)] : "";
+        const actionIndex = actionButton ? Number(actionButton.dataset.messageAction) : 0;
+        const action = message?.actions[actionIndex] || message?.actions[0];
         markPortalMessageRead(card.dataset.messageId);
-        if (actionLabel) showPortalMessageToast(`已触发“${actionLabel}”（原型交互）`);
+        if (action) showPortalMessageToast(`将进入 ${action.targetSystem} / ${action.targetPage}：${action.url}`);
+      });
+      portalMessageList.addEventListener("keydown", (event) => {
+        if (!["Enter", " "].includes(event.key) || event.target.closest("button")) return;
+        const card = event.target.closest("[data-message-id]");
+        if (!card) return;
+        event.preventDefault();
+        const message = PORTAL_MESSAGES.find((item) => item.id === card.dataset.messageId);
+        const action = message?.actions[0];
+        markPortalMessageRead(card.dataset.messageId);
+        if (action) showPortalMessageToast(`将进入 ${action.targetSystem} / ${action.targetPage}：${action.url}`);
       });
 
       function createIcon(iconMarkup) {
