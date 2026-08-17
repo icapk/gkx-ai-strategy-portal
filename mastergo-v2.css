@@ -496,12 +496,6 @@
   visibility: visible;
 }
 
-.mg-voice-toast.is-error {
-  border-color: #f1c3c0;
-  color: #a93f3a;
-  background: #fff8f7;
-}
-
 @keyframes mgVoicePulse {
   from {
     opacity: 0.72;

@@ -4538,15 +4538,7 @@
       let messageReturnFocus = null;
       let messageCenterCloseTimer = null;
       let messageToastTimer = null;
-      const HeroSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      let mgVoiceRecognition = null;
       let mgVoiceListening = false;
-      let mgVoiceInsertPrefix = "";
-      let mgVoiceInsertSuffix = "";
-      let mgVoiceRecognizedText = "";
-      let mgVoiceHadError = false;
-      let mgVoiceManualStop = false;
-      let mgVoiceRestoreFocus = true;
       let mgVoiceToastTimer = null;
       const SEARCH_PAGE_SIZE = 3;
       const reduceCarouselMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -5464,133 +5456,25 @@
       function setHeroVoiceListening(listening) {
         mgVoiceListening = listening;
         mgVoiceInputButton?.classList.toggle("is-listening", listening);
-        mgHeroSearchForm?.classList.toggle("is-voice-listening", listening);
         mgVoiceInputButton?.setAttribute("aria-pressed", String(listening));
         mgVoiceInputButton?.setAttribute("aria-label", listening ? "停止语音输入" : "开始语音输入");
         if (mgVoiceInputButton) mgVoiceInputButton.title = listening ? "停止语音输入" : "语音输入";
       }
 
-      function showHeroVoiceFeedback(message, options = {}) {
-        const isError = Boolean(options.error);
-        const duration = Number.isFinite(options.duration) ? options.duration : 2400;
+      function showHeroVoiceFeedback(message) {
         window.clearTimeout(mgVoiceToastTimer);
         if (mgVoiceInputStatus) mgVoiceInputStatus.textContent = message;
         if (!mgVoiceInputToast) return;
         mgVoiceInputToast.textContent = message;
-        mgVoiceInputToast.classList.toggle("is-error", isError);
+        mgVoiceInputToast.classList.remove("is-error");
         mgVoiceInputToast.classList.add("is-visible");
-        mgVoiceToastTimer = window.setTimeout(() => mgVoiceInputToast.classList.remove("is-visible"), duration);
+        mgVoiceToastTimer = window.setTimeout(() => mgVoiceInputToast.classList.remove("is-visible"), 2200);
       }
 
-      function stopHeroVoiceInput(options = {}) {
-        if (!mgVoiceRecognition) {
-          setHeroVoiceListening(false);
-          return;
-        }
-        mgVoiceManualStop = Boolean(options.manual);
-        mgVoiceRestoreFocus = options.restoreFocus !== false;
-        try {
-          if (options.abort) mgVoiceRecognition.abort();
-          else mgVoiceRecognition.stop();
-        } catch (error) {
-          mgVoiceRecognition = null;
-          setHeroVoiceListening(false);
-        }
-      }
-
-      function startHeroVoiceInput() {
-        if (!mgHeroSearchInput || !mgVoiceInputButton) return;
-        if (!HeroSpeechRecognition) {
-          showHeroVoiceFeedback("当前浏览器暂不支持语音输入，请使用支持语音识别的浏览器", { error: true, duration: 3600 });
-          return;
-        }
-        if (mgVoiceRecognition) {
-          showHeroVoiceFeedback("正在结束语音输入");
-          stopHeroVoiceInput({ manual: true });
-          return;
-        }
-
-        const selectionStart = mgHeroSearchInput.selectionStart ?? mgHeroSearchInput.value.length;
-        const selectionEnd = mgHeroSearchInput.selectionEnd ?? selectionStart;
-        mgVoiceInsertPrefix = mgHeroSearchInput.value.slice(0, selectionStart);
-        mgVoiceInsertSuffix = mgHeroSearchInput.value.slice(selectionEnd);
-        mgVoiceRecognizedText = "";
-        mgVoiceHadError = false;
-        mgVoiceManualStop = false;
-        mgVoiceRestoreFocus = true;
-
-        const recognition = new HeroSpeechRecognition();
-        mgVoiceRecognition = recognition;
-        recognition.lang = "zh-CN";
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
-
-        recognition.onstart = () => {
-          if (mgVoiceRecognition !== recognition) return;
-          setHeroVoiceListening(true);
-          showHeroVoiceFeedback("正在聆听，请开始说话", { duration: 1800 });
-        };
-
-        recognition.onresult = (event) => {
-          let transcript = "";
-          let hasFinalResult = false;
-          for (let index = 0; index < event.results.length; index += 1) {
-            transcript += event.results[index][0]?.transcript || "";
-            hasFinalResult = hasFinalResult || event.results[index].isFinal;
-          }
-          transcript = transcript.trim();
-          if (!transcript) return;
-          mgVoiceRecognizedText = transcript;
-          mgHeroSearchInput.value = `${mgVoiceInsertPrefix}${transcript}${mgVoiceInsertSuffix}`;
-          const caretPosition = mgVoiceInsertPrefix.length + transcript.length;
-          mgHeroSearchInput.setSelectionRange(caretPosition, caretPosition);
-          mgHeroSearchInput.dispatchEvent(new Event("input", { bubbles: true }));
-          if (mgVoiceInputStatus) mgVoiceInputStatus.textContent = hasFinalResult ? `已识别：${transcript}` : `正在识别：${transcript}`;
-        };
-
-        recognition.onerror = (event) => {
-          const isManualAbort = event.error === "aborted" && mgVoiceManualStop;
-          mgVoiceHadError = !isManualAbort;
-          if (isManualAbort) return;
-          const errorMessages = {
-            "not-allowed": "未获得麦克风权限，请在浏览器地址栏允许后重试",
-            "service-not-allowed": "浏览器未允许使用语音识别服务",
-            "audio-capture": "未检测到可用的麦克风",
-            "no-speech": "没有听到语音，请靠近麦克风后重试",
-            "network": "语音识别网络异常，请稍后重试"
-          };
-          showHeroVoiceFeedback(errorMessages[event.error] || "语音识别未完成，请重试", { error: true, duration: 3600 });
-        };
-
-        recognition.onend = () => {
-          if (mgVoiceRecognition !== recognition) return;
-          const recognizedText = mgVoiceRecognizedText;
-          const shouldRestoreFocus = mgVoiceRestoreFocus;
-          const wasManualStop = mgVoiceManualStop;
-          mgVoiceRecognition = null;
-          setHeroVoiceListening(false);
-          if (!mgVoiceHadError) {
-            if (recognizedText) showHeroVoiceFeedback("语音内容已写入搜索框");
-            else if (wasManualStop) showHeroVoiceFeedback("已停止语音输入");
-            else showHeroVoiceFeedback("没有识别到语音，请重试", { error: true });
-          }
-          if (recognizedText && shouldRestoreFocus) {
-            mgHeroSearchInput.focus();
-            const caretPosition = mgVoiceInsertPrefix.length + recognizedText.length;
-            mgHeroSearchInput.setSelectionRange(caretPosition, caretPosition);
-          }
-          mgVoiceManualStop = false;
-          mgVoiceRestoreFocus = true;
-        };
-
-        try {
-          recognition.start();
-        } catch (error) {
-          mgVoiceRecognition = null;
-          setHeroVoiceListening(false);
-          showHeroVoiceFeedback("语音输入暂时无法启动，请稍后重试", { error: true });
-        }
+      function toggleHeroVoiceInput() {
+        const nextListeningState = !mgVoiceListening;
+        setHeroVoiceListening(nextListeningState);
+        showHeroVoiceFeedback(nextListeningState ? "语音输入已开始（原型演示）" : "语音输入已停止（原型演示）");
       }
 
       function deriveQueryUnderstanding(query) {
@@ -6077,7 +5961,7 @@
 
       function showSurface(name, options = {}) {
         if (name !== "qa") window.clearTimeout(qaAnswerTimer);
-        if (name !== "home" && mgVoiceRecognition) stopHeroVoiceInput({ abort: true, manual: true, restoreFocus: false });
+        if (name !== "home" && mgVoiceListening) setHeroVoiceListening(false);
         Object.entries(SURFACES).forEach(([key, node]) => {
           node.hidden = key !== name;
         });
@@ -6400,10 +6284,9 @@
         });
       }
 
-      mgVoiceInputButton?.addEventListener("click", startHeroVoiceInput);
+      mgVoiceInputButton?.addEventListener("click", toggleHeroVoiceInput);
       mgHeroSearchForm?.addEventListener("submit", (event) => {
         event.preventDefault();
-        if (mgVoiceRecognition) stopHeroVoiceInput({ manual: true, restoreFocus: false });
         if (activeHeroExperience === "v2") {
           if (activeV2HeroMode === "qa") performQuestion(mgHeroSearchInput?.value);
           else performSearch(mgHeroSearchInput?.value, { mode: "全文", focusTarget: mgHeroSearchInput });
