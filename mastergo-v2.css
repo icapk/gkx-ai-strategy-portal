@@ -472,7 +472,8 @@
 .mg-voice-toast {
   position: fixed;
   z-index: 220;
-  top: calc(var(--header-height) + 18px);
+  right: auto;
+  bottom: max(24px, env(safe-area-inset-bottom));
   left: 50%;
   max-width: min(420px, calc(100vw - 32px));
   padding: 9px 14px;
@@ -485,7 +486,7 @@
   line-height: 1.45;
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -8px);
+  transform: translate(-50%, 8px);
   transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
   visibility: hidden;
 }
