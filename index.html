@@ -641,17 +641,6 @@
       line-height: 1;
     }
 
-    .profile-unread-dot {
-      position: absolute;
-      top: 5px;
-      right: 4px;
-      width: 10px;
-      height: 10px;
-      border: 2px solid var(--header-surface);
-      border-radius: 50%;
-      background: #f53f3f;
-    }
-
     .profile-button:hover,
     .profile-button:focus-visible,
     .profile-button[aria-expanded="true"] {
@@ -699,16 +688,6 @@
 
     .profile-menu-item + .profile-menu-item {
       border-top: 1px solid #f0f3f7;
-    }
-
-    .profile-count {
-      min-width: 18px;
-      color: #f53f3f;
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 1;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
     }
 
     .mobile-menu-button {
@@ -2947,6 +2926,11 @@
 
         <nav class="utility-nav" id="utilityNav" aria-label="快捷导航"></nav>
 
+        <button class="message-center-button" id="messageCenterButton" type="button" aria-label="消息中心，4 条未读消息" aria-controls="portalMessageCenter" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+          <span class="message-center-badge" id="messageCenterBadge" aria-hidden="true">4</span>
+        </button>
+
         <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mobileDrawer">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 7h16M4 12h16M4 17h16"></path>
@@ -2958,21 +2942,16 @@
             class="profile-button"
             id="profileButton"
             type="button"
-            aria-label="用户菜单，3 条未读消息"
+            aria-label="用户菜单"
             aria-haspopup="true"
             aria-expanded="false"
             aria-controls="profileMenu"
           >
             <span class="profile-avatar" aria-hidden="true">科</span>
-            <span class="profile-unread-dot" aria-hidden="true"></span>
           </button>
 
           <div class="profile-menu" id="profileMenu" aria-label="用户菜单" hidden>
             <button class="profile-menu-item" id="openProfilePage" type="button">个人中心</button>
-            <button class="profile-menu-item" id="openMessagePage" type="button">
-              <span>消息中心</span>
-              <span class="profile-count" id="profileMenuUnreadCount" aria-label="3 条未读消息">3</span>
-            </button>
           </div>
         </div>
       </div>
@@ -3004,6 +2983,40 @@
   <aside class="mobile-drawer" id="mobileDrawer" aria-label="移动端导航" hidden>
     <nav class="mobile-nav" id="mobileNav"></nav>
   </aside>
+
+  <section class="portal-message-center" id="portalMessageCenter" aria-hidden="true" hidden>
+    <button class="portal-message-overlay" id="portalMessageOverlay" type="button" aria-label="关闭消息中心"></button>
+    <aside class="portal-message-drawer" role="dialog" aria-labelledby="portalMessageTitle">
+      <header class="portal-message-head">
+        <div class="portal-message-head-row">
+          <div class="portal-message-title-wrap">
+            <span class="portal-message-bell" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></span>
+            <div>
+              <h2 class="portal-message-title" id="portalMessageTitle">消息中心</h2>
+              <p class="portal-message-subtitle">汇总关注对象更新、任务进展和门户服务提醒</p>
+            </div>
+          </div>
+          <button class="portal-message-close" id="portalMessageClose" type="button" aria-label="关闭消息中心"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+        </div>
+        <div class="portal-message-summary" id="portalMessageSummary" aria-label="消息汇总"></div>
+      </header>
+
+      <div class="portal-message-toolbar">
+        <div class="portal-message-tabs" id="portalMessageTabs" role="tablist" aria-label="消息分类"></div>
+        <label class="portal-message-search-wrap">
+          <span class="sr-only">搜索消息</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+          <input class="portal-message-search" id="portalMessageSearch" type="search" autocomplete="off" placeholder="搜索消息标题、领域、机构、政策">
+        </label>
+      </div>
+
+      <div class="portal-message-list-wrap">
+        <div class="portal-message-list" id="portalMessageList" aria-live="polite"></div>
+        <div class="portal-message-empty" id="portalMessageEmpty" hidden>当前没有符合条件的消息</div>
+      </div>
+      <div class="portal-message-toast" id="portalMessageToast" role="status" aria-live="polite"></div>
+    </aside>
+  </section>
 
   <main class="site-main" id="mainContent">
     <div class="home-content" id="homeContent">
@@ -4190,21 +4203,6 @@
       </div>
     </section>
 
-    <section class="account-page message-page" id="messagePage" aria-labelledby="messagePageTitle" hidden>
-      <div class="account-shell">
-        <div class="account-topbar"><span>账户服务</span></div>
-        <header class="message-header"><div><p class="account-eyebrow">消息中心</p><h1 class="message-title" id="messagePageTitle" tabindex="-1">通知与动态</h1><p class="message-lead">集中查看内容更新、收藏动态与会议提醒。</p></div><span class="message-unread-summary message-unread-count"><strong id="messagePageUnreadCount">3</strong>&nbsp;条未读</span></header>
-        <div class="message-toolbar" id="messageFilters" role="tablist" aria-label="消息筛选"><button class="is-active" type="button" role="tab" aria-selected="true" data-message-filter="all">全部消息</button><button type="button" role="tab" aria-selected="false" data-message-filter="unread">未读消息 <span>3</span></button></div>
-        <div class="message-list" id="messageList">
-          <article class="message-item message-card is-unread" data-message-status="unread"><span class="message-dot" aria-label="未读"></span><div class="message-icon" aria-hidden="true">荐</div><div class="message-card-copy"><p class="message-type message-card-kicker">智能推荐</p><h2 class="message-card-title">智能推荐已更新</h2><p class="message-card-summary">根据你关注的 AI for Science 与战略研判主题，为你更新了一批权威内容。</p><time class="message-card-time" datetime="2026-07-20T09:30:00+08:00">今天 09:30</time></div><button class="message-card-action" type="button" data-open-recommendation>查看推荐</button></article>
-          <article class="message-item message-card is-unread" data-message-status="unread"><span class="message-dot" aria-label="未读"></span><div class="message-icon" aria-hidden="true">藏</div><div class="message-card-copy"><p class="message-type message-card-kicker">收藏动态</p><h2 class="message-card-title">收藏内容有新版本</h2><p class="message-card-summary">你关注的科技创新态势报告已更新，可回到推荐区查看最新公开版本。</p><time class="message-card-time" datetime="2026-07-19T16:20:00+08:00">昨天 16:20</time></div><button class="message-card-action" type="button" data-open-recommendation>查看内容</button></article>
-          <article class="message-item message-card is-unread" data-message-status="unread"><span class="message-dot" aria-label="未读"></span><div class="message-icon" aria-hidden="true">会</div><div class="message-card-copy"><p class="message-type message-card-kicker">会议提醒</p><h2 class="message-card-title">NeurIPS 2026 会议动态</h2><p class="message-card-summary">你关注的会议近期有日程更新，请通过活动官网查看最新安排。</p><time class="message-card-time" datetime="2026-07-18T11:00:00+08:00">7 月 18 日 11:00</time></div><a class="message-card-action" href="https://neurips.cc/Conferences/2026" target="_blank" rel="noopener noreferrer">查看会议</a></article>
-          <article class="message-item message-card" data-message-status="read"><div class="message-icon" aria-hidden="true">系</div><div class="message-card-copy"><p class="message-type message-card-kicker">系统通知</p><h2 class="message-card-title">门户功能更新说明</h2><p class="message-card-summary">综合资源检索、推荐内容和个人中心现已开放体验。</p><time class="message-card-time" datetime="2026-07-17T10:00:00+08:00">7 月 17 日 10:00</time></div><button class="message-card-action" type="button" data-open-search>体验搜索</button></article>
-        </div>
-        <div class="message-empty" id="messageEmpty" hidden><h2>暂无匹配消息</h2><p>当前筛选条件下没有可显示的消息。</p></div>
-      </div>
-    </section>
-
     <section class="iframe-shell" id="iframeShell" aria-label="内嵌服务" hidden>
       <div class="embedded-toolbar">
         <strong class="embedded-title" id="embeddedTitle">内嵌服务</strong>
@@ -4391,14 +4389,18 @@
       const mgKeywordSearchGuide = document.getElementById("mgKeywordSearchGuide");
       const mgV2QaSearchGuide = document.getElementById("mgV2QaSearchGuide");
       const profilePage = document.getElementById("profilePage");
-      const messagePage = document.getElementById("messagePage");
       const openProfilePage = document.getElementById("openProfilePage");
-      const openMessagePage = document.getElementById("openMessagePage");
-      const profileMenuUnreadCount = document.getElementById("profileMenuUnreadCount");
-      const messagePageUnreadCount = document.getElementById("messagePageUnreadCount");
-      const messageFilters = document.getElementById("messageFilters");
-      const messageList = document.getElementById("messageList");
-      const messageEmpty = document.getElementById("messageEmpty");
+      const messageCenterButton = document.getElementById("messageCenterButton");
+      const messageCenterBadge = document.getElementById("messageCenterBadge");
+      const portalMessageCenter = document.getElementById("portalMessageCenter");
+      const portalMessageOverlay = document.getElementById("portalMessageOverlay");
+      const portalMessageClose = document.getElementById("portalMessageClose");
+      const portalMessageSummary = document.getElementById("portalMessageSummary");
+      const portalMessageTabs = document.getElementById("portalMessageTabs");
+      const portalMessageSearch = document.getElementById("portalMessageSearch");
+      const portalMessageList = document.getElementById("portalMessageList");
+      const portalMessageEmpty = document.getElementById("portalMessageEmpty");
+      const portalMessageToast = document.getElementById("portalMessageToast");
       const portalResultSearchForm = document.getElementById("portalResultSearchForm");
       const portalResultSearchInput = document.getElementById("portalResultSearchInput");
       const portalSearchModes = document.getElementById("portalSearchModes");
@@ -4519,6 +4521,11 @@
       let activeDocumentMatchIndex = 0;
       let activeDocumentTrigger = null;
       let announcementDismissed = false;
+      let activeMessageCategory = "ALL";
+      let messageKeyword = "";
+      let messageReturnFocus = null;
+      let messageCenterCloseTimer = null;
+      let messageToastTimer = null;
       const SEARCH_PAGE_SIZE = 3;
       const reduceCarouselMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -4912,12 +4919,30 @@
         }
       ];
 
+      const MESSAGE_CATEGORIES = {
+        ALL: "全部",
+        FOLLOW: "关注更新",
+        TASK: "任务通知",
+        NOTICE: "消息提醒"
+      };
+      const MESSAGE_TAB_ORDER = ["ALL", "FOLLOW", "TASK", "NOTICE"];
+      const PORTAL_MESSAGES = [
+        { id: "m001", category: "FOLLOW", iconText: "关", iconClass: "is-update", title: "你关注的“AI 材料设计”有 3 篇新论文", summary: "系统根据你的关键词订阅，匹配到 3 篇高相关论文，已合并为一条更新提醒。", source: "科技情报", time: "2小时前", unread: true, badges: ["NEW"], tags: ["AI材料设计", "论文", "订阅更新"], actions: ["查看论文", "调整订阅"] },
+        { id: "m002", category: "TASK", iconText: "任", iconClass: "is-report", title: "《低空经济产业趋势分析报告》已生成", summary: "你手动创建的报告生成任务已完成，可在线预览或下载 Word/PDF 文件。", source: "新型高端智库", time: "今天 11:20", unread: true, badges: ["NEW"], tags: ["低空经济", "报告生成", "任务完成"], actions: ["在线预览", "下载报告"] },
+        { id: "m003", category: "NOTICE", iconText: "提", iconClass: "is-policy", title: "国家重点研发计划申报通知更新", summary: "2026 年度人工智能与先进制造专项启动申报，系统已为你匹配相关政策服务。", source: "科技专题", time: "今天 09:40", unread: true, badges: ["服务提醒"], tags: ["科技政策", "项目申报", "人工智能"], actions: ["查看政策", "保存到关注"] },
+        { id: "m003b", category: "TASK", iconText: "比", iconClass: "is-report", title: "“深圳人工智能政策对比”任务已完成", summary: "你发起的政策比对任务已生成结果，包含差异摘要、适用主体和申报建议。", source: "科技专题", time: "今天 09:05", unread: true, badges: ["NEW"], tags: ["政策比对", "任务完成", "人工智能"], actions: ["查看结果", "继续分析"] },
+        { id: "m004", category: "FOLLOW", iconText: "技", iconClass: "is-update", title: "半导体产业链出现新的技术动态", summary: "国内 7nm 芯片制程技术取得重要突破，与你关注的产业链专题相关。", source: "科技信息", time: "5小时前", unread: false, badges: [], tags: ["半导体", "芯片制造", "产业链"], actions: ["查看动态"] },
+        { id: "m005", category: "NOTICE", iconText: "提", iconClass: "is-event", title: "深圳人工智能产业对接会开放报名", summary: "活动面向科研院所、科技企业和投资机构开放报名，与你关注的人工智能领域相关。", source: "科技信息", time: "昨天", unread: false, badges: [], tags: ["人工智能", "产业活动", "深圳"], actions: ["查看活动", "立即报名"] },
+        { id: "m006", category: "NOTICE", iconText: "信", iconClass: "is-interaction", title: "你的咨询反馈已有回复", summary: "关于“政策适用范围”的咨询已收到回复，可进入反馈记录查看详情。", source: "门户服务", time: "昨天", unread: false, badges: [], tags: ["咨询反馈", "政策服务"], actions: ["查看回复"] },
+        { id: "m007", category: "FOLLOW", iconText: "关", iconClass: "is-update", title: "你订阅的“量子计算”专题洞察月报已发布", summary: "你关注的量子计算专题有新的洞察月报，本期覆盖量子纠错、云平台和产业化进展。", source: "新型高端智库", time: "2天前", unread: false, badges: [], tags: ["量子计算", "洞察月报", "技术突破"], actions: ["阅读月报"] },
+        { id: "m008", category: "NOTICE", iconText: "提", iconClass: "is-service", title: "有 2 条政策可能适合你的企业", summary: "根据企业画像和关注领域，系统匹配到研发补贴、成果转化相关政策。", source: "科技专题", time: "3天前", unread: false, badges: [], tags: ["科技企业", "政策匹配", "成果转化"], actions: ["查看匹配"] }
+      ];
+
       const SURFACES = {
         home: homeContent,
         search: searchResultsPage,
         qa: qaPage,
         profile: profilePage,
-        messages: messagePage,
         iframe: iframeShell
       };
 
@@ -4930,6 +4955,121 @@
         return String(value ?? "").replace(/[&<>"']/g, (character) => ({
           "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
         })[character]);
+      }
+
+      function getFilteredPortalMessages() {
+        const keyword = messageKeyword.trim().toLowerCase();
+        return PORTAL_MESSAGES.filter((message) => {
+          const categoryMatches = activeMessageCategory === "ALL" || message.category === activeMessageCategory;
+          const searchable = [message.title, message.summary, message.source, ...message.tags].join(" ").toLowerCase();
+          return categoryMatches && (!keyword || searchable.includes(keyword));
+        });
+      }
+
+      function updateMessageIndicators() {
+        const unread = PORTAL_MESSAGES.filter((message) => message.unread).length;
+        messageCenterBadge.textContent = String(unread);
+        messageCenterBadge.hidden = unread === 0;
+        messageCenterButton.setAttribute("aria-label", unread ? `消息中心，${unread} 条未读消息` : "消息中心，没有未读消息");
+      }
+
+      function renderMessageSummary() {
+        const unread = PORTAL_MESSAGES.filter((message) => message.unread).length;
+        const totals = {
+          FOLLOW: PORTAL_MESSAGES.filter((message) => message.category === "FOLLOW").length,
+          TASK: PORTAL_MESSAGES.filter((message) => message.category === "TASK").length,
+          NOTICE: PORTAL_MESSAGES.filter((message) => message.category === "NOTICE").length
+        };
+        portalMessageSummary.innerHTML = [
+          ["未读消息", unread],
+          ["关注更新", totals.FOLLOW],
+          ["任务通知", totals.TASK],
+          ["消息提醒", totals.NOTICE]
+        ].map(([label, value]) => `<div class="portal-message-summary-item"><div class="portal-message-summary-value">${value}</div><div class="portal-message-summary-label">${label}</div></div>`).join("");
+        updateMessageIndicators();
+      }
+
+      function renderMessageTabs() {
+        portalMessageTabs.innerHTML = MESSAGE_TAB_ORDER.map((category) => {
+          const count = category === "ALL"
+            ? PORTAL_MESSAGES.length
+            : PORTAL_MESSAGES.filter((message) => message.category === category).length;
+          const active = activeMessageCategory === category;
+          return `<button class="portal-message-tab ${active ? "is-active" : ""}" type="button" role="tab" aria-selected="${active}" data-message-category="${category}">${MESSAGE_CATEGORIES[category]} ${count}</button>`;
+        }).join("");
+      }
+
+      function renderMessageList() {
+        const messages = getFilteredPortalMessages();
+        portalMessageList.innerHTML = messages.map((message) => `
+          <article class="portal-message-card ${message.unread ? "is-unread" : ""}" data-message-id="${escapeHtml(message.id)}">
+            <div class="portal-message-type-icon ${escapeHtml(message.iconClass)}" aria-hidden="true">${escapeHtml(message.iconText)}</div>
+            <div class="portal-message-card-main">
+              <div class="portal-message-title-row">
+                <h3 class="portal-message-card-title">${escapeHtml(message.title)}</h3>
+                ${message.badges.map((badge) => `<span class="portal-message-label ${badge === "NEW" ? "is-new" : "is-service"}">${escapeHtml(badge)}</span>`).join("")}
+              </div>
+              <p class="portal-message-card-summary">${escapeHtml(message.summary)}</p>
+              <div class="portal-message-meta"><span class="portal-message-tag is-source">${escapeHtml(message.source)}</span>${message.tags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}</div>
+              <div class="portal-message-actions">${message.actions.map((action, index) => `<button class="${index === 0 ? "portal-message-primary" : "portal-message-secondary"}" type="button" data-message-action="${index}">${escapeHtml(action)}</button>`).join("")}</div>
+            </div>
+            <time class="portal-message-time">${escapeHtml(message.time)}</time>
+          </article>
+        `).join("");
+        portalMessageEmpty.hidden = messages.length !== 0;
+      }
+
+      function renderMessageCenter() {
+        renderMessageSummary();
+        renderMessageTabs();
+        renderMessageList();
+      }
+
+      function markPortalMessageRead(id) {
+        const message = PORTAL_MESSAGES.find((item) => item.id === id);
+        if (!message?.unread) return;
+        message.unread = false;
+        renderMessageSummary();
+        renderMessageList();
+      }
+
+      function showPortalMessageToast(message) {
+        window.clearTimeout(messageToastTimer);
+        portalMessageToast.textContent = message;
+        portalMessageToast.classList.add("is-visible");
+        messageToastTimer = window.setTimeout(() => portalMessageToast.classList.remove("is-visible"), 2200);
+      }
+
+      function openMessageCenter() {
+        window.clearTimeout(messageCenterCloseTimer);
+        if (!portalMessageCenter.hidden && portalMessageCenter.classList.contains("is-open")) return;
+        closeSearchPanel();
+        closeDesktopMenu();
+        closeUtilityMenu();
+        closeMobileDrawer();
+        closeProfileMenu();
+        messageReturnFocus = document.activeElement;
+        portalMessageCenter.hidden = false;
+        portalMessageCenter.setAttribute("aria-hidden", "false");
+        messageCenterButton.setAttribute("aria-expanded", "true");
+        document.body.classList.add("has-message-center");
+        requestAnimationFrame(() => {
+          portalMessageCenter.classList.add("is-open");
+          portalMessageClose.focus();
+        });
+      }
+
+      function closeMessageCenter(restoreFocus = false) {
+        if (portalMessageCenter.hidden) return;
+        window.clearTimeout(messageCenterCloseTimer);
+        portalMessageCenter.classList.remove("is-open");
+        portalMessageCenter.setAttribute("aria-hidden", "true");
+        messageCenterButton.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("has-message-center");
+        messageCenterCloseTimer = window.setTimeout(() => {
+          portalMessageCenter.hidden = true;
+        }, reduceCarouselMotion.matches ? 0 : 240);
+        if (restoreFocus) messageReturnFocus?.focus?.();
       }
 
       function getResultTypeIcon(type) {
@@ -5807,6 +5947,7 @@
         } else {
           iframeShell.classList.remove("is-header-cropped");
         }
+        closeMessageCenter();
         closeSearchPanel();
         closeDesktopMenu();
         closeUtilityMenu();
@@ -6485,36 +6626,45 @@
         renderDocumentMatch();
       });
 
-      const unreadCount = messageList.querySelectorAll(".message-item.is-unread").length;
-      profileMenuUnreadCount.textContent = String(unreadCount);
-      messagePageUnreadCount.textContent = String(unreadCount);
-      profileButton.setAttribute("aria-label", `用户菜单，${unreadCount} 条未读消息`);
-
       openProfilePage.addEventListener("click", openPersonalCenter);
-      openMessagePage.addEventListener("click", () => showSurface("messages", { focusTarget: document.getElementById("messagePageTitle") }));
-      messageFilters.addEventListener("click", (event) => {
-        const tab = event.target.closest("[data-message-filter]");
+      renderMessageCenter();
+      messageCenterButton.addEventListener("click", () => {
+        if (!portalMessageCenter.hidden && portalMessageCenter.classList.contains("is-open")) closeMessageCenter(true);
+        else openMessageCenter();
+      });
+      portalMessageOverlay.addEventListener("click", () => closeMessageCenter(true));
+      portalMessageClose.addEventListener("click", () => closeMessageCenter(true));
+      portalMessageTabs.addEventListener("click", (event) => {
+        const tab = event.target.closest("[data-message-category]");
         if (!tab) return;
-        const filter = tab.dataset.messageFilter;
-        messageFilters.querySelectorAll("[data-message-filter]").forEach((item) => {
-          const active = item === tab;
-          item.classList.toggle("is-active", active);
-          item.setAttribute("aria-selected", String(active));
-        });
-        let visibleCount = 0;
-        messageList.querySelectorAll(".message-item").forEach((item) => {
-          const visible = filter === "all" || item.dataset.messageStatus === filter;
-          item.hidden = !visible;
-          if (visible) visibleCount += 1;
-        });
-        messageEmpty.hidden = visibleCount !== 0;
+        activeMessageCategory = tab.dataset.messageCategory;
+        renderMessageTabs();
+        renderMessageList();
       });
-      document.querySelectorAll("[data-open-recommendation]").forEach((button) => {
-        button.addEventListener("click", () => {
-          performSearch("AI for Science");
-        });
+      portalMessageTabs.addEventListener("keydown", (event) => {
+        if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const tabs = [...portalMessageTabs.querySelectorAll("[data-message-category]")];
+        const currentIndex = tabs.findIndex((tab) => tab.dataset.messageCategory === activeMessageCategory);
+        const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+        activeMessageCategory = tabs[nextIndex].dataset.messageCategory;
+        renderMessageTabs();
+        renderMessageList();
+        portalMessageTabs.querySelector(`[data-message-category="${activeMessageCategory}"]`)?.focus();
       });
-      document.querySelector("[data-open-search]")?.addEventListener("click", () => performSearch("AI for Science"));
+      portalMessageSearch.addEventListener("input", (event) => {
+        messageKeyword = event.target.value;
+        renderMessageList();
+      });
+      portalMessageList.addEventListener("click", (event) => {
+        const card = event.target.closest("[data-message-id]");
+        if (!card) return;
+        const actionButton = event.target.closest("[data-message-action]");
+        const message = PORTAL_MESSAGES.find((item) => item.id === card.dataset.messageId);
+        const actionLabel = actionButton && message ? message.actions[Number(actionButton.dataset.messageAction)] : "";
+        markPortalMessageRead(card.dataset.messageId);
+        if (actionLabel) showPortalMessageToast(`已触发“${actionLabel}”（原型交互）`);
+      });
 
       function createIcon(iconMarkup) {
         const icon = document.createElement("span");
@@ -6617,6 +6767,7 @@
         if (window.matchMedia("(max-width: 1279px)").matches) return;
 
         window.clearTimeout(utilityCloseTimer);
+        closeMessageCenter();
         closeSearchPanel();
         closeDesktopMenu();
         closeProfileMenu();
@@ -6721,6 +6872,7 @@
       function openDesktopMenu(index, focusFirstItem = false) {
         if (window.matchMedia("(max-width: 1279px)").matches) return;
 
+        closeMessageCenter();
         closeSearchPanel();
         closeUtilityMenu();
         closeProfileMenu();
@@ -6755,6 +6907,7 @@
 
       function openProfileMenu() {
         window.clearTimeout(profileCloseTimer);
+        closeMessageCenter();
         closeSearchPanel();
         closeDesktopMenu();
         closeUtilityMenu();
@@ -6924,6 +7077,7 @@
       });
 
       function openMobileDrawer() {
+        closeMessageCenter();
         closeSearchPanel();
         closeDesktopMenu();
         closeUtilityMenu();
@@ -6962,6 +7116,8 @@
 
         if (!portalDocumentViewer.hidden) {
           closeDocumentViewer();
+        } else if (!portalMessageCenter.hidden) {
+          closeMessageCenter(true);
         } else if (portalSearchSidebar.classList.contains("is-open")) {
           setFilterDrawer(false);
         } else if (!mobileDrawer.hidden) {
