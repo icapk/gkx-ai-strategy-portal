@@ -308,7 +308,7 @@
 .mg-search-card input {
   width: 100%;
   height: 48px;
-  padding: 0 6px;
+  padding: 0 48px 0 6px;
   border: 0;
   outline: none;
   color: #303644;
@@ -396,10 +396,68 @@
   stroke-width: 1.7;
 }
 
-.mg-search-submit {
+.mg-search-actions {
   position: absolute;
   right: 18px;
   top: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mg-voice-input {
+  position: relative;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #dce2ec;
+  border-radius: 50%;
+  color: #6d7789;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.mg-voice-input:hover,
+.mg-voice-input:focus-visible {
+  border-color: #aeb8e9;
+  color: #4e5fe7;
+  background: #f7f8ff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 99, 245, 0.08);
+  transform: translateY(-1px);
+}
+
+.mg-voice-input svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.mg-voice-input.is-listening {
+  border-color: #f0a3a3;
+  color: #d94b4b;
+  background: #fff5f4;
+  box-shadow: 0 0 0 4px rgba(217, 75, 75, 0.08);
+}
+
+.mg-voice-input.is-listening::after {
+  position: absolute;
+  inset: -5px;
+  border: 1px solid rgba(217, 75, 75, 0.42);
+  border-radius: 50%;
+  animation: mgVoicePulse 1.4s ease-out infinite;
+  content: "";
+  pointer-events: none;
+}
+
+.mg-search-submit {
   display: grid;
   width: 44px;
   height: 44px;
@@ -409,6 +467,50 @@
   background: linear-gradient(145deg, #d3dbff, #aebcfb);
   cursor: pointer;
   transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.mg-voice-toast {
+  position: fixed;
+  z-index: 220;
+  top: calc(var(--header-height) + 18px);
+  left: 50%;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 9px 14px;
+  border: 1px solid #dfe4ee;
+  border-radius: 8px;
+  color: #4b5465;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 10px 28px rgba(39, 50, 79, 0.14);
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -8px);
+  transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
+  visibility: hidden;
+}
+
+.mg-voice-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  visibility: visible;
+}
+
+.mg-voice-toast.is-error {
+  border-color: #f1c3c0;
+  color: #a93f3a;
+  background: #fff8f7;
+}
+
+@keyframes mgVoicePulse {
+  from {
+    opacity: 0.72;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.18);
+  }
 }
 
 .mg-search-submit:hover,
@@ -2164,7 +2266,7 @@ a.mg-partner-logo:focus-visible {
   }
 
   .mg-search-card input {
-    padding-right: 54px;
+    padding-right: 102px;
   }
 
   .mg-search-intents {
@@ -2185,9 +2287,10 @@ a.mg-partner-logo:focus-visible {
     justify-content: center;
   }
 
-  .mg-search-submit {
+  .mg-search-actions {
     top: 56px;
     right: 14px;
+    gap: 6px;
   }
 
   .mg-smart-recommendations {
@@ -2307,6 +2410,24 @@ a.mg-partner-logo:focus-visible {
 }
 
 @media (max-width: 420px) {
+  .mg-search-card input {
+    padding-right: 92px;
+  }
+
+  .mg-search-actions {
+    gap: 5px;
+  }
+
+  .mg-voice-input {
+    width: 34px;
+    height: 34px;
+  }
+
+  .mg-search-submit {
+    width: 42px;
+    height: 42px;
+  }
+
   .mg-simulation-strip {
     grid-auto-columns: min(84vw, 310px);
     grid-template-columns: none;
@@ -2352,5 +2473,9 @@ a.mg-partner-logo:focus-visible {
   .mg-portal *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .mg-voice-input.is-listening::after {
+    animation: none;
   }
 }
