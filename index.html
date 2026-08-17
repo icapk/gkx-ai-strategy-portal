@@ -2945,22 +2945,15 @@
           </svg>
         </button>
 
-        <div class="profile-wrap" id="profileWrap">
+        <div class="profile-wrap">
           <button
             class="profile-button"
             id="profileButton"
             type="button"
-            aria-label="用户菜单"
-            aria-haspopup="true"
-            aria-expanded="false"
-            aria-controls="profileMenu"
+            aria-label="个人中心"
           >
             <span class="profile-avatar" aria-hidden="true">科</span>
           </button>
-
-          <div class="profile-menu" id="profileMenu" aria-label="用户菜单" hidden>
-            <button class="profile-menu-item" id="openProfilePage" type="button">个人中心</button>
-          </div>
         </div>
       </div>
     </div>
@@ -4349,9 +4342,7 @@
       const mobileBackdrop = document.getElementById("mobileBackdrop");
       const mobileDrawer = document.getElementById("mobileDrawer");
       const mobileNav = document.getElementById("mobileNav");
-      const profileWrap = document.getElementById("profileWrap");
       const profileButton = document.getElementById("profileButton");
-      const profileMenu = document.getElementById("profileMenu");
       const searchResultsPage = document.getElementById("searchResultsPage");
       const searchResultsTitle = document.getElementById("searchResultsTitle");
       const searchResultQuery = document.getElementById("searchResultQuery");
@@ -4412,7 +4403,6 @@
       const mgKeywordSearchGuide = document.getElementById("mgKeywordSearchGuide");
       const mgV2QaSearchGuide = document.getElementById("mgV2QaSearchGuide");
       const profilePage = document.getElementById("profilePage");
-      const openProfilePage = document.getElementById("openProfilePage");
       const messageCenterButton = document.getElementById("messageCenterButton");
       const messageCenterBadge = document.getElementById("messageCenterBadge");
       const portalMessageCenter = document.getElementById("portalMessageCenter");
@@ -4507,7 +4497,6 @@
       const utilityDropdowns = [];
       let activeDesktopIndex = -1;
       let closeTimer = null;
-      let profileCloseTimer = null;
       let utilityCloseTimer = null;
       let activeUtilityIndex = -1;
       let activeMobileIndex = -1;
@@ -5080,7 +5069,6 @@
         closeDesktopMenu();
         closeUtilityMenu();
         closeMobileDrawer();
-        closeProfileMenu();
         messageReturnFocus = document.activeElement;
         portalMessageCenter.hidden = false;
         portalMessageCenter.setAttribute("aria-hidden", "false");
@@ -6133,7 +6121,6 @@
         closeDesktopMenu();
         closeUtilityMenu();
         closeMobileDrawer();
-        closeProfileMenu();
         window.scrollTo({ top: 0, behavior: "auto" });
         if (options.focusTarget) requestAnimationFrame(() => options.focusTarget.focus());
       }
@@ -6809,7 +6796,7 @@
         renderDocumentMatch();
       });
 
-      openProfilePage.addEventListener("click", openPersonalCenter);
+      profileButton.addEventListener("click", openPersonalCenter);
       renderMessageCenter();
       messageCenterButton.addEventListener("click", () => {
         if (!portalMessageCenter.hidden && portalMessageCenter.classList.contains("is-open")) closeMessageCenter(true);
@@ -6960,7 +6947,6 @@
         closeMessageCenter();
         closeSearchPanel();
         closeDesktopMenu();
-        closeProfileMenu();
         activeUtilityIndex = index;
 
         utilityDropdowns.forEach((dropdown, dropdownIndex) => {
@@ -7053,7 +7039,6 @@
             closeSearchPanel();
             closeDesktopMenu();
             closeUtilityMenu();
-            closeProfileMenu();
           });
         }
 
@@ -7074,7 +7059,6 @@
         closeMessageCenter();
         closeSearchPanel();
         closeUtilityMenu();
-        closeProfileMenu();
         window.clearTimeout(closeTimer);
         activeDesktopIndex = index;
         const group = NAVIGATION[index];
@@ -7102,30 +7086,6 @@
       function scheduleDesktopClose() {
         window.clearTimeout(closeTimer);
         closeTimer = window.setTimeout(closeDesktopMenu, 130);
-      }
-
-      function openProfileMenu() {
-        window.clearTimeout(profileCloseTimer);
-        closeMessageCenter();
-        closeSearchPanel();
-        closeDesktopMenu();
-        closeUtilityMenu();
-        closeMobileDrawer();
-        profileMenu.hidden = false;
-        profileButton.setAttribute("aria-expanded", "true");
-      }
-
-      function closeProfileMenu(restoreFocus = false) {
-        window.clearTimeout(profileCloseTimer);
-        if (profileMenu.hidden) return;
-        profileMenu.hidden = true;
-        profileButton.setAttribute("aria-expanded", "false");
-        if (restoreFocus) profileButton.focus();
-      }
-
-      function scheduleProfileClose() {
-        window.clearTimeout(profileCloseTimer);
-        profileCloseTimer = window.setTimeout(() => closeProfileMenu(), 130);
       }
 
       const mobileHomeSection = document.createElement("section");
@@ -7194,19 +7154,7 @@
         }, 0);
       });
 
-      profileWrap.addEventListener("pointerenter", () => {
-        if (window.matchMedia("(hover: hover)").matches) openProfileMenu();
-      });
-      profileWrap.addEventListener("pointerleave", scheduleProfileClose);
-      profileWrap.addEventListener("focusin", openProfileMenu);
-      profileWrap.addEventListener("focusout", () => {
-        window.setTimeout(() => {
-          if (!profileWrap.contains(document.activeElement)) closeProfileMenu();
-        }, 0);
-      });
-      profileButton.addEventListener("click", openProfileMenu);
       document.addEventListener("pointerdown", (event) => {
-        if (!profileWrap.contains(event.target)) closeProfileMenu();
         if (!utilityNav.contains(event.target)) closeUtilityMenu();
       });
 
@@ -7292,7 +7240,6 @@
         closeSearchPanel();
         closeDesktopMenu();
         closeUtilityMenu();
-        closeProfileMenu();
         mobileDrawer.hidden = false;
         mobileBackdrop.hidden = false;
         mobileMenuButton.setAttribute("aria-expanded", "true");
@@ -7333,8 +7280,6 @@
           setFilterDrawer(false);
         } else if (!mobileDrawer.hidden) {
           closeMobileDrawer(true);
-        } else if (!profileMenu.hidden) {
-          closeProfileMenu();
         } else if (activeUtilityIndex >= 0) {
           closeUtilityMenu(true);
         } else if (!megaMenu.hidden) {
@@ -7350,7 +7295,6 @@
 
       window.addEventListener("resize", () => {
         closeSearchPanel();
-        closeProfileMenu();
         closeUtilityMenu();
         if (!window.matchMedia("(max-width: 860px)").matches && portalSearchSidebar.classList.contains("is-open")) {
           portalSearchSidebar.classList.remove("is-open");
