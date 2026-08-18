@@ -686,12 +686,73 @@
       background: #f6f8fb;
     }
 
+    .profile-menu-item:focus-visible {
+      background: #f0f6ff;
+      outline: 2px solid rgba(0, 110, 255, 0.24);
+      outline-offset: -2px;
+    }
+
     .profile-menu-item.is-disabled:hover {
       background: transparent;
     }
 
     .profile-menu-item + .profile-menu-item {
       border-top: 1px solid #f0f3f7;
+    }
+
+    .profile-account-menu {
+      top: calc(100% - 6px);
+      width: 232px;
+      border-radius: 8px;
+    }
+
+    .profile-account-menu .profile-menu-item {
+      width: 100%;
+      min-height: 58px;
+      border-right: 0;
+      border-bottom: 0;
+      border-left: 0;
+      padding: 9px 12px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .profile-account-menu .profile-menu-item:hover,
+    .profile-account-menu .profile-menu-item:focus-visible {
+      background: #f0f6ff;
+    }
+
+    .profile-menu-copy {
+      display: grid;
+      min-width: 0;
+      gap: 2px;
+    }
+
+    .profile-menu-copy strong {
+      color: #273142;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .profile-menu-copy small {
+      overflow: hidden;
+      color: var(--ink-muted);
+      font-size: 12px;
+      font-weight: 400;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile-menu-arrow {
+      width: 16px;
+      min-width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: #8a96a8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.7;
     }
 
     .mobile-menu-button {
@@ -2950,10 +3011,29 @@
             class="profile-button"
             id="profileButton"
             type="button"
-            aria-label="个人中心"
+            aria-label="打开个人中心菜单"
+            aria-controls="profileMenu"
+            aria-expanded="false"
+            aria-haspopup="menu"
           >
             <span class="profile-avatar" aria-hidden="true">科</span>
           </button>
+          <div class="profile-menu profile-account-menu" id="profileMenu" role="menu" aria-label="个人中心" hidden>
+            <button class="profile-menu-item" id="profileCenterOne" type="button" role="menuitem">
+              <span class="profile-menu-copy">
+                <strong>个人中心1</strong>
+                <small>统一用户中心</small>
+              </span>
+              <svg class="profile-menu-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 5.5 4.5 4.5-4.5 4.5"></path></svg>
+            </button>
+            <button class="profile-menu-item" id="profileCenterTwo" type="button" role="menuitem">
+              <span class="profile-menu-copy">
+                <strong>个人中心2</strong>
+                <small>我的内容记录</small>
+              </span>
+              <svg class="profile-menu-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 5.5 4.5 4.5-4.5 4.5"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -4343,6 +4423,9 @@
       const mobileDrawer = document.getElementById("mobileDrawer");
       const mobileNav = document.getElementById("mobileNav");
       const profileButton = document.getElementById("profileButton");
+      const profileMenu = document.getElementById("profileMenu");
+      const profileCenterOne = document.getElementById("profileCenterOne");
+      const profileCenterTwo = document.getElementById("profileCenterTwo");
       const searchResultsPage = document.getElementById("searchResultsPage");
       const searchResultsTitle = document.getElementById("searchResultsTitle");
       const searchResultQuery = document.getElementById("searchResultQuery");
@@ -5150,6 +5233,7 @@
       function openMessageCenter() {
         window.clearTimeout(messageCenterCloseTimer);
         if (!portalMessageCenter.hidden && portalMessageCenter.classList.contains("is-open")) return;
+        closeProfileMenu();
         closeSearchPanel();
         closeDesktopMenu();
         closeUtilityMenu();
@@ -6094,6 +6178,7 @@
           iframeShell.style.removeProperty("--embedded-header-crop");
         }
         closeMessageCenter();
+        closeProfileMenu();
         closeSearchPanel();
         closeDesktopMenu();
         closeUtilityMenu();
@@ -6570,7 +6655,45 @@
         iframeUrl: "https://edu.itic-sci.com/uc/portal/my-account",
         embedTitle: "个人中心"
       });
+      const openPersonalCenterTwo = () => showSurface("iframe", {
+        iframeUrl: "personal-center-2.html",
+        embedTitle: "个人中心2",
+        hideEmbeddedToolbar: true
+      });
+
+      function openProfileMenu(focusFirstItem = false) {
+        closeMessageCenter();
+        closeSearchPanel();
+        closeDesktopMenu();
+        closeUtilityMenu();
+        closeMobileDrawer();
+        profileMenu.hidden = false;
+        profileButton.setAttribute("aria-expanded", "true");
+        profileButton.setAttribute("aria-label", "关闭个人中心菜单");
+        if (focusFirstItem) requestAnimationFrame(() => profileCenterOne.focus());
+      }
+
+      function closeProfileMenu(restoreFocus = false) {
+        profileMenu.hidden = true;
+        profileButton.setAttribute("aria-expanded", "false");
+        profileButton.setAttribute("aria-label", "打开个人中心菜单");
+        if (restoreFocus) profileButton.focus();
+      }
+
+      function toggleProfileMenu() {
+        if (profileMenu.hidden) openProfileMenu();
+        else closeProfileMenu();
+      }
+
       manageRecommendationProfile?.addEventListener("click", openPersonalCenter);
+      profileCenterOne.addEventListener("click", () => {
+        closeProfileMenu();
+        openPersonalCenter();
+      });
+      profileCenterTwo.addEventListener("click", () => {
+        closeProfileMenu();
+        openPersonalCenterTwo();
+      });
 
       portalResultSearchForm.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -6772,7 +6895,30 @@
         renderDocumentMatch();
       });
 
-      profileButton.addEventListener("click", openPersonalCenter);
+      profileButton.addEventListener("click", toggleProfileMenu);
+      profileButton.addEventListener("keydown", (event) => {
+        if (!["ArrowDown", "ArrowUp"].includes(event.key)) return;
+        event.preventDefault();
+        openProfileMenu();
+        requestAnimationFrame(() => (event.key === "ArrowUp" ? profileCenterTwo : profileCenterOne).focus());
+      });
+      profileMenu.addEventListener("keydown", (event) => {
+        if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const items = [profileCenterOne, profileCenterTwo];
+        const currentIndex = items.indexOf(document.activeElement);
+        const nextIndex = event.key === "Home"
+          ? 0
+          : event.key === "End"
+            ? items.length - 1
+            : (Math.max(0, currentIndex) + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+        items[nextIndex].focus();
+      });
+      profileMenu.addEventListener("focusout", () => {
+        window.setTimeout(() => {
+          if (!profileMenu.contains(document.activeElement) && document.activeElement !== profileButton) closeProfileMenu();
+        }, 0);
+      });
       renderMessageCenter();
       messageCenterButton.addEventListener("click", () => {
         if (!portalMessageCenter.hidden && portalMessageCenter.classList.contains("is-open")) closeMessageCenter(true);
@@ -6932,6 +7078,7 @@
 
         window.clearTimeout(utilityCloseTimer);
         closeMessageCenter();
+        closeProfileMenu();
         closeSearchPanel();
         closeDesktopMenu();
         activeUtilityIndex = index;
@@ -7044,6 +7191,7 @@
         if (window.matchMedia("(max-width: 1279px)").matches) return;
 
         closeMessageCenter();
+        closeProfileMenu();
         closeSearchPanel();
         closeUtilityMenu();
         window.clearTimeout(closeTimer);
@@ -7143,6 +7291,7 @@
 
       document.addEventListener("pointerdown", (event) => {
         if (!utilityNav.contains(event.target)) closeUtilityMenu();
+        if (!profileButton.contains(event.target) && !profileMenu.contains(event.target)) closeProfileMenu();
       });
 
       function closeMobileSubmenus() {
@@ -7224,6 +7373,7 @@
 
       function openMobileDrawer() {
         closeMessageCenter();
+        closeProfileMenu();
         closeSearchPanel();
         closeDesktopMenu();
         closeUtilityMenu();
@@ -7263,6 +7413,8 @@
           closeDocumentViewer();
         } else if (!portalMessageCenter.hidden) {
           closeMessageCenter(true);
+        } else if (!profileMenu.hidden) {
+          closeProfileMenu(true);
         } else if (portalSearchSidebar.classList.contains("is-open")) {
           setFilterDrawer(false);
         } else if (!mobileDrawer.hidden) {
