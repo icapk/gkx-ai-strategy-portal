@@ -4375,12 +4375,24 @@
         {
           label: "管理后台",
           description: "提供系统、权限与门户内容管理能力，支撑平台安全稳定运行。",
-          url: "https://hungezu.github.io/gkx-portal-admin/",
-          action: "embed",
-          embedTitle: "管理后台",
-          hideEmbeddedToolbar: true,
-          hideEmbeddedHeader: true,
-          headerCropPx: 64
+          items: [
+            {
+              label: "后台管理一",
+              url: "https://hungezu.github.io/gkx-portal-admin/",
+              action: "embed",
+              embedTitle: "后台管理一",
+              hideEmbeddedToolbar: true,
+              hideEmbeddedHeader: true,
+              headerCropPx: 64
+            },
+            {
+              label: "后台管理二",
+              url: "portal-admin-2.html",
+              action: "embed",
+              embedTitle: "后台管理二",
+              hideEmbeddedToolbar: true
+            }
+          ]
         },
         {
           label: "工作台",
@@ -7155,30 +7167,6 @@
         utilityNav.appendChild(wrapper);
       }
 
-      function createDesktopDirectEntry(group) {
-        const isEmbedded = group.action === "embed";
-        const entry = document.createElement(isEmbedded ? "button" : "a");
-        entry.className = "nav-trigger nav-direct-entry";
-        entry.dataset.navLabel = group.label;
-        entry.textContent = group.label;
-
-        if (isEmbedded) {
-          entry.type = "button";
-          entry.addEventListener("click", () => activateEmbeddedSystem(group));
-        } else {
-          entry.href = group.url;
-          entry.target = "_blank";
-          entry.rel = "noopener noreferrer";
-          entry.addEventListener("click", () => {
-            closeSearchPanel();
-            closeDesktopMenu();
-            closeUtilityMenu();
-          });
-        }
-
-        desktopNav.appendChild(entry);
-      }
-
       function setDesktopTriggerState(activeIndex) {
         desktopTriggers.forEach((trigger, index) => {
           const isActive = index === activeIndex;
@@ -7239,11 +7227,6 @@
       NAVIGATION.forEach((group, index) => {
         if (group.label === "工作台") {
           createUtilityDropdown(group);
-          return;
-        }
-
-        if (group.label === "管理后台") {
-          createDesktopDirectEntry(group);
           return;
         }
 

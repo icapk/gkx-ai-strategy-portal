@@ -1,0 +1,2236 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>门户后台 - 课程/顶会/活动资源维护</title>
+  <style>
+    :root {
+      --gkx-brand: #165DFF;
+      --gkx-brand-hover: #4080FF;
+      --gkx-brand-active: #0E42D2;
+      --gkx-brand-light: #E8F3FF;
+      --gkx-bg-page: #D8E7FC;
+      --gkx-bg-surface: #FFFFFF;
+      --gkx-bg-module: #F7F8FA;
+      --gkx-bg-subtle: #F2F3F5;
+      --gkx-text-1: #1D2129;
+      --gkx-text-2: #4E5969;
+      --gkx-text-3: #86909C;
+      --gkx-text-4: #C9CDD4;
+      --gkx-border: #E5E6EB;
+      --gkx-success: #00B42A;
+      --gkx-warning: #FF7D00;
+      --gkx-danger: #F53F3F;
+      --gkx-radius-control: 4px;
+      --gkx-radius-card: 6px;
+      --gkx-radius-panel: 8px;
+      font-family: "PingFang SC", "PingFang HK", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--gkx-bg-page);
+      color: var(--gkx-text-1);
+      font-size: 14px;
+      line-height: 22px;
+      letter-spacing: 0;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 200px minmax(0, 1fr);
+    }
+
+    aside {
+      background: rgba(255,255,255,.34);
+      border-right: 1px solid rgba(255,255,255,.72);
+      color: var(--gkx-text-2);
+      padding: 16px;
+      overflow-y: auto;
+      max-height: 100vh;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 40px;
+      margin-bottom: 16px;
+      color: var(--gkx-text-1);
+      font-weight: 600;
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      background: var(--gkx-brand);
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .nav-group-title {
+      min-height: 28px;
+      padding: 16px 8px 4px;
+      color: var(--gkx-text-3);
+      font-size: 13px;
+      line-height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-item {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      border-radius: 4px;
+      color: var(--gkx-text-2);
+      margin-bottom: 4px;
+      border: 1px solid transparent;
+      width: 100%;
+      background: transparent;
+      text-align: left;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      background: rgba(255,255,255,.52);
+      border-color: rgba(255,255,255,.9);
+      color: var(--gkx-brand);
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,.46);
+      color: var(--gkx-brand);
+    }
+
+    .nav-label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .nav-badge {
+      display: none;
+      flex: 0 0 auto;
+      min-width: 38px;
+      height: 20px;
+      border-radius: 4px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 7px;
+      font-size: 11px;
+      color: var(--gkx-text-3);
+      background: rgba(242,243,245,.72);
+      border: 1px solid rgba(229,230,235,.82);
+    }
+
+    .nav-item.active .nav-badge {
+      display: inline-flex;
+    }
+
+    .nav-badge.done {
+      color: var(--gkx-brand);
+      background: var(--gkx-brand-light);
+      border-color: rgba(22,93,255,.18);
+    }
+
+    main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 64px;
+      background: rgba(255,255,255,.34);
+      border-bottom: 1px solid rgba(255,255,255,.72);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .crumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gkx-text-3);
+      white-space: nowrap;
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .crumb strong {
+      color: var(--gkx-text-1);
+      font-weight: 400;
+    }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gkx-text-2);
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gkx-brand-light);
+      color: var(--gkx-brand);
+      display: grid;
+      place-items: center;
+      font-weight: 500;
+    }
+
+    .content {
+      margin: 16px 16px 16px 0;
+      padding: 16px;
+      min-height: calc(100vh - 80px);
+      background: rgba(255,255,255,.48);
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: var(--gkx-radius-panel);
+      backdrop-filter: blur(8px);
+      overflow: auto;
+    }
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+      background: var(--gkx-bg-surface);
+      border-radius: var(--gkx-radius-card);
+      padding: 16px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      line-height: 28px;
+      font-weight: 600;
+    }
+
+    .desc {
+      margin: 0;
+      color: var(--gkx-text-2);
+      line-height: 22px;
+      max-width: 780px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      height: 32px;
+      border: 1px solid var(--gkx-border);
+      background: var(--gkx-bg-surface);
+      color: var(--gkx-text-1);
+      border-radius: var(--gkx-radius-control);
+      padding: 0 16px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover {
+      color: var(--gkx-brand);
+      border-color: var(--gkx-brand-hover);
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      border-color: var(--gkx-brand);
+      box-shadow: 0 0 0 2px rgba(22,93,255,.12);
+    }
+
+    button.primary {
+      background: var(--gkx-brand);
+      border-color: var(--gkx-brand);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    button.primary:hover {
+      background: var(--gkx-brand-hover);
+      border-color: var(--gkx-brand-hover);
+      color: #fff;
+    }
+
+    button.icon {
+      width: 32px;
+      padding: 0;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      margin-bottom: 16px;
+      background: var(--gkx-bg-surface);
+      border-radius: var(--gkx-radius-card);
+      padding: 16px 0;
+    }
+
+    .operation-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+      background: var(--gkx-bg-surface);
+      border-radius: var(--gkx-radius-card);
+      padding: 16px;
+    }
+
+    .operation {
+      background: var(--gkx-bg-module);
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-control);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .operation strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--gkx-text-1);
+      font-weight: 600;
+    }
+
+    .operation span {
+      color: var(--gkx-text-2);
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .operation .step {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--gkx-radius-control);
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      background: var(--gkx-brand-light);
+      color: var(--gkx-brand);
+      font-weight: 600;
+    }
+
+    .metric {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 0 24px;
+      position: relative;
+    }
+
+    .metric + .metric::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 1px;
+      height: 40px;
+      background: var(--gkx-border);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+      margin-bottom: 8px;
+    }
+
+    .metric strong {
+      font-size: 20px;
+      line-height: 28px;
+      font-weight: 600;
+    }
+
+    .tabs {
+      background: var(--gkx-bg-subtle);
+      border: 0;
+      border-radius: var(--gkx-radius-control);
+      display: flex;
+      padding: 4px;
+      width: fit-content;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      min-width: 116px;
+      height: 32px;
+      border: 0;
+      border-radius: var(--gkx-radius-control);
+      color: var(--gkx-text-2);
+      background: transparent;
+      padding: 0 16px;
+    }
+
+    .tab.active {
+      background: var(--gkx-bg-surface);
+      color: var(--gkx-brand);
+      font-weight: 500;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);
+      gap: 16px;
+      align-items: start;
+      background: var(--gkx-bg-surface);
+      border-radius: var(--gkx-radius-card);
+      padding: 16px;
+    }
+
+    .panel {
+      background: var(--gkx-bg-surface);
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-card);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gkx-border);
+      background: var(--gkx-bg-surface);
+    }
+
+    .panel-title {
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 600;
+      color: var(--gkx-text-1);
+    }
+
+    .panel-sub {
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+      margin-top: 0;
+    }
+
+    .resource-hint {
+      padding: 8px 16px;
+      background: var(--gkx-bg-module);
+      border-bottom: 1px solid var(--gkx-border);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: var(--gkx-text-2);
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-control);
+      background: #fff;
+      color: var(--gkx-text-1);
+      font: inherit;
+      outline: none;
+    }
+
+    input, select {
+      height: 32px;
+      padding: 0 12px;
+    }
+
+    textarea {
+      min-height: 76px;
+      padding: 8px 12px;
+      resize: vertical;
+      line-height: 22px;
+    }
+
+    .search {
+      width: 220px;
+    }
+
+    .select-sm {
+      width: 118px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      height: 40px;
+      padding: 9px 16px;
+      border-bottom: 1px solid var(--gkx-border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--gkx-bg-module);
+      color: var(--gkx-text-2);
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 500;
+    }
+
+    td {
+      color: var(--gkx-text-2);
+      line-height: 22px;
+    }
+
+    .name {
+      font-weight: 500;
+      color: var(--gkx-text-1);
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .small {
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      height: 22px;
+      border-radius: 0;
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 400;
+      background: transparent;
+    }
+
+    .status::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex: 0 0 auto;
+    }
+
+    .status.on { color: var(--gkx-success); }
+    .status.draft { color: var(--gkx-warning); }
+    .status.off { color: var(--gkx-text-3); }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .row-actions button {
+      height: 28px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--gkx-brand);
+      font-size: 14px;
+    }
+
+    .tag-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 0 8px;
+      border-radius: var(--gkx-radius-control);
+      background: var(--gkx-bg-subtle);
+      color: var(--gkx-text-2);
+      font-size: 12px;
+      line-height: 20px;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .tag.green { background: #E8FFEA; color: #00B42A; }
+    .tag.orange { background: #FFF7E8; color: #FF7D00; }
+    .tag.blue { background: var(--gkx-brand-light); color: var(--gkx-brand); }
+
+    .form-body {
+      padding: 16px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--gkx-text-1);
+      margin-bottom: 8px;
+    }
+
+    .required::before {
+      content: "*";
+      color: var(--gkx-danger);
+      margin-right: 4px;
+    }
+
+    .help {
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+      margin-top: 8px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      min-height: 64px;
+      padding: 16px;
+      border-top: 1px solid var(--gkx-border);
+      background: var(--gkx-bg-module);
+    }
+
+    .preview {
+      margin-top: 16px;
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-control);
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .preview-head {
+      padding: 8px 16px;
+      background: var(--gkx-bg-module);
+      border-bottom: 1px solid var(--gkx-border);
+      color: var(--gkx-text-2);
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 500;
+    }
+
+    .front-card {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .thumb {
+      width: 96px;
+      height: 72px;
+      border-radius: var(--gkx-radius-control);
+      background: var(--gkx-brand-light);
+      border: 1px solid rgba(22,93,255,.16);
+      display: grid;
+      place-items: center;
+      color: var(--gkx-brand);
+      font-weight: 600;
+    }
+
+    .thumb.purple {
+      background: #F2F3F5;
+      border-color: var(--gkx-border);
+      color: var(--gkx-text-2);
+    }
+
+    .thumb.green {
+      background: #E8FFEA;
+      border-color: rgba(0,180,42,.18);
+      color: var(--gkx-success);
+    }
+
+    .front-title {
+      font-weight: 600;
+      color: var(--gkx-text-1);
+      margin-bottom: 8px;
+    }
+
+    .front-desc {
+      color: var(--gkx-text-2);
+      font-size: 13px;
+      line-height: 22px;
+      margin-bottom: 8px;
+    }
+
+    .front-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .work-card {
+      background: var(--gkx-bg-surface);
+      border-radius: var(--gkx-radius-card);
+      padding: 16px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .filter-item {
+      display: grid;
+      grid-template-columns: 84px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-item label {
+      margin: 0;
+      color: var(--gkx-text-2);
+      text-align: right;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 16px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 600;
+      color: var(--gkx-text-1);
+    }
+
+    .section-title span {
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      margin-bottom: 16px;
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-control);
+      overflow: hidden;
+    }
+
+    .analysis-metric {
+      padding: 16px;
+      background: var(--gkx-bg-surface);
+      border-right: 1px solid var(--gkx-border);
+    }
+
+    .analysis-metric:last-child { border-right: 0; }
+
+    .analysis-metric span {
+      display: block;
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+      margin-bottom: 8px;
+    }
+
+    .analysis-metric strong {
+      display: block;
+      color: var(--gkx-text-1);
+      font-size: 20px;
+      line-height: 28px;
+      font-weight: 600;
+    }
+
+    .analysis-metric em {
+      display: block;
+      margin-top: 4px;
+      color: var(--gkx-success);
+      font-style: normal;
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .chart-box {
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-control);
+      padding: 16px;
+      min-height: 220px;
+      background: var(--gkx-bg-surface);
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr) 56px;
+      align-items: center;
+      gap: 12px;
+      color: var(--gkx-text-2);
+    }
+
+    .bar-track {
+      height: 8px;
+      background: var(--gkx-bg-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--gkx-brand);
+      border-radius: 4px;
+    }
+
+    .trend {
+      height: 136px;
+      display: flex;
+      align-items: end;
+      gap: 14px;
+      padding-top: 16px;
+      border-bottom: 1px solid var(--gkx-border);
+    }
+
+    .trend i {
+      flex: 1;
+      min-width: 18px;
+      background: var(--gkx-brand-light);
+      border: 1px solid rgba(22,93,255,.24);
+      border-bottom: 0;
+      border-radius: 4px 4px 0 0;
+      display: block;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 16px;
+    }
+
+    .detail-panel {
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-card);
+      background: var(--gkx-bg-surface);
+      overflow: hidden;
+    }
+
+    .detail-head {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gkx-border);
+      background: var(--gkx-bg-module);
+      font-weight: 600;
+    }
+
+    .detail-body {
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 12px;
+      color: var(--gkx-text-2);
+    }
+
+    .info-row span:first-child {
+      color: var(--gkx-text-3);
+      text-align: right;
+    }
+
+    .review-text {
+      padding: 12px;
+      background: var(--gkx-bg-module);
+      border-radius: var(--gkx-radius-control);
+      color: var(--gkx-text-1);
+      line-height: 22px;
+    }
+
+    .audit-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      padding-top: 8px;
+    }
+
+    .danger {
+      color: var(--gkx-danger);
+      border-color: rgba(245,63,63,.4);
+    }
+
+    .danger:hover {
+      color: var(--gkx-danger);
+      border-color: var(--gkx-danger);
+    }
+
+    .hidden { display: none; }
+
+    .coming-page {
+      background: var(--gkx-bg-surface);
+      border: 0;
+      border-radius: var(--gkx-radius-card);
+      min-height: 520px;
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(320px, .6fr);
+      overflow: hidden;
+    }
+
+    .coming-main {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .coming-kicker {
+      width: fit-content;
+      border-radius: var(--gkx-radius-control);
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .coming-main h2 {
+      font-size: 24px;
+      margin: 0;
+      color: var(--gkx-text-1);
+    }
+
+    .coming-main p {
+      margin: 0;
+      max-width: 620px;
+      line-height: 1.75;
+      color: var(--gkx-text-2);
+    }
+
+    .coming-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .coming-list div {
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-control);
+      padding: 10px 12px;
+      background: var(--gkx-bg-module);
+      color: var(--gkx-text-2);
+    }
+
+    .coming-side {
+      background: var(--gkx-bg-module);
+      border-left: 1px solid var(--gkx-border);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .mini-card {
+      border: 1px solid var(--gkx-border);
+      border-radius: var(--gkx-radius-control);
+      padding: 12px;
+      background: #fff;
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--gkx-text-1);
+    }
+
+    .mini-card span {
+      color: var(--gkx-text-2);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 16px;
+      right: auto;
+      bottom: auto;
+      background: var(--gkx-bg-surface);
+      color: var(--gkx-text-1);
+      padding: 10px 14px;
+      border-radius: var(--gkx-radius-control);
+      border: 1px solid var(--gkx-border);
+      box-shadow: 0 8px 24px rgba(29,33,41,.12);
+      opacity: 0;
+      transform: translate(-50%, -8px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 1fr; }
+      .summary-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 780px) {
+      .app { grid-template-columns: 1fr; }
+      aside { display: none; }
+      .topbar { padding: 12px 14px; }
+      .content { margin: 16px 14px; padding: 16px 14px 22px; }
+      .page-title { align-items: flex-start; flex-direction: column; }
+      .summary-row { grid-template-columns: 1fr; }
+      .operation-strip { grid-template-columns: 1fr; }
+      .filter-grid { grid-template-columns: 1fr; }
+      .filter-item { grid-template-columns: 72px minmax(0, 1fr); }
+      .analysis-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chart-grid, .detail-layout { grid-template-columns: 1fr; }
+      .tabs { width: 100%; }
+      .tab { min-width: 0; flex: 1; }
+      .form-grid { grid-template-columns: 1fr; }
+      .front-card { grid-template-columns: 1fr; }
+      .thumb { width: 100%; height: 116px; }
+      table { min-width: 760px; }
+      .table-wrap { overflow-x: auto; }
+      .coming-page { grid-template-columns: 1fr; }
+      .coming-side { border-left: 0; border-top: 1px solid var(--gkx-border); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">门</div>
+        <div>门户后台管理系统</div>
+      </div>
+
+      <div class="nav-group-title">门户数据运营</div>
+      <button class="nav-item" data-menu="报告管理" data-domain="门户数据运营" data-status="开发中"><span class="nav-label">报告管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="资源管理" data-domain="门户数据运营" data-status="开发中"><span class="nav-label">资源管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="人才库资源管理" data-domain="门户数据运营" data-status="开发中"><span class="nav-label">人才库资源管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="智库资源管理" data-domain="门户数据运营" data-status="开发中"><span class="nav-label">智库资源管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="平台通知公告管理" data-domain="门户数据运营" data-status="已设计"><span class="nav-label">平台通知公告管理</span><span class="nav-badge done">已设计</span></button>
+      <button class="nav-item active" data-menu="课程/顶会/活动维护" data-domain="门户数据运营" data-status="已设计"><span class="nav-label">课程/顶会/活动维护</span><span class="nav-badge done">已设计</span></button>
+
+      <div class="nav-group-title">门户运营分析</div>
+      <button class="nav-item" data-menu="埋点管理" data-domain="门户运营分析" data-status="开发中"><span class="nav-label">埋点管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="运营数据分析" data-domain="门户运营分析" data-status="已设计"><span class="nav-label">运营数据分析</span><span class="nav-badge done">已设计</span></button>
+      <button class="nav-item" data-menu="评论审核" data-domain="门户运营分析" data-status="已设计"><span class="nav-label">评论审核</span><span class="nav-badge done">已设计</span></button>
+      <button class="nav-item" data-menu="认证学者审核" data-domain="门户运营分析" data-status="已设计"><span class="nav-label">认证学者审核</span><span class="nav-badge done">已设计</span></button>
+      <button class="nav-item" data-menu="报告审核" data-domain="门户运营分析" data-status="开发中"><span class="nav-label">报告审核</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="工单管理" data-domain="门户运营分析" data-status="开发中"><span class="nav-label">工单管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="咨询回复管理" data-domain="门户运营分析" data-status="开发中"><span class="nav-label">咨询回复管理</span><span class="nav-badge">开发中</span></button>
+
+      <div class="nav-group-title">门户用户与权限</div>
+      <button class="nav-item" data-menu="组织管理" data-domain="门户用户与权限" data-status="开发中"><span class="nav-label">组织管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="用户管理" data-domain="门户用户与权限" data-status="开发中"><span class="nav-label">用户管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="角色管理" data-domain="门户用户与权限" data-status="开发中"><span class="nav-label">角色管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="页面管理" data-domain="门户用户与权限" data-status="开发中"><span class="nav-label">页面管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="权限配置" data-domain="门户用户与权限" data-status="开发中"><span class="nav-label">权限配置</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="接口资源管理" data-domain="门户用户与权限" data-status="开发中"><span class="nav-label">接口资源管理</span><span class="nav-badge">开发中</span></button>
+
+      <div class="nav-group-title">门户消息与任务</div>
+      <button class="nav-item" data-menu="消息列表管理" data-domain="门户消息与任务" data-status="开发中"><span class="nav-label">消息列表管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="消息分类与模板" data-domain="门户消息与任务" data-status="开发中"><span class="nav-label">消息分类与模板</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="订阅规则管理" data-domain="门户消息与任务" data-status="开发中"><span class="nav-label">订阅规则管理</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="发送记录" data-domain="门户消息与任务" data-status="开发中"><span class="nav-label">发送记录</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="用户任务管理" data-domain="门户消息与任务" data-status="开发中"><span class="nav-label">用户任务管理</span><span class="nav-badge">开发中</span></button>
+
+      <div class="nav-group-title">门户系统配置</div>
+      <button class="nav-item" data-menu="页面配置" data-domain="门户系统配置" data-status="开发中"><span class="nav-label">页面配置</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="资源权限配置" data-domain="门户系统配置" data-status="开发中"><span class="nav-label">资源权限配置</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="接口令牌配置" data-domain="门户系统配置" data-status="开发中"><span class="nav-label">接口令牌配置</span><span class="nav-badge">开发中</span></button>
+      <button class="nav-item" data-menu="接口文档与日志" data-domain="门户系统配置" data-status="开发中"><span class="nav-label">接口文档与日志</span><span class="nav-badge">开发中</span></button>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="crumb">
+          <span id="crumb-domain">门户数据运营</span>
+          <span>/</span>
+          <strong id="crumb-menu">课程、顶会、活动资源维护</strong>
+        </div>
+        <div class="user-chip">
+          <span>运营管理员</span>
+          <div class="avatar">运</div>
+        </div>
+      </div>
+
+      <section class="content" id="resource-page">
+        <div class="page-title">
+          <div>
+            <h1>课程、顶会、活动资源维护</h1>
+            <p class="desc">用于补齐门户前台“课程推荐、顶会推荐、活动推荐”的数据录入和管理闭环。后台只维护前台展示、详情查看、搜索筛选和推荐排序需要的字段。</p>
+          </div>
+          <div class="actions">
+            <button>导入</button>
+            <button>导出</button>
+            <button class="primary">新增资源</button>
+          </div>
+        </div>
+
+        <div class="summary-row">
+          <div class="metric">
+            <span>已上架课程</span>
+            <strong>128</strong>
+          </div>
+          <div class="metric">
+            <span>近期会议</span>
+            <strong>36</strong>
+          </div>
+          <div class="metric">
+            <span>推荐活动</span>
+            <strong>72</strong>
+          </div>
+          <div class="metric">
+            <span>待完善资料</span>
+            <strong>9</strong>
+          </div>
+        </div>
+
+        <div class="operation-strip">
+          <div class="operation">
+            <div>
+              <strong>录入基础资料</strong>
+              <span>维护名称、简介、时间、地点、来源、详情地址等前台字段。</span>
+            </div>
+            <div class="step">1</div>
+          </div>
+          <div class="operation">
+            <div>
+              <strong>配置展示状态</strong>
+              <span>支持草稿、已上架、已下架，避免未确认内容进入前台。</span>
+            </div>
+            <div class="step">2</div>
+          </div>
+          <div class="operation">
+            <div>
+              <strong>支撑推荐排序</strong>
+              <span>会议热度、活动时间、课程发布时间等字段参与前台排序。</span>
+            </div>
+            <div class="step">3</div>
+          </div>
+        </div>
+
+        <div class="tabs" aria-label="资源类型切换">
+          <button class="tab active" data-tab="course">课程资源</button>
+          <button class="tab" data-tab="conference">顶会/会议</button>
+          <button class="tab" data-tab="activity">活动资源</button>
+        </div>
+
+        <section id="course" class="tab-pane">
+          <div class="workspace">
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">课程列表</div>
+                  <div class="panel-sub">支撑前台课程推荐列表和课程详情查看</div>
+                </div>
+                <div class="filters">
+                  <input class="search" value="人工智能" aria-label="搜索课程" />
+                  <select class="select-sm" aria-label="课程状态">
+                    <option>全部状态</option>
+                    <option>已上架</option>
+                    <option>草稿</option>
+                    <option>已下架</option>
+                  </select>
+                  <button class="icon" title="筛选">筛</button>
+                </div>
+              </div>
+              <div class="resource-hint">
+                <span>字段依据：课程名称</span>
+                <span>课程简介</span>
+                <span>发布时间</span>
+                <span>详情/播放地址</span>
+                <span>展示状态</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width: 30%;">课程名称</th>
+                      <th style="width: 18%;">来源/机构</th>
+                      <th style="width: 16%;">领域标签</th>
+                      <th style="width: 14%;">发布时间</th>
+                      <th style="width: 10%;">状态</th>
+                      <th style="width: 12%;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="name">机器学习基础与科研应用</div>
+                        <div class="small">用于课程推荐列表展示</div>
+                      </td>
+                      <td>公开课程平台</td>
+                      <td><div class="tag-list"><span class="tag blue">人工智能</span><span class="tag">机器学习</span></div></td>
+                      <td>2026-07-20</td>
+                      <td><span class="status on">已上架</span></td>
+                      <td><div class="row-actions"><button>编辑</button><button>下架</button></div></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="name">生物医药数据分析入门</div>
+                        <div class="small">详情页含课程简介、发布时间</div>
+                      </td>
+                      <td>名校视频课程</td>
+                      <td><div class="tag-list"><span class="tag green">生物医药</span></div></td>
+                      <td>2026-06-28</td>
+                      <td><span class="status draft">草稿</span></td>
+                      <td><div class="row-actions"><button>编辑</button><button>上架</button></div></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="name">科技政策文本分析方法</div>
+                        <div class="small">关联政策比对类任务入口</div>
+                      </td>
+                      <td>专题服务系统</td>
+                      <td><div class="tag-list"><span class="tag orange">科技政策</span></div></td>
+                      <td>2026-05-19</td>
+                      <td><span class="status off">已下架</span></td>
+                      <td><div class="row-actions"><button>编辑</button><button>复制</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">课程录入</div>
+                  <div class="panel-sub">对应前台字段：课程名称、课程简介、发布时间</div>
+                </div>
+              </div>
+              <div class="form-body">
+                <div class="form-grid">
+                  <div class="field full">
+                    <label class="required">课程名称</label>
+                    <input value="机器学习基础与科研应用" />
+                  </div>
+                  <div class="field">
+                    <label class="required">课程来源</label>
+                    <input value="公开课程平台" />
+                  </div>
+                  <div class="field">
+                    <label>发布机构</label>
+                    <input value="某高校开放课程中心" />
+                  </div>
+                  <div class="field">
+                    <label class="required">发布时间</label>
+                    <input type="date" value="2026-07-20" />
+                  </div>
+                  <div class="field">
+                    <label class="required">展示状态</label>
+                    <select>
+                      <option>已上架</option>
+                      <option>草稿</option>
+                      <option>已下架</option>
+                    </select>
+                  </div>
+                  <div class="field full">
+                    <label class="required">课程简介</label>
+                    <textarea>面向科研人员和科技企业研发人员，介绍机器学习基础方法及其在论文分析、专利分析、技术趋势研判中的应用。</textarea>
+                  </div>
+                  <div class="field">
+                    <label>领域标签</label>
+                    <input value="人工智能、机器学习、科研分析" />
+                  </div>
+                  <div class="field">
+                    <label>封面图地址</label>
+                    <input value="/assets/course/ml-cover.png" />
+                  </div>
+                  <div class="field full">
+                    <label class="required">课程详情/播放地址</label>
+                    <input value="https://example.edu/course/ml-research" />
+                    <div class="help">学习进度如未学习、已学习、进行中属于用户行为数据，不在课程基础资料中手工维护。</div>
+                  </div>
+                </div>
+
+                <div class="preview">
+                  <div class="preview-head">前台展示预览</div>
+                  <div class="front-card">
+                    <div class="thumb">课程</div>
+                    <div>
+                      <div class="front-title">机器学习基础与科研应用</div>
+                      <div class="front-desc">面向科研人员和科技企业研发人员，介绍机器学习基础方法及其在论文分析、专利分析、技术趋势研判中的应用。</div>
+                      <div class="front-meta">
+                        <span>2026-07-20</span>
+                        <span>公开课程平台</span>
+                        <span>人工智能</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button>保存草稿</button>
+                <button class="primary">保存并上架</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="conference" class="tab-pane hidden">
+          <div class="workspace">
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">顶会/会议列表</div>
+                  <div class="panel-sub">支撑最近会议、热门会议两类前台推荐</div>
+                </div>
+                <div class="filters">
+                  <input class="search" value="NLP" aria-label="搜索会议" />
+                  <select class="select-sm" aria-label="推荐类型">
+                    <option>全部类型</option>
+                    <option>最近会议</option>
+                    <option>热门会议</option>
+                  </select>
+                  <button class="icon" title="排序">排</button>
+                </div>
+              </div>
+              <div class="resource-hint">
+                <span>推荐依据：最近会议按举办时间</span>
+                <span>热门会议按投稿数、参与人数、会议热度</span>
+                <span>默认支撑前台展示 3 条</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width: 27%;">会议名称</th>
+                      <th style="width: 16%;">领域</th>
+                      <th style="width: 15%;">举办时间</th>
+                      <th style="width: 14%;">热度依据</th>
+                      <th style="width: 12%;">推荐类型</th>
+                      <th style="width: 8%;">状态</th>
+                      <th style="width: 8%;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="name">ACL 2026</div>
+                        <div class="small">自然语言处理国际会议</div>
+                      </td>
+                      <td><span class="tag blue">NLP</span></td>
+                      <td>2026-08-18</td>
+                      <td>投稿 4,800 / 参会 3,200</td>
+                      <td><span class="tag green">最近会议</span></td>
+                      <td><span class="status on">已上架</span></td>
+                      <td><div class="row-actions"><button>编辑</button></div></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="name">ICML 2026</div>
+                        <div class="small">机器学习国际会议</div>
+                      </td>
+                      <td><span class="tag blue">机器学习</span></td>
+                      <td>2026-07-12</td>
+                      <td>投稿 7,600 / 参会 5,100</td>
+                      <td><span class="tag orange">热门会议</span></td>
+                      <td><span class="status on">已上架</span></td>
+                      <td><div class="row-actions"><button>编辑</button></div></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="name">BioData Forum</div>
+                        <div class="small">生物数据与智能分析论坛</div>
+                      </td>
+                      <td><span class="tag green">生物医药</span></td>
+                      <td>2026-10-09</td>
+                      <td>投稿 860 / 参会 900</td>
+                      <td><span class="tag green">最近会议</span></td>
+                      <td><span class="status draft">草稿</span></td>
+                      <td><div class="row-actions"><button>编辑</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">顶会/会议录入</div>
+                  <div class="panel-sub">对应前台规则：按举办时间、投稿数、参与人数、会议热度推荐</div>
+                </div>
+              </div>
+              <div class="form-body">
+                <div class="form-grid">
+                  <div class="field">
+                    <label class="required">会议名称</label>
+                    <input value="ACL 2026" />
+                  </div>
+                  <div class="field">
+                    <label>会议简称</label>
+                    <input value="ACL" />
+                  </div>
+                  <div class="field">
+                    <label class="required">领域方向</label>
+                    <input value="自然语言处理" />
+                  </div>
+                  <div class="field">
+                    <label>举办形式</label>
+                    <select>
+                      <option>线下</option>
+                      <option>线上</option>
+                      <option>线上线下结合</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label class="required">举办开始日期</label>
+                    <input type="date" value="2026-08-18" />
+                  </div>
+                  <div class="field">
+                    <label>举办地点</label>
+                    <input value="新加坡" />
+                  </div>
+                  <div class="field">
+                    <label>投稿数</label>
+                    <input type="number" value="4800" />
+                  </div>
+                  <div class="field">
+                    <label>参与人数</label>
+                    <input type="number" value="3200" />
+                  </div>
+                  <div class="field">
+                    <label>热度权重</label>
+                    <input type="number" value="86" />
+                    <div class="help">用于热门会议排序；可由投稿数、参与人数、会议热度综合计算后回填。</div>
+                  </div>
+                  <div class="field">
+                    <label class="required">展示状态</label>
+                    <select>
+                      <option>已上架</option>
+                      <option>草稿</option>
+                      <option>已下架</option>
+                    </select>
+                  </div>
+                  <div class="field full">
+                    <label>会议简介</label>
+                    <textarea>自然语言处理领域国际会议，覆盖大模型、机器翻译、信息抽取、知识增强等方向。</textarea>
+                  </div>
+                  <div class="field full">
+                    <label class="required">详情地址</label>
+                    <input value="https://example.org/acl2026" />
+                  </div>
+                </div>
+
+                <div class="preview">
+                  <div class="preview-head">前台展示预览</div>
+                  <div class="front-card">
+                    <div class="thumb purple">会议</div>
+                    <div>
+                      <div class="front-title">ACL 2026</div>
+                      <div class="front-desc">自然语言处理领域国际会议，覆盖大模型、机器翻译、信息抽取、知识增强等方向。</div>
+                      <div class="front-meta">
+                        <span>2026-08-18</span>
+                        <span>新加坡</span>
+                        <span>投稿 4,800</span>
+                        <span>参会 3,200</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button>保存草稿</button>
+                <button class="primary">保存并上架</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="activity" class="tab-pane hidden">
+          <div class="workspace">
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">活动列表</div>
+                  <div class="panel-sub">支撑活动推荐列表、活动详情、论坛讲座回放</div>
+                </div>
+                <div class="filters">
+                  <input class="search" value="低空经济" aria-label="搜索活动" />
+                  <select class="select-sm" aria-label="活动状态">
+                    <option>全部状态</option>
+                    <option>报名中</option>
+                    <option>已结束</option>
+                    <option>已上架</option>
+                  </select>
+                  <button class="icon" title="筛选">筛</button>
+                </div>
+              </div>
+              <div class="resource-hint">
+                <span>字段依据：活动名称</span>
+                <span>主办单位</span>
+                <span>活动地点</span>
+                <span>活动时间</span>
+                <span>活动回放</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width: 27%;">活动名称</th>
+                      <th style="width: 17%;">主办单位</th>
+                      <th style="width: 16%;">活动时间</th>
+                      <th style="width: 15%;">活动地点</th>
+                      <th style="width: 13%;">领域标签</th>
+                      <th style="width: 12%;">状态</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="name">低空经济技术创新论坛</div>
+                        <div class="small">含论坛回放</div>
+                      </td>
+                      <td>深圳市科技服务机构</td>
+                      <td>2026-08-26</td>
+                      <td>深圳南山</td>
+                      <td><span class="tag blue">低空经济</span></td>
+                      <td><span class="status on">已上架</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="name">人工智能企业路演对接会</div>
+                        <div class="small">关联产业服务动态</div>
+                      </td>
+                      <td>产业创新中心</td>
+                      <td>2026-09-05</td>
+                      <td>深圳福田</td>
+                      <td><span class="tag blue">人工智能</span></td>
+                      <td><span class="status draft">草稿</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="name">生物医药政策宣讲</div>
+                        <div class="small">已开展活动，支持记录回放</div>
+                      </td>
+                      <td>园区服务平台</td>
+                      <td>2026-07-16</td>
+                      <td>线上</td>
+                      <td><span class="tag green">生物医药</span></td>
+                      <td><span class="status on">已上架</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">活动录入</div>
+                  <div class="panel-sub">对应前台字段：活动名称、主办单位、地点、时间、记录回放</div>
+                </div>
+              </div>
+              <div class="form-body">
+                <div class="form-grid">
+                  <div class="field full">
+                    <label class="required">活动名称</label>
+                    <input value="低空经济技术创新论坛" />
+                  </div>
+                  <div class="field">
+                    <label class="required">主办单位</label>
+                    <input value="深圳市科技服务机构" />
+                  </div>
+                  <div class="field">
+                    <label>活动类型</label>
+                    <select>
+                      <option>论坛</option>
+                      <option>讲座</option>
+                      <option>赛事</option>
+                      <option>路演对接会</option>
+                      <option>培训活动</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label class="required">活动时间</label>
+                    <input type="datetime-local" value="2026-08-26T14:00" />
+                  </div>
+                  <div class="field">
+                    <label class="required">活动地点</label>
+                    <input value="深圳南山" />
+                  </div>
+                  <div class="field">
+                    <label>热点技术/话题</label>
+                    <input value="低空经济、智能装备、空域管理" />
+                  </div>
+                  <div class="field">
+                    <label class="required">展示状态</label>
+                    <select>
+                      <option>已上架</option>
+                      <option>草稿</option>
+                      <option>已下架</option>
+                    </select>
+                  </div>
+                  <div class="field full">
+                    <label class="required">活动简介</label>
+                    <textarea>围绕低空经济产业链、关键技术突破和应用场景落地，邀请科研院所、科技企业和政府部门共同交流。</textarea>
+                  </div>
+                  <div class="field">
+                    <label>宣传图地址</label>
+                    <input value="/assets/activity/low-altitude.png" />
+                  </div>
+                  <div class="field">
+                    <label>活动详情地址</label>
+                    <input value="https://example.com/events/low-altitude" />
+                  </div>
+                  <div class="field full">
+                    <label>记录回放地址</label>
+                    <input value="https://example.com/replay/low-altitude" />
+                    <div class="help">仅已开展活动需要维护；用于前台活动详情查看回放。</div>
+                  </div>
+                </div>
+
+                <div class="preview">
+                  <div class="preview-head">前台展示预览</div>
+                  <div class="front-card">
+                    <div class="thumb green">活动</div>
+                    <div>
+                      <div class="front-title">低空经济技术创新论坛</div>
+                      <div class="front-desc">围绕低空经济产业链、关键技术突破和应用场景落地，邀请科研院所、科技企业和政府部门共同交流。</div>
+                      <div class="front-meta">
+                        <span>深圳市科技服务机构</span>
+                        <span>2026-08-26 14:00</span>
+                        <span>深圳南山</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button>保存草稿</button>
+                <button class="primary">保存并上架</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="content hidden" id="analytics-page">
+        <div class="page-title">
+          <div>
+            <h1>运营数据分析</h1>
+            <p class="desc">面向门户运营人员查看访问、资源、内容、用户行为等关键数据，数据来源于门户埋点、资源访问、消息触达和互动反馈。</p>
+          </div>
+          <div class="actions">
+            <button>导出报表</button>
+            <button class="primary">生成周报</button>
+          </div>
+        </div>
+
+        <div class="work-card">
+          <div class="filter-grid">
+            <div class="filter-item">
+              <label>统计周期</label>
+              <select><option>近 7 天</option><option>近 30 天</option><option>本月</option></select>
+            </div>
+            <div class="filter-item">
+              <label>用户类型</label>
+              <select><option>全部用户</option><option>政府用户</option><option>科研院所</option><option>科技企业</option></select>
+            </div>
+            <div class="filter-item">
+              <label>业务模块</label>
+              <select><option>全部模块</option><option>报告资源</option><option>课程资源</option><option>顶会/活动</option><option>消息中心</option></select>
+            </div>
+          </div>
+
+          <div class="analysis-grid">
+            <div class="analysis-metric"><span>门户访问用户</span><strong>12,486</strong><em>较上期 +8.2%</em></div>
+            <div class="analysis-metric"><span>资源查看次数</span><strong>38,921</strong><em>较上期 +11.6%</em></div>
+            <div class="analysis-metric"><span>报告下载次数</span><strong>4,736</strong><em>较上期 +5.4%</em></div>
+            <div class="analysis-metric"><span>任务完成数</span><strong>926</strong><em>较上期 +9.1%</em></div>
+          </div>
+
+          <div class="chart-grid">
+            <div class="chart-box">
+              <div class="section-title">
+                <h2>访问趋势</h2>
+                <span>按日统计</span>
+              </div>
+              <div class="trend" aria-label="访问趋势示意图">
+                <i style="height:42%"></i><i style="height:58%"></i><i style="height:51%"></i><i style="height:66%"></i><i style="height:72%"></i><i style="height:61%"></i><i style="height:82%"></i>
+              </div>
+              <div class="front-meta"><span>08-11</span><span>08-12</span><span>08-13</span><span>08-14</span><span>08-15</span><span>08-16</span><span>08-17</span></div>
+            </div>
+            <div class="chart-box">
+              <div class="section-title">
+                <h2>热门访问内容</h2>
+                <span>按资源查看次数排序</span>
+              </div>
+              <div class="bar-list">
+                <div class="bar-row"><span>产研报告</span><div class="bar-track"><div class="bar-fill" style="width:86%"></div></div><span>8,640</span></div>
+                <div class="bar-row"><span>人才库</span><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><span>7,218</span></div>
+                <div class="bar-row"><span>政策比对</span><div class="bar-track"><div class="bar-fill" style="width:61%"></div></div><span>6,104</span></div>
+                <div class="bar-row"><span>课程资源</span><div class="bar-track"><div class="bar-fill" style="width:48%"></div></div><span>4,809</span></div>
+                <div class="bar-row"><span>顶会活动</span><div class="bar-track"><div class="bar-fill" style="width:35%"></div></div><span>3,512</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <h2>运营明细</h2>
+            <span>用于运营人员定位内容表现和用户使用情况</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:24%;">页面/资源</th>
+                  <th style="width:14%;">所属模块</th>
+                  <th style="width:13%;">访问用户</th>
+                  <th style="width:13%;">查看次数</th>
+                  <th style="width:13%;">转化动作</th>
+                  <th style="width:13%;">互动反馈</th>
+                  <th style="width:10%;">趋势</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><div class="name">半导体产业链专题报告</div><div class="small">报告详情页</div></td><td>报告资源</td><td>1,826</td><td>5,941</td><td>下载 486</td><td>评论 24</td><td><span class="status on">上升</span></td></tr>
+                <tr><td><div class="name">人工智能政策比对任务</div><div class="small">任务工具页</div></td><td>任务服务</td><td>942</td><td>2,108</td><td>生成 318</td><td>反馈 11</td><td><span class="status on">上升</span></td></tr>
+                <tr><td><div class="name">低空经济技术创新论坛</div><div class="small">活动详情页</div></td><td>活动资源</td><td>713</td><td>1,356</td><td>查看回放 206</td><td>收藏 68</td><td><span class="status draft">波动</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="content hidden" id="comment-page">
+        <div class="page-title">
+          <div>
+            <h1>评论审核</h1>
+            <p class="desc">审核门户报告、课程、活动、社区问答等前台互动内容，保障普通用户可见内容合规、可信、可追溯。</p>
+          </div>
+          <div class="actions">
+            <button>批量通过</button>
+            <button class="danger">批量驳回</button>
+          </div>
+        </div>
+
+        <div class="work-card">
+          <div class="filter-grid">
+            <div class="filter-item"><label>审核状态</label><select><option>待审核</option><option>已通过</option><option>已驳回</option></select></div>
+            <div class="filter-item"><label>内容来源</label><select><option>全部来源</option><option>报告评论</option><option>课程评论</option><option>活动评论</option><option>社区问答</option></select></div>
+            <div class="filter-item"><label>风险类型</label><select><option>全部类型</option><option>敏感词</option><option>广告引流</option><option>无关内容</option><option>用户举报</option></select></div>
+          </div>
+
+          <div class="detail-layout">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:28%;">评论内容</th>
+                    <th style="width:14%;">用户</th>
+                    <th style="width:18%;">关联对象</th>
+                    <th style="width:12%;">来源</th>
+                    <th style="width:12%;">风险提示</th>
+                    <th style="width:10%;">状态</th>
+                    <th style="width:6%;">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><div class="name">这份报告对深圳低空经济政策梳理比较清楚...</div><div class="small">2026-08-17 09:26</div></td><td>科技企业用户</td><td>低空经济专题报告</td><td>报告评论</td><td>无</td><td><span class="status draft">待审核</span></td><td><div class="row-actions"><button>查看</button></div></td></tr>
+                  <tr><td><div class="name">建议补充更多企业融资信息和联系方式...</div><div class="small">2026-08-17 08:54</div></td><td>科研院所用户</td><td>人工智能产业链专题</td><td>专题评论</td><td>联系方式</td><td><span class="status draft">待审核</span></td><td><div class="row-actions"><button>查看</button></div></td></tr>
+                  <tr><td><div class="name">课程内容不错，但视频地址访问较慢。</div><div class="small">2026-08-16 18:20</div></td><td>政府用户</td><td>科技政策文本分析方法</td><td>课程评论</td><td>无</td><td><span class="status on">已通过</span></td><td><div class="row-actions"><button>查看</button></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="detail-panel">
+              <div class="detail-head">审核详情</div>
+              <div class="detail-body">
+                <div class="info-row"><span>关联对象</span><strong>低空经济专题报告</strong></div>
+                <div class="info-row"><span>发布用户</span><span>科技企业用户 / 已认证企业</span></div>
+                <div class="info-row"><span>发布时间</span><span>2026-08-17 09:26</span></div>
+                <div class="info-row"><span>风险提示</span><span>未命中敏感词，未被举报</span></div>
+                <div class="review-text">这份报告对深圳低空经济政策梳理比较清楚，建议后续增加更多应用场景案例。</div>
+                <div class="field full">
+                  <label>审核意见</label>
+                  <textarea placeholder="请输入">内容与关联报告相关，未发现违规信息。</textarea>
+                </div>
+                <div class="audit-actions">
+                  <button class="danger">驳回</button>
+                  <button>退回修改</button>
+                  <button class="primary">通过</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content hidden" id="scholar-page">
+        <div class="page-title">
+          <div>
+            <h1>认证学者审核</h1>
+            <p class="desc">处理门户普通用户提交的学者认证申请，结合情报挖掘侧学者数据进行核验，审核通过后用于前台专家身份展示和可信互动。</p>
+          </div>
+          <div class="actions">
+            <button>导出申请</button>
+            <button class="primary">批量分派</button>
+          </div>
+        </div>
+
+        <div class="work-card">
+          <div class="filter-grid">
+            <div class="filter-item"><label>审核状态</label><select><option>待审核</option><option>补充材料</option><option>已通过</option><option>已驳回</option></select></div>
+            <div class="filter-item"><label>机构类型</label><select><option>全部类型</option><option>高校</option><option>科研院所</option><option>企业研发机构</option></select></div>
+            <div class="filter-item"><label>研究领域</label><input value="人工智能" /></div>
+          </div>
+
+          <div class="detail-layout">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:18%;">申请人</th>
+                    <th style="width:22%;">所在机构</th>
+                    <th style="width:16%;">研究领域</th>
+                    <th style="width:14%;">匹配学者库</th>
+                    <th style="width:12%;">提交时间</th>
+                    <th style="width:10%;">状态</th>
+                    <th style="width:8%;">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><div class="name">Andrew Ng</div><div class="small">申请认证学者</div></td><td>某高校人工智能研究院</td><td><div class="tag-list"><span class="tag blue">机器学习</span><span class="tag">NLP</span></div></td><td>高匹配</td><td>2026-08-16</td><td><span class="status draft">待审核</span></td><td><div class="row-actions"><button>查看</button></div></td></tr>
+                  <tr><td><div class="name">李明</div><div class="small">补充材料后提交</div></td><td>深圳某科研院所</td><td><span class="tag green">生物医药</span></td><td>中匹配</td><td>2026-08-15</td><td><span class="status draft">待审核</span></td><td><div class="row-actions"><button>查看</button></div></td></tr>
+                  <tr><td><div class="name">王磊</div><div class="small">企业研发专家</div></td><td>科技企业研发中心</td><td><span class="tag orange">半导体</span></td><td>未匹配</td><td>2026-08-14</td><td><span class="status off">补材料</span></td><td><div class="row-actions"><button>查看</button></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="detail-panel">
+              <div class="detail-head">认证核验</div>
+              <div class="detail-body">
+                <div class="info-row"><span>申请人</span><strong>Andrew Ng</strong></div>
+                <div class="info-row"><span>所在机构</span><span>某高校人工智能研究院</span></div>
+                <div class="info-row"><span>认证材料</span><span>个人主页、机构邮箱、代表论文、身份证明</span></div>
+                <div class="info-row"><span>学者库匹配</span><span>姓名、机构、研究领域高匹配</span></div>
+                <div class="review-text">系统建议：申请人与学者库画像匹配度较高，代表论文和机构信息一致。审核通过后，可在门户前台展示认证标识，并允许其参与专家互动。</div>
+                <div class="field full">
+                  <label>审核意见</label>
+                  <textarea placeholder="请输入">材料完整，学者库匹配一致，建议通过认证。</textarea>
+                </div>
+                <div class="audit-actions">
+                  <button class="danger">驳回</button>
+                  <button>要求补充材料</button>
+                  <button class="primary">通过认证</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content hidden" id="announcement-page">
+        <div class="page-title">
+          <div>
+            <h1>平台通知公告管理</h1>
+            <p class="desc">维护面向门户普通用户展示的平台通知、政策提醒、服务变更和系统提示。公告内容进入门户前台展示，也可同步形成消息中心的“消息提醒”。</p>
+          </div>
+          <div class="actions">
+            <button>保存草稿</button>
+            <button class="primary">发布公告</button>
+          </div>
+        </div>
+
+        <div class="work-card">
+          <div class="filter-grid">
+            <div class="filter-item">
+              <label>公告状态</label>
+              <select><option>全部状态</option><option>已发布</option><option>草稿</option><option>已下线</option></select>
+            </div>
+            <div class="filter-item">
+              <label>公告类型</label>
+              <select><option>全部类型</option><option>平台通知</option><option>政策提醒</option><option>服务变更</option><option>系统提示</option></select>
+            </div>
+            <div class="filter-item">
+              <label>发布范围</label>
+              <select><option>全部用户</option><option>政府用户</option><option>科研院所</option><option>科技企业</option></select>
+            </div>
+          </div>
+
+          <div class="detail-layout">
+            <div>
+              <div class="section-title">
+                <h2>公告列表</h2>
+                <span>用于门户首页公告区、消息提醒和站内通知展示</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:28%;">公告标题</th>
+                      <th style="width:12%;">类型</th>
+                      <th style="width:14%;">发布范围</th>
+                      <th style="width:14%;">发布时间</th>
+                      <th style="width:12%;">展示位置</th>
+                      <th style="width:10%;">状态</th>
+                      <th style="width:10%;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><div class="name">2026年度人工智能与先进制造专项申报通知</div><div class="small">政策申报类通知，可同步消息中心</div></td>
+                      <td><span class="tag blue">政策提醒</span></td>
+                      <td>全部用户</td>
+                      <td>2026-08-17 09:00</td>
+                      <td>公告列表</td>
+                      <td><span class="status on">已发布</span></td>
+                      <td><div class="row-actions"><button>编辑</button><button>下线</button></div></td>
+                    </tr>
+                    <tr>
+                      <td><div class="name">门户报告下载服务维护提示</div><div class="small">服务变更通知</div></td>
+                      <td><span class="tag orange">服务变更</span></td>
+                      <td>全部用户</td>
+                      <td>2026-08-16 18:00</td>
+                      <td>消息中心</td>
+                      <td><span class="status draft">草稿</span></td>
+                      <td><div class="row-actions"><button>编辑</button><button>发布</button></div></td>
+                    </tr>
+                    <tr>
+                      <td><div class="name">科技企业用户专属资源包上线</div><div class="small">面向企业用户的资源提醒</div></td>
+                      <td><span class="tag green">平台通知</span></td>
+                      <td>科技企业</td>
+                      <td>2026-08-12 10:30</td>
+                      <td>公告列表</td>
+                      <td><span class="status off">已下线</span></td>
+                      <td><div class="row-actions"><button>编辑</button><button>复制</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="detail-panel">
+              <div class="detail-head">公告录入</div>
+              <div class="detail-body">
+                <div class="field full">
+                  <label class="required">公告标题</label>
+                  <input value="2026年度人工智能与先进制造专项申报通知" />
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label class="required">公告类型</label>
+                    <select><option>政策提醒</option><option>平台通知</option><option>服务变更</option><option>系统提示</option></select>
+                  </div>
+                  <div class="field">
+                    <label class="required">发布范围</label>
+                    <select><option>全部用户</option><option>政府用户</option><option>科研院所</option><option>科技企业</option></select>
+                  </div>
+                  <div class="field">
+                    <label class="required">发布时间</label>
+                    <input type="datetime-local" value="2026-08-17T09:00" />
+                  </div>
+                  <div class="field">
+                    <label class="required">展示状态</label>
+                    <select><option>已发布</option><option>草稿</option><option>已下线</option></select>
+                  </div>
+                  <div class="field">
+                    <label>展示位置</label>
+                    <select><option>公告列表</option><option>消息中心</option><option>公告列表 + 消息中心</option></select>
+                  </div>
+                  <div class="field">
+                    <label>有效期至</label>
+                    <input type="date" value="2026-09-15" />
+                  </div>
+                </div>
+                <div class="field full">
+                  <label class="required">公告摘要</label>
+                  <textarea>面向政府、科研院所和科技企业用户开放人工智能与先进制造专项申报入口，请符合条件的用户在规定时间内完成材料提交。</textarea>
+                </div>
+                <div class="field full">
+                  <label class="required">公告正文</label>
+                  <textarea>根据年度科技计划安排，2026年度人工智能与先进制造专项申报工作已启动。用户可通过门户进入项目申报页面，查看申报条件、材料清单和截止时间。</textarea>
+                </div>
+                <div class="field full">
+                  <label>跳转地址</label>
+                  <input value="https://portal.example.gov.cn/policy/apply/ai-manufacturing-2026" />
+                </div>
+
+                <div class="preview">
+                  <div class="preview-head">前台公告预览</div>
+                  <div class="front-card">
+                    <div class="thumb">公告</div>
+                    <div>
+                      <div class="front-title">2026年度人工智能与先进制造专项申报通知</div>
+                      <div class="front-desc">面向政府、科研院所和科技企业用户开放人工智能与先进制造专项申报入口，请符合条件的用户在规定时间内完成材料提交。</div>
+                      <div class="front-meta">
+                        <span>政策提醒</span>
+                        <span>全部用户</span>
+                        <span>2026-08-17 09:00</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="audit-actions">
+                  <button>预览</button>
+                  <button>保存草稿</button>
+                  <button class="primary">发布公告</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content hidden" id="coming-page">
+        <div class="page-title">
+          <div>
+            <h1 id="coming-title">模块开发中</h1>
+            <p class="desc" id="coming-desc">该模块已纳入门户后台完整菜单，当前原型先保留入口和定位说明，后续进入详细页面设计。</p>
+          </div>
+          <div class="actions">
+            <button id="back-resource">返回资源维护</button>
+            <button class="primary">查看建设依据</button>
+          </div>
+        </div>
+
+        <div class="coming-page">
+          <div class="coming-main">
+            <div class="coming-kicker">开发中</div>
+            <h2 id="coming-heading">模块开发中</h2>
+            <p id="coming-copy">当前页面已支持菜单点击和业务定位展示，具体列表、筛选、表单、审核流等控件将在对应模块原型阶段补齐。</p>
+            <div class="coming-list" id="coming-points"></div>
+          </div>
+          <div class="coming-side">
+            <div class="mini-card">
+              <strong>当前一级菜单</strong>
+              <span id="coming-domain">门户数据运营</span>
+            </div>
+            <div class="mini-card">
+              <strong>当前二级菜单</strong>
+              <span id="coming-menu">报告管理</span>
+            </div>
+            <div class="mini-card">
+              <strong>原型状态</strong>
+              <span>已保留导航入口，可交互点击；页面详细字段后续开发中。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">已切换模块</div>
+
+  <script>
+    const tabs = document.querySelectorAll(".tab");
+    const panes = document.querySelectorAll(".tab-pane");
+    const navItems = document.querySelectorAll(".nav-item");
+    const resourcePage = document.getElementById("resource-page");
+    const analyticsPage = document.getElementById("analytics-page");
+    const commentPage = document.getElementById("comment-page");
+    const scholarPage = document.getElementById("scholar-page");
+    const announcementPage = document.getElementById("announcement-page");
+    const comingPage = document.getElementById("coming-page");
+    const crumbDomain = document.getElementById("crumb-domain");
+    const crumbMenu = document.getElementById("crumb-menu");
+    const toast = document.getElementById("toast");
+    const designedPages = {
+      "课程/顶会/活动维护": resourcePage,
+      "平台通知公告管理": announcementPage,
+      "运营数据分析": analyticsPage,
+      "评论审核": commentPage,
+      "认证学者审核": scholarPage
+    };
+
+    const moduleCopy = {
+      "报告管理": ["维护门户前台报告的上传、上架、下架、排序、修改、删除。", "与专题服务产研报告上传、标签分类、下架能力衔接。", "后续页面建议包含报告列表、审核状态、上架范围、排序权重。"],
+      "资源管理": ["统一维护门户可展示、可授权、可访问的资源目录。", "覆盖接口资源、人才库资源、报告资源、智库资源等。", "后续页面建议包含资源目录、资源类型、授权范围、展示状态。"],
+      "人才库资源管理": ["维护门户侧人才库资源目录、前台可见状态和访问权限。", "学者底层数据仍由情报挖掘侧维护，门户后台只做展示和授权。", "后续页面建议包含人才分组、展示状态、资源授权。"],
+      "智库资源管理": ["维护门户可展示的智库资源目录和访问权限。", "智库成果、专家、报告等内容由新型高端智库系统提供。", "后续页面建议包含智库资源类型、详情入口、授权范围。"],
+      "埋点管理": ["配置门户前台用户行为采集点。", "用于支撑运营数据分析和前台使用情况评估。", "后续页面建议包含埋点事件、页面位置、采集状态。"],
+      "运营数据分析": ["面向运营人员查看访问、资源、内容、用户行为等关键数据。", "与埋点数据、社区数据、资源访问数据衔接。", "后续页面建议包含运营总览、内容表现、用户活跃、资源访问。"],
+      "评论审核": ["审核门户或社区中普通用户发布的评论内容。", "属于运营人员日常工作台能力。", "后续页面建议包含待审评论、审核结果、关联内容、处理记录。"],
+      "认证学者审核": ["处理学者认证申请，保障前台专家身份可信。", "与情报挖掘系统学者数据、学者画像有关联。", "后续页面建议包含申请材料、认证状态、审核意见。"],
+      "报告审核": ["审核报告上架、展示、发布前的内容状态。", "与报告管理、专题服务产研报告流程衔接。", "后续页面建议包含待审报告、审核流、退回原因。"],
+      "工单管理": ["处理普通用户咨询、反馈、申请类工单。", "承接专题服务系统工单管理和门户问题咨询反馈。", "后续页面建议包含工单列表、优先级、处理人、处理状态。"],
+      "咨询回复管理": ["对用户咨询和问题反馈进行回复闭环。", "与门户问题咨询反馈、专题服务咨询回复衔接。", "后续页面建议包含咨询内容、回复记录、处理状态。"],
+      "组织管理": ["管理门户后台及相关用户所属组织结构。", "属于权限管理基础能力。", "后续页面建议包含组织树、组织成员、启停状态。"],
+      "用户管理": ["管理后台用户、门户用户基础信息和账号状态。", "与角色、组织、资源权限关联。", "后续页面建议包含用户列表、账号状态、组织归属。"],
+      "角色管理": ["配置运维、运营、审核等后台角色权限。", "与页面管理和权限配置联动。", "后续页面建议包含角色列表、角色成员、权限范围。"],
+      "页面管理": ["管理门户后台页面资源和可访问范围。", "属于权限管理中的页面资源配置。", "后续页面建议包含页面树、页面编码、启停状态。"],
+      "权限配置": ["配置用户、角色、页面、资源之间的授权关系。", "支撑后台分工和资源访问控制。", "后续页面建议包含授权矩阵、批量授权、权限预览。"],
+      "接口资源管理": ["管理门户相关接口资源、访问令牌、文档和调用日志。", "用于支撑系统对接和问题排查。", "后续页面建议包含接口目录、令牌、文档、调用记录。"],
+      "消息列表管理": ["管理面向普通用户的门户消息记录和展示状态。", "承接关注更新、任务通知、消息提醒三类消息。", "后续页面建议包含消息列表、发送状态、阅读状态。"],
+      "消息分类与模板": ["维护普通用户消息分类和展示模板。", "分类保持关注更新、任务通知、消息提醒三类。", "后续页面建议包含模板内容、跳转地址、适用场景。"],
+      "订阅规则管理": ["管理用户关注实体、订阅对象、通知范围等规则。", "与论文、专利、学者、会议、资源等关注对象衔接。", "后续页面建议包含订阅对象、触发规则、接收范围。"],
+      "发送记录": ["查询消息发送结果、阅读状态、失败记录。", "用于运营排查，不承担 Kafka/Flink 运维。", "后续页面建议包含发送批次、成功失败、重试记录。"],
+      "用户任务管理": ["管理用户发起的耗时任务状态。", "包括报告生成、政策比对、专题分析等任务通知来源。", "后续页面建议包含任务列表、执行状态、结果链接。"],
+      "页面配置": ["维护原文明确的页面资源配置。", "不扩展为通用装修平台。", "后续页面建议包含页面资源、显示状态、访问控制。"],
+      "资源权限配置": ["配置报告、人才库、智库、接口等资源访问控制。", "与门户用户与权限体系联动。", "后续页面建议包含资源范围、授权对象、权限级别。"],
+      "接口令牌配置": ["管理系统间接口调用令牌和访问凭证。", "与接口资源管理、调用日志联动。", "后续页面建议包含令牌申请、有效期、启停状态。"],
+      "接口文档与日志": ["查看接口说明和接口调用记录。", "支撑项目组对接和问题排查。", "后续页面建议包含接口文档、调用时间、调用方、响应状态。"]
+    };
+
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function setCrumb(domain, menu) {
+      crumbDomain.textContent = domain;
+      crumbMenu.textContent = menu;
+    }
+
+    function hideAllPages() {
+      [resourcePage, analyticsPage, commentPage, scholarPage, announcementPage, comingPage].forEach((page) => {
+        page.classList.add("hidden");
+      });
+    }
+
+    function showResourcePage() {
+      showDesignedPage("门户数据运营", "课程/顶会/活动维护");
+    }
+
+    function showDesignedPage(domain, menu) {
+      hideAllPages();
+      designedPages[menu].classList.remove("hidden");
+      setCrumb(domain, menu === "课程/顶会/活动维护" ? "课程、顶会、活动资源维护" : menu);
+      showToast(`已打开${menu === "课程/顶会/活动维护" ? "课程/顶会/活动维护" : menu}`);
+    }
+
+    function showComingPage(domain, menu) {
+      hideAllPages();
+      comingPage.classList.remove("hidden");
+      setCrumb(domain, menu);
+
+      document.getElementById("coming-title").textContent = menu;
+      document.getElementById("coming-heading").textContent = menu;
+      document.getElementById("coming-domain").textContent = domain;
+      document.getElementById("coming-menu").textContent = menu;
+      document.getElementById("coming-desc").textContent = `${menu}已纳入完整门户后台菜单，当前标注为开发中。`;
+
+      const points = moduleCopy[menu] || ["该模块已保留导航入口。", "详细字段和流程将在后续原型中补齐。"];
+      document.getElementById("coming-points").innerHTML = points.map((point) => `<div>${point}</div>`).join("");
+      showToast(`${menu}：开发中`);
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((item) => item.classList.remove("active"));
+        panes.forEach((pane) => pane.classList.add("hidden"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab).classList.remove("hidden");
+        showToast(`已切换到${tab.textContent}`);
+      });
+    });
+
+    navItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        navItems.forEach((nav) => nav.classList.remove("active"));
+        item.classList.add("active");
+        const menu = item.dataset.menu;
+        const domain = item.dataset.domain;
+
+        if (designedPages[menu]) {
+          showDesignedPage(domain, menu);
+          return;
+        }
+
+        showComingPage(domain, menu);
+      });
+    });
+
+    document.getElementById("back-resource").addEventListener("click", () => {
+      const resourceNav = Array.from(navItems).find((item) => item.dataset.menu === "课程/顶会/活动维护");
+      navItems.forEach((nav) => nav.classList.remove("active"));
+      resourceNav.classList.add("active");
+      showResourcePage();
+    });
+
+    document.querySelectorAll("button").forEach((button) => {
+      if (button.classList.contains("tab") || button.classList.contains("nav-item") || button.id === "back-resource") return;
+      button.addEventListener("click", () => {
+        const label = button.textContent.trim() || button.title || "操作";
+        showToast(`${label}操作已触发`);
+      });
+    });
+  </script>
+</body>
+</html>
