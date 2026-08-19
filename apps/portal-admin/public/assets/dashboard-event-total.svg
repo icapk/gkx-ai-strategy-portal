@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="back" x1="18" y1="8" x2="48" y2="50" gradientUnits="userSpaceOnUse"><stop stop-color="#D7EAFF"/><stop offset="1" stop-color="#6FA8F7"/></linearGradient>
+    <linearGradient id="front" x1="10" y1="16" x2="53" y2="55" gradientUnits="userSpaceOnUse"><stop stop-color="#BCE1FF"/><stop offset="1" stop-color="#6D82F2"/></linearGradient>
+    <filter id="shadow" x="2" y="3" width="60" height="59" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#6B8FD9" flood-opacity=".24"/></filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <rect x="18" y="8" width="36" height="42" rx="12" fill="url(#back)"/>
+    <rect x="9" y="15" width="44" height="40" rx="13" fill="url(#front)" stroke="#FFFFFF" stroke-opacity=".55"/>
+    <path d="M9 37H53V42C53 49.18 47.18 55 40 55H22C14.82 55 9 49.18 9 42V37Z" fill="#FFFFFF" fill-opacity=".27"/>
+    <rect x="19" y="24" width="25" height="4" rx="2" fill="#FFFFFF" fill-opacity=".92"/>
+    <rect x="19" y="32" width="19" height="4" rx="2" fill="#FFFFFF" fill-opacity=".72"/>
+    <rect x="19" y="40" width="23" height="4" rx="2" fill="#FFFFFF" fill-opacity=".88"/>
+    <circle cx="46" cy="42" r="5" fill="#50D3D0"/>
+  </g>
+</svg>
