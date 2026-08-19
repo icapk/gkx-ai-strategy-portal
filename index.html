@@ -500,41 +500,9 @@
     }
 
     .mega-inner {
-      display: grid;
       width: min(100%, var(--content-width));
       margin: 0 auto;
       padding: 26px 32px 30px;
-      grid-template-columns: 220px minmax(0, 1fr);
-      column-gap: 32px;
-    }
-
-    .mega-context {
-      align-self: stretch;
-      border-right: 1px solid #dce4ee;
-      padding: 7px 28px 8px 0;
-    }
-
-    .mega-eyebrow {
-      margin: 0 0 7px;
-      color: var(--ink-muted);
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    .mega-title {
-      margin: 0;
-      color: var(--ink);
-      font-size: 19px;
-      font-weight: 600;
-      line-height: 1.4;
-    }
-
-    .mega-description {
-      max-width: 168px;
-      margin: 16px 0 0;
-      color: var(--ink-secondary);
-      font-size: 13px;
-      line-height: 1.75;
     }
 
     .mega-grid {
@@ -3040,11 +3008,6 @@
 
     <section class="mega-menu" id="megaMenu" aria-label="二级导航" hidden>
       <div class="mega-inner">
-        <div class="mega-context">
-          <p class="mega-eyebrow">目录</p>
-          <h2 class="mega-title" id="megaTitle"></h2>
-          <p class="mega-description" id="megaDescription" hidden></p>
-        </div>
         <div class="mega-grid" id="megaGrid"></div>
       </div>
     </section>
@@ -4314,7 +4277,6 @@
       const NAVIGATION = [
         {
           label: "科学研究",
-          description: "汇聚科研人才、文献资源、学术数据库与智能科研工具，为科研创新提供一站式信息服务。",
           items: [
             { label: "深圳人才宇宙", url: "https://ai4s.itic-sci.com/talent" },
             { label: "数据库导航", url: "https://itic-sci.com/databaseNavigation" },
@@ -4332,7 +4294,6 @@
         },
         {
           label: "未来教育",
-          description: "聚焦智能教育与信息素养培养，提供面向学习、教学与能力提升的数字化服务。",
           items: [
             { label: "学伴智能体平台", url: "https://edu.itic-sci.com/" },
             { label: "信息素养教育", url: "https://xxsy.itic-sci.com/" }
@@ -4340,7 +4301,6 @@
         },
         {
           label: "科技评价",
-          description: "围绕人才、资源与决策评价场景，提供科学、专业的科技评价支撑服务。",
           items: [
             { label: "智慧人才", url: "https://vip.itic-sci.com/talent/index/" },
             { label: "科技资源服务" },
@@ -4349,7 +4309,6 @@
         },
         {
           label: "战略咨询",
-          description: "面向产业发展与科技创新决策，汇聚智库研究、专题服务和产业洞察。",
           items: [
             { label: "战略咨询总体" },
             { label: "新型高端智库", url: "https://effortless-licorice-cdaa9f.netlify.app" },
@@ -4361,7 +4320,6 @@
         },
         {
           label: "应用管理",
-          description: "集中展示科技服务与信息展示类应用，支持页内嵌入与专题系统快速访问。",
           items: [
             { label: "科技专题服务系统", url: "https://skxdemo.unicomcn.tech:30999/development/search", action: "embed", hideEmbeddedHeader: true },
             { label: "科技信息展示系统", url: "https://skxrules.unicomcn.tech:30999/", action: "embed", hideEmbeddedHeader: true },
@@ -4374,7 +4332,6 @@
         },
         {
           label: "管理后台",
-          description: "提供系统、权限与门户内容管理能力，支撑平台安全稳定运行。",
           items: [
             {
               label: "后台管理一",
@@ -4396,7 +4353,6 @@
         },
         {
           label: "工作台",
-          description: "整合智能科研、智能阅读与专题工单，提供便捷高效的个人工作入口。",
           items: [
             { label: "智能科研", url: "workbench-bridge.html?view=research", action: "embed", embedTitle: "智能科研" },
             { label: "智能阅读", url: "workbench-bridge.html?view=reading", action: "embed", embedTitle: "智能阅读" }
@@ -4420,8 +4376,6 @@
       const homeNavTab = document.getElementById("homeNavTab");
       const utilityNav = document.getElementById("utilityNav");
       const megaMenu = document.getElementById("megaMenu");
-      const megaTitle = document.getElementById("megaTitle");
-      const megaDescription = document.getElementById("megaDescription");
       const megaGrid = document.getElementById("megaGrid");
       const iframeShell = document.getElementById("iframeShell");
       const embeddedSystem = document.getElementById("embeddedSystem");
@@ -7185,9 +7139,6 @@
         window.clearTimeout(closeTimer);
         activeDesktopIndex = index;
         const group = NAVIGATION[index];
-        megaTitle.textContent = group.label;
-        megaDescription.textContent = group.description || "";
-        megaDescription.hidden = !group.description;
         megaGrid.replaceChildren(...group.items.map(createMenuEntry));
         megaMenu.hidden = false;
         setDesktopTriggerState(index);
