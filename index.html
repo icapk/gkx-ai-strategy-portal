@@ -2977,9 +2977,9 @@
 
         <nav class="utility-nav" id="utilityNav" aria-label="快捷导航"></nav>
 
-        <button class="message-center-button" id="messageCenterButton" type="button" aria-label="消息中心，4 条未读消息" aria-controls="portalMessageCenter" aria-expanded="false">
+        <button class="message-center-button" id="messageCenterButton" type="button" aria-label="消息中心，5 条未读消息" aria-controls="portalMessageCenter" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
-          <span class="message-center-badge" id="messageCenterBadge" aria-hidden="true">4</span>
+          <span class="message-center-badge" id="messageCenterBadge" aria-hidden="true">5</span>
         </button>
 
         <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mobileDrawer">
@@ -3051,20 +3051,19 @@
             <span class="portal-message-bell" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></span>
             <div>
               <h2 class="portal-message-title" id="portalMessageTitle">消息中心</h2>
-              <p class="portal-message-subtitle">为你汇总关注对象更新、待处理事项、任务进展和服务消息提醒</p>
+              <p class="portal-message-subtitle">按未读和已读状态集中查看门户消息</p>
             </div>
           </div>
           <button class="portal-message-close" id="portalMessageClose" type="button" aria-label="关闭消息中心"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
         </div>
-        <div class="portal-message-summary" id="portalMessageSummary" aria-label="消息汇总"></div>
       </header>
 
       <div class="portal-message-toolbar">
-        <div class="portal-message-tabs" id="portalMessageTabs" role="tablist" aria-label="消息分类"></div>
+        <div class="portal-message-tabs" id="portalMessageTabs" role="tablist" aria-label="消息状态"></div>
         <label class="portal-message-search-wrap">
           <span class="sr-only">搜索消息</span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-          <input class="portal-message-search" id="portalMessageSearch" type="search" autocomplete="off" placeholder="搜索消息标题、领域、机构、政策">
+          <input class="portal-message-search" id="portalMessageSearch" type="search" autocomplete="off" placeholder="搜索标题、详情、子系统或标签">
         </label>
       </div>
 
@@ -4460,7 +4459,6 @@
       const portalMessageCenter = document.getElementById("portalMessageCenter");
       const portalMessageOverlay = document.getElementById("portalMessageOverlay");
       const portalMessageClose = document.getElementById("portalMessageClose");
-      const portalMessageSummary = document.getElementById("portalMessageSummary");
       const portalMessageTabs = document.getElementById("portalMessageTabs");
       const portalMessageSearch = document.getElementById("portalMessageSearch");
       const portalMessageList = document.getElementById("portalMessageList");
@@ -4597,8 +4595,9 @@
       };
       let activeAnnouncement = DEFAULT_HOME_ANNOUNCEMENT;
       let announcementDismissed = false;
-      let activeMessageCategory = "ALL";
+      let activeMessageStatus = "UNREAD";
       let messageKeyword = "";
+      const expandedPortalMessageIds = new Set();
       let messageReturnFocus = null;
       let messageCenterCloseTimer = null;
       let messageToastTimer = null;
@@ -5052,14 +5051,10 @@
         }
       ];
 
-      const MESSAGE_CATEGORIES = {
-        ALL: "全部",
-        FOLLOW: "关注更新",
-        TODO: "待办",
-        TASK: "任务通知",
-        NOTICE: "消息提醒"
-      };
-      const MESSAGE_TAB_ORDER = ["ALL", "FOLLOW", "TODO", "TASK", "NOTICE"];
+      const MESSAGE_STATUS_TABS = [
+        { value: "UNREAD", label: "未读消息" },
+        { value: "READ", label: "已读消息" }
+      ];
       const PORTAL_MESSAGES = [
         {
           id: "m001", category: "FOLLOW", iconText: "关", iconClass: "is-update",
@@ -5182,10 +5177,10 @@
       function getFilteredPortalMessages() {
         const keyword = messageKeyword.trim().toLowerCase();
         return PORTAL_MESSAGES.filter((message) => {
-          const categoryMatches = activeMessageCategory === "ALL" || message.category === activeMessageCategory;
+          const statusMatches = activeMessageStatus === "UNREAD" ? message.unread : !message.unread;
           const actionDetails = message.actions.flatMap((action) => [action.name, action.targetSystem, action.targetPage, action.url]);
           const searchable = [message.title, message.summary, message.source, message.due, ...message.tags, ...actionDetails].join(" ").toLowerCase();
-          return categoryMatches && (!keyword || searchable.includes(keyword));
+          return statusMatches && (!keyword || searchable.includes(keyword));
         });
       }
 
@@ -5196,57 +5191,59 @@
         messageCenterButton.setAttribute("aria-label", unread ? `消息中心，${unread} 条未读消息` : "消息中心，没有未读消息");
       }
 
-      function renderMessageSummary() {
-        const unread = PORTAL_MESSAGES.filter((message) => message.unread).length;
-        const totals = {
-          FOLLOW: PORTAL_MESSAGES.filter((message) => message.category === "FOLLOW").length,
-          TODO: PORTAL_MESSAGES.filter((message) => message.category === "TODO").length,
-          TASK: PORTAL_MESSAGES.filter((message) => message.category === "TASK").length,
-          NOTICE: PORTAL_MESSAGES.filter((message) => message.category === "NOTICE").length
-        };
-        portalMessageSummary.innerHTML = [
-          ["未读消息", unread],
-          ["关注更新", totals.FOLLOW],
-          ["待办", totals.TODO],
-          ["任务通知", totals.TASK],
-          ["消息提醒", totals.NOTICE]
-        ].map(([label, value]) => `<div class="portal-message-summary-item"><div class="portal-message-summary-value">${value}</div><div class="portal-message-summary-label">${label}</div></div>`).join("");
-        updateMessageIndicators();
-      }
-
       function renderMessageTabs() {
-        portalMessageTabs.innerHTML = MESSAGE_TAB_ORDER.map((category) => {
-          const count = category === "ALL"
-            ? PORTAL_MESSAGES.length
-            : PORTAL_MESSAGES.filter((message) => message.category === category).length;
-          const active = activeMessageCategory === category;
-          return `<button class="portal-message-tab ${active ? "is-active" : ""}" type="button" role="tab" aria-selected="${active}" data-message-category="${category}">${MESSAGE_CATEGORIES[category]} ${count}</button>`;
+        portalMessageTabs.innerHTML = MESSAGE_STATUS_TABS.map((status) => {
+          const unread = status.value === "UNREAD";
+          const count = PORTAL_MESSAGES.filter((message) => message.unread === unread).length;
+          const active = activeMessageStatus === status.value;
+          return `<button class="portal-message-tab ${active ? "is-active" : ""}" type="button" role="tab" aria-selected="${active}" data-message-status="${status.value}"><span>${status.label}</span><span class="portal-message-tab-count">${count}</span></button>`;
         }).join("");
       }
 
       function renderMessageList() {
         const messages = getFilteredPortalMessages();
-        portalMessageList.innerHTML = messages.map((message) => `
-          <article class="portal-message-card ${message.unread ? "is-unread" : ""}" data-message-id="${escapeHtml(message.id)}" tabindex="0" aria-label="${escapeHtml(message.title)}">
-            <div class="portal-message-type-icon ${escapeHtml(message.iconClass)}" aria-hidden="true">${escapeHtml(message.iconText)}</div>
-            <div class="portal-message-card-main">
-              <div class="portal-message-title-row">
+        portalMessageList.innerHTML = messages.map((message) => {
+          const primaryAction = message.actions[0];
+          const detailId = `portal-message-detail-${escapeHtml(message.id)}`;
+          const expanded = expandedPortalMessageIds.has(message.id);
+          return `
+          <article class="portal-message-card ${message.unread ? "is-unread" : "is-read"}" data-message-id="${escapeHtml(message.id)}">
+            <header class="portal-message-card-head">
+              <div class="portal-message-card-title-wrap">
+                <span class="portal-message-status-dot" aria-hidden="true"></span>
                 <h3 class="portal-message-card-title">${escapeHtml(message.title)}</h3>
-                ${message.badges.map((badge) => `<span class="portal-message-label ${badge === "NEW" ? "is-new" : "is-service"}">${escapeHtml(badge)}</span>`).join("")}
               </div>
-              <p class="portal-message-card-summary">${escapeHtml(message.summary)}</p>
-              <div class="portal-message-meta"><span class="portal-message-tag is-source">${escapeHtml(message.source)}</span>${message.tags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}${message.due ? `<span class="portal-message-tag is-due">${escapeHtml(message.due)}</span>` : ""}</div>
-              <div class="portal-message-jump"><span>跳转目标</span><span class="portal-message-target-system">${escapeHtml(message.actions[0].targetSystem)}</span><span>${escapeHtml(message.actions[0].targetPage)}</span></div>
-              <div class="portal-message-actions">${message.actions.map((action, index) => `<button class="${index === 0 ? "portal-message-primary" : "portal-message-secondary"}" type="button" data-message-action="${index}">${escapeHtml(action.name)}</button>`).join("")}</div>
+              <time class="portal-message-time">${escapeHtml(message.time)}</time>
+            </header>
+            <button class="portal-message-detail-toggle ${expanded ? "is-expanded" : ""}" type="button" data-message-detail-toggle aria-expanded="${expanded}" aria-controls="${detailId}">
+              <span>详情</span>
+              <span class="portal-message-detail-action"><span class="portal-message-detail-state">${expanded ? "收起" : "展开"}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"></path></svg></span>
+            </button>
+            <div class="portal-message-detail" id="${detailId}" ${expanded ? "" : "hidden"}>
+              <p>${escapeHtml(message.summary)}</p>
             </div>
-            <time class="portal-message-time">${escapeHtml(message.time)}</time>
+            <div class="portal-message-fields">
+              <div class="portal-message-field">
+                <span class="portal-message-field-label">跳转链接</span>
+                ${primaryAction ? `<button class="portal-message-link" type="button" data-message-action="0" title="${escapeHtml(primaryAction.url)}"><span>${escapeHtml(primaryAction.name)}</span><span class="portal-message-link-page">${escapeHtml(primaryAction.targetPage)}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 13 13 7M8 7h5v5"></path></svg></button>` : `<span class="portal-message-field-value">暂无跳转链接</span>`}
+              </div>
+              <div class="portal-message-field">
+                <span class="portal-message-field-label">子系统名称</span>
+                <span class="portal-message-field-value">${escapeHtml(primaryAction?.targetSystem || message.source)}</span>
+              </div>
+            </div>
+            <div class="portal-message-meta"><span class="portal-message-field-label">标签</span>${message.tags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}${message.due ? `<span class="portal-message-tag is-due">${escapeHtml(message.due)}</span>` : ""}</div>
           </article>
-        `).join("");
+        `;
+        }).join("");
         portalMessageEmpty.hidden = messages.length !== 0;
+        portalMessageEmpty.textContent = messageKeyword.trim()
+          ? "当前状态下没有匹配的消息"
+          : activeMessageStatus === "UNREAD" ? "暂无未读消息" : "暂无已读消息";
       }
 
       function renderMessageCenter() {
-        renderMessageSummary();
+        updateMessageIndicators();
         renderMessageTabs();
         renderMessageList();
       }
@@ -5255,7 +5252,9 @@
         const message = PORTAL_MESSAGES.find((item) => item.id === id);
         if (!message?.unread) return;
         message.unread = false;
-        renderMessageSummary();
+        expandedPortalMessageIds.delete(id);
+        updateMessageIndicators();
+        renderMessageTabs();
         renderMessageList();
       }
 
@@ -6964,22 +6963,22 @@
       portalMessageOverlay.addEventListener("click", () => closeMessageCenter(true));
       portalMessageClose.addEventListener("click", () => closeMessageCenter(true));
       portalMessageTabs.addEventListener("click", (event) => {
-        const tab = event.target.closest("[data-message-category]");
+        const tab = event.target.closest("[data-message-status]");
         if (!tab) return;
-        activeMessageCategory = tab.dataset.messageCategory;
+        activeMessageStatus = tab.dataset.messageStatus;
         renderMessageTabs();
         renderMessageList();
       });
       portalMessageTabs.addEventListener("keydown", (event) => {
         if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
         event.preventDefault();
-        const tabs = [...portalMessageTabs.querySelectorAll("[data-message-category]")];
-        const currentIndex = tabs.findIndex((tab) => tab.dataset.messageCategory === activeMessageCategory);
+        const tabs = [...portalMessageTabs.querySelectorAll("[data-message-status]")];
+        const currentIndex = tabs.findIndex((tab) => tab.dataset.messageStatus === activeMessageStatus);
         const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
-        activeMessageCategory = tabs[nextIndex].dataset.messageCategory;
+        activeMessageStatus = tabs[nextIndex].dataset.messageStatus;
         renderMessageTabs();
         renderMessageList();
-        portalMessageTabs.querySelector(`[data-message-category="${activeMessageCategory}"]`)?.focus();
+        portalMessageTabs.querySelector(`[data-message-status="${activeMessageStatus}"]`)?.focus();
       });
       portalMessageSearch.addEventListener("input", (event) => {
         messageKeyword = event.target.value;
@@ -6988,20 +6987,25 @@
       portalMessageList.addEventListener("click", (event) => {
         const card = event.target.closest("[data-message-id]");
         if (!card) return;
+
+        const detailToggle = event.target.closest("[data-message-detail-toggle]");
+        if (detailToggle) {
+          const expanded = detailToggle.getAttribute("aria-expanded") !== "true";
+          const detail = card.querySelector(`#${detailToggle.getAttribute("aria-controls")}`);
+          detailToggle.setAttribute("aria-expanded", String(expanded));
+          detailToggle.classList.toggle("is-expanded", expanded);
+          detailToggle.querySelector(".portal-message-detail-state").textContent = expanded ? "收起" : "展开";
+          if (detail) detail.hidden = !expanded;
+          if (expanded) expandedPortalMessageIds.add(card.dataset.messageId);
+          else expandedPortalMessageIds.delete(card.dataset.messageId);
+          return;
+        }
+
         const actionButton = event.target.closest("[data-message-action]");
+        if (!actionButton) return;
         const message = PORTAL_MESSAGES.find((item) => item.id === card.dataset.messageId);
-        const actionIndex = actionButton ? Number(actionButton.dataset.messageAction) : 0;
+        const actionIndex = Number(actionButton.dataset.messageAction);
         const action = message?.actions[actionIndex] || message?.actions[0];
-        markPortalMessageRead(card.dataset.messageId);
-        if (action) showPortalMessageToast(`将进入 ${action.targetSystem} / ${action.targetPage}：${action.url}`);
-      });
-      portalMessageList.addEventListener("keydown", (event) => {
-        if (!["Enter", " "].includes(event.key) || event.target.closest("button")) return;
-        const card = event.target.closest("[data-message-id]");
-        if (!card) return;
-        event.preventDefault();
-        const message = PORTAL_MESSAGES.find((item) => item.id === card.dataset.messageId);
-        const action = message?.actions[0];
         markPortalMessageRead(card.dataset.messageId);
         if (action) showPortalMessageToast(`将进入 ${action.targetSystem} / ${action.targetPage}：${action.url}`);
       });

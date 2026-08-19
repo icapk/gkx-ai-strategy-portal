@@ -2842,9 +2842,9 @@ body.has-message-center {
 
 .portal-message-head-row,
 .portal-message-title-wrap,
-.portal-message-title-row,
-.portal-message-meta,
-.portal-message-actions {
+.portal-message-card-head,
+.portal-message-card-title-wrap,
+.portal-message-meta {
   display: flex;
   align-items: center;
 }
@@ -2922,70 +2922,36 @@ body.has-message-center {
   outline: none;
 }
 
-.portal-message-summary {
-  display: grid;
-  margin-top: 18px;
-  gap: 8px;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
-.portal-message-summary-item {
-  min-width: 0;
-  border: 1px solid #dae4ef;
-  border-radius: 7px;
-  padding: 9px 11px;
-  background: #fff;
-}
-
-.portal-message-summary-value {
-  color: #223148;
-  font-size: 19px;
-  font-weight: 700;
-  line-height: 1.15;
-}
-
-.portal-message-summary-label {
-  margin-top: 4px;
-  overflow: hidden;
-  color: #718197;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.portal-message-summary-item:nth-child(1) .portal-message-summary-value { color: #c84646; }
-.portal-message-summary-item:nth-child(2) .portal-message-summary-value { color: #2563eb; }
-.portal-message-summary-item:nth-child(3) .portal-message-summary-value { color: #c96817; }
-.portal-message-summary-item:nth-child(4) .portal-message-summary-value { color: #16825d; }
-.portal-message-summary-item:nth-child(5) .portal-message-summary-value { color: #a86409; }
-
 .portal-message-toolbar {
   display: grid;
-  gap: 11px;
+  gap: 10px;
   border-bottom: 1px solid #e1e7ef;
   padding: 13px 17px;
   background: #f8fafc;
 }
 
 .portal-message-tabs {
-  display: flex;
-  overflow-x: auto;
-  gap: 7px;
-  padding-bottom: 1px;
-  scrollbar-width: none;
-}
-
-.portal-message-tabs::-webkit-scrollbar {
-  display: none;
+  display: grid;
+  width: min(360px, 100%);
+  gap: 4px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  padding: 3px;
+  background: #eef2f7;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .portal-message-tab {
-  min-height: 34px;
-  border: 1px solid transparent;
-  border-radius: 7px;
-  padding: 0 12px;
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 10px;
   color: #5f6b7f;
-  background: #fff;
+  background: transparent;
   cursor: pointer;
   font-size: 13px;
   font-weight: 620;
@@ -2994,9 +2960,34 @@ body.has-message-center {
 
 .portal-message-tab.is-active,
 .portal-message-tab[aria-selected="true"] {
-  border-color: #b9cff8;
   color: #0052d9;
-  background: #edf5ff;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(36, 53, 78, 0.12);
+}
+
+.portal-message-tab:focus-visible {
+  outline: 2px solid rgba(0, 110, 255, 0.35);
+  outline-offset: 1px;
+}
+
+.portal-message-tab-count {
+  display: inline-flex;
+  min-width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 0 6px;
+  color: #687489;
+  background: #e2e7ee;
+  font-size: 11px;
+  line-height: 20px;
+}
+
+.portal-message-tab.is-active .portal-message-tab-count,
+.portal-message-tab[aria-selected="true"] .portal-message-tab-count {
+  color: #0052d9;
+  background: #e9f3ff;
 }
 
 .portal-message-search-wrap {
@@ -3043,24 +3034,17 @@ body.has-message-center {
 }
 
 .portal-message-card {
-  display: grid;
-  align-items: start;
-  gap: 12px;
   border: 1px solid #dfe5ee;
   border-radius: 8px;
-  padding: 14px;
+  padding: 15px 16px;
   background: #fff;
-  cursor: pointer;
-  grid-template-columns: 40px minmax(0, 1fr) auto;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .portal-message-card:hover,
-.portal-message-card:focus-within,
-.portal-message-card:focus-visible {
+.portal-message-card:focus-within {
   border-color: #bfd0ec;
   box-shadow: 0 6px 18px rgba(44, 73, 118, 0.07);
-  outline: none;
 }
 
 .portal-message-card.is-unread {
@@ -3068,33 +3052,31 @@ body.has-message-center {
   box-shadow: inset 3px 0 0 #2563eb;
 }
 
-.portal-message-type-icon {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.portal-message-type-icon.is-update { background: #2563eb; }
-.portal-message-type-icon.is-todo { background: #c96817; }
-.portal-message-type-icon.is-report { background: #16825d; }
-.portal-message-type-icon.is-policy { background: #c84646; }
-.portal-message-type-icon.is-event { background: #7653d6; }
-.portal-message-type-icon.is-service { background: #a86409; }
-.portal-message-type-icon.is-interaction { background: #0f8ea0; }
-
-.portal-message-card-main {
+.portal-message-card-head {
   min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
 }
 
-.portal-message-title-row {
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-bottom: 6px;
+.portal-message-card-title-wrap {
+  min-width: 0;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.portal-message-status-dot {
+  width: 7px;
+  min-width: 7px;
+  height: 7px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: #aeb8c6;
+}
+
+.portal-message-card.is-unread .portal-message-status-dot {
+  background: #006eff;
+  box-shadow: 0 0 0 3px #e7f1ff;
 }
 
 .portal-message-card-title {
@@ -3105,38 +3087,156 @@ body.has-message-center {
   line-height: 1.45;
 }
 
-.portal-message-label {
-  display: inline-flex;
-  min-height: 20px;
-  align-items: center;
-  border-radius: 5px;
-  padding: 0 6px;
-  font-size: 11px;
-  font-weight: 650;
+.portal-message-time {
+  padding-top: 1px;
+  color: #8791a1;
+  font-size: 12px;
   white-space: nowrap;
 }
 
-.portal-message-label.is-new {
-  color: #c84646;
-  background: #fff1f1;
+.portal-message-detail-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 9px;
+  color: #586478;
+  background: #f6f8fb;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 620;
 }
 
-.portal-message-label.is-service {
-  color: #a86409;
-  background: #fff7e7;
+.portal-message-detail-toggle:hover {
+  color: #315fbd;
+  background: #eff4fb;
 }
 
-.portal-message-card-summary {
+.portal-message-detail-toggle:focus-visible,
+.portal-message-link:focus-visible {
+  outline: 2px solid rgba(0, 110, 255, 0.35);
+  outline-offset: 2px;
+}
+
+.portal-message-detail-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #748197;
+  font-weight: 500;
+}
+
+.portal-message-detail-action svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  transition: transform 160ms ease;
+}
+
+.portal-message-detail-toggle.is-expanded .portal-message-detail-action svg {
+  transform: rotate(180deg);
+}
+
+.portal-message-detail {
+  margin-top: 7px;
+  border-left: 2px solid #c9dcf7;
+  padding: 2px 10px;
+}
+
+.portal-message-detail p {
   margin: 0;
   color: #5d687a;
   font-size: 13px;
   line-height: 1.6;
 }
 
+.portal-message-fields {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.portal-message-field {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 5px;
+}
+
+.portal-message-field-label {
+  color: #8791a1;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.portal-message-field-value {
+  color: #4f5d72;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.portal-message-link {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 24px;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  padding: 0;
+  color: #0052d9;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  text-align: left;
+}
+
+.portal-message-link:hover {
+  color: #003ea8;
+}
+
+.portal-message-link-page {
+  overflow: hidden;
+  color: #6f7c91;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portal-message-link-page::before {
+  margin-right: 5px;
+  color: #a4afbd;
+  content: "·";
+}
+
+.portal-message-link svg {
+  width: 15px;
+  min-width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .portal-message-meta {
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 9px;
+  margin-top: 11px;
 }
 
 .portal-message-tag {
@@ -3148,80 +3248,9 @@ body.has-message-center {
   font-weight: 600;
 }
 
-.portal-message-tag.is-source {
-  color: #687489;
-  background: #f1f3f6;
-}
-
 .portal-message-tag.is-due {
   color: #a64f0b;
   background: #fff3e8;
-}
-
-.portal-message-jump {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 9px;
-  color: #7a8597;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.portal-message-target-system {
-  color: #315fbd;
-  font-weight: 650;
-}
-
-.portal-message-target-system::after {
-  margin-left: 6px;
-  color: #a4afbd;
-  content: "/";
-}
-
-.portal-message-time {
-  padding-top: 2px;
-  color: #8791a1;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.portal-message-actions {
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 10px;
-}
-
-.portal-message-primary,
-.portal-message-secondary {
-  min-height: 30px;
-  border-radius: 6px;
-  padding: 0 10px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 620;
-}
-
-.portal-message-primary {
-  border: 1px solid #006eff;
-  color: #fff;
-  background: #006eff;
-}
-
-.portal-message-primary:hover {
-  background: #0052d9;
-}
-
-.portal-message-secondary {
-  border: 1px solid #d5deea;
-  color: #586478;
-  background: #fff;
-}
-
-.portal-message-secondary:hover {
-  border-color: #b9cff8;
-  color: #0052d9;
 }
 
 .portal-message-empty {
@@ -3271,15 +3300,6 @@ body.has-message-center {
     font-size: 21px;
   }
 
-  .portal-message-summary {
-    gap: 6px;
-    margin-top: 14px;
-  }
-
-  .portal-message-summary-item {
-    padding: 8px;
-  }
-
   .portal-message-toolbar {
     padding: 11px 12px;
   }
@@ -3289,28 +3309,18 @@ body.has-message-center {
   }
 
   .portal-message-card {
-    padding: 12px;
-    grid-template-columns: 38px minmax(0, 1fr);
-  }
-
-  .portal-message-type-icon {
-    width: 38px;
-    height: 38px;
-  }
-
-  .portal-message-time {
-    padding-top: 0;
-    grid-column: 2;
+    padding: 13px;
   }
 }
 
 @media (max-width: 560px) {
-  .portal-message-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .portal-message-tabs {
+    width: 100%;
   }
 
-  .portal-message-summary-item:nth-child(5) {
-    grid-column: 1 / -1;
+  .portal-message-fields {
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .portal-message-title-wrap {
