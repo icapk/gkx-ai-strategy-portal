@@ -4368,8 +4368,8 @@
         {
           label: "工作台",
           items: [
-            { label: "智能科研", url: "workbench-bridge.html?view=research", action: "embed", embedTitle: "智能科研" },
-            { label: "智能阅读", url: "workbench-bridge.html?view=reading", action: "embed", embedTitle: "智能阅读" }
+            { label: "智能科研", url: "apps/research-reading/dist/index.html?view=research", action: "embed", embedTitle: "智能科研", hideEmbeddedToolbar: true },
+            { label: "智能阅读", url: "apps/research-reading/dist/index.html?view=reading", action: "embed", embedTitle: "智能阅读", hideEmbeddedToolbar: true }
           ]
         }
       ];
@@ -6216,7 +6216,8 @@
           embeddedTitle.textContent = title;
           embeddedSystem.title = title;
           iframeShell.setAttribute("aria-label", title);
-          if (embeddedSystem.getAttribute("src") !== options.iframeUrl) embeddedSystem.src = options.iframeUrl;
+          const isLocalWorkbench = options.iframeUrl.startsWith("apps/research-reading/dist/index.html");
+          if (isLocalWorkbench || embeddedSystem.getAttribute("src") !== options.iframeUrl) embeddedSystem.src = options.iframeUrl;
         } else if (embeddedSystem.getAttribute("src") !== "about:blank") {
           iframeShell.classList.remove("is-header-cropped", "is-toolbar-hidden");
           iframeShell.style.removeProperty("--embedded-header-crop");

@@ -12,6 +12,7 @@
 - 综合资源搜索落地页，包含模式、筛选、分类、排序与分页
 - 个人中心与消息中心（默认 3 条未读消息）
 - 首页公告与后台公告管理，支持草稿、立即/定时发布、自动下线和历史记录
+- 工作台内置智能科研与智能阅读，源码和构建产物均由门户本地托管
 - 桌面端和移动端响应式布局
 
 ## 本地预览
@@ -30,6 +31,7 @@ python3 -m http.server 8000
 - `education.html`：未来教育落地页
 - `evaluation.html`：科技评价落地页
 - `portal-admin-2.html`：门户后台，包含首页公告管理等运营功能
+- `apps/research-reading/`：智能科研/智能阅读 React 源码，`dist/` 为门户实际内嵌的静态构建产物
 - `home-additions.css`：首页新增业务与合作生态样式
 - `portal-extras.css`：推荐、搜索、个人中心与消息中心样式
 - `landing.css`、`landing.js`：四个落地页共享样式与交互
