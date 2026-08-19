@@ -11,6 +11,7 @@
 - 合作伙伴与生态模块
 - 综合资源搜索落地页，包含模式、筛选、分类、排序与分页
 - 个人中心与消息中心（默认 3 条未读消息）
+- 首页公告与后台公告管理，支持草稿、立即/定时发布、自动下线和历史记录
 - 桌面端和移动端响应式布局
 
 ## 本地预览
@@ -28,6 +29,7 @@ python3 -m http.server 8000
 - `strategy.html`：战略咨询落地页
 - `education.html`：未来教育落地页
 - `evaluation.html`：科技评价落地页
+- `portal-admin-2.html`：门户后台，包含首页公告管理等运营功能
 - `home-additions.css`：首页新增业务与合作生态样式
 - `portal-extras.css`：推荐、搜索、个人中心与消息中心样式
 - `landing.css`、`landing.js`：四个落地页共享样式与交互
@@ -35,3 +37,5 @@ python3 -m http.server 8000
 ## 在线发布
 
 仓库使用 GitHub Pages 从默认分支根目录发布。
+
+公告管理当前使用同源 `localStorage` 串联后台与首页，数据仅在当前浏览器内持久化；正式生产环境仍需接入服务端公告接口和调度任务。

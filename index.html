@@ -809,6 +809,20 @@
       font-size: 12px;
     }
 
+    .announcement-content {
+      color: inherit;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .announcement-content[href]:hover,
+    .announcement-content[href]:focus-visible {
+      color: var(--blue-strong);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      outline: none;
+    }
+
     .announcement-close {
       position: absolute;
       top: 50%;
@@ -3016,7 +3030,7 @@
   <aside class="announcement-bar" id="announcementBar" aria-label="平台公告">
     <div class="announcement-inner">
       <span class="announcement-label">公告</span>
-      <span>门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。</span>
+      <a class="announcement-content" id="announcementContent" aria-disabled="true">门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。</a>
     </div>
     <button class="announcement-close" id="announcementClose" type="button" aria-label="关闭公告">
       <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"></path></svg>
@@ -4382,6 +4396,7 @@
       const embeddedTitle = document.getElementById("embeddedTitle");
       const announcementBar = document.getElementById("announcementBar");
       const announcementClose = document.getElementById("announcementClose");
+      const announcementContent = document.getElementById("announcementContent");
       const homeContent = document.getElementById("homeContent");
       const brandHome = document.getElementById("brandHome");
       const mobileMenuButton = document.getElementById("mobileMenuButton");
@@ -4581,6 +4596,18 @@
       let activeDocumentItem = null;
       let activeDocumentMatchIndex = 0;
       let activeDocumentTrigger = null;
+      const ANNOUNCEMENT_STORAGE_KEY = "gkx-portal-announcements-v1";
+      const DEFAULT_HOME_ANNOUNCEMENT = {
+        id: "announcement-home-default",
+        content: "门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。",
+        linkMode: "none",
+        link: "",
+        publishAt: "2026-08-17T09:00",
+        autoOffline: false,
+        offlineAt: "",
+        status: "published"
+      };
+      let activeAnnouncement = DEFAULT_HOME_ANNOUNCEMENT;
       let announcementDismissed = false;
       let activeMessageCategory = "ALL";
       let messageKeyword = "";
@@ -4592,8 +4619,63 @@
       const SEARCH_PAGE_SIZE = 3;
       const reduceCarouselMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+      function readActivePortalAnnouncement() {
+        let stored = null;
+        let hasStoredData = false;
+        try {
+          const raw = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
+          hasStoredData = raw !== null;
+          stored = raw ? JSON.parse(raw) : null;
+        } catch (error) {
+          stored = null;
+        }
+
+        if (!hasStoredData || !Array.isArray(stored)) return DEFAULT_HOME_ANNOUNCEMENT;
+
+        const now = Date.now();
+        return stored
+          .filter((record) => record && typeof record.content === "string" && record.content.trim())
+          .filter((record) => record.status === "published" || (record.status === "scheduled" && new Date(record.publishAt).getTime() <= now))
+          .filter((record) => !record.autoOffline || !record.offlineAt || new Date(record.offlineAt).getTime() > now)
+          .sort((a, b) => new Date(b.publishAt || 0).getTime() - new Date(a.publishAt || 0).getTime())[0] || null;
+      }
+
+      function applyPortalAnnouncement() {
+        activeAnnouncement = readActivePortalAnnouncement();
+        let dismissedAnnouncementId = "";
+        try { dismissedAnnouncementId = sessionStorage.getItem("gkx-announcement-closed") || ""; } catch (error) { /* keep visible */ }
+        announcementDismissed = Boolean(activeAnnouncement) && (
+          dismissedAnnouncementId === activeAnnouncement.id ||
+          (dismissedAnnouncementId === "1" && activeAnnouncement.id === DEFAULT_HOME_ANNOUNCEMENT.id)
+        );
+
+        if (!activeAnnouncement) {
+          announcementBar.hidden = true;
+          return;
+        }
+
+        announcementContent.textContent = activeAnnouncement.content.trim();
+        announcementContent.removeAttribute("href");
+        announcementContent.removeAttribute("target");
+        announcementContent.removeAttribute("rel");
+        announcementContent.setAttribute("aria-disabled", "true");
+
+        const link = String(activeAnnouncement.link || "").trim();
+        const isInternalLink = activeAnnouncement.linkMode === "internal" && link && !/^[a-z][a-z\d+.-]*:/i.test(link) && !link.startsWith("//");
+        const isExternalLink = activeAnnouncement.linkMode === "external" && /^https:\/\//i.test(link);
+        if (isInternalLink || isExternalLink) {
+          announcementContent.href = link;
+          announcementContent.removeAttribute("aria-disabled");
+          if (isExternalLink) {
+            announcementContent.target = "_blank";
+            announcementContent.rel = "noopener noreferrer";
+          }
+        }
+
+        announcementBar.hidden = announcementDismissed || homeContent.hidden;
+      }
+
       try {
-        announcementDismissed = sessionStorage.getItem("gkx-announcement-closed") === "1";
         const storedHeroRecommendation = sessionStorage.getItem("portal-active-hero-recommendation");
         if (["simulation", "paper", "expert", "strategy"].includes(storedHeroRecommendation)) {
           activeHeroRecommendation = storedHeroRecommendation;
@@ -4605,7 +4687,7 @@
           activeV2HeroMode = storedReturnExperience === "v2-qa" ? "qa" : "search";
         }
       } catch (error) { /* keep the announcement available */ }
-      announcementBar.hidden = announcementDismissed;
+      applyPortalAnnouncement();
 
       const RECOMMENDATION_ITEMS = [
         {
@@ -6118,7 +6200,7 @@
           if (isActive) entry.setAttribute("aria-current", "page");
           else entry.removeAttribute("aria-current");
         });
-        announcementBar.hidden = !isHome || announcementDismissed;
+        announcementBar.hidden = !isHome || !activeAnnouncement || announcementDismissed;
         stopCarousel();
         if (name === "home") startCarousel();
         if (name === "iframe" && options.iframeUrl) {
@@ -6972,7 +7054,11 @@
       announcementClose.addEventListener("click", () => {
         announcementDismissed = true;
         announcementBar.hidden = true;
-        try { sessionStorage.setItem("gkx-announcement-closed", "1"); } catch (error) { /* storage may be unavailable */ }
+        try { sessionStorage.setItem("gkx-announcement-closed", activeAnnouncement?.id || "1"); } catch (error) { /* storage may be unavailable */ }
+      });
+      window.addEventListener("storage", (event) => {
+        if (event.key !== ANNOUNCEMENT_STORAGE_KEY) return;
+        applyPortalAnnouncement();
       });
       initializeFeatureCarousel();
 

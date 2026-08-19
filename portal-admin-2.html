@@ -563,6 +563,7 @@
     .status.on { color: var(--gkx-success); }
     .status.draft { color: var(--gkx-warning); }
     .status.off { color: var(--gkx-text-3); }
+    .status.scheduled { color: var(--gkx-brand); }
 
     .row-actions {
       display: flex;
@@ -742,6 +743,173 @@
       margin: 0;
       color: var(--gkx-text-2);
       text-align: right;
+    }
+
+    .announcement-current-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 16px;
+      border-left: 3px solid var(--gkx-brand);
+      border-radius: var(--gkx-radius-card);
+      background: var(--gkx-bg-surface);
+    }
+
+    .announcement-current-kicker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .announcement-current-text {
+      display: block;
+      color: var(--gkx-text-1);
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .announcement-current-meta {
+      margin: 4px 0 0;
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .announcement-toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 160px auto;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .announcement-toolbar .filter-item {
+      display: block;
+    }
+
+    .announcement-toolbar .filter-item label {
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .announcement-counts {
+      align-self: center;
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+      white-space: nowrap;
+    }
+
+    .announcement-workbench {
+      grid-template-columns: minmax(0, 1fr) 380px;
+    }
+
+    .announcement-workbench > * {
+      min-width: 0;
+    }
+
+    .announcement-row.is-selected td {
+      background: var(--gkx-brand-light);
+    }
+
+    .announcement-empty {
+      padding: 40px 16px;
+      color: var(--gkx-text-3);
+      text-align: center;
+    }
+
+    .announcement-editor-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .announcement-editor-state {
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .announcement-field-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 6px;
+      color: var(--gkx-text-3);
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .announcement-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      color: var(--gkx-text-2);
+      cursor: pointer;
+    }
+
+    .announcement-checkbox input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+    }
+
+    .announcement-field-hidden {
+      display: none;
+    }
+
+    .announcement-home-preview {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 10px 14px;
+      background: linear-gradient(90deg, #f2f7ff 0%, #eef7ff 52%, #f5f9ff 100%);
+      color: #43536a;
+      font-size: 13px;
+      line-height: 20px;
+    }
+
+    .announcement-home-preview strong {
+      flex: none;
+      border-radius: 4px;
+      padding: 1px 7px;
+      background: var(--gkx-brand);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .announcement-home-preview span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .announcement-preview-link {
+      margin-left: auto;
+      color: var(--gkx-brand);
+      white-space: nowrap;
+    }
+
+    .announcement-delete {
+      margin-right: auto;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled {
+      cursor: not-allowed;
+      opacity: .55;
     }
 
     .section-title {
@@ -1047,6 +1215,7 @@
     @media (max-width: 1180px) {
       .workspace { grid-template-columns: 1fr; }
       .summary-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .announcement-workbench { grid-template-columns: minmax(0, 1fr); }
     }
 
     @media (max-width: 780px) {
@@ -1059,8 +1228,14 @@
       .operation-strip { grid-template-columns: 1fr; }
       .filter-grid { grid-template-columns: 1fr; }
       .filter-item { grid-template-columns: 72px minmax(0, 1fr); }
+      .announcement-current-card { grid-template-columns: 1fr; }
+      .announcement-current-card .actions { justify-content: flex-start; }
+      .announcement-toolbar { grid-template-columns: 1fr; }
+      .announcement-counts { justify-self: start; }
       .analysis-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .chart-grid, .detail-layout { grid-template-columns: 1fr; }
+      .announcement-workbench { grid-template-columns: minmax(0, 1fr); }
+      .announcement-workbench .detail-panel { order: -1; }
       .tabs { width: 100%; }
       .tab { min-width: 0; flex: 1; }
       .form-grid { grid-template-columns: 1fr; }
@@ -1907,148 +2082,137 @@
         <div class="page-title">
           <div>
             <h1>平台通知公告管理</h1>
-            <p class="desc">维护面向门户普通用户展示的平台通知、政策提醒、服务变更和系统提示。公告内容进入门户前台展示，也可同步形成消息中心的“消息提醒”。</p>
+            <p class="desc">维护首页菜单下方的单条公告。支持草稿、立即发布、定时发布和自动下线；新公告发布后会替换当前公告并保留历史记录。当前静态原型数据保存在本浏览器。</p>
           </div>
           <div class="actions">
-            <button>保存草稿</button>
-            <button class="primary">发布公告</button>
+            <button id="announcement-new" data-announcement-control>新建公告</button>
+            <button id="announcement-save-top" data-announcement-control>保存草稿</button>
+            <button class="primary" id="announcement-publish-top" data-announcement-control>发布公告</button>
+          </div>
+        </div>
+
+        <div class="announcement-current-card" id="announcement-current-card">
+          <div>
+            <div class="announcement-current-kicker">
+              <span>首页当前公告</span>
+              <span class="status on" id="announcement-current-status">展示中</span>
+            </div>
+            <strong class="announcement-current-text" id="announcement-current-text">门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。</strong>
+            <p class="announcement-current-meta" id="announcement-current-meta">立即发布 · 无跳转</p>
+          </div>
+          <div class="actions">
+            <button id="announcement-open-home" data-announcement-control>查看首页</button>
+            <button class="danger" id="announcement-offline-current" data-announcement-control>下线</button>
           </div>
         </div>
 
         <div class="work-card">
-          <div class="filter-grid">
+          <div class="announcement-toolbar">
             <div class="filter-item">
-              <label>公告状态</label>
-              <select><option>全部状态</option><option>已发布</option><option>草稿</option><option>已下线</option></select>
+              <label for="announcement-search">搜索公告</label>
+              <input id="announcement-search" placeholder="搜索公告内容" />
             </div>
             <div class="filter-item">
-              <label>公告类型</label>
-              <select><option>全部类型</option><option>平台通知</option><option>政策提醒</option><option>服务变更</option><option>系统提示</option></select>
+              <label for="announcement-status-filter">公告状态</label>
+              <select id="announcement-status-filter">
+                <option value="all">全部状态</option>
+                <option value="published">已发布</option>
+                <option value="scheduled">待发布</option>
+                <option value="draft">草稿</option>
+                <option value="offline">已下线</option>
+              </select>
             </div>
-            <div class="filter-item">
-              <label>发布范围</label>
-              <select><option>全部用户</option><option>政府用户</option><option>科研院所</option><option>科技企业</option></select>
-            </div>
+            <div class="announcement-counts" id="announcement-counts">共 0 条公告</div>
           </div>
 
-          <div class="detail-layout">
+          <div class="detail-layout announcement-workbench">
             <div>
               <div class="section-title">
                 <h2>公告列表</h2>
-                <span>用于门户首页公告区、消息提醒和站内通知展示</span>
+                <span>首页同时只展示一条已发布公告</span>
               </div>
               <div class="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th style="width:28%;">公告标题</th>
-                      <th style="width:12%;">类型</th>
-                      <th style="width:14%;">发布范围</th>
-                      <th style="width:14%;">发布时间</th>
-                      <th style="width:12%;">展示位置</th>
-                      <th style="width:10%;">状态</th>
-                      <th style="width:10%;">操作</th>
+                      <th style="width:36%;">公告内容</th>
+                      <th style="width:18%;">生效时间</th>
+                      <th style="width:12%;">状态</th>
+                      <th style="width:16%;">最后更新</th>
+                      <th style="width:18%;">操作</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td><div class="name">2026年度人工智能与先进制造专项申报通知</div><div class="small">政策申报类通知，可同步消息中心</div></td>
-                      <td><span class="tag blue">政策提醒</span></td>
-                      <td>全部用户</td>
-                      <td>2026-08-17 09:00</td>
-                      <td>公告列表</td>
-                      <td><span class="status on">已发布</span></td>
-                      <td><div class="row-actions"><button>编辑</button><button>下线</button></div></td>
-                    </tr>
-                    <tr>
-                      <td><div class="name">门户报告下载服务维护提示</div><div class="small">服务变更通知</div></td>
-                      <td><span class="tag orange">服务变更</span></td>
-                      <td>全部用户</td>
-                      <td>2026-08-16 18:00</td>
-                      <td>消息中心</td>
-                      <td><span class="status draft">草稿</span></td>
-                      <td><div class="row-actions"><button>编辑</button><button>发布</button></div></td>
-                    </tr>
-                    <tr>
-                      <td><div class="name">科技企业用户专属资源包上线</div><div class="small">面向企业用户的资源提醒</div></td>
-                      <td><span class="tag green">平台通知</span></td>
-                      <td>科技企业</td>
-                      <td>2026-08-12 10:30</td>
-                      <td>公告列表</td>
-                      <td><span class="status off">已下线</span></td>
-                      <td><div class="row-actions"><button>编辑</button><button>复制</button></div></td>
-                    </tr>
+                  <tbody id="announcement-table-body">
+                    <tr><td colspan="5" class="announcement-empty">正在读取公告数据…</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
             <div class="detail-panel">
-              <div class="detail-head">公告录入</div>
+              <div class="detail-head announcement-editor-head">
+                <span id="announcement-editor-title">编辑公告</span>
+                <span class="announcement-editor-state" id="announcement-editor-state">已发布</span>
+              </div>
               <div class="detail-body">
                 <div class="field full">
-                  <label class="required">公告标题</label>
-                  <input value="2026年度人工智能与先进制造专项申报通知" />
+                  <label class="required" for="announcement-content">公告内容</label>
+                  <input id="announcement-content" maxlength="60" value="门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。" />
+                  <div class="announcement-field-meta">
+                    <span>首页单行展示，建议控制在 40 字以内</span>
+                    <span id="announcement-char-count">31/60</span>
+                  </div>
                 </div>
                 <div class="form-grid">
                   <div class="field">
-                    <label class="required">公告类型</label>
-                    <select><option>政策提醒</option><option>平台通知</option><option>服务变更</option><option>系统提示</option></select>
+                    <label for="announcement-link-mode">跳转方式</label>
+                    <select id="announcement-link-mode">
+                      <option value="none">不跳转</option>
+                      <option value="internal">门户内页</option>
+                      <option value="external">外部链接</option>
+                    </select>
                   </div>
                   <div class="field">
-                    <label class="required">发布范围</label>
-                    <select><option>全部用户</option><option>政府用户</option><option>科研院所</option><option>科技企业</option></select>
+                    <label for="announcement-publish-mode">发布方式</label>
+                    <select id="announcement-publish-mode">
+                      <option value="immediate">立即发布</option>
+                      <option value="scheduled">定时发布</option>
+                    </select>
                   </div>
-                  <div class="field">
-                    <label class="required">发布时间</label>
-                    <input type="datetime-local" value="2026-08-17T09:00" />
+                  <div class="field full announcement-field-hidden" id="announcement-link-field">
+                    <label for="announcement-link">跳转地址</label>
+                    <input id="announcement-link" placeholder="门户内页路径或 https:// 外部地址" />
+                    <div class="help" id="announcement-link-help">门户内页示例：recommendations.html</div>
                   </div>
-                  <div class="field">
-                    <label class="required">展示状态</label>
-                    <select><option>已发布</option><option>草稿</option><option>已下线</option></select>
+                  <div class="field full announcement-field-hidden" id="announcement-publish-at-field">
+                    <label class="required" for="announcement-publish-at">发布时间</label>
+                    <input id="announcement-publish-at" type="datetime-local" />
                   </div>
-                  <div class="field">
-                    <label>展示位置</label>
-                    <select><option>公告列表</option><option>消息中心</option><option>公告列表 + 消息中心</option></select>
+                  <div class="field full">
+                    <label class="announcement-checkbox" for="announcement-auto-offline">
+                      <input id="announcement-auto-offline" type="checkbox" />
+                      到期后自动下线
+                    </label>
                   </div>
-                  <div class="field">
-                    <label>有效期至</label>
-                    <input type="date" value="2026-09-15" />
+                  <div class="field full announcement-field-hidden" id="announcement-offline-at-field">
+                    <label class="required" for="announcement-offline-at">下线时间</label>
+                    <input id="announcement-offline-at" type="datetime-local" />
                   </div>
-                </div>
-                <div class="field full">
-                  <label class="required">公告摘要</label>
-                  <textarea>面向政府、科研院所和科技企业用户开放人工智能与先进制造专项申报入口，请符合条件的用户在规定时间内完成材料提交。</textarea>
-                </div>
-                <div class="field full">
-                  <label class="required">公告正文</label>
-                  <textarea>根据年度科技计划安排，2026年度人工智能与先进制造专项申报工作已启动。用户可通过门户进入项目申报页面，查看申报条件、材料清单和截止时间。</textarea>
-                </div>
-                <div class="field full">
-                  <label>跳转地址</label>
-                  <input value="https://portal.example.gov.cn/policy/apply/ai-manufacturing-2026" />
                 </div>
 
                 <div class="preview">
                   <div class="preview-head">前台公告预览</div>
-                  <div class="front-card">
-                    <div class="thumb">公告</div>
-                    <div>
-                      <div class="front-title">2026年度人工智能与先进制造专项申报通知</div>
-                      <div class="front-desc">面向政府、科研院所和科技企业用户开放人工智能与先进制造专项申报入口，请符合条件的用户在规定时间内完成材料提交。</div>
-                      <div class="front-meta">
-                        <span>政策提醒</span>
-                        <span>全部用户</span>
-                        <span>2026-08-17 09:00</span>
-                      </div>
-                    </div>
+                  <div class="announcement-home-preview">
+                    <strong>公告</strong>
+                    <span id="announcement-preview-text">门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。</span>
+                    <span class="announcement-preview-link" id="announcement-preview-link" hidden>查看详情 →</span>
                   </div>
                 </div>
 
                 <div class="audit-actions">
-                  <button>预览</button>
-                  <button>保存草稿</button>
-                  <button class="primary">发布公告</button>
+                  <button class="danger announcement-delete" id="announcement-delete" data-announcement-control>删除</button>
+                  <button id="announcement-save" data-announcement-control>保存草稿</button>
+                  <button class="primary" id="announcement-publish" data-announcement-control>发布公告</button>
                 </div>
               </div>
             </div>
@@ -2109,6 +2273,79 @@
     const crumbDomain = document.getElementById("crumb-domain");
     const crumbMenu = document.getElementById("crumb-menu");
     const toast = document.getElementById("toast");
+    const announcementTableBody = document.getElementById("announcement-table-body");
+    const announcementSearch = document.getElementById("announcement-search");
+    const announcementStatusFilter = document.getElementById("announcement-status-filter");
+    const announcementCounts = document.getElementById("announcement-counts");
+    const announcementCurrentText = document.getElementById("announcement-current-text");
+    const announcementCurrentMeta = document.getElementById("announcement-current-meta");
+    const announcementCurrentStatus = document.getElementById("announcement-current-status");
+    const announcementOfflineCurrent = document.getElementById("announcement-offline-current");
+    const announcementEditorTitle = document.getElementById("announcement-editor-title");
+    const announcementEditorState = document.getElementById("announcement-editor-state");
+    const announcementContent = document.getElementById("announcement-content");
+    const announcementCharCount = document.getElementById("announcement-char-count");
+    const announcementLinkMode = document.getElementById("announcement-link-mode");
+    const announcementLinkField = document.getElementById("announcement-link-field");
+    const announcementLink = document.getElementById("announcement-link");
+    const announcementLinkHelp = document.getElementById("announcement-link-help");
+    const announcementPublishMode = document.getElementById("announcement-publish-mode");
+    const announcementPublishAtField = document.getElementById("announcement-publish-at-field");
+    const announcementPublishAt = document.getElementById("announcement-publish-at");
+    const announcementAutoOffline = document.getElementById("announcement-auto-offline");
+    const announcementOfflineAtField = document.getElementById("announcement-offline-at-field");
+    const announcementOfflineAt = document.getElementById("announcement-offline-at");
+    const announcementPreviewText = document.getElementById("announcement-preview-text");
+    const announcementPreviewLink = document.getElementById("announcement-preview-link");
+    const announcementDelete = document.getElementById("announcement-delete");
+
+    const ANNOUNCEMENT_STORAGE_KEY = "gkx-portal-announcements-v1";
+    const ANNOUNCEMENT_STATUS = {
+      published: { label: "已发布", className: "on" },
+      scheduled: { label: "待发布", className: "scheduled" },
+      draft: { label: "草稿", className: "draft" },
+      offline: { label: "已下线", className: "off" }
+    };
+    const DEFAULT_ANNOUNCEMENTS = [
+      {
+        id: "announcement-home-default",
+        content: "门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。",
+        linkMode: "none",
+        link: "",
+        publishMode: "immediate",
+        publishAt: "2026-08-17T09:00",
+        autoOffline: false,
+        offlineAt: "",
+        status: "published",
+        updatedAt: "2026-08-17T09:00"
+      },
+      {
+        id: "announcement-maintenance-draft",
+        content: "门户报告下载服务将于本周六 00:00—02:00 进行维护。",
+        linkMode: "none",
+        link: "",
+        publishMode: "scheduled",
+        publishAt: "2026-08-22T00:00",
+        autoOffline: true,
+        offlineAt: "2026-08-22T02:00",
+        status: "draft",
+        updatedAt: "2026-08-19T09:30"
+      },
+      {
+        id: "announcement-resource-offline",
+        content: "科技企业用户专属资源包已上线，欢迎前往应用管理体验。",
+        linkMode: "internal",
+        link: "recommendations.html",
+        publishMode: "immediate",
+        publishAt: "2026-08-12T10:30",
+        autoOffline: false,
+        offlineAt: "",
+        status: "offline",
+        updatedAt: "2026-08-15T18:20"
+      }
+    ];
+    let announcementRecords = [];
+    let selectedAnnouncementId = null;
     const designedPages = {
       "课程/顶会/活动维护": resourcePage,
       "平台通知公告管理": announcementPage,
@@ -2145,6 +2382,438 @@
       "接口令牌配置": ["管理系统间接口调用令牌和访问凭证。", "与接口资源管理、调用日志联动。", "后续页面建议包含令牌申请、有效期、启停状态。"],
       "接口文档与日志": ["查看接口说明和接口调用记录。", "支撑项目组对接和问题排查。", "后续页面建议包含接口文档、调用时间、调用方、响应状态。"]
     };
+
+    function cloneDefaultAnnouncements() {
+      return DEFAULT_ANNOUNCEMENTS.map((item) => ({ ...item }));
+    }
+
+    function createAnnouncementId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return `announcement-${window.crypto.randomUUID()}`;
+      }
+      return `announcement-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function toLocalInputValue(date = new Date()) {
+      const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return localDate.toISOString().slice(0, 16);
+    }
+
+    function formatAnnouncementTime(value) {
+      if (!value) return "—";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value.replace("T", " ");
+      return new Intl.DateTimeFormat("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(date).replaceAll("/", "-");
+    }
+
+    function escapeAnnouncementText(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function normalizeAnnouncement(record) {
+      return {
+        id: String(record.id || createAnnouncementId()),
+        content: String(record.content || "").slice(0, 60),
+        linkMode: ["none", "internal", "external"].includes(record.linkMode) ? record.linkMode : "none",
+        link: String(record.link || ""),
+        publishMode: record.publishMode === "scheduled" ? "scheduled" : "immediate",
+        publishAt: String(record.publishAt || ""),
+        autoOffline: Boolean(record.autoOffline),
+        offlineAt: String(record.offlineAt || ""),
+        status: ANNOUNCEMENT_STATUS[record.status] ? record.status : "draft",
+        updatedAt: String(record.updatedAt || toLocalInputValue())
+      };
+    }
+
+    function saveAnnouncementRecords() {
+      try {
+        localStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, JSON.stringify(announcementRecords));
+      } catch (error) {
+        showToast("浏览器存储不可用，本次修改无法保留");
+      }
+    }
+
+    function reconcileAnnouncementRecords() {
+      const now = Date.now();
+      let changed = false;
+
+      announcementRecords.forEach((record) => {
+        const offlineAt = record.offlineAt ? new Date(record.offlineAt).getTime() : Number.POSITIVE_INFINITY;
+        if ((record.status === "published" || record.status === "scheduled") && record.autoOffline && offlineAt <= now) {
+          record.status = "offline";
+          record.updatedAt = toLocalInputValue();
+          changed = true;
+        }
+      });
+
+      const dueScheduled = announcementRecords
+        .filter((record) => record.status === "scheduled" && new Date(record.publishAt).getTime() <= now)
+        .sort((a, b) => new Date(b.publishAt).getTime() - new Date(a.publishAt).getTime());
+
+      if (dueScheduled.length) {
+        const newestDue = dueScheduled[0];
+        announcementRecords.forEach((record) => {
+          if (record.status === "published" || (record.status === "scheduled" && record.id !== newestDue.id && new Date(record.publishAt).getTime() <= now)) {
+            record.status = "offline";
+            record.updatedAt = toLocalInputValue();
+          }
+        });
+        newestDue.status = "published";
+        newestDue.updatedAt = toLocalInputValue();
+        changed = true;
+      }
+
+      const publishedRecords = announcementRecords
+        .filter((record) => record.status === "published")
+        .sort((a, b) => new Date(b.publishAt || b.updatedAt).getTime() - new Date(a.publishAt || a.updatedAt).getTime());
+
+      publishedRecords.slice(1).forEach((record) => {
+        record.status = "offline";
+        record.updatedAt = toLocalInputValue();
+        changed = true;
+      });
+
+      if (changed) saveAnnouncementRecords();
+    }
+
+    function loadAnnouncementRecords() {
+      let parsed = null;
+      try {
+        parsed = JSON.parse(localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY) || "null");
+      } catch (error) {
+        parsed = null;
+      }
+
+      announcementRecords = Array.isArray(parsed) && parsed.length
+        ? parsed.map(normalizeAnnouncement)
+        : cloneDefaultAnnouncements();
+
+      if (!Array.isArray(parsed) || !parsed.length) saveAnnouncementRecords();
+      reconcileAnnouncementRecords();
+    }
+
+    function getActiveAnnouncement() {
+      return announcementRecords.find((record) => record.status === "published") || null;
+    }
+
+    function announcementLinkDescription(record) {
+      if (record.linkMode === "internal") return `门户内页 · ${record.link || "未填写"}`;
+      if (record.linkMode === "external") return `外部链接 · ${record.link || "未填写"}`;
+      return "无跳转";
+    }
+
+    function renderCurrentAnnouncement() {
+      const active = getActiveAnnouncement();
+      if (!active) {
+        announcementCurrentStatus.className = "status off";
+        announcementCurrentStatus.textContent = "未展示";
+        announcementCurrentText.textContent = "当前没有已发布公告，首页公告栏暂不展示。";
+        announcementCurrentMeta.textContent = "可从右侧新建或选择历史公告发布";
+        announcementOfflineCurrent.disabled = true;
+        return;
+      }
+
+      announcementCurrentStatus.className = "status on";
+      announcementCurrentStatus.textContent = "展示中";
+      announcementCurrentText.textContent = active.content;
+      announcementCurrentMeta.textContent = `${formatAnnouncementTime(active.publishAt)} 生效 · ${announcementLinkDescription(active)}${active.autoOffline && active.offlineAt ? ` · ${formatAnnouncementTime(active.offlineAt)} 自动下线` : ""}`;
+      announcementOfflineCurrent.disabled = false;
+    }
+
+    function rowActionButtons(record) {
+      const buttons = [`<button data-announcement-row-action="edit" data-id="${escapeAnnouncementText(record.id)}">编辑</button>`];
+      if (record.status === "published") {
+        buttons.push(`<button data-announcement-row-action="offline" data-id="${escapeAnnouncementText(record.id)}">下线</button>`);
+      } else if (record.status === "scheduled") {
+        buttons.push(`<button data-announcement-row-action="cancel-schedule" data-id="${escapeAnnouncementText(record.id)}">取消定时</button>`);
+      } else {
+        buttons.push(`<button data-announcement-row-action="publish-now" data-id="${escapeAnnouncementText(record.id)}">发布</button>`);
+        buttons.push(`<button data-announcement-row-action="delete" data-id="${escapeAnnouncementText(record.id)}">删除</button>`);
+      }
+      return buttons.join("");
+    }
+
+    function renderAnnouncementTable() {
+      const keyword = announcementSearch.value.trim().toLowerCase();
+      const statusFilter = announcementStatusFilter.value;
+      const statusOrder = { published: 0, scheduled: 1, draft: 2, offline: 3 };
+      const filtered = announcementRecords
+        .filter((record) => !keyword || record.content.toLowerCase().includes(keyword))
+        .filter((record) => statusFilter === "all" || record.status === statusFilter)
+        .sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+      announcementCounts.textContent = `共 ${announcementRecords.length} 条 · 当前显示 ${filtered.length} 条`;
+      if (!filtered.length) {
+        announcementTableBody.innerHTML = '<tr><td colspan="5" class="announcement-empty">没有符合条件的公告</td></tr>';
+        return;
+      }
+
+      announcementTableBody.innerHTML = filtered.map((record) => {
+        const status = ANNOUNCEMENT_STATUS[record.status];
+        return `
+          <tr class="announcement-row${record.id === selectedAnnouncementId ? " is-selected" : ""}" data-id="${escapeAnnouncementText(record.id)}">
+            <td>
+              <div class="name" title="${escapeAnnouncementText(record.content)}">${escapeAnnouncementText(record.content)}</div>
+              <div class="small">${escapeAnnouncementText(announcementLinkDescription(record))}</div>
+            </td>
+            <td>${record.status === "draft" ? "保存后待发布" : formatAnnouncementTime(record.publishAt)}</td>
+            <td><span class="status ${status.className}">${status.label}</span></td>
+            <td>${formatAnnouncementTime(record.updatedAt)}</td>
+            <td><div class="row-actions">${rowActionButtons(record)}</div></td>
+          </tr>`;
+      }).join("");
+    }
+
+    function updateAnnouncementFormVisibility() {
+      const hasLink = announcementLinkMode.value !== "none";
+      announcementLinkField.classList.toggle("announcement-field-hidden", !hasLink);
+      announcementPublishAtField.classList.toggle("announcement-field-hidden", announcementPublishMode.value !== "scheduled");
+      announcementOfflineAtField.classList.toggle("announcement-field-hidden", !announcementAutoOffline.checked);
+      announcementLinkHelp.textContent = announcementLinkMode.value === "external"
+        ? "仅支持 https:// 安全链接"
+        : "门户内页示例：recommendations.html";
+      announcementCharCount.textContent = `${announcementContent.value.length}/60`;
+      announcementPreviewText.textContent = announcementContent.value.trim() || "请输入公告内容";
+      announcementPreviewLink.hidden = !hasLink || !announcementLink.value.trim();
+    }
+
+    function markAnnouncementEditorDirty() {
+      announcementEditorState.textContent = "未保存";
+      updateAnnouncementFormVisibility();
+    }
+
+    function loadAnnouncementEditor(id = null) {
+      selectedAnnouncementId = id;
+      const record = announcementRecords.find((item) => item.id === id) || null;
+      const emptyPublishAt = toLocalInputValue(new Date(Date.now() + 60 * 60 * 1000));
+
+      announcementEditorTitle.textContent = record ? "编辑公告" : "新建公告";
+      announcementEditorState.textContent = record ? ANNOUNCEMENT_STATUS[record.status].label : "未保存";
+      announcementContent.value = record?.content || "";
+      announcementLinkMode.value = record?.linkMode || "none";
+      announcementLink.value = record?.link || "";
+      announcementPublishMode.value = record?.publishMode || "immediate";
+      announcementPublishAt.value = record?.publishAt || emptyPublishAt;
+      announcementAutoOffline.checked = Boolean(record?.autoOffline);
+      announcementOfflineAt.value = record?.offlineAt || toLocalInputValue(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+      announcementDelete.hidden = !record || !["draft", "offline"].includes(record.status);
+      updateAnnouncementFormVisibility();
+      renderAnnouncementTable();
+    }
+
+    function collectAnnouncementForm({ forPublish = true } = {}) {
+      const content = announcementContent.value.trim();
+      const linkMode = announcementLinkMode.value;
+      const link = announcementLink.value.trim();
+      const publishMode = announcementPublishMode.value;
+      const publishAt = publishMode === "scheduled" ? announcementPublishAt.value : toLocalInputValue();
+      const autoOffline = announcementAutoOffline.checked;
+      const offlineAt = autoOffline ? announcementOfflineAt.value : "";
+
+      if (!content) throw new Error("请输入公告内容");
+      if (content.length > 60) throw new Error("公告内容不能超过 60 个字");
+      if (linkMode !== "none" && !link) throw new Error("请填写跳转地址");
+      if (linkMode === "internal" && (/^[a-z][a-z\d+.-]*:/i.test(link) || link.startsWith("//"))) {
+        throw new Error("门户内页请填写相对路径，例如 recommendations.html");
+      }
+      if (linkMode === "external") {
+        let externalUrl = null;
+        try { externalUrl = new URL(link); } catch (error) { /* handled below */ }
+        if (!externalUrl || externalUrl.protocol !== "https:") throw new Error("外部链接需填写完整的 https:// 地址");
+      }
+      if (forPublish && publishMode === "scheduled" && (!publishAt || new Date(publishAt).getTime() <= Date.now())) {
+        throw new Error("定时发布时间必须晚于当前时间");
+      }
+      const effectivePublishTime = publishMode === "scheduled" ? new Date(publishAt).getTime() : Date.now();
+      if (forPublish && autoOffline && (!offlineAt || new Date(offlineAt).getTime() <= effectivePublishTime)) {
+        throw new Error("自动下线时间必须晚于发布时间");
+      }
+
+      return { content, linkMode, link: linkMode === "none" ? "" : link, publishMode, publishAt, autoOffline, offlineAt };
+    }
+
+    function refreshAnnouncementManagement() {
+      reconcileAnnouncementRecords();
+      renderCurrentAnnouncement();
+      renderAnnouncementTable();
+    }
+
+    function saveAnnouncementDraft() {
+      try {
+        const form = collectAnnouncementForm({ forPublish: false });
+        const selected = announcementRecords.find((record) => record.id === selectedAnnouncementId) || null;
+        const shouldCreateCopy = selected?.status === "published";
+        const record = shouldCreateCopy || !selected
+          ? { id: createAnnouncementId() }
+          : selected;
+
+        Object.assign(record, form, {
+          status: "draft",
+          updatedAt: toLocalInputValue()
+        });
+        if (!announcementRecords.includes(record)) announcementRecords.unshift(record);
+        selectedAnnouncementId = record.id;
+        saveAnnouncementRecords();
+        refreshAnnouncementManagement();
+        loadAnnouncementEditor(record.id);
+        showToast(shouldCreateCopy ? "已另存为草稿，首页当前公告不变" : "草稿已保存");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    function publishAnnouncementFromForm() {
+      try {
+        const form = collectAnnouncementForm();
+        const selected = announcementRecords.find((record) => record.id === selectedAnnouncementId) || null;
+        const nextStatus = form.publishMode === "scheduled" ? "scheduled" : "published";
+        const shouldCreateCopy = selected?.status === "published";
+        const record = shouldCreateCopy || !selected
+          ? { id: createAnnouncementId() }
+          : selected;
+
+        if (nextStatus === "published") {
+          announcementRecords.forEach((item) => {
+            if (item.id !== record.id && item.status === "published") {
+              item.status = "offline";
+              item.updatedAt = toLocalInputValue();
+            }
+          });
+        }
+
+        Object.assign(record, form, {
+          status: nextStatus,
+          updatedAt: toLocalInputValue()
+        });
+        if (!announcementRecords.includes(record)) announcementRecords.unshift(record);
+        selectedAnnouncementId = record.id;
+        saveAnnouncementRecords();
+        refreshAnnouncementManagement();
+        loadAnnouncementEditor(record.id);
+        showToast(nextStatus === "scheduled" ? `已设置为 ${formatAnnouncementTime(record.publishAt)} 发布` : "公告已发布，首页已更新");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    function publishAnnouncementNow(id) {
+      const record = announcementRecords.find((item) => item.id === id);
+      if (!record) return;
+      announcementRecords.forEach((item) => {
+        if (item.id !== id && item.status === "published") {
+          item.status = "offline";
+          item.updatedAt = toLocalInputValue();
+        }
+      });
+      record.publishMode = "immediate";
+      record.publishAt = toLocalInputValue();
+      record.status = "published";
+      if (record.autoOffline && new Date(record.offlineAt).getTime() <= Date.now()) {
+        record.autoOffline = false;
+        record.offlineAt = "";
+      }
+      record.updatedAt = toLocalInputValue();
+      saveAnnouncementRecords();
+      refreshAnnouncementManagement();
+      loadAnnouncementEditor(id);
+      showToast("公告已发布，首页已更新");
+    }
+
+    function offlineAnnouncement(id) {
+      const record = announcementRecords.find((item) => item.id === id);
+      if (!record) return;
+      record.status = "offline";
+      record.updatedAt = toLocalInputValue();
+      saveAnnouncementRecords();
+      refreshAnnouncementManagement();
+      loadAnnouncementEditor(id);
+      showToast("公告已下线，首页公告栏已隐藏");
+    }
+
+    function cancelAnnouncementSchedule(id) {
+      const record = announcementRecords.find((item) => item.id === id);
+      if (!record) return;
+      record.status = "draft";
+      record.updatedAt = toLocalInputValue();
+      saveAnnouncementRecords();
+      refreshAnnouncementManagement();
+      loadAnnouncementEditor(id);
+      showToast("定时发布已取消，公告已转为草稿");
+    }
+
+    function deleteAnnouncement(id) {
+      const record = announcementRecords.find((item) => item.id === id);
+      if (!record || !["draft", "offline"].includes(record.status)) return;
+      if (!window.confirm("确认删除这条公告吗？删除后无法恢复。")) return;
+      announcementRecords = announcementRecords.filter((item) => item.id !== id);
+      saveAnnouncementRecords();
+      selectedAnnouncementId = null;
+      refreshAnnouncementManagement();
+      loadAnnouncementEditor(getActiveAnnouncement()?.id || null);
+      showToast("公告已删除");
+    }
+
+    function initializeAnnouncementManagement() {
+      loadAnnouncementRecords();
+      refreshAnnouncementManagement();
+      loadAnnouncementEditor(getActiveAnnouncement()?.id || announcementRecords[0]?.id || null);
+
+      announcementSearch.addEventListener("input", renderAnnouncementTable);
+      announcementStatusFilter.addEventListener("change", renderAnnouncementTable);
+      [announcementContent, announcementLink, announcementPublishAt, announcementOfflineAt].forEach((field) => {
+        field.addEventListener("input", markAnnouncementEditorDirty);
+      });
+      [announcementLinkMode, announcementPublishMode, announcementAutoOffline].forEach((field) => {
+        field.addEventListener("change", markAnnouncementEditorDirty);
+      });
+
+      document.getElementById("announcement-new").addEventListener("click", () => loadAnnouncementEditor());
+      document.getElementById("announcement-save").addEventListener("click", saveAnnouncementDraft);
+      document.getElementById("announcement-save-top").addEventListener("click", saveAnnouncementDraft);
+      document.getElementById("announcement-publish").addEventListener("click", publishAnnouncementFromForm);
+      document.getElementById("announcement-publish-top").addEventListener("click", publishAnnouncementFromForm);
+      document.getElementById("announcement-open-home").addEventListener("click", () => window.open("index.html", "_blank", "noopener"));
+      announcementOfflineCurrent.addEventListener("click", () => {
+        const active = getActiveAnnouncement();
+        if (active) offlineAnnouncement(active.id);
+      });
+      announcementDelete.addEventListener("click", () => {
+        if (selectedAnnouncementId) deleteAnnouncement(selectedAnnouncementId);
+      });
+
+      announcementTableBody.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-announcement-row-action]");
+        if (!button) return;
+        const id = button.dataset.id;
+        const action = button.dataset.announcementRowAction;
+        if (action === "edit") loadAnnouncementEditor(id);
+        if (action === "publish-now") publishAnnouncementNow(id);
+        if (action === "offline") offlineAnnouncement(id);
+        if (action === "cancel-schedule") cancelAnnouncementSchedule(id);
+        if (action === "delete") deleteAnnouncement(id);
+      });
+
+      window.addEventListener("storage", (event) => {
+        if (event.key !== ANNOUNCEMENT_STORAGE_KEY) return;
+        loadAnnouncementRecords();
+        refreshAnnouncementManagement();
+        if (selectedAnnouncementId && announcementRecords.some((record) => record.id === selectedAnnouncementId)) {
+          loadAnnouncementEditor(selectedAnnouncementId);
+        }
+      });
+    }
 
     function showToast(text) {
       toast.textContent = text;
@@ -2224,8 +2893,16 @@
       showResourcePage();
     });
 
+    initializeAnnouncementManagement();
+
     document.querySelectorAll("button").forEach((button) => {
-      if (button.classList.contains("tab") || button.classList.contains("nav-item") || button.id === "back-resource") return;
+      if (
+        button.classList.contains("tab") ||
+        button.classList.contains("nav-item") ||
+        button.id === "back-resource" ||
+        button.hasAttribute("data-announcement-control") ||
+        button.hasAttribute("data-announcement-row-action")
+      ) return;
       button.addEventListener("click", () => {
         const label = button.textContent.trim() || button.title || "操作";
         showToast(`${label}操作已触发`);
