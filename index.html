@@ -4346,24 +4346,12 @@
         },
         {
           label: "管理后台",
-          items: [
-            {
-              label: "后台管理一",
-              url: "apps/portal-admin/dist/index.html",
-              action: "embed",
-              embedTitle: "后台管理一",
-              hideEmbeddedToolbar: true,
-              hideEmbeddedHeader: true,
-              headerCropPx: 64
-            },
-            {
-              label: "后台管理二",
-              url: "portal-admin-2.html",
-              action: "embed",
-              embedTitle: "后台管理二",
-              hideEmbeddedToolbar: true
-            }
-          ]
+          url: "apps/portal-admin/dist/index.html",
+          action: "embed",
+          embedTitle: "后台管理一",
+          hideEmbeddedToolbar: true,
+          hideEmbeddedHeader: true,
+          headerCropPx: 64
         },
         {
           label: "工作台",
@@ -7208,6 +7196,31 @@
         utilityNav.appendChild(wrapper);
       }
 
+      function createDesktopDirectEntry(group) {
+        const isEmbedded = group.action === "embed";
+        const entry = document.createElement(isEmbedded ? "button" : "a");
+        entry.className = "nav-trigger nav-direct-entry";
+        entry.dataset.navLabel = group.label;
+        entry.textContent = group.label;
+
+        if (isEmbedded) {
+          entry.type = "button";
+          entry.addEventListener("click", () => activateEmbeddedSystem(group));
+        } else {
+          entry.href = group.url;
+          entry.target = "_blank";
+          entry.rel = "noopener noreferrer";
+          entry.addEventListener("click", () => {
+            closeSearchPanel();
+            closeDesktopMenu();
+            closeUtilityMenu();
+            closeProfileMenu();
+          });
+        }
+
+        desktopNav.appendChild(entry);
+      }
+
       function setDesktopTriggerState(activeIndex) {
         desktopTriggers.forEach((trigger, index) => {
           const isActive = index === activeIndex;
@@ -7268,6 +7281,11 @@
           return;
         }
 
+        if (group.url) {
+          createDesktopDirectEntry(group);
+          return;
+        }
+
         const trigger = document.createElement("button");
         trigger.type = "button";
         trigger.className = "nav-trigger";
@@ -7317,7 +7335,7 @@
 
       function closeMobileSubmenus() {
         activeMobileIndex = -1;
-        mobileNav.querySelectorAll("button.mobile-primary").forEach((button) => {
+        mobileNav.querySelectorAll("button.mobile-primary[aria-expanded]").forEach((button) => {
           button.setAttribute("aria-expanded", "false");
         });
         mobileNav.querySelectorAll(".mobile-submenu").forEach((submenu) => {
@@ -7326,7 +7344,7 @@
       }
 
       function toggleMobileGroup(index) {
-        const buttons = [...mobileNav.querySelectorAll("button.mobile-primary")];
+        const buttons = [...mobileNav.querySelectorAll("button.mobile-primary[aria-expanded]")];
         const submenus = [...mobileNav.querySelectorAll(".mobile-submenu")];
         const isClosing = activeMobileIndex === index;
 
@@ -7371,7 +7389,7 @@
           return;
         }
 
-        const mobileToggleIndex = mobileNav.querySelectorAll("button.mobile-primary").length;
+        const mobileToggleIndex = mobileNav.querySelectorAll("button.mobile-primary[aria-expanded]").length;
         const primary = document.createElement("button");
         primary.type = "button";
         primary.className = "mobile-primary";
