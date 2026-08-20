@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>门户工单弹窗原型</title>
+  <style>
+    :root {
+      --blue: #165dff;
+      --blue-soft: #e8f1ff;
+      --green: #16a34a;
+      --orange: #d97706;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d8e7fc;
+      --line-soft: #e5e7eb;
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --soft: #f8fafc;
+      --shadow: 0 24px 72px rgba(15, 23, 42, .24);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+      background: transparent;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .portal-bg {
+      min-height: 100vh;
+      padding: 28px;
+      filter: blur(3px);
+      transform: scale(1.01);
+      pointer-events: none;
+    }
+
+    .mock-top {
+      height: 54px;
+      border: 1px solid rgba(203, 213, 225, .9);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .88);
+      margin-bottom: 28px;
+    }
+
+    .mock-hero {
+      width: min(720px, 72vw);
+      height: 42px;
+      border-radius: 6px;
+      background: rgba(100, 116, 139, .14);
+      margin: 36px auto 14px;
+    }
+
+    .mock-sub {
+      width: min(460px, 52vw);
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(100, 116, 139, .12);
+      margin: 0 auto 34px;
+    }
+
+    .mock-grid {
+      width: min(980px, 82vw);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin: 0 auto;
+    }
+
+    .mock-card {
+      min-height: 136px;
+      border: 1px solid rgba(203, 213, 225, .9);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .72);
+      padding: 18px;
+    }
+
+    .mock-line {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(100, 116, 139, .16);
+      margin-bottom: 14px;
+    }
+
+    .mock-line.short { width: 56%; }
+    .mock-line.mid { width: 76%; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, .38);
+    }
+
+    .ticket-popup {
+      width: min(920px, calc(100vw - 36px));
+      height: min(680px, calc(100vh - 36px));
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .popup-head {
+      min-height: 62px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid rgba(255, 255, 255, .26);
+      background: rgba(255, 255, 255, .18);
+      font-weight: 900;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      margin: 2px 0 0;
+      font-size: 13px;
+      line-height: 1.45;
+      opacity: .86;
+    }
+
+    .close {
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255, 255, 255, .28);
+      border-radius: 6px;
+      color: #fff;
+      background: rgba(255, 255, 255, .14);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .popup-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line-soft);
+      background: var(--soft);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      height: 30px;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      padding: 0 10px;
+      color: var(--muted);
+      background: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: var(--blue);
+      border-color: rgba(22, 93, 255, .36);
+      background: var(--blue-soft);
+    }
+
+    .popup-body {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 340px minmax(0, 1fr);
+    }
+
+    .list-pane {
+      min-height: 0;
+      overflow: auto;
+      border-right: 1px solid var(--line-soft);
+      background: #fff;
+    }
+
+    .ticket-item {
+      width: 100%;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #fff;
+      color: inherit;
+    }
+
+    .ticket-item:hover,
+    .ticket-item:focus-within,
+    .ticket-item.active {
+      background: #f7fbff;
+    }
+
+    .ticket-item.active {
+      box-shadow: inset 3px 0 0 var(--blue);
+    }
+
+    .ticket-main {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      border: 0;
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      text-align: left;
+    }
+
+    .ticket-main:focus-visible {
+      border-radius: 6px;
+      outline: 2px solid rgba(22, 93, 255, .24);
+      outline-offset: 3px;
+    }
+
+    .ticket-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .ticket-process {
+      height: 30px;
+      border: 1px solid rgba(22, 93, 255, .32);
+      border-radius: 6px;
+      padding: 0 12px;
+      color: var(--blue);
+      background: #fff;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .ticket-process:hover,
+    .ticket-process:focus-visible {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      outline: none;
+    }
+
+    .ticket-title {
+      margin: 0 0 7px;
+      color: #111827;
+      font-weight: 800;
+      line-height: 1.42;
+      overflow-wrap: anywhere;
+    }
+
+    .ticket-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status {
+      height: 24px;
+      min-width: 56px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .status.wait { color: var(--orange); background: #fff7ed; }
+    .status.reply { color: var(--blue); background: var(--blue-soft); }
+    .status.close { color: var(--green); background: #ecfdf3; }
+
+    .detail-pane {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .detail-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .detail-title {
+      margin: 0 0 8px;
+      color: #111827;
+      font-size: 18px;
+      line-height: 1.36;
+    }
+
+    .detail-title:focus {
+      outline: none;
+    }
+
+    .detail-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .block {
+      padding-top: 16px;
+      margin-top: 16px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .block h2 {
+      margin: 0 0 10px;
+      color: #111827;
+      font-size: 15px;
+    }
+
+    .text {
+      margin: 0;
+      color: #374151;
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+
+    .reply-box {
+      border: 1px solid #b9d3ff;
+      border-radius: 6px;
+      background: #f6faff;
+      padding: 14px;
+    }
+
+    .reply-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .empty-reply {
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      padding: 16px;
+      color: var(--muted);
+      background: var(--soft);
+      line-height: 1.65;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      padding: 10px 14px;
+      border-radius: 6px;
+      color: #fff;
+      background: #111827;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, .22);
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 760px) {
+      .overlay {
+        padding: 0;
+        place-items: stretch;
+      }
+
+      .ticket-popup {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .popup-body {
+        grid-template-columns: 1fr;
+      }
+
+      .list-pane {
+        max-height: 240px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .detail-top {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="overlay" id="ticketOverlay">
+    <section class="ticket-popup" role="dialog" aria-modal="true" aria-labelledby="ticketServiceTitle">
+      <header class="popup-head">
+        <div class="title-wrap">
+          <div class="mark">工</div>
+          <div>
+            <h1 id="ticketServiceTitle">工单服务</h1>
+            <p class="subtitle">查看工单状态、详情和运营回复</p>
+          </div>
+        </div>
+        <button class="close" type="button" title="关闭" aria-label="关闭工单服务">×</button>
+      </header>
+
+      <div class="popup-toolbar">
+        <div class="tabs" id="tabs"></div>
+      </div>
+
+      <div class="popup-body" id="historyView">
+        <aside class="list-pane" id="ticketList"></aside>
+        <section class="detail-pane" id="detail"></section>
+      </div>
+
+    </section>
+  </main>
+
+  <div class="toast" id="toast">操作成功</div>
+
+  <script>
+    const tickets = [
+      {
+        id: "TK20260819003",
+        type: "报告服务",
+        title: "低空经济报告下载后无法打开",
+        desc: "在新型高端智库中生成的低空经济报告下载后提示文件损坏，希望确认是否可以重新生成。",
+        status: "reply",
+        statusText: "已回复",
+        time: "2026-08-19 10:22",
+        replyTime: "2026-08-19 11:05",
+        reply: "已为你重新生成报告文件，请进入原报告详情页重新下载。如仍无法打开，可继续补充反馈。"
+      },
+      {
+        id: "TK20260818002",
+        type: "政策咨询",
+        title: "企业是否符合人工智能专项申报条件",
+        desc: "企业主营业务为工业视觉检测，想确认是否符合 2026 年人工智能专项申报范围。",
+        status: "close",
+        statusText: "已关闭",
+        time: "2026-08-18 15:40",
+        replyTime: "2026-08-18 17:20",
+        reply: "根据你提供的信息，企业方向与智能制造场景较匹配。建议查看政策详情中的申报主体、研发投入和知识产权要求。"
+      },
+      {
+        id: "TK20260817001",
+        type: "账号权限",
+        title: "无法查看某智库报告详情",
+        desc: "点击量子计算专题报告后提示无权限，需确认是否和机构账号授权有关。",
+        status: "wait",
+        statusText: "待处理",
+        time: "2026-08-17 09:18",
+        replyTime: "",
+        reply: ""
+      }
+    ];
+
+    const statusMap = {
+      all: "全部",
+      wait: "待处理",
+      reply: "已回复",
+      close: "已关闭"
+    };
+
+    let currentStatus = "all";
+    let currentId = tickets[0].id;
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
+      })[character]);
+    }
+
+    function statusClass(status) {
+      if (status === "reply") return "reply";
+      if (status === "close") return "close";
+      return "wait";
+    }
+
+    function filteredTickets() {
+      return tickets.filter((ticket) => currentStatus === "all" || ticket.status === currentStatus);
+    }
+
+    function renderTabs() {
+      document.getElementById("tabs").innerHTML = Object.entries(statusMap).map(([key, label]) => (
+        `<button class="tab ${currentStatus === key ? "active" : ""}" data-status="${key}">${label}</button>`
+      )).join("");
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          currentStatus = tab.dataset.status;
+          const list = filteredTickets();
+          currentId = list[0]?.id || tickets[0].id;
+          render();
+        });
+      });
+    }
+
+    function renderList() {
+      document.getElementById("ticketList").innerHTML = filteredTickets().map((ticket) => `
+        <article class="ticket-item ${ticket.id === currentId ? "active" : ""}">
+          <button class="ticket-main" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
+            <div>
+              <p class="ticket-title">${escapeHtml(ticket.title)}</p>
+              <div class="ticket-meta">
+                <span>${escapeHtml(ticket.id)}</span>
+                <span>${escapeHtml(ticket.type)}</span>
+                <span>${escapeHtml(ticket.time)}</span>
+              </div>
+            </div>
+            <span class="status ${statusClass(ticket.status)}">${escapeHtml(ticket.statusText)}</span>
+          </button>
+          <div class="ticket-actions">
+            <button class="ticket-process" type="button" data-process-id="${escapeHtml(ticket.id)}">去处理</button>
+          </div>
+        </article>
+      `).join("");
+
+      document.querySelectorAll("[data-ticket-id]").forEach((item) => {
+        item.addEventListener("click", () => {
+          currentId = item.dataset.ticketId;
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-process-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentId = button.dataset.processId;
+          render();
+          requestAnimationFrame(() => {
+            document.getElementById("detail").scrollTop = 0;
+            document.querySelector(".detail-title")?.focus();
+          });
+          showToast("已打开工单详情");
+        });
+      });
+    }
+
+    function renderDetail() {
+      const ticket = tickets.find((item) => item.id === currentId) || tickets[0];
+      document.getElementById("detail").innerHTML = `
+        <div class="detail-top">
+          <div>
+            <h2 class="detail-title" tabindex="-1">${escapeHtml(ticket.title)}</h2>
+            <div class="detail-meta">
+              <span>${escapeHtml(ticket.id)}</span>
+              <span>${escapeHtml(ticket.type)}</span>
+              <span>提交时间：${escapeHtml(ticket.time)}</span>
+            </div>
+          </div>
+          <span class="status ${statusClass(ticket.status)}">${escapeHtml(ticket.statusText)}</span>
+        </div>
+
+        <div class="block">
+          <h2>提交内容</h2>
+          <p class="text">${escapeHtml(ticket.desc)}</p>
+        </div>
+
+        <div class="block">
+          <h2>运营回复</h2>
+          ${ticket.reply ? `
+            <div class="reply-box">
+              <div class="reply-head">
+                <span>系统运营人员</span>
+                <span>${escapeHtml(ticket.replyTime)}</span>
+              </div>
+              <p class="text">${escapeHtml(ticket.reply)}</p>
+            </div>
+          ` : `
+            <div class="empty-reply">等待运营人员处理，回复后将在这里展示。</div>
+          `}
+        </div>
+      `;
+    }
+
+    function render() {
+      renderTabs();
+      renderList();
+      renderDetail();
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1500);
+    }
+
+    function requestClose() {
+      if (window.parent !== window) {
+        const parentOrigin = window.location.origin === "null" ? "*" : window.location.origin;
+        window.parent.postMessage({ type: "gkx-ticket-service-close" }, parentOrigin);
+      } else {
+        showToast("关闭工单弹窗");
+      }
+    }
+
+    document.querySelector(".close").addEventListener("click", requestClose);
+    document.getElementById("ticketOverlay").addEventListener("click", (event) => {
+      if (event.target === event.currentTarget) requestClose();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") requestClose();
+    });
+
+    render();
+  </script>
+</body>
+</html>

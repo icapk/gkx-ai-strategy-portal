@@ -2953,7 +2953,7 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css">
+  <link rel="stylesheet" href="portal-extras.css?v=20260820-ticket-service">
   <link rel="stylesheet" href="mastergo-v2.css">
 </head>
 <body>
@@ -2976,6 +2976,11 @@
         </a>
 
         <nav class="utility-nav" id="utilityNav" aria-label="快捷导航"></nav>
+
+        <button class="utility-trigger ticket-service-button" id="ticketServiceButton" type="button" aria-label="打开工单服务" aria-controls="portalTicketService" aria-expanded="false">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 5.5h11v9h-11z"></path><path d="M7 8h6M7 11h4"></path></svg>
+          <span>工单服务</span>
+        </button>
 
         <button class="message-center-button" id="messageCenterButton" type="button" aria-label="消息中心，5 条未读消息" aria-controls="portalMessageCenter" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
@@ -3041,6 +3046,10 @@
   <aside class="mobile-drawer" id="mobileDrawer" aria-label="移动端导航" hidden>
     <nav class="mobile-nav" id="mobileNav"></nav>
   </aside>
+
+  <section class="portal-ticket-service" id="portalTicketService" aria-hidden="true" hidden>
+    <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20260820-ticket-actions" title="工单服务"></iframe>
+  </section>
 
   <section class="portal-message-center" id="portalMessageCenter" aria-hidden="true" hidden>
     <button class="portal-message-overlay" id="portalMessageOverlay" type="button" aria-label="关闭消息中心"></button>
@@ -4454,6 +4463,9 @@
       const mgKeywordSearchGuide = document.getElementById("mgKeywordSearchGuide");
       const mgV2QaSearchGuide = document.getElementById("mgV2QaSearchGuide");
       const profilePage = document.getElementById("profilePage");
+      const ticketServiceButton = document.getElementById("ticketServiceButton");
+      const portalTicketService = document.getElementById("portalTicketService");
+      const portalTicketServiceFrame = document.getElementById("portalTicketServiceFrame");
       const messageCenterButton = document.getElementById("messageCenterButton");
       const messageCenterBadge = document.getElementById("messageCenterBadge");
       const portalMessageCenter = document.getElementById("portalMessageCenter");
@@ -4595,6 +4607,7 @@
       };
       let activeAnnouncement = DEFAULT_HOME_ANNOUNCEMENT;
       let announcementDismissed = false;
+      let ticketServiceReturnFocus = null;
       let activeMessageStatus = "UNREAD";
       let messageKeyword = "";
       const expandedPortalMessageIds = new Set();
@@ -5268,6 +5281,7 @@
       function openMessageCenter() {
         window.clearTimeout(messageCenterCloseTimer);
         if (!portalMessageCenter.hidden && portalMessageCenter.classList.contains("is-open")) return;
+        closeTicketService();
         closeProfileMenu();
         closeSearchPanel();
         closeDesktopMenu();
@@ -5295,6 +5309,38 @@
           portalMessageCenter.hidden = true;
         }, reduceCarouselMotion.matches ? 0 : 240);
         if (restoreFocus) messageReturnFocus?.focus?.();
+      }
+
+      function openTicketService(returnFocus = ticketServiceButton) {
+        if (!portalTicketService.hidden) return;
+        closeMessageCenter();
+        closeProfileMenu();
+        closeSearchPanel();
+        closeDesktopMenu();
+        closeUtilityMenu();
+        closeMobileDrawer();
+        ticketServiceReturnFocus = returnFocus;
+        portalTicketService.hidden = false;
+        portalTicketService.setAttribute("aria-hidden", "false");
+        ticketServiceButton.setAttribute("aria-expanded", "true");
+        document.body.classList.add("has-ticket-service");
+        requestAnimationFrame(() => {
+          try {
+            portalTicketServiceFrame.contentWindow?.focus();
+            portalTicketServiceFrame.contentDocument?.querySelector(".close")?.focus();
+          } catch (error) {
+            portalTicketServiceFrame.focus();
+          }
+        });
+      }
+
+      function closeTicketService(restoreFocus = false) {
+        if (portalTicketService.hidden) return;
+        portalTicketService.hidden = true;
+        portalTicketService.setAttribute("aria-hidden", "true");
+        ticketServiceButton.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("has-ticket-service");
+        if (restoreFocus) ticketServiceReturnFocus?.focus?.();
       }
 
       function getResultTypeIcon(type) {
@@ -6956,6 +7002,12 @@
         }, 0);
       });
       renderMessageCenter();
+      ticketServiceButton.addEventListener("click", () => openTicketService(ticketServiceButton));
+      window.addEventListener("message", (event) => {
+        if (event.source !== portalTicketServiceFrame.contentWindow) return;
+        if (window.location.origin !== "null" && event.origin !== window.location.origin) return;
+        if (event.data?.type === "gkx-ticket-service-close") closeTicketService(true);
+      });
       messageCenterButton.addEventListener("click", () => {
         if (!portalMessageCenter.hidden && portalMessageCenter.classList.contains("is-open")) closeMessageCenter(true);
         else openMessageCenter();
@@ -7414,7 +7466,22 @@
         mobileNav.appendChild(section);
       });
 
+      const mobileTicketSection = document.createElement("section");
+      mobileTicketSection.className = "mobile-group";
+      const mobileTicketButton = document.createElement("button");
+      mobileTicketButton.type = "button";
+      mobileTicketButton.className = "mobile-primary mobile-primary--link";
+      mobileTicketButton.innerHTML = `
+        <span>工单服务</span>
+        <svg class="mobile-direct-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M4.5 5.5h11v9h-11zM7 8h6M7 11h4"></path>
+        </svg>`;
+      mobileTicketButton.addEventListener("click", () => openTicketService(mobileMenuButton));
+      mobileTicketSection.appendChild(mobileTicketButton);
+      mobileNav.appendChild(mobileTicketSection);
+
       function openMobileDrawer() {
+        closeTicketService();
         closeMessageCenter();
         closeProfileMenu();
         closeSearchPanel();
@@ -7452,7 +7519,9 @@
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape") return;
 
-        if (!portalDocumentViewer.hidden) {
+        if (!portalTicketService.hidden) {
+          closeTicketService(true);
+        } else if (!portalDocumentViewer.hidden) {
           closeDocumentViewer();
         } else if (!portalMessageCenter.hidden) {
           closeMessageCenter(true);
