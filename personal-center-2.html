@@ -3,17 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>国科信 - 我的内容记录</title>
+  <title>国科信 - 关注与收藏</title>
   <style>
     :root {
       --brand: #165DFF;
       --brand-hover: #4080FF;
-      --brand-active: #0E42D2;
       --brand-light: #E8F3FF;
       --bg-page: #D8E7FC;
       --surface: #FFFFFF;
       --module: #F7F8FA;
-      --subtle: #F2F3F5;
       --text-1: #1D2129;
       --text-2: #4E5969;
       --text-3: #86909C;
@@ -21,8 +19,6 @@
       --border: #E5E6EB;
       --success: #00B42A;
       --warning: #FF7D00;
-      --danger: #F53F3F;
-      --radius: 6px;
       font-family: "PingFang SC", "PingFang HK", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
     }
 
@@ -30,7 +26,7 @@
 
     body {
       margin: 0;
-      min-width: 1280px;
+      min-width: 1180px;
       background:
         linear-gradient(90deg, rgba(255,255,255,.78) 0, rgba(255,255,255,.36) 38%, rgba(255,255,255,.18) 100%),
         var(--bg-page);
@@ -40,9 +36,7 @@
       letter-spacing: 0;
     }
 
-    button, input, select {
-      font: inherit;
-    }
+    button, select, input { font: inherit; }
 
     .app {
       min-height: 100vh;
@@ -53,8 +47,6 @@
     .sidebar {
       background: rgba(255, 255, 255, .62);
       border-right: 1px solid rgba(198, 212, 232, .7);
-      display: flex;
-      flex-direction: column;
     }
 
     .brand {
@@ -92,9 +84,7 @@
       white-space: nowrap;
     }
 
-    .nav {
-      padding: 10px;
-    }
+    .nav { padding: 10px; }
 
     .nav-item {
       height: 42px;
@@ -107,7 +97,6 @@
       font-size: 15px;
       font-weight: 500;
       margin: 4px 0;
-      cursor: default;
     }
 
     .nav-item.active {
@@ -122,9 +111,7 @@
       flex: 0 0 auto;
     }
 
-    .nav-spacer {
-      flex: 1;
-    }
+    .nav-spacer { flex: 1; }
 
     .main {
       min-width: 0;
@@ -221,7 +208,10 @@
     }
 
     .tab {
+      width: 100%;
       height: 42px;
+      border: 0;
+      background: transparent;
       border-radius: 6px;
       padding: 0 14px;
       display: flex;
@@ -230,32 +220,23 @@
       font-size: 15px;
       font-weight: 500;
       margin-bottom: 8px;
-      white-space: nowrap;
-      border: 0;
-      background: transparent;
-      width: 100%;
       cursor: pointer;
+      text-align: left;
     }
 
-    .tab:last-child {
-      margin-bottom: 0;
-    }
+    .tab:last-child { margin-bottom: 0; }
 
     .tab.active {
       background: linear-gradient(90deg, #E8F3FF, rgba(232,243,255,.6));
       color: var(--brand);
     }
 
-    .tab:focus-visible {
-      outline: 2px solid rgba(22, 93, 255, .24);
-    }
-
     .panel {
-      min-height: 690px;
       background: var(--surface);
       border-radius: 8px;
       border: 1px solid rgba(229,230,235,.88);
       padding: 24px;
+      min-height: 660px;
     }
 
     .section-head {
@@ -292,6 +273,7 @@
       justify-content: center;
       gap: 8px;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .btn.primary {
@@ -310,93 +292,29 @@
       background: var(--brand-hover);
     }
 
-    .overview {
+    .explain {
       margin-top: 16px;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .metric {
-      background: var(--module);
-      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border: 1px solid #BEDAFF;
       border-radius: 6px;
-      padding: 14px 16px;
-    }
-
-    .metric-label {
-      color: var(--text-3);
-      font-size: 13px;
-      line-height: 20px;
-    }
-
-    .metric-value {
-      margin-top: 8px;
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      font-size: 24px;
-      line-height: 30px;
-      font-weight: 600;
-    }
-
-    .metric-unit {
-      color: var(--text-3);
-      font-size: 12px;
-      font-weight: 400;
-    }
-
-    .grid {
-      margin-top: 16px;
+      background: #F2F7FF;
+      color: var(--text-2);
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(360px, .8fr);
+      grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
 
-    .category-bar {
+    .explain strong {
+      color: var(--text-1);
+      font-weight: 600;
+    }
+
+    .block {
       margin-top: 16px;
-      display: grid;
-      grid-template-columns: repeat(8, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    .category {
-      height: 52px;
-      border-radius: 6px;
       border: 1px solid var(--border);
+      border-radius: 6px;
       background: #fff;
-      padding: 7px 10px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .category:focus-visible {
-      outline: 2px solid rgba(22, 93, 255, .24);
-      border-color: var(--brand);
-    }
-
-    .category.active {
-      border-color: #BEDAFF;
-      background: #F2F7FF;
-      color: var(--brand);
-    }
-
-    .category-name {
-      font-weight: 500;
-      white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .category-count {
-      margin-top: 2px;
-      color: var(--text-3);
-      font-size: 12px;
-      line-height: 18px;
-      white-space: nowrap;
     }
 
     .toolbar {
@@ -407,6 +325,13 @@
       justify-content: space-between;
       gap: 16px;
       border-bottom: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .block-title {
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 600;
     }
 
     .filters {
@@ -423,81 +348,12 @@
       padding: 0 12px;
       background: #fff;
       color: var(--text-2);
-      min-width: 120px;
-    }
-
-    .block {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: #fff;
-      min-width: 0;
-    }
-
-    .block-head {
-      height: 48px;
-      padding: 0 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .block-title {
-      font-size: 16px;
-      line-height: 24px;
-      font-weight: 600;
-    }
-
-    .link {
-      color: var(--brand);
-      border: 0;
-      background: transparent;
-      padding: 0;
-      cursor: pointer;
-    }
-
-    .tag-area {
-      padding: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tag {
-      height: 28px;
-      border-radius: 4px;
-      padding: 0 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid #BEDAFF;
-      background: #F2F7FF;
-      color: var(--brand);
-      white-space: nowrap;
-    }
-
-    .tag.neutral {
-      border-color: var(--border);
-      background: var(--module);
-      color: var(--text-2);
-    }
-
-    .tag.warning {
-      border-color: #FFD8A8;
-      background: #FFF7E8;
-      color: #D25F00;
-    }
-
-    .empty {
-      height: 160px;
-      display: grid;
-      place-items: center;
-      color: var(--text-3);
-      border-bottom: 1px solid var(--border);
+      min-width: 128px;
     }
 
     .table-wrap {
       overflow-x: auto;
+      background: #fff;
     }
 
     table {
@@ -524,19 +380,39 @@
       font-weight: 500;
     }
 
-    tr:last-child td {
-      border-bottom: 0;
+    tr:last-child td { border-bottom: 0; }
+
+    .tag-list {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
     }
 
-    tbody tr.clickable {
-      cursor: pointer;
+    .tag {
+      height: 24px;
+      max-width: 112px;
+      border-radius: 4px;
+      padding: 0 8px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #BEDAFF;
+      background: #F2F7FF;
+      color: var(--brand);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+      line-height: 20px;
     }
 
-    tbody tr.clickable:hover td {
-      background: #F7FBFF;
+    .tag.neutral {
+      border-color: var(--border);
+      background: var(--module);
+      color: var(--text-2);
     }
 
-    .status {
+    .state {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -552,101 +428,20 @@
     }
 
     .dot.warn { background: var(--warning); }
-    .dot.danger { background: var(--danger); }
-    .dot.gray { background: var(--text-4); }
 
-    .rules {
-      padding: 8px 16px 16px;
+    .link {
+      color: var(--brand);
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      white-space: nowrap;
     }
 
-    .rule {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .rule:last-child {
-      border-bottom: 0;
-    }
-
-    .rule-title {
-      font-weight: 500;
-      color: var(--text-1);
-    }
-
-    .rule-desc {
+    .empty {
+      height: 140px;
+      text-align: center;
       color: var(--text-3);
-      font-size: 13px;
-      line-height: 20px;
-      margin-top: 2px;
-    }
-
-    .switch {
-      width: 36px;
-      height: 20px;
-      border-radius: 10px;
-      background: var(--brand);
-      position: relative;
-      margin-top: 2px;
-    }
-
-    .switch::after {
-      content: "";
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
-    }
-
-    .switch.off {
-      background: var(--text-4);
-    }
-
-    .switch.off::after {
-      left: 2px;
-      right: auto;
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-top: 16px;
-    }
-
-    .form {
-      padding: 16px;
-      display: grid;
-      grid-template-columns: 90px minmax(0, 1fr);
-      gap: 16px 12px;
-      align-items: center;
-    }
-
-    .label {
-      color: var(--text-2);
-      text-align: right;
-    }
-
-    .input, .select {
-      height: 32px;
-      border: 1px solid #C9D5E6;
-      border-radius: 4px;
-      padding: 0 12px;
-      color: var(--text-1);
-      background: #fff;
-      width: 100%;
-    }
-
-    .hint {
-      color: var(--text-3);
-      font-size: 12px;
-      line-height: 20px;
-      margin-top: 4px;
     }
 
     .footer-actions {
@@ -656,229 +451,6 @@
       gap: 16px;
       border-top: 1px solid var(--border);
       padding-top: 16px;
-    }
-
-    .drawer-mask {
-      position: fixed;
-      inset: 0;
-      background: rgba(29, 33, 41, .22);
-      display: none;
-      justify-content: flex-end;
-      z-index: 20;
-    }
-
-    .drawer-mask.open {
-      display: flex;
-    }
-
-    .drawer {
-      width: 520px;
-      height: 100%;
-      background: #fff;
-      box-shadow: -8px 0 24px rgba(29, 33, 41, .12);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .drawer-head {
-      height: 56px;
-      padding: 0 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .drawer-title {
-      font-size: 16px;
-      line-height: 24px;
-      font-weight: 600;
-    }
-
-    .icon-btn {
-      width: 32px;
-      height: 32px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: #fff;
-      color: var(--text-2);
-      cursor: pointer;
-    }
-
-    .drawer-body {
-      padding: 24px;
-      overflow: auto;
-      flex: 1;
-    }
-
-    .detail-title {
-      margin: 0;
-      font-size: 18px;
-      line-height: 26px;
-      font-weight: 600;
-    }
-
-    .detail-meta {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: 88px minmax(0, 1fr);
-      gap: 12px 16px;
-      color: var(--text-2);
-    }
-
-    .detail-label {
-      color: var(--text-3);
-      text-align: right;
-    }
-
-    .detail-summary {
-      margin-top: 20px;
-      padding: 14px 16px;
-      border-radius: 6px;
-      background: var(--module);
-      color: var(--text-2);
-    }
-
-    .drawer-foot {
-      height: 64px;
-      padding: 16px 24px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: flex-end;
-      gap: 16px;
-    }
-
-    @media (max-width: 1360px) {
-      body { min-width: 1180px; }
-      .overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .category-bar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .grid, .two-col { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 900px) {
-      body { min-width: 320px; }
-
-      .app { grid-template-columns: minmax(0, 1fr); }
-      .sidebar { display: none; }
-
-      .topbar {
-        min-height: 56px;
-        padding: 0 16px;
-      }
-
-      .account { display: none; }
-
-      .page-head {
-        min-height: 60px;
-        height: auto;
-        gap: 12px;
-        padding: 12px 16px;
-      }
-
-      .content {
-        min-height: calc(100vh - 116px);
-        padding: 12px;
-      }
-
-      .workspace {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 12px;
-      }
-
-      .inner-tabs {
-        display: flex;
-        gap: 6px;
-        overflow-x: auto;
-        padding: 6px;
-        scrollbar-width: thin;
-      }
-
-      .tab {
-        width: auto;
-        min-width: max-content;
-        flex: 0 0 auto;
-        margin: 0;
-      }
-
-      .panel {
-        min-height: 0;
-        padding: 16px;
-      }
-
-      .section-head {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .section-head > div:last-child {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .category-bar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-
-      .toolbar {
-        height: auto;
-        align-items: stretch;
-        flex-direction: column;
-        padding: 12px;
-      }
-
-      .filters {
-        width: 100%;
-        flex-wrap: wrap;
-      }
-
-      .filter {
-        min-width: 132px;
-        flex: 1 1 132px;
-      }
-
-      table { min-width: 680px; }
-
-      .drawer { width: min(520px, 100%); }
-    }
-
-    @media (max-width: 520px) {
-      .top-actions { gap: 10px; }
-      .auth-pill { display: none; }
-
-      .page-head h1 { font-size: 18px; }
-
-      .panel { padding: 12px; }
-
-      .overview,
-      .category-bar {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .metric { padding: 12px; }
-      .metric-value { font-size: 21px; }
-
-      .section-head > div:last-child .btn {
-        flex: 1 1 140px;
-      }
-
-      .footer-actions {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .footer-actions .btn { flex: 1 1 140px; }
-
-      .drawer-head,
-      .drawer-body,
-      .drawer-foot {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .detail-meta {
-        grid-template-columns: 72px minmax(0, 1fr);
-        gap: 10px 12px;
-      }
     }
   </style>
 </head>
@@ -937,126 +509,66 @@
 
       <div class="page-head">
         <h1>我的账户</h1>
-        <button class="btn primary">导出记录</button>
+        <button class="btn primary">保存调整</button>
       </div>
 
       <section class="content">
         <div class="workspace">
           <aside class="inner-tabs" aria-label="账户设置">
-            <button class="tab" data-section="profile">基本信息</button>
-            <button class="tab active" data-section="favoriteSection">我的收藏</button>
-            <button class="tab" data-section="browseSection">浏览记录</button>
-            <button class="tab" data-section="followSection">我的关注</button>
+            <button class="tab">基本信息</button>
+            <button class="tab active">关注与收藏</button>
           </aside>
 
           <div class="panel">
             <div class="section-head">
               <div>
-                <h2>我的收藏</h2>
-                <div class="muted">展示用户自己收藏、浏览和关注的数据；推荐规则、触达策略和算法参数由后台统一配置。</div>
+                <h2>关注与收藏</h2>
+                <div class="muted">关注用于形成推荐标签；收藏用于保存具体内容。两类操作分层管理。</div>
               </div>
-              <div>
-                <button class="btn">批量移除</button>
-                <button class="btn primary">查看推荐内容</button>
-              </div>
+              <button class="btn primary">查看推荐内容</button>
             </div>
 
-            <div class="overview" aria-label="内容记录概览">
-              <div class="metric">
-                <div class="metric-label">收藏内容</div>
-                <div class="metric-value"><span id="favoriteTotal">68</span> <span class="metric-unit">条</span></div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">浏览记录</div>
-                <div class="metric-value"><span id="browseTotal">148</span> <span class="metric-unit">条</span></div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">关注对象</div>
-                <div class="metric-value"><span id="followTotal">21</span> <span class="metric-unit">个</span></div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">近7天新增</div>
-                <div class="metric-value"><span id="weekTotal">9</span> <span class="metric-unit">条</span></div>
-              </div>
+            <div class="explain">
+              <div><strong>关注</strong>：关注学者、产业方向、学术分类、热词，形成用户标签，用于推荐新增内容。</div>
+              <div><strong>收藏</strong>：收藏某篇文献、某份报告、某个课程或活动，用于后续回看，不作为关注对象。</div>
             </div>
 
-            <div class="category-bar" aria-label="内容类型">
-              <button class="category active" data-type="资讯"><span class="category-name">资讯</span><span class="category-count">收藏 12 / 浏览 31</span></button>
-              <button class="category" data-type="文献"><span class="category-name">文献</span><span class="category-count">收藏 18 / 浏览 42</span></button>
-              <button class="category" data-type="报告"><span class="category-name">报告</span><span class="category-count">收藏 9 / 浏览 19</span></button>
-              <button class="category" data-type="人才"><span class="category-name">人才</span><span class="category-count">关注 6 / 浏览 14</span></button>
-              <button class="category" data-type="顶会"><span class="category-name">顶会</span><span class="category-count">收藏 5 / 浏览 10</span></button>
-              <button class="category" data-type="课程"><span class="category-name">课程</span><span class="category-count">收藏 7 / 浏览 16</span></button>
-              <button class="category" data-type="活动"><span class="category-name">活动</span><span class="category-count">收藏 4 / 浏览 9</span></button>
-              <button class="category" data-type="热词"><span class="category-name">热词</span><span class="category-count">关注 8 / 浏览 7</span></button>
-            </div>
-
-            <div class="grid">
-              <section class="block" id="browseSection">
-                <div class="toolbar">
-                  <div class="filters">
-                    <select class="filter" id="browseTypeFilter">
-                      <option>资讯</option>
-                      <option>文献</option>
-                      <option>报告</option>
-                      <option>人才</option>
-                      <option>顶会</option>
-                      <option>课程</option>
-                      <option>活动</option>
-                      <option>热词</option>
-                    </select>
-                    <select class="filter">
-                      <option>全部来源</option>
-                    </select>
-                    <select class="filter">
-                      <option>近30天</option>
-                    </select>
-                  </div>
-                  <button class="btn" id="clearBrowseBtn">清空浏览记录</button>
-                </div>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th style="width: 16%">内容类型</th>
-                        <th style="width: 34%">内容名称</th>
-                        <th style="width: 18%">来源</th>
-                        <th style="width: 18%">最近浏览</th>
-                        <th style="width: 14%">操作</th>
-                      </tr>
-                    </thead>
-                    <tbody id="browseRows"></tbody>
-                  </table>
-                </div>
-              </section>
-
-              <section class="block" id="followSection">
-                <div class="block-head">
-                  <div class="block-title">我的关注</div>
-                  <button class="link">新增关注</button>
-                </div>
-                <div class="tag-area" id="followTags"></div>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th style="width: 30%">关注对象</th>
-                        <th style="width: 22%">对象类型</th>
-                        <th style="width: 24%">关注时间</th>
-                        <th style="width: 24%">操作</th>
-                      </tr>
-                    </thead>
-                    <tbody id="followRows"></tbody>
-                  </table>
-                </div>
-              </section>
-            </div>
-
-            <section class="block" id="favoriteSection" style="margin-top: 16px;">
+            <section class="block">
               <div class="toolbar">
-                <div class="block-title">收藏记录</div>
+                <div class="block-title">我的关注</div>
+                <div class="filters">
+                  <select class="filter" id="followTypeFilter">
+                    <option>全部关注类型</option>
+                    <option>学者</option>
+                    <option>产业方向</option>
+                    <option>学术分类</option>
+                    <option>热词</option>
+                  </select>
+                  <button class="btn">新增关注</button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width: 18%">关注类型</th>
+                      <th style="width: 22%">关注对象</th>
+                      <th style="width: 24%">形成用户标签</th>
+                      <th style="width: 24%">推荐更新范围</th>
+                      <th style="width: 12%">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="followRows"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="block">
+              <div class="toolbar">
+                <div class="block-title">我的收藏</div>
                 <div class="filters">
                   <select class="filter" id="favoriteTypeFilter">
+                    <option>全部内容类型</option>
                     <option>资讯</option>
                     <option>文献</option>
                     <option>报告</option>
@@ -1064,10 +576,6 @@
                     <option>顶会</option>
                     <option>课程</option>
                     <option>活动</option>
-                    <option>热词</option>
-                  </select>
-                  <select class="filter">
-                    <option>收藏时间倒序</option>
                   </select>
                 </div>
               </div>
@@ -1077,9 +585,8 @@
                     <tr>
                       <th style="width: 12%">内容类型</th>
                       <th style="width: 30%">收藏内容</th>
-                      <th style="width: 18%">来源系统</th>
-                      <th style="width: 14%">收藏时间</th>
-                      <th style="width: 14%">更新状态</th>
+                      <th style="width: 24%">实体标签</th>
+                      <th style="width: 22%">来源系统</th>
                       <th style="width: 12%">操作</th>
                     </tr>
                   </thead>
@@ -1090,205 +597,35 @@
 
             <div class="footer-actions">
               <button class="btn">返回</button>
-      <button class="btn primary">保存本页调整</button>
+              <button class="btn primary">保存本页调整</button>
             </div>
           </div>
         </div>
       </section>
     </main>
   </div>
-  <div class="drawer-mask" id="detailDrawer" aria-hidden="true">
-    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
-      <div class="drawer-head">
-        <div class="drawer-title" id="drawerTitle">浏览详情</div>
-        <button class="icon-btn" id="closeDrawer" aria-label="关闭">×</button>
-      </div>
-      <div class="drawer-body">
-        <h3 class="detail-title" id="detailTitle">-</h3>
-        <div class="detail-meta">
-          <div class="detail-label">内容类型</div>
-          <div id="detailType">-</div>
-          <div class="detail-label">来源系统</div>
-          <div id="detailSource">-</div>
-          <div class="detail-label">浏览时间</div>
-          <div id="detailTime">-</div>
-          <div class="detail-label">推荐动作</div>
-          <div id="detailAction">可继续查看详情、收藏或从浏览记录中移除。</div>
-        </div>
-        <div class="detail-summary" id="detailSummary">-</div>
-      </div>
-      <div class="drawer-foot">
-        <button class="btn" id="drawerRemoveBrowse">移除记录</button>
-        <button class="btn primary">打开内容</button>
-      </div>
-    </aside>
-  </div>
-  <script>
-    const typeData = {
-      "资讯": {
-        favorite: 12,
-        browse: 31,
-        follow: 2,
-        week: 3,
-        browseRows: [
-          ["资讯", "人工智能基础设施建设进展", "科技信息展示系统", "2026-08-18 10:24"],
-          ["资讯", "低空经济技术应用动态", "科技信息展示系统", "2026-08-17 15:42"],
-          ["资讯", "深圳未来产业政策动态", "科技专题服务系统", "2026-08-15 09:18"]
-        ],
-        favoriteRows: [
-          ["资讯", "低空经济技术应用动态", "科技信息展示系统", "2026-08-18", "有更新", "green"],
-          ["资讯", "人工智能产业投融资观察", "科技信息展示系统", "2026-08-16", "无更新", "gray"]
-        ],
-        followTags: ["人工智能", "低空经济", "科技政策"],
-        followRows: [
-          ["人工智能", "热词", "2026-08-18"],
-          ["低空经济", "热词", "2026-08-16"]
-        ]
-      },
-      "文献": {
-        favorite: 18,
-        browse: 42,
-        follow: 5,
-        week: 4,
-        browseRows: [
-          ["文献", "多模态大模型可信评估研究", "科技情报挖掘系统", "2026-08-17 16:02"],
-          ["文献", "可解释人工智能方法综述", "科技情报挖掘系统", "2026-08-17 11:20"],
-          ["文献", "高性能计算资源调度算法研究", "科技情报挖掘系统", "2026-08-14 13:09"]
-        ],
-        favoriteRows: [
-          ["文献", "可解释人工智能方法综述", "科技情报挖掘系统", "2026-08-17", "无更新", "gray"],
-          ["文献", "多模态大模型可信评估研究", "科技情报挖掘系统", "2026-08-15", "有更新", "green"]
-        ],
-        followTags: ["可解释人工智能", "多模态智能", "高性能计算"],
-        followRows: [
-          ["李某某", "作者", "2026-08-17"],
-          ["多模态智能", "热词", "2026-08-12"],
-          ["计算机科学技术", "学科", "2026-08-10"]
-        ]
-      },
-      "报告": {
-        favorite: 9,
-        browse: 19,
-        follow: 3,
-        week: 2,
-        browseRows: [
-          ["报告", "集成电路产业趋势分析报告", "科技报告服务系统", "2026-08-16 09:36"],
-          ["报告", "未来产业洞察月报", "科技报告服务系统", "2026-08-15 17:28"],
-          ["报告", "战略咨询报告：算力基础设施", "科技报告服务系统", "2026-08-12 10:01"]
-        ],
-        favoriteRows: [
-          ["报告", "未来产业洞察月报", "科技报告服务系统", "2026-08-16", "有更新", "green"],
-          ["报告", "集成电路产业趋势分析报告", "科技报告服务系统", "2026-08-14", "无更新", "gray"]
-        ],
-        followTags: ["集成电路", "算力基础设施", "战略咨询"],
-        followRows: [
-          ["趋势分析报告", "报告类型", "2026-08-16"],
-          ["算力基础设施", "热词", "2026-08-11"]
-        ]
-      },
-      "人才": {
-        favorite: 6,
-        browse: 14,
-        follow: 6,
-        week: 1,
-        browseRows: [
-          ["人才", "先进材料领域专家库", "新型高端智库系统", "2026-08-15 14:52"],
-          ["人才", "人工智能青年学者画像", "新型高端智库系统", "2026-08-14 16:08"],
-          ["人才", "半导体方向领域新星", "科技情报挖掘系统", "2026-08-11 09:40"]
-        ],
-        favoriteRows: [
-          ["人才", "先进材料领域专家库", "新型高端智库系统", "2026-08-15", "无更新", "gray"],
-          ["人才", "人工智能青年学者画像", "新型高端智库系统", "2026-08-13", "有更新", "green"]
-        ],
-        followTags: ["张某某", "王某某", "先进材料", "半导体"],
-        followRows: [
-          ["张某某", "人才", "2026-08-17"],
-          ["王某某", "人才", "2026-08-15"],
-          ["先进材料", "学科", "2026-08-12"]
-        ]
-      },
-      "顶会": {
-        favorite: 5,
-        browse: 10,
-        follow: 2,
-        week: 1,
-        browseRows: [
-          ["顶会", "全球人工智能顶会日程", "门户CMS", "2026-08-14 10:12"],
-          ["顶会", "集成电路设计国际会议", "门户CMS", "2026-08-13 15:22"]
-        ],
-        favoriteRows: [
-          ["顶会", "全球人工智能顶会日程", "门户CMS", "2026-08-14", "即将开始", "orange"],
-          ["顶会", "集成电路设计国际会议", "门户CMS", "2026-08-12", "无更新", "gray"]
-        ],
-        followTags: ["人工智能顶会", "集成电路会议"],
-        followRows: [
-          ["人工智能顶会", "会议", "2026-08-14"],
-          ["集成电路设计国际会议", "会议", "2026-08-12"]
-        ]
-      },
-      "课程": {
-        favorite: 7,
-        browse: 16,
-        follow: 1,
-        week: 2,
-        browseRows: [
-          ["课程", "AI 科研工具实务课程", "门户CMS", "2026-08-15 14:20"],
-          ["课程", "科技情报分析入门课程", "门户CMS", "2026-08-13 08:58"]
-        ],
-        favoriteRows: [
-          ["课程", "科技情报分析入门课程", "门户CMS", "2026-08-13", "无更新", "gray"],
-          ["课程", "AI 科研工具实务课程", "门户CMS", "2026-08-12", "有更新", "green"]
-        ],
-        followTags: ["科技情报分析"],
-        followRows: [
-          ["科技情报分析", "课程方向", "2026-08-13"]
-        ]
-      },
-      "活动": {
-        favorite: 4,
-        browse: 9,
-        follow: 1,
-        week: 1,
-        browseRows: [
-          ["活动", "智能制造产业沙龙", "门户CMS", "2026-08-12 18:34"],
-          ["活动", "青年学者前沿讲座", "门户CMS", "2026-08-11 10:06"]
-        ],
-        favoriteRows: [
-          ["活动", "智能制造产业沙龙", "门户CMS", "2026-08-12", "可报名", "green"],
-          ["活动", "青年学者前沿讲座", "门户CMS", "2026-08-10", "已结束", "gray"]
-        ],
-        followTags: ["智能制造", "青年学者"],
-        followRows: [
-          ["智能制造产业沙龙", "活动", "2026-08-12"]
-        ]
-      },
-      "热词": {
-        favorite: 8,
-        browse: 7,
-        follow: 8,
-        week: 2,
-        browseRows: [
-          ["热词", "多模态智能", "门户推荐服务", "2026-08-11 11:45"],
-          ["热词", "具身智能", "门户推荐服务", "2026-08-10 17:14"]
-        ],
-        favoriteRows: [
-          ["热词", "多模态智能", "门户推荐服务", "2026-08-11", "持续更新", "green"],
-          ["热词", "具身智能", "门户推荐服务", "2026-08-09", "持续更新", "green"]
-        ],
-        followTags: ["多模态智能", "具身智能", "可信AI"],
-        followRows: [
-          ["多模态智能", "热词", "2026-08-18"],
-          ["具身智能", "热词", "2026-08-16"],
-          ["可信AI", "热词", "2026-08-12"]
-        ]
-      }
-    };
 
-    let activeType = "资讯";
-    let currentDetailKey = "";
-    const removedBrowse = new Set();
-    const removedFavorite = new Set();
-    const removedFollow = new Set();
+  <script>
+    const initialFollows = [
+      { type: "产业方向", name: "人工智能", tags: ["人工智能", "产业", "科技前沿"], scope: "更新人工智能相关资讯、文献、报告、课程、活动" },
+      { type: "产业方向", name: "集成电路", tags: ["集成电路", "半导体", "产业趋势"], scope: "更新产业报告、政策资讯、会议活动" },
+      { type: "学术分类", name: "计算机科学技术", tags: ["计算机科学技术", "文献", "专家"], scope: "更新相关文献、作者动态、顶会信息" },
+      { type: "学者", name: "张某某", tags: ["张某某", "人工智能", "青年学者"], scope: "更新该学者论文、会议、科研动态" },
+      { type: "热词", name: "多模态智能", tags: ["多模态智能", "大模型", "人工智能"], scope: "更新相关文献、资讯、热词内容" }
+    ];
+
+    const initialFavorites = [
+      { type: "文献", name: "可解释人工智能方法综述", tags: ["文献", "人工智能", "可信AI"], source: "科技情报挖掘系统" },
+      { type: "报告", name: "集成电路产业趋势分析报告", tags: ["报告", "产业趋势", "集成电路"], source: "科技报告服务系统" },
+      { type: "资讯", name: "低空经济技术应用动态", tags: ["资讯", "低空经济", "政策"], source: "科技信息展示系统" },
+      { type: "课程", name: "科技情报分析入门课程", tags: ["课程", "科技情报", "入门"], source: "门户CMS" },
+      { type: "活动", name: "智能制造产业沙龙", tags: ["活动", "智能制造", "成果转化"], source: "门户CMS" }
+    ];
+
+    let follows = initialFollows.map(item => ({ ...item }));
+    let favorites = initialFavorites.map(item => ({ ...item }));
+    let followFilter = "全部关注类型";
+    let favoriteFilter = "全部内容类型";
 
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, function(char) {
@@ -1296,185 +633,77 @@
       });
     }
 
-    function dotClass(color) {
-      if (color === "orange") return " warn";
-      if (color === "gray") return " gray";
-      return "";
+    function renderTags(tags) {
+      return `<div class="tag-list">${tags.map(function(tag, index) {
+        return `<span class="tag${index > 1 ? " neutral" : ""}" title="${escapeHtml(tag)}">${escapeHtml(tag)}</span>`;
+      }).join("")}</div>`;
     }
 
-    function renderRows(tbody, rows, columns, emptyText) {
-      if (!rows.length) {
-        tbody.innerHTML = `<tr><td colspan="${columns}" class="empty">${emptyText}</td></tr>`;
+    function renderFollows() {
+      const visible = follows
+        .map((item, index) => ({ item, index }))
+        .filter(entry => followFilter === "全部关注类型" || entry.item.type === followFilter);
+      if (!visible.length) {
+        document.getElementById("followRows").innerHTML = '<tr><td class="empty" colspan="5">暂无符合条件的关注</td></tr>';
         return;
       }
-      tbody.innerHTML = rows.join("");
+      document.getElementById("followRows").innerHTML = visible.map(function(entry) {
+        const item = entry.item;
+        return `<tr>
+          <td>${escapeHtml(item.type)}</td>
+          <td title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</td>
+          <td>${renderTags(item.tags)}</td>
+          <td title="${escapeHtml(item.scope)}">${escapeHtml(item.scope)}</td>
+          <td><button class="link" data-action="unfollow" data-index="${entry.index}">取消关注</button></td>
+        </tr>`;
+      }).join("");
     }
 
-    function renderPage() {
-      const data = typeData[activeType];
-      document.querySelectorAll(".category").forEach(function(item) {
-        item.classList.toggle("active", item.dataset.type === activeType);
-      });
-      document.getElementById("browseTypeFilter").value = activeType;
-      document.getElementById("favoriteTypeFilter").value = activeType;
-      document.getElementById("favoriteTotal").textContent = data.favorite;
-      document.getElementById("browseTotal").textContent = data.browse;
-      document.getElementById("followTotal").textContent = data.follow;
-      document.getElementById("weekTotal").textContent = data.week;
-
-      const browseRows = data.browseRows
-        .map(function(row, index) {
-          const key = `${activeType}-${index}`;
-          if (removedBrowse.has(key)) return "";
-          return `<tr class="clickable" data-action="open-detail" data-key="${key}" title="点击查看浏览详情">
-            <td>${escapeHtml(row[0])}</td>
-            <td title="${escapeHtml(row[1])}">${escapeHtml(row[1])}</td>
-            <td title="${escapeHtml(row[2])}">${escapeHtml(row[2])}</td>
-            <td>${escapeHtml(row[3])}</td>
-            <td><button class="link" data-action="open-detail" data-key="${key}">查看</button>　<button class="link" data-action="remove-browse" data-key="${key}">移除</button></td>
-          </tr>`;
-        })
-        .filter(Boolean);
-      renderRows(document.getElementById("browseRows"), browseRows, 5, "暂无该类型浏览记录");
-
-      document.getElementById("followTags").innerHTML = data.followTags
-        .map(function(name, index) {
-          const cls = index < 2 ? "tag" : "tag neutral";
-          return `<span class="${cls}">${escapeHtml(name)}</span>`;
-        })
-        .join("");
-
-      const followRows = data.followRows
-        .map(function(row, index) {
-          const key = `${activeType}-${index}`;
-          if (removedFollow.has(key)) return "";
-          return `<tr>
-            <td title="${escapeHtml(row[0])}">${escapeHtml(row[0])}</td>
-            <td>${escapeHtml(row[1])}</td>
-            <td>${escapeHtml(row[2])}</td>
-            <td><button class="link" data-action="remove-follow" data-key="${key}">取消关注</button></td>
-          </tr>`;
-        })
-        .filter(Boolean);
-      renderRows(document.getElementById("followRows"), followRows, 4, "暂无该类型关注对象");
-
-      const favoriteRows = data.favoriteRows
-        .map(function(row, index) {
-          const key = `${activeType}-${index}`;
-          if (removedFavorite.has(key)) return "";
-          return `<tr>
-            <td>${escapeHtml(row[0])}</td>
-            <td title="${escapeHtml(row[1])}">${escapeHtml(row[1])}</td>
-            <td title="${escapeHtml(row[2])}">${escapeHtml(row[2])}</td>
-            <td>${escapeHtml(row[3])}</td>
-            <td><span class="status"><span class="dot${dotClass(row[5])}"></span>${escapeHtml(row[4])}</span></td>
-            <td><button class="link" data-action="remove-favorite" data-key="${key}">移除收藏</button></td>
-          </tr>`;
-        })
-        .filter(Boolean);
-      renderRows(document.getElementById("favoriteRows"), favoriteRows, 6, "暂无该类型收藏记录");
-    }
-
-    function getBrowseRowByKey(key) {
-      const splitIndex = key.lastIndexOf("-");
-      const type = key.slice(0, splitIndex);
-      const index = Number(key.slice(splitIndex + 1));
-      const row = typeData[type] && typeData[type].browseRows[index];
-      return row ? { type, index, row } : null;
-    }
-
-    function openDetail(key) {
-      const item = getBrowseRowByKey(key);
-      if (!item) return;
-      currentDetailKey = key;
-      const row = item.row;
-      document.getElementById("detailTitle").textContent = row[1];
-      document.getElementById("detailType").textContent = row[0];
-      document.getElementById("detailSource").textContent = row[2];
-      document.getElementById("detailTime").textContent = row[3];
-      document.getElementById("detailSummary").textContent = `该条记录来自用户浏览行为，可用于用户自己回看历史内容。系统推荐规则和算法参数不在个人中心开放配置，统一由后台推荐配置维护。`;
-      document.getElementById("detailDrawer").classList.add("open");
-      document.getElementById("detailDrawer").setAttribute("aria-hidden", "false");
-    }
-
-    function closeDetail() {
-      document.getElementById("detailDrawer").classList.remove("open");
-      document.getElementById("detailDrawer").setAttribute("aria-hidden", "true");
-      currentDetailKey = "";
-    }
-
-    function activateAccountTab(sectionId) {
-      document.querySelectorAll(".inner-tabs .tab").forEach(function(tab) {
-        tab.classList.toggle("active", tab.dataset.section === sectionId);
-      });
-      if (sectionId === "profile") {
-        document.querySelector(".section-head h2").textContent = "基本信息";
-        document.querySelector(".section-head .muted").textContent = "基础资料仍沿用账号中心原有表单；本页重点展示收藏、浏览和关注数据。";
-        window.scrollTo({ top: 0, behavior: "smooth" });
+    function renderFavorites() {
+      const visible = favorites
+        .map((item, index) => ({ item, index }))
+        .filter(entry => favoriteFilter === "全部内容类型" || entry.item.type === favoriteFilter);
+      if (!visible.length) {
+        document.getElementById("favoriteRows").innerHTML = '<tr><td class="empty" colspan="5">暂无符合条件的收藏</td></tr>';
         return;
       }
-      const titleMap = {
-        favoriteSection: "我的收藏",
-        browseSection: "浏览记录",
-        followSection: "我的关注"
-      };
-      document.querySelector(".section-head h2").textContent = titleMap[sectionId] || "我的收藏";
-      document.querySelector(".section-head .muted").textContent = "展示用户自己收藏、浏览和关注的数据；推荐规则、触达策略和算法参数由后台统一配置。";
-      const target = document.getElementById(sectionId);
-      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("favoriteRows").innerHTML = visible.map(function(entry) {
+        const item = entry.item;
+        return `<tr>
+          <td>${escapeHtml(item.type)}</td>
+          <td title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</td>
+          <td>${renderTags(item.tags)}</td>
+          <td title="${escapeHtml(item.source)}">${escapeHtml(item.source)}</td>
+          <td><button class="link" data-action="unfavorite" data-index="${entry.index}">取消收藏</button></td>
+        </tr>`;
+      }).join("");
     }
 
-    document.querySelectorAll(".category").forEach(function(item) {
-      item.addEventListener("click", function() {
-        activeType = item.dataset.type;
-        renderPage();
-      });
-    });
-
-    document.querySelectorAll(".inner-tabs .tab").forEach(function(tab) {
-      tab.addEventListener("click", function() {
-        activateAccountTab(tab.dataset.section);
-      });
-    });
-
-    document.getElementById("browseTypeFilter").addEventListener("change", function(event) {
-      activeType = event.target.value;
-      renderPage();
+    document.getElementById("followTypeFilter").addEventListener("change", function(event) {
+      followFilter = event.target.value;
+      renderFollows();
     });
 
     document.getElementById("favoriteTypeFilter").addEventListener("change", function(event) {
-      activeType = event.target.value;
-      renderPage();
-    });
-
-    document.getElementById("clearBrowseBtn").addEventListener("click", function() {
-      typeData[activeType].browseRows.forEach(function(_, index) {
-        removedBrowse.add(`${activeType}-${index}`);
-      });
-      renderPage();
+      favoriteFilter = event.target.value;
+      renderFavorites();
     });
 
     document.addEventListener("click", function(event) {
       const target = event.target.closest("[data-action]");
       if (!target) return;
-      if (target.dataset.action === "open-detail") openDetail(target.dataset.key);
-      if (target.dataset.action === "remove-browse") removedBrowse.add(target.dataset.key);
-      if (target.dataset.action === "remove-favorite") removedFavorite.add(target.dataset.key);
-      if (target.dataset.action === "remove-follow") removedFollow.add(target.dataset.key);
-      renderPage();
+      if (target.dataset.action === "unfollow") {
+        follows.splice(Number(target.dataset.index), 1);
+        renderFollows();
+      }
+      if (target.dataset.action === "unfavorite") {
+        favorites.splice(Number(target.dataset.index), 1);
+        renderFavorites();
+      }
     });
 
-    document.getElementById("closeDrawer").addEventListener("click", closeDetail);
-    document.getElementById("detailDrawer").addEventListener("click", function(event) {
-      if (event.target.id === "detailDrawer") closeDetail();
-    });
-    document.getElementById("drawerRemoveBrowse").addEventListener("click", function() {
-      if (currentDetailKey) removedBrowse.add(currentDetailKey);
-      closeDetail();
-      renderPage();
-    });
-
-    renderPage();
+    renderFollows();
+    renderFavorites();
   </script>
 </body>
 </html>
