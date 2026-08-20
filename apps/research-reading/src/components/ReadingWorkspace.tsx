@@ -9,7 +9,7 @@ interface ReadingWorkspaceProps {
 }
 
 export function ReadingWorkspace({ onSwitchToResearch }: ReadingWorkspaceProps) {
-  const [view, setView] = useState<'reader' | 'library' | 'upload'>('reader')
+  const [view, setView] = useState<'reader' | 'library' | 'upload'>('library')
   const [documents, setDocuments] = useState(readingDocuments)
   const [activeDocumentId, setActiveDocumentId] = useState(1)
   const [librarySelectedDocumentId, setLibrarySelectedDocumentId] = useState<number | null>(1)
