@@ -556,9 +556,11 @@
             </div>
             <span class="status ${statusClass(ticket.status)}">${escapeHtml(ticket.statusText)}</span>
           </button>
-          <div class="ticket-actions">
-            <button class="ticket-process" type="button" data-process-id="${escapeHtml(ticket.id)}">去处理</button>
-          </div>
+          ${ticket.status === "wait" ? `
+            <div class="ticket-actions">
+              <button class="ticket-process" type="button" data-process-id="${escapeHtml(ticket.id)}">去处理</button>
+            </div>
+          ` : ""}
         </article>
       `).join("");
 
