@@ -553,6 +553,38 @@
       overflow-wrap: anywhere;
     }
 
+    .entry-name {
+      display: inline-flex;
+      min-width: 0;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .entry-badge {
+      display: inline-flex;
+      height: 18px;
+      flex: none;
+      align-items: center;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 0 5px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 16px;
+    }
+
+    .entry-badge--new {
+      border-color: #c7e1ff;
+      color: #075dad;
+      background: #eaf4ff;
+    }
+
+    .entry-badge--hot {
+      border-color: #ffd2c2;
+      color: #b93815;
+      background: #fff0eb;
+    }
+
     .entry-icon {
       display: grid;
       width: 20px;
@@ -2970,16 +3002,16 @@
       </nav>
 
       <div class="header-actions">
-        <a class="legacy-link" href="https://itic-sci.com/" aria-label="在当前页面回到旧版门户">
+        <a class="legacy-link" href="https://itic-sci.com/" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开旧版门户">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5 3 10l5 5M3.5 10H12a4.5 4.5 0 0 1 4.5 4.5"></path></svg>
           <span>回到旧版</span>
         </a>
 
         <nav class="utility-nav" id="utilityNav" aria-label="快捷导航"></nav>
 
-        <button class="utility-trigger ticket-service-button" id="ticketServiceButton" type="button" aria-label="打开工单服务" aria-controls="portalTicketService" aria-expanded="false">
+        <button class="utility-trigger ticket-service-button" id="ticketServiceButton" type="button" aria-label="打开待办中心" aria-controls="portalTicketService" aria-expanded="false">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 5.5h11v9h-11z"></path><path d="M7 8h6M7 11h4"></path></svg>
-          <span>工单服务</span>
+          <span>待办中心</span>
         </button>
 
         <button class="message-center-button" id="messageCenterButton" type="button" aria-label="消息中心，5 条未读消息" aria-controls="portalMessageCenter" aria-expanded="false">
@@ -3048,7 +3080,7 @@
   </aside>
 
   <section class="portal-ticket-service" id="portalTicketService" aria-hidden="true" hidden>
-    <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20260820-ticket-pending-only" title="工单服务"></iframe>
+    <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20260821-todo-center-label" title="待办中心"></iframe>
   </section>
 
   <section class="portal-message-center" id="portalMessageCenter" aria-hidden="true" hidden>
@@ -4333,11 +4365,11 @@
           label: "战略咨询",
           items: [
             { label: "战略咨询总体" },
-            { label: "新型高端智库", url: "https://effortless-licorice-cdaa9f.netlify.app" },
-            { label: "科技专题服务系统", url: "https://skxdemo.unicomcn.tech:30999/development/search", action: "embed", hideEmbeddedHeader: true },
-            { label: "科技信息展示系统", url: "https://skxrules.unicomcn.tech:30999/", action: "embed", hideEmbeddedHeader: true },
-            { label: "未来产业概述", url: "https://future_industry.itic-sci.com/index/" },
-            { label: "未来产业图谱", url: "https://itic-sci.com/sso/user/login?back_url=https://itic-sci.com/brain-graph/" }
+            { label: "新型高端智库", badge: "new", url: "https://effortless-licorice-cdaa9f.netlify.app" },
+            { label: "科技专题服务系统", badge: "hot", url: "https://skxdemo.unicomcn.tech:30999/development/search", action: "embed", hideEmbeddedHeader: true },
+            { label: "科技信息展示系统", badge: "hot", url: "https://skxrules.unicomcn.tech:30999/", action: "embed", hideEmbeddedHeader: true },
+            { label: "未来产业概述", badge: "new", url: "https://future_industry.itic-sci.com/index/" },
+            { label: "未来产业图谱", badge: "hot", url: "https://itic-sci.com/sso/user/login?back_url=https://itic-sci.com/brain-graph/" }
           ]
         },
         {
@@ -4347,19 +4379,11 @@
             { label: "科技信息展示系统", url: "https://skxrules.unicomcn.tech:30999/", action: "embed", hideEmbeddedHeader: true },
             { label: "AI 分析与智能分发工作台", url: "apps/ai-distribution/index.html", action: "embed", embedTitle: "AI 分析与智能分发工作台" },
             { label: "语音增强与适配工作台", url: "apps/voice-enhancement/index.html", action: "embed", embedTitle: "语音增强与适配工作台" },
+            { label: "管理后台", url: "apps/portal-admin/dist/index.html", action: "embed", embedTitle: "后台管理一", hideEmbeddedToolbar: true, hideEmbeddedHeader: true, headerCropPx: 64 },
             { label: "示例系统" },
             { label: "示例系统" },
             { label: "示例系统" }
           ]
-        },
-        {
-          label: "管理后台",
-          url: "apps/portal-admin/dist/index.html",
-          action: "embed",
-          embedTitle: "后台管理一",
-          hideEmbeddedToolbar: true,
-          hideEmbeddedHeader: true,
-          headerCropPx: 64
         },
         {
           label: "工作台",
@@ -7107,6 +7131,25 @@
       });
       initializeFeatureCarousel();
 
+      function createEntryName(item) {
+        const name = document.createElement("span");
+        name.className = "entry-name";
+
+        const label = document.createElement("span");
+        label.className = "entry-label";
+        label.textContent = item.label;
+        name.appendChild(label);
+
+        if (item.badge === "new" || item.badge === "hot") {
+          const badge = document.createElement("span");
+          badge.className = `entry-badge entry-badge--${item.badge}`;
+          badge.textContent = item.badge.toUpperCase();
+          name.appendChild(badge);
+        }
+
+        return name;
+      }
+
       function createMenuEntry(item) {
         let entry;
 
@@ -7131,10 +7174,7 @@
           });
         }
 
-        const label = document.createElement("span");
-        label.className = "entry-label";
-        label.textContent = item.label;
-        entry.appendChild(label);
+        entry.appendChild(createEntryName(item));
 
         if (item.url) {
           entry.appendChild(createIcon(item.action === "embed" ? embedIcon : externalIcon));
@@ -7166,7 +7206,7 @@
         }
 
         entry.classList.add("profile-menu-item");
-        entry.textContent = item.label;
+        entry.appendChild(createEntryName(item));
         return entry;
       }
 
@@ -7472,7 +7512,7 @@
       mobileTicketButton.type = "button";
       mobileTicketButton.className = "mobile-primary mobile-primary--link";
       mobileTicketButton.innerHTML = `
-        <span>工单服务</span>
+        <span>待办中心</span>
         <svg class="mobile-direct-icon" viewBox="0 0 20 20" aria-hidden="true">
           <path d="M4.5 5.5h11v9h-11zM7 8h6M7 11h4"></path>
         </svg>`;

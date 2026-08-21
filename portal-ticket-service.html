@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>门户工单弹窗原型</title>
+  <title>门户待办中心原型</title>
   <style>
     :root {
       --blue: #165dff;
@@ -441,13 +441,13 @@
     <section class="ticket-popup" role="dialog" aria-modal="true" aria-labelledby="ticketServiceTitle">
       <header class="popup-head">
         <div class="title-wrap">
-          <div class="mark">工</div>
+          <div class="mark">待</div>
           <div>
-            <h1 id="ticketServiceTitle">工单服务</h1>
+            <h1 id="ticketServiceTitle">待办中心</h1>
             <p class="subtitle">查看工单状态、详情和运营回复</p>
           </div>
         </div>
-        <button class="close" type="button" title="关闭" aria-label="关闭工单服务">×</button>
+        <button class="close" type="button" title="关闭" aria-label="关闭待办中心">×</button>
       </header>
 
       <div class="popup-toolbar">
@@ -640,7 +640,7 @@
         const parentOrigin = window.location.origin === "null" ? "*" : window.location.origin;
         window.parent.postMessage({ type: "gkx-ticket-service-close" }, parentOrigin);
       } else {
-        showToast("关闭工单弹窗");
+        showToast("关闭待办中心");
       }
     }
 
