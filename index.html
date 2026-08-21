@@ -166,40 +166,6 @@
       cursor: pointer;
     }
 
-    .legacy-link {
-      display: inline-flex;
-      height: 34px;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      border: 1px solid #c9d8ee;
-      border-radius: 6px;
-      padding: 0 11px;
-      color: #43536a;
-      background: rgba(255, 255, 255, 0.78);
-      font-size: 13px;
-      white-space: nowrap;
-      transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
-    }
-
-    .legacy-link:hover,
-    .legacy-link:focus-visible {
-      border-color: #8ab8ff;
-      color: var(--blue-strong);
-      background: #ffffff;
-      outline: none;
-    }
-
-    .legacy-link svg {
-      width: 14px;
-      height: 14px;
-      fill: none;
-      stroke: currentColor;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-width: 1.8;
-    }
-
     .utility-menu {
       width: 204px;
     }
@@ -2477,11 +2443,6 @@
         margin-left: auto;
       }
 
-      .legacy-link {
-        height: 32px;
-        padding: 0 9px;
-      }
-
       .search-wrap {
         width: 40px;
       }
@@ -2692,10 +2653,6 @@
     }
 
     @media (max-width: 720px) {
-      .legacy-link {
-        display: none;
-      }
-
       .announcement-inner {
         width: 100%;
         min-height: 46px;
@@ -3002,11 +2959,6 @@
       </nav>
 
       <div class="header-actions">
-        <a class="legacy-link" href="https://itic-sci.com/" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开旧版门户">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5 3 10l5 5M3.5 10H12a4.5 4.5 0 0 1 4.5 4.5"></path></svg>
-          <span>回到旧版</span>
-        </a>
-
         <nav class="utility-nav" id="utilityNav" aria-label="快捷导航"></nav>
 
         <button class="utility-trigger ticket-service-button" id="ticketServiceButton" type="button" aria-label="打开待办中心" aria-controls="portalTicketService" aria-expanded="false">
