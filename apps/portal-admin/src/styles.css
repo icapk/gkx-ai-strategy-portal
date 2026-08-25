@@ -52,6 +52,8 @@
 .organization-node-menu button:hover { color: var(--gkx-brand); background: var(--gkx-brand-light); }
 .organization-tree-empty { padding: 48px 8px; color: var(--gkx-text-tertiary); font-size: 14px; text-align: center; }
 .user-list-panel { min-width: 0; padding-left: 16px; }
+.organization-sync-toolbar { min-height: 32px; margin-bottom: 8px; display: flex; align-items: center; justify-content: flex-start; }
+.organization-sync-toolbar .btn { min-width: 128px; }
 .user-list-context { justify-content: flex-start; }
 .user-management-filters { grid-template-columns: minmax(240px, 1fr) minmax(240px, 1fr) max-content; }
 .user-filter-actions { height: var(--control-height); display: flex; align-items: center; gap: 8px; }
@@ -66,6 +68,15 @@
 .account-status-text { color: var(--gkx-text-secondary); font-size: 14px; line-height: 22px; }
 .user-row-actions .primary-action { color: var(--gkx-brand); font-weight: 500; }
 .organization-editor-modal { width: min(440px, calc(100vw - 32px)); }
+.organization-sync-modal { width: min(640px, calc(100vw - 32px)); }
+.organization-sync-summary { margin: 16px 0 0; border: 1px solid var(--gkx-border); border-radius: 4px; overflow: hidden; }
+.organization-sync-summary > div { min-height: 44px; display: grid; grid-template-columns: 112px minmax(0, 1fr); border-bottom: 1px solid var(--gkx-border); }
+.organization-sync-summary > div:last-child { border-bottom: 0; }
+.organization-sync-summary dt,
+.organization-sync-summary dd { margin: 0; padding: 10px 12px; font-size: 14px; line-height: 22px; }
+.organization-sync-summary dt { color: var(--gkx-text-secondary); background: var(--gkx-bg-module); }
+.organization-sync-summary dd { color: var(--gkx-text-primary); }
+.modal-helper-text { margin: 12px 0 0; color: var(--gkx-text-tertiary); font-size: 12px; line-height: 20px; }
 .organization-cascader { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .validated-control { width: 100%; }
 .validated-control input.is-error,

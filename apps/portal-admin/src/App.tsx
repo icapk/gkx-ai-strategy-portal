@@ -115,7 +115,7 @@ const navSections: NavSection[] = [
         children: [
           { key: "workflow-center", label: "审核流程管理 / 流程中心" },
           { key: "form-center", label: "审核流程管理 / 表单中心" },
-          { key: "audit-content", label: "审核内容管理 / 审核内容" },
+          { key: "audit-content", label: "审核内容管理 / 评论审核" },
         ],
       },
       {
@@ -149,7 +149,7 @@ const pageLabels: Record<PageKey, string> = {
   "announcement-management": "公告管理",
   "workflow-center": "流程中心",
   "form-center": "表单中心",
-  "audit-content": "审核内容管理",
+  "audit-content": "评论审核",
   "event-info": "埋点信息管理",
   "event-dashboard": "埋点数据统计",
   "org-management": "组织管理",
@@ -163,7 +163,7 @@ const pageLabels: Record<PageKey, string> = {
 const breadcrumbParents: Partial<Record<PageKey, string>> = {
   "workflow-center": "审核管理",
   "form-center": "审核管理",
-  "audit-content": "审核管理",
+  "audit-content": "审核内容管理",
   "event-info": "埋点管理",
   "event-dashboard": "埋点管理",
 };
@@ -171,7 +171,7 @@ const breadcrumbParents: Partial<Record<PageKey, string>> = {
 const breadcrumbParentTargets: Partial<Record<PageKey, PageKey>> = {
   "workflow-center": "workflow-center",
   "form-center": "workflow-center",
-  "audit-content": "workflow-center",
+  "audit-content": "audit-content",
   "event-info": "event-info",
   "event-dashboard": "event-info",
 };
@@ -608,7 +608,7 @@ const initialPageMenuTree: PageMenuNode[] = [
         children: [
           { id: "workflow-page", title: "流程中心", url: "/workflow-center", enabled: "启用" },
           { id: "form-page", title: "表单中心", url: "/form-center", enabled: "启用" },
-          { id: "audit-content-page", title: "审核内容", url: "/audit-content", enabled: "启用" },
+          { id: "audit-content-page", title: "评论审核", url: "/audit-content", enabled: "启用" },
         ],
       },
       { id: "tracking-page", title: "埋点管理", url: "/event-tracking", enabled: "启用" },
@@ -855,15 +855,13 @@ function Button({
 }
 
 const compactActionLabels: Record<string, string> = {
-  "报告上架": "上架",
-  "报告下架": "下架",
-  "报告删除": "删除",
-  "信息修改": "编辑",
+  "报告上架": "报告上架",
+  "报告下架": "报告下架",
+  "报告删除": "报告删除",
+  "信息修改": "信息修改",
   "查看详情": "查看",
   "查看资料": "查看",
   "权限配置": "配置",
-  "新建子页面": "新增子页",
-  "修改页面属性": "修改",
   "审核通过": "通过",
   "审核驳回": "驳回",
   "审核失败/取消展示": "取消展示",
@@ -1553,6 +1551,7 @@ function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify:
         <FilterSelect label="所属领域" options={["全部", "人工智能", "智能制造", "新材料", "低空经济"]} />
         <FilterInput label="报告来源" placeholder="请输入" searchable />
       </div>
+      <div className="workflow-management-label">排序规则设置：上传时间 · 报告类型 · 所属领域 · 报告来源</div>
       <div className="table-toolbar">
         <div>
           <Button
@@ -2121,8 +2120,9 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
   if (view === "management") {
     return (
       <section className="card page-card workflow-management">
+        <div className="workflow-management-label">流程设计器 · 流程建模 · 流程控制 · 流程发布 · 流程实例管理</div>
         <div className="table-toolbar workflow-toolbar">
-          <div><Button variant="primary" icon={Plus} onClick={createWorkflowModel}>新建流程建模</Button></div>
+          <div><Button variant="primary" icon={Plus} onClick={createWorkflowModel}>流程建模</Button></div>
         </div>
         <DataTable
           columns={["流程ID", "流程名称", "发布时间", "发布状态"]}
@@ -2162,7 +2162,7 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
         <div className="workflow-designer-back">
           <Button variant="text" icon={ChevronLeft} onClick={() => setView("management")}>返回</Button>
         </div>
-        <strong className="workflow-designer-heading">{selectedWorkflow?.流程名称 ?? "流程设计表单"}</strong>
+        <strong className="workflow-designer-heading">流程设计器{selectedWorkflow ? ` · ${selectedWorkflow.流程名称}` : ""}</strong>
         <div className="workflow-designer-publish">
           <Button onClick={() => notify("保存成功")}>保存</Button>
           <Button variant="primary" onClick={() => {
@@ -2173,7 +2173,7 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
         </div>
       </header>
       <div className="process-designer-main">
-        <section className="designer-canvas" aria-label="流程设计表单">
+        <section className="designer-canvas" aria-label="流程设计器">
           <div className="designer-canvas-scroll">
             <div className="flow-strip" style={{ transform: `scale(${canvasZoom / 100})` }}>
               {currentNodes.map((node, index) => (
@@ -2535,7 +2535,8 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
   if (view === "management") {
     return (
       <section className="card page-card form-management">
-        <div className="table-toolbar workflow-toolbar"><div><Button variant="primary" icon={Plus} onClick={createForm}>新建表单</Button></div></div>
+        <div className="workflow-management-label">表单设计器 · 表单规则 · 表单打印</div>
+        <div className="table-toolbar workflow-toolbar"><div><Button variant="primary" icon={Plus} onClick={createForm}>表单设计器</Button></div></div>
         <DataTable
           columns={["表单ID", "表单名称", "组件数量", "最近修改时间"]}
           fullTextColumns={["表单ID"]}
@@ -2545,11 +2546,11 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
           onRowClick={(row) => openWorkspace(String(row.id))}
           actions={(row) => (
             <ActionLinks
-              actions={["设计", "打印", "删除"]}
+              actions={["表单设计器", "表单打印", "删除"]}
               onAction={(action) => {
                 const formId = String(row.id);
-                if (action === "设计") openWorkspace(formId);
-                if (action === "打印") openWorkspace(formId, true);
+                if (action === "表单设计器") openWorkspace(formId);
+                if (action === "表单打印") openWorkspace(formId, true);
                 if (action === "删除") openModal("delete", {
                   payload: { message: `确认删除${row.表单名称}？` },
                   onConfirm: () => setForms((list) => list.filter((form) => form.id !== formId)),
@@ -2573,7 +2574,7 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
         </div>
         <div className="form-workspace-actions">
           <Button icon={Eye} onClick={() => setPreviewOpen(true)}>预览</Button>
-          <Button icon={Printer} onClick={printForm}>打印</Button>
+          <Button icon={Printer} onClick={printForm}>表单打印</Button>
           <Button variant="primary" icon={Save} onClick={saveForm}>保存表单</Button>
         </div>
       </header>
@@ -2615,8 +2616,8 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
               <div className="form-property-body">
                 <label className="designer-field"><span>字段名称</span><input value={selectedComponent.字段名称} onChange={(event) => updateComponent(selectedComponent.id, { 字段名称: event.target.value })} /></label>
                 <div className="form-component-type"><span>组件类型</span><b>{selectedComponent.类型}</b></div>
-                <section className="form-property-rules" aria-label="组件规则">
-                  <div className="form-property-section-title">组件规则</div>
+                <section className="form-property-rules" aria-label="表单规则">
+                  <div className="form-property-section-title">表单规则</div>
                   <FormRuleEditor component={selectedComponent} onChange={(patch) => updateComponentRules(selectedComponent.id, patch)} />
                 </section>
               </div>
@@ -2635,7 +2636,7 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
                 ? <div className="form-empty-state"><Printer size={34} /><b>暂无可预览内容</b><span>请先在表单设计器中添加组件</span></div>
                 : <FormPrintTable form={selectedForm} />}
             </div>
-            <footer className="modal-footer"><Button onClick={() => setPreviewOpen(false)}>关闭</Button><Button variant="primary" icon={Printer} onClick={printForm}>打印</Button></footer>
+            <footer className="modal-footer"><Button onClick={() => setPreviewOpen(false)}>关闭</Button><Button variant="primary" icon={Printer} onClick={printForm}>表单打印</Button></footer>
           </section>
         </div>,
         document.body,
@@ -3177,7 +3178,7 @@ function OrganizationTreeNodeRow({ node, level, selectedId, expandedIds, forceEx
             <div className="organization-node-menu" role="menu" onClick={(event) => event.stopPropagation()}>
               <button type="button" role="menuitem" onClick={() => onAction("add", node)}>新增子组织</button>
               <button type="button" role="menuitem" onClick={() => onAction("rename", node)}>重命名</button>
-              <button type="button" role="menuitem" onClick={() => onAction("sync", node)}>同步数据</button>
+              <button type="button" role="menuitem" onClick={() => onAction("sync", node)}>组织数据对接</button>
             </div>
           )}
         </div>
@@ -3203,6 +3204,38 @@ function OrganizationEditorModal({ mode, organizationName, close, save }: { mode
   );
 }
 
+function OrganizationSyncModal({ close, notify }: { close: () => void; notify: Notify }) {
+  const [syncing, setSyncing] = useState(false);
+  const startSync = () => {
+    setSyncing(true);
+    window.setTimeout(() => {
+      setSyncing(false);
+      notify("组织数据对接完成");
+      close();
+    }, 450);
+  };
+  return createPortal(
+    <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <div className="modal organization-sync-modal" role="dialog" aria-modal="true" aria-label="组织数据对接">
+        <ModalHeader title="组织数据对接" subtitle="从已配置的外部组织系统同步最新组织架构" close={close} />
+        <div className="modal-form">
+          <div className="modal-form-body">
+            <ModalAlert tone="info" title="同步说明">系统将按外部组织标识新增或更新组织，并保留现有组织层级。</ModalAlert>
+            <dl className="organization-sync-summary">
+              <div><dt>数据来源</dt><dd>外部组织系统</dd></div>
+              <div><dt>同步范围</dt><dd>全部组织及层级关系</dd></div>
+              <div><dt>同步方式</dt><dd>手动触发</dd></div>
+            </dl>
+            <p className="modal-helper-text">当前为原型模拟数据；正式接口接入后以外部系统返回结果为准。</p>
+          </div>
+          <div className="modal-footer"><Button onClick={close}>取消</Button><Button variant="primary" icon={Network} disabled={syncing} onClick={startSync}>{syncing ? "对接中" : "开始对接"}</Button></div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 function AccountStatusSwitch({ checked, label, onChange }: { checked: boolean; label: string; onChange: () => void }) {
   return <div className="account-status-control"><button type="button" role="switch" aria-checked={checked} aria-label={`${label}账号当前${checked ? "启用" : "禁用"}，点击切换`} className={`account-status-switch ${checked ? "checked" : ""}`} onClick={(event) => { event.stopPropagation(); onChange(); }}><span /></button><span className="account-status-text">{checked ? "启用" : "禁用"}</span></div>;
 }
@@ -3214,6 +3247,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   const [expandedOrganizationIds, setExpandedOrganizationIds] = useState<Set<string>>(new Set(["gkx", "research-center", "operation-center"]));
   const [activeOrganizationMenu, setActiveOrganizationMenu] = useState<string | null>(null);
   const [organizationEditor, setOrganizationEditor] = useState<{ mode: "add" | "rename"; node: OrganizationNode } | null>(null);
+  const [organizationSyncOpen, setOrganizationSyncOpen] = useState(false);
   const [users, setUsers] = useState(userRows);
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("全部");
@@ -3239,7 +3273,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   const handleOrganizationAction = (action: "add" | "rename" | "sync", node: OrganizationNode) => {
     setActiveOrganizationMenu(null);
     if (action === "sync") {
-      notify(`${node.label}数据同步成功`);
+      setOrganizationSyncOpen(true);
       return;
     }
     setOrganizationEditor({ mode: action, node });
@@ -3262,23 +3296,25 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
     <section className="card page-card user-organization-page" onClick={() => setActiveOrganizationMenu(null)}>
       <div className="user-organization-layout">
         <aside className="organization-tree-panel">
-          <div className="organization-tree-heading"><div><h2>组织架构</h2><span>{collectOrganizationLabels(organizations[0]).length} 个组织</span></div></div>
-          <label className="filter-search-control organization-tree-search"><input aria-label="组织检索" placeholder="检索组织" value={organizationKeyword} onChange={(event) => setOrganizationKeyword(event.target.value)} />{organizationKeyword ? <button type="button" aria-label="清空组织检索" onClick={() => setOrganizationKeyword("")}><X size={14} /></button> : <Search size={16} aria-hidden="true" />}</label>
+          <div className="organization-tree-heading"><div><h2>组织管理</h2><span>组织数据管理 · 组织列表查看 · {collectOrganizationLabels(organizations[0]).length} 个组织</span></div></div>
+          <label className="filter-search-control organization-tree-search"><input aria-label="组织检索" placeholder="组织检索" value={organizationKeyword} onChange={(event) => setOrganizationKeyword(event.target.value)} />{organizationKeyword ? <button type="button" aria-label="清空组织检索" onClick={() => setOrganizationKeyword("")}><X size={14} /></button> : <Search size={16} aria-hidden="true" />}</label>
           <div className="organization-tree-list" role="tree">
             {visibleOrganizations.length ? visibleOrganizations.map((node) => <OrganizationTreeNodeRow key={node.id} node={node} level={0} selectedId={selectedOrganizationId} expandedIds={expandedOrganizationIds} forceExpanded={Boolean(organizationKeyword.trim())} activeMenuId={activeOrganizationMenu} onSelect={(selectedNode) => { setSelectedOrganizationId(selectedNode.id); setActiveOrganizationMenu(null); }} onToggle={toggleOrganization} onOpenMenu={setActiveOrganizationMenu} onAction={handleOrganizationAction} />) : <div className="organization-tree-empty">未找到相关组织</div>}
           </div>
         </aside>
         <section className="user-list-panel">
+          <div className="organization-sync-toolbar"><Button icon={Network} onClick={() => setOrganizationSyncOpen(true)}>组织数据对接</Button></div>
+          <div className="user-list-context"><h2>用户管理</h2><span>用户列表展示</span></div>
           <div className="filters user-management-filters">
-            <FilterInput label="用户姓名" placeholder="请输入" searchable value={nameFilter} onChange={setNameFilter} />
+            <FilterInput label="用户检索" placeholder="请输入用户姓名" searchable value={nameFilter} onChange={setNameFilter} />
             <FilterSelect label="账号状态" options={["全部", "启用", "禁用"]} value={statusFilter} onChange={setStatusFilter} />
           </div>
           <div className="table-toolbar user-management-toolbar"><div>
             <Button variant="primary" icon={Plus} onClick={() => openModal("user", { mode: "create", onSave: (values) => {
               setUsers((list) => [...list, { 用户ID: `U2026${String(list.length + 1).padStart(4, "0")}`, 用户姓名: values.姓名, 所属组织名称: values.所属组织, 手机号: values.手机号, 邮箱: values.邮箱, 创建时间: "2026-07-14", 账号状态: "启用" }]);
-              notify("用户创建成功");
-            } })}>手动创建用户</Button>
-            <Button icon={Network} onClick={() => notify("接口数据同步成功")}>接口数据同步</Button>
+              notify("用户注册成功");
+            } })}>用户注册</Button>
+            <Button icon={Network} onClick={() => notify("用户数据对接成功")}>用户数据对接</Button>
           </div></div>
           <DataTable
             columns={["用户ID", "姓名", "归属组织名称", "手机号", "邮箱", "创建时间", "账号状态"]}
@@ -3291,6 +3327,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
         </section>
       </div>
       {organizationEditor && <OrganizationEditorModal mode={organizationEditor.mode} organizationName={organizationEditor.node.label} close={() => setOrganizationEditor(null)} save={saveOrganization} />}
+      {organizationSyncOpen && <OrganizationSyncModal close={() => setOrganizationSyncOpen(false)} notify={notify} />}
       {transferUser && <RoleTransferModal user={transferUser} roles={userRoleMap[transferUser.用户ID] ?? []} close={() => setTransferUser(null)} save={(roles) => { setUserRoleMap((current) => ({ ...current, [transferUser.用户ID]: roles })); setTransferUser(null); notify("角色分配成功"); }} />}
     </section>
   );
@@ -3305,6 +3342,7 @@ function RoleManagement({ openModal, onPermissionConfig }: { openModal: OpenModa
 
   return (
     <section className="card page-card">
+      <div className="workflow-management-label">角色检索 · 角色列表展示</div>
       <div className="filters">
         <FilterInput label="角色ID" placeholder="角色ID" />
         <FilterInput label="角色名称" placeholder="角色名称" />
@@ -3331,7 +3369,7 @@ function RoleManagement({ openModal, onPermissionConfig }: { openModal: OpenModa
                 },
               ]),
             })}
-          >新建</Button>
+          >创建</Button>
         </div>
       </div>
       <DataTable
@@ -3425,7 +3463,7 @@ function PageParentCascader({ nodes, value, disabled, excludedId, onChange }: { 
         setLevelTwoId("");
         onChange(nextId);
       }}>
-        <option value="">无（新建一级页面）</option>
+        <option value="">无（新建页面）</option>
         {availableRoots.map((node) => <option key={node.id} value={node.id}>{node.title}</option>)}
       </select>
       <select aria-label="二级页面" value={levelTwoId} disabled={disabled || !levelOneId} onChange={(event) => {
@@ -3452,7 +3490,7 @@ function PageEditorModal({ state, nodes, close, save }: { state: PageEditorState
   const [submitted, setSubmitted] = useState(false);
   const parentLocked = state.mode === "create-root" || Boolean(node?.children?.length);
   const canSubmit = Boolean(title.trim() && url.trim());
-  const modalTitle = state.mode === "edit" ? "修改页面属性" : state.mode === "create-root" ? "新建一级页面" : "新建子页面";
+  const modalTitle = state.mode === "edit" ? "修改页面" : "新建页面";
   return createPortal(
     <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
       <div className="modal page-editor-modal" role="dialog" aria-modal="true" aria-label={modalTitle}>
@@ -3480,7 +3518,7 @@ function PageManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   const [tooltip, setTooltip] = useState<{ content: string; left: number; top: number } | null>(null);
   const tableWrapRef = useRef<HTMLDivElement>(null);
   const visibleRows = useMemo(() => getVisiblePageMenuRows(pages, expandedIds), [pages, expandedIds]);
-  const pageActionColumnWidth = getActionColumnWidth([getOrderedActions(["新建子页面", "修改页面属性", "删除"])]);
+  const pageActionColumnWidth = getActionColumnWidth([getOrderedActions(["新建页面", "修改页面", "删除页面"])]);
 
   const updateScrollState = useCallback(() => {
     const tableWrap = tableWrapRef.current;
@@ -3526,19 +3564,20 @@ function PageManagement({ openModal, notify }: { openModal: OpenModal; notify: N
       const editedNode: PageMenuNode = { ...current, title: values.title, url: values.url, enabled: values.enabled };
       const withoutCurrent = removePageMenuNode(pages, current.id);
       setPages(addPageMenuNode(withoutCurrent, values.parentId, editedNode));
-      notify("页面属性修改成功");
+      notify("页面修改成功");
     } else {
       const newNode: PageMenuNode = { id: `page-${Date.now()}`, title: values.title, url: values.url, enabled: values.enabled };
       setPages((current) => addPageMenuNode(current, values.parentId, newNode));
       if (values.parentId) setExpandedIds((current) => new Set([...current, values.parentId]));
-      notify(editor.mode === "create-root" ? "一级页面新建成功" : "子页面新建成功");
+      notify("页面新建成功");
     }
     setEditor(null);
   };
 
   return (
     <section className="card page-card page-menu-management-page">
-      <div className="table-toolbar page-menu-toolbar"><div><Button variant="primary" icon={Plus} onClick={() => setEditor({ mode: "create-root", parentId: "" })}>新建一级页面</Button></div></div>
+      <div className="workflow-management-label">分级管理</div>
+      <div className="table-toolbar page-menu-toolbar"><div><Button variant="primary" icon={Plus} onClick={() => setEditor({ mode: "create-root", parentId: "" })}>新建页面</Button></div></div>
       <div className={`table-wrap page-tree-grid-wrap ${scrollState.hasOverflow ? "is-scrollable" : ""} ${scrollState.showLeftShadow ? "has-left-shadow" : ""} ${scrollState.showRightShadow ? "has-right-shadow" : ""}`} ref={tableWrapRef} onScroll={updateScrollState}>
         <table className="page-tree-grid">
           <colgroup><col /><col /><col style={{ width: 160 }} /><col style={{ width: 112 }} /><col style={{ width: pageActionColumnWidth }} /></colgroup>
@@ -3552,10 +3591,10 @@ function PageManagement({ openModal, notify }: { openModal: OpenModal; notify: N
               <td><span className="page-route-text"><TableCellContent value={node.url} onShowTooltip={showTooltip} onHideTooltip={() => setTooltip(null)} /></span></td>
               <td><TableCellContent value={parentTitle} onShowTooltip={showTooltip} onHideTooltip={() => setTooltip(null)} /></td>
               <td><StatusTag value={node.enabled} /></td>
-              <td className="table-action-cell table-sticky-right" style={{ width: pageActionColumnWidth, minWidth: pageActionColumnWidth, maxWidth: pageActionColumnWidth }}><ActionLinks actions={["新建子页面", "修改页面属性", "删除"]} disabledActions={canCreateChild ? [] : ["新建子页面"]} actionTipOverrides={canCreateChild ? {} : { 新建子页面: "最多支持三级页面" }} onAction={(action) => {
-                if (action === "新建子页面") setEditor({ mode: "create-child", parentId: node.id });
-                if (action === "修改页面属性") setEditor({ mode: "edit", nodeId: node.id, parentId });
-                if (action === "删除") openModal("delete", { payload: { message: `确定要删除页面“${node.title}”吗？`, description: "此操作将隐藏对应前端访问入口，且无法撤销。", successMessage: "页面删除成功" }, onConfirm: () => setPages((current) => removePageMenuNode(current, node.id)) });
+              <td className="table-action-cell table-sticky-right" style={{ width: pageActionColumnWidth, minWidth: pageActionColumnWidth, maxWidth: pageActionColumnWidth }}><ActionLinks actions={["新建页面", "修改页面", "删除页面"]} disabledActions={canCreateChild ? [] : ["新建页面"]} actionTipOverrides={canCreateChild ? {} : { 新建页面: "最多支持三级页面" }} onAction={(action) => {
+                if (action === "新建页面") setEditor({ mode: "create-child", parentId: node.id });
+                if (action === "修改页面") setEditor({ mode: "edit", nodeId: node.id, parentId });
+                if (action === "删除页面") openModal("delete", { payload: { message: `确定要删除页面“${node.title}”吗？`, description: "此操作将隐藏对应前端访问入口，且无法撤销。", successMessage: "页面删除成功" }, onConfirm: () => setPages((current) => removePageMenuNode(current, node.id)) });
               }} /></td>
             </tr>;
           })}</tbody>
@@ -3568,14 +3607,14 @@ function PageManagement({ openModal, notify }: { openModal: OpenModal; notify: N
 }
 
 function ResourceManagement({ openModal, notify }: { openModal: OpenModal; notify: Notify }) {
-  const [tab, setTab] = useState<"api" | "business">("api");
+  const [tab, setTab] = useState<"api" | BusinessResourceType>("api");
   return (
     <section className="card page-card resource-management-page">
       <div className="resource-tabs resource-primary-tabs" aria-label="资源管理类型">
         <button className={tab === "api" ? "active" : ""} onClick={() => setTab("api")}>接口资源管理</button>
-        <button className={tab === "business" ? "active" : ""} onClick={() => setTab("business")}>业务资源管理</button>
+        {(Object.keys(businessResourceConfigs) as BusinessResourceType[]).map((type) => <button className={tab === type ? "active" : ""} onClick={() => setTab(type)} key={type}>{businessResourceConfigs[type].tab}</button>)}
       </div>
-      {tab === "api" ? <ApiResources openModal={openModal} notify={notify} /> : <BusinessResources openModal={openModal} notify={notify} />}
+      {tab === "api" ? <ApiResources openModal={openModal} notify={notify} /> : <BusinessResourceWorkspace type={tab} openModal={openModal} notify={notify} key={tab} />}
     </section>
   );
 }
@@ -3625,7 +3664,7 @@ function ApiResources({ openModal, notify }: { openModal: OpenModal; notify: Not
     <div className="api-resource-workspace">
       <div className="resource-subtabs" aria-label="接口资源管理功能">
         <button className={tab === "tokens" ? "active" : ""} onClick={() => setTab("tokens")}>令牌管理</button>
-        <button className={tab === "docs" ? "active" : ""} onClick={() => setTab("docs")}>接口调用文档</button>
+        <button className={tab === "docs" ? "active" : ""} onClick={() => setTab("docs")}>接口调用文档展示</button>
         <button className={tab === "logs" ? "active" : ""} onClick={() => setTab("logs")}>接口调用日志</button>
       </div>
       {tab === "tokens" && (
@@ -3881,7 +3920,7 @@ function BusinessResourceWorkspace({ type, openModal, notify }: { type: Business
 }
 
 const pagePermissionGroups = [
-  { label: "系统管理", items: [{ key: "report", label: "报告管理", level: 0 }, { key: "workflow", label: "审核管理 / 流程中心", level: 0 }, { key: "form", label: "审核管理 / 表单中心", level: 1 }, { key: "audit", label: "审核管理 / 审核内容管理", level: 1 }, { key: "event-info", label: "埋点管理 / 埋点信息管理", level: 0 }, { key: "event-dashboard", label: "埋点管理 / 埋点数据统计", level: 1 }] },
+  { label: "系统管理", items: [{ key: "report", label: "报告管理", level: 0 }, { key: "workflow", label: "审核流程管理 / 流程中心", level: 0 }, { key: "form", label: "审核流程管理 / 表单中心", level: 1 }, { key: "audit", label: "审核内容管理 / 评论审核", level: 1 }, { key: "event-info", label: "埋点管理 / 埋点信息管理", level: 0 }, { key: "event-dashboard", label: "埋点管理 / 埋点数据统计", level: 1 }] },
   { label: "权限管理", items: [{ key: "user", label: "用户管理", level: 0 }, { key: "role", label: "角色管理", level: 0 }, { key: "page", label: "页面管理", level: 0 }, { key: "resource", label: "资源管理", level: 0 }, { key: "permission", label: "权限配置", level: 0 }] },
 ];
 
@@ -3942,7 +3981,7 @@ function PermissionConfig({ notify }: { notify: Notify }) {
   const filteredUsers = userRows.filter((user) => user.用户姓名.includes(userKeyword.trim()));
   return (
     <section className="card permission-page permission-config-page">
-      <div className="resource-tabs permission-primary-tabs" aria-label="权限配置类型"><button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>用户分配</button><button className={tab === "roles" ? "active" : ""} onClick={() => setTab("roles")}>角色权限</button></div>
+      <div className="resource-tabs permission-primary-tabs" aria-label="权限配置类型"><button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>用户</button><button className={tab === "roles" ? "active" : ""} onClick={() => setTab("roles")}>角色</button></div>
       {tab === "users" ? (
         <div className="permission-user-list">
           <div className="filters permission-user-filters"><FilterInput label="用户检索" placeholder="请输入" searchable value={userKeyword} onChange={setUserKeyword} /></div>
@@ -3953,7 +3992,7 @@ function PermissionConfig({ notify }: { notify: Notify }) {
           <aside className="role-selector"><h3>角色列表</h3>{roles.map((role) => <button type="button" className={activeRole === role ? "active" : ""} onClick={() => setActiveRole(role)} key={role}><ShieldCheck size={16} /><span><b>{role}</b><small>{role === "系统管理员" ? "全部系统权限" : "自定义权限"}</small></span><ChevronRight size={15} /></button>)}</aside>
           <section className="permission-workspace">
             <div className="permission-workspace-header"><div><h3>{activeRole}</h3><p>配置该角色可访问的页面与业务资源范围</p></div><Button variant="primary" icon={Save} onClick={() => notify("权限配置保存成功")}>保存配置</Button></div>
-            <div className="resource-subtabs permission-workspace-tabs"><button className={permissionTab === "pages" ? "active" : ""} onClick={() => setPermissionTab("pages")}>页面权限</button><button className={permissionTab === "resources" ? "active" : ""} onClick={() => setPermissionTab("resources")}>资源权限</button></div>
+            <div className="resource-subtabs permission-workspace-tabs"><button className={permissionTab === "pages" ? "active" : ""} onClick={() => setPermissionTab("pages")}>页面</button><button className={permissionTab === "resources" ? "active" : ""} onClick={() => setPermissionTab("resources")}>资源</button></div>
             {permissionTab === "pages" ? <><div className="permission-note"><ShieldCheck size={16} /><span>若页面管理中页面已禁用，则优先覆盖此处配置。</span></div><PagePermissionTree selected={pagePermissions[activeRole] ?? []} onChange={(next) => setPagePermissions((current) => ({ ...current, [activeRole]: next }))} /></> : <ResourcePermissionTree selected={resourcePermissions[activeRole] ?? []} onChange={(next) => setResourcePermissions((current) => ({ ...current, [activeRole]: next }))} />}
           </section>
         </div>
@@ -4157,7 +4196,7 @@ function UserModal({ close, mode, payload, onSave }: { close: () => void; mode: 
   };
   return (
     <>
-      <ModalHeader title={isDetail ? "用户详情" : "手动创建用户"} close={close} />
+      <ModalHeader title={isDetail ? "用户详情" : "用户注册"} close={close} />
       <form className="modal-form user-account-form" onSubmit={(event) => { event.preventDefault(); if (!isDetail) submit(); }} noValidate>
         <div className="modal-form-body">
           <FormField label="姓名" required={!isDetail}><div className="validated-control"><input readOnly={isDetail} className={errors.姓名 ? "is-error" : ""} placeholder="请输入姓名" value={values.姓名} onChange={(event) => changeValue("姓名", event.target.value)} />{errors.姓名 && <span className="form-error-message">{errors.姓名}</span>}</div></FormField>
@@ -4165,7 +4204,7 @@ function UserModal({ close, mode, payload, onSave }: { close: () => void; mode: 
           <FormField label="邮箱" required={!isDetail}><div className="validated-control"><input readOnly={isDetail} className={errors.邮箱 ? "is-error" : ""} type="email" placeholder="请输入邮箱地址" value={values.邮箱} onChange={(event) => changeValue("邮箱", event.target.value)} />{errors.邮箱 && <span className="form-error-message">{errors.邮箱}</span>}</div></FormField>
           <FormField label="所属组织" required={!isDetail}><div className={`validated-control ${errors.所属组织 ? "is-error" : ""}`}><OrganizationCascader value={values.所属组织} disabled={isDetail} onChange={(value) => changeValue("所属组织", value)} />{errors.所属组织 && <span className="form-error-message">{errors.所属组织}</span>}</div></FormField>
         </div>
-        <div className="modal-footer">{isDetail ? <Button variant="primary" onClick={close}>关闭</Button> : <><Button onClick={close}>取消</Button><Button type="submit" variant="primary">创建</Button></>}</div>
+        <div className="modal-footer">{isDetail ? <Button variant="primary" onClick={close}>关闭</Button> : <><Button onClick={close}>取消</Button><Button type="submit" variant="primary">注册</Button></>}</div>
       </form>
     </>
   );
@@ -4176,7 +4215,7 @@ function RoleModal({ close, payload, onSave }: { close: () => void; payload: Mod
   const canSubmit = values.角色名称.trim().length > 0 && values.状态.trim().length > 0;
   return (
     <>
-      <ModalHeader title="新建/编辑" close={close} />
+      <ModalHeader title="创建/编辑" close={close} />
       <form className="modal-form" onSubmit={(e) => { e.preventDefault(); if (!canSubmit) return; onSave?.(values); close(); }}>
         <div className="modal-form-body">
           <FormField label="角色名称" required><input value={values.角色名称} onChange={(event) => setValue("角色名称", event.target.value)} /></FormField>
@@ -4194,7 +4233,7 @@ function PageModal({ close, payload, onSave }: { close: () => void; payload: Mod
   const canSubmit = values.标题.trim().length > 0 && values["地址(URL)"].trim().length > 0 && values.启用属性.trim().length > 0;
   return (
     <>
-      <ModalHeader title="新建/修改页面" close={close} />
+      <ModalHeader title="新建页面/修改页面" close={close} />
       <form className="modal-form" onSubmit={(e) => { e.preventDefault(); if (!canSubmit) return; onSave?.(values); close(); }}>
         <div className="modal-form-body">
           <FormField label="标题" required><input value={values.标题} onChange={(event) => setValue("标题", event.target.value)} /></FormField>
