@@ -1,0 +1,13 @@
+node_modules
+.DS_Store
+*.log
+.vite
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+tmp/
+outputs/
+design-preview/
+qa-*.png
+PRODUCT.md
+科技专题服务-PRD.md
