@@ -113,17 +113,17 @@ const navSections: NavSection[] = [
         label: "审核管理",
         icon: ShieldCheck,
         children: [
-          { key: "workflow-center", label: "流程中心（审核流程管理）" },
-          { key: "form-center", label: "表单中心（审核流程管理）" },
-          { key: "audit-content", label: "审核内容" },
+          { key: "workflow-center", label: "流程中心" },
+          { key: "form-center", label: "表单中心" },
+          { key: "audit-content", label: "审核内容管理" },
         ],
       },
       {
         label: "埋点管理",
         icon: Activity,
         children: [
-          { key: "event-info", label: "埋点信息" },
-          { key: "event-dashboard", label: "数据看板" },
+          { key: "event-info", label: "埋点信息管理" },
+          { key: "event-dashboard", label: "埋点数据统计" },
         ],
       },
     ],
@@ -147,11 +147,11 @@ const allMenuItems = navSections.flatMap((section) =>
 const pageLabels: Record<PageKey, string> = {
   "report-management": "报告管理",
   "announcement-management": "公告管理",
-  "workflow-center": "流程中心（审核流程管理）",
-  "form-center": "表单中心（审核流程管理）",
+  "workflow-center": "流程中心",
+  "form-center": "表单中心",
   "audit-content": "审核内容管理",
-  "event-info": "埋点信息",
-  "event-dashboard": "数据看板",
+  "event-info": "埋点信息管理",
+  "event-dashboard": "埋点数据统计",
   "org-management": "组织管理",
   "user-management": "用户管理",
   "role-management": "角色管理",
@@ -496,7 +496,7 @@ const eventDashboardData: Record<TimeInterval, DashboardData> = {
       pathConversion: { value: "32.8%", trend: "+3.6% 较上年", direction: "up" },
     },
     trend: [{ label: "1月", eventValue: 18200, userValue: 4860 }, { label: "3月", eventValue: 23600, userValue: 6280 }, { label: "5月", eventValue: 31800, userValue: 5720 }, { label: "7月", eventValue: 40200, userValue: 7640 }, { label: "9月", eventValue: 47700, userValue: 6980 }, { label: "11月", eventValue: 53600, userValue: 8420 }],
-    funnel: [{ label: "页面访问", value: "186,420", rate: 100 }, { label: "关键按钮点击", value: "87,256", rate: 68 }, { label: "业务提交", value: "52,938", rate: 48 }, { label: "完成转化", value: "32,846", rate: 32.8 }],
+      funnel: [{ label: "页面访问", value: "186,420", rate: 100 }, { label: "按钮点击", value: "87,256", rate: 68 }, { label: "业务提交", value: "52,938", rate: 48 }, { label: "完成转化", value: "32,846", rate: 32.8 }],
     ranking: [
       { 事件ID: "EVT_REPORT_VIEW", 埋点标签: "报告查看", 触发次数: "68,420", 页面停留均时: "3分18秒" },
       { 事件ID: "EVT_USER_REGISTER", 埋点标签: "用户注册", 触发次数: "42,600", 页面停留均时: "2分46秒" },
@@ -512,7 +512,7 @@ const eventDashboardData: Record<TimeInterval, DashboardData> = {
       pathConversion: { value: "30.6%", trend: "-1.2% 较上月", direction: "down" },
     },
     trend: [{ label: "第1周", eventValue: 6260, userValue: 1800 }, { label: "第2周", eventValue: 7420, userValue: 1520 }, { label: "第3周", eventValue: 6780, userValue: 2140 }, { label: "第4周", eventValue: 8050, userValue: 1960 }],
-    funnel: [{ label: "页面访问", value: "21,680", rate: 100 }, { label: "关键按钮点击", value: "9,452", rate: 70 }, { label: "业务提交", value: "5,816", rate: 50 }, { label: "完成转化", value: "3,548", rate: 30.6 }],
+      funnel: [{ label: "页面访问", value: "21,680", rate: 100 }, { label: "按钮点击", value: "9,452", rate: 70 }, { label: "业务提交", value: "5,816", rate: 50 }, { label: "完成转化", value: "3,548", rate: 30.6 }],
     ranking: [
       { 事件ID: "EVT_REPORT_VIEW", 埋点标签: "报告查看", 触发次数: "8,280", 页面停留均时: "3分06秒" },
       { 事件ID: "EVT_USER_REGISTER", 埋点标签: "用户注册", 触发次数: "5,460", 页面停留均时: "2分32秒" },
@@ -528,7 +528,7 @@ const eventDashboardData: Record<TimeInterval, DashboardData> = {
       pathConversion: { value: "28.4%", trend: "-0.8% 较昨日", direction: "down" },
     },
     trend: [{ label: "09:00", eventValue: 126, userValue: 52 }, { label: "11:00", eventValue: 214, userValue: 88 }, { label: "13:00", eventValue: 168, userValue: 60 }, { label: "15:00", eventValue: 246, userValue: 110 }, { label: "17:00", eventValue: 312, userValue: 84 }, { label: "19:00", eventValue: 220, userValue: 96 }],
-    funnel: [{ label: "页面访问", value: "986", rate: 100 }, { label: "关键按钮点击", value: "412", rate: 72 }, { label: "业务提交", value: "268", rate: 50 }, { label: "完成转化", value: "186", rate: 28.4 }],
+      funnel: [{ label: "页面访问", value: "986", rate: 100 }, { label: "按钮点击", value: "412", rate: 72 }, { label: "业务提交", value: "268", rate: 50 }, { label: "完成转化", value: "186", rate: 28.4 }],
     ranking: [
       { 事件ID: "EVT_REPORT_VIEW", 埋点标签: "报告查看", 触发次数: "362", 页面停留均时: "3分12秒" },
       { 事件ID: "EVT_USER_REGISTER", 埋点标签: "用户注册", 触发次数: "216", 页面停留均时: "2分28秒" },
@@ -2942,11 +2942,11 @@ function EventGrowthTrend({ data }: { data: DashboardData }) {
   return (
     <section className="dashboard-panel trend-panel">
       <div className="dashboard-panel-heading">
-        <h3>事件增长趋势与活跃用户波形图</h3>
-        <div className="chart-legend"><span className="event">事件增长趋势</span><span className="user">活跃用户</span></div>
+        <h3>事件增长趋势</h3>
+        <div className="chart-legend"><span className="event">事件增长趋势</span><span className="user">活跃用户数</span></div>
       </div>
       <div className="trend-chart">
-        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="事件增长趋势与活跃用户波形图">
+        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="事件增长趋势">
           {[0, 1, 2, 3].map((line) => {
             const y = chartTop + line * ((height - chartTop - chartBottom) / 3);
             return <line key={line} x1={chartLeft} x2={width - chartRight} y1={y} y2={y} className="trend-grid-line" />;
@@ -2959,7 +2959,7 @@ function EventGrowthTrend({ data }: { data: DashboardData }) {
               <text x={point.x} y={height - 14} textAnchor="middle">{point.label}</text>
             </g>
           ))}
-          {userPoints.map((point) => <circle key={`user-${point.label}`} className={`user-point ${hoveredPoint?.index === point.index ? "is-hovered" : ""}`} cx={point.x} cy={point.y} r="5" tabIndex={0} aria-label={`${point.label} 活跃用户 ${point.userValue}`} onClick={() => setHoveredPoint({ index: point.index, label: point.label, x: point.x })} onFocus={() => setHoveredPoint({ index: point.index, label: point.label, x: point.x })} onBlur={() => setHoveredPoint(null)} onMouseEnter={() => setHoveredPoint({ index: point.index, label: point.label, x: point.x })} onMouseLeave={() => setHoveredPoint(null)}><title>{`${point.label} 活跃用户 ${point.userValue}`}</title></circle>)}
+          {userPoints.map((point) => <circle key={`user-${point.label}`} className={`user-point ${hoveredPoint?.index === point.index ? "is-hovered" : ""}`} cx={point.x} cy={point.y} r="5" tabIndex={0} aria-label={`${point.label} 活跃用户数 ${point.userValue}`} onClick={() => setHoveredPoint({ index: point.index, label: point.label, x: point.x })} onFocus={() => setHoveredPoint({ index: point.index, label: point.label, x: point.x })} onBlur={() => setHoveredPoint(null)} onMouseEnter={() => setHoveredPoint({ index: point.index, label: point.label, x: point.x })} onMouseLeave={() => setHoveredPoint(null)}><title>{`${point.label} 活跃用户数 ${point.userValue}`}</title></circle>)}
           {hoveredPoint && (
             <g className="chart-hover-layer" pointerEvents="none">
               <line className="chart-hover-guide" x1={hoveredPoint.x} x2={hoveredPoint.x} y1={chartTop} y2={height - chartBottom} />
@@ -2970,7 +2970,7 @@ function EventGrowthTrend({ data }: { data: DashboardData }) {
                 <text className="chart-hover-label" x="22" y="42">事件增长趋势</text>
                 <text className="chart-hover-value" x="152" y="42" textAnchor="end">{data.trend[hoveredPoint.index].eventValue.toLocaleString()}</text>
                 <circle className="chart-hover-marker user" cx="12" cy="58" r="3" />
-                <text className="chart-hover-label" x="22" y="62">活跃用户</text>
+                <text className="chart-hover-label" x="22" y="62">活跃用户数</text>
                 <text className="chart-hover-value" x="152" y="62" textAnchor="end">{data.trend[hoveredPoint.index].userValue.toLocaleString()}</text>
               </g>
             </g>
@@ -2984,8 +2984,8 @@ function EventGrowthTrend({ data }: { data: DashboardData }) {
 function EventFunnel({ data }: { data: DashboardData }) {
   return (
     <section className="dashboard-panel funnel-panel">
-      <h3>用户行为事件转化率漏斗模型</h3>
-      <div className="event-funnel" aria-label="用户行为事件转化率漏斗模型">
+      <h3>事件转化率</h3>
+      <div className="event-funnel" aria-label="事件转化率">
         {data.funnel.map((step, index) => (
           <div className={`funnel-step step-${index + 1}`} style={{ width: `${56 + (step.rate / 100) * 44}%` }} title={`${step.label}：${step.value}，转化率 ${step.rate}%`} tabIndex={0} key={step.label}>
             <span>{step.label}</span><strong>{step.value}</strong><small>{step.rate}%</small>
@@ -2999,7 +2999,7 @@ function EventFunnel({ data }: { data: DashboardData }) {
 function EventRankingTable({ data }: { data: DashboardData }) {
   return (
     <section className="dashboard-ranking-section">
-      <h3>热门事件排行榜</h3>
+      <h3>事件排行</h3>
       <div className="event-ranking-table-wrap">
         <table className="event-ranking-table">
           <thead><tr><th>排名</th><th>事件ID</th><th>埋点标签</th><th>触发次数</th><th>页面停留均时</th></tr></thead>
@@ -3040,8 +3040,8 @@ function EventDashboard() {
       <div className="dashboard-metrics">
         <DashboardMetric label="事件总量" {...data.stats.eventTotal} iconSrc="./assets/dashboard-event-total-3d.png" />
         <DashboardMetric label="活跃用户数" {...data.stats.activeUsers} iconSrc="./assets/dashboard-active-users-3d.png" />
-        <DashboardMetric label="关键按钮点击率" {...data.stats.clickRate} iconSrc="./assets/dashboard-click-rate-3d.png" />
-        <DashboardMetric label="核心路径转化率" {...data.stats.pathConversion} iconSrc="./assets/dashboard-path-conversion-3d.png" />
+        <DashboardMetric label="按钮点击率" {...data.stats.clickRate} iconSrc="./assets/dashboard-click-rate-3d.png" />
+        <DashboardMetric label="事件转化率" {...data.stats.pathConversion} iconSrc="./assets/dashboard-path-conversion-3d.png" />
       </div>
       <div className="dashboard-data-panels">
         <EventGrowthTrend data={data} />
@@ -3090,7 +3090,7 @@ function EventTracking({ openModal, initialTab }: { openModal: OpenModal; initia
                 创建时间: "2026-07-13 14:30",
               }]),
             })}
-          >新增埋点</Button>
+          >新增埋点事件</Button>
           <Button icon={Upload} onClick={() => openModal("tracking", { mode: "batch" })}>批量上传</Button>
         </div>
       </div>
@@ -3881,7 +3881,7 @@ function BusinessResourceWorkspace({ type, openModal, notify }: { type: Business
 }
 
 const pagePermissionGroups = [
-  { label: "系统管理", items: [{ key: "report", label: "报告管理", level: 0 }, { key: "workflow", label: "审核管理 / 流程中心", level: 0 }, { key: "form", label: "审核管理 / 表单中心", level: 1 }, { key: "audit", label: "审核管理 / 审核内容", level: 1 }, { key: "event-info", label: "埋点管理 / 埋点信息", level: 0 }, { key: "event-dashboard", label: "埋点管理 / 数据看板", level: 1 }] },
+  { label: "系统管理", items: [{ key: "report", label: "报告管理", level: 0 }, { key: "workflow", label: "审核管理 / 流程中心", level: 0 }, { key: "form", label: "审核管理 / 表单中心", level: 1 }, { key: "audit", label: "审核管理 / 审核内容管理", level: 1 }, { key: "event-info", label: "埋点管理 / 埋点信息管理", level: 0 }, { key: "event-dashboard", label: "埋点管理 / 埋点数据统计", level: 1 }] },
   { label: "权限管理", items: [{ key: "user", label: "用户管理", level: 0 }, { key: "role", label: "角色管理", level: 0 }, { key: "page", label: "页面管理", level: 0 }, { key: "resource", label: "资源管理", level: 0 }, { key: "permission", label: "权限配置", level: 0 }] },
 ];
 
@@ -4076,7 +4076,7 @@ function TrackingModal({ close, mode, payload, onSave }: { close: () => void; mo
   const triggerOptions = ["点击", "提交", "保存", "曝光", "页面加载"];
   return (
     <>
-      <ModalHeader title={isDetail ? "查看详情" : mode === "edit" ? "修改埋点" : "新增埋点"} close={close} />
+      <ModalHeader title={isDetail ? "查看详情" : mode === "edit" ? "修改埋点" : "新增埋点事件"} close={close} />
       <form className="modal-form" onSubmit={(e) => { e.preventDefault(); if (!isDetail && !canSubmit) return; onSave?.(values); close(); }}>
         <div className="modal-form-body">
           <FormField label="事件ID" required={!isDetail}><input readOnly={isDetail} value={values.事件ID} onChange={(event) => setValue("事件ID", event.target.value)} /></FormField>
