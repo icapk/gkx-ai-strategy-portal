@@ -24,6 +24,7 @@
 .user-list-context { gap: 8px; }
 .organization-tree-heading h2,
 .user-list-context h2 { margin: 0; color: var(--gkx-text-primary); font-size: 16px; line-height: 24px; font-weight: 600; }
+.organization-tree-heading h2 { white-space: nowrap; }
 .organization-tree-heading span,
 .user-list-context span { color: var(--gkx-text-secondary); font-size: 12px; line-height: 20px; }
 .organization-tree-search { width: 100%; height: var(--control-height); padding: 0 10px; display: flex; align-items: center; gap: 8px; color: var(--gkx-text-tertiary); background: #fff; border: 1px solid var(--gkx-border); border-radius: 4px; }
