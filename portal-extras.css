@@ -630,6 +630,317 @@
   .portal-qa-send { right: 10px; bottom: 10px; width: 44px; height: 44px; }
 }
 
+/* Portal paper comments: inline review workspace inside 搜论文 results. */
+.portal-paper-comment-toggle {
+  border-color: #b7ded5;
+  color: #197b6d;
+  background: #effaf7;
+}
+
+.portal-paper-comment-toggle:hover,
+.portal-paper-comment-toggle:focus-visible {
+  border-color: #7fc8bb;
+  color: #126456;
+  background: #e4f6f1;
+}
+
+.portal-search-card.is-comment-open {
+  background: #fafdff;
+  box-shadow: inset 3px 0 0 #2b9a89;
+}
+
+.portal-paper-comment-panel {
+  overflow: hidden;
+  margin-top: 16px;
+  border: 1px solid #cfe0ef;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(41, 76, 116, .08);
+}
+
+.portal-paper-comment-panel[hidden] { display: none; }
+
+.portal-paper-comment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e1ebf4;
+  background: linear-gradient(90deg, #f2f8ff, #fbfdff);
+}
+
+.portal-paper-comment-kicker {
+  display: inline-flex;
+  color: #147b6b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.portal-paper-comment-header h4 {
+  margin: 5px 0 2px;
+  color: #263f59;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.portal-paper-comment-header p {
+  margin: 0;
+  color: #74869a;
+  font-size: 10px;
+}
+
+.portal-paper-comment-review {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  min-height: 26px;
+  border: 1px solid #c5e9df;
+  border-radius: 4px;
+  padding: 0 8px;
+  color: #2d6b61;
+  background: #eaf8f4;
+  font-size: 10px;
+}
+
+.portal-paper-comment-review span { color: #168e7a; font-size: 13px; }
+
+.portal-paper-comment-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .84fr) minmax(300px, 1.16fr);
+  gap: 14px;
+  padding: 14px 16px 15px;
+  background: #fbfcfe;
+}
+
+.portal-paper-summary,
+.portal-paper-comment-card {
+  min-width: 0;
+  border: 1px solid #e1e8f1;
+  border-radius: 6px;
+  padding: 13px;
+  background: #ffffff;
+}
+
+.portal-paper-summary { background: #f8fbfe; }
+
+.portal-paper-summary > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #526b85;
+  font-size: 10px;
+}
+
+.portal-paper-summary > div:first-child span { color: #a0aab6; font-weight: 400; }
+
+.portal-paper-summary > p {
+  margin: 9px 0 0;
+  color: #5e7186;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.portal-paper-summary dl {
+  display: grid;
+  gap: 5px;
+  margin: 12px 0 0;
+  border-top: 1px solid #e5edf4;
+  padding-top: 10px;
+}
+
+.portal-paper-summary dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.portal-paper-summary dt,
+.portal-paper-summary dd {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.portal-paper-summary dt { color: #8a99a8; }
+.portal-paper-summary dd { color: #4e657b; text-align: right; }
+
+.portal-paper-comment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.portal-paper-comment-tags span {
+  border-radius: 3px;
+  padding: 4px 6px;
+  color: #4e6c89;
+  background: #eaf1f8;
+  font-size: 9px;
+}
+
+.portal-paper-comment-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.portal-paper-comment-card > header > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2f4965;
+}
+
+.portal-paper-comment-card > header > div span { color: #168e7a; font-size: 16px; }
+.portal-paper-comment-card > header strong { font-size: 12px; }
+.portal-paper-comment-card > header > span { color: #8392a4; font-size: 10px; }
+
+.portal-paper-comment-policy {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  margin: 9px 0 12px;
+  border: 1px solid #d8eee8;
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: #5f768b;
+  background: #f5faf9;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.portal-paper-comment-policy span { color: #168e7a; }
+
+.portal-paper-comment-form {
+  border-bottom: 1px solid #e7edf3;
+  padding-bottom: 12px;
+}
+
+.portal-paper-comment-form label {
+  display: block;
+  margin-bottom: 5px;
+  color: #53677e;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.portal-paper-comment-form textarea {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  border: 1px solid #cfdae6;
+  border-radius: 5px;
+  padding: 8px 9px;
+  color: #3e556d;
+  background: #ffffff;
+  outline: none;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.portal-paper-comment-form textarea:focus {
+  border-color: #78aadd;
+  box-shadow: 0 0 0 3px rgba(23, 105, 255, .1);
+}
+
+.portal-paper-comment-form > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+.portal-paper-comment-form small { color: #8997a7; font-size: 9px; }
+
+.portal-paper-comment-form button {
+  min-height: 29px;
+  border: 1px solid #5265d6;
+  border-radius: 4px;
+  padding: 0 9px;
+  color: #ffffff;
+  background: #5265d6;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.portal-paper-comment-form button:hover,
+.portal-paper-comment-form button:focus-visible { border-color: #4357c9; background: #4357c9; }
+
+.portal-paper-comment-success {
+  margin: 7px 0 0;
+  color: #147b6b;
+  font-size: 10px;
+}
+
+.portal-paper-comment-list {
+  max-height: 230px;
+  overflow-y: auto;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portal-paper-comment-list li {
+  border-bottom: 1px solid #edf1f5;
+  padding: 9px 0;
+}
+
+.portal-paper-comment-list li:first-child { padding-top: 0; }
+.portal-paper-comment-list li:last-child { border-bottom: 0; }
+
+.portal-paper-comment-list li > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.portal-paper-comment-list li > header > div { display: inline-flex; align-items: center; gap: 6px; }
+.portal-paper-comment-list li strong { color: #405a72; font-size: 10px; }
+.portal-paper-comment-list li time { color: #98a3b0; font-size: 9px; }
+.portal-paper-comment-list li p { margin: 4px 0; color: #63768a; font-size: 10px; line-height: 1.7; }
+.portal-paper-comment-list li > small { color: #8a99a8; font-size: 9px; }
+.portal-paper-comment-status { border-radius: 3px; padding: 2px 5px; font-size: 9px; }
+.portal-paper-comment-status.is-approved { color: #217763; background: #eaf8f4; }
+.portal-paper-comment-status.is-pending { color: #9a6a1b; background: #fff6df; }
+.portal-paper-comment-empty { color: #8997a7; font-size: 10px; }
+
+.portal-paper-comment-boundary {
+  margin: 0;
+  border-top: 1px solid #e8edf3;
+  padding: 8px 16px 10px;
+  color: #8594a4;
+  background: #fbfcfe;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .portal-paper-comment-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .portal-paper-comment-grid { grid-template-columns: 1fr; }
+
+  .portal-paper-comment-form > div {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .portal-paper-comment-form button { width: 100%; min-height: 40px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .portal-qa-loading span { animation: none; }
 }

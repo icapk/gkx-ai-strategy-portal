@@ -5051,6 +5051,72 @@
         }
       ];
 
+      const PAPER_COMMENT_SEEDS = {
+        "Deep Learning for AI": [
+          { author: "林岚", date: "2026-08-24 16:20", status: "已通过", likes: 8, content: "建议补充模型在跨数据集迁移场景下的对比实验，便于读者判断方法的泛化边界。" },
+          { author: "陈启", date: "2026-08-23 09:42", status: "已通过", likes: 5, content: "综述对表示学习与神经网络的关系梳理得很清晰，期待补充最新开放数据集说明。" }
+        ],
+        "面向科学发现的生成式智能体协作框架": [
+          { author: "周研", date: "2026-08-24 11:16", status: "已通过", likes: 6, content: "建议进一步说明证据校验节点的输入输出，方便复现科学发现工作流。" },
+          { author: "顾宁", date: "2026-08-22 15:08", status: "已通过", likes: 3, content: "材料发现任务的评测指标很有参考价值，建议增加失败案例与人工复核边界。" }
+        ],
+        "大语言模型驱动的药物靶点发现：方法、证据与验证边界": [
+          { author: "李然", date: "2026-08-21 10:25", status: "已通过", likes: 4, content: "建议把数据偏差、实验验证和知识图谱覆盖范围拆成独立的限制项。" }
+        ]
+      };
+      const paperCommentState = new Map();
+
+      function getPaperComments(item) {
+        if (!paperCommentState.has(item.title)) {
+          paperCommentState.set(item.title, (PAPER_COMMENT_SEEDS[item.title] || []).map((comment) => ({ ...comment })));
+        }
+        return paperCommentState.get(item.title);
+      }
+
+      function getPaperCommentPanelMarkup(item) {
+        const comments = getPaperComments(item);
+        const tags = item.tags.slice(0, 4).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
+        const commentList = comments.length
+          ? comments.map((comment) => `
+              <li>
+                <header><div><strong>${escapeHtml(comment.author)}</strong><span class="portal-paper-comment-status ${comment.status === "已通过" ? "is-approved" : "is-pending"}">${escapeHtml(comment.status)}</span></div><time>${escapeHtml(comment.date)}</time></header>
+                <p>${escapeHtml(comment.content)}</p>
+                <small>赞同 ${comment.likes}</small>
+              </li>`).join("")
+          : `<li class="portal-paper-comment-empty">暂无公开评论，欢迎发表第一条评论。</li>`;
+        return `
+          <section class="portal-paper-comment-panel" data-paper-comment-panel aria-labelledby="portal-paper-comment-title-${SEARCH_ITEMS.indexOf(item)}" hidden>
+            <header class="portal-paper-comment-header">
+              <div>
+                <span class="portal-paper-comment-kicker">论文详情 · 门户论文评论</span>
+                <h4 id="portal-paper-comment-title-${SEARCH_ITEMS.indexOf(item)}">${escapeHtml(item.title)}</h4>
+                <p>${escapeHtml(item.type)} · ${escapeHtml(item.source)} · ${escapeHtml(item.date.slice(0, 4))}</p>
+              </div>
+              <span class="portal-paper-comment-review"><span aria-hidden="true">✓</span>评论提交后审核</span>
+            </header>
+            <div class="portal-paper-comment-grid">
+              <article class="portal-paper-summary">
+                <div><strong>论文摘要</strong><span>演示题录</span></div>
+                <p>${escapeHtml(item.summary)}</p>
+                <dl><div><dt>作者</dt><dd>${escapeHtml(item.author || "原型作者")}</dd></div><div><dt>期刊／会议</dt><dd>${escapeHtml(item.venue || item.source)}</dd></div><div><dt>可见范围</dt><dd>门户用户可查看</dd></div></dl>
+                <div class="portal-paper-comment-tags">${tags}</div>
+              </article>
+              <aside class="portal-paper-comment-card">
+                <header><div><span aria-hidden="true">◌</span><strong>门户论文评论</strong></div><span>${comments.length} 条评论</span></header>
+                <p class="portal-paper-comment-policy"><span aria-hidden="true">✓</span>提交后进入审核队列，审核通过后对外展示。</p>
+                <form class="portal-paper-comment-form" data-paper-comment-form data-paper-comment-key="${escapeHtml(item.title)}">
+                  <label for="portal-paper-comment-input-${SEARCH_ITEMS.indexOf(item)}">发表评论</label>
+                  <textarea id="portal-paper-comment-input-${SEARCH_ITEMS.indexOf(item)}" name="comment" maxlength="300" placeholder="分享你对这篇论文的观点或补充信息"></textarea>
+                  <div><small>不超过 300 字 · 请勿发布违法或不当内容</small><button type="submit">提交评论</button></div>
+                  <p class="portal-paper-comment-success" data-paper-comment-success role="status" hidden>✓ 评论已提交，当前状态：待审核</p>
+                </form>
+                <ol class="portal-paper-comment-list" aria-label="论文评论列表">${commentList}</ol>
+              </aside>
+            </div>
+            <p class="portal-paper-comment-boundary">原型交互：评论提交与后台审核接口待接入，当前仅在本次浏览会话中演示状态流转。</p>
+          </section>`;
+      }
+
       const MESSAGE_STATUS_TABS = [
         { value: "UNREAD", label: "未读消息" },
         { value: "READ", label: "已读消息" }
@@ -6109,11 +6175,15 @@
             <div class="portal-result-bottomline">
               <div class="portal-search-card-tags">${item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag">${tag}</span>`).join("")}</div>
               <div class="portal-search-card-actions">
+                ${item.type === "论文"
+                  ? `<button class="portal-search-card-action portal-paper-comment-toggle" type="button" data-paper-comment-toggle aria-expanded="false">查看论文并评论</button>`
+                  : ""}
                 ${resultDetailUrl
                   ? `<a class="portal-search-card-action is-primary" data-result-detail-link href="${escapeHtml(resultDetailUrl)}" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开 ${escapeHtml(item.title)}${item.type === "论文" ? " 论文详情" : " 资源详情"}">${resultDetailLabel}&nbsp;↗</a>`
                   : ""}
               </div>
             </div>
+            ${item.type === "论文" ? getPaperCommentPanelMarkup(item) : ""}
           </div>`;
         return article;
       }
@@ -6807,6 +6877,47 @@
         setSearchType(tab.dataset.searchType);
         activeSearchPage = 1;
         renderSearchResults();
+      });
+      portalSearchResultList.addEventListener("click", (event) => {
+        const toggle = event.target.closest("[data-paper-comment-toggle]");
+        if (!toggle) return;
+        const card = toggle.closest(".portal-search-card");
+        const panel = card?.querySelector("[data-paper-comment-panel]");
+        if (!card || !panel) return;
+        const open = panel.hidden;
+        panel.hidden = !open;
+        card.classList.toggle("is-comment-open", open);
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.textContent = open ? "收起评论" : "查看论文并评论";
+        if (open) {
+          panel.scrollIntoView({ behavior: reduceCarouselMotion.matches ? "auto" : "smooth", block: "nearest" });
+          panel.querySelector("textarea")?.focus({ preventScroll: true });
+        }
+      });
+      portalSearchResultList.addEventListener("submit", (event) => {
+        const form = event.target.closest("[data-paper-comment-form]");
+        if (!form) return;
+        event.preventDefault();
+        const content = form.querySelector("textarea")?.value.trim() || "";
+        const key = form.dataset.paperCommentKey;
+        if (!content || !key) return;
+        const comments = paperCommentState.get(key) || [];
+        comments.unshift({ author: "当前用户", date: "2026-08-25 14:20", status: "待审核", likes: 0, content });
+        paperCommentState.set(key, comments);
+        const item = SEARCH_ITEMS.find((candidate) => candidate.title === key);
+        const card = form.closest(".portal-search-card");
+        if (!item || !card) return;
+        const panel = card.querySelector("[data-paper-comment-panel]");
+        const toggle = card.querySelector("[data-paper-comment-toggle]");
+        if (panel) panel.outerHTML = getPaperCommentPanelMarkup(item);
+        const nextPanel = card.querySelector("[data-paper-comment-panel]");
+        if (nextPanel) {
+          nextPanel.hidden = false;
+          nextPanel.querySelector("[data-paper-comment-success]")?.removeAttribute("hidden");
+        }
+        card.classList.add("is-comment-open");
+        toggle?.setAttribute("aria-expanded", "true");
+        if (toggle) toggle.textContent = "收起评论";
       });
       portalSearchTypeTabs.addEventListener("keydown", (event) => {
         const tabs = [...portalSearchTypeTabs.querySelectorAll("[data-search-type]")];
