@@ -113,9 +113,9 @@ const navSections: NavSection[] = [
         label: "审核管理",
         icon: ShieldCheck,
         children: [
-          { key: "workflow-center", label: "流程中心" },
-          { key: "form-center", label: "表单中心" },
-          { key: "audit-content", label: "审核内容管理" },
+          { key: "workflow-center", label: "审核流程管理 / 流程中心" },
+          { key: "form-center", label: "审核流程管理 / 表单中心" },
+          { key: "audit-content", label: "审核内容管理 / 审核内容" },
         ],
       },
       {
