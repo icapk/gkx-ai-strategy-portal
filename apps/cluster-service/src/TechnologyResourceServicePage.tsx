@@ -64,12 +64,12 @@ const moduleDefinitions: ModuleDefinition[] = [
   },
   {
     id: "evaluation",
-    label: "科技资源效果判定",
-    description: "围绕科技活动布局与产出效果，提供量化评估框架和辅助研判视图。",
+    label: "科技资助效果判定",
+    description: "归集并分析科技资源信息，围绕各类科技活动的布局与产出效果提供深度剖析、量化评估和辅助研判。",
     icon: FileCheck2,
     sections: [
       { id: "trs-eval-analysis", label: "布局与产出分析" },
-      { id: "trs-eval-comparison", label: "对象对比" },
+      { id: "trs-eval-comparison", label: "深度剖析" },
       { id: "trs-eval-framework", label: "判定体系说明" },
     ],
   },
@@ -423,41 +423,83 @@ function IntelligenceContent() {
   );
 }
 
-const evaluationScopes = ["全市科技活动", "资助项目群", "专题领域"] as const;
-const evaluationMetrics = ["综合研判", "资源布局", "产出质量", "协同转化"] as const;
+const evaluationScopes = ["全部科技活动", "资助项目群", "专题领域"] as const;
+const evaluationMetrics = ["布局结构", "产出结构", "投入产出关联", "综合研判"] as const;
+const activityTypes = ["全部类型", "基础研究", "技术攻关", "平台建设", "成果转化"] as const;
+const evaluationPeriods = ["2022—2026", "2021—2025", "2020—2024"] as const;
+const evaluationRegions = ["全市", "南山区", "福田区", "龙岗区"] as const;
+
+const periodYears = {
+  "2022—2026": [2022, 2023, 2024, 2025, 2026],
+  "2021—2025": [2021, 2022, 2023, 2024, 2025],
+  "2020—2024": [2020, 2021, 2022, 2023, 2024],
+} satisfies Record<(typeof evaluationPeriods)[number], number[]>;
+
+const metricProfiles = {
+  "布局结构": {
+    trend: [63.4, 66.1, 68.8, 72.6, 76.4],
+    breakdown: [
+      { label: "基础研究", value: 28 },
+      { label: "技术攻关", value: 34 },
+      { label: "平台建设", value: 22 },
+      { label: "成果转化", value: 16 },
+    ],
+    summary: "模拟样本中，技术攻关类活动占比最高；正式分析需结合区域、承担主体与资助批次继续下钻。",
+  },
+  "产出结构": {
+    trend: [60.8, 64.3, 69.7, 73.1, 77.9],
+    breakdown: [
+      { label: "论文与报告", value: 31 },
+      { label: "知识产权", value: 27 },
+      { label: "技术成果", value: 24 },
+      { label: "标准与数据", value: 18 },
+    ],
+    summary: "模拟样本展示不同成果类型的结构差异；正式结论需核验成果质量、形成时间与项目归属。",
+  },
+  "投入产出关联": {
+    trend: [58.6, 62.7, 66.9, 71.5, 74.8],
+    breakdown: [
+      { label: "高关联项目", value: 36 },
+      { label: "稳定关联", value: 31 },
+      { label: "待跟踪项目", value: 21 },
+      { label: "数据待补全", value: 12 },
+    ],
+    summary: "模拟样本按投入、执行和成果记录的完整程度分组，用于展示关联分析与异常核验方式。",
+  },
+  "综合研判": {
+    trend: [61.5, 65.2, 68.9, 72.7, 75.6],
+    breakdown: [
+      { label: "活动布局", value: 78 },
+      { label: "产出质量", value: 74 },
+      { label: "协同程度", value: 69 },
+      { label: "转化效能", value: 66 },
+    ],
+    summary: "模拟综合研判由布局、产出、协同与转化四个维度组成，权重与阈值仍需按正式口径确认。",
+  },
+} satisfies Record<(typeof evaluationMetrics)[number], { trend: number[]; breakdown: { label: string; value: number }[]; summary: string }>;
 
 const criteria = [
-  { id: "layout", label: "资源布局", weight: "30%", definition: "观察科技资源在对象范围内的覆盖、结构与配置关系。", evidence: "项目、机构、人才与平台的结构化汇总字段" },
-  { id: "output", label: "产出质量", weight: "30%", definition: "观察论文、专利、报告与成果等产出的数量结构和质量信号。", evidence: "产出目录、同行评价与成果关联字段" },
+  { id: "layout", label: "活动布局", weight: "30%", definition: "观察各类科技活动在区域、时间、领域与承担主体之间的覆盖、结构和配置关系。", evidence: "科技活动分类、区域、周期、承担主体与资助项目字段" },
+  { id: "output", label: "产出质量", weight: "30%", definition: "观察论文、专利、报告与成果等产出的数量结构、质量信号和形成周期。", evidence: "产出目录、成果类型、质量依据与项目关联字段" },
   { id: "coordination", label: "协同程度", weight: "20%", definition: "观察跨机构、跨区域及产学研对象之间的协作关系。", evidence: "合作对象、共同产出与关联网络字段" },
   { id: "translation", label: "转化效能", weight: "20%", definition: "观察科技活动产出向应用、服务或后续项目的衔接情况。", evidence: "成果应用、后续项目和转化过程字段" },
 ];
 
-function EvaluationTrendChart({
-  values,
-  scope,
-  metric,
-}: {
-  values: number[];
-  scope: (typeof evaluationScopes)[number];
-  metric: (typeof evaluationMetrics)[number];
-}) {
-  const points = values.map((value, index) => `${56 + index * 82},${210 - (value - 50) * 3.2}`).join(" ");
-  const area = `56,230 ${points} ${56 + (values.length - 1) * 82},230`;
-  const accessibleSummary = values
-    .map((value, index) => `${2020 + index}年 ${value.toFixed(1)}分`)
-    .join("，");
+const analysisViews = [
+  { id: "layout", title: "科技活动布局", description: "按活动类型、区域、时间与承担主体查看资源配置结构。", icon: Layers3 },
+  { id: "output", title: "产出效果分析", description: "按成果类型、质量依据与形成周期查看产出结构。", icon: FileText },
+  { id: "input-output", title: "投入产出关联", description: "对齐资助投入、执行过程和成果记录，形成可追溯关系。", icon: GitBranch },
+] as const;
+
+function EvaluationTrendChart({ values, years, label }: { values: number[]; years: number[]; label: string }) {
+  const points = values.map((value, index) => `${56 + index * 125},${230 - (value - 50) * 4}`).join(" ");
+  const area = `56,230 ${points} ${56 + (values.length - 1) * 125},230`;
   return (
-    <svg
-      className="trs-eval-chart"
-      viewBox="0 0 590 260"
-      role="img"
-      aria-label={`${scope}的${metric}趋势演示：${accessibleSummary}。数值均为非正式演示。`}
-    >
+    <svg className="trs-eval-chart" viewBox="0 0 590 260" role="img" aria-label={`${label}模拟趋势：${values.map((value, index) => `${years[index]}年 ${value.toFixed(1)}分`).join("，")}。`}>
       {[70, 110, 150, 190, 230].map((y) => <line x1="44" x2="558" y1={y} y2={y} key={y} />)}
       <polygon points={area} />
       <polyline points={points} />
-      {values.map((value, index) => <g key={index}><circle cx={56 + index * 82} cy={210 - (value - 50) * 3.2} r="4" /><text x={56 + index * 82} y="248">{2020 + index}</text><text className="value" x={56 + index * 82} y={198 - (value - 50) * 3.2}>{value.toFixed(1)}</text></g>)}
+      {values.map((value, index) => <g key={years[index]}><circle cx={56 + index * 125} cy={230 - (value - 50) * 4} r="4" /><text x={56 + index * 125} y="250">{years[index]}</text><text className="value" x={56 + index * 125} y={218 - (value - 50) * 4}>{value.toFixed(1)}</text></g>)}
     </svg>
   );
 }
@@ -465,79 +507,83 @@ function EvaluationTrendChart({
 function EvaluationContent() {
   const [scope, setScope] = useState<(typeof evaluationScopes)[number]>(evaluationScopes[0]);
   const [metric, setMetric] = useState<(typeof evaluationMetrics)[number]>(evaluationMetrics[0]);
+  const [activityType, setActivityType] = useState<(typeof activityTypes)[number]>(activityTypes[0]);
+  const [period, setPeriod] = useState<(typeof evaluationPeriods)[number]>(evaluationPeriods[0]);
+  const [region, setRegion] = useState<(typeof evaluationRegions)[number]>(evaluationRegions[0]);
   const [criterionId, setCriterionId] = useState(criteria[0].id);
-  const scopeIndex = evaluationScopes.indexOf(scope);
-  const metricIndex = evaluationMetrics.indexOf(metric);
+  const metricProfile = metricProfiles[metric];
+  const selectionAdjustment = evaluationScopes.indexOf(scope) * 1.1 + activityTypes.indexOf(activityType) * .45 + evaluationRegions.indexOf(region) * .35 - evaluationPeriods.indexOf(period) * .8;
   const trendValues = useMemo(
-    () => [62.4, 64.8, 67.1, 68.6, 71.2, 73.5, 75.1].map((value, index) => Number((value + scopeIndex * 1.4 + metricIndex * .9 + (index % 2 ? .3 : 0)).toFixed(1))),
-    [metricIndex, scopeIndex],
+    () => metricProfile.trend.map((value, index) => Number((value + selectionAdjustment + (index % 2 ? .2 : 0)).toFixed(1))),
+    [metricProfile, selectionAdjustment],
   );
   const demonstrationScore = trendValues[trendValues.length - 1];
-  const comparisons = [
-    { label: scopeIndex === 2 ? "专题样本 A" : "对象样本 A", value: 78 + metricIndex },
-    { label: scopeIndex === 2 ? "专题样本 B" : "对象样本 B", value: 70 + scopeIndex * 2 },
-    { label: scopeIndex === 2 ? "专题样本 C" : "对象样本 C", value: 65 + metricIndex * 2 },
-    { label: scopeIndex === 2 ? "专题样本 D" : "对象样本 D", value: 59 + scopeIndex },
-  ];
   const activeCriterion = criteria.find((item) => item.id === criterionId) ?? criteria[0];
+  const activeAnalysisViewId = metric === "布局结构" ? "layout" : metric === "产出结构" ? "output" : metric === "投入产出关联" ? "input-output" : null;
 
   return (
     <>
       <ContentSection
         id="trs-eval-analysis"
         title="科技活动布局与产出效果分析"
-        description="切换对象范围与指标观察演示趋势。分值仅用于表达功能，不构成正式评价、排名或政策结论。"
-        aside={<DemoBadge>非正式判定</DemoBadge>}
+        description="通过模拟数据展示科技活动布局、产出效果和投入产出关联的筛选、量化与趋势分析。"
+        aside={<DemoBadge>模拟数据</DemoBadge>}
       >
-        <div className="trs-eval-controls">
-          <div><span>对象范围</span><div className="trs-control-tabs" role="group" aria-label="判定对象范围">{evaluationScopes.map((item) => <button type="button" className={scope === item ? "is-active" : ""} aria-pressed={scope === item} onClick={() => setScope(item)} key={item}>{item}</button>)}</div></div>
-          <label><span>分析指标</span><select value={metric} onChange={(event) => setMetric(event.target.value as (typeof evaluationMetrics)[number])}>{evaluationMetrics.map((item) => <option key={item}>{item}</option>)}</select></label>
+        <div className="trs-eval-filter-grid">
+          <div className="trs-eval-scope"><span>分析对象</span><div className="trs-control-tabs" role="group" aria-label="判定对象范围">{evaluationScopes.map((item) => <button type="button" className={scope === item ? "is-active" : ""} aria-pressed={scope === item} onClick={() => setScope(item)} key={item}>{item}</button>)}</div></div>
+          <label><span>科技活动类型</span><select value={activityType} onChange={(event) => setActivityType(event.target.value as (typeof activityTypes)[number])} aria-label="科技活动类型">{activityTypes.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label><span>统计周期</span><select value={period} onChange={(event) => setPeriod(event.target.value as (typeof evaluationPeriods)[number])} aria-label="统计周期">{evaluationPeriods.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label><span>区域范围</span><select value={region} onChange={(event) => setRegion(event.target.value as (typeof evaluationRegions)[number])} aria-label="区域范围">{evaluationRegions.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label><span>分析维度</span><select value={metric} onChange={(event) => setMetric(event.target.value as (typeof evaluationMetrics)[number])}>{evaluationMetrics.map((item) => <option key={item}>{item}</option>)}</select></label>
         </div>
         <div className="trs-eval-layout">
           <div className="trs-eval-chart-panel">
-            <header><div><Activity size={17} /><strong>{scope} · {metric}趋势</strong></div><span>2020—2026 · 演示</span></header>
-            <EvaluationTrendChart values={trendValues} scope={scope} metric={metric} />
+            <header><div><Activity size={17} /><strong>{scope} · {metric}趋势</strong></div><span>{period} · 模拟</span></header>
+            <EvaluationTrendChart values={trendValues} years={periodYears[period]} label={`${region}${activityType}${scope}${metric}`} />
           </div>
           <aside className="trs-score-readout">
-            <span>{metric === "综合研判" ? "当前演示综合值" : `当前${metric}演示值`}</span>
+            <span>当前模拟评估值</span>
             <strong>{demonstrationScore.toFixed(1)}<small>/ 100</small></strong>
-            <p>根据当前演示数据与选择项即时计算，仅用于说明量化评估界面。</p>
-            <dl><div><dt>对象范围</dt><dd>{scope}</dd></div><div><dt>分析指标</dt><dd>{metric}</dd></div><div><dt>判定性质</dt><dd>非正式判定</dd></div></dl>
+            <p>根据当前筛选条件生成，用于展示量化评估界面与联动逻辑。</p>
+            <dl><div><dt>活动类型</dt><dd>{activityType}</dd></div><div><dt>区域范围</dt><dd>{region}</dd></div><div><dt>数据性质</dt><dd>模拟数据</dd></div></dl>
           </aside>
         </div>
       </ContentSection>
 
       <ContentSection
         id="trs-eval-comparison"
-        title="资源对象对比"
-        description="在同一演示口径下比较不同对象的布局或产出表现，辅助识别结构差异，不提供真实排名。"
+        title="科技活动布局与产出深度剖析"
+        description="围绕布局、产出和投入产出关系展示模拟结构数据，辅助识别差异并验证分析流程。"
+        aside={<DemoBadge>模拟分析</DemoBadge>}
       >
-        <div className="trs-comparison-layout">
-          <div
-            className="trs-comparison-bars"
-            role="img"
-            aria-label={`${scope}的${metric}对象对比演示：${comparisons.map((item) => `${item.label} ${item.value}分`).join("，")}。`}
-          >
-            {comparisons.map((item) => <div key={item.label}><span>{item.label}</span><i><b style={{ "--bar-value": `${item.value}%` } as CSSProperties} /></i><strong>{item.value}</strong></div>)}
+        <div className="trs-analysis-view-grid">
+          {analysisViews.map((item) => {
+            const Icon = item.icon;
+            return <article className={activeAnalysisViewId === item.id ? "is-active" : ""} key={item.id}><span><Icon size={19} /></span><div><strong>{item.title}</strong><p>{item.description}</p></div><em>模拟数据已生成</em></article>;
+          })}
+        </div>
+        <div className="trs-comparison-layout trs-analysis-result">
+          <div className="trs-comparison-bars" role="img" aria-label={`${metric}模拟结构：${metricProfile.breakdown.map((item) => `${item.label} ${item.value}%`).join("，")}。`}>
+            {metricProfile.breakdown.map((item) => <div key={item.label}><span>{item.label}</span><i><b style={{ "--bar-value": `${item.value}%` } as CSSProperties} /></i><strong>{item.value}%</strong></div>)}
           </div>
-          <div className="trs-comparison-note"><Gauge size={22} /><strong>对比口径说明</strong><p>当前展示 {scope} 下的 {metric} 演示值。正式使用时需统一数据周期、对象边界、缺失值处理与指标权重。</p><span>对象名称与数值均为演示</span></div>
+          <div className="trs-comparison-note"><Gauge size={22} /><strong>模拟分析摘要</strong><p>{metricProfile.summary}</p><span>{scope} · {activityType} · {region}</span></div>
         </div>
       </ContentSection>
 
       <ContentSection
         id="trs-eval-framework"
-        title="科技资源判定体系"
-        description="将布局、产出、协同与转化组织为可解释的演示指标框架，为后续量化评估和专家研判提供说明。"
-        aside={<DemoBadge>演示权重</DemoBadge>}
+        title="科技资助效果判定体系"
+        description="将活动布局、产出质量、协同与转化组织为可解释的模拟指标框架，为量化评估和专家研判提供依据。"
+        aside={<DemoBadge>模拟权重</DemoBadge>}
       >
         <div className="trs-criteria-tabs" role="group" aria-label="评价指标说明选择">
           {criteria.map((item) => <button type="button" className={criterionId === item.id ? "is-active" : ""} aria-pressed={criterionId === item.id} onClick={() => setCriterionId(item.id)} key={item.id}><span>{item.label}</span><strong>{item.weight}</strong></button>)}
         </div>
         <div className="trs-criterion-detail" aria-live="polite">
           <div><span>当前指标说明</span><h4>{activeCriterion.label}</h4><p>{activeCriterion.definition}</p></div>
-          <dl><div><dt>演示权重</dt><dd>{activeCriterion.weight}</dd></div><div><dt>参考证据</dt><dd>{activeCriterion.evidence}</dd></div><div><dt>正式应用前提</dt><dd>指标口径、数据质量与专家规则均需确认</dd></div></dl>
+          <dl><div><dt>模拟权重</dt><dd>{activeCriterion.weight}</dd></div><div><dt>参考证据</dt><dd>{activeCriterion.evidence}</dd></div><div><dt>正式应用前提</dt><dd>指标口径、数据质量与专家规则均需确认</dd></div></dl>
         </div>
-        <div className="trs-evaluation-boundary"><AlertTriangle size={17} /><p><strong>使用边界：</strong>本模块只演示分析、评估与研判流程，不输出任何机构、项目或区域的真实判定结论。</p></div>
+        <div className="trs-evaluation-boundary"><AlertTriangle size={17} /><p><strong>使用边界：</strong>当前分类、区域、数值、权重与分析摘要均为模拟数据，只用于展示科技资助效果判定的界面和交互，不代表真实项目或正式结论。</p></div>
       </ContentSection>
     </>
   );
@@ -841,7 +887,7 @@ export default function TechnologyResourceServicePage() {
         <div className="trs-hero-inner">
           <div className="trs-hero-copy">
             <h1 id="trs-title">科技资源服务</h1>
-            <p>面向科研工作者、数据管理者和数据使用者，提供科技情报资源组织、科技资源效果研判与创新要素挖掘的一体化服务入口。</p>
+            <p>面向科研工作者、数据管理者和数据使用者，提供科技情报资源组织、科技资助效果判定与创新要素挖掘的一体化服务入口。</p>
           </div>
           <div className="trs-hero-flow" aria-label="科技资源服务链路">
             <span><Database size={17} />数据汇聚</span><i /><span><BookOpen size={17} />知识组织</span><i /><span><Radar size={17} />分析研判</span>
@@ -880,7 +926,7 @@ export default function TechnologyResourceServicePage() {
 
         <footer className="trs-footer">
           <div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科技资源服务</strong><small>深圳国际科技信息中心</small></span></div>
-          <p>页面用于标书功能与交互演示。资源条目、评价分值、趋势预测、对象关联和项目风险均不代表真实数据或正式结论。</p>
+          <p>页面用于标书功能与交互演示。科技资助效果判定中的分类、数值、权重和分析摘要均为模拟数据。</p>
         </footer>
       </div>
       </main>
