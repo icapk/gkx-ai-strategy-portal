@@ -1811,6 +1811,67 @@ th {
   border-top: 0;
 }
 
+.sortable-table-header {
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+}
+
+.sortable-table-header > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-sort-buttons {
+  width: 14px;
+  height: 24px;
+  display: inline-flex;
+  flex: 0 0 14px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-sort-button {
+  width: 14px;
+  height: 12px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gkx-text-tertiary);
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.table-sort-button:hover {
+  color: var(--gkx-text-primary);
+  background: var(--gkx-bg-subtle);
+}
+
+.table-sort-button.is-active {
+  color: var(--gkx-brand);
+}
+
+.table-sort-button:focus-visible {
+  color: var(--gkx-brand);
+  outline: 2px solid rgba(22,93,255,.18);
+  outline-offset: 1px;
+}
+
+.table-sort-button svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.8;
+}
+
 .table-select-column,
 .table-select-cell {
   width: 52px;

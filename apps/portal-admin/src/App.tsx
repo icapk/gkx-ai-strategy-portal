@@ -193,6 +193,10 @@ const breadcrumbSections: Record<PageKey, "系统管理" | "权限管理"> = {
 };
 
 const reportTypeOptions = ["TR报告", "战略咨询报告", "洞察分析报告", "未来产业报告"];
+const reportSortFieldOptions = ["上传时间", "报告类型", "所属领域", "报告来源"] as const;
+type ReportSortField = (typeof reportSortFieldOptions)[number];
+type ReportSortDirection = "正序" | "倒序";
+const reportSortCollator = new Intl.Collator("zh-CN", { numeric: true, sensitivity: "base" });
 const statusOptions = ["启用", "禁用"];
 const roleOptions = ["普通用户", "机构用户", "政府用户"];
 const resourcePermissionOptions = ["人才库资源", "报告资源", "智库资源"];
@@ -1280,6 +1284,47 @@ function TableCellContent({
   );
 }
 
+function SortableTableHeader({
+  field,
+  activeField,
+  activeDirection,
+  onSort,
+}: {
+  field: ReportSortField;
+  activeField: ReportSortField;
+  activeDirection: ReportSortDirection;
+  onSort: (field: ReportSortField, direction: ReportSortDirection) => void;
+}) {
+  const isActive = activeField === field;
+  return (
+    <span className={`sortable-table-header ${isActive ? "is-active" : ""}`}>
+      <span>{field}</span>
+      <span className="table-sort-buttons" aria-label={`${field}排序`}>
+        <button
+          type="button"
+          className={`table-sort-button ${isActive && activeDirection === "正序" ? "is-active" : ""}`}
+          aria-label={`按${field}正序排列`}
+          aria-pressed={isActive && activeDirection === "正序"}
+          title={`${field}正序`}
+          onClick={() => onSort(field, "正序")}
+        >
+          <ArrowUp aria-hidden="true" size={12} />
+        </button>
+        <button
+          type="button"
+          className={`table-sort-button ${isActive && activeDirection === "倒序" ? "is-active" : ""}`}
+          aria-label={`按${field}倒序排列`}
+          aria-pressed={isActive && activeDirection === "倒序"}
+          title={`${field}倒序`}
+          onClick={() => onSort(field, "倒序")}
+        >
+          <ArrowDown aria-hidden="true" size={12} />
+        </button>
+      </span>
+    </span>
+  );
+}
+
 function DataTable<T extends Record<string, ReactNode>>({
   columns,
   rows,
@@ -1291,6 +1336,7 @@ function DataTable<T extends Record<string, ReactNode>>({
   selectable = false,
   batchActions,
   actionWidth,
+  renderHeader,
 }: {
   columns: string[];
   rows: T[];
@@ -1302,6 +1348,7 @@ function DataTable<T extends Record<string, ReactNode>>({
   selectable?: boolean;
   batchActions?: (selectedRows: T[], clearSelection: () => void) => ReactNode;
   actionWidth?: number;
+  renderHeader?: (column: string) => ReactNode;
 }) {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -1428,7 +1475,7 @@ function DataTable<T extends Record<string, ReactNode>>({
               {selectable && <th className="table-select-cell table-sticky-left">
                 <input ref={selectAllRef} type="checkbox" aria-label="选择当前页全部数据" checked={allVisibleRowsSelected} onChange={toggleVisibleRows} />
               </th>}
-              {columns.map((column) => <th key={column}>{column}</th>)}
+              {columns.map((column) => <th key={column}>{renderHeader?.(column) ?? column}</th>)}
               {actions && <th className="table-action-cell table-sticky-right">操作</th>}
             </tr>
           </thead>
@@ -1479,11 +1526,21 @@ function DataTable<T extends Record<string, ReactNode>>({
 
 function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify: Notify }) {
   const [reports, setReports] = useState(reportRows);
+  const [sortField, setSortField] = useState<ReportSortField>("上传时间");
+  const [sortDirection, setSortDirection] = useState<ReportSortDirection>("倒序");
 
   const sortedReports = useMemo(() => reports
     .map((report, index) => ({ report, index }))
-    .sort((a, b) => Number(b.report.是否置顶 === "是") - Number(a.report.是否置顶 === "是") || a.index - b.index)
-    .map(({ report }) => report), [reports]);
+    .sort((a, b) => {
+      const pinnedOrder = Number(b.report.是否置顶 === "是") - Number(a.report.是否置顶 === "是");
+      if (pinnedOrder !== 0) return pinnedOrder;
+
+      const comparison = sortField === "上传时间"
+        ? a.report.上传时间.localeCompare(b.report.上传时间)
+        : reportSortCollator.compare(a.report[sortField], b.report[sortField]);
+      return (sortDirection === "正序" ? comparison : -comparison) || a.index - b.index;
+    })
+    .map(({ report }) => report), [reports, sortDirection, sortField]);
 
   const updateReport = (title: string, patch: Partial<(typeof reportRows)[number]>) => {
     setReports((list) => list.map((report) => (report.报告标题 === title ? { ...report, ...patch } : report)));
@@ -1521,8 +1578,22 @@ function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify:
         </div>
       </div>
       <DataTable
+        key={`${sortField}-${sortDirection}`}
         columns={["报告标题", "报告类型", "报告来源", "所属领域", "上传时间", "内容摘要", "状态", "是否置顶"]}
         rows={sortedReports.map((row) => ({ ...row, 原始状态: row.状态, 状态: <StatusTag value={row.状态} />, 是否置顶: <PinState pinned={row.是否置顶 === "是"} />, 原始置顶状态: row.是否置顶 }))}
+        renderHeader={(column) => reportSortFieldOptions.includes(column as ReportSortField)
+          ? (
+            <SortableTableHeader
+              field={column as ReportSortField}
+              activeField={sortField}
+              activeDirection={sortDirection}
+              onSort={(field, direction) => {
+                setSortField(field);
+                setSortDirection(direction);
+              }}
+            />
+          )
+          : column}
         selectable
         rowKey={(row) => String(row.报告标题)}
         actions={(row) => (
