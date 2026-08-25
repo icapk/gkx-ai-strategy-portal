@@ -1018,6 +1018,12 @@ textarea:focus-visible {
   text-align: left;
 }
 
+.group-children button.is-long-label {
+  padding: 0 6px 0 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .group-children button:hover,
 .group-children button.active {
   color: var(--gkx-brand);
@@ -1090,6 +1096,10 @@ textarea:focus-visible {
   transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
 }
 
+.collapsed-submenu.is-wide {
+  width: 184px;
+}
+
 .collapsed-submenu::before {
   position: absolute;
   top: 0;
@@ -1136,6 +1146,11 @@ textarea:focus-visible {
   font-size: 14px;
   line-height: 22px;
   text-align: left;
+}
+
+.collapsed-submenu button.is-long-label {
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .collapsed-submenu button:hover,

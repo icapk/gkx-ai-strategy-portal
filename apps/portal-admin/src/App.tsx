@@ -113,8 +113,8 @@ const navSections: NavSection[] = [
         label: "审核管理",
         icon: ShieldCheck,
         children: [
-          { key: "workflow-center", label: "流程中心" },
-          { key: "form-center", label: "表单中心" },
+          { key: "workflow-center", label: "流程中心（审核流程管理）" },
+          { key: "form-center", label: "表单中心（审核流程管理）" },
           { key: "audit-content", label: "审核内容" },
         ],
       },
@@ -147,8 +147,8 @@ const allMenuItems = navSections.flatMap((section) =>
 const pageLabels: Record<PageKey, string> = {
   "report-management": "报告管理",
   "announcement-management": "公告管理",
-  "workflow-center": "流程中心",
-  "form-center": "表单中心",
+  "workflow-center": "流程中心（审核流程管理）",
+  "form-center": "表单中心（审核流程管理）",
   "audit-content": "审核内容管理",
   "event-info": "埋点信息",
   "event-dashboard": "数据看板",
@@ -4579,8 +4579,8 @@ function Sidebar({ active, setActive, collapsed, setCollapsed }: { active: PageK
                     <ItemIcon className="nav-item-icon" size={20} strokeWidth={1.2} />
                     {!collapsed && <><span>{item.label}</span><ChevronDown className={`nav-chevron ${isOpen ? "rotate" : ""}`} size={16} strokeWidth={1.2} /></>}
                   </button>
-                  {!collapsed && isOpen && <div className="group-children">{item.children?.map((child) => <button className={active === child.key ? "active" : ""} onClick={() => setActive(child.key)} key={child.key}>{child.label}</button>)}</div>}
-                  {collapsed && <div className="collapsed-submenu" role="menu" aria-label={`${item.label}二级菜单`}><strong>{item.label}</strong>{item.children?.map((child) => <button type="button" role="menuitem" className={active === child.key ? "active" : ""} onClick={() => setActive(child.key)} key={child.key}>{child.label}</button>)}</div>}
+                  {!collapsed && isOpen && <div className="group-children">{item.children?.map((child) => <button className={`${active === child.key ? "active" : ""} ${child.label.length > 8 ? "is-long-label" : ""}`.trim()} onClick={() => setActive(child.key)} key={child.key}>{child.label}</button>)}</div>}
+                  {collapsed && <div className={`collapsed-submenu ${item.children?.some((child) => child.label.length > 8) ? "is-wide" : ""}`.trim()} role="menu" aria-label={`${item.label}二级菜单`}><strong>{item.label}</strong>{item.children?.map((child) => <button type="button" role="menuitem" className={`${active === child.key ? "active" : ""} ${child.label.length > 8 ? "is-long-label" : ""}`.trim()} onClick={() => setActive(child.key)} key={child.key}>{child.label}</button>)}</div>}
                 </div>
               );
             })}
