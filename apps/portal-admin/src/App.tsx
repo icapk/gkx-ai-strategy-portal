@@ -1999,6 +1999,7 @@ type WorkflowNode = {
   节点提交条件: string;
   多位负责人规则: "所有负责人提交后进入下一节点" | "任一负责人提交后进入下一节点";
   找不到负责人处理: "自动提交当前待办" | "将待办转给指定人员进行处理";
+  转交负责人: string;
   流转条件: WorkflowCondition[];
 };
 
@@ -2018,7 +2019,8 @@ function createWorkflowNodes(workflowId: string): WorkflowNode[] {
     节点提交条件: "",
     多位负责人规则: "所有负责人提交后进入下一节点",
     找不到负责人处理: "自动提交当前待办",
-    流转条件: type === "process" ? [{ id: `${workflowId}-${suffix}-condition`, field: "", operator: "包含", value: "" }] : [],
+    转交负责人: "",
+    流转条件: [],
   });
   return [createNode("start", "start"), createNode("process", "process"), createNode("end", "end")];
 }
@@ -2047,8 +2049,43 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
     setView("designer");
   };
 
+  const updateWorkflow = (workflowId: string, patch: Partial<(typeof workflowList)[number]>) => {
+    setWorkflowList((list) => list.map((workflow) => (workflow.id === workflowId ? { ...workflow, ...patch } : workflow)));
+  };
+
   const updateWorkflowStatus = (workflowId: string, 发布状态: string) => {
-    setWorkflowList((list) => list.map((workflow) => (workflow.id === workflowId ? { ...workflow, 发布状态 } : workflow)));
+    const 发布时间 = 发布状态 === "已发布"
+      ? new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()).replaceAll("/", "-")
+      : undefined;
+    updateWorkflow(workflowId, { 发布状态, ...(发布时间 ? { 发布时间 } : {}) });
+  };
+
+  const getWorkflowPublishError = (workflowId: string) => {
+    const workflow = workflowList.find((item) => item.id === workflowId);
+    const nodes = nodesByWorkflow[workflowId] ?? [];
+    if (!workflow?.流程名称.trim()) return "请先填写流程名称";
+    if (!nodes.some((node) => node.type === "start") || !nodes.some((node) => node.type === "end")) return "流程必须包含发起节点和结束节点";
+    const processNodes = nodes.filter((node) => node.type === "process");
+    if (processNodes.length === 0) return "请至少添加一个流程节点";
+    const unnamedNode = nodes.find((node) => !node.节点名称.trim());
+    if (unnamedNode) return "请完善所有节点名称";
+    const ownerlessNode = processNodes.find((node) => node.负责人.length === 0);
+    if (ownerlessNode) return `请为“${ownerlessNode.节点名称}”配置负责人`;
+    const missingTransferOwner = processNodes.find((node) => node.找不到负责人处理 === "将待办转给指定人员进行处理" && !node.转交负责人);
+    if (missingTransferOwner) return `请为“${missingTransferOwner.节点名称}”选择待办转交人`;
+    const incompleteCondition = processNodes.flatMap((node) => node.流转条件.map((condition) => ({ node, condition }))).find(({ condition }) => !condition.field.trim() || !condition.value.trim());
+    if (incompleteCondition) return `请完善“${incompleteCondition.node.节点名称}”的流转条件`;
+    return null;
+  };
+
+  const publishWorkflow = (workflowId: string, successMessage = "发布成功") => {
+    const error = getWorkflowPublishError(workflowId);
+    if (error) {
+      notify(error, "warning");
+      return;
+    }
+    updateWorkflowStatus(workflowId, "已发布");
+    notify(successMessage);
   };
 
   const createWorkflowModel = () => {
@@ -2095,7 +2132,8 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
       节点提交条件: "",
       多位负责人规则: "所有负责人提交后进入下一节点",
       找不到负责人处理: "自动提交当前待办",
-      流转条件: type === "process" ? [{ id: `${nodeId}-condition`, field: "", operator: "包含", value: "" }] : [],
+      转交负责人: "",
+      流转条件: [],
     };
     setNodesByWorkflow((current) => {
       const nodes = current[selectedWorkflowId] ?? [];
@@ -2120,16 +2158,27 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
   };
 
   const removeCondition = (conditionId: string) => {
-    if (!selectedNode || selectedNode.流转条件.length <= 1) return;
+    if (!selectedNode) return;
     updateNode(selectedNode.id, { 流转条件: selectedNode.流转条件.filter((condition) => condition.id !== conditionId) });
+  };
+
+  const removeNode = (nodeId: string) => {
+    if (!selectedWorkflowId) return;
+    const nodes = nodesByWorkflow[selectedWorkflowId] ?? [];
+    const index = nodes.findIndex((node) => node.id === nodeId);
+    const node = nodes[index];
+    if (!node || node.type === "start" || node.type === "end") return;
+    const remaining = nodes.filter((item) => item.id !== nodeId);
+    setNodesByWorkflow((current) => ({ ...current, [selectedWorkflowId]: remaining }));
+    setSelectedNodeId(remaining[Math.min(index, remaining.length - 1)]?.id ?? null);
+    notify("节点已删除");
   };
 
   if (view === "management") {
     return (
       <section className="card page-card workflow-management">
-        <div className="workflow-management-label">流程设计器 · 流程建模 · 流程控制 · 流程发布 · 流程实例管理</div>
         <div className="table-toolbar workflow-toolbar">
-          <div><Button variant="primary" icon={Plus} onClick={createWorkflowModel}>流程建模</Button></div>
+          <div><Button variant="primary" icon={Plus} onClick={createWorkflowModel}>新建流程</Button></div>
         </div>
         <DataTable
           columns={["流程ID", "流程名称", "发布时间", "发布状态"]}
@@ -2146,8 +2195,11 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
                 const workflowId = String(row.id);
                 if (action === "编辑") openDesigner(workflowId);
                 if (action === "发布" || action === "下架") {
-                  updateWorkflowStatus(workflowId, action === "发布" ? "已发布" : "未发布");
-                  notify(action === "发布" ? "发布成功" : "下架成功");
+                  if (action === "发布") publishWorkflow(workflowId);
+                  else {
+                    updateWorkflowStatus(workflowId, "未发布");
+                    notify("下架成功");
+                  }
                 }
                 if (action === "删除") {
                   openModal("delete", {
@@ -2169,13 +2221,17 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
         <div className="workflow-designer-back">
           <Button variant="text" icon={ChevronLeft} onClick={() => setView("management")}>返回</Button>
         </div>
-        <strong className="workflow-designer-heading">流程设计器{selectedWorkflow ? ` · ${selectedWorkflow.流程名称}` : ""}</strong>
+        {selectedWorkflow && (
+          <label className="workflow-name-field">
+            <span>流程名称</span>
+            <input aria-label="流程名称" value={selectedWorkflow.流程名称} onChange={(event) => updateWorkflow(selectedWorkflow.id, { 流程名称: event.target.value })} />
+          </label>
+        )}
         <div className="workflow-designer-publish">
-          <Button onClick={() => notify("保存成功")}>保存</Button>
+          <Button onClick={() => notify("流程配置已保存")}>保存</Button>
           <Button variant="primary" onClick={() => {
             if (!selectedWorkflow) return;
-            updateWorkflowStatus(selectedWorkflow.id, "已发布");
-            notify("保存并发布成功");
+            publishWorkflow(selectedWorkflow.id, "保存并发布成功");
           }}>保存并发布</Button>
         </div>
       </header>
@@ -2194,7 +2250,7 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
                     <span className="workflow-node-card-meta">
                       {node.type === "start" || node.type === "end"
                         ? "系统默认，不可删除"
-                        : `负责人：${node.负责人.length ? node.负责人.join("、") : "待配置"}`}
+                        : `${node.type === "cc" ? "抄送人" : "负责人"}：${node.负责人.length ? node.负责人.join("、") : "待配置"}`}
                     </span>
                   </button>
                   {index < currentNodes.length - 1 && <i className="flow-connector" />}
@@ -2229,37 +2285,53 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
               <span>{propertyCollapsed ? "节点配置" : "节点配置表单"}</span>
               {!propertyCollapsed && <em>（流程控制）</em>}
             </span>
-            <button type="button" aria-label={propertyCollapsed ? "展开节点配置" : "收起节点配置"} onClick={() => setPropertyCollapsed((collapsed) => !collapsed)}>{propertyCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button>
+            <div className="node-property-title-actions">
+              {!propertyCollapsed && selectedNode && selectedNode.type !== "start" && selectedNode.type !== "end" && (
+                <button type="button" className="node-delete-button" aria-label="删除当前节点" onClick={() => openModal("delete", { payload: { message: `确认删除${selectedNode.节点名称}？` }, onConfirm: () => removeNode(selectedNode.id) })}><Trash2 size={16} /></button>
+              )}
+              <button type="button" aria-label={propertyCollapsed ? "展开节点配置" : "收起节点配置"} onClick={() => setPropertyCollapsed((collapsed) => !collapsed)}>{propertyCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button>
+            </div>
           </div>
           {!propertyCollapsed && selectedNode && (
             <div className="node-property-body">
               <label className="designer-field"><span>节点名称</span><input type="text" value={selectedNode.节点名称} onChange={(event) => updateNode(selectedNode.id, { 节点名称: event.target.value })} /></label>
-              <div className="designer-field"><span>负责人</span><FormMultiSelect ariaLabel="负责人" options={roleOptions} value={selectedNode.负责人} onChange={(负责人) => updateNode(selectedNode.id, { 负责人 })} /></div>
-              <label className="designer-field"><span>节点提交条件</span><input type="text" value={selectedNode.节点提交条件} onChange={(event) => updateNode(selectedNode.id, { 节点提交条件: event.target.value })} /></label>
-              <div className="designer-field">
-                <span>有多位负责人时</span>
-                <div className="radio-stack">
-                  {(["所有负责人提交后进入下一节点", "任一负责人提交后进入下一节点"] as const).map((rule) => (
-                    <label key={rule}><input type="radio" name={`multi-user-${selectedNode.id}`} checked={selectedNode.多位负责人规则 === rule} onChange={() => updateNode(selectedNode.id, { 多位负责人规则: rule })} />{rule}</label>
-                  ))}
-                </div>
-              </div>
-              <div className="designer-field">
-                <span>找不到节点负责人时</span>
-                <FormSelect ariaLabel="找不到节点负责人时" options={["自动提交当前待办", "将待办转给指定人员进行处理"]} value={selectedNode.找不到负责人处理} onChange={(找不到负责人处理) => updateNode(selectedNode.id, { 找不到负责人处理: 找不到负责人处理 as WorkflowNode["找不到负责人处理"] })} />
-              </div>
-              <div className="condition-panel">
-                <h3>按条件流转</h3>
-                {selectedNode.流转条件.map((condition) => (
-                  <div className="condition-row" key={condition.id}>
-                    <input type="text" aria-label="流转条件字段" placeholder="字段名称" value={condition.field} onChange={(event) => updateCondition(condition.id, { field: event.target.value })} />
-                    <FormSelect ariaLabel="流转条件运算符" options={["包含", "等于"]} value={condition.operator} onChange={(operator) => updateCondition(condition.id, { operator: operator as WorkflowCondition["operator"] })} />
-                    <input type="text" aria-label="流转条件值" placeholder="条件值" value={condition.value} onChange={(event) => updateCondition(condition.id, { value: event.target.value })} />
-                    <button type="button" className="delete-condition" onClick={() => removeCondition(condition.id)} aria-label="删除"><Trash2 size={16} /></button>
+              {(selectedNode.type === "start" || selectedNode.type === "end") && <p className="workflow-default-node-note">系统默认节点，流程发布时必须保留，不可删除。</p>}
+              {(selectedNode.type === "process" || selectedNode.type === "cc") && (
+                <div className="designer-field"><span>{selectedNode.type === "cc" ? "抄送人" : "负责人"}</span><FormMultiSelect ariaLabel={selectedNode.type === "cc" ? "抄送人" : "负责人"} options={roleOptions} value={selectedNode.负责人} onChange={(负责人) => updateNode(selectedNode.id, { 负责人 })} /></div>
+              )}
+              {selectedNode.type === "process" && (
+                <>
+                  <label className="designer-field"><span>节点提交条件</span><input type="text" placeholder="例如：必须填写审核意见" value={selectedNode.节点提交条件} onChange={(event) => updateNode(selectedNode.id, { 节点提交条件: event.target.value })} /></label>
+                  <div className="designer-field">
+                    <span>有多位负责人时</span>
+                    <div className="radio-stack">
+                      {(["所有负责人提交后进入下一节点", "任一负责人提交后进入下一节点"] as const).map((rule) => (
+                        <label key={rule}><input type="radio" name={`multi-user-${selectedNode.id}`} checked={selectedNode.多位负责人规则 === rule} onChange={() => updateNode(selectedNode.id, { 多位负责人规则: rule })} />{rule}</label>
+                      ))}
+                    </div>
                   </div>
-                ))}
-                <button type="button" className="add-condition" onClick={addCondition}><Plus size={14} />添加流转条件</button>
-              </div>
+                  <div className="designer-field">
+                    <span>找不到节点负责人时</span>
+                    <FormSelect ariaLabel="找不到节点负责人时" options={["自动提交当前待办", "将待办转给指定人员进行处理"]} value={selectedNode.找不到负责人处理} onChange={(找不到负责人处理) => updateNode(selectedNode.id, { 找不到负责人处理: 找不到负责人处理 as WorkflowNode["找不到负责人处理"] })} />
+                  </div>
+                  {selectedNode.找不到负责人处理 === "将待办转给指定人员进行处理" && (
+                    <div className="designer-field"><span>待办转交人</span><FormSelect ariaLabel="待办转交人" options={roleOptions} value={selectedNode.转交负责人} placeholder="请选择" onChange={(转交负责人) => updateNode(selectedNode.id, { 转交负责人 })} /></div>
+                  )}
+                  <div className="condition-panel">
+                    <h3>按条件流转</h3>
+                    {selectedNode.流转条件.length === 0 && <p className="condition-empty">未配置条件，将按默认路径流转。</p>}
+                    {selectedNode.流转条件.map((condition) => (
+                      <div className="condition-row" key={condition.id}>
+                        <input type="text" aria-label="流转条件字段" placeholder="字段名称" value={condition.field} onChange={(event) => updateCondition(condition.id, { field: event.target.value })} />
+                        <FormSelect ariaLabel="流转条件运算符" options={["包含", "等于"]} value={condition.operator} onChange={(operator) => updateCondition(condition.id, { operator: operator as WorkflowCondition["operator"] })} />
+                        <input type="text" aria-label="流转条件值" placeholder="条件值" value={condition.value} onChange={(event) => updateCondition(condition.id, { value: event.target.value })} />
+                        <button type="button" className="delete-condition" onClick={() => removeCondition(condition.id)} aria-label="删除流转条件"><Trash2 size={16} /></button>
+                      </div>
+                    ))}
+                    <button type="button" className="add-condition" onClick={addCondition}><Plus size={14} />添加流转条件</button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </aside>
@@ -2348,15 +2420,58 @@ const formComponentIcons: Record<FormComponentType, LucideIcon> = {
   下拉框: ChevronDown,
 };
 
-function FormComponentPreview({ component }: { component: FormDesignerComponent }) {
+function getFormRuleSummary(component: FormDesignerComponent) {
+  if (component.类型 === "单行文本" || component.类型 === "多行文本") return `最多 ${component.规则.最大长度 || "未设置"} 个字符`;
+  if (component.类型 === "数字字段") return `取值范围：${component.规则.最小值 || "不限"} 至 ${component.规则.最大值 || "不限"}`;
+  if (component.类型 === "日期时间") return `日期范围：${component.规则.最小日期 || "不限"} 至 ${component.规则.最大日期 || "不限"}`;
+  if (component.类型 === "下拉框") return `${component.规则.可选项.length} 个选项${component.规则.多选 ? "，允许多选" : "，单选"}`;
+  return `${component.规则.可选项.length} 个可选项`;
+}
+
+function getFormComponentRuleError(component: FormDesignerComponent) {
+  if (!component.字段名称.trim()) return "字段名称不能为空";
+  const rules = component.规则;
+  if (component.类型 === "单行文本" || component.类型 === "多行文本") {
+    const maximumLength = Number(rules.最大长度);
+    if (!Number.isInteger(maximumLength) || maximumLength <= 0) return "最大长度必须是大于 0 的整数";
+  }
+  if (component.类型 === "数字字段") {
+    const minimum = rules.最小值.trim() === "" ? null : Number(rules.最小值);
+    const maximum = rules.最大值.trim() === "" ? null : Number(rules.最大值);
+    if (minimum !== null && !Number.isFinite(minimum)) return "最小值必须是有效数字";
+    if (maximum !== null && !Number.isFinite(maximum)) return "最大值必须是有效数字";
+    if (minimum !== null && maximum !== null && minimum > maximum) return "最小值不能大于最大值";
+  }
+  if (component.类型 === "日期时间" && rules.最小日期 && rules.最大日期 && rules.最小日期 > rules.最大日期) return "最小日期不能晚于最大日期";
+  if (component.类型 === "单选按钮组" || component.类型 === "复选框组" || component.类型 === "下拉框") {
+    const options = rules.可选项.map((option) => option.trim()).filter(Boolean);
+    if (options.length === 0) return "请至少配置一个可选项";
+    if (options.length !== rules.可选项.length) return "可选项不能为空";
+    if (new Set(options).size !== options.length) return "可选项不能重复";
+  }
+  return null;
+}
+
+function getFormValidationError(form: FormDefinition, requireComponents: boolean) {
+  if (!form.表单名称.trim()) return "请先填写表单名称";
+  if (requireComponents && form.组件.length === 0) return "请先添加表单组件";
+  for (const component of form.组件) {
+    const error = getFormComponentRuleError(component);
+    if (error) return `“${component.字段名称 || component.类型}”：${error}`;
+  }
+  return null;
+}
+
+function FormComponentPreview({ component, interactive = false }: { component: FormDesignerComponent; interactive?: boolean }) {
   const options = component.规则.可选项.length > 0 ? component.规则.可选项 : ["选项"];
+  const maximumLength = Number(component.规则.最大长度);
   return (
     <div className="form-component-preview">
       <label>{component.字段名称}</label>
-      {component.类型 === "单行文本" && <input type="text" placeholder="请输入" readOnly />}
-      {component.类型 === "多行文本" && <textarea placeholder="请输入" readOnly />}
-      {component.类型 === "数字字段" && <input type="number" placeholder="请输入" readOnly />}
-      {component.类型 === "日期时间" && <input type="datetime-local" readOnly />}
+      {component.类型 === "单行文本" && <input type="text" placeholder="请输入" maxLength={Number.isInteger(maximumLength) && maximumLength > 0 ? maximumLength : undefined} readOnly={!interactive} />}
+      {component.类型 === "多行文本" && <textarea placeholder="请输入" maxLength={Number.isInteger(maximumLength) && maximumLength > 0 ? maximumLength : undefined} readOnly={!interactive} />}
+      {component.类型 === "数字字段" && <input type="number" placeholder="请输入" min={component.规则.最小值 || undefined} max={component.规则.最大值 || undefined} readOnly={!interactive} />}
+      {component.类型 === "日期时间" && <input type="date" min={component.规则.最小日期 || undefined} max={component.规则.最大日期 || undefined} readOnly={!interactive} />}
       {(component.类型 === "单选按钮组" || component.类型 === "复选框组") && (
         <div className="form-preview-options">
           {options.map((option, index) => (
@@ -2364,16 +2479,20 @@ function FormComponentPreview({ component }: { component: FormDesignerComponent 
               <input
                 type={component.类型 === "单选按钮组" ? "radio" : "checkbox"}
                 name={`${component.id}-preview-options`}
-                aria-disabled="true"
-                tabIndex={-1}
-                readOnly
+                disabled={!interactive}
               />
               <span>{option}</span>
             </label>
           ))}
         </div>
       )}
-      {component.类型 === "下拉框" && <select disabled><option>{component.规则.多选 ? "请选择，可多选" : "请选择"}</option></select>}
+      {component.类型 === "下拉框" && (
+        <select disabled={!interactive} multiple={component.规则.多选} defaultValue={component.规则.多选 ? [] : ""}>
+          <option value="" disabled>{component.规则.多选 ? "请选择，可多选" : "请选择"}</option>
+          {options.map((option, index) => <option value={option} key={`${option}-${index}`}>{option}</option>)}
+        </select>
+      )}
+      <small className="form-rule-summary">{getFormRuleSummary(component)}</small>
     </div>
   );
 }
@@ -2437,8 +2556,16 @@ function FormPrintTable({ form }: { form: FormDefinition }) {
   return (
     <div className="form-print-table-wrap">
       <table className="form-print-table">
-        <thead><tr>{form.组件.map((component) => <th key={component.id}>{component.字段名称}</th>)}</tr></thead>
-        <tbody><tr>{form.组件.map((component) => <td key={component.id}>—</td>)}</tr></tbody>
+        <caption>{form.表单名称}</caption>
+        <thead><tr><th>字段</th><th>填写内容</th></tr></thead>
+        <tbody>
+          {form.组件.map((component) => (
+            <tr key={component.id}>
+              <th scope="row"><span>{component.字段名称}</span><small>{component.类型}</small></th>
+              <td>{component.类型 === "单选按钮组" || component.类型 === "复选框组" || component.类型 === "下拉框" ? component.规则.可选项.map((option) => `□ ${option}`).join("    ") : ""}</td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );
@@ -2449,7 +2576,7 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
   const [forms, setForms] = useState<FormDefinition[]>(initialFormDefinitions);
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewMode, setPreviewMode] = useState<"form" | "print" | null>(null);
   const selectedForm = forms.find((form) => form.id === selectedFormId) ?? null;
   const selectedComponent = selectedForm?.组件.find((component) => component.id === selectedComponentId) ?? selectedForm?.组件[0] ?? null;
 
@@ -2462,11 +2589,14 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
     setForms((list) => list.map((form) => form.id === selectedFormId ? updater(form) : form));
   };
 
-  const openWorkspace = (formId: string, showPreview = false) => {
+  const openWorkspace = (formId: string, nextPreviewMode: "form" | "print" | null = null) => {
     const form = forms.find((item) => item.id === formId);
+    if (!form) return;
     setSelectedFormId(formId);
     setSelectedComponentId(form?.组件[0]?.id ?? null);
-    setPreviewOpen(showPreview);
+    const error = nextPreviewMode ? getFormValidationError(form, true) : null;
+    setPreviewMode(error ? null : nextPreviewMode);
+    if (error) notify(error, "warning");
     setView("workspace");
   };
 
@@ -2486,7 +2616,7 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
     setForms((list) => [...list, nextForm]);
     setSelectedFormId(id);
     setSelectedComponentId(null);
-    setPreviewOpen(false);
+    setPreviewMode(null);
     setView("workspace");
   };
 
@@ -2529,13 +2659,31 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
   };
 
   const saveForm = () => {
+    if (!selectedForm) return;
+    const error = getFormValidationError(selectedForm, false);
+    if (error) {
+      notify(error, "warning");
+      return;
+    }
     updateSelectedForm((form) => ({ ...form, 最近修改时间: "2026-07-13 14:00" }));
-    notify("保存成功");
+    notify("表单配置已保存");
+  };
+
+  const openPreview = (mode: "form" | "print") => {
+    if (!selectedForm) return;
+    const error = getFormValidationError(selectedForm, true);
+    if (error) {
+      notify(error, "warning");
+      return;
+    }
+    setPreviewMode(mode);
   };
 
   const printForm = () => {
-    if (!selectedForm || selectedForm.组件.length === 0) {
-    notify("请先添加表单组件", "warning");
+    if (!selectedForm) return;
+    const error = getFormValidationError(selectedForm, true);
+    if (error) {
+      notify(error, "warning");
       return;
     }
     notify("正在打开打印预览");
@@ -2545,8 +2693,7 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
   if (view === "management") {
     return (
       <section className="card page-card form-management">
-        <div className="workflow-management-label">表单设计器 · 表单规则 · 表单打印</div>
-        <div className="table-toolbar workflow-toolbar"><div><Button variant="primary" icon={Plus} onClick={createForm}>表单设计器</Button></div></div>
+        <div className="table-toolbar workflow-toolbar"><div><Button variant="primary" icon={Plus} onClick={createForm}>新建表单</Button></div></div>
         <DataTable
           columns={["表单ID", "表单名称", "组件数量", "最近修改时间"]}
           fullTextColumns={["表单ID"]}
@@ -2556,11 +2703,11 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
           onRowClick={(row) => openWorkspace(String(row.id))}
           actions={(row) => (
             <ActionLinks
-              actions={["表单设计器", "表单打印", "删除"]}
+              actions={["设计", "打印", "删除"]}
               onAction={(action) => {
                 const formId = String(row.id);
-                if (action === "表单设计器") openWorkspace(formId);
-                if (action === "表单打印") openWorkspace(formId, true);
+                if (action === "设计") openWorkspace(formId);
+                if (action === "打印") openWorkspace(formId, "print");
                 if (action === "删除") openModal("delete", {
                   payload: { message: `确认删除${row.表单名称}？` },
                   onConfirm: () => setForms((list) => list.filter((form) => form.id !== formId)),
@@ -2579,12 +2726,12 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
     <section className="form-workspace">
       <header className="form-workspace-header">
         <div className="form-workspace-identity">
-          <Button variant="text" icon={ChevronLeft} onClick={() => { setPreviewOpen(false); setView("management"); }}>返回</Button>
+          <Button variant="text" icon={ChevronLeft} onClick={() => { setPreviewMode(null); setView("management"); }}>返回</Button>
           <label><span>表单名称</span><input aria-label="表单名称" value={selectedForm.表单名称} onChange={(event) => updateSelectedForm((form) => ({ ...form, 表单名称: event.target.value }))} /></label>
         </div>
         <div className="form-workspace-actions">
-          <Button icon={Eye} onClick={() => setPreviewOpen(true)}>预览</Button>
-          <Button icon={Printer} onClick={printForm}>表单打印</Button>
+          <Button icon={Eye} onClick={() => openPreview("form")}>预览</Button>
+          <Button icon={Printer} onClick={() => openPreview("print")}>打印</Button>
           <Button variant="primary" icon={Save} onClick={saveForm}>保存表单</Button>
         </div>
       </header>
@@ -2629,6 +2776,7 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
                 <section className="form-property-rules" aria-label="表单规则">
                   <div className="form-property-section-title">表单规则</div>
                   <FormRuleEditor component={selectedComponent} onChange={(patch) => updateComponentRules(selectedComponent.id, patch)} />
+                  {getFormComponentRuleError(selectedComponent) && <p className="form-rule-error" role="alert">{getFormComponentRuleError(selectedComponent)}</p>}
                 </section>
               </div>
             ) : <div className="form-panel-empty">请选择或添加组件</div>}
@@ -2637,16 +2785,16 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
 
       {selectedForm.组件.length > 0 && <section className="form-print-panel form-print-source" aria-hidden="true"><FormPrintTable form={selectedForm} /></section>}
 
-      {previewOpen && createPortal(
-        <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setPreviewOpen(false)}>
+      {previewMode && createPortal(
+        <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setPreviewMode(null)}>
           <section className="modal form-preview-modal" role="dialog" aria-modal="true" aria-labelledby="form-preview-title">
-            <header className="modal-header"><div><h2 id="form-preview-title">表单预览</h2></div><button type="button" aria-label="关闭预览" onClick={() => setPreviewOpen(false)}><X size={20} /></button></header>
+            <header className="modal-header"><div><h2 id="form-preview-title">{previewMode === "form" ? "表单预览" : "打印预览"}</h2></div><button type="button" aria-label="关闭预览" onClick={() => setPreviewMode(null)}><X size={20} /></button></header>
             <div className="form-preview-modal-body">
-              {selectedForm.组件.length === 0
-                ? <div className="form-empty-state"><Printer size={34} /><b>暂无可预览内容</b><span>请先在表单设计器中添加组件</span></div>
+              {previewMode === "form"
+                ? <div className="form-preview-sheet">{selectedForm.组件.map((component) => <FormComponentPreview key={component.id} component={component} interactive />)}</div>
                 : <FormPrintTable form={selectedForm} />}
             </div>
-            <footer className="modal-footer"><Button onClick={() => setPreviewOpen(false)}>关闭</Button><Button variant="primary" icon={Printer} onClick={printForm}>表单打印</Button></footer>
+            <footer className="modal-footer"><Button onClick={() => setPreviewMode(null)}>关闭</Button>{previewMode === "print" && <Button variant="primary" icon={Printer} onClick={printForm}>打印</Button>}</footer>
           </section>
         </div>,
         document.body,
@@ -3419,7 +3567,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
     <section className="card page-card user-organization-page" onClick={() => setActiveOrganizationMenu(null)}>
       <div className="user-organization-layout">
         <aside className="organization-tree-panel">
-          <div className="organization-tree-heading"><div><h2>组织管理</h2><span>组织数据管理 · 组织列表查看 · {collectOrganizationLabels(organizations[0]).length} 个组织</span></div></div>
+          <div className="organization-tree-heading"><div><h2>组织管理（组织列表查看）</h2></div></div>
           <label className="filter-search-control organization-tree-search"><input aria-label="组织检索" placeholder="组织检索" value={organizationKeyword} onChange={(event) => setOrganizationKeyword(event.target.value)} />{organizationKeyword ? <button type="button" aria-label="清空组织检索" onClick={() => setOrganizationKeyword("")}><X size={14} /></button> : <Search size={16} aria-hidden="true" />}</label>
           <div className="organization-tree-list" role="tree">
             {visibleOrganizations.length ? visibleOrganizations.map((node) => <OrganizationTreeNodeRow key={node.id} node={node} level={0} selectedId={selectedOrganizationId} expandedIds={expandedOrganizationIds} forceExpanded={Boolean(organizationKeyword.trim())} activeMenuId={activeOrganizationMenu} onSelect={(selectedNode) => { setSelectedOrganizationId(selectedNode.id); setActiveOrganizationMenu(null); }} onToggle={toggleOrganization} onOpenMenu={setActiveOrganizationMenu} onAction={handleOrganizationAction} />) : <div className="organization-tree-empty">未找到相关组织</div>}
