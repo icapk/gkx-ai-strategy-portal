@@ -4,7 +4,115 @@ export type WorkbenchTab = 'recent' | 'favorites' | 'owned' | 'shared'
 
 export type TeamPanelTab = 'todo' | 'comments' | 'members'
 
-export type DocumentKind = '在线文档' | 'PDF文档' | 'Word文档' | 'Excel文档'
+export type DocumentKind = '在线文档' | '数据表格' | 'PDF文档' | 'Word文档' | 'Excel文档'
+
+export type DataTableTemplate = 'project-progress' | 'research-data'
+
+export type DataTableColumnType = 'text' | 'number' | 'select' | 'date' | 'percent' | 'file'
+
+export interface DataTableColumn {
+  id: string
+  name: string
+  type: DataTableColumnType
+  required: boolean
+  options?: string[]
+}
+
+export interface ResearchDataRow {
+  id: string
+  values: Record<string, string>
+  updatedAt: string
+  updatedBy: string
+}
+
+export interface DataTableAttachment {
+  id: string
+  name: string
+  size: number
+  mimeType: string
+  uploadedAt: string
+  uploadedBy: string
+  rowCount: number
+  source: 'upload' | 'import'
+  dataUrl?: string
+  previewText?: string
+}
+
+export type DataTableShareAccess = 'private' | 'team-view' | 'team-edit'
+
+export interface DataTableShareSettings {
+  access: DataTableShareAccess
+  collaborators: string[]
+  updatedAt: string
+  updatedBy: string
+}
+
+export interface ResearchDataTable {
+  documentId: number
+  template: DataTableTemplate
+  columns: DataTableColumn[]
+  rows: ResearchDataRow[]
+  attachments: DataTableAttachment[]
+  share: DataTableShareSettings
+  createdAt: string
+  updatedAt: string
+  updatedBy: string
+}
+
+export type DocumentTextStyle = 'paragraph' | 'heading-1' | 'heading-2' | 'quote'
+
+export interface DocumentTextBlock {
+  id: string
+  type: 'text'
+  text: string
+  style: DocumentTextStyle
+  bold: boolean
+  italic: boolean
+  underline: boolean
+}
+
+export interface DocumentListBlock {
+  id: string
+  type: 'list'
+  ordered: boolean
+  items: string[]
+}
+
+export interface DocumentImageBlock {
+  id: string
+  type: 'image'
+  src: string
+  alt: string
+  caption: string
+}
+
+export interface DocumentFormulaBlock {
+  id: string
+  type: 'formula'
+  latex: string
+}
+
+export interface DocumentBookmarkBlock {
+  id: string
+  type: 'bookmark'
+  url: string
+  title: string
+  description: string
+}
+
+export interface DocumentDividerBlock {
+  id: string
+  type: 'divider'
+  style: 'solid' | 'dashed'
+}
+
+export type DocumentBlock =
+  | DocumentTextBlock
+  | DocumentListBlock
+  | DocumentImageBlock
+  | DocumentFormulaBlock
+  | DocumentBookmarkBlock
+  | DocumentDividerBlock
 
 export interface ResearchDocument {
   id: number
@@ -18,6 +126,20 @@ export interface ResearchDocument {
   favorite: boolean
   owned: boolean
   shared: boolean
+  description?: string
+  keywords?: string[]
+  content?: string
+  blocks?: DocumentBlock[]
+}
+
+export interface ResearchNote {
+  id: number
+  documentId: number
+  title: string
+  content: string
+  createdAt: string
+  updatedAt: string
+  tags: string[]
 }
 
 export interface FolderItem {
@@ -62,4 +184,7 @@ export type ModalKind =
   | 'new-team'
   | 'invite-member'
   | 'add-todo'
+  | 'profile-settings'
+  | 'note-detail'
+  | 'note-editor'
   | null

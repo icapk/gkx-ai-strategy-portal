@@ -1,0 +1,69 @@
+{
+  "name": "intelligent-research-data-table-module",
+  "manifestVersion": 1,
+  "description": "智能科研数据表格模块的嵌合文件、资源和宿主契约清单",
+  "runtimeDependencies": {
+    "react": ">=19"
+  },
+  "coreFiles": [
+    "src/types.ts",
+    "src/dataTableContent.ts",
+    "src/components/Modal.tsx",
+    "src/components/DataTableWorkspace.tsx"
+  ],
+  "managementEntryFiles": [
+    "src/components/DataTableHub.tsx",
+    "src/components/WorkspaceView.tsx"
+  ],
+  "hostReferenceFiles": [
+    "src/App.tsx",
+    "src/data.ts",
+    "tests/dataTableContent.test.ts"
+  ],
+  "requiredAssets": [
+    "public/assets/iconpark/grid-nine.svg",
+    "public/assets/iconpark/form-one.svg",
+    "public/assets/iconpark/upload-logs.svg",
+    "public/assets/iconpark/download.svg",
+    "public/assets/iconpark/list-numbers.svg",
+    "public/assets/iconpark/share.svg",
+    "public/assets/iconpark/left.svg",
+    "public/assets/iconpark/more.svg",
+    "public/assets/iconpark/NOTICE.md",
+    "public/assets/reading/search.svg",
+    "public/assets/document-sheet.svg",
+    "public/assets/figma/modal-close.svg"
+  ],
+  "styleSources": [
+    "src/styles.css"
+  ],
+  "styleFamilies": [
+    ".data-sheet-*",
+    ".data-hub-*",
+    ".workbench-data-hub-entry",
+    ".modal-*",
+    ".button*",
+    ".field-*",
+    ".sr-only",
+    ".icon-plus"
+  ],
+  "localStorageKeys": [
+    "intelligent-research-portal:documents:v1",
+    "intelligent-research-portal:data-tables:v1",
+    "intelligent-research-portal:user-profile:v1"
+  ],
+  "routeContracts": [
+    "#data-tables",
+    "#table=<documentId>"
+  ],
+  "hostInvariants": [
+    "ResearchDataTable.documentId must equal ResearchDocument.id",
+    "Table and document index saves must be atomic or compensating",
+    "Table and form tabs must share the same filtered rows",
+    "DataTableWorkspace must be keyed by document id",
+    "Host navigation must call the registered navigation guard",
+    "Only one effective modal dialog may be exposed at a time",
+    "Absolute /assets paths must be adapted for sub-path deployment"
+  ],
+  "documentation": "docs/INTEGRATION_GUIDE.md"
+}

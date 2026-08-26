@@ -1,0 +1,2 @@
+56086d0bdeba3cdab34effda9fd5a8438117b3741b13679aa70299160eae7cfd  intelligent-research-portal-source-20260826.zip
+bb4c085e66dda864f62227072f13424a9d8f3ce5c70f61988ea1b58dbbf36a75  intelligent-research-portal-prebuilt-20260826.zip

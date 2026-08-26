@@ -14,16 +14,37 @@ interface DocumentTableProps {
   onRestore?: (id: number) => void
   onRename?: (id: number, title: string) => void
   onCreateNote?: (documentItem: ResearchDocument) => void
+  onOpenDocument?: (documentItem: ResearchDocument) => void
+  highlightedDocumentId?: number | null
 }
 
 function KindTag({ kind }: { kind: ResearchDocument['kind'] }) {
-  return <span className={`kind-tag kind-tag--${kind === '在线文档' ? 'online' : 'file'}`}>{kind}</span>
+  const variant = kind === '在线文档' ? 'online' : kind === '数据表格' ? 'sheet' : 'file'
+  return <span className={`kind-tag kind-tag--${variant}`}>{kind}</span>
 }
 
-function Pagination({ page, onChange }: { page: number; onChange: (page: number) => void }) {
-  const [pageSize, setPageSize] = useState<10 | 20 | 50>(10)
+const isNativeDocument = (documentItem: ResearchDocument) => (
+  documentItem.kind === '在线文档' || documentItem.kind === '数据表格'
+)
+
+function Pagination({
+  page,
+  pageSize,
+  totalItems,
+  onChange,
+  onPageSizeChange,
+}: {
+  page: number
+  pageSize: 10 | 20 | 50
+  totalItems: number
+  onChange: (page: number) => void
+  onPageSizeChange: (size: 10 | 20 | 50) => void
+}) {
   const [pageSizeOpen, setPageSizeOpen] = useState(false)
   const pageSizeRef = useRef<HTMLDivElement>(null)
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
+  const firstPage = Math.max(1, Math.min(page - 2, totalPages - 4))
+  const pageNumbers = Array.from({ length: Math.min(5, totalPages) }, (_, index) => firstPage + index)
 
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -45,7 +66,7 @@ function Pagination({ page, onChange }: { page: number; onChange: (page: number)
       <button type="button" disabled={page === 1} onClick={() => onChange(Math.max(1, page - 1))} aria-label="上一页">
         <span className="pager-chevron pager-chevron--prev" aria-hidden="true" />
       </button>
-      {[1, 2, 3, 4, 5].map((number) => (
+      {pageNumbers.map((number) => (
         <button
           type="button"
           key={number}
@@ -56,12 +77,12 @@ function Pagination({ page, onChange }: { page: number; onChange: (page: number)
           {number}
         </button>
       ))}
-      <button type="button" disabled={page === 5} onClick={() => onChange(Math.min(5, page + 1))} aria-label="下一页">
+      <button type="button" disabled={page === totalPages} onClick={() => onChange(Math.min(totalPages, page + 1))} aria-label="下一页">
         <span className="pager-chevron" aria-hidden="true" />
       </button>
       <div className="page-size" ref={pageSizeRef}>
         <button type="button" className={`page-size-trigger${pageSizeOpen ? ' is-open' : ''}`} aria-haspopup="listbox" aria-expanded={pageSizeOpen} onClick={() => setPageSizeOpen((open) => !open)}><span>{pageSize}条/页</span><span className="page-size-chevron" aria-hidden="true" /></button>
-        {pageSizeOpen && <div className="page-size-menu" role="listbox" aria-label="每页显示数量">{([10, 20, 50] as const).map((size) => <button type="button" role="option" aria-selected={pageSize === size} className={pageSize === size ? 'is-active' : ''} key={size} onClick={() => { setPageSize(size); setPageSizeOpen(false) }}>{size}条/页</button>)}</div>}
+        {pageSizeOpen && <div className="page-size-menu" role="listbox" aria-label="每页显示数量">{([10, 20, 50] as const).map((size) => <button type="button" role="option" aria-selected={pageSize === size} className={pageSize === size ? 'is-active' : ''} key={size} onClick={() => { onPageSizeChange(size); setPageSizeOpen(false) }}>{size}条/页</button>)}</div>}
       </div>
     </div>
   )
@@ -79,12 +100,16 @@ export function DocumentTable({
   onRestore,
   onRename,
   onCreateNote,
+  onOpenDocument,
+  highlightedDocumentId = null,
 }: DocumentTableProps) {
   const [spaceMenuId, setSpaceMenuId] = useState<number | null>(null)
+  const [pageSize, setPageSize] = useState<10 | 20 | 50>(10)
   const [spaceMenuPosition, setSpaceMenuPosition] = useState({ top: 0, left: 0 })
   const [renamingDocumentId, setRenamingDocumentId] = useState<number | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const spaceMenuRef = useRef<HTMLDivElement>(null)
+  const tableRegionRef = useRef<HTMLDivElement>(null)
   const isWorkbench = mode === 'workbench'
   const isFavorites = isWorkbench && workbenchTab === 'favorites'
   const isRecycle = mode === 'recycle'
@@ -93,6 +118,12 @@ export function DocumentTable({
     + (!isWorkbench && !isRecycle ? 1 : 0)
     + (isWorkbench ? 1 : 0)
     + (!isFavorites ? 1 : 0)
+  const totalPages = Math.max(1, Math.ceil(documents.length / pageSize))
+  const paginatedDocuments = documents.slice((page - 1) * pageSize, page * pageSize)
+
+  useEffect(() => {
+    if (page > totalPages) onPageChange(totalPages)
+  }, [onPageChange, page, totalPages])
 
   useEffect(() => {
     if (spaceMenuId == null) return
@@ -114,6 +145,16 @@ export function DocumentTable({
     }
   }, [spaceMenuId])
 
+  useEffect(() => {
+    if (highlightedDocumentId == null) return
+    const frame = window.requestAnimationFrame(() => {
+      tableRegionRef.current
+        ?.querySelector<HTMLElement>(`[data-document-id="${highlightedDocumentId}"]`)
+        ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [highlightedDocumentId])
+
   const openSpaceMenu = (event: ReactMouseEvent<HTMLButtonElement>, documentId: number) => {
     event.stopPropagation()
     if (spaceMenuId === documentId) {
@@ -122,7 +163,8 @@ export function DocumentTable({
     }
     const rect = event.currentTarget.getBoundingClientRect()
     const menuWidth = 96
-    const menuHeight = 224
+    const menuDocument = documents.find((item) => item.id === documentId)
+    const menuHeight = menuDocument && isNativeDocument(menuDocument) ? 266 : 224
     const viewportGap = 8
     const left = Math.min(window.innerWidth - menuWidth - viewportGap, Math.max(viewportGap, rect.right - menuWidth))
     const belowTop = rect.bottom + 2
@@ -146,8 +188,8 @@ export function DocumentTable({
     setRenameValue('')
   }
 
-  const downloadDocument = (documentItem: ResearchDocument) => {
-    const body = `${documentItem.title}\n${documentItem.owner}\n${documentItem.kind}`
+  const downloadFallback = (documentItem: ResearchDocument) => {
+    const body = `${documentItem.title}\n\n${documentItem.content?.trim() || '暂无正文内容'}\n\n所有者：${documentItem.owner}\n类型：${documentItem.kind}`
     const url = URL.createObjectURL(new Blob([body], { type: 'text/plain;charset=utf-8' }))
     const anchor = document.createElement('a')
     anchor.href = url
@@ -157,7 +199,7 @@ export function DocumentTable({
   }
 
   return (
-    <div className="table-region">
+    <div className="table-region" ref={tableRegionRef}>
       <div className="table-scroll">
         <table className="document-table">
           <thead>
@@ -182,14 +224,19 @@ export function DocumentTable({
                 </td>
               </tr>
             ) : (
-              documents.map((doc) => (
-                <tr key={doc.id}>
+              paginatedDocuments.map((doc) => (
+                <tr
+                  key={doc.id}
+                  data-document-id={doc.id}
+                  className={highlightedDocumentId === doc.id ? 'is-search-target' : undefined}
+                >
                   <td className="title-cell">
                     {renamingDocumentId === doc.id ? (
                       <input
                         className="document-title-rename"
                         value={renameValue}
                         autoFocus
+                        maxLength={50}
                         aria-label="文档新名称"
                         onChange={(event) => setRenameValue(event.target.value)}
                         onBlur={() => finishRename(doc)}
@@ -201,6 +248,16 @@ export function DocumentTable({
                           }
                         }}
                       />
+                    ) : isNativeDocument(doc) && !isRecycle && onOpenDocument ? (
+                      <button
+                        className={`document-title-link${doc.kind === '数据表格' ? ' document-title-link--sheet' : ''}`}
+                        type="button"
+                        onClick={() => onOpenDocument(doc)}
+                        aria-label={`${doc.kind === '数据表格' ? '打开表格' : '编辑'}“${doc.title}”`}
+                      >
+                        {doc.kind === '数据表格' && <img className="document-title-sheet-icon" src="/assets/document-sheet.svg" alt="" width="18" height="18" />}
+                        {doc.title}
+                      </button>
                     ) : doc.title}
                   </td>
                   {isWorkbench && <td>{doc.location}</td>}
@@ -251,7 +308,13 @@ export function DocumentTable({
           </tbody>
         </table>
       </div>
-      <Pagination page={page} onChange={onPageChange} />
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        totalItems={documents.length}
+        onChange={onPageChange}
+        onPageSizeChange={(size) => { setPageSize(size); onPageChange(1) }}
+      />
       {spaceMenuId != null && typeof document !== 'undefined' && createPortal((() => {
         const documentItem = documents.find((item) => item.id === spaceMenuId)
         if (!documentItem) return null
@@ -264,9 +327,10 @@ export function DocumentTable({
             style={{ top: spaceMenuPosition.top, left: spaceMenuPosition.left }}
             onClick={(event) => event.stopPropagation()}
           >
+            {isNativeDocument(documentItem) && <button type="button" role="menuitem" onClick={() => { onOpenDocument?.(documentItem); setSpaceMenuId(null) }}>{documentItem.kind === '数据表格' ? '打开表格' : '编辑文档'}</button>}
             <button type="button" role="menuitem" onClick={() => { onCreateNote?.(documentItem); setSpaceMenuId(null) }}>笔记</button>
             <button type="button" role="menuitem" onClick={() => { onToggleFavorite(documentItem.id); setSpaceMenuId(null) }}>{documentItem.favorite ? '取消收藏' : '收藏'}</button>
-            <button type="button" role="menuitem" onClick={() => { downloadDocument(documentItem); setSpaceMenuId(null) }}>下载</button>
+            <button type="button" role="menuitem" onClick={() => { downloadFallback(documentItem); setSpaceMenuId(null) }}>下载</button>
             <button type="button" role="menuitem" onClick={() => beginRename(documentItem)}>重命名</button>
             <button type="button" role="menuitem" className="danger-link" onClick={() => { onDelete(documentItem.id); setSpaceMenuId(null) }}>删除</button>
           </div>

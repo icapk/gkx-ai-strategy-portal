@@ -17,9 +17,21 @@ interface TopNavigationProps {
   activeSection: Section
   onSelect: (section: Section) => void
   onReadingSelect: () => void
+  onSearchOpen: () => void
+  onProfileOpen: () => void
+  profileName: string
+  profileAvatar?: string | null
 }
 
-export function TopNavigation({ activeSection, onSelect, onReadingSelect }: TopNavigationProps) {
+export function TopNavigation({
+  activeSection,
+  onSelect,
+  onReadingSelect,
+  onSearchOpen,
+  onProfileOpen,
+  profileName,
+  profileAvatar,
+}: TopNavigationProps) {
   return (
     <>
       <div className="product-row">
@@ -31,9 +43,29 @@ export function TopNavigation({ activeSection, onSelect, onReadingSelect }: TopN
             智能阅读
           </button>
         </div>
-        <button className="profile-button" type="button" aria-label="个人中心">
-          <img src="/assets/avatar-user.svg" alt="" />
-        </button>
+        <div className="top-utilities">
+          <button
+            className="global-search-trigger"
+            type="button"
+            aria-label="全文搜索笔记和文档"
+            aria-haspopup="dialog"
+            aria-keyshortcuts="Meta+K Control+K"
+            onClick={onSearchOpen}
+          >
+            <img src="/assets/reading/search.svg" alt="" />
+            <span>搜索笔记、文档</span>
+            <kbd>⌘ K</kbd>
+          </button>
+          <button
+            className="profile-button"
+            type="button"
+            aria-label={`打开个人信息设置（${profileName}）`}
+            aria-haspopup="dialog"
+            onClick={onProfileOpen}
+          >
+            <img className={profileAvatar ? 'is-custom-avatar' : undefined} src={profileAvatar || '/assets/avatar-user.svg'} alt="" />
+          </button>
+        </div>
       </div>
       <nav className="stats-nav" aria-label="科研空间概览">
         <div className="stats-track">

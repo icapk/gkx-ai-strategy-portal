@@ -23,6 +23,7 @@ interface SpaceViewProps {
   onShare: (id: number) => void
   onRenameDocument: (id: number, title: string) => void
   onCreateNote: (documentItem: ResearchDocument) => void
+  onOpenDocument: (documentItem: ResearchDocument) => void
   emptyTeam?: boolean
 }
 
@@ -46,6 +47,7 @@ export function SpaceView({
   onShare,
   onRenameDocument,
   onCreateNote,
+  onOpenDocument,
   emptyTeam = false,
 }: SpaceViewProps) {
   const label = mode === 'personal' ? '我的空间' : teamName ?? 'AI研究团队'
@@ -134,7 +136,7 @@ export function SpaceView({
         </h1>
         <div className="header-actions">
           <button className="button button--secondary" type="button" onClick={onImportDocument}>导入文档</button>
-          <button className="button button--secondary" type="button" onClick={onNewDocument}>新建在线文档</button>
+          <button className="button button--secondary" type="button" onClick={onNewDocument}>新建内容</button>
           <button className="button button--primary" type="button" onClick={onNewFolder}><span className="button-plus icon-plus" aria-hidden="true" />新建文件夹</button>
         </div>
       </header>
@@ -143,7 +145,7 @@ export function SpaceView({
           <div className="empty-team-view">
             <div className="empty-team-actions">
               <button type="button" onClick={onImportDocument}><span className="empty-action-icon"><img src="/assets/action-pdf.svg" alt="" /></span><span><strong>导入</strong><small>导入PDF文档</small></span></button>
-              <button type="button" onClick={onNewDocument}><span className="empty-action-icon"><img src="/assets/action-word.svg" alt="" /></span><span><strong>新建</strong><small>新建在线文档</small></span></button>
+              <button type="button" onClick={onNewDocument}><span className="empty-action-icon"><img src="/assets/action-word.svg" alt="" /></span><span><strong>新建</strong><small>新建文档或表格</small></span></button>
               <button type="button" onClick={onNewFolder}><span className="empty-action-icon"><img src="/assets/action-folder.svg" alt="" /></span><span><strong>添加</strong><small>添加文件夹</small></span></button>
               <button type="button"><span className="empty-action-icon"><img src="/assets/action-manage.svg" alt="" /></span><span><strong>管理</strong><small>管理团队空间</small></span></button>
             </div>
@@ -220,6 +222,7 @@ export function SpaceView({
             onShare={onShare}
             onRename={onRenameDocument}
             onCreateNote={onCreateNote}
+            onOpenDocument={onOpenDocument}
           />
         </section>}
       </div>

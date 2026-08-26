@@ -17,6 +17,11 @@ interface WorkspaceViewProps {
   onToggleFavorite: (id: number) => void
   onDelete: (id: number) => void
   onShare: (id: number) => void
+  onOpenDocument: (documentItem: ResearchDocument) => void
+  onOpenDataTableHub: () => void
+  dataTableCount: number
+  dataRecordCount: number
+  highlightedDocumentId?: number | null
 }
 
 export function WorkspaceView({
@@ -28,11 +33,21 @@ export function WorkspaceView({
   onToggleFavorite,
   onDelete,
   onShare,
+  onOpenDocument,
+  onOpenDataTableHub,
+  dataTableCount,
+  dataRecordCount,
+  highlightedDocumentId,
 }: WorkspaceViewProps) {
   return (
     <section className="view view--workbench">
       <header className="view-header">
         <h1><span className="title-accent" />工作台</h1>
+        <button className="workbench-data-hub-entry" type="button" onClick={onOpenDataTableHub}>
+          <img src="/assets/iconpark/grid-nine.svg" alt="" />
+          <span><strong>数据表格</strong><small>{dataTableCount} 个表格 · {dataRecordCount} 条记录</small></span>
+          <i aria-hidden="true">›</i>
+        </button>
       </header>
       <div className="view-body workbench-body">
         <div className="subtabs" role="tablist" aria-label="工作台筛选">
@@ -58,9 +73,10 @@ export function WorkspaceView({
           onToggleFavorite={onToggleFavorite}
           onDelete={onDelete}
           onShare={onShare}
+          onOpenDocument={onOpenDocument}
+          highlightedDocumentId={highlightedDocumentId}
         />
       </div>
     </section>
   )
 }
-

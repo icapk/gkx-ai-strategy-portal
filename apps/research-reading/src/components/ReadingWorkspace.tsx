@@ -6,10 +6,13 @@ import { ReadingReader } from './ReadingReader'
 
 interface ReadingWorkspaceProps {
   onSwitchToResearch: () => void
+  onProfileOpen: () => void
+  profileName: string
+  profileAvatar?: string | null
 }
 
-export function ReadingWorkspace({ onSwitchToResearch }: ReadingWorkspaceProps) {
-  const [view, setView] = useState<'reader' | 'library' | 'upload'>('library')
+export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileName, profileAvatar }: ReadingWorkspaceProps) {
+  const [view, setView] = useState<'reader' | 'library' | 'upload'>('reader')
   const [documents, setDocuments] = useState(readingDocuments)
   const [activeDocumentId, setActiveDocumentId] = useState(1)
   const [librarySelectedDocumentId, setLibrarySelectedDocumentId] = useState<number | null>(1)
@@ -91,7 +94,13 @@ export function ReadingWorkspace({ onSwitchToResearch }: ReadingWorkspaceProps) 
         <div className="reading-product-actions">
           {(view === 'reader' || view === 'upload') && <button className="reading-library-launch" type="button" onClick={() => setView('library')}>智能阅读库</button>}
           {(view === 'library' || readerEditingNote) && view !== 'upload' && <button className="reading-upload-button" type="button" onClick={() => { setUploadFolderOpen(false); setIsUploading(false); setView('upload') }}><img src="/assets/reading/upload.svg" alt="" />上传文件</button>}
-          <button className="profile-button" type="button" aria-label="个人中心"><img src="/assets/avatar-user.svg" alt="" /></button>
+          <button
+            className="profile-button"
+            type="button"
+            aria-label={`打开个人信息设置（${profileName}）`}
+            aria-haspopup="dialog"
+            onClick={onProfileOpen}
+          ><img className={profileAvatar ? 'is-custom-avatar' : undefined} src={profileAvatar || '/assets/avatar-user.svg'} alt="" /></button>
         </div>
       </div>
 

@@ -1,6 +1,14 @@
 node_modules/
 .pnpm-store/
-# dist/ is committed because the portal is published directly from the repository root.
+dist/
+# 门户直接加载本目录的静态构建，需将覆盖版 dist 纳入项目交付。
+!dist/
+!dist/**
 .DS_Store
 *.local
 *.log
+.env
+.env.*
+!.env.example
+.openai/hosting.json
+*.zip
