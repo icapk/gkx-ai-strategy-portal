@@ -714,11 +714,49 @@ const apiDocumentCatalog: Record<string, ApiDocument[]> = {
 
 type BusinessResourceType = "talent" | "report" | "thinktank";
 
+type BusinessDirectoryNode = {
+  id: string;
+  name: string;
+  count: number;
+  children?: BusinessDirectoryNode[];
+};
+
 const businessResourceConfigs = {
   talent: {
     tab: "人才库资源",
     directoryTitle: "人才库目录",
-    directories: ["人工智能人才库", "新材料人才库", "生命科学人才库"],
+    directories: [
+      {
+        id: "talent-ai",
+        name: "人工智能人才库",
+        count: 128,
+        children: [
+          { id: "talent-ai-ml", name: "机器学习", count: 52 },
+          { id: "talent-ai-cv", name: "计算机视觉", count: 41 },
+          { id: "talent-ai-nlp", name: "自然语言处理", count: 35 },
+        ],
+      },
+      {
+        id: "talent-material",
+        name: "新材料人才库",
+        count: 96,
+        children: [
+          { id: "talent-material-advanced", name: "先进材料", count: 38 },
+          { id: "talent-material-nano", name: "纳米材料", count: 32 },
+          { id: "talent-material-energy", name: "能源材料", count: 26 },
+        ],
+      },
+      {
+        id: "talent-life",
+        name: "生命科学人才库",
+        count: 74,
+        children: [
+          { id: "talent-life-biomed", name: "生物医药", count: 30 },
+          { id: "talent-life-gene", name: "基因工程", count: 24 },
+          { id: "talent-life-neuro", name: "神经科学", count: 20 },
+        ],
+      },
+    ],
     info: { 名称: "人工智能人才库", 描述: "聚合人工智能领域重点学者资源", 总数标签: "学者总数", 总数: "128", 创建人: "系统管理员" },
     columns: ["学者名称", "所属学科", "职称", "关联时间"],
     requiredColumns: ["学者名称", "所属学科", "职称"],
@@ -731,7 +769,13 @@ const businessResourceConfigs = {
   report: {
     tab: "报告资源",
     directoryTitle: "报告资源目录",
-    directories: ["TR报告", "战略咨询报告", "洞察分析报告", "未来产业报告", "趋势分析报告"],
+    directories: [
+      { id: "report-tr", name: "TR报告", count: 46 },
+      { id: "report-strategy", name: "战略咨询报告", count: 32 },
+      { id: "report-insight", name: "洞察分析报告", count: 28 },
+      { id: "report-future", name: "未来产业报告", count: 20 },
+      { id: "report-trend", name: "趋势分析报告", count: 15 },
+    ],
     info: { 名称: "TR报告", 描述: "技术研究类报告资源集合", 总数标签: "报告总数", 总数: "46", 创建人: "系统管理员" },
     columns: ["报告名称", "报告类型ID", "所属学科", "领域", "关联时间"],
     requiredColumns: ["报告名称", "报告类型ID", "所属学科", "领域"],
@@ -743,7 +787,11 @@ const businessResourceConfigs = {
   thinktank: {
     tab: "智库资源",
     directoryTitle: "智库资源目录",
-    directories: ["科技政策智库", "未来产业智库", "区域创新智库"],
+    directories: [
+      { id: "thinktank-policy", name: "科技政策智库", count: 18 },
+      { id: "thinktank-future", name: "未来产业智库", count: 12 },
+      { id: "thinktank-region", name: "区域创新智库", count: 9 },
+    ],
     info: { 名称: "科技政策智库", 描述: "科技政策研究与决策咨询资源集合", 总数标签: "智库总数", 总数: "18", 创建人: "系统管理员" },
     columns: ["智库名称", "所属领域", "创建人", "关联时间"],
     requiredColumns: ["智库名称", "所属领域"],
@@ -755,7 +803,7 @@ const businessResourceConfigs = {
 } satisfies Record<BusinessResourceType, {
   tab: string;
   directoryTitle: string;
-  directories: string[];
+  directories: BusinessDirectoryNode[];
   info: { 名称: string; 描述: string; 总数标签: string; 总数: string; 创建人: string };
   columns: string[];
   requiredColumns: string[];
@@ -4085,15 +4133,119 @@ function BusinessResources({ openModal, notify }: { openModal: OpenModal; notify
   );
 }
 
-function DirectoryEditorModal({ mode, initialValue, close, save }: { mode: "create" | "edit"; initialValue: string; close: () => void; save: (value: string) => void }) {
+type FlatBusinessDirectory = {
+  node: BusinessDirectoryNode;
+  level: number;
+  parentId: string | null;
+};
+
+function flattenBusinessDirectories(nodes: BusinessDirectoryNode[], level = 0, parentId: string | null = null): FlatBusinessDirectory[] {
+  return nodes.flatMap((node) => [
+    { node, level, parentId },
+    ...flattenBusinessDirectories(node.children ?? [], level + 1, node.id),
+  ]);
+}
+
+function findBusinessDirectory(nodes: BusinessDirectoryNode[], directoryId: string): BusinessDirectoryNode | null {
+  for (const node of nodes) {
+    if (node.id === directoryId) return node;
+    const child = findBusinessDirectory(node.children ?? [], directoryId);
+    if (child) return child;
+  }
+  return null;
+}
+
+function updateBusinessDirectory(nodes: BusinessDirectoryNode[], directoryId: string, updater: (node: BusinessDirectoryNode) => BusinessDirectoryNode): BusinessDirectoryNode[] {
+  return nodes.map((node) => {
+    if (node.id === directoryId) return updater(node);
+    if (!node.children?.length) return node;
+    return { ...node, children: updateBusinessDirectory(node.children, directoryId, updater) };
+  });
+}
+
+function removeBusinessDirectory(nodes: BusinessDirectoryNode[], directoryId: string): BusinessDirectoryNode[] {
+  return nodes.reduce<BusinessDirectoryNode[]>((result, node) => {
+    if (node.id === directoryId) return result;
+    result.push(node.children?.length ? { ...node, children: removeBusinessDirectory(node.children, directoryId) } : node);
+    return result;
+  }, []);
+}
+
+function insertBusinessDirectory(nodes: BusinessDirectoryNode[], parentId: string | null, node: BusinessDirectoryNode): BusinessDirectoryNode[] {
+  if (!parentId) return [...nodes, node];
+  return updateBusinessDirectory(nodes, parentId, (parent) => ({ ...parent, children: [...(parent.children ?? []), node] }));
+}
+
+function getBusinessDirectorySubtreeIds(node: BusinessDirectoryNode): string[] {
+  return [node.id, ...(node.children ?? []).flatMap(getBusinessDirectorySubtreeIds)];
+}
+
+function BusinessDirectoryTree({ nodes, selectedId, expandedIds, onSelect, onToggle, level = 0 }: {
+  nodes: BusinessDirectoryNode[];
+  selectedId: string;
+  expandedIds: Set<string>;
+  onSelect: (directoryId: string) => void;
+  onToggle: (directoryId: string) => void;
+  level?: number;
+}) {
+  return (
+    <>
+      {nodes.map((node) => {
+        const hasChildren = Boolean(node.children?.length);
+        const expanded = hasChildren && expandedIds.has(node.id);
+        return (
+          <div className="business-directory-node" key={node.id}>
+            <div className="business-directory-row" style={{ paddingLeft: `${8 + level * 20}px` }}>
+              {hasChildren
+                ? <button type="button" className="business-directory-toggle" aria-label={`${expanded ? "收起" : "展开"}${node.name}`} onClick={() => onToggle(node.id)}><ChevronRight className={expanded ? "expanded" : ""} size={16} /></button>
+                : <span className="business-directory-spacer" aria-hidden="true" />}
+              <button
+                type="button"
+                role="treeitem"
+                aria-level={level + 1}
+                aria-selected={selectedId === node.id}
+                aria-expanded={hasChildren ? expanded : undefined}
+                className={`business-directory-item ${selectedId === node.id ? "active" : ""}`}
+                onClick={() => onSelect(node.id)}
+              >
+                <FolderOpen size={16} /><span>{node.name}</span><b>{node.count}</b>
+              </button>
+            </div>
+            {expanded && node.children && <div role="group"><BusinessDirectoryTree nodes={node.children} selectedId={selectedId} expandedIds={expandedIds} onSelect={onSelect} onToggle={onToggle} level={level + 1} /></div>}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function DirectoryEditorModal({ mode, initialValue, initialParentId = null, parentOptions, close, save }: {
+  mode: "create" | "edit";
+  initialValue: string;
+  initialParentId?: string | null;
+  parentOptions?: Array<{ id: string; name: string; level: number }>;
+  close: () => void;
+  save: (value: string, parentId: string | null) => void;
+}) {
   const [value, setValue] = useState(initialValue);
+  const [parentId, setParentId] = useState(initialParentId ?? "");
   const canSubmit = value.trim().length > 0;
   return createPortal(
     <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
       <div className="modal directory-editor-modal" role="dialog" aria-modal="true" aria-label={mode === "create" ? "新增目录" : "编辑目录"}>
         <ModalHeader title={mode === "create" ? "新增目录" : "编辑目录"} close={close} />
-        <form className="modal-form" onSubmit={(event) => { event.preventDefault(); if (canSubmit) save(value.trim()); }}>
-          <div className="modal-form-body"><FormField label="目录名称" required><input value={value} placeholder="请输入目录名称" onChange={(event) => setValue(event.target.value)} /></FormField></div>
+        <form className="modal-form" onSubmit={(event) => { event.preventDefault(); if (canSubmit) save(value.trim(), parentId || null); }}>
+          <div className="modal-form-body directory-editor-form">
+            <FormField label="目录名称" required><input value={value} placeholder="请输入目录名称" onChange={(event) => setValue(event.target.value)} /></FormField>
+            {parentOptions && (
+              <FormField label="上级目录">
+                <select aria-label="上级目录" value={parentId} onChange={(event) => setParentId(event.target.value)}>
+                  <option value="">无（一级目录）</option>
+                  {parentOptions.map((option) => <option value={option.id} key={option.id}>{`${"　".repeat(option.level)}${option.name}`}</option>)}
+                </select>
+              </FormField>
+            )}
+          </div>
           <div className="modal-footer"><Button onClick={close}>取消</Button><Button type="submit" variant="primary" disabled={!canSubmit}>保存</Button></div>
         </form>
       </div>
@@ -4122,30 +4274,53 @@ function BusinessItemModal({ mode, columns, requiredColumns, values, close, save
 
 function BusinessResourceWorkspace({ type, openModal, notify }: { type: BusinessResourceType; openModal: OpenModal; notify: Notify }) {
   const config = businessResourceConfigs[type];
-  const resourceTotals = type === "talent" ? [128, 96, 74] : type === "report" ? [46, 32, 28, 20, 15] : [18, 12, 9];
-  const [directories, setDirectories] = useState(() => config.directories.map((name, index) => ({ name, count: resourceTotals[index] ?? 0 })));
-  const [directory, setDirectory] = useState(config.directories[0]);
+  const cloneDirectory = (node: BusinessDirectoryNode): BusinessDirectoryNode => ({ ...node, children: node.children?.map(cloneDirectory) });
+  const [directories, setDirectories] = useState<BusinessDirectoryNode[]>(() => config.directories.map(cloneDirectory));
+  const [directoryId, setDirectoryId] = useState(config.directories[0].id);
+  const [expandedDirectoryIds, setExpandedDirectoryIds] = useState<Set<string>>(() => new Set(flattenBusinessDirectories(config.directories).filter(({ node }) => node.children?.length).map(({ node }) => node.id)));
   const [directoryEditor, setDirectoryEditor] = useState<"create" | "edit" | null>(null);
   const [resourceRows, setResourceRows] = useState<Array<Record<string, string>>>(() => config.rows.map((row) => ({ ...row })));
   const [itemEditor, setItemEditor] = useState<{ mode: "create" | "edit" | "detail"; index: number; values: Record<string, string> } | null>(null);
-  const selectedDirectory = directories.find((item) => item.name === directory) ?? directories[0];
+  const flatDirectories = useMemo(() => flattenBusinessDirectories(directories), [directories]);
+  const selectedEntry = flatDirectories.find(({ node }) => node.id === directoryId) ?? flatDirectories[0];
+  const selectedDirectory = selectedEntry?.node;
+  const directoryName = selectedDirectory?.name ?? "";
   const selectedTotal = String(selectedDirectory?.count ?? 0);
-  const selectedDescription = type === "talent" ? `聚合${directory}相关学者资源` : type === "report" ? `${directory}资源集合` : `${directory}数据资源集合`;
+  const selectedDescription = type === "talent" ? `聚合${directoryName}相关学者资源` : type === "report" ? `${directoryName}资源集合` : `${directoryName}数据资源集合`;
   const rowActions = type === "report" ? ["编辑", "删除"] : ["查看", "编辑", "删除"];
   const primaryColumn = config.columns[0];
   const emptyValues = Object.fromEntries(config.columns.map((column) => [column, column === "关联时间" ? "2026-07-13 16:10" : ""]));
-  const saveDirectory = (name: string) => {
-    if (directories.some((item) => item.name === name && item.name !== directory)) {
+  const selectedSubtreeIds = selectedDirectory ? getBusinessDirectorySubtreeIds(selectedDirectory) : [];
+  const parentOptions = type === "talent"
+    ? flatDirectories.filter(({ node }) => directoryEditor !== "edit" || !selectedSubtreeIds.includes(node.id)).map(({ node, level }) => ({ id: node.id, name: node.name, level }))
+    : undefined;
+  const initialParentId = directoryEditor === "create" && type === "talent" ? directoryId : selectedEntry?.parentId ?? null;
+  const canDeleteDirectory = flatDirectories.length - selectedSubtreeIds.length > 0;
+
+  const toggleDirectory = (targetId: string) => setExpandedDirectoryIds((current) => {
+    const next = new Set(current);
+    if (next.has(targetId)) next.delete(targetId); else next.add(targetId);
+    return next;
+  });
+
+  const saveDirectory = (name: string, parentId: string | null) => {
+    const parent = parentId ? findBusinessDirectory(directories, parentId) : null;
+    const siblings = parentId ? parent?.children ?? [] : directories;
+    if (siblings.some((item) => item.name === name && item.id !== directoryId)) {
       notify("目录名称已存在", "warning");
       return;
     }
     if (directoryEditor === "create") {
-      setDirectories((list) => [...list, { name, count: 0 }]);
-      setDirectory(name);
+      const nextDirectory = { id: `directory-${Date.now()}`, name, count: 0 };
+      setDirectories((list) => insertBusinessDirectory(list, parentId, nextDirectory));
+      if (parentId) setExpandedDirectoryIds((current) => new Set([...current, parentId]));
+      setDirectoryId(nextDirectory.id);
       notify("目录新增成功");
-    } else {
-      setDirectories((list) => list.map((item) => item.name === directory ? { ...item, name } : item));
-      setDirectory(name);
+    } else if (selectedDirectory) {
+      const movedDirectory = { ...selectedDirectory, name };
+      setDirectories((list) => insertBusinessDirectory(removeBusinessDirectory(list, selectedDirectory.id), parentId, movedDirectory));
+      if (parentId) setExpandedDirectoryIds((current) => new Set([...current, parentId]));
+      setDirectoryId(selectedDirectory.id);
       notify("目录编辑成功");
     }
     setDirectoryEditor(null);
@@ -4154,18 +4329,32 @@ function BusinessResourceWorkspace({ type, openModal, notify }: { type: Business
     <div className="business-resource-layout">
       <aside className="business-directory">
         <div className="business-directory-heading"><h3>{config.directoryTitle}</h3><button type="button" aria-label="新增目录" title="新增目录" onClick={() => setDirectoryEditor("create")}><Plus size={16} /></button></div>
-        <div className="tree-list business-tree-list">
-          {directories.map((item) => (
-            <button type="button" className={directory === item.name ? "active" : ""} onClick={() => setDirectory(item.name)} key={item.name}>
-              <FolderOpen size={16} /><span>{item.name}</span><b>{item.count}</b>
-            </button>
-          ))}
+        <div className="business-tree-list" role="tree" aria-label={config.directoryTitle}>
+          <BusinessDirectoryTree nodes={directories} selectedId={directoryId} expandedIds={expandedDirectoryIds} onSelect={setDirectoryId} onToggle={toggleDirectory} />
         </div>
-        <div className="business-directory-actions"><button type="button" onClick={() => setDirectoryEditor("edit")}>编辑</button><button type="button" className="danger-action" disabled={directories.length <= 1} onClick={() => openModal("delete", { payload: { message: `确认删除${directory}？` }, onConfirm: () => { const remaining = directories.filter((item) => item.name !== directory); setDirectories(remaining); setDirectory(remaining[0].name); } })}>删除</button></div>
+        <div className="business-directory-actions">
+          <button type="button" disabled={!selectedDirectory} onClick={() => setDirectoryEditor("edit")}>编辑</button>
+          <button type="button" className="danger-action" disabled={!canDeleteDirectory} onClick={() => {
+            if (!selectedDirectory) return;
+            const fallbackParentId = selectedEntry?.parentId ?? null;
+            const hasChildren = Boolean(selectedDirectory.children?.length);
+            openModal("delete", {
+              payload: { message: `确认删除${directoryName}${hasChildren ? "及其下级目录" : ""}？` },
+              onConfirm: () => {
+                const remaining = removeBusinessDirectory(directories, selectedDirectory.id);
+                const fallbackId = fallbackParentId && findBusinessDirectory(remaining, fallbackParentId)
+                  ? fallbackParentId
+                  : flattenBusinessDirectories(remaining)[0]?.node.id;
+                setDirectories(remaining);
+                if (fallbackId) setDirectoryId(fallbackId);
+              },
+            });
+          }}>删除</button>
+        </div>
       </aside>
       <section className="business-resource-content">
         <div className="business-resource-summary">
-          <div><span>{type === "talent" ? "人才库名称" : type === "report" ? "报告资源名称" : "智库资源名称"}</span><strong>{directory}</strong></div>
+          <div><span>{type === "talent" ? "人才库名称" : type === "report" ? "报告资源名称" : "智库资源名称"}</span><strong>{directoryName}</strong></div>
           <div className="summary-description"><span>描述</span><p>{selectedDescription}</p></div>
           <div className="summary-count"><span>{config.info.总数标签}</span><strong>{selectedTotal}</strong></div>
           <div><span>创建人</span><strong>{config.info.创建人}</strong></div>
@@ -4179,7 +4368,14 @@ function BusinessResourceWorkspace({ type, openModal, notify }: { type: Business
           if (action === "删除") openModal("delete", { payload: { message: `确认删除${values[primaryColumn]}？` }, onConfirm: () => setResourceRows((list) => list.filter((_, index) => index !== rowIndex)) });
         }} />} />
       </section>
-      {directoryEditor && <DirectoryEditorModal mode={directoryEditor} initialValue={directoryEditor === "edit" ? directory : ""} close={() => setDirectoryEditor(null)} save={saveDirectory} />}
+      {directoryEditor && <DirectoryEditorModal
+        mode={directoryEditor}
+        initialValue={directoryEditor === "edit" ? directoryName : ""}
+        initialParentId={initialParentId}
+        parentOptions={parentOptions}
+        close={() => setDirectoryEditor(null)}
+        save={saveDirectory}
+      />}
       {itemEditor && <BusinessItemModal mode={itemEditor.mode} columns={config.columns} requiredColumns={config.requiredColumns} values={itemEditor.values} showFileUpload={type === "report"} close={() => setItemEditor(null)} save={(values) => {
         if (itemEditor.mode === "create") setResourceRows((list) => [...list, values]);
         else setResourceRows((list) => list.map((item, index) => index === itemEditor.index ? values : item));
