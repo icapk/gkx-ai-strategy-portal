@@ -3554,6 +3554,151 @@ function OrganizationSyncModal({ organizationName, close, notify }: { organizati
   );
 }
 
+type UserSyncConfig = {
+  endpoint: string;
+  method: "GET" | "POST";
+  authType: "Bearer Token" | "API Key" | "无需认证";
+  credential: string;
+  scope: "全部用户" | "当前组织及下级";
+  responsePath: string;
+  userIdField: string;
+  nameField: string;
+  organizationField: string;
+  mobileField: string;
+  emailField: string;
+  statusField: string;
+};
+
+const defaultUserSyncConfig: UserSyncConfig = {
+  endpoint: "",
+  method: "GET",
+  authType: "Bearer Token",
+  credential: "",
+  scope: "全部用户",
+  responsePath: "data.users",
+  userIdField: "id",
+  nameField: "name",
+  organizationField: "organizationName",
+  mobileField: "mobile",
+  emailField: "email",
+  statusField: "status",
+};
+
+function UserDataSyncModal({ organizationName, close, notify, onSync }: { organizationName?: string; close: () => void; notify: Notify; onSync: () => void }) {
+  const [config, setConfig] = useState<UserSyncConfig>(() => ({ ...defaultUserSyncConfig, scope: organizationName ? "当前组织及下级" : "全部用户" }));
+  const [connectionState, setConnectionState] = useState<OrganizationSyncConnectionState>("未测试");
+  const [syncing, setSyncing] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const updateConfig = (patch: Partial<UserSyncConfig>) => {
+    setConfig((current) => ({ ...current, ...patch }));
+    setConnectionState("未测试");
+  };
+  const endpointError = (() => {
+    if (!config.endpoint.trim()) return "请输入外部用户接口地址";
+    try {
+      const parsed = new URL(config.endpoint.trim());
+      return parsed.protocol === "https:" ? "" : "接口地址必须使用 https:// 安全协议";
+    } catch {
+      return "请输入有效的 https:// 接口地址";
+    }
+  })();
+  const credentialError = config.authType !== "无需认证" && !config.credential.trim() ? "请输入认证凭证" : "";
+  const mappingFields = [config.responsePath, config.userIdField, config.nameField, config.organizationField, config.mobileField, config.emailField, config.statusField];
+  const mappingError = mappingFields.some((value) => !value.trim());
+  const canTest = !endpointError && !credentialError && !mappingError;
+  const connectionMessage = connectionState === "已通过"
+    ? "已读取用户数据示例，接口、认证信息及字段映射校验通过"
+    : connectionState === "测试失败"
+      ? "请检查接口地址、认证凭证和返回字段映射"
+      : connectionState === "测试中"
+        ? "正在验证接口连通性并读取用户数据示例…"
+        : "请先填写接口配置，连接测试通过后才能开始对接";
+
+  const testConnection = () => {
+    setSubmitted(true);
+    if (!canTest) {
+      setConnectionState("测试失败");
+      notify("请先完善用户接口配置", "warning");
+      return;
+    }
+    setConnectionState("测试中");
+    window.setTimeout(() => {
+      setConnectionState("已通过");
+      notify("用户接口连接测试通过", "success");
+    }, 650);
+  };
+  const startSync = () => {
+    setSubmitted(true);
+    if (!canTest || connectionState !== "已通过") {
+      notify("请先完善配置并完成连接测试", "warning");
+      return;
+    }
+    setSyncing(true);
+    window.setTimeout(() => {
+      onSync();
+      setSyncing(false);
+      notify("用户数据对接完成：读取 7 条，新增 2 条、更新 5 条", "success");
+      close();
+    }, 900);
+  };
+
+  return createPortal(
+    <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <div className="modal organization-sync-modal user-sync-modal" role="dialog" aria-modal="true" aria-label="用户数据对接">
+        <ModalHeader title="用户数据对接" subtitle="填写外部用户接口，连接测试通过后导入用户数据" close={close} />
+        <div className="modal-form">
+          <div className="modal-form-body">
+            <ModalAlert tone="info" title="对接规则">系统按外部用户 ID 新增或更新用户，接口返回的组织名称需与组织管理中的名称一致。</ModalAlert>
+            <div className={`organization-sync-connection ${connectionState === "已通过" ? "success" : connectionState === "测试失败" ? "error" : connectionState === "测试中" ? "testing" : ""}`} role="status" aria-live="polite">
+              <div className="organization-sync-connection-heading"><span>连接状态</span><StatusTag value={connectionState} /></div>
+              <p>{connectionMessage}</p>
+            </div>
+            <div className="form-row organization-sync-endpoint-row">
+              <FormField label="外部用户接口地址" required>
+                <div className="validated-control">
+                  <input aria-label="外部用户接口地址" className={submitted && endpointError ? "is-error" : ""} type="url" placeholder="https://user.example.com/api/v1/users" value={config.endpoint} onChange={(event) => updateConfig({ endpoint: event.target.value })} />
+                  {submitted && endpointError && <span className="form-error-message">{endpointError}</span>}
+                </div>
+              </FormField>
+              <FormField label="请求方式" required><FormSelect ariaLabel="请求方式" options={["GET", "POST"]} value={config.method} onChange={(value) => updateConfig({ method: value as UserSyncConfig["method"] })} /></FormField>
+            </div>
+            <div className="form-row organization-sync-form-row">
+              <FormField label="认证方式" required><FormSelect ariaLabel="认证方式" options={["Bearer Token", "API Key", "无需认证"]} value={config.authType} onChange={(value) => updateConfig({ authType: value as UserSyncConfig["authType"], credential: value === "无需认证" ? "" : config.credential })} /></FormField>
+              <FormField label="认证凭证" required={config.authType !== "无需认证"}>
+                <div className="validated-control">
+                  <input aria-label="认证凭证" className={submitted && credentialError ? "is-error" : ""} type="password" autoComplete="new-password" disabled={config.authType === "无需认证"} placeholder={config.authType === "API Key" ? "请输入 API Key" : "请输入 Bearer Token"} value={config.credential} onChange={(event) => updateConfig({ credential: event.target.value })} />
+                  {submitted && credentialError && <span className="form-error-message">{credentialError}</span>}
+                </div>
+              </FormField>
+            </div>
+            <div className="form-row organization-sync-form-row">
+              <FormField label="对接范围" required><FormSelect ariaLabel="对接范围" options={["全部用户", "当前组织及下级"]} value={config.scope} onChange={(value) => updateConfig({ scope: value as UserSyncConfig["scope"] })} /></FormField>
+              <FormField label="返回用户数据路径" required><input aria-label="返回用户数据路径" className={submitted && !config.responsePath.trim() ? "is-error" : ""} placeholder="例如 data.users" value={config.responsePath} onChange={(event) => updateConfig({ responsePath: event.target.value })} /></FormField>
+            </div>
+            {config.scope === "当前组织及下级" && <p className="organization-sync-context">当前组织：{organizationName ?? "未指定"}（包含下级组织）</p>}
+            <div className="organization-sync-mapping">
+              <div className="organization-sync-section-title">用户字段映射</div>
+              <p className="organization-sync-section-helper">填写外部接口返回字段，系统据此转换为门户用户数据。</p>
+              <div className="organization-sync-mapping-grid">
+                <FormField label="外部用户 ID 字段" required><input className={submitted && !config.userIdField.trim() ? "is-error" : ""} value={config.userIdField} onChange={(event) => updateConfig({ userIdField: event.target.value })} /></FormField>
+                <FormField label="用户姓名字段" required><input className={submitted && !config.nameField.trim() ? "is-error" : ""} value={config.nameField} onChange={(event) => updateConfig({ nameField: event.target.value })} /></FormField>
+                <FormField label="归属组织字段" required><input className={submitted && !config.organizationField.trim() ? "is-error" : ""} value={config.organizationField} onChange={(event) => updateConfig({ organizationField: event.target.value })} /></FormField>
+                <FormField label="手机号字段" required><input className={submitted && !config.mobileField.trim() ? "is-error" : ""} value={config.mobileField} onChange={(event) => updateConfig({ mobileField: event.target.value })} /></FormField>
+                <FormField label="邮箱字段" required><input className={submitted && !config.emailField.trim() ? "is-error" : ""} value={config.emailField} onChange={(event) => updateConfig({ emailField: event.target.value })} /></FormField>
+                <FormField label="账号状态字段" required><input className={submitted && !config.statusField.trim() ? "is-error" : ""} value={config.statusField} onChange={(event) => updateConfig({ statusField: event.target.value })} /></FormField>
+              </div>
+            </div>
+            <p className="modal-helper-text">生产实现时由门户服务端安全保存认证凭证、请求外部接口并记录同步日志；当前原型通过本地校验模拟接口连接和数据写入。</p>
+          </div>
+          <div className="modal-footer"><Button onClick={close}>取消</Button><Button disabled={syncing || connectionState === "测试中"} onClick={testConnection}>{connectionState === "测试中" ? "测试中" : "连接测试"}</Button><Button variant="primary" icon={Network} disabled={syncing || connectionState !== "已通过"} onClick={startSync}>{syncing ? "对接中" : "开始对接"}</Button></div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 function AccountStatusSwitch({ checked, label, onChange }: { checked: boolean; label: string; onChange: () => void }) {
   return <div className="account-status-control"><button type="button" role="switch" aria-checked={checked} aria-label={`${label}账号当前${checked ? "启用" : "禁用"}，点击切换`} className={`account-status-switch ${checked ? "checked" : ""}`} onClick={(event) => { event.stopPropagation(); onChange(); }}><span /></button><span className="account-status-text">{checked ? "启用" : "禁用"}</span></div>;
 }
@@ -3567,6 +3712,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   const [organizationEditor, setOrganizationEditor] = useState<{ mode: "add" | "rename"; node: OrganizationNode } | null>(null);
   const [organizationSyncOpen, setOrganizationSyncOpen] = useState(false);
   const [organizationSyncTarget, setOrganizationSyncTarget] = useState<string | undefined>();
+  const [userSyncOpen, setUserSyncOpen] = useState(false);
   const [users, setUsers] = useState(userRows);
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("全部");
@@ -3634,7 +3780,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
               setUsers((list) => [...list, { 用户ID: `U2026${String(list.length + 1).padStart(4, "0")}`, 用户姓名: values.姓名, 所属组织名称: values.所属组织, 手机号: values.手机号, 邮箱: values.邮箱, 创建时间: "2026-07-14", 账号状态: "启用" }]);
               notify("用户注册成功");
             } })}>用户注册</Button>
-            <Button icon={Network} onClick={() => notify("用户数据对接成功")}>用户数据对接</Button>
+            <Button icon={Network} onClick={() => setUserSyncOpen(true)}>用户数据对接</Button>
           </div></div>
           <DataTable
             columns={["用户ID", "姓名", "归属组织名称", "手机号", "邮箱", "创建时间", "账号状态"]}
@@ -3648,6 +3794,16 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
       </div>
       {organizationEditor && <OrganizationEditorModal mode={organizationEditor.mode} organizationName={organizationEditor.node.label} close={() => setOrganizationEditor(null)} save={saveOrganization} />}
       {organizationSyncOpen && <OrganizationSyncModal organizationName={organizationSyncTarget} close={() => { setOrganizationSyncOpen(false); setOrganizationSyncTarget(undefined); }} notify={notify} />}
+      {userSyncOpen && <UserDataSyncModal organizationName={selectedOrganization?.label} close={() => setUserSyncOpen(false)} notify={notify} onSync={() => {
+        setUsers((list) => {
+          const syncedUsers = [
+            { 用户ID: "EXT-1006", 用户姓名: "赵清扬", 所属组织名称: "人工智能研究部", 手机号: "13800000006", 邮箱: "zhaoqingyang@gkx.cn", 创建时间: "2026-08-26", 账号状态: "启用" },
+            { 用户ID: "EXT-1007", 用户姓名: "林嘉禾", 所属组织名称: "门户运营部", 手机号: "13800000007", 邮箱: "linjiahe@gkx.cn", 创建时间: "2026-08-26", 账号状态: "启用" },
+          ];
+          const syncedIds = new Set(syncedUsers.map((user) => user.用户ID));
+          return [...list.filter((user) => !syncedIds.has(user.用户ID)), ...syncedUsers];
+        });
+      }} />}
       {transferUser && <RoleTransferModal user={transferUser} roles={userRoleMap[transferUser.用户ID] ?? []} close={() => setTransferUser(null)} save={(roles) => { setUserRoleMap((current) => ({ ...current, [transferUser.用户ID]: roles })); setTransferUser(null); notify("角色分配成功"); }} />}
     </section>
   );
