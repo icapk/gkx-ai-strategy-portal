@@ -3785,6 +3785,75 @@ tbody tr:hover {
   font-weight: 500;
 }
 
+.workflow-capability-strip {
+  margin: 0 0 var(--space-medium);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.workflow-capability-card {
+  min-height: 72px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--gkx-bg-module);
+  border: 1px solid var(--gkx-border);
+  border-radius: 4px;
+}
+
+.workflow-capability-card.modeling {
+  border-left: 3px solid var(--gkx-brand);
+}
+
+.workflow-capability-card.control {
+  border-left: 3px solid var(--gkx-success);
+}
+
+.workflow-capability-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gkx-brand);
+  background: var(--gkx-brand-light);
+  border-radius: 4px;
+}
+
+.workflow-capability-card.control .workflow-capability-icon {
+  color: var(--gkx-success);
+  background: var(--gkx-success-light);
+}
+
+.workflow-capability-card > span:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.workflow-capability-card strong {
+  color: var(--gkx-text-primary);
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+}
+
+.workflow-capability-card small {
+  color: var(--gkx-text-secondary);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+@media (max-width: 680px) {
+  .workflow-capability-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
 .workflow-toolbar {
   min-height: var(--control-height);
   margin: 0 0 var(--space-medium);
