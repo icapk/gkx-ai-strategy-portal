@@ -4909,7 +4909,12 @@ tbody tr:hover {
 
 /* Event tracking list and data dashboard. */
 .event-info-filters {
-  grid-template-columns: repeat(2, minmax(0, 384px));
+  grid-template-columns: repeat(2, minmax(0, 384px)) max-content;
+}
+
+.event-info-filters > .btn {
+  min-width: 72px;
+  justify-self: start;
 }
 
 .event-info-toolbar {
