@@ -3203,31 +3203,137 @@ function OrganizationEditorModal({ mode, organizationName, close, save }: { mode
   );
 }
 
-function OrganizationSyncModal({ close, notify }: { close: () => void; notify: Notify }) {
+type OrganizationSyncConfig = {
+  endpoint: string;
+  method: "GET" | "POST";
+  authType: "Bearer Token" | "API Key" | "无需认证";
+  credential: string;
+  scope: "全部组织" | "当前组织及下级";
+  responsePath: string;
+  externalIdField: string;
+  nameField: string;
+  parentIdField: string;
+};
+
+type OrganizationSyncConnectionState = "未测试" | "测试中" | "已通过" | "测试失败";
+
+const defaultOrganizationSyncConfig: OrganizationSyncConfig = {
+  endpoint: "",
+  method: "GET",
+  authType: "Bearer Token",
+  credential: "",
+  scope: "全部组织",
+  responsePath: "data.organizations",
+  externalIdField: "id",
+  nameField: "name",
+  parentIdField: "parentId",
+};
+
+function OrganizationSyncModal({ organizationName, close, notify }: { organizationName?: string; close: () => void; notify: Notify }) {
+  const [config, setConfig] = useState<OrganizationSyncConfig>(() => ({ ...defaultOrganizationSyncConfig, scope: organizationName ? "当前组织及下级" : "全部组织" }));
+  const [connectionState, setConnectionState] = useState<OrganizationSyncConnectionState>("未测试");
   const [syncing, setSyncing] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const updateConfig = (patch: Partial<OrganizationSyncConfig>) => {
+    setConfig((current) => ({ ...current, ...patch }));
+    setConnectionState("未测试");
+  };
+
+  const endpointError = (() => {
+    if (!config.endpoint.trim()) return "请输入外部组织接口地址";
+    try {
+      const parsed = new URL(config.endpoint.trim());
+      return parsed.protocol === "https:" ? "" : "接口地址必须使用 https:// 安全协议";
+    } catch {
+      return "请输入有效的 https:// 接口地址";
+    }
+  })();
+  const credentialError = config.authType !== "无需认证" && !config.credential.trim() ? "请输入认证凭证" : "";
+  const mappingError = !config.responsePath.trim() || !config.externalIdField.trim() || !config.nameField.trim() || !config.parentIdField.trim();
+  const canTest = !endpointError && !credentialError && !mappingError;
+  const connectionMessage = connectionState === "已通过"
+    ? "接口地址、认证信息与字段映射校验通过"
+    : connectionState === "测试失败"
+      ? "请检查接口地址、认证凭证和字段映射"
+      : connectionState === "测试中"
+        ? "正在校验接口连通性与返回结构…"
+        : "连接测试通过后才可开始对接";
+
+  const testConnection = () => {
+    setSubmitted(true);
+    if (!canTest) {
+      setConnectionState("测试失败");
+      notify("请先完善外部接口配置", "warning");
+      return;
+    }
+    setConnectionState("测试中");
+    window.setTimeout(() => {
+      setConnectionState("已通过");
+      notify("接口连接测试通过", "success");
+    }, 650);
+  };
+
   const startSync = () => {
+    setSubmitted(true);
+    if (!canTest || connectionState !== "已通过") {
+      notify("请先完善配置并完成连接测试", "warning");
+      return;
+    }
     setSyncing(true);
     window.setTimeout(() => {
       setSyncing(false);
-      notify("组织数据对接完成");
+      notify("组织数据对接完成：新增 2 个、更新 3 个、未变更 12 个", "success");
       close();
-    }, 450);
+    }, 900);
   };
+
   return createPortal(
     <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
       <div className="modal organization-sync-modal" role="dialog" aria-modal="true" aria-label="组织数据对接">
-        <ModalHeader title="组织数据对接" subtitle="从已配置的外部组织系统同步最新组织架构" close={close} />
+        <ModalHeader title="组织数据对接" subtitle="配置外部组织接口，测试通过后同步最新组织架构" close={close} />
         <div className="modal-form">
           <div className="modal-form-body">
-            <ModalAlert tone="info" title="同步说明">系统将按外部组织标识新增或更新组织，并保留现有组织层级。</ModalAlert>
-            <dl className="organization-sync-summary">
-              <div><dt>数据来源</dt><dd>外部组织系统</dd></div>
-              <div><dt>同步范围</dt><dd>全部组织及层级关系</dd></div>
-              <div><dt>同步方式</dt><dd>手动触发</dd></div>
-            </dl>
-            <p className="modal-helper-text">当前为原型模拟数据；正式接口接入后以外部系统返回结果为准。</p>
+            <ModalAlert tone="info" title="同步说明">服务端按外部组织标识新增或更新，保留现有组织层级。</ModalAlert>
+            <div className={`organization-sync-connection ${connectionState === "已通过" ? "success" : connectionState === "测试失败" ? "error" : connectionState === "测试中" ? "testing" : ""}`} role="status" aria-live="polite">
+              <div className="organization-sync-connection-heading"><span>连接状态</span><StatusTag value={connectionState} /></div>
+              <p>{connectionMessage}</p>
+            </div>
+            <div className="form-row organization-sync-endpoint-row">
+              <FormField label="外部组织接口地址" required>
+                <div className="validated-control">
+                  <input className={submitted && endpointError ? "is-error" : ""} type="url" placeholder="https://org.example.com/api/v1/organizations" value={config.endpoint} onChange={(event) => updateConfig({ endpoint: event.target.value })} />
+                  {submitted && endpointError && <span className="form-error-message">{endpointError}</span>}
+                </div>
+              </FormField>
+              <FormField label="请求方式" required><FormSelect ariaLabel="请求方式" options={["GET", "POST"]} value={config.method} onChange={(value) => updateConfig({ method: value as OrganizationSyncConfig["method"] })} /></FormField>
+            </div>
+            <div className="form-row organization-sync-form-row">
+              <FormField label="认证方式" required><FormSelect ariaLabel="认证方式" options={["Bearer Token", "API Key", "无需认证"]} value={config.authType} onChange={(value) => updateConfig({ authType: value as OrganizationSyncConfig["authType"], credential: value === "无需认证" ? "" : config.credential })} /></FormField>
+              <FormField label="认证凭证" required={config.authType !== "无需认证"}>
+                <div className="validated-control">
+                  <input className={submitted && credentialError ? "is-error" : ""} type="password" autoComplete="new-password" disabled={config.authType === "无需认证"} placeholder={config.authType === "API Key" ? "请输入 API Key" : "请输入 Bearer Token"} value={config.credential} onChange={(event) => updateConfig({ credential: event.target.value })} />
+                  {submitted && credentialError && <span className="form-error-message">{credentialError}</span>}
+                </div>
+              </FormField>
+            </div>
+            <div className="form-row organization-sync-form-row">
+              <FormField label="同步范围" required><FormSelect ariaLabel="同步范围" options={["全部组织", "当前组织及下级"]} value={config.scope} onChange={(value) => updateConfig({ scope: value as OrganizationSyncConfig["scope"] })} /></FormField>
+              <FormField label="返回组织数据路径" required><input className={submitted && !config.responsePath.trim() ? "is-error" : ""} placeholder="例如 data.organizations" value={config.responsePath} onChange={(event) => updateConfig({ responsePath: event.target.value })} /></FormField>
+            </div>
+            {config.scope === "当前组织及下级" && <p className="organization-sync-context">当前组织：{organizationName ?? "未指定"}（包含下级组织）</p>}
+            <div className="organization-sync-mapping">
+              <div className="organization-sync-section-title">组织字段映射</div>
+              <p className="organization-sync-section-helper">服务端按映射读取外部返回数据，避免不同组织系统字段不一致导致同步失败。</p>
+              <div className="organization-sync-mapping-grid">
+                <FormField label="外部组织 ID 字段" required><input className={submitted && !config.externalIdField.trim() ? "is-error" : ""} placeholder="id" value={config.externalIdField} onChange={(event) => updateConfig({ externalIdField: event.target.value })} /></FormField>
+                <FormField label="组织名称字段" required><input className={submitted && !config.nameField.trim() ? "is-error" : ""} placeholder="name" value={config.nameField} onChange={(event) => updateConfig({ nameField: event.target.value })} /></FormField>
+                <FormField label="上级组织 ID 字段" required><input className={submitted && !config.parentIdField.trim() ? "is-error" : ""} placeholder="parentId" value={config.parentIdField} onChange={(event) => updateConfig({ parentIdField: event.target.value })} /></FormField>
+              </div>
+            </div>
+            <p className="modal-helper-text">生产实现时，前端只提交接口配置到门户服务端，由服务端安全托管凭证、调用外部接口并创建可追踪的同步任务；当前原型用本地校验模拟连接测试结果。</p>
           </div>
-          <div className="modal-footer"><Button onClick={close}>取消</Button><Button variant="primary" icon={Network} disabled={syncing} onClick={startSync}>{syncing ? "对接中" : "开始对接"}</Button></div>
+          <div className="modal-footer"><Button onClick={close}>取消</Button><Button disabled={syncing || connectionState === "测试中"} onClick={testConnection}>{connectionState === "测试中" ? "测试中" : "连接测试"}</Button><Button variant="primary" icon={Network} disabled={syncing || connectionState !== "已通过"} onClick={startSync}>{syncing ? "对接中" : "开始对接"}</Button></div>
         </div>
       </div>
     </div>,
@@ -3247,6 +3353,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   const [activeOrganizationMenu, setActiveOrganizationMenu] = useState<string | null>(null);
   const [organizationEditor, setOrganizationEditor] = useState<{ mode: "add" | "rename"; node: OrganizationNode } | null>(null);
   const [organizationSyncOpen, setOrganizationSyncOpen] = useState(false);
+  const [organizationSyncTarget, setOrganizationSyncTarget] = useState<string | undefined>();
   const [users, setUsers] = useState(userRows);
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("全部");
@@ -3272,6 +3379,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   const handleOrganizationAction = (action: "add" | "rename" | "sync", node: OrganizationNode) => {
     setActiveOrganizationMenu(null);
     if (action === "sync") {
+      setOrganizationSyncTarget(node.label);
       setOrganizationSyncOpen(true);
       return;
     }
@@ -3302,7 +3410,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
           </div>
         </aside>
         <section className="user-list-panel">
-          <div className="organization-sync-toolbar"><Button icon={Network} onClick={() => setOrganizationSyncOpen(true)}>组织数据对接</Button></div>
+          <div className="organization-sync-toolbar"><Button icon={Network} onClick={() => { setOrganizationSyncTarget(selectedOrganization?.label); setOrganizationSyncOpen(true); }}>组织数据对接</Button></div>
           <div className="user-list-context"><h2>用户管理</h2><span>用户列表展示</span></div>
           <div className="filters user-management-filters">
             <FilterInput label="用户检索" placeholder="请输入用户姓名" searchable value={nameFilter} onChange={setNameFilter} />
@@ -3326,7 +3434,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
         </section>
       </div>
       {organizationEditor && <OrganizationEditorModal mode={organizationEditor.mode} organizationName={organizationEditor.node.label} close={() => setOrganizationEditor(null)} save={saveOrganization} />}
-      {organizationSyncOpen && <OrganizationSyncModal close={() => setOrganizationSyncOpen(false)} notify={notify} />}
+      {organizationSyncOpen && <OrganizationSyncModal organizationName={organizationSyncTarget} close={() => { setOrganizationSyncOpen(false); setOrganizationSyncTarget(undefined); }} notify={notify} />}
       {transferUser && <RoleTransferModal user={transferUser} roles={userRoleMap[transferUser.用户ID] ?? []} close={() => setTransferUser(null)} save={(roles) => { setUserRoleMap((current) => ({ ...current, [transferUser.用户ID]: roles })); setTransferUser(null); notify("角色分配成功"); }} />}
     </section>
   );
