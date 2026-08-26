@@ -4102,7 +4102,7 @@ function DirectoryEditorModal({ mode, initialValue, close, save }: { mode: "crea
   );
 }
 
-function BusinessItemModal({ mode, columns, requiredColumns, values, close, save }: { mode: "create" | "edit" | "detail"; columns: string[]; requiredColumns: string[]; values: Record<string, string>; close: () => void; save: (values: Record<string, string>) => void }) {
+function BusinessItemModal({ mode, columns, requiredColumns, values, close, save, showFileUpload = false }: { mode: "create" | "edit" | "detail"; columns: string[]; requiredColumns: string[]; values: Record<string, string>; close: () => void; save: (values: Record<string, string>) => void; showFileUpload?: boolean }) {
   const [formValues, setFormValues] = useState(values);
   const title = mode === "create" ? "新增资源" : mode === "edit" ? "编辑资源" : "资源详情";
   const canSubmit = requiredColumns.every((column) => String(formValues[column] ?? "").trim().length > 0);
@@ -4111,7 +4111,7 @@ function BusinessItemModal({ mode, columns, requiredColumns, values, close, save
       <div className="modal business-item-modal" role="dialog" aria-modal="true" aria-label={title}>
         <ModalHeader title={title} close={close} />
         <form className="modal-form" onSubmit={(event) => { event.preventDefault(); if (mode !== "detail" && canSubmit) save(formValues); }}>
-          <div className="modal-form-body business-item-form">{columns.map((column) => <FormField label={column} required={mode !== "detail" && requiredColumns.includes(column)} key={column}><input disabled={mode === "detail"} value={formValues[column] ?? ""} placeholder={`请输入${column}`} onChange={(event) => setFormValues((current) => ({ ...current, [column]: event.target.value }))} /></FormField>)}</div>
+          <div className="modal-form-body business-item-form">{showFileUpload && mode === "create" && <FormField label="报告文件"><FileUploadField accept="application/pdf,.doc,.docx" hint="支持 PDF、Word 格式文件" /></FormField>}{columns.map((column) => <FormField label={column} required={mode !== "detail" && requiredColumns.includes(column)} key={column}><input disabled={mode === "detail"} value={formValues[column] ?? ""} placeholder={`请输入${column}`} onChange={(event) => setFormValues((current) => ({ ...current, [column]: event.target.value }))} /></FormField>)}</div>
           <div className="modal-footer">{mode === "detail" ? <Button onClick={close}>关闭</Button> : <><Button onClick={close}>取消</Button><Button type="submit" variant="primary" disabled={!canSubmit}>保存</Button></>}</div>
         </form>
       </div>
@@ -4180,7 +4180,7 @@ function BusinessResourceWorkspace({ type, openModal, notify }: { type: Business
         }} />} />
       </section>
       {directoryEditor && <DirectoryEditorModal mode={directoryEditor} initialValue={directoryEditor === "edit" ? directory : ""} close={() => setDirectoryEditor(null)} save={saveDirectory} />}
-      {itemEditor && <BusinessItemModal mode={itemEditor.mode} columns={config.columns} requiredColumns={config.requiredColumns} values={itemEditor.values} close={() => setItemEditor(null)} save={(values) => {
+      {itemEditor && <BusinessItemModal mode={itemEditor.mode} columns={config.columns} requiredColumns={config.requiredColumns} values={itemEditor.values} showFileUpload={type === "report"} close={() => setItemEditor(null)} save={(values) => {
         if (itemEditor.mode === "create") setResourceRows((list) => [...list, values]);
         else setResourceRows((list) => list.map((item, index) => index === itemEditor.index ? values : item));
         setItemEditor(null);
