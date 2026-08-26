@@ -6578,6 +6578,14 @@ tbody tr:hover {
   font-size: 12px;
 }
 
+.business-tree-list button.is-disabled {
+  color: var(--gkx-text-disabled);
+}
+
+.business-tree-list button.is-disabled svg {
+  color: var(--gkx-text-disabled);
+}
+
 .business-directory-actions {
   min-height: 48px;
   padding: 0 16px;

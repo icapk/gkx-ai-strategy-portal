@@ -4123,13 +4123,14 @@ function BusinessItemModal({ mode, columns, requiredColumns, values, close, save
 function BusinessResourceWorkspace({ type, openModal, notify }: { type: BusinessResourceType; openModal: OpenModal; notify: Notify }) {
   const config = businessResourceConfigs[type];
   const resourceTotals = type === "talent" ? [128, 96, 74] : type === "report" ? [46, 32, 28, 20, 15] : [18, 12, 9];
-  const [directories, setDirectories] = useState(() => config.directories.map((name, index) => ({ name, count: resourceTotals[index] ?? 0 })));
+  const [directories, setDirectories] = useState(() => config.directories.map((name, index) => ({ name, count: resourceTotals[index] ?? 0, disabled: false })));
   const [directory, setDirectory] = useState(config.directories[0]);
   const [directoryEditor, setDirectoryEditor] = useState<"create" | "edit" | null>(null);
   const [resourceRows, setResourceRows] = useState<Array<Record<string, string>>>(() => config.rows.map((row) => ({ ...row })));
   const [itemEditor, setItemEditor] = useState<{ mode: "create" | "edit" | "detail"; index: number; values: Record<string, string> } | null>(null);
   const selectedDirectory = directories.find((item) => item.name === directory) ?? directories[0];
   const selectedTotal = String(selectedDirectory?.count ?? 0);
+  const selectedDirectoryDisabled = Boolean(selectedDirectory?.disabled);
   const selectedDescription = type === "talent" ? `聚合${directory}相关学者资源` : type === "report" ? `${directory}资源集合` : `${directory}数据资源集合`;
   const rowActions = type === "report" ? ["编辑", "删除"] : ["查看", "编辑", "删除"];
   const primaryColumn = config.columns[0];
@@ -4140,7 +4141,7 @@ function BusinessResourceWorkspace({ type, openModal, notify }: { type: Business
       return;
     }
     if (directoryEditor === "create") {
-      setDirectories((list) => [...list, { name, count: 0 }]);
+      setDirectories((list) => [...list, { name, count: 0, disabled: false }]);
       setDirectory(name);
       notify("目录新增成功");
     } else {
@@ -4156,12 +4157,12 @@ function BusinessResourceWorkspace({ type, openModal, notify }: { type: Business
         <div className="business-directory-heading"><h3>{config.directoryTitle}</h3><button type="button" aria-label="新增目录" title="新增目录" onClick={() => setDirectoryEditor("create")}><Plus size={16} /></button></div>
         <div className="tree-list business-tree-list">
           {directories.map((item) => (
-            <button type="button" className={directory === item.name ? "active" : ""} onClick={() => setDirectory(item.name)} key={item.name}>
-              <FolderOpen size={16} /><span>{item.name}</span><b>{item.count}</b>
+            <button type="button" className={`${directory === item.name ? "active" : ""} ${item.disabled ? "is-disabled" : ""}`.trim()} onClick={() => setDirectory(item.name)} key={item.name}>
+              <FolderOpen size={16} /><span>{item.name}</span><b>{item.disabled ? "已禁用" : item.count}</b>
             </button>
           ))}
         </div>
-        <div className="business-directory-actions"><button type="button" onClick={() => setDirectoryEditor("edit")}>编辑</button><button type="button" className="danger-action" disabled={directories.length <= 1} onClick={() => openModal("delete", { payload: { message: `确认删除${directory}？` }, onConfirm: () => { const remaining = directories.filter((item) => item.name !== directory); setDirectories(remaining); setDirectory(remaining[0].name); } })}>删除</button></div>
+        <div className="business-directory-actions"><button type="button" onClick={() => setDirectoryEditor("edit")}>编辑</button>{type === "talent" && <button type="button" onClick={() => { setDirectories((list) => list.map((item) => item.name === directory ? { ...item, disabled: !item.disabled } : item)); notify(selectedDirectoryDisabled ? "人才库已启用" : "人才库已禁用", "success"); }}>{selectedDirectoryDisabled ? "启用" : "禁用"}</button>}<button type="button" className="danger-action" disabled={directories.length <= 1} onClick={() => openModal("delete", { payload: { message: `确认删除${directory}？` }, onConfirm: () => { const remaining = directories.filter((item) => item.name !== directory); setDirectories(remaining); setDirectory(remaining[0].name); } })}>删除</button></div>
       </aside>
       <section className="business-resource-content">
         <div className="business-resource-summary">
