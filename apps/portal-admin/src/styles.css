@@ -5992,6 +5992,16 @@ tbody tr:hover {
   width: 640px;
 }
 
+.directory-editor-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.directory-editor-form .form-field {
+  margin-bottom: 0;
+}
+
 .token-editor-modal .btn:disabled,
 .directory-editor-modal .btn:disabled,
 .business-item-modal .btn:disabled {
@@ -6517,7 +6527,7 @@ tbody tr:hover {
 .business-resource-layout {
   min-height: 590px;
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-columns: 264px minmax(0, 1fr);
   overflow: visible;
 }
 
@@ -6564,18 +6574,85 @@ tbody tr:hover {
 
 .business-tree-list {
   padding: 8px;
-  flex: 1;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 
-.business-tree-list button {
+.business-directory-row {
+  min-width: 0;
   height: 40px;
+  padding-right: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.business-directory-toggle,
+.business-directory-spacer {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+
+.business-directory-toggle {
+  display: grid;
+  place-items: center;
+  color: var(--gkx-text-tertiary);
+  border-radius: 4px;
+}
+
+.business-directory-toggle:hover {
+  color: var(--gkx-brand);
+  background: var(--gkx-brand-light);
+}
+
+.business-directory-toggle svg {
+  transition: transform .16s ease;
+}
+
+.business-directory-toggle svg.expanded {
+  transform: rotate(90deg);
+}
+
+.business-directory-item {
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--gkx-text-secondary);
+  border-radius: 4px;
   font-size: 14px;
   line-height: 22px;
+  text-align: left;
 }
 
-.business-tree-list button b {
+.business-directory-item:hover,
+.business-directory-item.active {
+  color: var(--gkx-brand);
+  background: var(--gkx-brand-light);
+}
+
+.business-directory-item > svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.4;
+}
+
+.business-directory-item > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.business-directory-item b {
   color: var(--gkx-text-tertiary);
   font-size: 12px;
+  font-weight: 400;
 }
 
 .business-tree-list button.is-disabled {
@@ -7096,6 +7173,10 @@ tbody tr:hover {
 
   .business-directory {
     max-height: 280px;
+  }
+
+  .directory-editor-form {
+    grid-template-columns: 1fr;
   }
 
   .api-log-filters,
