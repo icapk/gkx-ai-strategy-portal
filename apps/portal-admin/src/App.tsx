@@ -1301,9 +1301,9 @@ function SortableTableHeader({
         <button
           type="button"
           className={`table-sort-button ${isActive && activeDirection === "正序" ? "is-active" : ""}`}
-          aria-label={`按${field}正序排列`}
+          aria-label={`排序规则设置：${field}正序`}
           aria-pressed={isActive && activeDirection === "正序"}
-          title={`${field}正序`}
+          title={`排序规则设置：${field}正序`}
           onClick={() => onSort(field, "正序")}
         >
           <ArrowUp aria-hidden="true" size={12} />
@@ -1311,9 +1311,9 @@ function SortableTableHeader({
         <button
           type="button"
           className={`table-sort-button ${isActive && activeDirection === "倒序" ? "is-active" : ""}`}
-          aria-label={`按${field}倒序排列`}
+          aria-label={`排序规则设置：${field}倒序`}
           aria-pressed={isActive && activeDirection === "倒序"}
-          title={`${field}倒序`}
+          title={`排序规则设置：${field}倒序`}
           onClick={() => onSort(field, "倒序")}
         >
           <ArrowDown aria-hidden="true" size={12} />
@@ -1551,7 +1551,6 @@ function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify:
         <FilterSelect label="所属领域" options={["全部", "人工智能", "智能制造", "新材料", "低空经济"]} />
         <FilterInput label="报告来源" placeholder="请输入" searchable />
       </div>
-      <div className="workflow-management-label">排序规则设置：上传时间 · 报告类型 · 所属领域 · 报告来源</div>
       <div className="table-toolbar">
         <div>
           <Button
