@@ -1,4 +1,4 @@
-import { ChevronDown, Search } from "lucide-react";
+import { ArrowLeft, ChevronDown, Search } from "lucide-react";
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { buildPortalPageHref, type PortalPage } from "./portalRoutes";
 
@@ -69,37 +69,43 @@ function HeaderMenu({
 export default function PortalHeader({ currentPage }: PortalHeaderProps) {
   const active = currentPage === "information-exchange" || currentPage === "technology-resource-service" || currentPage === "technology-decision-support" || currentPage === "scientific-data-center" ? "science" : "strategy";
   return (
-    <header className="fp-site-header">
-      <div className="fp-site-header-inner">
-        <a className="fp-brand" href={buildPortalPageHref("think-tank")} aria-label="深圳国际科技信息中心首页">
-          <img src="./assets/gkx-logo.png" alt="" />
-          <strong>深圳国际科技信息中心</strong>
-        </a>
+    <>
+      <a className="fp-back-to-portal" href="../../../index.html" target="_top" aria-label="返回门户首页">
+        <ArrowLeft size={16} strokeWidth={1.8} aria-hidden="true" />
+        <span>返回首页</span>
+      </a>
+      <header className="fp-site-header">
+        <div className="fp-site-header-inner">
+          <a className="fp-brand" href="../../../index.html" target="_top" aria-label="返回深圳国际科技信息中心门户首页">
+            <img src="./assets/gkx-logo.png" alt="" />
+            <strong>深圳国际科技信息中心</strong>
+          </a>
 
-        <nav className="fp-main-nav" aria-label="主导航">
-          <a href={buildPortalPageHref("think-tank")}>首页</a>
-          <HeaderMenu label="科学研究" active={active === "science"}>
-            <a href={buildPortalPageHref("information-exchange")} aria-current={currentPage === "information-exchange" ? "page" : undefined}>科技信息交流</a>
-            <a href={buildPortalPageHref("technology-resource-service")} aria-current={currentPage === "technology-resource-service" ? "page" : undefined}>科技资源服务</a>
-            <a href={buildPortalPageHref("technology-decision-support")} aria-current={currentPage === "technology-decision-support" ? "page" : undefined}>科技决策支持</a>
-            <a href={buildPortalPageHref("scientific-data-center")} aria-current={currentPage === "scientific-data-center" ? "page" : undefined}>科学数据中心</a>
-          </HeaderMenu>
-          <span className="fp-nav-static is-disabled">未来教育</span>
-          <HeaderMenu label="战略咨询" active={active === "strategy"}>
-            <a href={buildPortalPageHref("think-tank")} aria-current={currentPage === "think-tank" ? "page" : undefined}>新型高端智库</a>
-            <a href={buildPortalPageHref("technology-topic-service")} aria-current={currentPage === "technology-topic-service" ? "page" : undefined}>科技专题服务</a>
-          </HeaderMenu>
-          <span className="fp-nav-static is-disabled">科技评价</span>
-        </nav>
+          <nav className="fp-main-nav" aria-label="主导航">
+            <a href="../../../index.html" target="_top">首页</a>
+            <HeaderMenu label="科学研究" active={active === "science"}>
+              <a href={buildPortalPageHref("information-exchange")} aria-current={currentPage === "information-exchange" ? "page" : undefined}>科技信息交流</a>
+              <a href={buildPortalPageHref("technology-resource-service")} aria-current={currentPage === "technology-resource-service" ? "page" : undefined}>科技资源服务</a>
+              <a href={buildPortalPageHref("technology-decision-support")} aria-current={currentPage === "technology-decision-support" ? "page" : undefined}>科技决策支持</a>
+              <a href={buildPortalPageHref("scientific-data-center")} aria-current={currentPage === "scientific-data-center" ? "page" : undefined}>科学数据中心</a>
+            </HeaderMenu>
+            <span className="fp-nav-static is-disabled">未来教育</span>
+            <HeaderMenu label="战略咨询" active={active === "strategy"}>
+              <a href={buildPortalPageHref("think-tank")} aria-current={currentPage === "think-tank" ? "page" : undefined}>新型高端智库</a>
+              <a href={buildPortalPageHref("technology-topic-service")} aria-current={currentPage === "technology-topic-service" ? "page" : undefined}>科技专题服务</a>
+            </HeaderMenu>
+            <span className="fp-nav-static is-disabled">科技评价</span>
+          </nav>
 
-        <div className="fp-global-search is-disabled" aria-label="全站搜索未开放">
-          <span>AI科研 / AI教育 / AI战略咨询</span>
-          <Search size={16} strokeWidth={1.8} aria-hidden="true" />
+          <div className="fp-global-search is-disabled" aria-label="全站搜索未开放">
+            <span>AI科研 / AI教育 / AI战略咨询</span>
+            <Search size={16} strokeWidth={1.8} aria-hidden="true" />
+          </div>
+          <span className="fp-header-link is-disabled">应用</span>
+          <span className="fp-header-link is-disabled">登录</span>
+          <span className="fp-register is-disabled">免费注册</span>
         </div>
-        <span className="fp-header-link is-disabled">应用</span>
-        <span className="fp-header-link is-disabled">登录</span>
-        <span className="fp-register is-disabled">免费注册</span>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

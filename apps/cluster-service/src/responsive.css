@@ -236,7 +236,6 @@ html.is-portal-embed .fp-site-header { display: none; }
   .trs-module-nav > header,
   .tds-module-nav > header,
   .sdc-topic-nav > header,
-  .trs-nav-note,
   .tds-nav-note { grid-column: 1 / -1; }
   .trs-module-nav > button,
   .tds-module-nav > button,

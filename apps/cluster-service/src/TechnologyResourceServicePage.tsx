@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  CircleDot,
   Database,
   FileCheck2,
   FileText,
@@ -897,16 +896,15 @@ export default function TechnologyResourceServicePage() {
 
       <div id="trs-workspace" className="trs-shell">
         <nav className="trs-module-nav" aria-label="科技资源服务功能目录">
-          <header><strong>功能目录</strong><small>3 项科技资源服务</small></header>
+          <header><strong>功能目录</strong></header>
           {moduleDefinitions.map((module) => {
             const Icon = module.icon;
             return (
               <button type="button" className={activeModule === module.id ? "is-active" : ""} aria-current={activeModule === module.id ? "page" : undefined} onClick={() => openModule(module.id)} key={module.id}>
-                <Icon size={18} aria-hidden="true" /><span><strong>{module.label}</strong><small>{module.id === "intel" ? "目录 · 知识 · API" : module.id === "evaluation" ? "布局 · 产出 · 判定" : "趋势 · 关联 · 预警"}</small></span>
+                <Icon size={18} aria-hidden="true" /><strong>{module.label}</strong>
               </button>
             );
           })}
-          <div className="trs-nav-note"><CircleDot size={14} /><p>页面数据为演示样本。</p></div>
         </nav>
 
         <section className="trs-main-column" aria-labelledby="trs-module-title">

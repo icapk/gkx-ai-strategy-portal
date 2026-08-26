@@ -114,21 +114,19 @@
   box-shadow: 0 7px 24px rgba(49, 76, 112, .04);
 }
 .trs-module-nav > header {
-  min-height: 64px;
-  padding: 13px 15px;
-  display: grid;
-  align-content: center;
-  gap: 2px;
+  min-height: 52px;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
   background: #f8fafd;
   border-bottom: 1px solid #e6edf5;
 }
 .trs-module-nav > header strong { color: #2b4059; font-size: 14px; }
-.trs-module-nav > header small { color: #75859b; font-size: 11px; }
 .trs-module-nav > button {
   position: relative;
   width: 100%;
-  min-height: 68px;
-  padding: 11px 13px;
+  min-height: 56px;
+  padding: 10px 13px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -139,13 +137,10 @@
 }
 .trs-module-nav > button + button { border-top: 1px solid #edf2f7; }
 .trs-module-nav > button > svg { flex: 0 0 auto; color: #7890aa; }
-.trs-module-nav > button > span { min-width: 0; display: grid; gap: 3px; }
 .trs-module-nav > button strong { font-size: 12px; line-height: 18px; }
-.trs-module-nav > button small { color: #8a98aa; font-size: 11px; line-height: 14px; font-weight: 400; }
 .trs-module-nav > button:hover { color: var(--trs-blue); background: #f7faff; }
 .trs-module-nav > button.is-active { color: var(--trs-blue); background: var(--trs-blue-soft); }
-.trs-module-nav > button.is-active > svg,
-.trs-module-nav > button.is-active small { color: var(--trs-blue); }
+.trs-module-nav > button.is-active > svg { color: var(--trs-blue); }
 .trs-module-nav > button.is-active::before {
   position: absolute;
   inset: 0 auto 0 0;
@@ -153,18 +148,6 @@
   content: "";
   background: var(--trs-blue);
 }
-.trs-nav-note {
-  padding: 13px;
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  color: #718298;
-  background: #fbfcfe;
-  border-top: 1px solid #e9eef4;
-}
-.trs-nav-note svg { flex: 0 0 auto; margin-top: 2px; color: #7598bd; }
-.trs-nav-note p { margin: 0; font-size: 11px; line-height: 16px; }
-
 .trs-main-column { min-width: 0; }
 .trs-module-heading {
   min-height: 64px;
@@ -863,9 +846,6 @@
 
 /* Keep operational copy legible at the fixed 1200px desktop canvas. */
 .trs-hero-flow span,
-.trs-module-nav > header small,
-.trs-module-nav > button small,
-.trs-nav-note p,
 .trs-demo-badge,
 .trs-section-locator > strong,
 .trs-section-locator > button,

@@ -299,10 +299,11 @@ function MetricStrip({ items }: { items: { label: string; value: string; note: s
   </dl>;
 }
 
-function TrendFigure({ label, values = [32, 40, 47, 59, 68, 81], color = "#1769ff" }: {
+function TrendFigure({ label, values = [32, 40, 47, 59, 68, 81], color = "#1769ff", showBadge = true }: {
   label: string;
   values?: number[];
   color?: string;
+  showBadge?: boolean;
 }) {
   const width = 620;
   const height = 190;
@@ -317,15 +318,57 @@ function TrendFigure({ label, values = [32, 40, 47, 59, 68, 81], color = "#1769f
   const area = `${line} L${points.at(-1)?.x ?? 0},155 L${points[0]?.x ?? 0},155 Z`;
   const years = ["2020", "2021", "2022", "2023", "2024", "2025"].slice(0, values.length);
   return <figure className="tp-trend-figure">
-    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${label}：${years.map((year, index) => `${year}年${values[index]}`).join("，")}；演示数据`}>
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${label}：${years.map((year, index) => `${year}年${values[index]}`).join("，")}`}>
       {[18, 52, 86, 120, 154].map((y) => <line x1="38" x2="590" y1={y} y2={y} key={y} />)}
       <path className="tp-trend-area" d={area} style={{ color }} />
       <path className="tp-trend-line" d={line} style={{ color }} />
       {points.map((point, index) => <circle cx={point.x} cy={point.y} r="4" style={{ color }} key={`${point.x}-${index}`} />)}
       {years.map((year, index) => <text x={points[index]?.x} y="180" textAnchor="middle" key={year}>{year}</text>)}
     </svg>
-    <figcaption><span>{label}</span><DemoBadge /></figcaption>
+    <figcaption><span>{label}</span>{showBadge ? <DemoBadge /> : null}</figcaption>
   </figure>;
+}
+
+function ShenzhenEnterpriseTrend({ industry, values }: { industry: Industry; values: number[] }) {
+  const years = ["2020", "2021", "2022", "2023", "2024", "2025"].slice(0, values.length);
+  const [selectedIndex, setSelectedIndex] = useState(values.length - 1);
+  useEffect(() => { setSelectedIndex(values.length - 1); }, [industry, values.length]);
+  const currentValue = values[selectedIndex] ?? values.at(-1) ?? 0;
+  const previousValue = selectedIndex > 0 ? values[selectedIndex - 1] : currentValue;
+  const growth = previousValue ? Number(((currentValue - previousValue) / previousValue * 100).toFixed(1)) : 0;
+  return <div className="tp-shenzhen-enterprise-trend">
+    <div className="tp-shenzhen-trend-summary"><div><span>当前年份</span><strong>{years[selectedIndex]} 年</strong></div><div><span>深圳企业数量</span><strong>{currentValue} 家</strong></div><div><span>同比变化</span><strong>{selectedIndex ? `${growth >= 0 ? "+" : ""}${growth}%` : "基期"}</strong></div></div>
+    <TrendFigure label={`${industry}深圳企业历年趋势`} values={values} showBadge={false} />
+    <div className="tp-shenzhen-year-tabs" role="group" aria-label="选择深圳企业统计年份">{years.map((year, index) => <button type="button" className={selectedIndex === index ? "is-active" : ""} aria-pressed={selectedIndex === index} onClick={() => setSelectedIndex(index)} key={year}><span>{year}</span><strong>{values[index]} 家</strong></button>)}</div>
+  </div>;
+}
+
+function ResearchInstitutionTrend({ industry, values }: { industry: Industry; values: number[] }) {
+  const years = ["2020", "2021", "2022", "2023", "2024", "2025"].slice(0, values.length);
+  const [selectedIndex, setSelectedIndex] = useState(values.length - 1);
+  useEffect(() => { setSelectedIndex(values.length - 1); }, [industry, values.length]);
+  const currentValue = values[selectedIndex] ?? values.at(-1) ?? 0;
+  const previousValue = selectedIndex > 0 ? values[selectedIndex - 1] : currentValue;
+  const growth = previousValue ? Number(((currentValue - previousValue) / previousValue * 100).toFixed(1)) : 0;
+  return <div className="tp-research-institution-trend">
+    <div className="tp-research-trend-summary"><div><span>当前年份</span><strong>{years[selectedIndex]} 年</strong></div><div><span>科研机构数量</span><strong>{currentValue} 家</strong></div><div><span>同比变化</span><strong>{selectedIndex ? `${growth >= 0 ? "+" : ""}${growth}%` : "基期"}</strong></div></div>
+    <TrendFigure label={`${industry}科研机构历年趋势`} values={values} showBadge={false} />
+    <div className="tp-research-year-tabs" role="group" aria-label="选择科研机构统计年份">{years.map((year, index) => <button type="button" className={selectedIndex === index ? "is-active" : ""} aria-pressed={selectedIndex === index} onClick={() => setSelectedIndex(index)} key={year}><span>{year}</span><strong>{values[index]} 家</strong></button>)}</div>
+  </div>;
+}
+
+function ShenzhenTalentTrend({ industry, values }: { industry: Industry; values: number[] }) {
+  const years = ["2020", "2021", "2022", "2023", "2024", "2025"].slice(0, values.length);
+  const [selectedIndex, setSelectedIndex] = useState(values.length - 1);
+  useEffect(() => { setSelectedIndex(values.length - 1); }, [industry, values.length]);
+  const currentValue = values[selectedIndex] ?? values.at(-1) ?? 0;
+  const previousValue = selectedIndex > 0 ? values[selectedIndex - 1] : currentValue;
+  const growth = previousValue ? Number(((currentValue - previousValue) / previousValue * 100).toFixed(1)) : 0;
+  return <div className="tp-shenzhen-talent-trend">
+    <div className="tp-research-trend-summary"><div><span>当前年份</span><strong>{years[selectedIndex]} 年</strong></div><div><span>深圳人才数量</span><strong>{currentValue} 人</strong></div><div><span>同比变化</span><strong>{selectedIndex ? `${growth >= 0 ? "+" : ""}${growth}%` : "基期"}</strong></div></div>
+    <TrendFigure label={`${industry}深圳人才历年趋势`} values={values} showBadge={false} />
+    <div className="tp-research-year-tabs" role="group" aria-label="选择深圳人才统计年份">{years.map((year, index) => <button type="button" className={selectedIndex === index ? "is-active" : ""} aria-pressed={selectedIndex === index} onClick={() => setSelectedIndex(index)} key={year}><span>{year}</span><strong>{values[index]} 人</strong></button>)}</div>
+  </div>;
 }
 
 function BarBreakdown({ items, suffix = "%", domainMax }: { items: { label: string; value: number }[]; suffix?: string; domainMax?: number }) {
@@ -1310,13 +1353,13 @@ function createRegionPoints(total: number, kind: "paper" | "patent"): RegionCoun
   return locations.map((item, index) => ({ ...item, count: Math.round(total * ratios[index]) }));
 }
 
-function QuantifiedWorldMap({ label, unit, points, scopeLabel = "全球演示样本" }: { label: string; unit: string; points: RegionCountPoint[]; scopeLabel?: string }) {
-  return <figure className="tp-world-map tp-quantified-map">
+function QuantifiedWorldMap({ label, unit, points, scopeLabel = "全球演示样本", showStatus = true, mapMode = "world", selectedName, onSelect }: { label: string; unit: string; points: RegionCountPoint[]; scopeLabel?: string; showStatus?: boolean; mapMode?: "world" | "national"; selectedName?: string | null; onSelect?: (point: RegionCountPoint) => void }) {
+  return <figure className={`tp-world-map tp-quantified-map${mapMode === "national" ? " is-national" : ""}`}>
     <div className="tp-map-canvas">
       <img src="./assets/thinktank-world-map.svg" alt="" />
-      {points.map((point) => <span className="tp-map-pin" style={{ left: `${point.x}%`, top: `${point.y}%` }} key={point.name}><i /><b>{point.name}<small>{point.count.toLocaleString()} {unit}</small></b></span>)}
+      {points.map((point) => onSelect ? <button type="button" className={`tp-map-pin${selectedName === point.name ? " is-selected" : ""}`} tabIndex={selectedName == null || selectedName === point.name ? 0 : -1} aria-pressed={selectedName === point.name} aria-label={`${point.name}，${point.count.toLocaleString()} ${unit}`} onClick={() => onSelect(point)} style={{ left: `${point.x}%`, top: `${point.y}%` }} key={point.name}><i /><b>{point.name}<small>{point.count.toLocaleString()} {unit}</small></b></button> : <span className="tp-map-pin" style={{ left: `${point.x}%`, top: `${point.y}%` }} key={point.name}><i /><b>{point.name}<small>{point.count.toLocaleString()} {unit}</small></b></span>)}
     </div>
-    <figcaption><span>{scopeLabel} · {label}</span><small>区域数量为演示统计</small></figcaption>
+    <figcaption><span>{scopeLabel} · {label}</span>{showStatus ? <small>区域数量为演示统计</small> : null}</figcaption>
   </figure>;
 }
 
@@ -1496,7 +1539,7 @@ function FrontierContent({ subId, industry }: { subId: string; industry: Industr
   return <ShenzhenTechnologyStatus industry={industry} />;
 }
 
-type EnterpriseTypeLabel = "外企样本" | "高企样本" | "小微样本" | "上市样本";
+type EnterpriseTypeLabel = "外企" | "高企" | "小微" | "上市";
 type EnterpriseRecord = {
   id: string;
   name: string;
@@ -1506,6 +1549,9 @@ type EnterpriseRecord = {
   type: EnterpriseTypeLabel;
   paperKeyword: string;
   patentKeyword: string;
+  foundedYear: string;
+  registeredCapital: string;
+  mainProduct: string;
 };
 type EnterpriseDemoProfile = {
   profile: PanoramaProfile;
@@ -1523,7 +1569,7 @@ type EnterpriseDemoProfile = {
   shenzhenRecords: EnterpriseRecord[];
 };
 
-const enterpriseTypeLabels: EnterpriseTypeLabel[] = ["外企样本", "高企样本", "小微样本", "上市样本"];
+const enterpriseTypeLabels: EnterpriseTypeLabel[] = ["外企", "高企", "小微", "上市"];
 const enterpriseNamePrefixes = ["湾区", "鹏城", "前海", "华新", "科澜"];
 const enterpriseLocations = ["中国·深圳", "中国·广州", "中国·上海", "中国·北京", "德国·慕尼黑", "美国·波士顿"];
 const shenzhenDistricts = ["南山区", "光明区", "龙岗区", "宝安区", "福田区", "龙华区"];
@@ -1544,30 +1590,36 @@ function createEnterpriseDemoProfile(industry: Industry): EnterpriseDemoProfile 
     const stem = item.name.replace(/[^一-龥A-Za-z0-9]/g, "").slice(0, 7);
     return {
       id: `${industryIndex}-${stageIndex}-${nodeIndex}`,
-      name: `${enterpriseNamePrefixes[flatIndex % enterpriseNamePrefixes.length]}${stem}科技（虚构）`,
+      name: `${enterpriseNamePrefixes[flatIndex % enterpriseNamePrefixes.length]}${stem}科技有限公司`,
       stageIndex,
       nodeName: item.name,
       location: enterpriseLocations[(flatIndex + industryIndex) % enterpriseLocations.length],
       type: enterpriseTypeLabels[(flatIndex + industryIndex) % enterpriseTypeLabels.length],
       paperKeyword: `${item.name}·${enterprisePaperKeywordThemes[(flatIndex + industryIndex) % enterprisePaperKeywordThemes.length]}`,
       patentKeyword: `${item.name}·${enterprisePatentKeywordThemes[(flatIndex + industryIndex * 2) % enterprisePatentKeywordThemes.length]}`,
+      foundedYear: `${2011 + (flatIndex + industryIndex) % 13} 年`,
+      registeredCapital: `${800 + ((flatIndex + industryIndex) % 8) * 450} 万元`,
+      mainProduct: `${item.name}技术产品与服务`,
     };
   }));
   const fieldCounts = chain.map((lane, stageIndex) => lane.map((_, nodeIndex) => 5 + ((industryIndex * 3 + stageIndex * 5 + nodeIndex * 2) % 12)));
   const shenzhenTotal = Math.round(total * (.29 + industryIndex % 3 * .014));
   const shenzhenFieldCounts = chain.map((lane, stageIndex) => lane.map((_, nodeIndex) => (industryIndex + stageIndex * 2 + nodeIndex) % 6));
-  const shenzhenRecords = chain.flatMap((lane, stageIndex) => lane.slice(0, 2).map((item, nodeIndex) => {
+  const shenzhenRecords = chain.flatMap((lane, stageIndex) => lane.map((item, nodeIndex) => {
     const flatIndex = stageIndex * 2 + nodeIndex;
     const stem = item.name.replace(/[^一-龥A-Za-z0-9]/g, "").slice(0, 7);
     return {
       id: `sz-${industryIndex}-${stageIndex}-${nodeIndex}`,
-      name: `深科${stem}产业（虚构）`,
+      name: `深科${stem}产业有限公司`,
       stageIndex,
       nodeName: item.name,
       location: shenzhenDistricts[(flatIndex + industryIndex) % shenzhenDistricts.length],
       type: enterpriseTypeLabels[(flatIndex + industryIndex + 1) % enterpriseTypeLabels.length],
       paperKeyword: `${item.name}·${enterprisePaperKeywordThemes[(flatIndex + industryIndex) % enterprisePaperKeywordThemes.length]}`,
       patentKeyword: `${item.name}·${enterprisePatentKeywordThemes[(flatIndex + industryIndex * 2) % enterprisePatentKeywordThemes.length]}`,
+      foundedYear: `${2013 + (flatIndex + industryIndex) % 10} 年`,
+      registeredCapital: `${1000 + ((flatIndex + industryIndex) % 6) * 500} 万元`,
+      mainProduct: `${item.name}产业化产品与解决方案`,
     };
   }));
   const nationalScale = [
@@ -1588,17 +1640,17 @@ function createEnterpriseDemoProfile(industry: Industry): EnterpriseDemoProfile 
     records,
     fieldCounts,
     scaleRows: [
-      { level: "全国", note: "国家级演示样本", values: nationalScale },
-      { level: "广东省", note: "省级演示样本", values: nationalScale.map((value) => Math.max(1, Math.round(value * .46))) },
-      { level: "深圳市", note: "市级演示样本", values: nationalScale.map((value) => Math.max(1, Math.round(value * .24))) },
+      { level: "全国", note: "国家级企业统计", values: nationalScale },
+      { level: "广东省", note: "省级企业统计", values: nationalScale.map((value) => Math.max(1, Math.round(value * .46))) },
+      { level: "深圳市", note: "市级企业统计", values: nationalScale.map((value) => Math.max(1, Math.round(value * .24))) },
     ],
     shenzhenTotal,
     shenzhenTrend: createCumulativeTrend(shenzhenTotal, [.47, .57, .66, .76, .87, 1]),
     shenzhenScale: [
-      { label: "大型企业样本", value: large },
-      { label: "中型企业样本", value: medium },
-      { label: "小型企业样本", value: small },
-      { label: "微型企业样本", value: Math.max(0, shenzhenTotal - large - medium - small) },
+      { label: "大型企业", value: large },
+      { label: "中型企业", value: medium },
+      { label: "小型企业", value: small },
+      { label: "微型企业", value: Math.max(0, shenzhenTotal - large - medium - small) },
     ],
     shenzhenFieldCounts,
     shenzhenRecords,
@@ -1614,24 +1666,43 @@ function EnterpriseRegionPanel({ industry, profile }: { industry: Industry; prof
   </div>}><QuantifiedWorldMap label={`${scope === "global" ? "全球" : "全国"}企业区域分布`} unit="家" points={points} scopeLabel={scope === "global" ? "全球演示样本" : "全国演示样本"} /></Panel>;
 }
 
-function EnterpriseDirectory({ records, label, shenzhen = false }: { records: EnterpriseRecord[]; label: string; shenzhen?: boolean }) {
+function EnterpriseDirectory({ records, label, shenzhen = false, selectedNodeName, onClearNode }: { records: EnterpriseRecord[]; label: string; shenzhen?: boolean; selectedNodeName?: string | null; onClearNode?: () => void }) {
   const pageSize = 8;
   const [expanded, setExpanded] = useState(false);
-  const hasMore = records.length > pageSize;
-  const visibleRecords = expanded ? records : records.slice(0, pageSize);
+  const [query, setQuery] = useState("");
+  const [type, setType] = useState<"全部类型" | EnterpriseTypeLabel>("全部类型");
+  const [selectedRecordId, setSelectedRecordId] = useState(records[0]?.id ?? "");
+  const filteredRecords = records.filter((record) => {
+    const keyword = query.trim().toLocaleLowerCase();
+    const matchesQuery = !keyword || `${record.name}${record.nodeName}${record.paperKeyword}${record.patentKeyword}${record.mainProduct}`.toLocaleLowerCase().includes(keyword);
+    const matchesType = type === "全部类型" || record.type === type;
+    const matchesNode = !selectedNodeName || record.nodeName === selectedNodeName;
+    return matchesQuery && matchesType && matchesNode;
+  });
+  const hasMore = filteredRecords.length > pageSize;
+  const visibleRecords = expanded ? filteredRecords : filteredRecords.slice(0, pageSize);
+  const selectedRecord = filteredRecords.find((record) => record.id === selectedRecordId) ?? filteredRecords[0] ?? null;
   const directoryId = shenzhen ? "tp-shenzhen-enterprise-directory" : "tp-key-enterprise-directory";
-  useEffect(() => { setExpanded(false); }, [label]);
+  useEffect(() => { setExpanded(false); setQuery(""); setType("全部类型"); setSelectedRecordId(records[0]?.id ?? ""); }, [label]);
   return <div className="tp-enterprise-directory-block">
+    <div className="tp-enterprise-directory-toolbar">
+      <label><Search size={16} aria-hidden="true" /><input value={query} onChange={(event) => { setQuery(event.target.value); setExpanded(false); }} placeholder="搜索企业、产品或关键词" aria-label="搜索重点企业" /></label>
+      <select value={type} onChange={(event) => { setType(event.target.value as "全部类型" | EnterpriseTypeLabel); setExpanded(false); }} aria-label="筛选企业类型"><option>全部类型</option>{enterpriseTypeLabels.map((item) => <option key={item}>{item}</option>)}</select>
+      {selectedNodeName ? <button type="button" onClick={onClearNode}>产业链节点：{selectedNodeName}<X size={14} aria-hidden="true" /></button> : null}
+      <span>共 {filteredRecords.length} 家</span>
+    </div>
     <div className="tp-enterprise-directory" id={directoryId}>
       <table>
         <caption className="tp-visually-hidden">{label}</caption>
-        <thead><tr><th>企业名称</th><th>产业链节点</th><th>{shenzhen ? "行政区" : "所在地"}</th><th>企业类型</th></tr></thead>
-        <tbody>{visibleRecords.map((record) => <tr key={record.id}><th scope="row">{record.name}</th><td>{record.nodeName}</td><td>{record.location}</td><td>{record.type}</td></tr>)}</tbody>
+        <thead><tr><th>企业名称</th><th>产业链节点</th><th>{shenzhen ? "行政区" : "所在地"}</th><th>企业类型</th><th>操作</th></tr></thead>
+        <tbody>{visibleRecords.map((record) => <tr className={selectedRecord?.id === record.id ? "is-selected" : ""} key={record.id}><th scope="row">{record.name}</th><td>{record.nodeName}</td><td>{record.location}</td><td>{record.type}</td><td><button type="button" onClick={() => setSelectedRecordId(record.id)}>查看</button></td></tr>)}</tbody>
       </table>
     </div>
+    {!filteredRecords.length ? <div className="tp-enterprise-directory-empty"><strong>没有符合条件的重点企业</strong><button type="button" onClick={() => { setQuery(""); setType("全部类型"); onClearNode?.(); }}>清除筛选</button></div> : null}
     {hasMore && <button className={`tp-enterprise-directory-toggle${expanded ? " is-expanded" : ""}`} type="button" aria-expanded={expanded} aria-controls={directoryId} onClick={() => setExpanded((value) => !value)}>
-      {expanded ? `收起至前 ${pageSize} 条` : `展开全部 ${records.length} 条`}<ChevronDown size={16} aria-hidden="true" />
+      {expanded ? `收起至前 ${pageSize} 条` : `展开全部 ${filteredRecords.length} 条`}<ChevronDown size={16} aria-hidden="true" />
     </button>}
+    {selectedRecord ? <article className="tp-enterprise-record-detail" aria-live="polite"><header><div><span>{selectedRecord.type}</span><h4>{selectedRecord.name}</h4></div><strong>{selectedRecord.nodeName}</strong></header><dl><div><dt>成立年份</dt><dd>{selectedRecord.foundedYear}</dd></div><div><dt>注册资本</dt><dd>{selectedRecord.registeredCapital}</dd></div><div><dt>{shenzhen ? "行政区" : "所在地"}</dt><dd>{selectedRecord.location}</dd></div><div><dt>主营产品</dt><dd>{selectedRecord.mainProduct}</dd></div></dl><div><span>论文关键词</span><p>{selectedRecord.paperKeyword}</p><span>专利关键词</span><p>{selectedRecord.patentKeyword}</p></div></article> : null}
   </div>;
 }
 
@@ -1647,7 +1718,7 @@ function EnterpriseScaleMatrix({ rows }: { rows: EnterpriseDemoProfile["scaleRow
   </div>;
 }
 
-function EnterpriseFieldDistribution({ data, shenzhen = false }: { data: EnterpriseDemoProfile; shenzhen?: boolean }) {
+function EnterpriseFieldDistribution({ data, shenzhen = false, selectedNodeName, onSelectNode }: { data: EnterpriseDemoProfile; shenzhen?: boolean; selectedNodeName?: string | null; onSelectNode?: (nodeName: string) => void }) {
   const counts = shenzhen ? data.shenzhenFieldCounts : data.fieldCounts;
   const max = Math.max(...counts.flat(), 1);
   return <div className={`tp-enterprise-field-map${shenzhen ? " is-shenzhen" : ""}`}>
@@ -1656,7 +1727,7 @@ function EnterpriseFieldDistribution({ data, shenzhen = false }: { data: Enterpr
       <ol>{lane.map((item, nodeIndex) => {
         const record = data.records.find((entry) => entry.stageIndex === stageIndex && entry.nodeName === item.name);
         const value = counts[stageIndex][nodeIndex];
-        return <li key={item.name}><div><strong>{item.name}</strong><span>{value} 家</span></div><i><b style={{ "--tp-enterprise-field-width": `${value / max * 100}%` } as CSSProperties} /></i>{!shenzhen && record && <dl className="tp-enterprise-field-keywords"><div><dt>论文样例</dt><dd>{record.paperKeyword}</dd></div><div><dt>专利样例</dt><dd>{record.patentKeyword}</dd></div></dl>}</li>;
+        return <li key={item.name}><button type="button" className={selectedNodeName === item.name ? "is-selected" : ""} aria-pressed={selectedNodeName === item.name} disabled={!onSelectNode} onClick={() => onSelectNode?.(item.name)}><div><strong>{item.name}</strong><span>{value} 家</span></div><i><b style={{ "--tp-enterprise-field-width": `${value / max * 100}%` } as CSSProperties} /></i>{!shenzhen && record && <dl className="tp-enterprise-field-keywords"><div><dt>论文关键词</dt><dd>{record.paperKeyword}</dd></div><div><dt>专利关键词</dt><dd>{record.patentKeyword}</dd></div></dl>}</button></li>;
       })}</ol>
     </section>)}
   </div>;
@@ -1679,15 +1750,21 @@ function EnterpriseOverview({ industry }: { industry: Industry }) {
 
 function KeyEnterprisePanorama({ industry }: { industry: Industry }) {
   const data = createEnterpriseDemoProfile(industry);
+  const [selectedNodeName, setSelectedNodeName] = useState<string | null>(null);
+  const selectNode = (nodeName: string) => {
+    const nextNode = selectedNodeName === nodeName ? null : nodeName;
+    setSelectedNodeName(nextNode);
+    if (nextNode) window.requestAnimationFrame(() => document.getElementById("tp-key-enterprise-directory")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
   return <div className="tp-key-enterprise-section">
-    <Panel title={`${industry}重点企业产业链覆盖与领域关联`} description="按上中下游保留产业链节点顺序，同时展示企业数量与论文、专利关联字段" action={<DemoBadge>{data.chain.flat().length} 个节点 · 关联字段为演示</DemoBadge>}>
-      <EnterpriseFieldDistribution data={data} />
+    <Panel title="重点企业全景" description={`按${industry}产业分类展示全产业链重点企业及企业基础信息`} action={<span className="tp-chart-kpi">共 {data.records.length} 家</span>}>
+      <EnterpriseDirectory records={data.records} label={`${industry}重点企业基础信息`} selectedNodeName={selectedNodeName} onClearNode={() => setSelectedNodeName(null)} />
     </Panel>
-    <Panel title="代表性重点企业样例" description="默认展示 8 条，可展开查看全部企业名称、产业链节点、所在地与类型" action={<DemoBadge>企业名称为虚构样例</DemoBadge>}>
-      <EnterpriseDirectory records={data.records} label={`${industry}重点企业基础信息`} />
-    </Panel>
-    <Panel title="重点企业规模统计" description="外企、高企、小微、上市四类标签的国家、省、市三级对比" action={<DemoBadge>三级统计均为演示</DemoBadge>}>
+    <Panel title="重点企业规模统计" description="按外企、高企、小微、上市四类统计全国、广东省、深圳市三级企业发展情况" action={<span className="tp-chart-kpi">全国 · 广东省 · 深圳市</span>}>
       <EnterpriseScaleMatrix rows={data.scaleRows} />
+    </Panel>
+    <Panel title="重点企业领域统计" description="结合产业链全景展示重点企业分布，并将论文、专利关键词关联到具体产业链节点" action={<span className="tp-chart-kpi">{data.chain.flat().length} 个产业链节点</span>}>
+      <EnterpriseFieldDistribution data={data} selectedNodeName={selectedNodeName} onSelectNode={selectNode} />
     </Panel>
   </div>;
 }
@@ -1762,15 +1839,23 @@ function StarEnterpriseShowcase({ industry, openDialog }: { industry: Industry; 
 
 function ShenzhenEnterpriseStatus({ industry }: { industry: Industry }) {
   const data = createEnterpriseDemoProfile(industry);
+  const [selectedNodeName, setSelectedNodeName] = useState<string | null>(null);
+  useEffect(() => { setSelectedNodeName(null); }, [industry]);
+  const selectNode = (nodeName: string) => {
+    const nextNode = selectedNodeName === nodeName ? null : nodeName;
+    setSelectedNodeName(nextNode);
+    if (nextNode) window.requestAnimationFrame(() => document.getElementById("tp-shenzhen-enterprise-directory")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
   return <div className="tp-shenzhen-enterprise-section">
-    <div className="tp-enterprise-scope"><div><strong>深圳{industry}企业发展状况</strong><span>与全域企业共用产业链节点，单独呈现深圳数量、规模与重点企业</span></div><DemoBadge>深圳指标均为演示</DemoBadge></div>
+    <div className="tp-enterprise-scope"><div><strong>深圳{industry}企业发展状况</strong><span>结合未来产业链展示深圳企业数量、领域分布、规模结构与重点企业</span></div><span className="tp-chart-kpi">当前产业：{industry}</span></div>
     <MetricStrip items={[
-      { label: "深圳企业数量", value: `${data.shenzhenTotal} 家`, note: `${industry}企业演示样本`, icon: Building2 },
-      { label: "深圳重点企业", value: `${data.shenzhenRecords.length} 家`, note: "基础信息虚构样例", icon: BriefcaseBusiness },
+      { label: "深圳企业数量", value: `${data.shenzhenTotal} 家`, note: "截至 2025 年", icon: Building2 },
+      { label: "深圳重点企业", value: `${data.shenzhenRecords.length} 家`, note: `覆盖 ${data.chain.flat().length} 个产业链节点`, icon: BriefcaseBusiness },
     ]} />
-    <div className="tp-two-column tp-shenzhen-enterprise-grid"><Panel title="数量与趋势" description={`${industry}深圳企业演示样本`}><TrendFigure label="深圳企业历年趋势" values={data.shenzhenTrend} /></Panel><Panel title="规模分布" description="大型、中型、小型、微型演示口径"><BarBreakdown suffix=" 家" items={data.shenzhenScale} /></Panel></div>
-    <Panel title="领域分布" description="沿用全域产业链节点与顺序，展示深圳企业数量" action={<DemoBadge>企业可关联多个产业链节点</DemoBadge>}><EnterpriseFieldDistribution data={data} shenzhen /></Panel>
-    <Panel title="重点企业" description="展示企业名称、产业链节点、行政区与企业类型" action={<DemoBadge>企业名称为虚构样例</DemoBadge>}><EnterpriseDirectory records={data.shenzhenRecords} label={`深圳${industry}重点企业`} shenzhen /></Panel>
+    <Panel title="深圳企业数量" description={`展示深圳${industry}企业数量和 2020—2025 年历年趋势`} action={<span className="tp-chart-kpi">2025 年 {data.shenzhenTotal} 家</span>}><ShenzhenEnterpriseTrend industry={industry} values={data.shenzhenTrend} /></Panel>
+    <Panel title="深圳企业领域分布" description="结合未来产业链全景展示深圳企业在上中下游节点的重点分布" action={<span className="tp-chart-kpi">点击节点查看关联企业</span>}><EnterpriseFieldDistribution data={data} shenzhen selectedNodeName={selectedNodeName} onSelectNode={selectNode} /></Panel>
+    <Panel title="深圳企业规模分析" description="展示大型、中型、小型、微型企业的规模分布" action={<span className="tp-chart-kpi">共 {data.shenzhenTotal} 家</span>}><BarBreakdown suffix=" 家" items={data.shenzhenScale} /></Panel>
+    <Panel title="深圳重点企业" description="展示企业名称、产业链节点、行政区、企业类型和基础信息" action={<span className="tp-chart-kpi">共 {data.shenzhenRecords.length} 家</span>}><EnterpriseDirectory records={data.shenzhenRecords} label={`深圳${industry}重点企业`} shenzhen selectedNodeName={selectedNodeName} onClearNode={() => setSelectedNodeName(null)} /></Panel>
   </div>;
 }
 
@@ -1899,35 +1984,35 @@ function createResearchDemoProfile(industry: Industry): ResearchDemoProfile {
 function ResearchRegionPanel({ industry, data }: { industry: Industry; data: ResearchDemoProfile }) {
   const [scope, setScope] = useState<RegionScope>("global");
   const points = scope === "global" ? data.globalRegions : data.nationalRegions;
-  return <Panel title="科研机构区域分布" description={`${industry}科研机构所在地演示统计`} action={<div className="tp-inline-tabs" role="group" aria-label="科研机构区域范围">
+  return <Panel title="科研机构区域分布" description={`展示${industry}相关科研机构的全球与全国分布情况`} action={<div className="tp-inline-tabs" role="group" aria-label="科研机构区域范围">
     <button className={scope === "global" ? "active" : ""} type="button" aria-pressed={scope === "global"} onClick={() => setScope("global")}>全球</button>
     <button className={scope === "national" ? "active" : ""} type="button" aria-pressed={scope === "national"} onClick={() => setScope("national")}>全国</button>
-  </div>}><QuantifiedWorldMap label="科研机构区域分布" unit="家" points={points} scopeLabel={scope === "global" ? "全球演示样本" : "全国演示样本"} /></Panel>;
+  </div>}><QuantifiedWorldMap label="科研机构区域分布" unit="家" points={points} scopeLabel={scope === "global" ? "全球科研机构" : "全国科研机构"} showStatus={false} /></Panel>;
 }
 
-function ResearchChainDistribution({ chain, counts, scopeLabel, unit = "家", entityLabel = "机构" }: { chain: ChainStageData; counts: number[][]; scopeLabel: string; unit?: string; entityLabel?: string }) {
+function ResearchChainDistribution({ chain, counts, scopeLabel, unit = "家", entityLabel = "机构", selectedName, onSelect }: { chain: ChainStageData; counts: number[][]; scopeLabel: string; unit?: string; entityLabel?: string; selectedName?: string | null; onSelect?: (selection: { name: string; stage: string; value: number; description: string }) => void }) {
   const max = Math.max(...counts.flat(), 1);
-  return <figure className="tp-research-field-distribution" aria-label={`${scopeLabel}在产业链各节点的演示分布`}>
+  return <figure className="tp-research-field-distribution" aria-label={`${scopeLabel}在产业链各节点的分布`}>
     <figcaption><span>节点顺序与产业链全景一致</span><small>{entityLabel}可关联多个节点，各节点不相加为{entityLabel}总数</small></figcaption>
     <div className="tp-research-field-grid">{chain.map((lane, stageIndex) => <section className={chainLaneMeta[stageIndex].className} key={chainLaneMeta[stageIndex].label}>
       <header><div><strong>{chainLaneMeta[stageIndex].label}</strong><small>{chainLaneMeta[stageIndex].role}</small></div><span>{lane.length} 个节点</span></header>
       <ol>{lane.map((item, nodeIndex) => {
         const value = counts[stageIndex][nodeIndex];
-        return <li key={item.name}><div><strong>{item.name}</strong><span>{value} {unit}</span></div><p>{item.note}</p><i><b style={{ "--tp-research-field-width": `${value / max * 100}%` } as CSSProperties} /></i></li>;
+        return <li className={selectedName === item.name ? "is-selected" : ""} key={item.name}><div><strong>{item.name}</strong><span>{value} {unit}</span></div><p>{item.note}</p><i><b style={{ "--tp-research-field-width": `${value / max * 100}%` } as CSSProperties} /></i>{onSelect ? <button type="button" aria-pressed={selectedName === item.name} onClick={() => onSelect({ name: item.name, stage: chainLaneMeta[stageIndex].label, value, description: item.note })}>查看{entityLabel}分布</button> : null}</li>;
       })}</ol>
     </section>)}</div>
   </figure>;
 }
 
-function ResearchTechnologyDistribution({ stages, counts, scopeLabel = "科研机构", unit = "家", entityLabel = "机构" }: { stages: FrontierTechnologyStage[]; counts: number[][]; scopeLabel?: string; unit?: string; entityLabel?: string }) {
+function ResearchTechnologyDistribution({ stages, counts, scopeLabel = "科研机构", unit = "家", entityLabel = "机构", selectedName, onSelect }: { stages: FrontierTechnologyStage[]; counts: number[][]; scopeLabel?: string; unit?: string; entityLabel?: string; selectedName?: string | null; onSelect?: (selection: { name: string; stage: string; value: number; description: string }) => void }) {
   const max = Math.max(...counts.flat(), 1);
-  return <figure className="tp-research-technology-distribution" aria-label={`${scopeLabel}在技术链各领域的演示分布`}>
+  return <figure className="tp-research-technology-distribution" aria-label={`${scopeLabel}在技术链各领域的分布`}>
     <figcaption><span>技术阶段与科技前沿技术链一致</span><small>{entityLabel}可跨技术领域布局</small></figcaption>
     <div>{stages.map((stage, stageIndex) => <section className={`is-stage-${stageIndex + 1}`} key={stage.id}>
       <header><span>{String(stageIndex + 1).padStart(2, "0")}</span><div><strong>{stage.title}</strong><small>{stage.role}</small></div></header>
       <ol>{stage.categories.map((category, categoryIndex) => {
         const value = counts[stageIndex][categoryIndex];
-        return <li key={category.id}><div><strong>{category.name}</strong><span>{value} {unit}</span></div><p>{category.summary} · {category.nodes.length} 个技术节点</p><i><b style={{ "--tp-research-field-width": `${value / max * 100}%` } as CSSProperties} /></i></li>;
+        return <li className={selectedName === category.name ? "is-selected" : ""} key={category.id}><div><strong>{category.name}</strong><span>{value} {unit}</span></div><p>{category.summary} · {category.nodes.length} 个技术节点</p><i><b style={{ "--tp-research-field-width": `${value / max * 100}%` } as CSSProperties} /></i>{onSelect ? <button type="button" aria-pressed={selectedName === category.name} onClick={() => onSelect({ name: category.name, stage: stage.title, value, description: category.summary })}>查看{entityLabel}分布</button> : null}</li>;
       })}</ol>
     </section>)}</div>
   </figure>;
@@ -1960,19 +2045,24 @@ function ResearchRankingTable({ records }: { records: ResearchInstitutionRecord[
 function ResearchOverview({ industry }: { industry: Industry }) {
   const data = createResearchDemoProfile(industry);
   const latestAdded = data.trend.at(-1)! - data.trend.at(-2)!;
+  const chainSelections = data.chain.flatMap((lane, stageIndex) => lane.map((item, nodeIndex) => ({ name: item.name, stage: chainLaneMeta[stageIndex].label, value: data.chainCounts[stageIndex][nodeIndex], description: item.note })));
+  const technologySelections = data.technologyStages.flatMap((stage, stageIndex) => stage.categories.map((category, categoryIndex) => ({ name: category.name, stage: stage.title, value: data.technologyCounts[stageIndex][categoryIndex], description: category.summary })));
+  const [selectedChainName, setSelectedChainName] = useState(chainSelections[0]?.name ?? "");
+  const [selectedTechnologyName, setSelectedTechnologyName] = useState(technologySelections[0]?.name ?? "");
+  useEffect(() => { setSelectedChainName(chainSelections[0]?.name ?? ""); setSelectedTechnologyName(technologySelections[0]?.name ?? ""); }, [industry]);
+  const selectedChain = chainSelections.find((item) => item.name === selectedChainName) ?? chainSelections[0];
+  const selectedTechnology = technologySelections.find((item) => item.name === selectedTechnologyName) ?? technologySelections[0];
   return <div className="tp-research-overview">
     <MetricStrip items={[
-      { label: "科研机构数量", value: `${data.total.toLocaleString()} 家`, note: "全球演示机构样本", icon: Microscope },
-      { label: "2025 年新增", value: `${latestAdded.toLocaleString()} 家`, note: "演示周期内新增", icon: Activity },
+      { label: "科研机构数量", value: `${data.total.toLocaleString()} 家`, note: "截至 2025 年", icon: Microscope },
+      { label: "2025 年新增", value: `${latestAdded.toLocaleString()} 家`, note: "较上一年度新增", icon: Activity },
       { label: "产业链节点", value: `${data.chain.flat().length} 个`, note: "与专题全景同序", icon: Network },
       { label: "技术链领域", value: `${data.technologyStages.reduce((sum, stage) => sum + stage.categories.length, 0)} 个`, note: "与科技前沿同序", icon: Atom },
     ]} />
-    <div className="tp-two-column tp-research-overview-grid">
-      <Panel title="科研机构数量与历史趋势" description={`${industry} · 2020—2025 全球演示样本`}><TrendFigure label="科研机构历年数量" values={data.trend} /></Panel>
-      <ResearchRegionPanel industry={industry} data={data} />
-    </div>
-    <Panel title="科研机构产业领域分布" description="结合产业链全景，展示科研机构在上中下游节点的布局" action={<DemoBadge>节点数量为演示统计</DemoBadge>}><ResearchChainDistribution chain={data.chain} counts={data.chainCounts} scopeLabel="全球科研机构" /></Panel>
-    <Panel title="科研机构技术领域分布" description="结合未来产业技术链，展示科研机构在基础、共性与转化技术领域的布局" action={<DemoBadge>领域数量为演示统计</DemoBadge>}><ResearchTechnologyDistribution stages={data.technologyStages} counts={data.technologyCounts} /></Panel>
+    <Panel title="科研机构数量" description={`展示${industry}相关科研机构数量和 2020—2025 年历史趋势`} action={<span className="tp-chart-kpi">2025 年 {data.total.toLocaleString()} 家</span>}><ResearchInstitutionTrend industry={industry} values={data.trend} /></Panel>
+    <ResearchRegionPanel industry={industry} data={data} />
+    <Panel title="科研机构产业领域分布" description="结合产业链全景展示科研机构在上中下游节点的重点分布" action={<span className="tp-chart-kpi">点击节点查看分布</span>}><ResearchChainDistribution chain={data.chain} counts={data.chainCounts} scopeLabel="全球科研机构" selectedName={selectedChainName} onSelect={(selection) => setSelectedChainName(selection.name)} />{selectedChain ? <div className="tp-research-selection-detail"><span>当前产业链节点</span><strong>{selectedChain.name}</strong><dl><div><dt>产业链阶段</dt><dd>{selectedChain.stage}</dd></div><div><dt>科研机构数量</dt><dd>{selectedChain.value} 家</dd></div></dl><p>{selectedChain.description}</p></div> : null}</Panel>
+    <Panel title="科研机构技术领域分布" description="结合产业技术链全景展示科研机构在基础、共性与转化技术领域的分布" action={<span className="tp-chart-kpi">点击领域查看分布</span>}><ResearchTechnologyDistribution stages={data.technologyStages} counts={data.technologyCounts} selectedName={selectedTechnologyName} onSelect={(selection) => setSelectedTechnologyName(selection.name)} />{selectedTechnology ? <div className="tp-research-selection-detail"><span>当前技术领域</span><strong>{selectedTechnology.name}</strong><dl><div><dt>技术阶段</dt><dd>{selectedTechnology.stage}</dd></div><div><dt>科研机构数量</dt><dd>{selectedTechnology.value} 家</dd></div></dl><p>{selectedTechnology.description}</p></div> : null}</Panel>
   </div>;
 }
 
@@ -2009,6 +2099,7 @@ function ResearchContent({ subId, industry }: { subId: string; industry: Industr
 }
 
 type TalentKind = "academic" | "industry";
+type TalentExperienceKind = "学习经历" | "工作经历";
 type TalentPerson = {
   id: string;
   kind: TalentKind;
@@ -2018,11 +2109,12 @@ type TalentPerson = {
   nationality: string;
   education: string;
   almaMater: string;
+  photoSrc: string;
   unit: string;
   specialty: string;
   position?: string;
   achievement: string;
-  experience: { period: string; content: string }[];
+  experience: { period: string; type: TalentExperienceKind; content: string }[];
   researchResults: string[];
   commercialResults: string[];
   honors: string[];
@@ -2061,7 +2153,7 @@ const talentProfileCache = new Map<Industry, TalentDemoProfile>();
 function createTalentRegionPoints(total: number, scope: RegionScope): RegionCountPoint[] {
   const metadata = scope === "global"
     ? [{ name: "中国", x: 75, y: 48 }, { name: "北美", x: 22, y: 40 }, { name: "欧洲", x: 49, y: 34 }, { name: "东亚", x: 84, y: 44 }, { name: "其他地区", x: 57, y: 63 }]
-    : [{ name: "粤港澳", x: 77, y: 55 }, { name: "长三角", x: 80, y: 49 }, { name: "京津冀", x: 78, y: 42 }, { name: "中西部", x: 70, y: 48 }, { name: "其他地区", x: 73, y: 58 }];
+    : [{ name: "粤港澳", x: 69, y: 49 }, { name: "长三角", x: 80, y: 35 }, { name: "京津冀", x: 65, y: 18 }, { name: "中西部", x: 48, y: 33 }, { name: "其他地区", x: 44, y: 55 }];
   const values = splitResearchTotal(total, scope === "global" ? [.36, .22, .18, .14, .1] : [.32, .24, .18, .16, .1]);
   return metadata.map((item, index) => ({ ...item, count: values[index] }));
 }
@@ -2076,11 +2168,11 @@ function createTalentPeople(industry: Industry, kind: TalentKind): TalentPerson[
     const startYear = 2005 + index % 5;
     const unitPrefix = isShenzhen ? "深圳" : ["北京", "上海", "广州", "杭州", "武汉", "成都"][(index + industryIndex) % 6];
     const unit = kind === "academic"
-      ? `${unitPrefix}${industry}前沿研究院（虚构）`
-      : `${unitPrefix}${industry}科技有限公司（虚构）`;
-    const achievement = kind === "academic"
-      ? `围绕${specialty}形成系列研究方法，牵头开放验证项目并发表代表性成果（演示）。`
-      : `推动${specialty}从技术验证进入工程应用，完成产品化与跨机构协作项目（演示）。`;
+      ? `${unitPrefix}${industry}前沿研究院`
+      : `${unitPrefix}${industry}科技有限公司`;
+    const researchAchievement = `围绕${specialty}形成系列研究方法，主持重点研究课题并形成代表性论文与专利成果。`;
+    const commercialAchievement = `推动${specialty}从技术验证进入工程应用，完成产品化与跨机构协作项目。`;
+    const achievement = kind === "academic" ? researchAchievement : commercialAchievement;
     return {
       id: `${kind}-${industryIndex}-${index + 1}`,
       kind,
@@ -2089,19 +2181,20 @@ function createTalentPeople(industry: Industry, kind: TalentKind): TalentPerson[
       birthDate: `${1972 + index % 15}-${String(index % 12 + 1).padStart(2, "0")}-${String(index % 26 + 1).padStart(2, "0")}`,
       nationality: talentNationalities[(index + industryIndex) % talentNationalities.length],
       education: kind === "academic" || index % 3 !== 0 ? "博士" : "硕士",
-      almaMater: `${talentSchools[(index + industryIndex) % talentSchools.length]}（虚构）`,
+      almaMater: talentSchools[(index + industryIndex) % talentSchools.length],
+      photoSrc: "./assets/figma-information-exchange/expert-avatar.png",
       unit,
       specialty,
       position: kind === "industry" ? talentPositions[(index + industryIndex) % talentPositions.length] : undefined,
       achievement,
       experience: [
-        { period: `${startYear}—${startYear + 4}`, content: `在${talentSchools[(index + industryIndex) % talentSchools.length]}完成专业学习与研究训练（虚构）` },
-        { period: `${startYear + 4}—${startYear + 10}`, content: `参与${industry}关键问题研究及工程验证工作（虚构）` },
-        { period: `${startYear + 10}—至今`, content: `在${unit}负责${specialty}与团队建设（虚构）` },
+        { period: `${startYear}—${startYear + 4}`, type: "学习经历", content: `在${talentSchools[(index + industryIndex) % talentSchools.length]}完成专业学习与研究训练` },
+        { period: `${startYear + 4}—${startYear + 10}`, type: "工作经历", content: `参与${industry}关键问题研究及工程验证工作` },
+        { period: `${startYear + 10}—至今`, type: "工作经历", content: `在${unit}负责${specialty}与团队建设` },
       ],
-      researchResults: [achievement, `建立${industry}跨学科协同研究与数据验证方法（演示成果）。`],
-      commercialResults: [`推动${industry}关键能力完成中试或场景验证（演示成绩）。`, `组织产业链协作项目并形成可复用实施框架（演示成绩）。`],
-      honors: [`2024 年度${industry}交叉创新人才（虚构）`, `2025 年度未来产业协同贡献奖（虚构）`],
+      researchResults: [researchAchievement, `建立${industry}跨学科协同研究与数据验证方法，推动研究数据与验证流程规范化。`],
+      commercialResults: [commercialAchievement, `组织产业链协作项目并形成可复用实施框架，推动关键能力完成中试与场景验证。`],
+      honors: [`2024 年度${industry}交叉创新人才`, "2025 年度未来产业协同贡献奖"],
       isShenzhen,
     };
   });
@@ -2151,29 +2244,64 @@ function getTalentDemoProfile(industry: Industry) {
 function TalentRegionDistribution({ industry, data }: { industry: Industry; data: TalentDemoProfile }) {
   const [scope, setScope] = useState<RegionScope>("global");
   const points = scope === "global" ? data.globalRegions : data.nationalRegions;
+  const [selectedRegionName, setSelectedRegionName] = useState(points[0]?.name ?? "");
+  const selectedRegion = points.find((point) => point.name === selectedRegionName) ?? points[0];
+  const scopeTotal = points.reduce((sum, point) => sum + point.count, 0);
+  const share = selectedRegion && scopeTotal ? Number((selectedRegion.count / scopeTotal * 100).toFixed(1)) : 0;
+  const chooseScope = (nextScope: RegionScope) => {
+    const nextPoints = nextScope === "global" ? data.globalRegions : data.nationalRegions;
+    setScope(nextScope);
+    setSelectedRegionName(nextPoints[0]?.name ?? "");
+  };
   return <div className="tp-talent-stack">
     <MetricStrip items={[
-      { label: "全球重点人才样本", value: `${data.total.toLocaleString()} 人`, note: `${industry}演示统计`, icon: Users },
-      { label: "全国重点人才样本", value: `${data.nationalTotal.toLocaleString()} 人`, note: "演示统计范围", icon: MapPinned },
-      { label: "区域样本", value: `${points.length} 个`, note: scope === "global" ? "全球区域" : "全国区域", icon: Globe2 },
-      { label: "统计周期", value: "2025 年", note: "演示截面数据", icon: CalendarDays },
+      { label: "全球重点人才", value: `${data.total.toLocaleString()} 人`, note: `${industry}人才总量`, icon: Users },
+      { label: "全国重点人才", value: `${data.nationalTotal.toLocaleString()} 人`, note: "全国范围人才数量", icon: MapPinned },
+      { label: "当前区域", value: `${points.length} 个`, note: scope === "global" ? "全球区域" : "全国区域", icon: Globe2 },
+      { label: "统计周期", value: "2025 年", note: "当前统计年份", icon: CalendarDays },
     ]} />
-    <Panel title={`${industry}重点人才区域分布`} description="以地图与数量图表展示全球或全国重点人才演示样本" action={<div className="tp-inline-tabs" role="group" aria-label="重点人才区域范围"><button className={scope === "global" ? "active" : ""} type="button" aria-pressed={scope === "global"} onClick={() => setScope("global")}>全球</button><button className={scope === "national" ? "active" : ""} type="button" aria-pressed={scope === "national"} onClick={() => setScope("national")}>全国</button></div>}>
+    <Panel title="重点人才分布" description={`通过地图和数量图表展示${industry}重点人才的全球或全国区域分布`} action={<div className="tp-inline-tabs" role="group" aria-label="重点人才区域范围"><button className={scope === "global" ? "active" : ""} type="button" aria-pressed={scope === "global"} onClick={() => chooseScope("global")}>全球</button><button className={scope === "national" ? "active" : ""} type="button" aria-pressed={scope === "national"} onClick={() => chooseScope("national")}>全国</button></div>}>
       <div className="tp-talent-region-layout">
-        <QuantifiedWorldMap label="重点人才区域分布" unit="人" points={points} scopeLabel={scope === "global" ? "全球演示样本" : "全国演示样本"} />
-        <section className="tp-talent-region-summary"><header><strong>区域人才数量</strong><small>一人只按当前工作地计入一个区域</small></header><BarBreakdown suffix=" 人" items={points.map((point) => ({ label: point.name, value: point.count }))} /></section>
+        <QuantifiedWorldMap label={`${industry}重点人才区域分布`} unit="人" points={points} scopeLabel={scope === "global" ? "全球重点人才" : "全国重点人才"} showStatus={false} mapMode={scope === "global" ? "world" : "national"} selectedName={selectedRegion?.name} onSelect={(point) => setSelectedRegionName(point.name)} />
+        <section className="tp-talent-region-summary" aria-labelledby="tp-talent-region-summary-title"><header><h4 id="tp-talent-region-summary-title">区域人才数量</h4><small>点击地图或图表选择区域</small></header><div className="tp-talent-region-list">{points.map((point) => <button type="button" className={selectedRegion?.name === point.name ? "is-active" : ""} aria-pressed={selectedRegion?.name === point.name} onClick={() => setSelectedRegionName(point.name)} key={point.name}><span>{point.name}</span><i><b style={{ "--tp-talent-region-width": `${point.count / Math.max(...points.map((item) => item.count), 1) * 100}%` } as CSSProperties}/></i><strong>{point.count} 人</strong></button>)}</div>{selectedRegion ? <div className="tp-talent-region-detail" aria-live="polite"><span>当前区域</span><strong>{selectedRegion.name}</strong><dl><div><dt>重点人才数量</dt><dd>{selectedRegion.count} 人</dd></div><div><dt>区域占比</dt><dd>{share}%</dd></div><div><dt>所属产业</dt><dd>{industry}</dd></div></dl></div> : null}</section>
       </div>
     </Panel>
   </div>;
 }
 
-function TalentDomainDistribution({ industry, data }: { industry: Industry; data: TalentDemoProfile }) {
-  return <div className="tp-talent-stack">
-    <Panel title="人才产业领域分布" description={`结合${industry}产业链全景，展示上游、中游与下游各节点的人才布局`} action={<DemoBadge>节点人数为演示统计</DemoBadge>}>
-      <ResearchChainDistribution chain={data.chain} counts={data.chainCounts} scopeLabel={`${industry}人才`} unit="人" entityLabel="人才" />
+function TalentDomainDistribution({ industry, data, scope = "global" }: { industry: Industry; data: TalentDemoProfile; scope?: "global" | "shenzhen" }) {
+  const isShenzhen = scope === "shenzhen";
+  const chainCounts = isShenzhen ? data.shenzhenChainCounts : data.chainCounts;
+  const technologyCounts = isShenzhen ? data.shenzhenTechnologyCounts : data.technologyCounts;
+  const sectionPrefix = isShenzhen ? "深圳" : "";
+  const audienceLabel = `${sectionPrefix}${industry}人才`;
+  const chainSelections = data.chain.flatMap((lane, stageIndex) => lane.map((item, nodeIndex) => ({ name: item.name, stage: chainLaneMeta[stageIndex].label, value: chainCounts[stageIndex][nodeIndex], description: item.note })));
+  const technologySelections = data.technologyStages.flatMap((stage, stageIndex) => stage.categories.map((category, categoryIndex) => ({ name: category.name, stage: stage.title, value: technologyCounts[stageIndex][categoryIndex], description: category.summary })));
+  const [selectedChainName, setSelectedChainName] = useState(chainSelections[0]?.name ?? "");
+  const [selectedTechnologyName, setSelectedTechnologyName] = useState(technologySelections[0]?.name ?? "");
+  useEffect(() => { setSelectedChainName(chainSelections[0]?.name ?? ""); setSelectedTechnologyName(technologySelections[0]?.name ?? ""); }, [industry, scope]);
+  const selectedChain = chainSelections.find((item) => item.name === selectedChainName) ?? chainSelections[0];
+  const selectedTechnology = technologySelections.find((item) => item.name === selectedTechnologyName) ?? technologySelections[0];
+  const selectedChainStageIndex = selectedChain ? data.chain.findIndex((lane) => lane.some((item) => item.name === selectedChain.name)) : -1;
+  const selectedTechnologyStageIndex = selectedTechnology ? data.technologyStages.findIndex((stage) => stage.categories.some((category) => category.name === selectedTechnology.name)) : -1;
+  const chainAssociationTotal = chainCounts.flat().reduce((sum, value) => sum + value, 0);
+  const technologyAssociationTotal = technologyCounts.flat().reduce((sum, value) => sum + value, 0);
+  const chainShare = selectedChain && chainAssociationTotal ? (selectedChain.value / chainAssociationTotal * 100).toFixed(1) : "0.0";
+  const technologyShare = selectedTechnology && technologyAssociationTotal ? (selectedTechnology.value / technologyAssociationTotal * 100).toFixed(1) : "0.0";
+  const linkedTechnologyStage = selectedChainStageIndex >= 0 ? data.technologyStages[selectedChainStageIndex]?.title : undefined;
+  const linkedChainStage = selectedTechnologyStageIndex >= 0 ? chainLaneMeta[selectedTechnologyStageIndex]?.label : undefined;
+  const selectedTechnologyCategory = data.technologyStages.flatMap((stage) => stage.categories).find((category) => category.name === selectedTechnology?.name);
+  const technologyNodeWeights = selectedTechnologyCategory?.nodes.map((_, index, nodes) => nodes.length - index) ?? [];
+  const technologyNodeWeightTotal = technologyNodeWeights.reduce((sum, value) => sum + value, 0);
+  const technologyNodeCounts = selectedTechnology && technologyNodeWeightTotal ? splitResearchTotal(selectedTechnology.value, technologyNodeWeights.map((value) => value / technologyNodeWeightTotal)) : [];
+  return <div className="tp-talent-stack tp-talent-domain-view">
+    <Panel title={`${sectionPrefix}人才产业领域分布`} description={isShenzhen ? `结合深圳${industry}产业链全景，展示产业链各环节的人才布局` : `结合${industry}产业链与技术链全景，展示上游、中游、下游各环节的人才分布`} action={<span className="tp-chart-kpi">点击节点查看人才分布</span>}>
+      <ResearchChainDistribution chain={data.chain} counts={chainCounts} scopeLabel={audienceLabel} unit="人" entityLabel="人才" selectedName={selectedChainName} onSelect={(selection) => setSelectedChainName(selection.name)} />
+      {selectedChain ? <div className="tp-talent-domain-detail" aria-live="polite"><div><span>当前产业链节点</span><strong>{selectedChain.name}</strong><p>{selectedChain.description}</p></div><dl><div><dt>产业链环节</dt><dd>{selectedChain.stage}</dd></div><div><dt>人才关联数量</dt><dd>{selectedChain.value} 人</dd></div><div><dt>节点关联占比</dt><dd>{chainShare}%</dd></div><div><dt>关联技术阶段</dt><dd>{linkedTechnologyStage ?? "—"}</dd></div></dl></div> : null}
     </Panel>
-    <Panel title="人才技术领域分布" description="结合未来产业技术链，展示基础支撑、关键共性与应用转化领域的人才布局" action={<DemoBadge>领域人数为演示统计</DemoBadge>}>
-      <ResearchTechnologyDistribution stages={data.technologyStages} counts={data.technologyCounts} scopeLabel={`${industry}人才`} unit="人" entityLabel="人才" />
+    <Panel title={`${sectionPrefix}人才技术领域分布`} description={isShenzhen ? `结合深圳${industry}技术链全景，展示技术链各环节的人才布局` : `结合${industry}技术链全景，展示基础支撑、关键共性、应用转化各环节的人才分布`} action={<span className="tp-chart-kpi">点击领域查看人才分布</span>}>
+      <ResearchTechnologyDistribution stages={data.technologyStages} counts={technologyCounts} scopeLabel={audienceLabel} unit="人" entityLabel="人才" selectedName={selectedTechnologyName} onSelect={(selection) => setSelectedTechnologyName(selection.name)} />
+      {selectedTechnology ? <div className="tp-talent-domain-detail" aria-live="polite"><div><span>当前技术领域</span><strong>{selectedTechnology.name}</strong><p>{selectedTechnology.description}</p></div><dl><div><dt>技术链阶段</dt><dd>{selectedTechnology.stage}</dd></div><div><dt>人才关联数量</dt><dd>{selectedTechnology.value} 人</dd></div><div><dt>领域关联占比</dt><dd>{technologyShare}%</dd></div><div><dt>对应产业环节</dt><dd>{linkedChainStage ?? "—"}</dd></div></dl>{selectedTechnologyCategory ? <section className="tp-talent-technology-nodes" aria-label={`${selectedTechnology.name}覆盖技术节点`}><header><strong>覆盖技术节点</strong><span>{selectedTechnologyCategory.nodes.length} 个节点</span></header><ul>{selectedTechnologyCategory.nodes.map((node, index) => <li key={node.id}><strong>{node.name}</strong><b>{technologyNodeCounts[index]} 人</b><span>{node.focus}</span></li>)}</ul></section> : null}</div> : null}
     </Panel>
   </div>;
 }
@@ -2217,44 +2345,60 @@ function TalentRanking({ people, kind }: { people: TalentPerson[]; kind: TalentK
 
 function TalentProfileShowcase({ people, label }: { people: TalentPerson[]; label: string }) {
   const [selectedId, setSelectedId] = useState(people[0].id);
+  useEffect(() => { setSelectedId(people[0]?.id ?? ""); }, [people[0]?.id]);
   const person = people.find((item) => item.id === selectedId) ?? people[0];
   return <div className="tp-talent-profile">
     <nav className="tp-talent-profile-switcher" aria-label={`${label}切换`}>{people.map((item) => <button className={person.id === item.id ? "active" : ""} type="button" aria-pressed={person.id === item.id} onClick={() => setSelectedId(item.id)} key={item.id}><span>{item.name}</span><small>{item.specialty}</small></button>)}</nav>
     <div className="tp-talent-profile-layout">
       <aside>
-        <div className="tp-talent-avatar"><Users size={34} aria-hidden="true" /><small>演示头像</small></div>
-        <h4>{person.name}<small>（虚构人物）</small></h4>
+        <div className="tp-talent-avatar"><img src={person.photoSrc} alt={`${person.name}人物照片`} /></div>
+        <h4>{person.name}</h4>
         <p>{person.specialty}</p>
-        <dl><div><dt>出生日期</dt><dd>{person.birthDate}</dd></div><div><dt>国籍</dt><dd>{person.nationality}</dd></div><div><dt>单位</dt><dd>{person.unit}</dd></div><div><dt>学历</dt><dd>{person.education}</dd></div><div><dt>毕业院校</dt><dd>{person.almaMater}</dd></div></dl>
+        <h5>基本信息介绍</h5>
+        <dl><div><dt>出生日期</dt><dd>{person.birthDate}</dd></div><div><dt>国籍</dt><dd>{person.nationality}</dd></div><div><dt>单位</dt><dd>{person.unit}</dd></div>{person.position ? <div><dt>职位</dt><dd>{person.position}</dd></div> : null}<div><dt>学历</dt><dd>{person.education}</dd></div><div><dt>毕业院校</dt><dd>{person.almaMater}</dd></div></dl>
       </aside>
-      <div className="tp-talent-profile-content" aria-live="polite">
-        <section className="tp-talent-career"><h4>个人经历简介</h4><ol>{person.experience.map((item) => <li key={item.period}><time>{item.period}</time><span aria-hidden="true" /><p>{item.content}</p></li>)}</ol></section>
-        <section className="tp-talent-results"><h4>重大成果介绍</h4><div><article><strong>科研成果</strong><ul>{person.researchResults.map((item) => <li key={item}><CheckCircle2 size={14} aria-hidden="true" />{item}</li>)}</ul></article><article><strong>商业与产业成绩</strong><ul>{person.commercialResults.map((item) => <li key={item}><CheckCircle2 size={14} aria-hidden="true" />{item}</li>)}</ul></article></div></section>
+      <div className="tp-talent-profile-content">
+        <p className="tp-visually-hidden" role="status">已切换至 {person.name}</p>
+        <section className="tp-talent-career"><h4>个人经历简介</h4><p className="tp-talent-section-note">按时间轴展示学习与工作经历</p><ol>{person.experience.map((item) => <li key={item.period}><time dateTime={item.period.slice(0, 4)}>{item.period}</time><span aria-hidden="true" /><div><small>{item.type}</small><p>{item.content}</p></div></li>)}</ol></section>
+        <section className="tp-talent-results"><h4>重大成果介绍</h4><div><article><h5>重大科研成果</h5><ul>{person.researchResults.map((item) => <li key={item}><CheckCircle2 size={14} aria-hidden="true" />{item}</li>)}</ul></article><article><h5>商业与产业成绩</h5><ul>{person.commercialResults.map((item) => <li key={item}><CheckCircle2 size={14} aria-hidden="true" />{item}</li>)}</ul></article></div></section>
         <section className="tp-talent-honors"><h4>个人荣誉介绍</h4><ul>{person.honors.map((item) => <li key={item}><GraduationCap size={16} aria-hidden="true" /><span>{item}</span></li>)}</ul></section>
       </div>
     </div>
   </div>;
 }
 
-function TalentIndustryComparison({ industry }: { industry: Industry }) {
+function TalentIndustryComparison({ industry, onSelect }: { industry: Industry; onSelect: (industry: Industry) => void }) {
   const values = industries.map((item, index) => ({ label: item, value: 192 + index * 17 }));
   const max = Math.max(...values.map((item) => item.value), 1);
-  return <div className="tp-talent-industry-comparison">{values.map((item) => <div className={item.label === industry ? "active" : ""} key={item.label}><span>{item.label}</span><i><b style={{ "--tp-talent-industry-width": `${item.value / max * 100}%` } as CSSProperties} /></i><strong>{item.value} 人</strong></div>)}</div>;
+  const total = values.reduce((sum, item) => sum + item.value, 0);
+  const selected = values.find((item) => item.label === industry) ?? values[0];
+  const share = total ? (selected.value / total * 100).toFixed(1) : "0.0";
+  return <div className="tp-talent-industry-overview">
+    <header aria-live="polite"><div><span>当前查看产业</span><strong>{selected.label}</strong></div><div><span>人才数量</span><strong>{selected.value} 人</strong></div><small>占八大产业人才总量 {share}%</small></header>
+    <div className="tp-talent-industry-comparison" role="group" aria-label="选择深圳人才统计产业">{values.map((item) => <button type="button" className={item.label === selected.label ? "active" : ""} aria-pressed={item.label === selected.label} onClick={() => onSelect(item.label)} key={item.label}><span>{item.label}</span><i><b style={{ "--tp-talent-industry-width": `${item.value / max * 100}%` } as CSSProperties} /></i><strong>{item.value} 人</strong></button>)}</div>
+  </div>;
 }
 
 function ShenzhenTalentSection({ industry, data }: { industry: Industry; data: TalentDemoProfile }) {
-  const latestAdded = data.shenzhenTrend.at(-1)! - data.shenzhenTrend.at(-2)!;
+  const [activeIndustry, setActiveIndustry] = useState(industry);
+  useEffect(() => { setActiveIndustry(industry); }, [industry]);
+  const activeData = activeIndustry === industry ? data : getTalentDemoProfile(activeIndustry);
+  const latestAdded = activeData.shenzhenTrend.at(-1)! - activeData.shenzhenTrend.at(-2)!;
+  const industryTalentTotal = industries.reduce((sum, _, index) => sum + 192 + index * 17, 0);
+  const featuredPeople = [
+    ...activeData.academicPeople.filter((person) => person.isShenzhen).slice(0, 2),
+    ...activeData.industryPeople.filter((person) => person.isShenzhen).slice(2, 4),
+  ];
   return <div className="tp-talent-stack">
     <MetricStrip items={[
-      { label: "深圳人才数量", value: `${data.shenzhenTotal} 人`, note: `${industry}演示样本`, icon: Users },
-      { label: "2025 年新增", value: `${latestAdded} 人`, note: "演示周期内新增", icon: Activity },
-      { label: "产业链节点", value: `${data.chain.flat().length} 个`, note: "人才可关联多节点", icon: Network },
-      { label: "技术链领域", value: `${data.technologyStages.reduce((sum, stage) => sum + stage.categories.length, 0)} 个`, note: "人才可跨领域布局", icon: Atom },
+      { label: "深圳人才数量", value: `${activeData.shenzhenTotal} 人`, note: `${activeIndustry} · 2025 年`, icon: Users },
+      { label: "2025 年新增", value: `${latestAdded} 人`, note: "较 2024 年", icon: Activity },
+      { label: "覆盖产业", value: `${industries.length} 个`, note: "八大未来产业", icon: Network },
+      { label: "产业人才合计", value: `${industryTalentTotal.toLocaleString()} 人`, note: "2025 年深圳各产业统计", icon: Atom },
     ]} />
-    <div className="tp-two-column tp-talent-shenzhen-overview"><Panel title="深圳人才数量趋势" description={`${industry} · 2020—2025 演示样本`}><TrendFigure label="深圳人才历年数量" values={data.shenzhenTrend} /></Panel><Panel title="八大未来产业人才数量" description="当前专题产业以蓝色突出"><TalentIndustryComparison industry={industry} /></Panel></div>
-    <Panel title="深圳人才产业领域分布" description="结合深圳产业链全景，展示人才在各产业链节点的布局" action={<DemoBadge>节点人数为演示统计</DemoBadge>}><ResearchChainDistribution chain={data.chain} counts={data.shenzhenChainCounts} scopeLabel={`深圳${industry}人才`} unit="人" entityLabel="人才" /></Panel>
-    <Panel title="深圳人才技术领域分布" description="结合深圳技术链全景，展示人才在各技术领域的布局" action={<DemoBadge>领域人数为演示统计</DemoBadge>}><ResearchTechnologyDistribution stages={data.technologyStages} counts={data.shenzhenTechnologyCounts} scopeLabel={`深圳${industry}人才`} unit="人" entityLabel="人才" /></Panel>
-    <Panel title="深圳重点人才介绍" description="展示基本信息、个人经历、重大成果与个人荣誉" action={<DemoBadge>人物资料为虚构演示</DemoBadge>}><TalentProfileShowcase people={data.shenzhenPeople} label="深圳重点人才" /></Panel>
+    <div className="tp-two-column tp-talent-shenzhen-overview"><Panel title="深圳人才数量趋势" description={`${activeIndustry} · 2020—2025`}><ShenzhenTalentTrend industry={activeIndustry} values={activeData.shenzhenTrend} /></Panel><Panel title="深圳各产业人才数量" description="选择产业后同步更新趋势、领域分布和重点人才"><TalentIndustryComparison industry={activeIndustry} onSelect={setActiveIndustry} /></Panel></div>
+    <TalentDomainDistribution industry={activeIndustry} data={activeData} scope="shenzhen" />
+    <Panel title="深圳重点人才介绍" description={`展示${activeIndustry}学术与产业重点人才的基本信息、个人经历、重大成果和个人荣誉`}><TalentProfileShowcase people={featuredPeople} label={`${activeIndustry}深圳重点人才`} /></Panel>
   </div>;
 }
 
@@ -2264,7 +2408,7 @@ function TalentContent({ subId, industry }: { subId: string; industry: Industry 
   if (subId === "talent-domain") return <TalentDomainDistribution industry={industry} data={data} />;
   if (subId === "academic-talent") return <Panel title={`${industry}学术人才 Top 30`} description="展示姓名、专业、国籍、学历、当前单位与重要学术成果"><TalentRanking people={data.academicPeople} kind="academic" /></Panel>;
   if (subId === "industry-talent") return <Panel title={`${industry}产业人才 Top 30`} description="展示姓名、领域、国籍、学历、单位、职位与重要产业成绩"><TalentRanking people={data.industryPeople} kind="industry" /></Panel>;
-  if (subId === "talent-profile") return <Panel title="领军人才介绍" description="展示基本信息、个人经历、重大成果与个人荣誉" action={<DemoBadge>人物资料为虚构演示</DemoBadge>}><TalentProfileShowcase people={[data.academicPeople[0], data.industryPeople[1], data.academicPeople[2]]} label="领军人才" /></Panel>;
+  if (subId === "talent-profile") return <Panel title="领军人才介绍" description="展示姓名、照片、基本信息、个人经历、重大成果与个人荣誉"><TalentProfileShowcase people={[data.academicPeople[0], data.industryPeople[1], data.academicPeople[2]]} label="领军人才" /></Panel>;
   return <ShenzhenTalentSection industry={industry} data={data} />;
 }
 
@@ -2969,7 +3113,7 @@ export default function TechnologyTopicServicePage() {
           <label className="tp-hero-industry">
             <span>当前专题产业</span>
             <div><select value={industry} onChange={(event) => selectIndustry(event.target.value as Industry)} aria-label="选择专题产业">{industries.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={16} aria-hidden="true" /></div>
-            <small>产业名称已确认，页面指标与对象为演示数据</small>
+            <small>选择产业后同步更新相关指标与内容</small>
           </label>
         </div>
       </div>
@@ -2990,7 +3134,6 @@ export default function TechnologyTopicServicePage() {
             <span className="tp-section-icon"><ActiveIcon size={22} aria-hidden="true" /></span>
             <div><h2 id="tp-module-title">{activeDefinition.label}</h2><p>{moduleContextLabel}&nbsp;｜&nbsp;{activeDefinition.description}</p></div>
           </div>
-          <div className="tp-section-actions"><DemoBadge>演示数据</DemoBadge></div>
         </header>
 
         <div className="tp-workspace">

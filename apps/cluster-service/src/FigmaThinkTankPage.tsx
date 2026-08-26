@@ -1,16 +1,18 @@
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import {
   Building2,
   CalendarDays,
   ChevronDown,
   ChevronLeft,
-  ChevronRight,
   Heart,
+  ListChecks,
   Minus,
   Plus,
   RefreshCw,
   Search,
+  ShieldCheck,
   Star,
+  Target,
   UserRound,
 } from "lucide-react";
 import PortalHeader from "./PortalHeader";
@@ -19,16 +21,83 @@ import "./figma-think-tank.css";
 
 const assetRoot = "./assets/figma-think-tank";
 
-const reportTitle = "人工智能产业发展方向与关键能力建设研究";
-const reportSummary = "研判通用大模型、具身智能和行业智能体的发展态势，提出自主能力与应用生态建设路径";
+type ConsultingReport = {
+  id: string;
+  kind: "push" | "case";
+  title: string;
+  summary: string;
+  field: string;
+  institution: string;
+  year: string;
+  topic: string;
+  direction: string;
+  analysis: string[];
+  recommendations: string[];
+};
 
-const reportRows = Array.from({ length: 5 }, (_, index) => ({
-  id: index + 1,
-  title: reportTitle,
-  summary: reportSummary,
-  institute: "中国科学院",
-  date: "2026-02-14",
-}));
+const reportFields = ["全部领域", "机械运输", "信息电子", "化学与化学工程", "能源动力", "土木建筑", "环境与水利", "农业", "医药卫生"] as const;
+const reportTopics = ["全部专题", "新能源专题库", "数字基建专题库", "公共卫生专题库", "环境保护专题库", "人工智能专题库"] as const;
+
+const consultingReports: ConsultingReport[] = [
+  {
+    id: "ai-capability-2026", kind: "push", title: "人工智能产业发展方向与关键能力建设研究", field: "信息电子", institution: "中国科学院", year: "2026", topic: "人工智能专题库",
+    summary: "围绕基础模型、多模态智能、具身智能和行业智能体梳理技术演进路径，分析关键能力、产品形态与应用生态。",
+    direction: "从通用能力竞争转向行业知识、工具调用与复杂任务协同，模型能力和工程体系同步演进。",
+    analysis: ["基础模型训练、推理与评测工具链持续完善", "多模态理解与具身决策成为重点融合方向", "行业智能体加速进入科研、制造与公共服务场景"],
+    recommendations: ["建设可复用的行业数据与评测基准", "围绕重点场景组织技术验证和产品迭代", "建立安全治理、版本管理与效果复盘机制"],
+  },
+  {
+    id: "energy-storage-2026", kind: "push", title: "新型储能技术路线与产业协同研究", field: "能源动力", institution: "深圳战略研究中心", year: "2026", topic: "新能源专题库",
+    summary: "梳理电化学储能、长时储能与系统集成的发展重点，分析技术成熟度、关键环节和产业协同方向。",
+    direction: "储能技术由单一性能提升转向安全、寿命、成本与系统调度能力的综合优化。",
+    analysis: ["电化学储能仍是近期工程化重点", "长时储能在多时间尺度调节场景中加快验证", "系统集成和安全管理成为产业链关键能力"],
+    recommendations: ["建立分场景的性能与安全评价口径", "加强关键材料、系统集成与运维环节协同", "持续跟踪示范项目运行数据"],
+  },
+  {
+    id: "public-health-2026", kind: "push", title: "公共卫生科技支撑与应急协同研究", field: "医药卫生", institution: "科技治理研究中心", year: "2026", topic: "公共卫生专题库",
+    summary: "围绕监测预警、快速检测、资源调度与协同处置，研究公共卫生科技支撑体系的关键能力。",
+    direction: "公共卫生技术体系向实时感知、智能研判和跨部门协同演进。",
+    analysis: ["监测数据的及时性和一致性影响研判效率", "检测技术与资源调度需要形成闭环", "跨机构协同依赖统一的数据和流程标准"],
+    recommendations: ["完善多源监测数据治理机制", "建设应急资源协同调度能力", "强化技术应用的隐私与安全边界"],
+  },
+  {
+    id: "river-ecology-2025", kind: "push", title: "流域生态治理与水资源协同研究", field: "环境与水利", institution: "湾区产业研究院", year: "2025", topic: "环境保护专题库",
+    summary: "从水环境监测、污染溯源、生态修复和资源调度角度分析流域协同治理路径。",
+    direction: "流域治理由分段管理转向数据贯通、联合研判和系统修复。",
+    analysis: ["监测网络需要覆盖关键断面和风险源", "污染溯源依赖多源数据与模型协同", "生态修复成效需进行长期连续评估"],
+    recommendations: ["统一流域监测指标与数据接口", "建立跨区域联合研判机制", "形成治理措施与生态成效的追踪关系"],
+  },
+  {
+    id: "intelligent-manufacturing-2025", kind: "case", title: "高端装备智能制造转型成果案例", field: "机械运输", institution: "先进制造研究中心", year: "2025", topic: "数字基建专题库",
+    summary: "展示高端装备企业围绕工艺数据、智能排产和设备预测维护形成的数字化转型成果。",
+    direction: "制造现场从单点自动化走向数据贯通、柔性协同与全流程优化。",
+    analysis: ["工艺参数和设备状态形成统一数据底座", "智能排产连接订单、产能与物料约束", "预测维护降低非计划停机风险"],
+    recommendations: ["持续完善设备与工艺数据标准", "建立模型效果与生产指标的联合评估", "分阶段扩展到更多产线和产品类型"],
+  },
+  {
+    id: "green-chemistry-2025", kind: "case", title: "绿色化工与低碳工艺优化成果案例", field: "化学与化学工程", institution: "绿色技术研究院", year: "2025", topic: "环境保护专题库",
+    summary: "展示化工流程在能耗监测、过程优化和副产物资源化方面形成的技术成果与应用路径。",
+    direction: "化工过程向低碳原料、连续监测和智能优化协同发展。",
+    analysis: ["关键工序能耗和排放数据实现连续采集", "过程参数优化兼顾效率、质量与安全", "副产物资源化形成新的工艺协同环节"],
+    recommendations: ["完善全流程碳排放核算边界", "加强工艺优化模型的现场验证", "建立资源化成果的长期效果跟踪"],
+  },
+  {
+    id: "resilient-city-2024", kind: "case", title: "韧性城市与新型建筑工业化成果案例", field: "土木建筑", institution: "城市建设研究院", year: "2024", topic: "数字基建专题库",
+    summary: "展示城市基础设施感知、建筑工业化和风险预警技术在韧性城市建设中的应用成果。",
+    direction: "城市建设从静态交付转向全生命周期感知、评估和协同维护。",
+    analysis: ["基础设施运行状态实现分层感知", "工业化建造提升构件和施工信息一致性", "风险预警连接设施状态与应急流程"],
+    recommendations: ["统一设施编码和状态数据标准", "加强建造与运维数据衔接", "形成风险预警到处置反馈的闭环"],
+  },
+  {
+    id: "digital-agriculture-2024", kind: "case", title: "数字农业精准生产与服务成果案例", field: "农业", institution: "现代农业研究中心", year: "2024", topic: "数字基建专题库",
+    summary: "展示农业感知、智能决策和生产服务协同形成的精准生产成果。",
+    direction: "农业生产向环境感知、精准决策和全程服务协同演进。",
+    analysis: ["田间感知数据支持生产过程动态调整", "模型建议与农事记录形成验证闭环", "服务平台连接技术、农资和生产主体"],
+    recommendations: ["完善农业数据采集与质量检查", "按作物和区域建立差异化模型", "加强技术服务效果的持续评估"],
+  },
+];
+
+const reportSummary = consultingReports[0].summary;
 
 const newsRows = [
   "人工智能产业发展方向与关键能力建设研究",
@@ -77,6 +146,62 @@ const technologyBranches = [
   },
 ];
 
+type HotTechnology = { name: string; detail: string };
+const yearlyTechnologies: Array<{ year: string; items: HotTechnology[] }> = [
+  { year: "2025年", items: [{ name: "行业智能体协同", detail: "面向复杂任务编排、工具调用与多智能体协作的技术方向。" }] },
+  { year: "2024年", items: [{ name: "具身智能决策控制", detail: "围绕感知、规划、控制闭环与真实环境验证的技术方向。" }] },
+  { year: "2023年", items: [{ name: "检索增强生成", detail: "结合领域知识检索、证据引用与生成质量控制的技术方向。" }] },
+  { year: "2022年", items: [{ name: "多模态表征学习", detail: "融合文本、图像与结构化数据表征的技术方向。" }] },
+  { year: "2021年", items: [{ name: "大规模预训练模型", detail: "以通用语义建模和迁移能力为重点的技术方向。" }] },
+];
+
+const technologyMilestones = [
+  { id: "m-2021", year: "2021年", technology: "预训练模型工程平台上线", team: "基础模型研发团队", impact: "夯实中文语义建模、训练与评测基础。" },
+  { id: "m-2022", year: "2022年", technology: "多模态表征框架完成验证", team: "多模态联合团队", impact: "推动图文理解与生成能力融合。" },
+  { id: "m-2023", year: "2023年", technology: "行业知识增强方案形成", team: "知识工程团队", impact: "提升垂直领域检索、问答与证据追溯能力。" },
+  { id: "m-2024", year: "2024年", technology: "具身智能决策控制样机", team: "机器人智能团队", impact: "验证感知、规划与控制的闭环协同。" },
+  { id: "m-2025", year: "2025年", technology: "行业智能体协同平台发布", team: "智能体工程团队", impact: "支持多智能体任务编排与工具调用。" },
+] as const;
+
+const roadmapLevels = [
+  {
+    id: "goal",
+    label: "发展目标",
+    title: "形成可持续演进的人工智能技术体系",
+    description: "围绕基础能力、前沿方向与行业应用构建可跟踪、可评估的发展目标。",
+    icon: Target,
+    items: [
+      { label: "发展方向", value: "基础模型、多模态智能、具身智能与行业智能体" },
+      { label: "能力目标", value: "增强训练推理、知识融合、任务规划与安全评测能力" },
+      { label: "成果目标", value: "形成可复用的技术组件、产品原型与评测方法" },
+    ],
+  },
+  {
+    id: "task",
+    label: "具体任务",
+    title: "将关键技术转化为可验证任务与核心产品",
+    description: "按技术攻关、产品形成和场景验证组织任务，避免路线只停留在名词清单。",
+    icon: ListChecks,
+    items: [
+      { label: "关键技术", value: "多模态理解、具身智能决策、行业知识增强" },
+      { label: "核心产品", value: "基础模型工具链、行业智能体平台、智能评测服务" },
+      { label: "验证任务", value: "完成数据准备、原型验证、指标评测与应用反馈闭环" },
+    ],
+  },
+  {
+    id: "safeguard",
+    label: "保障措施",
+    title: "建立数据、人才与治理协同保障",
+    description: "用可追溯的数据底座、跨团队协作和安全评测支撑技术路线持续推进。",
+    icon: ShieldCheck,
+    items: [
+      { label: "数据与算力", value: "建立数据质量、授权边界、算力调度和过程记录机制" },
+      { label: "人才与协同", value: "组织基础研究、工程研发与行业专家协同验证" },
+      { label: "评测与治理", value: "统一指标口径、风险检查、版本管理和阶段复盘" },
+    ],
+  },
+] as const;
+
 const thinkTankLocatorItems = [
   { id: "technology", label: "领域技术路线" },
   { id: "reports", label: "战略咨询报告" },
@@ -109,7 +234,7 @@ function MetricStrip({ items }: { items: Array<{ label: string; value: string; t
 
 function LineChart() {
   return (
-    <svg className="ttf-line-chart" viewBox="0 0 820 220" role="img" aria-label="2021至2025年技术发展演示概览：技术总量约为40、45、70、100、110，突破性技术约为30、35、60、90、100。">
+    <svg className="ttf-line-chart" viewBox="0 0 820 220" role="img" aria-label="2021至2025年技术发展概览：技术总量约为40、45、70、100、110，突破性技术约为30、35、60、90、100。">
       <defs>
         <linearGradient id="ttf-blue-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#1877ff" stopOpacity=".18"/><stop offset="1" stopColor="#1877ff" stopOpacity="0"/></linearGradient>
         <linearGradient id="ttf-green-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#00bc37" stopOpacity=".15"/><stop offset="1" stopColor="#00bc37" stopOpacity="0"/></linearGradient>
@@ -131,8 +256,13 @@ function TechnologySection() {
   const [expandedBranches, setExpandedBranches] = useState<Set<string>>(() => new Set(technologyBranches.map((item) => item.name)));
   const [treeScale, setTreeScale] = useState(1);
   const [treeQuery, setTreeQuery] = useState("");
-  const [selectedNode, setSelectedNode] = useState({ title: "人工智能", detail: "3 条关键技术路线 · 9 个细分技术节点" });
+  const [activeRoadmapLevel, setActiveRoadmapLevel] = useState<(typeof roadmapLevels)[number]["id"]>("goal");
+  const [selectedHotTechnology, setSelectedHotTechnology] = useState<HotTechnology>(yearlyTechnologies[0].items[0]);
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<(typeof technologyMilestones)[number]["id"]>(technologyMilestones[0].id);
+  const [selectedNode, setSelectedNode] = useState({ title: "人工智能", detail: "12,345 篇论文 · 3 条关键技术路线 · 9 个细分技术节点" });
   const normalizedQuery = treeQuery.trim();
+  const activeRoadmap = roadmapLevels.find((level) => level.id === activeRoadmapLevel) ?? roadmapLevels[0];
+  const activeMilestone = technologyMilestones.find((item) => item.id === selectedMilestoneId) ?? technologyMilestones[0];
   const visibleBranches = technologyBranches.map((branch) => {
     if (!normalizedQuery || branch.name.includes(normalizedQuery)) return branch;
     return { ...branch, leaves: branch.leaves.filter((leaf) => `${leaf.name}${leaf.relation}`.includes(normalizedQuery)) };
@@ -149,25 +279,33 @@ function TechnologySection() {
   return (
     <section id="technology" className="ttf-section ttf-tech">
       <SectionHeading title="领域技术路线" subtitle="总体画像｜发展目标｜具体任务｜保障措施">
-        <MiniSelect label="当前领域" value="人工智能" />
+        <span className="ttf-domain-label"><small>当前领域</small><b>人工智能</b></span>
         <label className="ttf-section-search"><input value={treeQuery} onChange={(event) => setTreeQuery(event.target.value)} placeholder="搜索技术分支" aria-label="搜索技术分支"/><Search size={16}/></label>
       </SectionHeading>
+      <article className="fp-card ttf-roadmap-panel">
+        <nav className="ttf-roadmap-tabs" role="tablist" aria-label="技术发展路线层级">
+          {roadmapLevels.map((level) => {
+            const Icon = level.icon;
+            const active = level.id === activeRoadmapLevel;
+            return <button type="button" role="tab" aria-selected={active} aria-controls="ttf-roadmap-detail" className={active ? "is-active" : ""} onClick={() => setActiveRoadmapLevel(level.id)} key={level.id}><Icon size={17} aria-hidden="true"/><span>{level.label}</span></button>;
+          })}
+        </nav>
+        <div id="ttf-roadmap-detail" className="ttf-roadmap-detail" role="tabpanel" aria-live="polite">
+          <header><span>{activeRoadmap.label}</span><h3>{activeRoadmap.title}</h3><p>{activeRoadmap.description}</p></header>
+          <dl>{activeRoadmap.items.map((item) => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>
+        </div>
+      </article>
       <MetricStrip items={[
-        { label: "论文总数", value: "12,345", trend: "15%" },
-        { label: "学者数量", value: "3,256", trend: "15%" },
-        { label: "企业数量", value: "12,345", trend: "15%" },
+        { label: "论文总数", value: "12,345" },
+        { label: "学者数量", value: "3,256" },
+        { label: "相关技术企业", value: "426" },
         { label: "论文发表环比", value: "+6.2%", danger: true },
       ]} />
       <div className="ttf-tech-overview">
         <article className="fp-card ttf-key-tech">
-          <PanelTitle title="近年关键技术" />
-          {[
-            ["2025年", "通用大模型高效推理"],
-            ["2024年", "多模态融合与生成", "具身智能决策控制"],
-            ["2023年", "多模态融合与生成", "具身智能决策控制"],
-            ["2022年", "多模态融合与生成", "具身智能决策控制"],
-            ["2021年", "多模态融合与生成", "具身智能决策控制"],
-          ].map(([year,...items])=><div className="ttf-key-year" key={year}><b>{year}</b>{items.map((item)=><span key={item}>{item}</span>)}</div>)}
+          <PanelTitle title="近5年热门关键技术" />
+          {yearlyTechnologies.map(({ year, items }) => <div className="ttf-key-year" key={year}><b>{year}</b>{items.map((item) => <button type="button" aria-pressed={selectedHotTechnology.name === item.name} className={selectedHotTechnology.name === item.name ? "is-active" : ""} onClick={() => setSelectedHotTechnology(item)} key={item.name}>{item.name}</button>)}</div>)}
+          <div className="ttf-key-detail" aria-live="polite"><strong>{selectedHotTechnology.name}</strong><p>{selectedHotTechnology.detail}</p></div>
         </article>
         <div className="ttf-tech-main">
           <article className="fp-card ttf-trend-panel">
@@ -176,18 +314,15 @@ function TechnologySection() {
           </article>
           <article className="fp-card ttf-milestone-panel">
             <PanelTitle title="关键技术发展里程碑轨道" aside="2021年–2025年" />
-            <div className="ttf-milestones">
-              {[
-                ["国产单细胞测序平台发布","华大生命科学研究院","2021年"],
-                ["国产单细胞测序平台发布","华大生命科学研究院","2022年"],
-                ["首个国产原子治疗系统获批","中科院上海细胞所","2022年"],
-              ].map(([title,team,year],index)=><div key={`${title}-${index}`}><article><b>{title}</b><p>{team}</p><span>高影响</span></article><i/><time>{year}</time></div>)}
+            <div className="ttf-milestone-track" role="tablist" aria-label="关键技术里程碑">
+              {technologyMilestones.map((item) => <button type="button" role="tab" aria-selected={selectedMilestoneId === item.id} aria-controls="ttf-milestone-detail" className={selectedMilestoneId === item.id ? "is-active" : ""} onClick={() => setSelectedMilestoneId(item.id)} key={item.id}><i/><time>{item.year}</time><span>{item.technology}</span></button>)}
             </div>
+            <dl id="ttf-milestone-detail" className="ttf-milestone-detail" role="tabpanel" aria-live="polite"><div><dt>时间节点</dt><dd>{activeMilestone.year}</dd></div><div><dt>技术名称</dt><dd>{activeMilestone.technology}</dd></div><div><dt>发明人或团队</dt><dd>{activeMilestone.team}</dd></div><div><dt>技术影响力</dt><dd>{activeMilestone.impact}</dd></div></dl>
           </article>
         </div>
       </div>
       <article className="fp-card ttf-tree-panel">
-        <PanelTitle title="关键技术分枝树" aside="节点可点击 · 内容为近五年演示数据" />
+        <PanelTitle title="关键技术分枝树" aside="节点可点击" />
         <div className="ttf-tree-toolbar">
           <button type="button" onClick={() => setTreeScale((value) => Math.max(.75, Number((value - .1).toFixed(2))))} disabled={treeScale <= .75} aria-label="缩小技术分枝树"><Minus size={14}/></button>
           <span aria-live="polite">{Math.round(treeScale * 100)}%</span>
@@ -198,7 +333,7 @@ function TechnologySection() {
         <div className="ttf-tree-viewport" aria-label="人工智能关键技术分枝树，可滚动查看">
           {visibleBranches.length ? <div className="ttf-tree-sizer" style={{ "--ttf-tree-scale": treeScale } as CSSProperties}>
             <div className="ttf-tree-canvas">
-              <button type="button" className={`ttf-tree-root${selectedNode.title === "人工智能" ? " is-selected" : ""}`} onClick={() => setSelectedNode({ title: "人工智能", detail: "3 条关键技术路线 · 9 个细分技术节点" })}><small>领域主线</small><b>人工智能</b><span>334,287 篇论文</span><em>{technologyBranches.length} 条路线</em></button>
+              <button type="button" className={`ttf-tree-root${selectedNode.title === "人工智能" ? " is-selected" : ""}`} onClick={() => setSelectedNode({ title: "人工智能", detail: "12,345 篇论文 · 3 条关键技术路线 · 9 个细分技术节点" })}><small>领域主线</small><b>人工智能</b><span>12,345 篇论文</span><em>{technologyBranches.length} 条路线</em></button>
               <ol className="ttf-tree-branches">{visibleBranches.map((branch) => {
                 const expanded = expandedBranches.has(branch.name);
                 return <li className={expanded ? "is-expanded" : ""} key={branch.name}>
@@ -215,21 +350,112 @@ function TechnologySection() {
   );
 }
 
-function ReportItem({ compact = false }: { compact?: boolean }) {
-  return <article className={`ttf-report-item${compact ? " is-compact" : ""}`}><h4>{reportTitle}</h4><p>{reportSummary}</p><div className="ttf-report-tags"><span>信息电子</span><span>新能源专题库</span></div><footer><span><Building2 size={13}/>中国科学院</span><span><CalendarDays size={13}/>2026-02-14</span></footer></article>;
+function ReportItem({
+  report,
+  compact = false,
+  expanded = false,
+  onToggleSummary,
+  onOpen,
+}: {
+  report: ConsultingReport;
+  compact?: boolean;
+  expanded?: boolean;
+  onToggleSummary?: () => void;
+  onOpen: () => void;
+}) {
+  const summaryId = `report-summary-${report.id}`;
+  return <article className={`ttf-report-item${compact ? " is-compact" : ""}`}>
+    <header><span>{report.kind === "push" ? "定向推送" : "成果案例"}</span><h4>{report.title}</h4></header>
+    <p id={summaryId} className={expanded ? "is-expanded" : ""}>{report.summary}</p>
+    <div className="ttf-report-tags"><span>{report.field}</span><span>{report.topic}</span></div>
+    <footer><span><Building2 size={13}/>{report.institution}</span><span><CalendarDays size={13}/>{report.year}</span></footer>
+    <div className="ttf-report-actions">
+      {!compact && onToggleSummary ? <button type="button" aria-expanded={expanded} aria-controls={summaryId} onClick={onToggleSummary}>{expanded ? "收起摘要" : "查看摘要"}</button> : null}
+      <button className="is-primary" type="button" onClick={onOpen}>{compact ? "查看报告" : "查看完整报告"}</button>
+    </div>
+  </article>;
+}
+
+function ReportDetailPage({ report }: { report: ConsultingReport }) {
+  const catalogUrl = new URL(window.location.href);
+  catalogUrl.searchParams.delete("report");
+  catalogUrl.hash = "reports";
+  return <article className="fp-card ttf-report-detail-page">
+    <header className="ttf-report-detail-header">
+      <a className="ttf-report-detail-back" href={`${catalogUrl.pathname}${catalogUrl.search}${catalogUrl.hash}`}><ChevronLeft size={16}/><span>返回报告列表</span></a>
+      <div><span>{report.kind === "push" ? "战略咨询研究报告" : "战略咨询成果案例"}</span><h3>{report.title}</h3><p>{report.summary}</p></div>
+    </header>
+    <div className="ttf-report-detail-meta"><span><small>领域分类</small>{report.field}</span><span><small>主题分类</small>{report.topic}</span><span><small>所属机构</small>{report.institution}</span><span><small>发表年度</small>{report.year}</span></div>
+    <div className="ttf-report-detail-content">
+      <section><h4>成果摘要</h4><p>{report.summary}</p></section>
+      <section><h4>技术发展方向</h4><p>{report.direction}</p></section>
+      <section><h4>分析内容</h4><ul>{report.analysis.map((item) => <li key={item}>{item}</li>)}</ul></section>
+      <section><h4>技术建议</h4><ol>{report.recommendations.map((item) => <li key={item}>{item}</li>)}</ol></section>
+    </div>
+  </article>;
 }
 
 function ReportsSection() {
-  const [tab,setTab]=useState<"push"|"cases">("push");
+  const [tab, setTab] = useState<"push" | "case">("push");
+  const [field, setField] = useState<(typeof reportFields)[number]>("全部领域");
+  const [institution, setInstitution] = useState("全部机构");
+  const [year, setYear] = useState("全部年度");
+  const [topic, setTopic] = useState<(typeof reportTopics)[number]>("全部专题");
+  const [query, setQuery] = useState("");
+  const [expandedSummaryId, setExpandedSummaryId] = useState<string | null>(null);
+  const [recommendationOffset, setRecommendationOffset] = useState(0);
+  const institutions = useMemo(() => ["全部机构", ...Array.from(new Set(consultingReports.map((report) => report.institution)))], []);
+  const years = useMemo(() => ["全部年度", ...Array.from(new Set(consultingReports.map((report) => report.year))).sort((a, b) => b.localeCompare(a))], []);
+  const pushedReports = consultingReports.filter((report) => report.kind === "push");
+  const recommendations = Array.from({ length: Math.min(3, pushedReports.length) }, (_, index) => pushedReports[(recommendationOffset + index) % pushedReports.length]);
+  const filteredReports = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase();
+    return consultingReports.filter((report) => {
+      const matchesKind = report.kind === tab;
+      const matchesField = field === "全部领域" || report.field === field;
+      const matchesInstitution = institution === "全部机构" || report.institution === institution;
+      const matchesYear = year === "全部年度" || report.year === year;
+      const matchesTopic = topic === "全部专题" || report.topic === topic;
+      const searchable = `${report.title}${report.summary}${report.direction}${report.analysis.join("")}${report.recommendations.join("")}`.toLocaleLowerCase();
+      return matchesKind && matchesField && matchesInstitution && matchesYear && matchesTopic && (!normalizedQuery || searchable.includes(normalizedQuery));
+    });
+  }, [field, institution, query, tab, topic, year]);
+
+  const clearFilters = () => {
+    setField("全部领域");
+    setInstitution("全部机构");
+    setYear("全部年度");
+    setTopic("全部专题");
+    setQuery("");
+  };
+
+  const openReport = (report: ConsultingReport) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("page", "think-tank");
+    url.searchParams.set("report", report.id);
+    url.hash = "reports";
+    window.location.assign(`${url.pathname}${url.search}${url.hash}`);
+  };
+
   return <section id="reports" className="ttf-section ttf-reports">
-    <SectionHeading title="战略咨询报告" subtitle="总体画像｜发展目标｜具体任务｜保障措施" />
+    <SectionHeading title="战略咨询报告" subtitle="定向推送｜成果案例｜分类检索｜报告详情" />
     <div className="ttf-report-workbench">
-      <aside className="fp-card ttf-recommend"><h3><Star size={18} fill="#ffaa3a"/>系统推荐</h3>{[1,2,3,4].map((item)=><ReportItem compact key={item}/>)}<button type="button"><RefreshCw size={16}/>换一换</button></aside>
+      <aside className="fp-card ttf-recommend">
+        <h3><Star size={18} fill="#ffaa3a"/>定向推送</h3>
+        <p className="ttf-recommend-context">根据已关注的人工智能、新能源与公共卫生领域匹配报告。</p>
+        <div className="ttf-recommend-list">{recommendations.map((report) => <ReportItem report={report} compact onOpen={() => openReport(report)} key={report.id}/>)}</div>
+        <button type="button" onClick={() => setRecommendationOffset((value) => (value + 1) % pushedReports.length)}><RefreshCw size={16}/>换一批</button>
+      </aside>
       <article className="fp-card ttf-report-catalog">
-        <div className="ttf-report-tabs"><button className={tab==="push"?"active":""} type="button" onClick={()=>setTab("push")}>定向推送</button><button className={tab==="cases"?"active":""} type="button" onClick={()=>setTab("cases")}>成果案例</button></div>
-        <div className="ttf-report-filters"><MiniSelect label="领域" value="全部领域"/><MiniSelect label="机构" value="全部机构"/><MiniSelect label="年度" value="全部年度"/><MiniSelect label="专题" value="全部专题"/></div>
-        <div className="ttf-report-list">{reportRows.map((item)=><ReportItem key={item.id}/>)}</div>
-        <div className="ttf-pagination"><ChevronLeft size={14}/><b>1</b><span>2</span><span>3</span><span>4</span><span>5</span><span>…</span><span>20</span><ChevronRight size={14}/></div>
+        <header className="ttf-report-catalog-header"><div className="ttf-report-tabs" role="tablist" aria-label="战略咨询报告类型"><button className={tab==="push"?"active":""} type="button" role="tab" aria-selected={tab === "push"} onClick={()=>{setTab("push");setExpandedSummaryId(null);}}>定向推送</button><button className={tab==="case"?"active":""} type="button" role="tab" aria-selected={tab === "case"} onClick={()=>{setTab("case");setExpandedSummaryId(null);}}>成果案例</button></div><span>共 {filteredReports.length} 项</span></header>
+        <div className="ttf-report-search"><Search size={16}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索报告标题、方向或建议" aria-label="搜索战略咨询报告"/></div>
+        <div className="ttf-report-filters">
+          <label><span>领域分类</span><select value={field} onChange={(event) => setField(event.target.value as (typeof reportFields)[number])}>{reportFields.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label><span>所属机构</span><select value={institution} onChange={(event) => setInstitution(event.target.value)}>{institutions.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label><span>发表年度</span><select value={year} onChange={(event) => setYear(event.target.value)}>{years.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label><span>主题分类</span><select value={topic} onChange={(event) => setTopic(event.target.value as (typeof reportTopics)[number])}>{reportTopics.map((item) => <option key={item}>{item}</option>)}</select></label>
+        </div>
+        <div className="ttf-report-list">{filteredReports.length ? filteredReports.map((report) => <ReportItem report={report} expanded={expandedSummaryId === report.id} onToggleSummary={() => setExpandedSummaryId((current) => current === report.id ? null : report.id)} onOpen={() => openReport(report)} key={report.id}/>) : <div className="ttf-report-empty"><strong>未找到符合条件的报告</strong><p>请调整领域、机构、年度、专题或搜索关键词。</p><button type="button" onClick={clearFilters}>清除筛选</button></div>}</div>
       </article>
     </div>
   </section>;
@@ -311,6 +537,14 @@ function NewsSection() {
 }
 
 export default function FigmaThinkTankPage() {
+  const reportId = new URL(window.location.href).searchParams.get("report");
+  const report = consultingReports.find((item) => item.id === reportId) ?? null;
+  useEffect(() => {
+    if (report) document.title = `${report.title} - 战略咨询报告`;
+  }, [report]);
+
+  if (report) return <main className="ttf-report-standalone"><PortalHeader currentPage="think-tank"/><div className="ttf-report-standalone-shell"><ReportDetailPage report={report}/></div></main>;
+
   return <main className="ttf-page">
     <PortalHeader currentPage="think-tank" />
     <section id="top" className="ttf-hero">
