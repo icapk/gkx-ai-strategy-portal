@@ -3193,7 +3193,7 @@ function OrganizationTreeNodeRow({ node, level, selectedId, expandedIds, forceEx
             <div className="organization-node-menu" role="menu" onClick={(event) => event.stopPropagation()}>
               <button type="button" role="menuitem" onClick={() => onAction("add", node)}>新增子组织</button>
               <button type="button" role="menuitem" onClick={() => onAction("rename", node)}>重命名</button>
-              <button type="button" role="menuitem" onClick={() => onAction("sync", node)}>组织数据对接</button>
+              <button type="button" role="menuitem" onClick={() => onAction("sync", node)}>组织数据管理</button>
             </div>
           )}
         </div>
@@ -3299,15 +3299,15 @@ function OrganizationSyncModal({ organizationName, close, notify }: { organizati
     setSyncing(true);
     window.setTimeout(() => {
       setSyncing(false);
-      notify("组织数据对接完成：新增 2 个、更新 3 个、未变更 12 个", "success");
+      notify("组织数据管理完成：新增 2 个、更新 3 个、未变更 12 个", "success");
       close();
     }, 900);
   };
 
   return createPortal(
     <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
-      <div className="modal organization-sync-modal" role="dialog" aria-modal="true" aria-label="组织数据对接">
-        <ModalHeader title="组织数据对接" subtitle="配置外部组织接口，测试通过后同步最新组织架构" close={close} />
+      <div className="modal organization-sync-modal" role="dialog" aria-modal="true" aria-label="组织数据管理">
+        <ModalHeader title="组织数据管理" subtitle="配置外部组织接口，测试通过后同步最新组织架构" close={close} />
         <div className="modal-form">
           <div className="modal-form-body">
             <ModalAlert tone="info" title="同步说明">服务端按外部组织标识新增或更新，保留现有组织层级。</ModalAlert>
@@ -3426,7 +3426,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
           </div>
         </aside>
         <section className="user-list-panel">
-          <div className="organization-sync-toolbar"><Button icon={Network} onClick={() => { setOrganizationSyncTarget(selectedOrganization?.label); setOrganizationSyncOpen(true); }}>组织数据对接</Button></div>
+          <div className="organization-sync-toolbar"><Button icon={Network} onClick={() => { setOrganizationSyncTarget(selectedOrganization?.label); setOrganizationSyncOpen(true); }}>组织数据管理</Button></div>
           <div className="user-list-context"><h2>用户管理</h2><span>用户列表展示</span></div>
           <div className="filters user-management-filters">
             <FilterInput label="用户检索" placeholder="请输入用户姓名" searchable value={nameFilter} onChange={setNameFilter} />
