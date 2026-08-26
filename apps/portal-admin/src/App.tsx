@@ -731,7 +731,7 @@ const businessResourceConfigs = {
   report: {
     tab: "报告资源",
     directoryTitle: "报告资源目录",
-    directories: ["TR报告", "战略咨询报告", "洞察分析报告", "未来产业报告"],
+    directories: ["TR报告", "战略咨询报告", "洞察分析报告", "未来产业报告", "趋势分析报告"],
     info: { 名称: "TR报告", 描述: "技术研究类报告资源集合", 总数标签: "报告总数", 总数: "46", 创建人: "系统管理员" },
     columns: ["报告名称", "报告类型ID", "所属学科", "领域", "关联时间"],
     requiredColumns: ["报告名称", "报告类型ID", "所属学科", "领域"],
@@ -3974,7 +3974,7 @@ function BusinessItemModal({ mode, columns, requiredColumns, values, close, save
 
 function BusinessResourceWorkspace({ type, openModal, notify }: { type: BusinessResourceType; openModal: OpenModal; notify: Notify }) {
   const config = businessResourceConfigs[type];
-  const resourceTotals = type === "talent" ? [128, 96, 74] : type === "report" ? [46, 32, 28, 20] : [18, 12, 9];
+  const resourceTotals = type === "talent" ? [128, 96, 74] : type === "report" ? [46, 32, 28, 20, 15] : [18, 12, 9];
   const [directories, setDirectories] = useState(() => config.directories.map((name, index) => ({ name, count: resourceTotals[index] ?? 0 })));
   const [directory, setDirectory] = useState(config.directories[0]);
   const [directoryEditor, setDirectoryEditor] = useState<"create" | "edit" | null>(null);
@@ -4049,7 +4049,7 @@ const pagePermissionGroups = [
 
 const resourcePermissionGroups = [
   { label: "人才库资源", items: ["人工智能人才库", "新材料人才库", "生命科学人才库"] },
-  { label: "报告资源", items: ["TR报告", "战略咨询报告", "洞察分析报告", "未来产业报告"] },
+  { label: "报告资源", items: ["TR报告", "战略咨询报告", "洞察分析报告", "未来产业报告", "趋势分析报告"] },
   { label: "智库资源", items: ["科技政策智库", "未来产业智库", "区域创新智库"] },
 ];
 
