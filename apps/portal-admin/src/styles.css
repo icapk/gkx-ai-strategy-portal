@@ -7538,7 +7538,7 @@ tbody tr:hover {
 
 .workflow-designer .node-property-title-copy > em {
   flex: 0 0 auto;
-  color: var(--gkx-danger);
+  color: var(--gkx-text-primary);
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
