@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="科研情报智能推荐中心，集中展示热词、资讯、文献、报告、人才、会议、课程与活动推荐。">
   <title>科研情报智能推荐｜深圳国际科技信息中心</title>
-  <link rel="stylesheet" href="recommendations.css">
+  <link rel="stylesheet" href="recommendations.css?v=20260826-keyword-follow">
 </head>
 <body>
   <a class="rec-skip-link" href="#recommendationMain">跳到主要内容</a>
@@ -43,8 +43,8 @@
         <a href="strategy.html">战略咨询</a>
       </nav>
       <div class="rec-header-actions">
-        <button class="rec-header-action is-message" type="button" data-demo-action="消息中心将在真实账号体系接入后开放">
-          <svg aria-hidden="true"><use href="#rec-icon-bell"></use></svg><span>消息</span><em>5</em>
+        <button class="rec-header-action is-message" id="recMessageButton" type="button" aria-label="消息，5 条未读">
+          <svg aria-hidden="true"><use href="#rec-icon-bell"></use></svg><span>消息</span><em id="recMessageCount">5</em>
         </button>
         <button class="rec-header-action" type="button" data-demo-action="应用中心为原型入口">应用</button>
         <button class="rec-login-button" type="button" data-demo-action="登录注册功能将在统一用户中心接入后开放">登录/注册</button>
@@ -106,7 +106,7 @@
               <option value="keyword">🎯 关键词检索</option>
             </select>
             <label class="rec-sr-only" for="recSearchInput">输入检索内容</label>
-            <input id="recSearchInput" type="search" autocomplete="off" placeholder="用自然语言描述你想找的内容，AI帮你理解搜索意图...">
+            <input id="recSearchInput" type="search" autocomplete="off" maxlength="120" placeholder="用自然语言描述你想找的内容，AI帮你理解搜索意图...">
             <button type="submit"><svg aria-hidden="true"><use href="#rec-icon-search"></use></svg><span>搜索</span></button>
           </form>
           <p class="rec-search-guide" id="recSearchGuide"><span aria-hidden="true">💡</span><strong>AI搜索：</strong>使用人工智能理解你的搜索意图，找到语义相似和深度相关的内容</p>
@@ -118,6 +118,7 @@
             <button type="button" data-hot-query="固态电池">固态电池</button>
             <button type="button" data-hot-query="科学智能体">科学智能体</button>
           </div>
+          <p class="rec-search-follow-tip" id="recSearchFollowTip">📌 搜索提交后会自动建立词汇关注并生成相关动态，可在“热词推荐”中管理。</p>
         </div>
       </section>
 
@@ -145,14 +146,29 @@
                 <button class="rec-hot-card" type="button" data-hot-query="纳米材料"><strong>纳米材料</strong><em>#12</em><span>3,800</span><small>+18%</small></button>
               </div>
               <p class="rec-source-note">💡 原型逻辑：综合检索热度、收藏与公开趋势信号生成，真实规则与权重待数据验证。</p>
-              <h3>📌 词汇关注</h3>
-              <div class="rec-follow-grid">
-                <article><strong>人工智能</strong><span>本周热度 +28%</span><button type="button" data-follow-button>关注 <small>(234)</small></button></article>
-                <article><strong>量子计算</strong><span>本周热度 +19%</span><button type="button" data-follow-button>关注 <small>(189)</small></button></article>
-                <article><strong>基因编辑</strong><span>本周热度 +17%</span><button type="button" data-follow-button>关注 <small>(156)</small></button></article>
-                <article><strong>固态电池</strong><span>本周热度 +14%</span><button type="button" data-follow-button>关注 <small>(142)</small></button></article>
-              </div>
-              <p class="rec-source-note">⚡ 关注后可在本页和站内信中接收词条更新；消息能力需接入真实账号体系。</p>
+              <section class="rec-keyword-follow" aria-labelledby="recKeywordFollowTitle">
+                <header class="rec-follow-heading">
+                  <div>
+                    <h3 id="recKeywordFollowTitle">📌 词汇关注</h3>
+                    <p>根据搜索词自动建立关注档案，持续汇集相关资讯、文献与报告动态。</p>
+                  </div>
+                  <label class="rec-auto-follow" for="recAutoFollow">
+                    <input id="recAutoFollow" type="checkbox" checked aria-describedby="recAutoFollowHint">
+                    <span class="rec-auto-follow-track" aria-hidden="true"></span>
+                    <span>搜索后自动关注</span>
+                  </label>
+                </header>
+                <div class="rec-follow-status" id="recAutoFollowHint" role="status" aria-live="polite">
+                  <strong>自动关注已开启</strong><span>尚未关注词汇，可搜索或从下方推荐词开始。</span>
+                </div>
+                <div class="rec-follow-grid" id="recKeywordFollowGrid">
+                  <article class="rec-follow-card" data-keyword-suggestion="人工智能"><div class="rec-follow-card-heading"><strong title="人工智能">人工智能</strong><span>推荐关注</span></div><p class="rec-follow-meta">本周热度 +28%</p><div class="rec-follow-actions"><button type="button" aria-pressed="false" data-keyword-follow="人工智能">关注 <small>(234)</small></button></div></article>
+                  <article class="rec-follow-card" data-keyword-suggestion="量子计算"><div class="rec-follow-card-heading"><strong title="量子计算">量子计算</strong><span>推荐关注</span></div><p class="rec-follow-meta">本周热度 +19%</p><div class="rec-follow-actions"><button type="button" aria-pressed="false" data-keyword-follow="量子计算">关注 <small>(189)</small></button></div></article>
+                  <article class="rec-follow-card" data-keyword-suggestion="基因编辑"><div class="rec-follow-card-heading"><strong title="基因编辑">基因编辑</strong><span>推荐关注</span></div><p class="rec-follow-meta">本周热度 +17%</p><div class="rec-follow-actions"><button type="button" aria-pressed="false" data-keyword-follow="基因编辑">关注 <small>(156)</small></button></div></article>
+                  <article class="rec-follow-card" data-keyword-suggestion="固态电池"><div class="rec-follow-card-heading"><strong title="固态电池">固态电池</strong><span>推荐关注</span></div><p class="rec-follow-meta">本周热度 +14%</p><div class="rec-follow-actions"><button type="button" aria-pressed="false" data-keyword-follow="固态电池">关注 <small>(142)</small></button></div></article>
+                </div>
+                <p class="rec-source-note">⚡ 原型动态保存在当前浏览器；正式上线后将接入账号、站内信和真实数据源，实现跨设备推送。</p>
+              </section>
             </div>
             <aside class="rec-interest-panel">
               <h3>🎯 关注领域热词</h3>
@@ -336,6 +352,6 @@
   </footer>
 
   <div class="rec-toast" id="recToast" role="status" aria-live="polite" hidden></div>
-  <script src="recommendations.js"></script>
+  <script src="recommendations.js?v=20260826-keyword-follow"></script>
 </body>
 </html>

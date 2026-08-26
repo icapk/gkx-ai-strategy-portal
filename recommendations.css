@@ -497,6 +497,12 @@ select:focus-visible {
   filter: brightness(0.96);
 }
 
+.rec-search-form > button:disabled {
+  cursor: wait;
+  filter: saturate(0.7);
+  opacity: 0.78;
+}
+
 .rec-search-guide {
   margin: 12px 0 0;
   padding: 8px 12px;
@@ -532,6 +538,15 @@ select:focus-visible {
 .rec-hot-searches button:hover {
   color: var(--rec-blue);
   border-color: #a5b4fc;
+}
+
+.rec-search-follow-tip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  color: #59647a;
+  font-size: 11px;
 }
 
 .rec-section-stack {
@@ -782,16 +797,119 @@ select:focus-visible {
   font-size: 11px;
 }
 
+.rec-keyword-follow {
+  min-width: 0;
+}
+
+.rec-follow-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.rec-hot-layout .rec-follow-heading h3 {
+  margin-bottom: 2px;
+}
+
+.rec-follow-heading p {
+  max-width: 62ch;
+  margin: 0;
+  color: #778195;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.rec-auto-follow {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #dbe4ff;
+  border-radius: 999px;
+  color: #59647a;
+  background: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.rec-auto-follow input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.rec-auto-follow-track {
+  position: relative;
+  width: 30px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background 0.18s ease;
+}
+
+.rec-auto-follow-track::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  content: "";
+  transition: transform 0.18s ease;
+}
+
+.rec-auto-follow input:checked + .rec-auto-follow-track {
+  background: var(--rec-blue);
+}
+
+.rec-auto-follow input:checked + .rec-auto-follow-track::after {
+  transform: translateX(12px);
+}
+
+.rec-auto-follow input:focus-visible + .rec-auto-follow-track {
+  outline: 3px solid rgba(49, 81, 235, 0.3);
+  outline-offset: 2px;
+}
+
+.rec-follow-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-height: 34px;
+  margin-bottom: 10px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  color: #667085;
+  background: #f8fafc;
+  font-size: 11px;
+}
+
+.rec-follow-status strong {
+  color: var(--rec-blue);
+}
+
 .rec-follow-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
 }
 
-.rec-follow-grid article {
+.rec-follow-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1px 10px;
+  gap: 3px 10px;
+  min-width: 0;
   align-items: center;
   padding: 10px 12px;
   border: 1px solid #e5e7eb;
@@ -799,18 +917,69 @@ select:focus-visible {
   background: rgba(255, 255, 255, 0.75);
 }
 
-.rec-follow-grid article strong {
-  color: #374151;
+.rec-follow-card.is-following {
+  border-color: #c7d2fe;
+  background: #fbfcff;
 }
 
-.rec-follow-grid article span {
+.rec-follow-card.is-expanded {
+  grid-column: 1 / -1;
+  padding: 13px 14px;
+}
+
+.rec-follow-card-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+}
+
+.rec-follow-card-heading strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #374151;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rec-follow-card-heading span,
+.rec-follow-badge {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: #5162b9;
+  background: #eef2ff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.rec-follow-badge.is-read {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.rec-follow-meta {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
   color: #8b95a7;
   font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.rec-follow-grid article button {
+.rec-follow-actions {
+  display: flex;
   grid-column: 2;
   grid-row: 1 / 3;
+  align-items: center;
+  gap: 6px;
+}
+
+.rec-follow-actions button,
+.rec-follow-updates-head button,
+.rec-follow-preferences button,
+.rec-follow-empty button {
   min-height: 32px;
   padding: 0 10px;
   border: 1px solid #c7d2fe;
@@ -819,6 +988,192 @@ select:focus-visible {
   background: #fff;
   cursor: pointer;
   font-size: 12px;
+}
+
+.rec-follow-actions button:hover,
+.rec-follow-updates-head button:hover,
+.rec-follow-empty button:hover {
+  border-color: #8ea0f7;
+  background: var(--rec-blue-soft);
+}
+
+.rec-follow-updates-head button:disabled {
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  cursor: default;
+}
+
+.rec-follow-actions button.is-following {
+  color: #fff;
+  border-color: var(--rec-blue);
+  background: var(--rec-blue);
+}
+
+.rec-follow-updates {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin-top: 9px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.rec-follow-updates[hidden] {
+  display: none;
+}
+
+.rec-follow-updates-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.rec-follow-updates-head strong {
+  color: #374151;
+  font-size: 12px;
+}
+
+.rec-follow-update-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rec-follow-update {
+  min-width: 0;
+}
+
+.rec-follow-update > button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 3px 9px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.rec-follow-update.is-unread > button {
+  border-color: #c7d2fe;
+  background: #f8faff;
+  font-weight: 600;
+}
+
+.rec-follow-update-type {
+  grid-row: 1 / 3;
+  align-self: start;
+  padding: 2px 6px;
+  border-radius: 999px;
+  color: #5162b9;
+  background: #eef2ff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.rec-follow-update strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #374151;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rec-follow-update time,
+.rec-follow-update-state {
+  color: #8b95a7;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.rec-follow-update-state {
+  grid-column: 3;
+}
+
+.rec-follow-update.is-unread .rec-follow-update-state {
+  color: var(--rec-blue);
+  font-weight: 700;
+}
+
+.rec-follow-update p {
+  grid-column: 2 / -1;
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.rec-follow-preferences {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 14px;
+  margin-top: 10px;
+}
+
+.rec-follow-preferences label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #667085;
+  font-size: 11px;
+}
+
+.rec-follow-preferences select {
+  min-height: 32px;
+  padding: 0 28px 0 9px;
+  border: 1px solid #dbe4ff;
+  border-radius: 7px;
+  color: #475569;
+  background: #fff;
+}
+
+.rec-follow-preferences button {
+  color: #b42318;
+  border-color: #fecaca;
+}
+
+.rec-follow-preferences button:hover {
+  border-color: #fca5a5;
+  background: #fff7f7;
+}
+
+.rec-follow-preferences button.is-confirming {
+  color: #fff;
+  border-color: #b42318;
+  background: #b42318;
+}
+
+.rec-follow-empty {
+  grid-column: 1 / -1;
+  padding: 13px;
+  border: 1px dashed #c7d2fe;
+  border-radius: 9px;
+  color: #667085;
+  background: rgba(248, 250, 255, 0.7);
+  font-size: 11px;
+  text-align: center;
+}
+
+.rec-follow-empty strong {
+  display: block;
+  margin-bottom: 2px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.rec-follow-empty button {
+  margin-top: 8px;
 }
 
 [data-follow-button].is-following {
@@ -1585,6 +1940,9 @@ select:focus-visible {
   right: 50%;
   bottom: 28px;
   z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   max-width: min(430px, calc(100vw - 28px));
   padding: 11px 16px;
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -1595,6 +1953,26 @@ select:focus-visible {
   text-align: center;
   transform: translateX(50%);
   backdrop-filter: blur(12px);
+}
+
+.rec-toast span {
+  min-width: 0;
+}
+
+.rec-toast button {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 7px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.rec-toast button:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .rec-toast[hidden] {
@@ -1695,11 +2073,14 @@ select:focus-visible {
   .rec-search-form input { min-height: 48px; }
   .rec-search-form > button { min-height: 48px; }
   .rec-hot-searches > span { width: 100%; }
+  .rec-search-follow-tip { align-items: flex-start; }
   .rec-section-stack { gap: 16px; margin-top: 16px; }
   .rec-panel { padding: 17px 15px; scroll-margin-top: 154px; }
   .rec-panel-title { align-items: flex-start; }
   .rec-panel-title h2 { font-size: 17px; }
   .rec-hot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rec-follow-heading { align-items: stretch; flex-direction: column; gap: 9px; }
+  .rec-auto-follow { align-self: flex-start; min-height: 44px; }
   .rec-follow-grid,
   .rec-news-grid,
   .rec-report-grid,
@@ -1709,6 +2090,16 @@ select:focus-visible {
   .rec-talent-layout { grid-template-columns: 1fr; }
   .rec-rising-stars { grid-column: auto; grid-template-columns: 1fr; }
   .rec-rising-stars > h3 { grid-column: auto; }
+  .rec-follow-card.is-expanded { padding: 12px; }
+  .rec-follow-actions button,
+  .rec-follow-updates-head button,
+  .rec-follow-preferences button,
+  .rec-follow-empty button { min-height: 44px; }
+  .rec-follow-preferences { align-items: stretch; flex-direction: column; }
+  .rec-follow-preferences label { justify-content: space-between; min-height: 44px; }
+  .rec-follow-preferences select { min-height: 44px; }
+  .rec-follow-preferences button { width: 100%; }
+  .rec-follow-update > button { min-height: 52px; }
   .rec-news-card { grid-template-columns: 34px minmax(0, 1fr); padding: 12px; }
   .rec-news-accent { width: 34px; height: 34px; }
   .rec-news-card p { white-space: normal; }
@@ -1731,6 +2122,20 @@ select:focus-visible {
   .rec-search-mode-tabs button { font-size: 12px; }
   .rec-hot-grid { grid-template-columns: 1fr; }
   .rec-hot-card { min-height: 56px; }
+  .rec-follow-actions { grid-column: 1 / -1; grid-row: auto; margin-top: 5px; }
+  .rec-follow-actions button { width: 100%; }
+  .rec-follow-update > button { grid-template-columns: auto minmax(0, 1fr); }
+  .rec-follow-update strong {
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .rec-follow-update time,
+  .rec-follow-update-state { grid-column: 2; }
+  .rec-follow-update p { grid-column: 1 / -1; }
   .rec-paper-card { grid-template-columns: 1fr; }
   .rec-paper-rank { grid-row: 1; }
   .rec-paper-content { grid-row: 2; }

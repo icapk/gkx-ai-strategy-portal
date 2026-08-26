@@ -2942,7 +2942,7 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css?v=20260825-paper-comments">
+  <link rel="stylesheet" href="portal-extras.css?v=20260826-search-model">
   <link rel="stylesheet" href="mastergo-v2.css">
 </head>
 <body>
@@ -3899,9 +3899,10 @@
           <form class="portal-search-form" id="portalResultSearchForm" role="search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 4.5 4.5"></path></svg>
             <label class="sr-only" for="portalResultSearchInput">综合资源检索</label>
-            <input class="portal-search-input" id="portalResultSearchInput" type="search" autocomplete="off" placeholder="搜索论文、专利、报告、人才、资讯、项目">
+            <input class="portal-search-input" id="portalResultSearchInput" type="search" autocomplete="off" maxlength="120" aria-describedby="portalSearchFeedback" placeholder="搜索论文、专利、报告、人才、资讯、项目">
             <button class="portal-search-button" type="submit">搜索</button>
           </form>
+          <p class="portal-search-feedback" id="portalSearchFeedback" role="status" aria-live="polite"></p>
         </div>
 
         <section class="portal-query-understanding" id="portalQueryUnderstanding" aria-labelledby="portalQueryUnderstandingTitle" hidden>
@@ -3927,7 +3928,7 @@
         <section class="portal-association-panel" id="portalAssociationPanel" aria-labelledby="portalAssociationTitle" hidden>
           <div class="portal-mode-panel-header">
             <div>
-              <p class="portal-mode-panel-eyebrow">智能关联 · 四步可追溯</p>
+              <p class="portal-mode-panel-eyebrow">智能关联 · 五步可追溯</p>
               <h2 id="portalAssociationTitle">从检索问题到关联知识推荐</h2>
             </div>
             <div class="portal-mode-panel-actions">
@@ -3936,38 +3937,149 @@
             </div>
           </div>
           <div class="portal-association-details" id="portalAssociationDetails">
-          <div class="portal-association-workflow">
-            <article>
-              <span class="portal-workflow-step">01 · 用户搜索</span>
-              <strong>解析并细化检索提问</strong>
-              <p id="portalAssociationOriginalQuery">原始问题：—</p>
-              <code id="portalAssociationNormalizedQuery">主题:(—)</code>
-            </article>
-            <article>
-              <span class="portal-workflow-step">02 · 行为分析</span>
-              <strong id="portalBehaviorAnalysisTitle">仅使用当前问题</strong>
-              <p id="portalBehaviorAnalysisText">默认不使用历史行为；开启后仅在本次演示中使用模拟的检索、查看与收藏信号。</p>
-              <small>模拟数据 · 可随时关闭，不含受限资源行为</small>
-            </article>
-            <article>
-              <span class="portal-workflow-step">03 · 信息处理</span>
-              <strong>兴趣模型动态维护</strong>
-              <div class="portal-interest-profile" id="portalInterestProfile"></div>
-              <p id="portalProfileUpdateStatus">未启用行为画像，结果不受长期兴趣影响。</p>
-            </article>
-            <article>
-              <span class="portal-workflow-step">04 · 知识检索</span>
-              <strong>规范化、过滤与推荐</strong>
-              <p>在主题、成果、专家和机构中查找相关内容；结果卡片展示关联类型与推荐依据。</p>
-              <div class="portal-related-terms">
-                <button type="button" data-related-query="AI for Science">相关主题</button>
-                <button type="button" data-related-query="生成式智能体">相似成果</button>
-                <button type="button" data-related-query="科研专家">专家与机构</button>
+            <p class="portal-association-status" id="portalAssociationStatus" role="status" aria-live="polite">等待检索提问</p>
+            <ol class="portal-association-workflow">
+              <li>
+                <span class="portal-workflow-step">01 · 提问预处理</span>
+                <strong>识别主题、对象与资源意图</strong>
+                <p id="portalAssociationOriginalQuery">原始问题：—</p>
+                <div class="portal-association-entities" id="portalAssociationEntities" aria-label="识别结果"></div>
+              </li>
+              <li>
+                <span class="portal-workflow-step">02 · 提问规范化</span>
+                <strong>消歧、同义扩展并形成检索式</strong>
+                <code id="portalAssociationNormalizedQuery">主题:(—)</code>
+                <p id="portalAssociationNormalization">保留原始问题，并将识别到的主题词用于原型语义召回。</p>
+              </li>
+              <li>
+                <span class="portal-workflow-step">03 · 信息处理</span>
+                <strong>分析显式操作并动态维护用户模型</strong>
+                <div class="portal-user-model-step-summary">
+                  <span id="portalUserModelState">未授权 · 不采集</span>
+                  <button id="portalUserModelDisclosure" type="button" aria-expanded="false" aria-controls="portalUserModelPanel">查看模型与信号</button>
+                </div>
+                <div class="portal-interest-profile" id="portalInterestProfile" aria-label="本次排序使用的兴趣信号"></div>
+                <p id="portalProfileUpdateStatus">个性化关联关闭，不采集行为，结果仅依据当前提问和知识关系排序。</p>
+              </li>
+              <li>
+                <span class="portal-workflow-step">04 · 知识库召回</span>
+                <strong>跨资源查找相关或相似信息</strong>
+                <p id="portalAssociationRecallSummary">等待从原型知识库召回候选信息。</p>
+                <div class="portal-association-sources" id="portalAssociationSources" aria-label="已召回资源来源"></div>
+              </li>
+              <li>
+                <span class="portal-workflow-step">05 · 分析过滤与推荐</span>
+                <strong>按需求排序并说明推荐依据</strong>
+                <p id="portalAssociationFilterSummary">等待分析候选信息。</p>
+                <div class="portal-association-scope" id="portalAssociationScope" role="group" aria-label="关联范围">
+                  <button class="is-active" type="button" aria-pressed="true" data-association-scope="all">全部</button>
+                  <button type="button" aria-pressed="false" data-association-scope="topic">相关主题</button>
+                  <button type="button" aria-pressed="false" data-association-scope="outcome">相似成果</button>
+                  <button type="button" aria-pressed="false" data-association-scope="expert">专家与机构</button>
+                </div>
+              </li>
+            </ol>
+          </div>
+          <section class="portal-user-model-panel" id="portalUserModelPanel" aria-labelledby="portalUserModelTitle" hidden>
+            <header>
+              <div>
+                <h3 id="portalUserModelTitle" tabindex="-1">用户模型与信息处理</h3>
+                <p>查看模型如何由显式操作建立，并随搜索、采用和主动反馈动态更新。</p>
               </div>
-            </article>
-          </div>
-          <p class="portal-mock-note">演示数据 · 行为信号、兴趣程度、关系类型与推荐理由均为模拟内容，用于验证可解释、可关闭的关联检索流程。</p>
-          </div>
+              <button class="portal-user-model-close" id="portalUserModelClose" type="button">收起</button>
+            </header>
+            <section class="portal-user-model-consent" id="portalUserModelConsent" aria-labelledby="portalUserModelConsentTitle" hidden>
+              <h4 id="portalUserModelConsentTitle" tabindex="-1">开启前确认信息处理范围</h4>
+              <p>开启后，原型只在本机浏览器中保存你明确提交的操作，用于调整智能关联排序；不会采集悬停、滚动、停留时长、受限资源正文或外部网站行为。</p>
+              <fieldset aria-describedby="portalUserModelConsentHelp">
+                <legend>允许计入用户模型的信号</legend>
+                <label><input id="portalUserModelConsentSearch" type="checkbox" name="userModelConsentSource" value="search" checked> 搜索提问</label>
+                <label><input type="checkbox" name="userModelConsentSource" value="adoption" checked> 采用结果</label>
+                <label><input type="checkbox" name="userModelConsentSource" value="feedback" checked> 主动相关／不相关反馈</label>
+              </fieldset>
+              <label class="portal-user-model-current-query"><input id="portalUserModelIncludeQuery" type="checkbox" checked> 将当前检索提问作为第一条模型信号</label>
+              <p id="portalUserModelConsentHelp">关闭个性化会立即停止采集和排序影响，但保留本机模型；你可以随时撤销单条信号或清除全部模型数据。</p>
+              <div class="portal-user-model-actions">
+                <button id="portalUserModelConsentCancel" type="button">暂不开启</button>
+                <button class="is-primary" id="portalUserModelConsentConfirm" type="button">同意并开启</button>
+              </div>
+            </section>
+            <div class="portal-user-model-dashboard" id="portalUserModelDashboard" hidden>
+              <div class="portal-user-model-overview">
+                <section aria-labelledby="portalUserModelInterestsTitle">
+                  <div class="portal-user-model-section-heading">
+                    <div>
+                      <h4 id="portalUserModelInterestsTitle" tabindex="-1">兴趣权重</h4>
+                      <p id="portalUserModelConfidence">暂无有效信号</p>
+                    </div>
+                    <span id="portalUserModelUpdatedAt">尚未更新</span>
+                  </div>
+                  <div class="portal-user-model-interest-list" id="portalUserModelInterestList"></div>
+                </section>
+                <section aria-labelledby="portalUserModelSourcesTitle">
+                  <div class="portal-user-model-section-heading">
+                    <div>
+                      <h4 id="portalUserModelSourcesTitle">信号来源</h4>
+                      <p>关闭来源会保留历史，但不再采集，也不参与权重计算。</p>
+                    </div>
+                  </div>
+                  <fieldset class="portal-user-model-sources" id="portalUserModelSources">
+                    <legend class="sr-only">用户模型信号来源</legend>
+                    <label><input type="checkbox" value="search"> 搜索提问 <small id="portalUserModelSourceCountSearch">0 条</small></label>
+                    <label><input type="checkbox" value="adoption"> 采用结果 <small id="portalUserModelSourceCountAdoption">0 条</small></label>
+                    <label><input type="checkbox" value="feedback"> 主动反馈 <small id="portalUserModelSourceCountFeedback">0 条</small></label>
+                  </fieldset>
+                  <p class="portal-user-model-boundary">当前为本地交互原型，不读取账号资料，也不跨设备同步；正式上线需接入身份、隐私策略与数据保留规则。</p>
+                </section>
+              </div>
+              <section class="portal-user-model-history" aria-labelledby="portalUserModelHistoryTitle">
+                <div class="portal-user-model-section-heading">
+                  <div>
+                    <h4 id="portalUserModelHistoryTitle" tabindex="-1">行为明细</h4>
+                    <p>每条权重都可回溯到具体操作；重复操作不会重复累计。</p>
+                  </div>
+                  <span id="portalUserModelSignalCount">0 条信号</span>
+                </div>
+                <ul id="portalUserModelSignalList"></ul>
+              </section>
+              <div class="portal-user-model-controls">
+                <button id="portalUserModelPause" type="button">暂停个性化</button>
+                <button id="portalUserModelClear" type="button">清除用户模型</button>
+              </div>
+              <div class="portal-user-model-clear-confirm" id="portalUserModelClearConfirm" hidden>
+                <strong id="portalUserModelClearTitle" tabindex="-1">确认清除用户模型？</strong>
+                <p>将删除本机保存的信号、主题权重和个性化排序设置；不会删除已采用结果、收藏或当前搜索结果。</p>
+                <div>
+                  <button id="portalUserModelClearCancel" type="button">取消</button>
+                  <button class="is-danger" id="portalUserModelClearConfirmButton" type="button">确认清除</button>
+                </div>
+              </div>
+            </div>
+            <div class="portal-user-model-status" id="portalUserModelStatus" role="status" aria-live="polite">
+              <span>尚未开启个性化关联。</span>
+              <button id="portalUserModelUndo" type="button" hidden>撤销上次模型更新</button>
+            </div>
+          </section>
+          <section class="portal-association-selection" id="portalAssociationSelection" aria-labelledby="portalAssociationSelectionTitle">
+            <div>
+              <strong id="portalAssociationSelectionTitle" tabindex="-1">本次采用 <span id="portalAssociationAdoptedCount">0</span> 条</strong>
+              <p id="portalAssociationSelectionText">可在结果卡中查看依据，并将有用信息加入本次检索摘要。</p>
+            </div>
+            <div class="portal-association-selection-actions">
+              <button id="portalAssociationOnlyAdopted" type="button" aria-pressed="false">仅看已采用</button>
+              <button id="portalAssociationClearAdopted" type="button" disabled>清空</button>
+              <button class="is-primary" id="portalAssociationGenerateSummary" type="button" disabled>生成检索摘要</button>
+            </div>
+            <div class="portal-association-feedback-status" id="portalAssociationFeedbackStatus" role="status" hidden>
+              <span></span><button id="portalAssociationFeedbackUndo" type="button">撤销</button>
+            </div>
+            <div class="portal-association-summary" id="portalAssociationSummary" hidden>
+              <header><h3 tabindex="-1">已采用信息摘要</h3><button id="portalAssociationCopySummary" type="button">复制摘要</button></header>
+              <p>以下内容来自本次选择的原型检索结果，请在正式使用前核验原始来源。</p>
+              <ol id="portalAssociationSummaryList"></ol>
+            </div>
+          </section>
+          <p class="portal-mock-note">本地交互原型 · 查询理解、用户模型、召回数量、关联强度、推荐依据与摘要均为模拟内容；用户模型仅在同意后保存到本机浏览器，正式上线需接入身份、隐私策略、知识库、权限校验和真实服务。</p>
         </section>
 
         <section class="portal-keyword-panel" id="portalKeywordPanel" aria-labelledby="portalKeywordTitle" hidden>
@@ -4465,6 +4577,7 @@
       const portalMessageToast = document.getElementById("portalMessageToast");
       const portalResultSearchForm = document.getElementById("portalResultSearchForm");
       const portalResultSearchInput = document.getElementById("portalResultSearchInput");
+      const portalSearchFeedback = document.getElementById("portalSearchFeedback");
       const portalSearchModes = document.getElementById("portalSearchModes");
       const portalSearchTypeTabs = document.getElementById("portalSearchTypeTabs");
       const portalSearchSort = document.getElementById("portalSearchSort");
@@ -4492,12 +4605,53 @@
       const portalAssociationDetails = document.getElementById("portalAssociationDetails");
       const portalAssociationDetailsToggle = document.getElementById("portalAssociationDetailsToggle");
       const portalAssociationOriginalQuery = document.getElementById("portalAssociationOriginalQuery");
+      const portalAssociationStatus = document.getElementById("portalAssociationStatus");
+      const portalAssociationEntities = document.getElementById("portalAssociationEntities");
       const portalAssociationNormalizedQuery = document.getElementById("portalAssociationNormalizedQuery");
-      const portalBehaviorAnalysisTitle = document.getElementById("portalBehaviorAnalysisTitle");
-      const portalBehaviorAnalysisText = document.getElementById("portalBehaviorAnalysisText");
+      const portalAssociationNormalization = document.getElementById("portalAssociationNormalization");
+      const portalAssociationRecallSummary = document.getElementById("portalAssociationRecallSummary");
+      const portalAssociationSources = document.getElementById("portalAssociationSources");
+      const portalAssociationFilterSummary = document.getElementById("portalAssociationFilterSummary");
+      const portalAssociationScope = document.getElementById("portalAssociationScope");
       const portalInterestProfile = document.getElementById("portalInterestProfile");
       const portalProfileUpdateStatus = document.getElementById("portalProfileUpdateStatus");
       const portalPersonalizationToggle = document.getElementById("portalPersonalizationToggle");
+      const portalUserModelState = document.getElementById("portalUserModelState");
+      const portalUserModelDisclosure = document.getElementById("portalUserModelDisclosure");
+      const portalUserModelPanel = document.getElementById("portalUserModelPanel");
+      const portalUserModelTitle = document.getElementById("portalUserModelTitle");
+      const portalUserModelClose = document.getElementById("portalUserModelClose");
+      const portalUserModelConsent = document.getElementById("portalUserModelConsent");
+      const portalUserModelConsentTitle = document.getElementById("portalUserModelConsentTitle");
+      const portalUserModelIncludeQuery = document.getElementById("portalUserModelIncludeQuery");
+      const portalUserModelConsentCancel = document.getElementById("portalUserModelConsentCancel");
+      const portalUserModelConsentConfirm = document.getElementById("portalUserModelConsentConfirm");
+      const portalUserModelDashboard = document.getElementById("portalUserModelDashboard");
+      const portalUserModelConfidence = document.getElementById("portalUserModelConfidence");
+      const portalUserModelUpdatedAt = document.getElementById("portalUserModelUpdatedAt");
+      const portalUserModelInterestList = document.getElementById("portalUserModelInterestList");
+      const portalUserModelSources = document.getElementById("portalUserModelSources");
+      const portalUserModelHistoryTitle = document.getElementById("portalUserModelHistoryTitle");
+      const portalUserModelSignalCount = document.getElementById("portalUserModelSignalCount");
+      const portalUserModelSignalList = document.getElementById("portalUserModelSignalList");
+      const portalUserModelPause = document.getElementById("portalUserModelPause");
+      const portalUserModelClear = document.getElementById("portalUserModelClear");
+      const portalUserModelClearConfirm = document.getElementById("portalUserModelClearConfirm");
+      const portalUserModelClearTitle = document.getElementById("portalUserModelClearTitle");
+      const portalUserModelClearCancel = document.getElementById("portalUserModelClearCancel");
+      const portalUserModelClearConfirmButton = document.getElementById("portalUserModelClearConfirmButton");
+      const portalUserModelStatus = document.getElementById("portalUserModelStatus");
+      const portalUserModelUndo = document.getElementById("portalUserModelUndo");
+      const portalAssociationAdoptedCount = document.getElementById("portalAssociationAdoptedCount");
+      const portalAssociationSelectionText = document.getElementById("portalAssociationSelectionText");
+      const portalAssociationOnlyAdopted = document.getElementById("portalAssociationOnlyAdopted");
+      const portalAssociationClearAdopted = document.getElementById("portalAssociationClearAdopted");
+      const portalAssociationGenerateSummary = document.getElementById("portalAssociationGenerateSummary");
+      const portalAssociationFeedbackStatus = document.getElementById("portalAssociationFeedbackStatus");
+      const portalAssociationFeedbackUndo = document.getElementById("portalAssociationFeedbackUndo");
+      const portalAssociationSummary = document.getElementById("portalAssociationSummary");
+      const portalAssociationSummaryList = document.getElementById("portalAssociationSummaryList");
+      const portalAssociationCopySummary = document.getElementById("portalAssociationCopySummary");
       const portalKeywordPanel = document.getElementById("portalKeywordPanel");
       const portalKeywordExpression = document.getElementById("portalKeywordExpression");
       const portalKeywordStatus = document.getElementById("portalKeywordStatus");
@@ -4539,8 +4693,9 @@
           description: "按关键词和筛选条件查看资源。"
         }
       };
-      // Advanced result summaries stay hidden until real APIs and acceptance evidence exist.
+      // Keep the unverified AI/keyword summaries hidden; the association workflow below is an explicitly labelled local prototype.
       const RESULT_MODE_PANELS_ENABLED = false;
+      const ASSOCIATION_KNOWLEDGE_RETRIEVAL_ENABLED = true;
 
       const desktopTriggers = [];
       const utilityDropdowns = [];
@@ -4569,15 +4724,30 @@
       let keywordExact = false;
       let keywordExpansionOpen = false;
       let associationDetailsOpen = true;
+      let associationScope = "all";
+      let associationOnlyAdopted = false;
+      let associationSummaryOpen = false;
+      let associationFeedbackPanelIndex = -1;
+      let associationLastFeedback = null;
+      let lastAssociationQuery = "";
+      const adoptedAssociationItems = new Set();
+      const associationFeedback = new Map();
       let originalKeywordQuery = "";
       let activeQaQuestion = "";
       let qaAnswerTimer = null;
-      let personalizationEnabled = false;
-      const associationInterests = new Map([
-        ["AI for Science", 86],
-        ["智能体", 74],
-        ["低空经济", 52]
-      ]);
+      const ASSOCIATION_USER_MODEL_STORAGE_KEY = "gkx-association-user-model-v1";
+      let userModelStorageError = "";
+      let associationUserModel = loadAssociationUserModel();
+      let personalizationEnabled = associationUserModel.enabled;
+      const associationInterests = new Map();
+      rebuildAssociationInterests();
+      let userModelPanelOpen = false;
+      let userModelClearOpen = false;
+      let userModelUndoSnapshot = null;
+      let userModelLastTrigger = null;
+      let userModelStatusMessage = associationUserModel.consent
+        ? (personalizationEnabled ? "已恢复本机用户模型。" : "用户模型已保留，个性化当前暂停。")
+        : "尚未开启个性化关联。";
       let activeDocumentItem = null;
       let activeDocumentMatchIndex = 0;
       let activeDocumentTrigger = null;
@@ -5820,6 +5990,518 @@
         return [...new Set(terms)].filter(Boolean);
       }
 
+      function setPortalSearchFeedback(message, tone = "") {
+        portalSearchFeedback.textContent = message;
+        portalSearchFeedback.classList.toggle("is-error", tone === "error");
+        portalSearchFeedback.classList.toggle("is-loading", tone === "loading");
+      }
+
+      function isUsableSearchQuery(query) {
+        return /[A-Za-z0-9\u3400-\u9fff]/.test(String(query || ""));
+      }
+
+      function getAssociationResourceIntent(query) {
+        const text = String(query || "");
+        const types = [];
+        if (/论文|文献|期刊|成果/.test(text)) types.push("论文");
+        if (/专利|发明/.test(text)) types.push("专利");
+        if (/专家|学者|人才|团队|机构/.test(text)) types.push("人才");
+        if (/报告|研判|趋势/.test(text)) types.push("报告");
+        if (/资讯|动态|新闻/.test(text)) types.push("资讯");
+        if (/项目|课题|合作/.test(text)) types.push("项目");
+        return [...new Set(types)];
+      }
+
+      function getAssociationRelation(item) {
+        if (item.type === "人才") return { key: "expert", label: "专家与机构" };
+        if (["论文", "专利", "项目"].includes(item.type)) return { key: "outcome", label: "相似成果" };
+        return { key: "topic", label: "相关主题" };
+      }
+
+      function createDefaultAssociationUserModel() {
+        return {
+          version: 1,
+          consent: false,
+          enabled: false,
+          sources: { search: true, adoption: true, feedback: true },
+          signals: [],
+          corrections: {},
+          updatedAt: ""
+        };
+      }
+
+      function cloneAssociationUserModel(model) {
+        return JSON.parse(JSON.stringify(model));
+      }
+
+      function normalizeAssociationUserModel(value) {
+        const fallback = createDefaultAssociationUserModel();
+        if (!value || typeof value !== "object" || Number(value.version) !== 1) return fallback;
+        const allowedSources = ["search", "adoption", "feedback"];
+        const sources = Object.fromEntries(allowedSources.map((source) => [source, value.sources?.[source] !== false]));
+        const signals = Array.isArray(value.signals) ? value.signals.filter((signal) => {
+          return signal && typeof signal.id === "string" && typeof signal.topic === "string" && typeof signal.label === "string"
+            && ["search", "adoption", "feedback", "correction"].includes(signal.source)
+            && Number.isFinite(Number(signal.delta));
+        }).slice(0, 120).map((signal) => ({
+          id: signal.id,
+          type: String(signal.type || signal.source),
+          source: signal.source,
+          topic: signal.topic.slice(0, 32),
+          delta: Number(signal.delta),
+          label: signal.label.slice(0, 120),
+          createdAt: signal.createdAt || new Date().toISOString(),
+          correctionAction: signal.correctionAction || ""
+        })) : [];
+        const corrections = {};
+        if (value.corrections && typeof value.corrections === "object") {
+          Object.entries(value.corrections).forEach(([topic, correction]) => {
+            if (correction === "suppressed") corrections[String(topic).slice(0, 32)] = correction;
+          });
+        }
+        return {
+          version: 1,
+          consent: Boolean(value.consent),
+          enabled: Boolean(value.consent && value.enabled),
+          sources,
+          signals,
+          corrections,
+          updatedAt: value.updatedAt || ""
+        };
+      }
+
+      function loadAssociationUserModel() {
+        try {
+          const stored = window.localStorage.getItem(ASSOCIATION_USER_MODEL_STORAGE_KEY);
+          if (!stored) return createDefaultAssociationUserModel();
+          const parsed = JSON.parse(stored);
+          if (!parsed || Number(parsed.version) !== 1) throw new Error("invalid model version");
+          return normalizeAssociationUserModel(parsed);
+        } catch (error) {
+          userModelStorageError = "本机用户模型无法读取，已保持关闭；可清除浏览器站点数据后重试。";
+          return createDefaultAssociationUserModel();
+        }
+      }
+
+      function persistAssociationUserModel(nextModel) {
+        try {
+          if (nextModel.consent) window.localStorage.setItem(ASSOCIATION_USER_MODEL_STORAGE_KEY, JSON.stringify(nextModel));
+          else window.localStorage.removeItem(ASSOCIATION_USER_MODEL_STORAGE_KEY);
+          userModelStorageError = "";
+          return true;
+        } catch (error) {
+          userModelStorageError = "本机存储不可用，模型更新未保存；已保留更新前的稳定状态，请检查浏览器存储权限后重试。";
+          return false;
+        }
+      }
+
+      function commitAssociationUserModel(nextValue, options = {}) {
+        const nextModel = normalizeAssociationUserModel({
+          ...nextValue,
+          updatedAt: options.preserveUpdatedAt ? nextValue.updatedAt : new Date().toISOString()
+        });
+        if (!persistAssociationUserModel(nextModel)) {
+          userModelStatusMessage = userModelStorageError;
+          return false;
+        }
+        if (options.remember !== false) userModelUndoSnapshot = cloneAssociationUserModel(associationUserModel);
+        associationUserModel = nextModel;
+        personalizationEnabled = nextModel.enabled;
+        userModelStatusMessage = options.status || "用户模型已更新，关联结果已重新排序。";
+        rebuildAssociationInterests();
+        return true;
+      }
+
+      function getAssociationModelTopic(value) {
+        const text = String(value || "");
+        if (/低空|无人机|通航/.test(text)) return "低空经济";
+        if (/药物|靶点|生物医药/.test(text)) return "药物靶点";
+        if (/固态|电池|储能/.test(text)) return "固态电池";
+        if (/量子/.test(text)) return "量子计算";
+        if (/基因|CRISPR/i.test(text)) return "基因编辑";
+        if (/智能体|Agent|具身智能/i.test(text)) return "智能体";
+        if (/AI|人工智能|大模型|机器学习|深度学习/i.test(text)) return "AI for Science";
+        return text.replace(/[\s，。！？、；：,.!?;:()（）【】\[\]"']/g, "").slice(0, 10);
+      }
+
+      function getAssociationTopicAliases(topic) {
+        const aliases = {
+          "AI for Science": ["ai for science", "人工智能", "大模型", "机器学习", "深度学习", "科学智能"],
+          "智能体": ["智能体", "agent", "具身智能", "机器人学习"],
+          "低空经济": ["低空", "无人机", "通航"],
+          "药物靶点": ["药物", "靶点", "生物医药"],
+          "固态电池": ["固态", "电池", "储能"],
+          "量子计算": ["量子"],
+          "基因编辑": ["基因", "crispr"]
+        };
+        return aliases[topic] || [topic.toLocaleLowerCase("zh-CN")];
+      }
+
+      function getUserModelSignalState(signal) {
+        if (signal.source !== "correction" && !associationUserModel.sources[signal.source]) return "来源已暂停";
+        if (associationUserModel.corrections[signal.topic] === "suppressed" && signal.correctionAction !== "restore") return "主题已停止推荐";
+        return "已计入";
+      }
+
+      function rebuildAssociationInterests() {
+        associationInterests.clear();
+        if (!associationUserModel.consent) return;
+        const grouped = new Map();
+        associationUserModel.signals.forEach((signal) => {
+          if (signal.source !== "correction" && !associationUserModel.sources[signal.source]) return;
+          if (associationUserModel.corrections[signal.topic] === "suppressed") return;
+          const current = grouped.get(signal.topic) || { raw: 0, count: 0, lastAt: "" };
+          current.raw += Number(signal.delta) || 0;
+          if (Number(signal.delta) !== 0) current.count += 1;
+          if (!current.lastAt || signal.createdAt > current.lastAt) current.lastAt = signal.createdAt;
+          grouped.set(signal.topic, current);
+        });
+        [...grouped.entries()].forEach(([topic, data]) => {
+          if (data.raw === 0) return;
+          associationInterests.set(topic, {
+            score: data.raw > 0 ? Math.max(20, Math.min(96, Math.round(20 + data.raw * 5))) : 0,
+            count: data.count,
+            raw: data.raw,
+            lastAt: data.lastAt
+          });
+        });
+      }
+
+      function getAssociationModelInfluence(item) {
+        if (!personalizationEnabled) return null;
+        const searchable = [item.title, item.summary, item.detail, item.type, item.source, item.meta, item.author, item.personName, item.institution, ...item.tags]
+          .filter(Boolean).join(" ").toLocaleLowerCase("zh-CN");
+        const suppressedTopic = Object.entries(associationUserModel.corrections).find(([topic, correction]) => {
+          return correction === "suppressed" && getAssociationTopicAliases(topic).some((alias) => searchable.includes(alias.toLocaleLowerCase("zh-CN")));
+        });
+        if (suppressedTopic) return { topic: suppressedTopic[0], score: 0, bonus: -12, suppressed: true };
+        const matches = [...associationInterests.entries()].filter(([topic]) => {
+          return getAssociationTopicAliases(topic).some((alias) => searchable.includes(alias.toLocaleLowerCase("zh-CN")));
+        }).sort((a, b) => Math.abs(b[1].raw) - Math.abs(a[1].raw));
+        if (!matches.length) return null;
+        const [topic, data] = matches[0];
+        const bonus = data.raw < 0
+          ? Math.max(-10, Math.round(data.raw))
+          : Math.max(2, Math.min(6, Math.round(data.score / 17)));
+        return { topic, score: data.score, bonus, suppressed: false };
+      }
+
+      function createUserModelSignal({ id, type, source, topic, delta, label, correctionAction = "" }) {
+        return { id, type, source, topic, delta, label, correctionAction, createdAt: new Date().toISOString() };
+      }
+
+      function upsertAssociationUserModelSignal(signal, status) {
+        if (!associationUserModel.consent || !personalizationEnabled) return false;
+        if (signal.source !== "correction" && !associationUserModel.sources[signal.source]) return false;
+        const next = cloneAssociationUserModel(associationUserModel);
+        const index = next.signals.findIndex((candidate) => candidate.id === signal.id);
+        if (index >= 0) {
+          const existing = next.signals[index];
+          if (existing.delta === signal.delta && existing.label === signal.label) return false;
+          next.signals.splice(index, 1);
+        }
+        next.signals.unshift(signal);
+        return commitAssociationUserModel(next, { status });
+      }
+
+      function removeAssociationUserModelSignal(signalId, status = "已撤销该条信号，用户模型与排序已同步更新。") {
+        const next = cloneAssociationUserModel(associationUserModel);
+        const signal = next.signals.find((candidate) => candidate.id === signalId);
+        if (!signal) return false;
+        next.signals = next.signals.filter((candidate) => candidate.id !== signalId);
+        if (signal.correctionAction === "suppress" || signal.correctionAction === "restore") {
+          const latestCorrection = next.signals
+            .filter((candidate) => candidate.topic === signal.topic && (candidate.correctionAction === "suppress" || candidate.correctionAction === "restore"))
+            .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0];
+          if (latestCorrection?.correctionAction === "suppress") next.corrections[signal.topic] = "suppressed";
+          else delete next.corrections[signal.topic];
+        }
+        return commitAssociationUserModel(next, { status });
+      }
+
+      function recordAssociationQuerySignal(query) {
+        const normalized = String(query || "").trim();
+        const topic = getAssociationModelTopic(normalized);
+        if (!topic) return false;
+        return upsertAssociationUserModelSignal(createUserModelSignal({
+          id: `search:${normalized.toLocaleLowerCase("zh-CN")}:${topic}`,
+          type: "搜索提问",
+          source: "search",
+          topic,
+          delta: 4,
+          label: `搜索“${normalized.slice(0, 36)}”`
+        }), `已分析搜索提问，“${topic}”模型信号 +4，结果已重新排序。`);
+      }
+
+      function syncAssociationItemModelSignal(source, itemIndex, value) {
+        const item = SEARCH_ITEMS[itemIndex];
+        if (!item) return false;
+        const topic = getAssociationModelTopic([item.title, item.summary, ...item.tags].join(" ")) || getAssociationModelTopic(lastAssociationQuery);
+        const signalId = `${source}:${lastAssociationQuery.toLocaleLowerCase("zh-CN")}:${itemIndex}`;
+        if (!value) return removeAssociationUserModelSignal(signalId);
+        if (!associationUserModel.consent || !personalizationEnabled || associationUserModel.sources[source] === false) return false;
+        const config = source === "adoption"
+          ? { type: "采用结果", delta: 6, label: `采用“${item.title.slice(0, 36)}”` }
+          : value.value === "relevant"
+            ? { type: "相关反馈", delta: 5, label: `标记“${item.title.slice(0, 32)}”为相关` }
+            : { type: "不相关反馈", delta: -8, label: `标记“${item.title.slice(0, 32)}”不相关：${value.reason}` };
+        return upsertAssociationUserModelSignal(createUserModelSignal({
+          id: signalId,
+          source,
+          topic,
+          ...config
+        }), `已将${config.type}计入“${topic}”模型，结果已重新排序。`);
+      }
+
+      function getAssociationFeedbackState(itemIndex, query = lastAssociationQuery || portalResultSearchInput.value.trim()) {
+        const transientFeedback = associationFeedback.get(itemIndex);
+        if (transientFeedback) return transientFeedback;
+        const normalizedQuery = String(query || "").trim().toLocaleLowerCase("zh-CN");
+        const storedSignal = associationUserModel.signals.find((signal) => signal.id === `feedback:${normalizedQuery}:${itemIndex}`);
+        if (!storedSignal) return null;
+        if (storedSignal.delta > 0) return { value: "relevant", reason: "用户确认相关" };
+        if (storedSignal.delta < 0) {
+          const reason = String(storedSignal.label || "").match(/不相关[：:]\s*(.+)$/)?.[1] || "用户确认不相关";
+          return { value: "irrelevant", reason };
+        }
+        return null;
+      }
+
+      function applyUserModelTopicAction(topic, action) {
+        const next = cloneAssociationUserModel(associationUserModel);
+        const topicId = encodeURIComponent(topic);
+        let signal;
+        if (action === "suppress") {
+          next.corrections[topic] = "suppressed";
+          signal = createUserModelSignal({ id: `correction:suppress:${topicId}:${Date.now()}`, type: "主动纠正", source: "correction", topic, delta: 0, label: `不再推荐“${topic}”`, correctionAction: "suppress" });
+        } else if (action === "restore") {
+          delete next.corrections[topic];
+          signal = createUserModelSignal({ id: `correction:restore:${topicId}:${Date.now()}`, type: "主动纠正", source: "correction", topic, delta: 0, label: `恢复自动判断“${topic}”`, correctionAction: "restore" });
+        } else {
+          const delta = action === "boost" ? 6 : -6;
+          const manualCorrectionId = `correction:manual:${topicId}`;
+          next.signals = next.signals.filter((candidate) => candidate.id !== manualCorrectionId);
+          signal = createUserModelSignal({ id: manualCorrectionId, type: "主动纠正", source: "correction", topic, delta, label: `${action === "boost" ? "提高" : "降低"}“${topic}”排序影响` });
+        }
+        next.signals.unshift(signal);
+        return commitAssociationUserModel(next, { status: `已${action === "boost" ? "提高" : action === "reduce" ? "降低" : action === "suppress" ? "停止" : "恢复"}“${topic}”的排序影响。` });
+      }
+
+      function formatUserModelTime(value) {
+        if (!value) return "尚未更新";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "时间未知";
+        return new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(date);
+      }
+
+      function renderUserModelPanel() {
+        rebuildAssociationInterests();
+        portalUserModelPanel.hidden = !userModelPanelOpen;
+        portalUserModelDisclosure.setAttribute("aria-expanded", String(userModelPanelOpen));
+        portalUserModelDisclosure.textContent = userModelPanelOpen ? "收起模型与信号" : "查看模型与信号";
+        portalUserModelConsent.hidden = associationUserModel.consent;
+        portalUserModelDashboard.hidden = !associationUserModel.consent;
+        portalUserModelClearConfirm.hidden = !userModelClearOpen;
+        portalUserModelState.textContent = !associationUserModel.consent
+          ? "未授权 · 不采集"
+          : personalizationEnabled
+            ? `已开启 · ${associationInterests.size} 个主题`
+            : `已暂停 · ${associationInterests.size} 个主题已保留`;
+        portalPersonalizationToggle.textContent = `个性化关联：${personalizationEnabled ? "开启" : "关闭"}`;
+        portalPersonalizationToggle.setAttribute("aria-pressed", String(personalizationEnabled));
+        portalInterestProfile.hidden = !personalizationEnabled || associationInterests.size === 0;
+        portalInterestProfile.innerHTML = [...associationInterests.entries()].sort((a, b) => b[1].score - a[1].score).slice(0, 3).map(([label, data]) => {
+          const negative = data.raw < 0;
+          const visualValue = negative ? Math.min(96, Math.abs(data.raw) * 8) : data.score;
+          const visibleValue = negative ? data.raw : data.score;
+          return `<span><b>${escapeHtml(label)}</b><i class="${negative ? "is-negative" : ""}" role="meter" aria-label="${escapeHtml(label)}${negative ? "负向" : "正向"}排序影响 ${visibleValue}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${visualValue}"><em style="width:${visualValue}%"></em></i><small>${visibleValue}</small></span>`;
+        }).join("");
+        const activeSignalCount = [...associationInterests.values()].reduce((count, interest) => count + interest.count, 0);
+        const relevanceSortActive = portalSearchSort.value === "relevance";
+        portalProfileUpdateStatus.textContent = !associationUserModel.consent
+          ? "个性化关联关闭，不采集行为，结果仅依据当前提问、知识关系与可核验性排序。"
+          : personalizationEnabled
+            ? activeSignalCount
+              ? relevanceSortActive
+                ? `用户模型由 ${activeSignalCount} 条显式信号动态计算，权重已参与综合相关性排序；可查看来源并随时纠正。`
+                : `用户模型由 ${activeSignalCount} 条显式信号动态计算；当前按${portalSearchSort.value === "latest" ? "最新发布" : "标题"}排序，模型仅影响“不再推荐”过滤和关联分展示。`
+              : "个性化已开启，但尚无有效信号；当前排序暂不受用户模型影响。"
+            : "个性化已暂停：停止采集且排序不使用用户模型，本机已保存的模型仍可恢复。";
+        if (!associationUserModel.consent) {
+          portalUserModelStatus.querySelector("span").textContent = userModelStorageError || userModelStatusMessage;
+          portalUserModelUndo.hidden = !userModelUndoSnapshot;
+          return;
+        }
+        portalUserModelSources.querySelectorAll("input[type='checkbox']").forEach((input) => {
+          input.checked = associationUserModel.sources[input.value] !== false;
+        });
+        ["search", "adoption", "feedback"].forEach((source) => {
+          const count = associationUserModel.signals.filter((signal) => signal.source === source).length;
+          const suffix = source === "search" ? "Search" : source === "adoption" ? "Adoption" : "Feedback";
+          document.getElementById(`portalUserModelSourceCount${suffix}`).textContent = `${count} 条`;
+        });
+        const sortedInterests = [...associationInterests.entries()].sort((a, b) => b[1].score - a[1].score);
+        const suppressedTopics = Object.entries(associationUserModel.corrections).filter(([, correction]) => correction === "suppressed").map(([topic]) => topic);
+        portalUserModelInterestList.innerHTML = sortedInterests.length || suppressedTopics.length
+          ? [
+              ...sortedInterests.map(([topic, data]) => {
+                const topicId = encodeURIComponent(topic);
+                const negative = data.raw < 0;
+                const visualValue = negative ? Math.min(96, Math.abs(data.raw) * 8) : data.score;
+                const visibleValue = negative ? data.raw : data.score;
+                return `<article data-user-model-topic-id="${topicId}">
+                  <div><strong>${escapeHtml(topic)}</strong><span>${data.count} 条有效信号 · ${negative ? `负向排序影响 ${visibleValue}` : `相对排序影响 ${visibleValue}`}</span></div>
+                  <div class="portal-user-model-meter"><i class="${negative ? "is-negative" : ""}" role="meter" aria-label="${escapeHtml(topic)}${negative ? "负向" : "正向"}排序影响 ${visibleValue}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${visualValue}"><em style="width:${visualValue}%"></em></i><b>${visibleValue}</b></div>
+                  <div class="portal-user-model-topic-actions">
+                    <button type="button" data-user-model-topic-action="boost" data-topic-id="${topicId}">提高此类</button>
+                    <button type="button" data-user-model-topic-action="reduce" data-topic-id="${topicId}">减少此类</button>
+                    <button type="button" data-user-model-topic-action="suppress" data-topic-id="${topicId}">不再推荐</button>
+                  </div>
+                </article>`;
+              }),
+              ...suppressedTopics.map((topic) => {
+                const topicId = encodeURIComponent(topic);
+                return `<article class="is-suppressed" data-user-model-topic-id="${topicId}">
+                  <div><strong>${escapeHtml(topic)}</strong><span>已按你的纠正停止用于推荐</span></div>
+                  <button type="button" data-user-model-topic-action="restore" data-topic-id="${topicId}">恢复自动判断</button>
+                </article>`;
+              })
+            ].join("")
+          : `<div class="portal-user-model-empty"><strong>尚未建立兴趣权重</strong><span>开启后提交一次搜索、采用结果或主动反馈，模型会在这里显示可解释变化。</span></div>`;
+        portalUserModelConfidence.textContent = activeSignalCount === 0
+          ? "暂无有效信号"
+          : activeSignalCount === 1
+            ? "信号较少 · 低置信度 · 分值表示相对排序影响"
+            : `${activeSignalCount} 条有效信号 · 分值表示相对排序影响，不是兴趣概率`;
+        portalUserModelUpdatedAt.textContent = formatUserModelTime(associationUserModel.updatedAt);
+        portalUserModelSignalCount.textContent = `${associationUserModel.signals.length} 条信号`;
+        portalUserModelSignalList.innerHTML = associationUserModel.signals.length
+          ? associationUserModel.signals.map((signal) => {
+              const state = getUserModelSignalState(signal);
+              const delta = signal.delta > 0 ? `+${signal.delta}` : String(signal.delta);
+              return `<li>
+                <div><strong>${escapeHtml(signal.label)}</strong><span>${escapeHtml(signal.type)} · ${escapeHtml(signal.topic)} · ${escapeHtml(formatUserModelTime(signal.createdAt))}</span></div>
+                <span class="${state === "已计入" ? "is-active" : ""}">${state} · ${delta}</span>
+                <button type="button" data-user-model-undo-signal="${escapeHtml(signal.id)}" aria-label="撤销${escapeHtml(signal.label)}对${escapeHtml(signal.topic)}权重的影响">撤销</button>
+              </li>`;
+            }).join("")
+          : `<li class="portal-user-model-empty"><strong>暂无行为明细</strong><span>只有同意后的显式操作才会出现在这里。</span></li>`;
+        portalUserModelPause.textContent = personalizationEnabled ? "暂停个性化" : "重新开启个性化";
+        portalUserModelStatus.querySelector("span").textContent = userModelStorageError || userModelStatusMessage;
+        portalUserModelUndo.hidden = !userModelUndoSnapshot;
+      }
+
+      function setUserModelPanelOpen(open, trigger = null) {
+        userModelPanelOpen = open;
+        userModelClearOpen = false;
+        if (open && trigger) userModelLastTrigger = trigger;
+        renderUserModelPanel();
+        if (open) {
+          window.requestAnimationFrame(() => {
+            (associationUserModel.consent ? portalUserModelTitle : portalUserModelConsentTitle).focus();
+            portalUserModelPanel.scrollIntoView({ behavior: reduceCarouselMotion.matches ? "auto" : "smooth", block: "nearest" });
+          });
+        } else {
+          userModelLastTrigger?.focus?.();
+          userModelLastTrigger = null;
+        }
+      }
+
+      function getAssociationProfile(item, query) {
+        const searchable = [item.title, item.summary, item.detail, item.type, item.source, item.meta, item.author, item.personName, item.institution, ...item.tags]
+          .filter(Boolean)
+          .join(" ")
+          .toLocaleLowerCase("zh-CN");
+        const originalTerms = getQueryTerms(query)
+          .map((term) => term.toLocaleLowerCase("zh-CN"))
+          .filter((term) => term.length >= 2);
+        const semanticTerms = getSemanticTerms(query)
+          .map((term) => term.toLocaleLowerCase("zh-CN"))
+          .filter((term) => term.length >= 2);
+        const exactMatches = originalTerms.filter((term) => searchable.includes(term));
+        const matchedTerms = [...new Set([...exactMatches, ...semanticTerms.filter((term) => searchable.includes(term))])].slice(0, 4);
+        const resourceIntent = getAssociationResourceIntent(query);
+        const intentMatched = !resourceIntent.length || resourceIntent.includes(item.type);
+        const relation = getAssociationRelation(item);
+        const itemIndex = SEARCH_ITEMS.indexOf(item);
+        const storedFeedbackSignal = associationUserModel.signals.find((signal) => {
+          return signal.id === `feedback:${String(query || "").trim().toLocaleLowerCase("zh-CN")}:${itemIndex}`;
+        });
+        let score = 60 + Math.min(16, exactMatches.length * 8) + Math.min(18, matchedTerms.length * 4) + (intentMatched ? 7 : 0) + (item.accessible ? 3 : 0);
+        const modelInfluence = getAssociationModelInfluence(item);
+        if (modelInfluence) score += modelInfluence.bonus;
+        if (personalizationEnabled && associationUserModel.sources.feedback && storedFeedbackSignal?.delta > 0) score += 4;
+        if (personalizationEnabled && associationUserModel.sources.feedback && storedFeedbackSignal?.delta < 0) score -= 24;
+        score = Math.max(52, Math.min(98, score));
+        const level = score >= 86 ? "高" : score >= 72 ? "中" : "一般";
+        const entity = deriveQueryUnderstanding(query)[0]?.[1] || String(query || "当前问题").slice(0, 12);
+        const evidenceCount = item.matches?.length || (item.summary ? 1 : 0);
+        const availableEvidence = item.accessible !== false && evidenceCount > 0;
+        const reasons = [];
+        if (matchedTerms.length) reasons.push(`命中${matchedTerms.slice(0, 3).map((term) => `“${term}”`).join("、")}`);
+        if (intentMatched && resourceIntent.length) reasons.push(`符合“${resourceIntent.join("／")}”资源意图`);
+        if (modelInfluence?.suppressed) reasons.push(`用户已停止“${modelInfluence.topic}”类推荐`);
+        else if (modelInfluence) reasons.push(`用户模型“${modelInfluence.topic}”贡献 ${modelInfluence.bonus > 0 ? "+" : ""}${modelInfluence.bonus} 分`);
+        if (!reasons.length) reasons.push("题名、摘要或结构化字段与当前问题存在语义关系");
+        return {
+          relation,
+          score,
+          level,
+          matchedTerms,
+          evidenceCount,
+          availableEvidence,
+          path: `${entity} → ${relation.label} → ${item.type}`,
+          reason: reasons.join("；")
+        };
+      }
+
+      function resetAssociationSession(query) {
+        const normalizedQuery = String(query || "").trim();
+        if (normalizedQuery === lastAssociationQuery) return;
+        lastAssociationQuery = normalizedQuery;
+        associationScope = "all";
+        associationOnlyAdopted = false;
+        associationSummaryOpen = false;
+        associationFeedbackPanelIndex = -1;
+        associationLastFeedback = null;
+        adoptedAssociationItems.clear();
+        associationFeedback.clear();
+      }
+
+      function updateAssociationSelectionPanel() {
+        const selectedItems = [...adoptedAssociationItems]
+          .map((index) => SEARCH_ITEMS[index])
+          .filter(Boolean);
+        portalAssociationAdoptedCount.textContent = String(selectedItems.length);
+        portalAssociationSelectionText.textContent = selectedItems.length
+          ? `已选择 ${selectedItems.length} 条可核验信息；可仅看已采用内容或生成本次检索摘要。`
+          : "可在结果卡中查看依据，并将有用信息加入本次检索摘要。";
+        portalAssociationOnlyAdopted.disabled = selectedItems.length === 0;
+        portalAssociationOnlyAdopted.setAttribute("aria-pressed", String(associationOnlyAdopted));
+        portalAssociationOnlyAdopted.classList.toggle("is-active", associationOnlyAdopted);
+        portalAssociationOnlyAdopted.textContent = associationOnlyAdopted ? "查看全部结果" : "仅看已采用";
+        portalAssociationClearAdopted.disabled = selectedItems.length === 0;
+        portalAssociationGenerateSummary.disabled = selectedItems.length === 0;
+        portalAssociationSummary.hidden = !associationSummaryOpen || selectedItems.length === 0;
+        portalAssociationSummaryList.innerHTML = selectedItems.map((item) => {
+          const profile = getAssociationProfile(item, portalResultSearchInput.value.trim());
+          return `<li><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(profile.reason)}；来源：${escapeHtml(item.source)}</span></li>`;
+        }).join("");
+        portalAssociationFeedbackStatus.hidden = !associationLastFeedback;
+        if (associationLastFeedback) {
+          const feedbackLabel = associationLastFeedback.next?.value === "irrelevant"
+            ? `已记录“不相关”：${associationLastFeedback.next.reason}`
+            : associationLastFeedback.next?.value === "relevant" ? "已记录“相关”反馈" : "已撤销关联反馈";
+          portalAssociationFeedbackStatus.querySelector("span").textContent = feedbackLabel;
+        }
+      }
+
+      function focusAssociationResultControl(itemIndex, selector) {
+        window.requestAnimationFrame(() => {
+          portalSearchResultList.querySelector(`[data-result-id="result-${itemIndex}"] ${selector}`)?.focus();
+        });
+      }
+
       function getExpansionSuggestions(query) {
         const text = String(query || "");
         if (/药物|靶点|生物医药/.test(text)) {
@@ -5846,30 +6528,53 @@
         };
       }
 
-      function renderAssociationPanel(query) {
+      function renderAssociationPanel(query, context = {}) {
         const safeQuery = query || "当前科研主题";
-        const entities = deriveQueryUnderstanding(safeQuery).map(([, value]) => value);
+        const entities = deriveQueryUnderstanding(safeQuery);
+        const entityValues = entities.map(([, value]) => value);
+        const semanticTerms = getSemanticTerms(safeQuery).filter((term) => term.length >= 2).slice(0, 6);
+        const resourceIntent = getAssociationResourceIntent(safeQuery);
+        const resourceTypes = resourceIntent.length ? resourceIntent : ["论文", "专利", "报告", "人才", "资讯", "项目"];
+        const candidates = context.candidates || [];
+        const filteredItems = context.items || [];
+        const visibleItems = context.visibleItems || [];
+        const sourceCounts = candidates.reduce((counts, item) => {
+          counts.set(item.type, (counts.get(item.type) || 0) + 1);
+          return counts;
+        }, new Map());
         portalAssociationOriginalQuery.textContent = `原始问题：${safeQuery}`;
-        portalAssociationNormalizedQuery.textContent = `主题:(\"${entities.join("\" OR \"")}\") AND 资源:(论文 OR 专利 OR 专家 OR 机构)`;
-        portalPersonalizationToggle.textContent = `个性化关联：${personalizationEnabled ? "开启" : "关闭"}`;
-        portalPersonalizationToggle.setAttribute("aria-pressed", String(personalizationEnabled));
-        portalBehaviorAnalysisTitle.textContent = personalizationEnabled ? "使用本次会话的模拟兴趣信号" : "仅使用当前问题";
-        portalBehaviorAnalysisText.textContent = personalizationEnabled
-          ? "综合本次演示中的检索、查看与收藏次数计算兴趣程度，并参与关联结果排序。"
-          : "默认不使用历史行为；开启后仅在本次演示中使用模拟的检索、查看与收藏信号。";
-        portalInterestProfile.innerHTML = [...associationInterests.entries()].map(([label, score]) => `
-          <span><b>${escapeHtml(label)}</b><i><em style="width:${score}%"></em></i><small>${score}</small></span>`).join("");
-        portalProfileUpdateStatus.textContent = personalizationEnabled
-          ? "本次会话画像已动态更新；关闭后不再参与推荐排序。"
-          : "模拟画像未参与当前排序，关联结果仅依据当前问题与知识关系。";
+        portalAssociationEntities.innerHTML = [
+          ...entities.map(([label, value]) => `<span><small>${escapeHtml(label)}</small>${escapeHtml(value)}</span>`),
+          `<span><small>资源意图</small>${escapeHtml(resourceIntent.length ? resourceIntent.join("／") : "多类型知识")}</span>`
+        ].join("");
+        portalAssociationNormalizedQuery.textContent = `主题:(\"${(semanticTerms.length ? semanticTerms : entityValues).join("\" OR \"")}\") AND 资源:(${resourceTypes.join(" OR ")})`;
+        portalAssociationNormalization.textContent = `保留原始提问；识别 ${entityValues.length} 个语义要素，并扩展为 ${semanticTerms.length || entityValues.length} 个可追溯检索概念。`;
+        portalAssociationRecallSummary.textContent = candidates.length
+          ? `已从 ${sourceCounts.size} 类原型知识资源召回 ${candidates.length} 条候选信息。`
+          : "未在当前原型知识库中召回候选信息，可缩短问题或更换主题后重试。";
+        portalAssociationSources.innerHTML = sourceCounts.size
+          ? [...sourceCounts.entries()].map(([type, count]) => `<span>${escapeHtml(type)} <small>${count}</small></span>`).join("")
+          : `<span>暂无召回来源</span>`;
+        const associationSortSummary = portalSearchSort.value === "latest"
+          ? "当前按最新发布排序；用户模型仅影响停止推荐过滤和关联分展示。"
+          : portalSearchSort.value === "title"
+            ? "当前按标题排序；用户模型仅影响停止推荐过滤和关联分展示。"
+            : `结果按关联强度、可核验性${personalizationEnabled && associationInterests.size ? "与已授权用户模型" : ""}排序。`;
+        portalAssociationFilterSummary.textContent = `候选 ${candidates.length} 条 → 按需求过滤 ${filteredItems.length} 条 → 当前展示 ${visibleItems.length} 条；${associationSortSummary}`;
+        portalAssociationStatus.textContent = candidates.length
+          ? `知识检索完成：已完成提问预处理、规范化、信息处理、知识库召回和分析推荐，共获得 ${filteredItems.length} 条符合当前条件的信息。`
+          : "知识检索完成，但当前原型知识库暂无匹配信息。";
+        portalAssociationScope.querySelectorAll("[data-association-scope]").forEach((button) => {
+          const active = button.dataset.associationScope === associationScope;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        renderUserModelPanel();
+        updateAssociationSelectionPanel();
       }
 
       function updateAssociationProfileFromQuery(query) {
-        if (!personalizationEnabled) return;
-        const text = String(query || "");
-        const topic = /药物|靶点/.test(text) ? "药物靶点" : /低空/.test(text) ? "低空经济" : /智能体/.test(text) ? "智能体" : /AI|人工智能|大模型/i.test(text) ? "AI for Science" : text.slice(0, 8);
-        if (!topic) return;
-        associationInterests.set(topic, Math.min(96, (associationInterests.get(topic) || 48) + 4));
+        return recordAssociationQuerySignal(query);
       }
 
       function renderKeywordExpansionSuggestions(query) {
@@ -6010,10 +6715,16 @@
         else portalMobileFilterToggle.focus();
       }
 
-      function updateSearchModePanels() {
+      function updateAssociationDetailsDisclosure() {
+        portalAssociationDetails.hidden = !associationDetailsOpen;
+        portalAssociationDetailsToggle.setAttribute("aria-expanded", String(associationDetailsOpen));
+        portalAssociationDetailsToggle.textContent = associationDetailsOpen ? "收起过程" : "查看过程";
+      }
+
+      function updateSearchModePanels(resultContext = {}) {
         const query = portalResultSearchInput.value.trim();
         const isAi = RESULT_MODE_PANELS_ENABLED && activeSearchMode === "AI 搜索";
-        const isAssociation = RESULT_MODE_PANELS_ENABLED && activeSearchMode === "关联";
+        const isAssociation = ASSOCIATION_KNOWLEDGE_RETRIEVAL_ENABLED && activeSearchMode === "关联";
         const isKeyword = RESULT_MODE_PANELS_ENABLED && activeSearchMode === "关键词";
         portalQueryUnderstanding.hidden = !isAi;
         portalAiOverview.hidden = !isAi;
@@ -6023,10 +6734,8 @@
         portalExpansionToggle.setAttribute("aria-expanded", String(keywordExpansionOpen));
         portalExpansionToggle.classList.toggle("is-active", keywordExpansionOpen);
         portalExpansionToggle.textContent = keywordExpansionOpen ? "收起扩展" : "词位扩展";
-        portalAssociationDetails.hidden = !associationDetailsOpen;
-        portalAssociationDetailsToggle.setAttribute("aria-expanded", String(associationDetailsOpen));
-        portalAssociationDetailsToggle.textContent = associationDetailsOpen ? "收起过程" : "查看过程";
-        if (isAssociation) renderAssociationPanel(query);
+        updateAssociationDetailsDisclosure();
+        if (isAssociation) renderAssociationPanel(query, resultContext);
         if (isKeyword) updateKeywordPanel(query);
         if (!isAi) return;
 
@@ -6112,15 +6821,15 @@
             ? exactPhraseMatch
             : originalMatch || expansionMatch || semanticMatch;
           const typeMatch = options.ignoreType || activeSearchType === "全部" || item.type === activeSearchType;
-          const accessMatch = !document.getElementById("accessibleOnly")?.checked || item.accessible;
-          const scopeMatch = scope !== "全文" || Boolean(item.matches?.length);
+          const accessMatch = options.ignoreFacets || !document.getElementById("accessibleOnly")?.checked || item.accessible;
+          const scopeMatch = options.ignoreFacets || scope !== "全文" || Boolean(item.matches?.length);
           const publishTime = String(filterValues.get("publishTime") || "不限时间");
           const yearThreshold = publishTime === "近一年" ? 2025 : publishTime === "近三年" ? 2023 : publishTime === "近五年" ? 2021 : 0;
-          const timeMatch = !yearThreshold || Number(String(item.date).slice(0, 4)) >= yearThreshold;
+          const timeMatch = options.ignoreFacets || !yearThreshold || Number(String(item.date).slice(0, 4)) >= yearThreshold;
           const disciplineText = [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN");
-          const disciplineMatch = !selectedDisciplines.length || selectedDisciplines.some((discipline) => (disciplineAliases[discipline] || [discipline]).some((alias) => disciplineText.includes(alias)));
-          const sourceMatch = !selectedSources.length || selectedSources.some((source) => (sourceGroups[source] || []).includes(item.type));
-          const secondaryMatch = (!fieldValue("personNameFilter") || String(item.personName || "").toLocaleLowerCase("zh-CN").includes(fieldValue("personNameFilter")))
+          const disciplineMatch = options.ignoreFacets || !selectedDisciplines.length || selectedDisciplines.some((discipline) => (disciplineAliases[discipline] || [discipline]).some((alias) => disciplineText.includes(alias)));
+          const sourceMatch = options.ignoreFacets || !selectedSources.length || selectedSources.some((source) => (sourceGroups[source] || []).includes(item.type));
+          const secondaryMatch = options.ignoreFacets || ((!fieldValue("personNameFilter") || String(item.personName || "").toLocaleLowerCase("zh-CN").includes(fieldValue("personNameFilter")))
             && (!fieldValue("institutionFilter") || String(item.institution || "").toLocaleLowerCase("zh-CN").includes(fieldValue("institutionFilter")))
             && (!fieldValue("authorFilter") || String(item.author || "").toLocaleLowerCase("zh-CN").includes(fieldValue("authorFilter")))
             && (!fieldValue("venueFilter") || String(item.venue || "").toLocaleLowerCase("zh-CN").includes(fieldValue("venueFilter")))
@@ -6128,20 +6837,20 @@
             && (!fieldValue("applicantFilter") || String(item.applicant || "").toLocaleLowerCase("zh-CN").includes(fieldValue("applicantFilter")))
             && (!fieldValue("inventorFilter") || String(item.inventor || "").toLocaleLowerCase("zh-CN").includes(fieldValue("inventorFilter")))
             && withinDateRange(item.applicationDate, String(filterValues.get("applicationStart") || ""), String(filterValues.get("applicationEnd") || ""))
-            && withinDateRange(item.publicationDate, String(filterValues.get("publicationStart") || ""), String(filterValues.get("publicationEnd") || ""));
-          return queryMatch && typeMatch && accessMatch && scopeMatch && timeMatch && disciplineMatch && sourceMatch && secondaryMatch;
+            && withinDateRange(item.publicationDate, String(filterValues.get("publicationStart") || ""), String(filterValues.get("publicationEnd") || "")));
+          const associationRelation = getAssociationRelation(item);
+          const associationScopeMatch = options.ignoreAssociationScope || activeSearchMode !== "关联" || associationScope === "all" || associationRelation.key === associationScope;
+          const adoptedMatch = options.ignoreAssociationScope || activeSearchMode !== "关联" || !associationOnlyAdopted || adoptedAssociationItems.has(SEARCH_ITEMS.indexOf(item));
+          const userModelMatch = options.ignorePersonalization || activeSearchMode !== "关联" || !getAssociationModelInfluence(item)?.suppressed;
+          return queryMatch && typeMatch && accessMatch && scopeMatch && timeMatch && disciplineMatch && sourceMatch && secondaryMatch && associationScopeMatch && adoptedMatch && userModelMatch;
         });
 
         if (portalSearchSort.value === "latest") {
           items = items.sort((a, b) => b.date.localeCompare(a.date));
         } else if (portalSearchSort.value === "title") {
           items = items.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
-        } else if (activeSearchMode === "关联" && personalizationEnabled) {
-          const interestScore = (item) => [...associationInterests.entries()].reduce((score, [topic, weight]) => {
-            const text = [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN");
-            return score + (text.includes(topic.toLocaleLowerCase("zh-CN")) ? weight : 0);
-          }, 0);
-          items = items.sort((a, b) => interestScore(b) - interestScore(a));
+        } else if (activeSearchMode === "关联") {
+          items = items.sort((a, b) => getAssociationProfile(b, rawQuery).score - getAssociationProfile(a, rawQuery).score);
         }
         return items;
       }
@@ -6151,9 +6860,16 @@
         article.className = "portal-search-card";
         article.dataset.type = item.type;
         article.dataset.date = item.date;
-        article.dataset.resultId = `result-${SEARCH_ITEMS.indexOf(item)}`;
+        const itemIndex = SEARCH_ITEMS.indexOf(item);
+        article.dataset.resultId = `result-${itemIndex}`;
         const query = portalResultSearchInput.value.trim();
         const metadata = getResultMetadata(item);
+        const associationProfile = activeSearchMode === "关联" ? getAssociationProfile(item, query) : null;
+        const currentFeedback = getAssociationFeedbackState(itemIndex, query);
+        const isAdopted = adoptedAssociationItems.has(itemIndex);
+        const evidenceId = `portal-association-evidence-${itemIndex}`;
+        const feedbackPanelId = `portal-association-feedback-${itemIndex}`;
+        const feedbackPanelOpen = associationFeedbackPanelIndex === itemIndex;
         const resultDetailUrl = item.type === "论文"
           ? item.detailUrl || PAPER_DETAIL_URL
           : item.detailUrl || item.url || "";
@@ -6162,6 +6878,32 @@
         const titleControl = resultDetailUrl
           ? `<a class="portal-result-detail-link" data-result-detail-link href="${escapeHtml(resultDetailUrl)}" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开 ${escapeHtml(item.title)}${item.type === "论文" ? " 论文详情" : " 资源详情"}">${resultTitle}<span class="portal-title-external-mark" aria-hidden="true">↗</span><small>新标签页</small></a>`
           : `<span>${resultTitle}</span>`;
+        const associationReasonMarkup = associationProfile ? `
+          <div class="portal-association-reason">
+            <strong>${associationProfile.level}关联 · ${associationProfile.score}%</strong>
+            <span><b>${associationProfile.relation.label}</b> · ${escapeHtml(associationProfile.reason)}${currentFeedback?.value === "irrelevant" ? `<small>已反馈不相关：${escapeHtml(currentFeedback.reason)}</small>` : currentFeedback?.value === "relevant" ? `<small>已反馈：相关</small>` : ""}</span>
+          </div>
+          <section class="portal-result-evidence ${associationProfile.availableEvidence ? "is-association" : "is-unavailable"}" id="${evidenceId}" data-evidence-snippet hidden>
+            <div><span class="portal-evidence-label">匹配依据</span><span>${associationProfile.availableEvidence ? `${associationProfile.evidenceCount} 条可核验信息` : "当前仅有受限元数据"}</span></div>
+            <p>${escapeHtml(item.matches?.[0]?.text || item.detail || item.summary)}</p>
+            <small>关联路径：${escapeHtml(associationProfile.path)} · 命中字段：${escapeHtml(getMatchFieldLabel(item, query))}</small>
+            ${associationProfile.availableEvidence && item.matches?.length
+              ? `<button type="button" data-open-fulltext="${itemIndex}">查看原文命中 <i>第 ${item.matches[0].page} 页 · 第 ${item.matches[0].paragraph} 段</i></button>`
+              : `<small>${associationProfile.availableEvidence ? "当前结果提供摘要与来源元数据，可进入详情继续核验。" : "该资源当前无访问权限，不能生成或采用虚构证据。"}</small>`}
+          </section>` : "";
+        const associationActionsMarkup = associationProfile ? `
+          <button class="portal-search-card-action" type="button" data-association-evidence-toggle aria-expanded="false" aria-controls="${evidenceId}">查看依据</button>
+          <button class="portal-search-card-action ${isAdopted ? "is-selected" : ""}" type="button" data-association-adopt="${itemIndex}" aria-pressed="${isAdopted}" ${associationProfile.availableEvidence ? "" : "disabled title=\"暂无可采用证据\""}>${isAdopted ? "已采用" : "采用"}</button>
+          <button class="portal-search-card-action ${currentFeedback?.value === "relevant" ? "is-selected" : ""}" type="button" data-association-feedback-relevant="${itemIndex}" aria-pressed="${currentFeedback?.value === "relevant"}">${currentFeedback?.value === "relevant" ? "已相关" : "相关"}</button>
+          <button class="portal-search-card-action ${currentFeedback?.value === "irrelevant" ? "is-selected" : ""}" type="button" data-association-feedback-irrelevant="${itemIndex}" aria-expanded="${feedbackPanelOpen}" aria-controls="${feedbackPanelId}">${currentFeedback?.value === "irrelevant" ? "撤销不相关" : "不相关"}</button>` : "";
+        const associationFeedbackMarkup = associationProfile ? `
+          <div class="portal-association-feedback-panel" id="${feedbackPanelId}" ${feedbackPanelOpen ? "" : "hidden"}>
+            <span>请选择不相关原因</span>
+            <div>
+              ${["主题偏离", "关系错误", "证据不足", "重复结果"].map((reason) => `<button type="button" data-association-feedback-reason="${escapeHtml(reason)}" data-item-index="${itemIndex}">${escapeHtml(reason)}</button>`).join("")}
+              <button type="button" data-association-feedback-cancel>取消</button>
+            </div>
+          </div>` : "";
         article.innerHTML = `
           <div class="portal-result-rail">
             <span class="portal-result-type-icon" data-result-type="${item.type}">${getResultTypeIcon(item.type)}</span>
@@ -6172,9 +6914,11 @@
             <h3 class="portal-search-card-title">${titleControl}</h3>
             <dl class="portal-result-metadata">${metadata.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>
             <p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>
+            ${associationReasonMarkup}
             <div class="portal-result-bottomline">
               <div class="portal-search-card-tags">${item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag">${tag}</span>`).join("")}</div>
               <div class="portal-search-card-actions">
+                ${associationActionsMarkup}
                 ${item.type === "论文"
                   ? `<button class="portal-search-card-action portal-paper-comment-toggle" type="button" data-paper-comment-toggle aria-expanded="false">查看论文并评论</button>`
                   : ""}
@@ -6183,6 +6927,7 @@
                   : ""}
               </div>
             </div>
+            ${associationFeedbackMarkup}
             ${item.type === "论文" ? getPaperCommentPanelMarkup(item) : ""}
           </div>`;
         return article;
@@ -6229,6 +6974,9 @@
       function renderSearchResults() {
         const items = getFilteredSearchItems();
         const allTypeItems = getFilteredSearchItems({ ignoreType: true });
+        const associationCandidates = activeSearchMode === "关联"
+          ? getFilteredSearchItems({ ignoreType: true, ignoreFacets: true, ignoreAssociationScope: true, ignorePersonalization: true })
+          : [];
         const totalPages = Math.max(1, Math.ceil(items.length / SEARCH_PAGE_SIZE));
         activeSearchPage = Math.min(activeSearchPage, totalPages);
         const start = (activeSearchPage - 1) * SEARCH_PAGE_SIZE;
@@ -6244,9 +6992,10 @@
         });
         updateActiveFilters();
         portalSearchResultList.replaceChildren(...visibleItems.map(createSearchResultCard));
+        portalSearchResultList.setAttribute("aria-busy", "false");
         portalSearchResultList.hidden = visibleItems.length === 0;
         portalSearchEmpty.hidden = visibleItems.length !== 0;
-        updateSearchModePanels();
+        updateSearchModePanels({ candidates: associationCandidates, items, visibleItems });
 
         if (items.length <= SEARCH_PAGE_SIZE) {
           portalSearchPagination.replaceChildren();
@@ -6567,6 +7316,12 @@
       function performSearch(rawQuery, options = {}) {
         const query = String(rawQuery || "").trim();
         if (!query) {
+          setPortalSearchFeedback("请输入要检索的研究主题、问题、成果或专家名称。", "error");
+          (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
+          return;
+        }
+        if (!isUsableSearchQuery(query)) {
+          setPortalSearchFeedback("检索提问需包含文字或数字，请修改后重试。", "error");
           (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
           return;
         }
@@ -6574,11 +7329,17 @@
         if (options.mode) setSearchMode(options.mode);
         if (options.resourceType) setSearchType(options.resourceType);
         if (activeSearchMode === "关键词") originalKeywordQuery = query;
-        if (activeSearchMode === "关联") updateAssociationProfileFromQuery(query);
+        if (activeSearchMode === "关联") {
+          resetAssociationSession(query);
+          updateAssociationProfileFromQuery(query);
+        }
         portalResultSearchInput.value = query;
         activeSearchPage = 1;
         searchResultQuery.textContent = `“${query}”`;
         renderSearchResults();
+        setPortalSearchFeedback(activeSearchMode === "关联"
+          ? "知识检索已完成，可查看规范化过程、关联依据并采用有用信息。"
+          : "检索已完成，可继续使用资源类型和筛选条件缩小范围。" );
         showSurface("search", { focusTarget: portalResultSearchInput });
       }
 
@@ -6837,19 +7598,34 @@
       portalResultSearchForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const query = portalResultSearchInput.value.trim();
-        if (query) {
-          performSearch(query);
-        } else {
-          searchResultQuery.textContent = "全部资源";
-          activeSearchPage = 1;
-          renderSearchResults();
-          showSurface("search", { focusTarget: portalResultSearchInput });
+        if (!query || !isUsableSearchQuery(query)) {
+          setPortalSearchFeedback(query ? "检索提问需包含文字或数字，请修改后重试。" : "请输入要检索的研究主题、问题、成果或专家名称。", "error");
+          portalResultSearchInput.focus();
+          return;
         }
+        const submitButton = portalResultSearchForm.querySelector("button[type='submit']");
+        if (submitButton.disabled) return;
+        submitButton.disabled = true;
+        submitButton.setAttribute("aria-busy", "true");
+        submitButton.textContent = activeSearchMode === "关联" ? "知识检索中" : "检索中";
+        portalSearchResultList.setAttribute("aria-busy", "true");
+        setPortalSearchFeedback(activeSearchMode === "关联" ? "正在预处理提问并检索原型知识库……" : "正在检索……", "loading");
+        window.setTimeout(() => {
+          performSearch(query);
+          submitButton.disabled = false;
+          submitButton.removeAttribute("aria-busy");
+          submitButton.textContent = "搜索";
+        }, reduceCarouselMotion.matches ? 0 : 260);
       });
       portalSearchModes.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-search-mode]");
         if (!tab) return;
         setSearchMode(tab.dataset.searchMode);
+        if (activeSearchMode === "关联") {
+          const query = portalResultSearchInput.value.trim();
+          resetAssociationSession(query);
+          updateAssociationProfileFromQuery(query);
+        }
         if (activeSearchMode === "关键词" && portalResultSearchInput.value.trim()) originalKeywordQuery = portalResultSearchInput.value.trim();
         activeSearchPage = 1;
         renderSearchResults();
@@ -6867,6 +7643,12 @@
         event.preventDefault();
         const target = tabs[(nextIndex + tabs.length) % tabs.length];
         setSearchMode(target.dataset.searchMode);
+        if (activeSearchMode === "关联") {
+          const query = portalResultSearchInput.value.trim();
+          resetAssociationSession(query);
+          updateAssociationProfileFromQuery(query);
+        }
+        if (activeSearchMode === "关键词" && portalResultSearchInput.value.trim()) originalKeywordQuery = portalResultSearchInput.value.trim();
         activeSearchPage = 1;
         renderSearchResults();
         target.focus();
@@ -6879,6 +7661,118 @@
         renderSearchResults();
       });
       portalSearchResultList.addEventListener("click", (event) => {
+        const evidenceToggle = event.target.closest("[data-association-evidence-toggle]");
+        if (evidenceToggle) {
+          const panel = document.getElementById(evidenceToggle.getAttribute("aria-controls"));
+          if (!panel) return;
+          const open = panel.hidden;
+          panel.hidden = !open;
+          evidenceToggle.setAttribute("aria-expanded", String(open));
+          evidenceToggle.textContent = open ? "收起依据" : "查看依据";
+          if (open) panel.scrollIntoView({ behavior: reduceCarouselMotion.matches ? "auto" : "smooth", block: "nearest" });
+          return;
+        }
+        const fulltextButton = event.target.closest("[data-open-fulltext]");
+        if (fulltextButton) {
+          const item = SEARCH_ITEMS[Number(fulltextButton.dataset.openFulltext)];
+          if (item?.matches?.length) openDocumentViewer(item, 0, fulltextButton);
+          return;
+        }
+        const adoptButton = event.target.closest("[data-association-adopt]");
+        if (adoptButton) {
+          const itemIndex = Number(adoptButton.dataset.associationAdopt);
+          const willAdopt = !adoptedAssociationItems.has(itemIndex);
+          if (willAdopt) adoptedAssociationItems.add(itemIndex);
+          else adoptedAssociationItems.delete(itemIndex);
+          syncAssociationItemModelSignal("adoption", itemIndex, willAdopt ? true : null);
+          associationSummaryOpen = false;
+          if (!adoptedAssociationItems.size) associationOnlyAdopted = false;
+          renderSearchResults();
+          focusAssociationResultControl(itemIndex, "[data-association-adopt]");
+          return;
+        }
+        const relevantButton = event.target.closest("[data-association-feedback-relevant]");
+        if (relevantButton) {
+          const itemIndex = Number(relevantButton.dataset.associationFeedbackRelevant);
+          const previous = getAssociationFeedbackState(itemIndex) || null;
+          const next = previous?.value === "relevant" ? null : { value: "relevant", reason: "用户确认相关" };
+          if (next) associationFeedback.set(itemIndex, next);
+          else associationFeedback.delete(itemIndex);
+          syncAssociationItemModelSignal("feedback", itemIndex, next);
+          associationLastFeedback = { itemIndex, previous, next };
+          associationFeedbackPanelIndex = -1;
+          renderSearchResults();
+          focusAssociationResultControl(itemIndex, "[data-association-feedback-relevant]");
+          return;
+        }
+        const irrelevantButton = event.target.closest("[data-association-feedback-irrelevant]");
+        if (irrelevantButton) {
+          const itemIndex = Number(irrelevantButton.dataset.associationFeedbackIrrelevant);
+          const previous = getAssociationFeedbackState(itemIndex) || null;
+          if (previous?.value === "irrelevant") {
+            associationFeedback.delete(itemIndex);
+            syncAssociationItemModelSignal("feedback", itemIndex, null);
+            associationLastFeedback = { itemIndex, previous, next: null };
+            associationFeedbackPanelIndex = -1;
+            renderSearchResults();
+            focusAssociationResultControl(itemIndex, "[data-association-feedback-irrelevant]");
+          } else {
+            associationFeedbackPanelIndex = associationFeedbackPanelIndex === itemIndex ? -1 : itemIndex;
+            const panel = document.getElementById(irrelevantButton.getAttribute("aria-controls"));
+            const open = associationFeedbackPanelIndex === itemIndex;
+            if (panel) panel.hidden = !open;
+            irrelevantButton.setAttribute("aria-expanded", String(open));
+            if (open) panel?.querySelector("[data-association-feedback-reason]")?.focus();
+          }
+          return;
+        }
+        const feedbackReason = event.target.closest("[data-association-feedback-reason]");
+        if (feedbackReason) {
+          const itemIndex = Number(feedbackReason.dataset.itemIndex);
+          const previous = getAssociationFeedbackState(itemIndex) || null;
+          const next = { value: "irrelevant", reason: feedbackReason.dataset.associationFeedbackReason };
+          associationFeedback.set(itemIndex, next);
+          syncAssociationItemModelSignal("feedback", itemIndex, next);
+          associationLastFeedback = { itemIndex, previous, next };
+          associationFeedbackPanelIndex = -1;
+          if (personalizationEnabled) {
+            renderSearchResults();
+            focusAssociationResultControl(itemIndex, "[data-association-feedback-irrelevant]");
+          } else {
+            const card = feedbackReason.closest(".portal-search-card");
+            const panel = feedbackReason.closest(".portal-association-feedback-panel");
+            const irrelevantControl = card?.querySelector("[data-association-feedback-irrelevant]");
+            const relevantControl = card?.querySelector("[data-association-feedback-relevant]");
+            const reasonContainer = card?.querySelector(".portal-association-reason > span");
+            if (panel) panel.hidden = true;
+            irrelevantControl?.classList.add("is-selected");
+            irrelevantControl?.setAttribute("aria-expanded", "false");
+            if (irrelevantControl) irrelevantControl.textContent = "撤销不相关";
+            relevantControl?.classList.remove("is-selected");
+            relevantControl?.setAttribute("aria-pressed", "false");
+            if (relevantControl) relevantControl.textContent = "相关";
+            reasonContainer?.querySelector("small")?.remove();
+            if (reasonContainer) {
+              const note = document.createElement("small");
+              note.textContent = `已反馈不相关：${next.reason}`;
+              reasonContainer.append(note);
+            }
+            updateAssociationSelectionPanel();
+            irrelevantControl?.focus();
+          }
+          return;
+        }
+        const feedbackCancel = event.target.closest("[data-association-feedback-cancel]");
+        if (feedbackCancel) {
+          const panel = feedbackCancel.closest(".portal-association-feedback-panel");
+          const card = feedbackCancel.closest(".portal-search-card");
+          associationFeedbackPanelIndex = -1;
+          if (panel) panel.hidden = true;
+          const trigger = card?.querySelector("[data-association-feedback-irrelevant]");
+          trigger?.setAttribute("aria-expanded", "false");
+          trigger?.focus();
+          return;
+        }
         const toggle = event.target.closest("[data-paper-comment-toggle]");
         if (!toggle) return;
         const card = toggle.closest(".portal-search-card");
@@ -7001,11 +7895,218 @@
         activeSearchPage = 1;
         renderSearchResults();
       });
-      portalPersonalizationToggle.addEventListener("click", () => {
-        personalizationEnabled = !personalizationEnabled;
-        if (personalizationEnabled) updateAssociationProfileFromQuery(portalResultSearchInput.value.trim());
+      portalAssociationScope.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-association-scope]");
+        if (!button) return;
+        associationScope = button.dataset.associationScope;
         activeSearchPage = 1;
         renderSearchResults();
+        button.focus();
+      });
+      portalAssociationOnlyAdopted.addEventListener("click", () => {
+        if (!adoptedAssociationItems.size) return;
+        associationOnlyAdopted = !associationOnlyAdopted;
+        activeSearchPage = 1;
+        renderSearchResults();
+        portalAssociationOnlyAdopted.focus();
+      });
+      portalAssociationClearAdopted.addEventListener("click", () => {
+        [...adoptedAssociationItems].forEach((itemIndex) => syncAssociationItemModelSignal("adoption", itemIndex, null));
+        adoptedAssociationItems.clear();
+        associationOnlyAdopted = false;
+        associationSummaryOpen = false;
+        activeSearchPage = 1;
+        renderSearchResults();
+        document.getElementById("portalAssociationSelectionTitle")?.focus();
+      });
+      portalAssociationGenerateSummary.addEventListener("click", () => {
+        if (!adoptedAssociationItems.size) return;
+        associationSummaryOpen = true;
+        updateAssociationSelectionPanel();
+        portalAssociationSummary.querySelector("h3")?.focus();
+      });
+      portalAssociationCopySummary.addEventListener("click", async () => {
+        const summaryText = [...adoptedAssociationItems].map((itemIndex, index) => {
+          const item = SEARCH_ITEMS[itemIndex];
+          if (!item) return "";
+          const profile = getAssociationProfile(item, portalResultSearchInput.value.trim());
+          return `${index + 1}. ${item.title}\n${profile.reason}\n来源：${item.source}`;
+        }).filter(Boolean).join("\n\n");
+        try {
+          await navigator.clipboard.writeText(summaryText);
+          portalAssociationCopySummary.textContent = "已复制";
+        } catch (error) {
+          portalAssociationCopySummary.textContent = "请手动复制";
+        }
+        window.setTimeout(() => { portalAssociationCopySummary.textContent = "复制摘要"; }, 1600);
+      });
+      portalAssociationFeedbackUndo.addEventListener("click", () => {
+        if (!associationLastFeedback) return;
+        const { itemIndex, previous } = associationLastFeedback;
+        if (previous) associationFeedback.set(itemIndex, previous);
+        else associationFeedback.delete(itemIndex);
+        syncAssociationItemModelSignal("feedback", itemIndex, previous);
+        associationLastFeedback = null;
+        renderSearchResults();
+        focusAssociationResultControl(itemIndex, "[data-association-feedback-irrelevant]");
+      });
+      portalPersonalizationToggle.addEventListener("click", () => {
+        if (!associationUserModel.consent) {
+          userModelStatusMessage = "请先确认信息处理范围，再开启个性化关联。";
+          setUserModelPanelOpen(true, portalPersonalizationToggle);
+          return;
+        }
+        const next = cloneAssociationUserModel(associationUserModel);
+        next.enabled = !personalizationEnabled;
+        const status = next.enabled
+          ? "个性化已重新开启，保留的用户模型已恢复参与排序。"
+          : "个性化已暂停：已停止采集和模型排序影响，本机模型仍保留。";
+        if (!commitAssociationUserModel(next, { status })) {
+          renderUserModelPanel();
+          return;
+        }
+        activeSearchPage = 1;
+        renderSearchResults();
+      });
+      portalUserModelDisclosure.addEventListener("click", () => {
+        setUserModelPanelOpen(!userModelPanelOpen, portalUserModelDisclosure);
+      });
+      portalUserModelClose.addEventListener("click", () => setUserModelPanelOpen(false));
+      portalUserModelConsentCancel.addEventListener("click", () => {
+        userModelStatusMessage = "未开启个性化；本次检索不会写入用户模型。";
+        setUserModelPanelOpen(false);
+        renderSearchResults();
+      });
+      portalUserModelConsent.addEventListener("change", (event) => {
+        const sourceInput = event.target.closest("input[name='userModelConsentSource']");
+        if (!sourceInput || sourceInput.value !== "search") return;
+        portalUserModelIncludeQuery.disabled = !sourceInput.checked;
+        portalUserModelIncludeQuery.checked = sourceInput.checked;
+      });
+      portalUserModelConsentConfirm.addEventListener("click", () => {
+        const selectedSources = [...portalUserModelConsent.querySelectorAll("input[name='userModelConsentSource']:checked")].map((input) => input.value);
+        if (!selectedSources.length) {
+          userModelStatusMessage = "请至少选择一种允许计入用户模型的信号来源。";
+          portalUserModelStatus.querySelector("span").textContent = userModelStatusMessage;
+          portalUserModelConsent.querySelector("input[name='userModelConsentSource']")?.focus();
+          return;
+        }
+        const next = createDefaultAssociationUserModel();
+        next.consent = true;
+        next.enabled = true;
+        Object.keys(next.sources).forEach((source) => { next.sources[source] = selectedSources.includes(source); });
+        const currentQuery = portalResultSearchInput.value.trim();
+        if (portalUserModelIncludeQuery.checked && next.sources.search && currentQuery) {
+          const topic = getAssociationModelTopic(currentQuery);
+          if (topic) next.signals.unshift(createUserModelSignal({
+            id: `search:${currentQuery.toLocaleLowerCase("zh-CN")}:${topic}`,
+            type: "搜索提问",
+            source: "search",
+            topic,
+            delta: 4,
+            label: `搜索“${currentQuery.slice(0, 36)}”`
+          }));
+        }
+        if (!commitAssociationUserModel(next, { status: "已同意并开启个性化；用户模型仅处理所选显式信号。" })) {
+          renderUserModelPanel();
+          return;
+        }
+        activeSearchPage = 1;
+        renderSearchResults();
+        window.requestAnimationFrame(() => portalUserModelTitle.focus());
+      });
+      portalUserModelSources.addEventListener("change", (event) => {
+        const input = event.target.closest("input[type='checkbox']");
+        if (!input) return;
+        const next = cloneAssociationUserModel(associationUserModel);
+        next.sources[input.value] = input.checked;
+        const sourceLabel = input.value === "search" ? "搜索提问" : input.value === "adoption" ? "采用结果" : "主动反馈";
+        if (!commitAssociationUserModel(next, { status: `${sourceLabel}来源已${input.checked ? "开启" : "暂停"}；历史信号保留，模型与排序已重算。` })) {
+          input.checked = associationUserModel.sources[input.value] !== false;
+          renderUserModelPanel();
+          return;
+        }
+        activeSearchPage = 1;
+        renderSearchResults();
+        window.requestAnimationFrame(() => portalUserModelSources.querySelector(`input[value="${input.value}"]`)?.focus());
+      });
+      portalUserModelInterestList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-user-model-topic-action]");
+        if (!button) return;
+        const topic = decodeURIComponent(button.dataset.topicId || "");
+        if (!topic) return;
+        if (!applyUserModelTopicAction(topic, button.dataset.userModelTopicAction)) {
+          renderUserModelPanel();
+          return;
+        }
+        activeSearchPage = 1;
+        renderSearchResults();
+        const action = button.dataset.userModelTopicAction;
+        const nextAction = action === "suppress" ? "restore" : action === "restore" ? "suppress" : action;
+        window.requestAnimationFrame(() => {
+          const nextControl = portalUserModelInterestList.querySelector(`[data-user-model-topic-action="${nextAction}"][data-topic-id="${encodeURIComponent(topic)}"]`);
+          (nextControl || document.getElementById("portalUserModelInterestsTitle"))?.focus?.();
+        });
+      });
+      portalUserModelSignalList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-user-model-undo-signal]");
+        if (!button) return;
+        if (!removeAssociationUserModelSignal(button.dataset.userModelUndoSignal)) {
+          renderUserModelPanel();
+          return;
+        }
+        activeSearchPage = 1;
+        renderSearchResults();
+        window.requestAnimationFrame(() => portalUserModelHistoryTitle?.focus?.());
+      });
+      portalUserModelPause.addEventListener("click", () => portalPersonalizationToggle.click());
+      portalUserModelClear.addEventListener("click", () => {
+        userModelClearOpen = true;
+        renderUserModelPanel();
+        window.requestAnimationFrame(() => portalUserModelClearTitle.focus());
+      });
+      portalUserModelClearCancel.addEventListener("click", () => {
+        userModelClearOpen = false;
+        renderUserModelPanel();
+        portalUserModelClear.focus();
+      });
+      portalUserModelClearConfirmButton.addEventListener("click", () => {
+        const next = createDefaultAssociationUserModel();
+        if (!commitAssociationUserModel(next, { status: "用户模型已清除；个性化关闭，搜索结果和已采用内容未受影响。" })) {
+          renderUserModelPanel();
+          return;
+        }
+        userModelClearOpen = false;
+        activeSearchPage = 1;
+        renderSearchResults();
+        window.requestAnimationFrame(() => portalUserModelConsentTitle.focus());
+      });
+      portalUserModelUndo.addEventListener("click", () => {
+        if (!userModelUndoSnapshot) return;
+        const snapshot = normalizeAssociationUserModel(userModelUndoSnapshot);
+        if (!persistAssociationUserModel(snapshot)) {
+          userModelStatusMessage = userModelStorageError;
+          renderUserModelPanel();
+          return;
+        }
+        associationUserModel = snapshot;
+        personalizationEnabled = snapshot.enabled;
+        userModelUndoSnapshot = null;
+        userModelStatusMessage = "已撤销上次模型更新，权重与排序已恢复。";
+        rebuildAssociationInterests();
+        activeSearchPage = 1;
+        renderSearchResults();
+        window.requestAnimationFrame(() => portalUserModelTitle.focus());
+      });
+      portalUserModelPanel.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        if (userModelClearOpen) {
+          event.preventDefault();
+          portalUserModelClearCancel.click();
+          return;
+        }
+        event.preventDefault();
+        setUserModelPanelOpen(false);
       });
       portalKeywordPanel.addEventListener("click", (event) => {
         const logicButton = event.target.closest("[data-keyword-logic]");
@@ -7030,7 +8131,7 @@
       });
       portalAssociationDetailsToggle.addEventListener("click", () => {
         associationDetailsOpen = !associationDetailsOpen;
-        updateSearchModePanels();
+        updateAssociationDetailsDisclosure();
       });
       portalCopyExpression.addEventListener("click", async () => {
         try {
