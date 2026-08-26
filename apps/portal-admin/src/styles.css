@@ -4005,6 +4005,12 @@ tbody tr:hover {
   font-weight: 500;
 }
 
+.form-rule-summary {
+  color: var(--gkx-text-tertiary);
+  font-size: 12px;
+  line-height: 20px;
+}
+
 .form-component-preview > input,
 .form-component-preview > textarea,
 .form-component-preview > select {
@@ -4136,6 +4142,16 @@ tbody tr:hover {
   font-size: 14px;
   line-height: 22px;
   font-weight: 500;
+}
+
+.form-rule-error {
+  margin: 0;
+  padding: 8px 10px;
+  color: var(--gkx-danger);
+  background: var(--gkx-danger-light);
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 20px;
 }
 
 .form-component-property .form-rule-pair {
@@ -4560,6 +4576,35 @@ tbody tr:hover {
   overflow: auto;
 }
 
+.form-preview-sheet {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #fff;
+  border: 1px solid var(--gkx-border);
+  border-radius: 4px;
+}
+
+.form-preview-sheet .form-component-preview > input,
+.form-preview-sheet .form-component-preview > textarea,
+.form-preview-sheet .form-component-preview > select {
+  color: var(--gkx-text-primary);
+}
+
+.form-preview-sheet .form-component-preview > select[multiple] {
+  min-height: 104px;
+  padding: 6px 12px;
+  background-image: none;
+}
+
+.form-preview-sheet .form-preview-options input:not(:disabled),
+.form-preview-sheet .form-preview-options label {
+  cursor: pointer;
+}
+
 .form-preview-modal .modal-footer {
   margin: 0;
 }
@@ -4597,20 +4642,53 @@ tbody tr:hover {
 
 .form-print-table {
   width: 100%;
-  min-width: max-content;
-  table-layout: auto;
+  min-width: 520px;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
 }
 
+.form-print-table caption {
+  padding: 16px;
+  color: var(--gkx-text-primary);
+  border-bottom: 1px solid var(--gkx-border);
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .form-print-table th,
 .form-print-table td {
-  min-width: 160px;
-  padding: 0 16px;
+  min-width: 0;
+  height: 52px;
+  padding: 8px 16px;
+  vertical-align: middle;
+  white-space: pre-wrap;
 }
 
 .form-print-table th {
   border-top: 0;
+}
+
+.form-print-table th:first-child {
+  width: 34%;
+}
+
+.form-print-table tbody th {
+  text-align: left;
+}
+
+.form-print-table tbody th > span,
+.form-print-table tbody th > small {
+  display: block;
+}
+
+.form-print-table tbody th > small {
+  color: var(--gkx-text-tertiary);
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 400;
 }
 
 @media print {
@@ -4641,6 +4719,38 @@ tbody tr:hover {
   min-height: 48px;
   padding: 0 var(--space-medium);
   background: transparent;
+}
+
+.workflow-name-field {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--gkx-text-secondary);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.workflow-name-field > span {
+  flex: 0 0 auto;
+}
+
+.workflow-name-field > input {
+  width: min(280px, 34vw);
+  height: 32px;
+  padding: 0 10px;
+  color: var(--gkx-text-primary);
+  background: #fff;
+  border: 1px solid var(--gkx-border);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.workflow-name-field > input:focus {
+  border-color: var(--gkx-brand);
+  outline: 0;
+  box-shadow: 0 0 0 2px rgba(22,93,255,.1);
 }
 
 .workflow-designer-title {
@@ -5639,6 +5749,24 @@ tbody tr:hover {
 
   .form-workspace-identity input {
     width: min(240px, calc(100vw - 120px));
+  }
+
+  .form-workspace-identity {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .form-workspace-identity label {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .form-workspace-identity input {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 auto;
   }
 
   .form-designer-layout,
@@ -7565,6 +7693,17 @@ tbody tr:hover {
   background: var(--gkx-brand-light);
 }
 
+.node-property-title-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.workflow-designer .node-property-title .node-delete-button:hover {
+  color: var(--gkx-danger);
+  background: var(--gkx-danger-light);
+}
+
 .workflow-designer .node-property.is-collapsed .node-property-title {
   min-height: 38px;
   padding: 7px 10px 7px 14px;
@@ -7577,6 +7716,20 @@ tbody tr:hover {
   gap: 16px;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.workflow-default-node-note,
+.condition-empty {
+  margin: 0;
+  color: var(--gkx-text-tertiary);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.workflow-default-node-note {
+  padding: 10px 12px;
+  background: var(--gkx-bg-module);
+  border-radius: 4px;
 }
 
 .workflow-designer .condition-panel {
@@ -7614,6 +7767,35 @@ tbody tr:hover {
   .workflow-designer .designer-canvas { min-height: 420px; }
   .workflow-designer .node-property {
     width: min(400px, calc(100% - 32px));
+  }
+  .workflow-designer .process-designer-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .workflow-name-field > span { display: none; }
+  .workflow-name-field > input { width: min(220px, 30vw); }
+}
+
+@media (max-width: 620px) {
+  .workflow-designer .process-designer-header {
+    height: auto;
+    min-height: 72px;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "back name"
+      "publish publish";
+    gap: 8px;
+  }
+
+  .workflow-designer-back { grid-area: back; }
+  .workflow-name-field {
+    grid-area: name;
+    justify-content: stretch;
+  }
+  .workflow-name-field > input { width: 100%; }
+  .workflow-designer-publish {
+    grid-area: publish;
+    justify-self: stretch;
+    justify-content: flex-end;
   }
 }
 
