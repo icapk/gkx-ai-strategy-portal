@@ -2120,16 +2120,6 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
     return (
       <section className="card page-card workflow-management">
         <div className="workflow-management-label">流程设计器 · 流程建模 · 流程控制 · 流程发布 · 流程实例管理</div>
-        <div className="workflow-capability-strip" aria-label="流程中心能力">
-          <div className="workflow-capability-card modeling" role="group" aria-label="流程建模">
-            <span className="workflow-capability-icon"><LayoutGrid size={18} aria-hidden="true" /></span>
-            <span><strong>流程建模</strong><small>配置节点、审批路径与流转条件</small></span>
-          </div>
-          <div className="workflow-capability-card control" role="group" aria-label="流程控制">
-            <span className="workflow-capability-icon"><ShieldCheck size={18} aria-hidden="true" /></span>
-            <span><strong>流程控制</strong><small>配置负责人、分支条件、待办转交与发布状态</small></span>
-          </div>
-        </div>
         <div className="table-toolbar workflow-toolbar">
           <div><Button variant="primary" icon={Plus} onClick={createWorkflowModel}>流程建模</Button></div>
         </div>
@@ -2227,7 +2217,10 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
 
         <aside className={`node-property ${propertyCollapsed ? "is-collapsed" : ""}`}>
           <div className="node-property-title">
-            <span>{propertyCollapsed ? "节点配置" : "节点配置表单"}</span>
+            <span className="node-property-title-copy">
+              <span>{propertyCollapsed ? "节点配置" : "节点配置表单"}</span>
+              {!propertyCollapsed && <em>（流程控制）</em>}
+            </span>
             <button type="button" aria-label={propertyCollapsed ? "展开节点配置" : "收起节点配置"} onClick={() => setPropertyCollapsed((collapsed) => !collapsed)}>{propertyCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button>
           </div>
           {!propertyCollapsed && selectedNode && (
