@@ -983,23 +983,31 @@ function FilterInput({
   searchable = false,
   value,
   onChange,
+  onEnter,
 }: {
   label: string;
   placeholder?: string;
   searchable?: boolean;
   value?: string;
   onChange?: (value: string) => void;
+  onEnter?: () => void;
 }) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter" || !onEnter) return;
+    event.preventDefault();
+    onEnter();
+  };
+
   return (
     <label className="filter-field">
       <span className="filter-label">{label}</span>
       {searchable ? (
         <span className="filter-search-control">
-          <input aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} />
+          <input aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} onKeyDown={handleKeyDown} />
           <Search aria-hidden="true" size={16} />
         </span>
       ) : (
-        <input className="filter-control" aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} />
+        <input className="filter-control" aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} onKeyDown={handleKeyDown} />
       )}
     </label>
   );
@@ -3059,6 +3067,7 @@ function EventTracking({ openModal, initialTab }: { openModal: OpenModal; initia
   const [events, setEvents] = useState(trackingRows);
   const [moduleFilter, setModuleFilter] = useState("全部");
   const [eventIdFilter, setEventIdFilter] = useState("");
+  const [appliedEventIdFilter, setAppliedEventIdFilter] = useState("");
 
   const updateEvent = (eventId: string, patch: Partial<(typeof trackingRows)[number]>) => {
     setEvents((list) => list.map((event) => (event.事件ID === eventId ? { ...event, ...patch } : event)));
@@ -3068,15 +3077,19 @@ function EventTracking({ openModal, initialTab }: { openModal: OpenModal; initia
 
   const filteredEvents = events.filter((event) => (
     (moduleFilter === "全部" || event.所属功能模块 === moduleFilter)
-    && event.事件ID.toLowerCase().includes(eventIdFilter.trim().toLowerCase())
+    && event.事件ID.toLowerCase().includes(appliedEventIdFilter.trim().toLowerCase())
   ));
 
   return (
     <section className="card page-card">
-      <div className="filters event-info-filters">
+      <form className="filters event-info-filters" onSubmit={(event) => {
+        event.preventDefault();
+        setAppliedEventIdFilter(eventIdFilter);
+      }}>
         <FilterSelect label="模块" options={["全部", "报告管理", "审核管理", "用户管理", "权限配置"]} value={moduleFilter} onChange={setModuleFilter} />
-        <FilterInput label="事件ID" placeholder="请输入" value={eventIdFilter} onChange={setEventIdFilter} />
-      </div>
+        <FilterInput label="事件ID" placeholder="请输入" value={eventIdFilter} onChange={setEventIdFilter} onEnter={() => setAppliedEventIdFilter(eventIdFilter)} />
+        <Button variant="primary" type="submit">查询</Button>
+      </form>
       <div className="table-toolbar event-info-toolbar">
         <div>
           <Button
