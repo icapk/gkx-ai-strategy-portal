@@ -656,7 +656,7 @@ type ApiDocument = {
 const apiDocumentCatalog: Record<string, ApiDocument[]> = {
   人才库: [{
     id: "talent-list",
-    name: "查询人才库学者",
+    name: "查询人才库学者（请求方法）",
     method: "GET",
     path: "/api/v1/talents/scholars",
     description: "按人才库查询已关联的学者数据。",
@@ -3793,7 +3793,7 @@ function ApiResources({ openModal, notify }: { openModal: OpenModal; notify: Not
       {tab === "tokens" && (
         <div className="resource-tab-content">
           <div className="table-toolbar">
-            <div><Button variant="primary" icon={Plus} onClick={() => setTokenEditor({ mode: "create" })}>生成Token</Button></div>
+            <div><Button variant="primary" icon={Plus} onClick={() => setTokenEditor({ mode: "create" })}>创建令牌</Button></div>
           </div>
           <DataTable
             columns={["应用名称", "Token字符串", "创建时间", "到期时间", "状态"]}
