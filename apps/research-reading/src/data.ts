@@ -34,6 +34,7 @@ export const initialDocuments: ResearchDocument[] = [
     size: '2.3 MB',
     kind: '在线文档',
     favorite: true,
+    favoritedAt: '2026-04-18 14:20',
     owned: true,
     shared: true,
     description: '记录 AI 研究团队的阶段目标、实验排期、负责人以及风险跟踪情况。',
@@ -114,6 +115,7 @@ export const initialDocuments: ResearchDocument[] = [
     size: '18 KB',
     kind: '数据表格',
     favorite: true,
+    favoritedAt: '2026-08-25 11:18',
     owned: true,
     shared: true,
     description: '集中跟踪储能材料项目的实验任务、负责人、项目进度、截止日期与数据文件。',
@@ -203,9 +205,9 @@ export const initialResearchNotes: ResearchNote[] = [
 ]
 
 export const initialFolders: FolderItem[] = [
-  { id: 1, name: '研究项目', count: 15, updatedAt: '2026-04-30 14:20' },
-  { id: 2, name: '实验数据', count: 8, updatedAt: '2026-04-30 14:20' },
-  { id: 3, name: '研究项目', count: 15, updatedAt: '2026-04-30 14:20' },
+  { id: 1, name: '研究项目', count: 2, updatedAt: '2026-08-24 16:45', createdAt: '2026-03-18 09:20', owner: '张研究员', location: '我的空间', size: '1.3 MB' },
+  { id: 2, name: '实验数据', count: 0, updatedAt: '2026-08-20 10:18', createdAt: '2026-04-02 14:10', owner: '张研究员', location: '我的空间', size: '0 KB' },
+  { id: 3, name: '论文资料', count: 0, updatedAt: '2026-08-18 09:30', createdAt: '2026-05-12 11:05', owner: '张研究员', location: '我的空间', size: '0 KB' },
 ]
 
 export const initialTodos: TodoItem[] = [

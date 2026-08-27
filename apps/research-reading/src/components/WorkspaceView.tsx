@@ -1,3 +1,4 @@
+import { useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { ResearchDocument, WorkbenchTab } from '../types'
 import { DocumentTable } from './DocumentTable'
 
@@ -17,6 +18,7 @@ interface WorkspaceViewProps {
   onToggleFavorite: (id: number) => void
   onDelete: (id: number) => void
   onShare: (id: number) => void
+  onRemoveRecent?: (id: number) => void
   onOpenDocument: (documentItem: ResearchDocument) => void
   onOpenDataTableHub: () => void
   dataTableCount: number
@@ -33,12 +35,39 @@ export function WorkspaceView({
   onToggleFavorite,
   onDelete,
   onShare,
+  onRemoveRecent,
   onOpenDocument,
   onOpenDataTableHub,
   dataTableCount,
   dataRecordCount,
   highlightedDocumentId,
 }: WorkspaceViewProps) {
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const activeTabIndex = tabs.findIndex((item) => item.id === tab)
+
+  const selectTabAt = (index: number) => {
+    const nextIndex = (index + tabs.length) % tabs.length
+    const nextTab = tabs[nextIndex]
+    onTabChange(nextTab.id)
+    tabRefs.current[nextIndex]?.focus()
+  }
+
+  const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault()
+      selectTabAt(index + 1)
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault()
+      selectTabAt(index - 1)
+    } else if (event.key === 'Home') {
+      event.preventDefault()
+      selectTabAt(0)
+    } else if (event.key === 'End') {
+      event.preventDefault()
+      selectTabAt(tabs.length - 1)
+    }
+  }
+
   return (
     <section className="view view--workbench">
       <header className="view-header">
@@ -50,32 +79,45 @@ export function WorkspaceView({
         </button>
       </header>
       <div className="view-body workbench-body">
-        <div className="subtabs" role="tablist" aria-label="工作台筛选">
-          {tabs.map((item) => (
+        <div className="subtabs" role="tablist" aria-label="工作台筛选" aria-orientation="horizontal">
+          {tabs.map((item, index) => (
             <button
               type="button"
               key={item.id}
+              id={`workbench-tab-${item.id}`}
+              ref={(node) => { tabRefs.current[index] = node }}
               className={tab === item.id ? 'is-active' : ''}
               role="tab"
               aria-selected={tab === item.id}
+              aria-controls="workbench-panel"
+              tabIndex={tab === item.id ? 0 : -1}
               onClick={() => onTabChange(item.id)}
+              onKeyDown={(event) => handleTabKeyDown(event, index)}
             >
               {item.label}
             </button>
           ))}
         </div>
-        <DocumentTable
-          documents={documents}
-          mode="workbench"
-          workbenchTab={tab}
-          page={page}
-          onPageChange={onPageChange}
-          onToggleFavorite={onToggleFavorite}
-          onDelete={onDelete}
-          onShare={onShare}
-          onOpenDocument={onOpenDocument}
-          highlightedDocumentId={highlightedDocumentId}
-        />
+        <div
+          className="workbench-tabpanel"
+          id="workbench-panel"
+          role="tabpanel"
+          aria-labelledby={`workbench-tab-${tabs[activeTabIndex]?.id ?? tab}`}
+        >
+          <DocumentTable
+            documents={documents}
+            mode="workbench"
+            workbenchTab={tab}
+            page={page}
+            onPageChange={onPageChange}
+            onToggleFavorite={onToggleFavorite}
+            onDelete={onDelete}
+            onShare={onShare}
+            onRemoveRecent={onRemoveRecent}
+            onOpenDocument={onOpenDocument}
+            highlightedDocumentId={highlightedDocumentId}
+          />
+        </div>
       </div>
     </section>
   )

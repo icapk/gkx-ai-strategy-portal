@@ -1,12 +1,22 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { articleSections, outlineGroups, type ReadingDocument, type ReadingNote } from '../readingData'
+import { articleSections, type ReadingDocument, type ReadingNote } from '../readingData'
+import {
+  getPaperAnalysis,
+  searchPaperAnalysis,
+  type PaperAnalysis,
+  type PaperAnalysisSearchKind,
+  type PaperFigure,
+  type PaperReference,
+} from '../readingAnalysis'
+import { Modal } from './Modal'
 
 type LeftPanel = 'outline' | 'thumbnails' | 'notes'
 type InsightPanel = 'ai' | 'charts' | 'references' | 'metadata' | 'graph'
 type ContextAction = null | 'highlight' | 'translate' | 'explain' | 'screenshot'
 type ActiveTool = null | 'search' | 'note' | 'screenshot'
 type CropHandle = 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'nw'
+type PageLayout = 'single' | 'double'
 
 interface ReadingResultCards {
   translationVisible: boolean
@@ -21,6 +31,32 @@ interface NoteSelection {
   text: string
   start: number
   end: number
+}
+
+interface StoredHighlight extends NoteSelection {
+  id: string
+  color: string
+  page: number
+}
+
+interface ReaderPosition {
+  page: number
+  scrollTop: number
+  label: string
+}
+
+interface ReaderSearchResult {
+  id: string
+  kind: PaperAnalysisSearchKind | 'full-text'
+  label: string
+  snippet: string
+  page: number
+  sectionTitle: string
+}
+
+interface LocalLanguageAid {
+  translation: string
+  definition: string
 }
 
 interface CropRect {
@@ -45,9 +81,19 @@ interface ReadingReaderProps {
   notes: ReadingNote[]
   onSelectDocument: (documentId: number) => void
   onFavorite: () => void
-  onNotesChange: (notes: ReadingNote[]) => void
-  onEditingNoteChange: (editing: boolean) => void
+  onNotesChange: (notes: ReadingNote[]) => boolean
+  onEditingNoteChange: (editing: boolean, controller?: ReadingDraftController) => void
   onToast: (message: string) => void
+}
+
+export interface ReadingDraftController {
+  save: () => boolean
+  discard: () => void
+}
+
+interface ReaderArticleSection {
+  title: string
+  parts: Array<{ title: string; body: string }>
 }
 
 const insightTabs: Array<{ id: InsightPanel; label: string }> = [
@@ -58,27 +104,108 @@ const insightTabs: Array<{ id: InsightPanel; label: string }> = [
   { id: 'graph', label: '图谱' },
 ]
 
-const highlightColors = ['transparent', '#F2F3F5', '#FABFBD', '#FFE4BA', '#FADC19', '#C6EFC1', '#BDE3FF', '#DCC9FB', '#E5E6EB', '#C9CDD4', '#F76965', '#FF9A2E', '#FADC19', '#62C554', '#7BC0FC', '#B8A1FF']
-
-const aiSearchResults = [
-  { page: 1, text: '最佳性能的模型也通过注意力机制连接编码器和解码器，我们提出了一种新的简单网络架构' },
-  { page: 5, text: 'Transformer模型架构完全基于注意力机制，完全摒弃了递归和卷积' },
-  { page: 6, text: '我们在模型中以三种不同的方式使用多头注意力' },
-  { page: 8, text: '我们的实验表明，基于注意力的方法优于之前最先进的模型' },
+const leftTabs: Array<{ id: LeftPanel; label: string }> = [
+  { id: 'outline', label: '目录' },
+  { id: 'thumbnails', label: '缩略图' },
+  { id: 'notes', label: '笔记' },
 ]
 
-const aiSearchTargetSections = ['1.1.研究背景与意义', '2.1.原料制备', '2.2.表征手段', '3.1.材料形貌分析']
+const highlightColors = ['transparent', '#F2F3F5', '#FABFBD', '#FFE4BA', '#FADC19', '#C6EFC1', '#BDE3FF', '#DCC9FB', '#E5E6EB', '#C9CDD4', '#F76965', '#FF9A2E', '#FADC19', '#62C554', '#7BC0FC', '#B8A1FF']
 
-const totalPages = 24
 const zoomPresets = [25, 50, 75, 100] as const
-const translatedExcerpt = 'Lithium-sulfur batteries are considered to be a promising new generation of energy storage systems due to their high theoretical specific capacity and energy density. However, during the actual charging and discharging process'
-const explainedExcerpt = '多硫化物穿梭效应是指锂硫电池充放电过程中，可溶性锂多硫化物在正负极之间反复迁移并发生副反应的现象。它会造成活性硫流失、锂负极腐蚀、容量衰减、库伦效率降低和自放电加剧，是限制锂硫电池商业化应用的核心问题之一。'
-const expandedNoteExcerpt = '多硫化物穿梭效应通常出现在锂硫电池中，是锂硫电池容量衰减、库伦效率低、自放电严重的重要原因之一。在放电阶段，正极硫被还原生成可溶性多硫化锂，这些中间产物溶入电解液后，在浓度梯度和电场作用下向锂负极迁移。到达负极后，它们可能与金属锂发生副反应，被进一步还原成短链多硫化物甚至 Li₂S / Li₂S₂，并沉积...全部'
-const articleAbstract = '本研究系统性探究了功能化碳纳米管界面对锂硫电池中多硫化物穿梭效应的抑制机理。通过原位X射线衍射（in-situ XRD）、冷冻电子显微镜（cryo-EM）等先进表征手段，结合密度泛函理论（DFT）计算，揭示了碳纳米管表面羧基、氨基官能团与长链多硫化物（Li₂Sₙ，4≤n≤8）之间的化学吸附机制。实验结果表明，所制备的功能化碳纳米管正极宿主材料相比对照组使比容量提升186%，1000次循环后容量保持率达92.3%，展示了优异的长循环稳定性。'
-const searchTranslation = 'ThiosulfateThe model with the best performance also connects the encoder and decoder through an attention mechanism, and we propose a new simple network architecture. shuttle effect'
+
+const localTerms: Array<{ matches: string[]; english: string; definition: string }> = [
+  {
+    matches: ['多硫化物', 'polysulfide'],
+    english: 'polysulfide',
+    definition: '锂硫电池反应中的含硫中间体；可溶性的长链多硫化物迁移会引发穿梭效应。',
+  },
+  {
+    matches: ['穿梭效应', 'shuttle effect'],
+    english: 'polysulfide shuttle effect',
+    definition: '可溶性多硫化物在正负极之间往返迁移并发生副反应，造成容量衰减与库仑效率下降。',
+  },
+  {
+    matches: ['功能化碳纳米管', '碳纳米管', 'cnt'],
+    english: 'functionalized carbon nanotube (CNT)',
+    definition: '经表面官能团改性的碳纳米管，可同时提供导电网络和极性吸附位点。',
+  },
+  {
+    matches: ['原位xrd', 'xrd'],
+    english: 'in-situ X-ray diffraction (XRD)',
+    definition: '在材料工作过程中实时记录晶相变化的衍射表征方法。',
+  },
+  {
+    matches: ['界面吸附', 'adsorption'],
+    english: 'interfacial adsorption',
+    definition: '分子或离子在材料界面活性位点富集并产生物理或化学相互作用的过程。',
+  },
+]
 
 function sectionSlug(sectionTitle: string) {
   return sectionTitle.replace(/[^\d\u4e00-\u9fa5]/g, '')
+}
+
+function resolvePaperSection(analysis: PaperAnalysis, sectionId?: string) {
+  if (!sectionId || sectionId === 'abstract') return '摘要'
+  const parsed = analysis.outline.find((section) => section.id === sectionId)
+  const title = parsed?.title ?? sectionId
+  if (analysis.documentId !== 1) return title
+  if (/^(1\.|introduction|background)/i.test(title)) return '1.1.研究背景与意义'
+  if (/界面|表征|operando|characterization/i.test(title)) return '2.2.表征手段'
+  if (/^(2\.|method|design)/i.test(title)) return '2.1.原料制备'
+  if (/^(3\.|result|device)/i.test(title)) return '3.2.储能机制研究'
+  if (/^(4\.|conclusion|reference)/i.test(title)) return '4.结论'
+  return '摘要'
+}
+
+function pageForSection(analysis: PaperAnalysis, sectionTitle: string) {
+  if (sectionTitle === '摘要') return 1
+  const exact = analysis.outline.find((section) => section.title === sectionTitle)
+  if (exact) return exact.page
+  const prefix = sectionTitle.match(/^\d+/)?.[0]
+  const parsed = analysis.outline.find((section) => prefix && section.title.startsWith(`${prefix}.`))
+  return parsed?.page ?? 1
+}
+
+function readerArticleSections(analysis: PaperAnalysis): ReaderArticleSection[] {
+  if (analysis.documentId === 1) return articleSections
+  const body = analysis.outline.filter((section) => section.kind === 'body')
+  return body.filter((section) => section.level === 1).map((section) => {
+    const children = body.filter((candidate) => candidate.parentId === section.id)
+    return {
+      title: section.title,
+      parts: children.length > 0
+        ? children.map((child) => ({ title: child.title, body: child.excerpt }))
+        : [{ title: '', body: section.excerpt }],
+    }
+  })
+}
+
+function noteImageSnapshot(images: string[]) {
+  return JSON.stringify(images)
+}
+
+function localLanguageAid(text: string): LocalLanguageAid {
+  const normalized = text.normalize('NFKC').toLocaleLowerCase('zh-CN')
+  const matched = localTerms.filter((term) => term.matches.some((candidate) => normalized.includes(candidate)))
+  if (matched.length > 0) {
+    return {
+      translation: matched.map((term) => term.english).join('；'),
+      definition: matched.map((term) => term.definition).join(' '),
+    }
+  }
+  return {
+    translation: /[\u4e00-\u9fa5]/.test(text)
+      ? '本地词典暂未收录完整句译文，可将选中内容加入笔记后继续人工核对。'
+      : '本地词典暂未收录该英文短语，可查看所在段落与论文元数据辅助判断。',
+    definition: `已保留原文“${text.slice(0, 80)}${text.length > 80 ? '…' : ''}”，当前仅提供本地辅助释义，不调用外部 AI。`,
+  }
+}
+
+function noteAnchor(excerpt: string) {
+  const match = excerpt.match(/^【(?:截图笔记\s*·\s*)?第(\d+)页\s*·\s*([^】]+)】/)
+  return match ? { page: Number(match[1]), sectionTitle: match[2].trim() } : null
 }
 
 function safeFileName(value: string) {
@@ -186,6 +313,14 @@ export function ReadingReader({
   onEditingNoteChange,
   onToast,
 }: ReadingReaderProps) {
+  const paperAnalysis = useMemo(() => getPaperAnalysis(activeDocumentId, documentTitle), [activeDocumentId, documentTitle])
+  const activeArticleSections = useMemo(() => readerArticleSections(paperAnalysis), [paperAnalysis])
+  const totalPages = useMemo(() => Math.max(
+    18,
+    ...paperAnalysis.outline.map((section) => section.page),
+    ...paperAnalysis.figures.map((figure) => figure.page),
+    ...paperAnalysis.references.flatMap((reference) => reference.citationAnchors.map((anchor) => anchor.page)),
+  ), [paperAnalysis])
   const [leftPanel, setLeftPanel] = useState<LeftPanel>('outline')
   const [outlineMainExpanded, setOutlineMainExpanded] = useState(true)
   const [rightPanel, setRightPanel] = useState<InsightPanel>('ai')
@@ -211,12 +346,24 @@ export function ReadingReader({
   const [searchQuery, setSearchQuery] = useState('')
   const [searchedQuery, setSearchedQuery] = useState('')
   const [translatedResult, setTranslatedResult] = useState<number | null>(null)
+  const [definedResult, setDefinedResult] = useState<number | null>(null)
   const [locatedResult, setLocatedResult] = useState<number | null>(null)
+  const [locatedSectionTitle, setLocatedSectionTitle] = useState<string | null>(null)
+  const [locationDepth, setLocationDepth] = useState(0)
+  const [pageInput, setPageInput] = useState('1')
+  const [markersVisible, setMarkersVisible] = useState(true)
+  const [pageLayout, setPageLayout] = useState<PageLayout>('single')
+  const [highlights, setHighlights] = useState<StoredHighlight[]>([])
+  const [selectedReferenceId, setSelectedReferenceId] = useState<string | null>(null)
+  const [selectedFigureId, setSelectedFigureId] = useState<string | null>(null)
   const [aiQuestion, setAiQuestion] = useState('')
   const [aiExchange, setAiExchange] = useState<{ question: string; answer: string } | null>(null)
   const [documentMenuOpen, setDocumentMenuOpen] = useState(false)
+  const [documentMenuActiveIndex, setDocumentMenuActiveIndex] = useState(0)
+  const [pendingDocumentId, setPendingDocumentId] = useState<number | null>(null)
   const [maximized, setMaximized] = useState(false)
   const [noteDetailId, setNoteDetailId] = useState<number | null>(null)
+  const [pendingDeleteNoteId, setPendingDeleteNoteId] = useState<number | null>(null)
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
   const [noteEditStage, setNoteEditStage] = useState(0)
   const [noteEditorExpanded, setNoteEditorExpanded] = useState(false)
@@ -230,6 +377,7 @@ export function ReadingReader({
   const [cropRect, setCropRect] = useState<CropRect | null>(null)
   const [mobileInsightsOpen, setMobileInsightsOpen] = useState(false)
   const [mobileLeftOpen, setMobileLeftOpen] = useState(false)
+  const [searchModeActiveIndex, setSearchModeActiveIndex] = useState(0)
   const [compactLayout, setCompactLayout] = useState(() => window.matchMedia('(max-width: 1180px)').matches)
   const [leftOverlayLayout, setLeftOverlayLayout] = useState(() => window.matchMedia('(max-width: 900px)').matches)
   const paperRef = useRef<HTMLElement>(null)
@@ -240,9 +388,26 @@ export function ReadingReader({
   const noteImageInputRef = useRef<HTMLInputElement>(null)
   const noteTextareaRef = useRef<HTMLTextAreaElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const searchDrawerRef = useRef<HTMLElement>(null)
+  const searchToolRef = useRef<HTMLButtonElement>(null)
+  const documentTriggerRef = useRef<HTMLButtonElement>(null)
+  const documentMenuRef = useRef<HTMLDivElement>(null)
+  const documentMenuItemRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const searchModeTriggerRef = useRef<HTMLButtonElement>(null)
+  const searchModeItemRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const selectionToolRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const contextMenuRef = useRef<HTMLDivElement>(null)
+  const noteDetailRef = useRef<HTMLElement>(null)
+  const noteDetailReturnFocusRef = useRef<HTMLElement | null>(null)
+  const cropActionFirstRef = useRef<HTMLButtonElement>(null)
   const leftContentRef = useRef<HTMLDivElement>(null)
   const thumbnailListRef = useRef<HTMLDivElement>(null)
-  const locationOriginRef = useRef<{ page: number; scrollTop: number } | null>(null)
+  const leftTabRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const rightTabRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const locationHistoryRef = useRef<ReaderPosition[]>([])
+  const restoredDocumentRef = useRef<number | null>(null)
+  const storageHydratingRef = useRef(true)
+  const storageHydrationFrameRef = useRef<number | null>(null)
   const screenshotDragStartRef = useRef<{ x: number; y: number } | null>(null)
   const screenshotPendingPointRef = useRef<ScreenshotPointer | null>(null)
   const screenshotAnimationFrameRef = useRef<number | null>(null)
@@ -262,23 +427,250 @@ export function ReadingReader({
   const screenshotResizeRef = useRef<{ handle: CropHandle; startX: number; startY: number; rect: CropRect } | null>(null)
   const noteRangeHandledRef = useRef(false)
   const notePointerStartRef = useRef<{ sectionTitle: string; index: number; x: number; y: number } | null>(null)
+  const noteKeyboardReturnFocusRef = useRef<HTMLElement | null>(null)
+  const noteDraftBaselineRef = useRef(JSON.stringify({ pending: '', text: '', images: [] as string[] }))
+  const uploadedNoteImagesRef = useRef<string[]>([])
 
-  const pageLabel = `${page}/${totalPages}`
   const filteredNotes = useMemo(() => notes.slice(), [notes])
   const detailedNote = notes.find((note) => note.id === noteDetailId)
+  const noteDraftDirty = useMemo(() => editingNoteId != null && noteDraftBaselineRef.current !== JSON.stringify({
+    pending: pendingAddedNote,
+    text: editingNoteText,
+    images: uploadedNoteImages,
+  }), [editingNoteId, editingNoteText, pendingAddedNote, uploadedNoteImages])
+  const selectionAid = useMemo(() => localLanguageAid(noteSelection?.text ?? ''), [noteSelection?.text])
+  const currentSectionTitle = useMemo(() => {
+    const parsed = paperAnalysis.outline
+      .filter((section) => section.page <= page)
+      .sort((left, right) => right.page - left.page)[0]
+    return resolvePaperSection(paperAnalysis, parsed?.id)
+  }, [page, paperAnalysis])
+
+  const searchResults = useMemo<ReaderSearchResult[]>(() => {
+    const query = searchedQuery.normalize('NFKC').trim().toLocaleLowerCase('zh-CN')
+    if (!query) return []
+    const terms = query.split(/\s+/).filter(Boolean)
+    const paragraphs = [
+      { id: 'abstract', label: '摘要', text: paperAnalysis.metadata.abstract, page: 1, sectionTitle: '摘要' },
+      ...activeArticleSections.flatMap((section) => section.parts.map((part) => ({
+        id: sectionSlug(part.title || section.title),
+        label: part.title || section.title,
+        text: part.body,
+        page: pageForSection(paperAnalysis, part.title || section.title),
+        sectionTitle: part.title || section.title,
+      }))),
+    ]
+    const lexical = paragraphs
+      .filter((paragraph) => {
+        const haystack = `${paragraph.label} ${paragraph.text}`.normalize('NFKC').toLocaleLowerCase('zh-CN')
+        return searchMode === 'AI语义' || searchMode === '智能关联'
+          ? terms.every((term) => haystack.includes(term))
+          : haystack.includes(query)
+      })
+      .map<ReaderSearchResult>((paragraph) => ({
+        id: `text-${paragraph.id}`,
+        kind: 'full-text',
+        label: paragraph.label,
+        snippet: paragraph.text,
+        page: paragraph.page,
+        sectionTitle: paragraph.sectionTitle,
+      }))
+    const structured = searchPaperAnalysis(paperAnalysis, searchedQuery).map<ReaderSearchResult>((result) => ({
+      id: result.id,
+      kind: result.kind,
+      label: result.label,
+      snippet: result.snippet,
+      page: result.target.page ?? 1,
+      sectionTitle: resolvePaperSection(paperAnalysis, result.target.sectionId),
+    }))
+    const combined = searchMode === '全文搜索' || searchMode === '关键词'
+      ? [...lexical, ...structured.filter((result) => result.kind === 'keyword' || result.kind === 'title')]
+      : [...structured, ...lexical]
+    return combined.filter((result, index, all) => all.findIndex((candidate) => candidate.id === result.id) === index).slice(0, 12)
+  }, [activeArticleSections, paperAnalysis, searchMode, searchedQuery])
 
   useEffect(() => {
-    onEditingNoteChange(editingNoteId != null)
     if (editingNoteId != null) window.requestAnimationFrame(() => {
       leftContentRef.current?.scrollTo({ top: 0, behavior: 'auto' })
       noteTextareaRef.current?.focus({ preventScroll: true })
     })
-  }, [editingNoteId, onEditingNoteChange])
+  }, [editingNoteId])
 
   useEffect(() => {
     if (!searchOpen) return
     window.requestAnimationFrame(() => searchInputRef.current?.focus({ preventScroll: true }))
+    const trapSearchFocus = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setSearchOpen(false)
+        setActiveTool((current) => current === 'search' ? null : current)
+        setSearchModeOpen(false)
+        return
+      }
+      if (event.key !== 'Tab') return
+      const focusable = Array.from(searchDrawerRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? []).filter((element) => element.offsetParent !== null)
+      const first = focusable[0]
+      const last = focusable.at(-1)
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last?.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first?.focus()
+      }
+    }
+    document.addEventListener('keydown', trapSearchFocus)
+    return () => {
+      document.removeEventListener('keydown', trapSearchFocus)
+      window.requestAnimationFrame(() => searchToolRef.current?.focus({ preventScroll: true }))
+    }
   }, [searchOpen])
+
+  useEffect(() => {
+    if (!documentMenuOpen) return
+    const currentIndex = Math.max(0, documents.findIndex((document) => document.id === activeDocumentId))
+    setDocumentMenuActiveIndex(currentIndex)
+    const focusFrame = window.requestAnimationFrame(() => documentMenuItemRefs.current[currentIndex]?.focus({ preventScroll: true }))
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (documentMenuRef.current?.contains(event.target as Node) || documentTriggerRef.current?.contains(event.target as Node)) return
+      setDocumentMenuOpen(false)
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      setDocumentMenuOpen(false)
+      documentTriggerRef.current?.focus({ preventScroll: true })
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      document.removeEventListener('pointerdown', closeOnOutsidePointer)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [activeDocumentId, documentMenuOpen, documents])
+
+  useEffect(() => {
+    if (!detailedNote) return
+    const focusFrame = window.requestAnimationFrame(() => noteDetailRef.current?.querySelector<HTMLElement>('button')?.focus({ preventScroll: true }))
+    const trapNoteDialogFocus = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setNoteDetailId(null)
+        return
+      }
+      if (event.key !== 'Tab') return
+      const focusable = Array.from(noteDetailRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [])
+        .filter((element) => element.offsetParent !== null)
+      const first = focusable[0]
+      const last = focusable.at(-1)
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last?.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first?.focus()
+      }
+    }
+    document.addEventListener('keydown', trapNoteDialogFocus)
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      document.removeEventListener('keydown', trapNoteDialogFocus)
+      window.requestAnimationFrame(() => noteDetailReturnFocusRef.current?.focus({ preventScroll: true }))
+    }
+  }, [detailedNote])
+
+  useEffect(() => {
+    setPageInput(String(page))
+  }, [page])
+
+  useEffect(() => {
+    storageHydratingRef.current = true
+    if (storageHydrationFrameRef.current != null) window.cancelAnimationFrame(storageHydrationFrameRef.current)
+    locationHistoryRef.current = []
+    setLocationDepth(0)
+    setLocatedResult(null)
+    setLocatedSectionTitle(null)
+    setSelectedReferenceId(null)
+    setSelectedFigureId(null)
+    restoredDocumentRef.current = activeDocumentId
+    try {
+      const saved = window.localStorage.getItem(`reading-progress:${activeDocumentId}`)
+      if (!saved) {
+        setPage(1)
+        setPageInput('1')
+        zoomValueRef.current = 50
+        setZoom(50)
+        setMarkersVisible(true)
+        setPageLayout('single')
+      } else {
+        const progress = JSON.parse(saved) as Partial<{ page: number; zoom: number; scrollTop: number; markersVisible: boolean; pageLayout: PageLayout }>
+        const restoredPage = Math.min(totalPages, Math.max(1, Number(progress.page) || 1))
+        const restoredZoom = Math.min(100, Math.max(25, Number(progress.zoom) || 50))
+        setPage(restoredPage)
+        setPageInput(String(restoredPage))
+        zoomValueRef.current = restoredZoom
+        setZoom(restoredZoom)
+        setMarkersVisible(progress.markersVisible !== false)
+        setPageLayout(progress.pageLayout === 'double' ? 'double' : 'single')
+        window.requestAnimationFrame(() => paperScrollRef.current?.scrollTo({ top: Math.max(0, Number(progress.scrollTop) || 0), behavior: 'auto' }))
+      }
+    } catch {
+      setPage(1)
+      setPageInput('1')
+      zoomValueRef.current = 50
+      setZoom(50)
+      setMarkersVisible(true)
+      setPageLayout('single')
+    }
+
+    try {
+      const savedHighlights = window.localStorage.getItem(`reading-highlights:${activeDocumentId}`)
+      const parsed = savedHighlights ? JSON.parse(savedHighlights) : []
+      setHighlights(Array.isArray(parsed) ? parsed.filter((item): item is StoredHighlight => (
+        item && typeof item.id === 'string' && typeof item.sectionTitle === 'string' && typeof item.text === 'string'
+        && Number.isFinite(item.start) && Number.isFinite(item.end) && typeof item.color === 'string'
+      )) : [])
+    } catch {
+      setHighlights([])
+    }
+    const restoringDocumentId = activeDocumentId
+    storageHydrationFrameRef.current = window.requestAnimationFrame(() => {
+      storageHydrationFrameRef.current = null
+      if (restoredDocumentRef.current === restoringDocumentId) storageHydratingRef.current = false
+    })
+  }, [activeDocumentId, totalPages])
+
+  useEffect(() => {
+    if (restoredDocumentRef.current !== activeDocumentId || storageHydratingRef.current) return
+    try {
+      window.localStorage.setItem(`reading-highlights:${activeDocumentId}`, JSON.stringify(highlights))
+    } catch {
+      // Highlighting remains available for this session if browser storage is unavailable.
+    }
+  }, [activeDocumentId, highlights])
+
+  useEffect(() => {
+    if (restoredDocumentRef.current !== activeDocumentId || storageHydratingRef.current) return
+    try {
+      const saved = window.localStorage.getItem(`reading-progress:${activeDocumentId}`)
+      const current = saved ? JSON.parse(saved) as Record<string, unknown> : {}
+      window.localStorage.setItem(`reading-progress:${activeDocumentId}`, JSON.stringify({
+        ...current,
+        documentId: activeDocumentId,
+        page,
+        zoom,
+        scrollTop: paperScrollRef.current?.scrollTop ?? 0,
+        markersVisible,
+        pageLayout,
+        savedAt: new Date().toISOString(),
+      }))
+    } catch {
+      // Explicit save still reports any storage error to the user.
+    }
+  }, [activeDocumentId, markersVisible, page, pageLayout, zoom])
 
   useEffect(() => () => {
     if (screenshotAnimationFrameRef.current != null) window.cancelAnimationFrame(screenshotAnimationFrameRef.current)
@@ -286,7 +678,15 @@ export function ReadingReader({
     if (zoomInputAnimationFrameRef.current != null) window.cancelAnimationFrame(zoomInputAnimationFrameRef.current)
     if (zoomRestoreAnimationFrameRef.current != null) window.cancelAnimationFrame(zoomRestoreAnimationFrameRef.current)
     if (zoomRestoreUnlockAnimationFrameRef.current != null) window.cancelAnimationFrame(zoomRestoreUnlockAnimationFrameRef.current)
+    if (storageHydrationFrameRef.current != null) window.cancelAnimationFrame(storageHydrationFrameRef.current)
+    uploadedNoteImagesRef.current.filter((url) => url.startsWith('blob:')).forEach((url) => URL.revokeObjectURL(url))
   }, [])
+
+  useEffect(() => {
+    const previous = uploadedNoteImagesRef.current
+    previous.filter((url) => url.startsWith('blob:') && !uploadedNoteImages.includes(url)).forEach((url) => URL.revokeObjectURL(url))
+    uploadedNoteImagesRef.current = uploadedNoteImages
+  }, [uploadedNoteImages])
 
   useEffect(() => {
     const syncFullscreenState = () => {
@@ -345,8 +745,18 @@ export function ReadingReader({
     scroller.scrollTo({ top: Math.max(0, top), behavior })
   }
 
-  const goToPage = (targetPage: number, options?: { sectionTitle?: string; scroll?: boolean }) => {
+  const pushCurrentPosition = (label: string) => {
+    const position = { page, scrollTop: paperScrollRef.current?.scrollTop ?? 0, label }
+    const last = locationHistoryRef.current.at(-1)
+    if (!last || last.page !== position.page || Math.abs(last.scrollTop - position.scrollTop) > 2) {
+      locationHistoryRef.current = [...locationHistoryRef.current.slice(-19), position]
+      setLocationDepth(locationHistoryRef.current.length)
+    }
+  }
+
+  const goToPage = (targetPage: number, options?: { sectionTitle?: string; scroll?: boolean; recordHistory?: boolean; label?: string }) => {
     const nextPage = Math.min(totalPages, Math.max(1, targetPage))
+    if (options?.recordHistory !== false) pushCurrentPosition(options?.label ?? `第 ${page} 页`)
     setPage(nextPage)
     if (options?.scroll === false) return
     window.requestAnimationFrame(() => {
@@ -360,6 +770,17 @@ export function ReadingReader({
       const pageProgress = (nextPage - 1) / (totalPages - 1)
       scroller.scrollTo({ top: availableScroll * pageProgress, behavior: 'auto' })
     })
+  }
+
+  const commitPageInput = () => {
+    const requested = Number.parseInt(pageInput, 10)
+    if (!Number.isFinite(requested)) {
+      setPageInput(String(page))
+      return
+    }
+    const nextPage = Math.min(totalPages, Math.max(1, requested))
+    setPageInput(String(nextPage))
+    goToPage(nextPage, { label: '页码跳转前' })
   }
 
   const closeZoomMenu = (restoreFocus = false) => {
@@ -588,7 +1009,7 @@ export function ReadingReader({
   }
 
   const jumpToSection = (sectionTitle: string) => {
-    scrollPaperToSection(sectionTitle)
+    goToPage(pageForSection(paperAnalysis, sectionTitle), { sectionTitle, label: sectionTitle })
   }
 
   const selectLeftPanel = (panel: LeftPanel) => {
@@ -602,25 +1023,114 @@ export function ReadingReader({
     setLeftPanel(panel)
   }
 
-  const locateSearchResult = (index: number, targetPage: number) => {
-    const scroller = paperScrollRef.current
-    const sectionTitle = aiSearchTargetSections[index]
-    if (!locationOriginRef.current) {
-      locationOriginRef.current = { page, scrollTop: scroller?.scrollTop ?? 0 }
+  const handleLeftTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    const key = event.key
+    if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(key)) return
+    event.preventDefault()
+    const nextIndex = key === 'Home'
+      ? 0
+      : key === 'End'
+        ? leftTabs.length - 1
+        : (index + (key === 'ArrowDown' || key === 'ArrowRight' ? 1 : -1) + leftTabs.length) % leftTabs.length
+    selectLeftPanel(leftTabs[nextIndex].id)
+    window.requestAnimationFrame(() => leftTabRefs.current[nextIndex]?.focus({ preventScroll: true }))
+  }
+
+  const handleRightTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    const key = event.key
+    if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) return
+    event.preventDefault()
+    const nextIndex = key === 'Home'
+      ? 0
+      : key === 'End'
+        ? insightTabs.length - 1
+        : (index + (key === 'ArrowRight' || key === 'ArrowDown' ? 1 : -1) + insightTabs.length) % insightTabs.length
+    selectInsightPanel(insightTabs[nextIndex].id)
+    window.requestAnimationFrame(() => rightTabRefs.current[nextIndex]?.focus({ preventScroll: true }))
+  }
+
+  const moveDocumentMenuFocus = (nextIndex: number) => {
+    if (documents.length === 0) return
+    const normalized = (nextIndex + documents.length) % documents.length
+    setDocumentMenuActiveIndex(normalized)
+    documentMenuItemRefs.current[normalized]?.focus({ preventScroll: true })
+  }
+
+  const handleDocumentMenuKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      moveDocumentMenuFocus(index + 1)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      moveDocumentMenuFocus(index - 1)
+    } else if (event.key === 'Home') {
+      event.preventDefault()
+      moveDocumentMenuFocus(0)
+    } else if (event.key === 'End') {
+      event.preventDefault()
+      moveDocumentMenuFocus(documents.length - 1)
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      setDocumentMenuOpen(false)
+      documentTriggerRef.current?.focus({ preventScroll: true })
+    } else if (event.key === 'Tab') {
+      setDocumentMenuOpen(false)
     }
+  }
+
+  const moveSearchModeFocus = (nextIndex: number) => {
+    const modes = ['全文搜索', '智能关联', 'AI语义', '关键词'] as const
+    const normalized = (nextIndex + modes.length) % modes.length
+    setSearchModeActiveIndex(normalized)
+    searchModeItemRefs.current[normalized]?.focus({ preventScroll: true })
+  }
+
+  const handleSearchModeKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      moveSearchModeFocus(index + 1)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      moveSearchModeFocus(index - 1)
+    } else if (event.key === 'Home') {
+      event.preventDefault()
+      moveSearchModeFocus(0)
+    } else if (event.key === 'End') {
+      event.preventDefault()
+      moveSearchModeFocus(3)
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      setSearchModeOpen(false)
+      searchModeTriggerRef.current?.focus({ preventScroll: true })
+    } else if (event.key === 'Tab') {
+      setSearchModeOpen(false)
+    }
+  }
+
+  const handleSelectionToolbarKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? 2 : (index + (event.key === 'ArrowRight' ? 1 : -1) + 3) % 3
+    selectionToolRefs.current[next]?.focus({ preventScroll: true })
+  }
+
+  const locateSearchResult = (index: number, result: ReaderSearchResult) => {
     setLocatedResult(index)
-    goToPage(targetPage, { sectionTitle })
+    setLocatedSectionTitle(result.sectionTitle)
+    goToPage(result.page, { sectionTitle: result.sectionTitle, label: `检索前 · ${result.label}` })
     onToast('已定位到原文出处')
   }
 
   const returnFromLocation = () => {
-    const origin = locationOriginRef.current
+    const origin = locationHistoryRef.current.at(-1)
     setLocatedResult(null)
+    setLocatedSectionTitle(null)
     if (origin) {
-      goToPage(origin.page, { scroll: false })
+      locationHistoryRef.current = locationHistoryRef.current.slice(0, -1)
+      setLocationDepth(locationHistoryRef.current.length)
+      goToPage(origin.page, { scroll: false, recordHistory: false })
       paperScrollRef.current?.scrollTo({ top: origin.scrollTop, behavior: 'auto' })
     }
-    locationOriginRef.current = null
   }
 
   const submitAiQuestion = () => {
@@ -628,7 +1138,7 @@ export function ReadingReader({
     if (!question) return
     setAiExchange({
       question,
-      answer: '功能化碳纳米管通过表面羧基、氨基对多硫化物进行多位点化学锚定，降低穿梭迁移并改善循环稳定性；论文以原位XRD、冷冻电镜和DFT计算共同验证了这一机制。',
+      answer: `根据当前文献《${paperAnalysis.metadata.title}》的本地解析，该问题与${paperAnalysis.metadata.researchField}相关。可重点核对“${paperAnalysis.metadata.keywords.slice(0, 3).join('、')}”及正文中的可追溯引文和图表；当前结论来自已解析的摘要与结构化数据，请结合定位原文复核。`,
     })
     setAiQuestion('')
     onToast('问题已提交')
@@ -639,13 +1149,18 @@ export function ReadingReader({
     setActiveTool((current) => current === 'search' ? null : current)
     setSearchModeOpen(false)
     setTranslatedResult(null)
-    returnFromLocation()
+    setDefinedResult(null)
+    if (locatedResult != null) returnFromLocation()
   }
 
   const submitSearch = () => {
     const value = searchQuery.trim()
     if (!value) return
     setSearchedQuery(value)
+    setTranslatedResult(null)
+    setDefinedResult(null)
+    setLocatedResult(null)
+    setLocatedSectionTitle(null)
   }
 
   const resetToolSurfaces = () => {
@@ -663,6 +1178,7 @@ export function ReadingReader({
     setCropRect(null)
     setSearchModeOpen(false)
     setTranslatedResult(null)
+    setDefinedResult(null)
     setSearchOpen(false)
     screenshotDragStartRef.current = null
     screenshotPendingPointRef.current = null
@@ -713,6 +1229,20 @@ export function ReadingReader({
     setActiveTool('screenshot')
   }
 
+  const createKeyboardScreenshotSelection = () => {
+    const bounds = paperScrollRef.current?.getBoundingClientRect()
+    if (!bounds) return
+    const inset = 28
+    setCropRect({
+      left: Math.max(0, bounds.left + inset),
+      top: Math.max(0, bounds.top + inset),
+      width: Math.max(120, bounds.width - inset * 2),
+      height: Math.max(90, bounds.height - inset * 2),
+    })
+    setContextAction('screenshot')
+    window.requestAnimationFrame(() => cropActionFirstRef.current?.focus({ preventScroll: true }))
+  }
+
   const placeContextMenu = (bounds: DOMRect) => {
     const canvasBounds = canvasRef.current?.getBoundingClientRect()
     if (!canvasBounds) return
@@ -745,6 +1275,45 @@ export function ReadingReader({
     setContextAction('highlight')
   }
 
+  const selectPaperLineWithKeyboard = (event: ReactKeyboardEvent<HTMLParagraphElement>, sectionTitle: string) => {
+    if (activeTool !== 'note' || !['Enter', ' '].includes(event.key)) return
+    event.preventDefault()
+    const text = event.currentTarget.textContent?.trim() ?? ''
+    if (!text) return
+    noteKeyboardReturnFocusRef.current = event.currentTarget
+    placeContextMenu(event.currentTarget.getBoundingClientRect())
+    setResultCards({
+      translationVisible: false,
+      translationExpanded: false,
+      explanationVisible: false,
+      explanationExpanded: false,
+    })
+    setNoteSelection({ kind: 'field', sectionTitle, text, start: 0, end: text.length })
+    setContextAction('highlight')
+    window.requestAnimationFrame(() => contextMenuRef.current?.querySelector<HTMLElement>('button')?.focus({ preventScroll: true }))
+  }
+
+  const handleContextMenuKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const buttons = Array.from(contextMenuRef.current?.querySelectorAll<HTMLButtonElement>('button:not([disabled])') ?? [])
+    const currentIndex = buttons.findIndex((button) => button === document.activeElement)
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      setContextAction(null)
+      setColorMenuOpen(false)
+      setNoteSelection(null)
+      noteKeyboardReturnFocusRef.current?.focus({ preventScroll: true })
+      return
+    }
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key) || buttons.length === 0) return
+    event.preventDefault()
+    const nextIndex = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? buttons.length - 1
+        : (Math.max(0, currentIndex) + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length
+    buttons[nextIndex]?.focus({ preventScroll: true })
+  }
+
   const textIndexAtPoint = (target: HTMLParagraphElement, clientX: number, clientY: number) => {
     const documentWithCaret = document as Document & { caretRangeFromPoint?: (x: number, y: number) => Range | null }
     const caretPosition = document.caretPositionFromPoint?.(clientX, clientY)
@@ -770,10 +1339,10 @@ export function ReadingReader({
   }
 
   const selectPaperRange = (event: ReactMouseEvent<HTMLParagraphElement>, sectionTitle: string) => {
-    if (activeTool !== 'note') return
+    if (activeTool === 'screenshot') return
     const pointerStart = notePointerStartRef.current
     notePointerStartRef.current = null
-    if (pointerStart?.sectionTitle === sectionTitle && Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) >= 4) {
+    if (activeTool === 'note' && pointerStart?.sectionTitle === sectionTitle && Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) >= 4) {
       const endIndex = textIndexAtPoint(event.currentTarget, event.clientX, event.clientY)
       const fullText = event.currentTarget.textContent ?? ''
       if (endIndex != null && endIndex !== pointerStart.index) {
@@ -825,11 +1394,55 @@ export function ReadingReader({
   }
 
   const renderSelectableText = (text: string, sectionTitle: string) => {
-    const selectionActive = noteSelection?.sectionTitle === sectionTitle && contextAction != null && contextAction !== 'screenshot'
-    if (!selectionActive || !noteSelection) return text
-    const start = Math.max(0, Math.min(text.length, noteSelection.start))
-    const end = Math.max(start, Math.min(text.length, noteSelection.end))
-    return <>{text.slice(0, start)}<mark className={`paper-note-selection is-${noteSelection.kind}`} style={{ '--selected-line-color': highlightColors[highlightColorIndex] } as CSSProperties}>{text.slice(start, end)}</mark>{text.slice(end)}</>
+    const ranges: Array<Pick<StoredHighlight, 'id' | 'start' | 'end' | 'color' | 'kind'>> = highlights
+      .filter((highlight) => highlight.sectionTitle === sectionTitle)
+      .map((highlight) => ({ id: highlight.id, start: highlight.start, end: highlight.end, color: highlight.color, kind: highlight.kind }))
+    if (noteSelection?.sectionTitle === sectionTitle && contextAction != null && contextAction !== 'screenshot') {
+      ranges.push({
+        id: 'active-selection',
+        start: noteSelection.start,
+        end: noteSelection.end,
+        color: highlightColors[highlightColorIndex],
+        kind: noteSelection.kind,
+      })
+    }
+    if (ranges.length === 0) return text
+    const ordered = ranges
+      .map((range) => ({ ...range, start: Math.max(0, Math.min(text.length, range.start)), end: Math.max(0, Math.min(text.length, range.end)) }))
+      .filter((range) => range.end > range.start)
+      .sort((left, right) => left.start - right.start || right.end - left.end)
+    const content: ReactNode[] = []
+    let cursor = 0
+    ordered.forEach((range) => {
+      if (range.start < cursor) return
+      if (range.start > cursor) content.push(text.slice(cursor, range.start))
+      content.push(<mark className={`paper-note-selection is-${range.kind}`} style={{ '--selected-line-color': range.color } as CSSProperties} key={range.id}>{text.slice(range.start, range.end)}</mark>)
+      cursor = range.end
+    })
+    if (cursor < text.length) content.push(text.slice(cursor))
+    return <>{content}</>
+  }
+
+  const applyHighlightColor = (index: number) => {
+    setHighlightColorIndex(index)
+    setColorMenuOpen(false)
+    if (!noteSelection) return
+    const chosenColor = highlightColors[index]
+    setHighlights((current) => {
+      const withoutSameRange = current.filter((highlight) => !(
+        highlight.sectionTitle === noteSelection.sectionTitle
+        && highlight.start === noteSelection.start
+        && highlight.end === noteSelection.end
+      ))
+      if (chosenColor === 'transparent') return withoutSameRange
+      return [...withoutSameRange, {
+        ...noteSelection,
+        id: `${activeDocumentId}-${Date.now()}-${noteSelection.start}-${noteSelection.end}`,
+        page: pageForSection(paperAnalysis, noteSelection.sectionTitle),
+        color: chosenColor,
+      }]
+    })
+    onToast(chosenColor === 'transparent' ? '已移除该处高亮' : '高亮已保存到当前文档')
   }
 
   const screenshotPoint = (event: ReactPointerEvent<HTMLElement>): ScreenshotPointer => {
@@ -903,7 +1516,7 @@ export function ReadingReader({
     else setCropRect(null)
   }
 
-  const beginCropResize = (event: ReactPointerEvent<HTMLSpanElement>, handle: CropHandle) => {
+  const beginCropResize = (event: ReactPointerEvent<HTMLButtonElement>, handle: CropHandle) => {
     if (!cropRect) return
     event.preventDefault()
     event.stopPropagation()
@@ -927,14 +1540,31 @@ export function ReadingReader({
     setCropRect({ left, top, width: right - left, height: bottom - top })
   }
 
-  const moveCropResize = (event: ReactPointerEvent<HTMLSpanElement>) => {
+  const moveCropResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault()
     updateCropResize(event.clientX, event.clientY)
   }
 
-  const finishCropResize = (event: ReactPointerEvent<HTMLSpanElement>) => {
+  const finishCropResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
     screenshotResizeRef.current = null
+  }
+
+  const resizeCropWithKeyboard = (event: ReactKeyboardEvent<HTMLButtonElement>, handle: CropHandle) => {
+    if (!cropRect || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return
+    event.preventDefault()
+    const step = event.shiftKey ? 10 : 2
+    const dx = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0
+    const dy = event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0
+    let left = cropRect.left
+    let top = cropRect.top
+    let right = cropRect.left + cropRect.width
+    let bottom = cropRect.top + cropRect.height
+    if (handle.includes('w')) left = Math.min(right - 12, Math.max(0, left + dx))
+    if (handle.includes('e')) right = Math.max(left + 12, Math.min(window.innerWidth, right + dx))
+    if (handle.includes('n')) top = Math.min(bottom - 12, Math.max(0, top + dy))
+    if (handle.includes('s')) bottom = Math.max(top + 12, Math.min(window.innerHeight, bottom + dy))
+    setCropRect({ left, top, width: right - left, height: bottom - top })
   }
 
   useEffect(() => {
@@ -982,32 +1612,35 @@ export function ReadingReader({
 
   const completeScreenshot = async () => {
     if (!cropRect) return
-    const addedToNote = editingNoteId != null
-    if (addedToNote) {
-      try {
-        const blob = await captureViewportCrop(cropRect)
-        const imageUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(String(reader.result))
-          reader.onerror = () => reject(reader.error)
-          reader.readAsDataURL(blob)
-        })
-        setUploadedNoteImages((current) => [...current, imageUrl])
-        setNoteEditStage((stage) => Math.max(stage, 3))
-      } catch (error) {
-        console.error('Screenshot generation failed', error)
-        onToast('截图生成失败，请重新选择')
-        return
-      }
+    try {
+      const blob = await captureViewportCrop(cropRect)
+      const imageUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result))
+        reader.onerror = () => reject(reader.error)
+        reader.readAsDataURL(blob)
+      })
+      const anchor = `【截图笔记 · 第${page}页 · ${currentSectionTitle}】`
+      cancelScreenshot()
+      if (editingNoteId == null) noteDraftBaselineRef.current = JSON.stringify({ pending: '', text: '', images: [] })
+      setUploadedNoteImages((current) => editingNoteId != null ? [...current, imageUrl].slice(0, 3) : [imageUrl])
+      setEditingNoteId((current) => current ?? 0)
+      setEditingNoteText('')
+      setPendingAddedNote((current) => current.trim() ? current : anchor)
+      setNoteEditStage(4)
+      setLeftPanel('notes')
+      if (leftOverlayLayout) setMobileLeftOpen(true)
+      onToast(editingNoteId != null ? '截图已添加到笔记草稿' : '截图已生成，可补充说明后保存')
+    } catch (error) {
+      console.error('Screenshot generation failed', error)
+      onToast('截图生成失败，请重新选择')
     }
-    cancelScreenshot()
-    onToast(addedToNote ? '截图已添加到笔记' : '截图已完成')
   }
 
   const downloadScreenshot = async () => {
     if (!cropRect) return
     try {
-      downloadLocalBlob(await captureViewportCrop(cropRect), '科研阅读截图.png')
+      downloadLocalBlob(await captureViewportCrop(cropRect), `${safeFileName(documentTitle)}-第${page}页截图.png`)
       onToast('截图已下载')
     } catch (error) {
       console.error('Screenshot download failed', error)
@@ -1016,6 +1649,8 @@ export function ReadingReader({
   }
 
   const startEditingNote = (note: ReadingNote) => {
+    const images = note.imageDataUrls?.slice(0, 3) ?? []
+    noteDraftBaselineRef.current = JSON.stringify({ pending: note.excerpt, text: '', images })
     setEditingNoteId(note.id)
     setEditingNoteText('')
     setPendingAddedNote(note.excerpt)
@@ -1023,14 +1658,16 @@ export function ReadingReader({
     setLeftPanel('notes')
     if (leftOverlayLayout) setMobileLeftOpen(true)
     setNoteEditStage(4)
-    setUploadedNoteImages([])
+    setUploadedNoteImages(images)
     setNoteEditorExpanded(false)
   }
 
   const openNoteEditor = (source: 'selection' | 'translation' | 'explanation') => {
+    const anchor = `【第${page}页 · ${noteSelection?.sectionTitle || currentSectionTitle}】`
+    noteDraftBaselineRef.current = JSON.stringify({ pending: '', text: '', images: [] })
     setEditingNoteId(0)
     setEditingNoteText('')
-    setPendingAddedNote(source === 'translation' ? translatedExcerpt : source === 'explanation' ? explainedExcerpt : noteSelection?.text ?? '')
+    setPendingAddedNote(`${anchor}\n${source === 'translation' ? selectionAid.translation : source === 'explanation' ? selectionAid.definition : noteSelection?.text ?? ''}`.trim())
     setNoteEditStage(source === 'translation' ? 1 : source === 'explanation' ? 2 : 0)
     setUploadedNoteImages([])
     setNoteEditorExpanded(false)
@@ -1051,15 +1688,7 @@ export function ReadingReader({
 
   const startAddingNote = () => openNoteEditor('selection')
 
-  const commitEditedNote = () => {
-    if (editingNoteId == null) return
-    const value = editingNoteText.trim() || pendingAddedNote.trim()
-    if (!value) return
-    if (editingNoteId === 0) {
-      onNotesChange([...notes, { id: Math.max(0, ...notes.map((note) => note.id)) + 1, title: value.slice(0, 18), excerpt: value, createdAt: '', color: highlightColors[highlightColorIndex] }])
-    } else {
-      onNotesChange(notes.map((note) => note.id === editingNoteId ? { ...note, title: value.slice(0, 18), excerpt: value, createdAt: '' } : note))
-    }
+  function discardEditedNote(announce = true) {
     setEditingNoteId(null)
     setContextAction(null)
     setResultCards({
@@ -1073,7 +1702,41 @@ export function ReadingReader({
     setNoteEditStage(0)
     setNoteEditorExpanded(false)
     setPendingAddedNote('')
-    onToast('笔记已更新')
+    setEditingNoteText('')
+    setUploadedNoteImages([])
+    noteDraftBaselineRef.current = JSON.stringify({ pending: '', text: '', images: [] })
+    if (announce) onToast('已放弃未保存的笔记修改')
+  }
+
+  const commitEditedNote = () => {
+    if (editingNoteId == null) return true
+    const value = editingNoteText.trim() || pendingAddedNote.trim()
+    if (!value) {
+      onToast('请先输入笔记内容')
+      noteTextareaRef.current?.focus({ preventScroll: true })
+      return false
+    }
+    const imageDataUrls = uploadedNoteImages.slice(0, 3)
+    const wasNew = editingNoteId === 0
+    const didPersist = wasNew
+      ? onNotesChange([...notes, {
+          id: Math.max(0, ...notes.map((note) => note.id)) + 1,
+          title: value.replace(/^【[^】]+】\s*/, '').slice(0, 18) || '阅读笔记',
+          excerpt: value,
+          createdAt: new Date().toLocaleString('zh-CN', { hour12: false }),
+          color: highlightColors[highlightColorIndex],
+          ...(imageDataUrls.length > 0 ? { imageDataUrls } : {}),
+        }])
+      : onNotesChange(notes.map((note) => note.id === editingNoteId ? {
+          ...note,
+          title: value.replace(/^【[^】]+】\s*/, '').slice(0, 18) || '阅读笔记',
+          excerpt: value,
+          imageDataUrls: imageDataUrls.length > 0 ? imageDataUrls : undefined,
+        } : note))
+    if (!didPersist) return false
+    discardEditedNote(false)
+    onToast(wasNew ? '笔记已保存' : '笔记已更新')
+    return true
   }
 
   const addNoteDraft = () => {
@@ -1084,11 +1747,31 @@ export function ReadingReader({
     setNoteEditStage(4)
   }
 
-  const uploadNoteImages = (files: FileList | null) => {
+  const uploadNoteImages = async (files: FileList | null) => {
     if (!files?.length) return
-    setUploadedNoteImages(Array.from(files).slice(0, 3).map((file) => URL.createObjectURL(file)))
+    const accepted = Array.from(files).filter((file) => file.type.startsWith('image/') && file.size <= 2 * 1024 * 1024).slice(0, 3)
+    if (accepted.length === 0) {
+      onToast('仅支持单张 2 MB 以内的图片')
+      return
+    }
+    const images = await Promise.all(accepted.map((file) => new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(String(reader.result))
+      reader.onerror = () => reject(reader.error)
+      reader.readAsDataURL(file)
+    }))).catch(() => [])
+    if (images.length === 0) {
+      onToast('图片读取失败，请重新选择')
+      return
+    }
+    setUploadedNoteImages(images)
     setNoteEditStage((stage) => Math.max(stage, 3))
   }
+
+  useEffect(() => {
+    onEditingNoteChange(noteDraftDirty, noteDraftDirty ? { save: commitEditedNote, discard: () => discardEditedNote(false) } : undefined)
+    return () => onEditingNoteChange(false)
+  }, [noteDraftDirty, onEditingNoteChange])
 
   const copyText = async (text: string, successMessage: string) => {
     try {
@@ -1161,13 +1844,15 @@ export function ReadingReader({
       documentTitle,
       '',
       '摘要',
-      '本研究系统性探究了功能化碳纳米管界面对锂硫电池中多硫化物穿梭效应的抑制机理。',
+      paperAnalysis.metadata.abstract,
       '',
-      ...articleSections.flatMap((section) => [
+      ...activeArticleSections.flatMap((section) => [
         section.title,
         ...section.parts.flatMap((part) => [part.title, part.body].filter(Boolean)),
         '',
       ]),
+      '参考文献',
+      ...paperAnalysis.references.map((reference, index) => `[${index + 1}] ${reference.authors.join(', ')}. ${reference.title}. ${reference.journal}, ${reference.publicationDate}. DOI: ${reference.doi}`),
     ].join('\n')
     downloadLocalBlob(new Blob([documentText], { type: 'text/plain;charset=utf-8' }), `${safeFileName(documentTitle)}.txt`)
     onToast('文档已下载')
@@ -1194,6 +1879,8 @@ export function ReadingReader({
         page,
         zoom,
         scrollTop: paperScrollRef.current?.scrollTop ?? 0,
+        markersVisible,
+        pageLayout,
         savedAt: new Date().toISOString(),
       }))
       onToast('阅读进度已保存')
@@ -1204,7 +1891,40 @@ export function ReadingReader({
 
   const selectInsightPanel = (panel: InsightPanel) => {
     setRightPanel(panel)
-    if (panel === 'charts') goToPage(3, { sectionTitle: '2.2.表征手段' })
+    if (panel === 'charts' && paperAnalysis.figures[0]) {
+      setSelectedFigureId(paperAnalysis.figures[0].id)
+      goToPage(paperAnalysis.figures[0].page, {
+        sectionTitle: resolvePaperSection(paperAnalysis, paperAnalysis.figures[0].sectionId),
+        label: '打开图表解析前',
+      })
+    }
+  }
+
+  const requestDocumentSelection = (documentId: number) => {
+    if (documentId === activeDocumentId) {
+      setDocumentMenuOpen(false)
+      documentTriggerRef.current?.focus({ preventScroll: true })
+      return
+    }
+    setDocumentMenuOpen(false)
+    if (noteDraftDirty) {
+      setPendingDocumentId(documentId)
+      return
+    }
+    onSelectDocument(documentId)
+  }
+
+  const finishDraftGuard = (choice: 'save' | 'discard' | 'continue') => {
+    const targetDocumentId = pendingDocumentId
+    if (choice === 'continue') {
+      setPendingDocumentId(null)
+      window.requestAnimationFrame(() => noteTextareaRef.current?.focus({ preventScroll: true }))
+      return
+    }
+    if (choice === 'save' && !commitEditedNote()) return
+    if (choice === 'discard') discardEditedNote(false)
+    setPendingDocumentId(null)
+    if (targetDocumentId != null && targetDocumentId > 0) onSelectDocument(targetDocumentId)
   }
 
   useEffect(() => {
@@ -1258,8 +1978,10 @@ export function ReadingReader({
       <header className="reading-document-header">
         <div className="reading-document-picker">
           <button
+            ref={documentTriggerRef}
             type="button"
             className="reading-document-title"
+            aria-haspopup="menu"
             aria-expanded={documentMenuOpen}
             aria-controls="reading-document-menu"
             onClick={() => setDocumentMenuOpen((open) => !open)}
@@ -1267,16 +1989,17 @@ export function ReadingReader({
             <span>{documentTitle}</span><span className={`reading-chevron${documentMenuOpen ? ' is-open' : ''}`} aria-hidden="true" />
           </button>
           {documentMenuOpen && (
-            <div className="reading-document-menu" id="reading-document-menu" role="menu">
-              {documents.map((readingDocument) => (
+            <div ref={documentMenuRef} className="reading-document-menu" id="reading-document-menu" role="menu" aria-label="切换阅读文献">
+              {documents.map((readingDocument, index) => (
                 <button
+                  ref={(node) => { documentMenuItemRefs.current[index] = node }}
                   type="button"
                   role="menuitemradio"
                   aria-checked={readingDocument.id === activeDocumentId}
-                  onClick={() => {
-                    onSelectDocument(readingDocument.id)
-                    setDocumentMenuOpen(false)
-                  }}
+                  tabIndex={index === documentMenuActiveIndex ? 0 : -1}
+                  onFocus={() => setDocumentMenuActiveIndex(index)}
+                  onKeyDown={(event) => handleDocumentMenuKeyDown(event, index)}
+                  onClick={() => requestDocumentSelection(readingDocument.id)}
                   key={readingDocument.id}
                 >
                   {readingDocument.title}
@@ -1298,13 +2021,13 @@ export function ReadingReader({
 
       <aside className={`reading-left-panel${mobileLeftOpen ? ' is-mobile-open' : ''}`}>
         <div className="reading-left-rail" role="tablist" aria-label="阅读辅助栏">
-          <button type="button" id="reading-left-tab-outline" role="tab" aria-controls="reading-left-panel-outline" aria-selected={leftPanel === 'outline'} aria-expanded={leftOverlayLayout ? mobileLeftOpen && leftPanel === 'outline' : undefined} tabIndex={leftPanel === 'outline' ? 0 : -1} className={leftPanel === 'outline' ? 'is-active' : ''} onClick={() => selectLeftPanel('outline')} aria-label="目录">
+          <button ref={(node) => { leftTabRefs.current[0] = node }} type="button" id="reading-left-tab-outline" role="tab" aria-controls="reading-left-panel-outline" aria-selected={leftPanel === 'outline'} aria-expanded={leftOverlayLayout ? mobileLeftOpen && leftPanel === 'outline' : undefined} tabIndex={leftPanel === 'outline' ? 0 : -1} className={leftPanel === 'outline' ? 'is-active' : ''} onClick={() => selectLeftPanel('outline')} onKeyDown={(event) => handleLeftTabKeyDown(event, 0)} aria-label="目录">
             <img src={leftPanel === 'outline' ? '/assets/reading/outline.svg' : '/assets/reading/outline-inactive.svg'} alt="" />
           </button>
-          <button type="button" id="reading-left-tab-thumbnails" role="tab" aria-controls="reading-left-panel-thumbnails" aria-selected={leftPanel === 'thumbnails'} aria-expanded={leftOverlayLayout ? mobileLeftOpen && leftPanel === 'thumbnails' : undefined} tabIndex={leftPanel === 'thumbnails' ? 0 : -1} className={leftPanel === 'thumbnails' ? 'is-active' : ''} onClick={() => selectLeftPanel('thumbnails')} aria-label="缩略图">
+          <button ref={(node) => { leftTabRefs.current[1] = node }} type="button" id="reading-left-tab-thumbnails" role="tab" aria-controls="reading-left-panel-thumbnails" aria-selected={leftPanel === 'thumbnails'} aria-expanded={leftOverlayLayout ? mobileLeftOpen && leftPanel === 'thumbnails' : undefined} tabIndex={leftPanel === 'thumbnails' ? 0 : -1} className={leftPanel === 'thumbnails' ? 'is-active' : ''} onClick={() => selectLeftPanel('thumbnails')} onKeyDown={(event) => handleLeftTabKeyDown(event, 1)} aria-label="缩略图">
             <img src={leftPanel === 'thumbnails' ? '/assets/reading/thumbnails-active.svg' : '/assets/reading/thumbnails.svg'} alt="" />
           </button>
-          <button type="button" id="reading-left-tab-notes" role="tab" aria-controls="reading-left-panel-notes" aria-selected={leftPanel === 'notes'} aria-expanded={leftOverlayLayout ? mobileLeftOpen && leftPanel === 'notes' : undefined} tabIndex={leftPanel === 'notes' ? 0 : -1} className={leftPanel === 'notes' ? 'is-active' : ''} onClick={() => selectLeftPanel('notes')} aria-label="笔记">
+          <button ref={(node) => { leftTabRefs.current[2] = node }} type="button" id="reading-left-tab-notes" role="tab" aria-controls="reading-left-panel-notes" aria-selected={leftPanel === 'notes'} aria-expanded={leftOverlayLayout ? mobileLeftOpen && leftPanel === 'notes' : undefined} tabIndex={leftPanel === 'notes' ? 0 : -1} className={leftPanel === 'notes' ? 'is-active' : ''} onClick={() => selectLeftPanel('notes')} onKeyDown={(event) => handleLeftTabKeyDown(event, 2)} aria-label="笔记">
             <img src={leftPanel === 'notes' ? '/assets/reading/notes-active.svg' : '/assets/reading/notes.svg'} alt="" />
           </button>
         </div>
@@ -1321,23 +2044,25 @@ export function ReadingReader({
                     aria-controls="reading-outline-main-sections"
                     onClick={() => setOutlineMainExpanded((expanded) => !expanded)}
                   >
-                    摘要<span className={`reading-inline-chevron${outlineMainExpanded ? '' : ' is-right'}`} aria-hidden="true" />
+                    目录解析 · {paperAnalysis.outline.length} 节<span className={`reading-inline-chevron${outlineMainExpanded ? '' : ' is-right'}`} aria-hidden="true" />
                   </button>
                   <div className={`reading-outline-collapse${outlineMainExpanded ? ' is-expanded' : ''}`} id="reading-outline-main-sections" aria-hidden={!outlineMainExpanded} inert={outlineMainExpanded ? undefined : true}>
                     <div>
-                      {outlineGroups.slice(1, -1).map((group) => (
-                        <div className="reading-outline-group" key={group.title}>
-                          <button type="button" onClick={() => jumpToSection(group.title)}>{group.title}</button>
-                          {group.children.map((child) => <button type="button" className="is-child" key={child} onClick={() => jumpToSection(child)}>{child}</button>)}
+                      {paperAnalysis.outline.filter((section) => section.kind !== 'references').map((section) => {
+                        const target = resolvePaperSection(paperAnalysis, section.id)
+                        return <div className="reading-outline-group" key={section.id}>
+                          <button type="button" className={section.level === 2 ? 'is-child' : ''} onClick={() => goToPage(section.page, { sectionTitle: target, label: section.title })}>
+                            <span>{section.title}</span><small>第{section.page}页</small>
+                          </button>
                         </div>
-                      ))}
+                      })}
                     </div>
                   </div>
                 </div>
                 <div className="reading-outline-disclosure">
-                  <div className="reading-outline-static is-emphasis">
-                    参考文献<span className="reading-inline-chevron is-right" aria-hidden="true" />
-                  </div>
+                  <button type="button" className="reading-outline-static is-emphasis" onClick={() => { setRightPanel('references'); const section = paperAnalysis.outline.find((item) => item.kind === 'references'); if (section) goToPage(section.page, { sectionTitle: resolvePaperSection(paperAnalysis, section.id), label: '参考文献' }) }}>
+                    参考文献 · {paperAnalysis.references.length} 条<span className="reading-inline-chevron is-right" aria-hidden="true" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -1376,25 +2101,27 @@ export function ReadingReader({
                     <strong><i />{note.title}</strong>
                     <div className="reading-note-label"><b>笔记：</b><button type="button" aria-label="复制笔记" onClick={() => void copyText(note.excerpt, '笔记已复制')}><img src="/assets/reading/copy.svg" alt="" /></button></div>
                     <div className="reading-note-excerpt">{note.excerpt}</div>
-                    <footer><button type="button" onClick={() => setNoteDetailId(note.id)}>详情</button><span /> <button type="button" onClick={() => startEditingNote(note)}>编辑</button></footer>
+                    {noteAnchor(note.excerpt) && <small className="reading-note-anchor">来源：第{noteAnchor(note.excerpt)?.page}页 · {noteAnchor(note.excerpt)?.sectionTitle}</small>}
+                    {note.imageDataUrls && note.imageDataUrls.length > 0 && <div className="reading-note-card-images">{note.imageDataUrls.map((src, index) => <img src={src} alt={`笔记附图 ${index + 1}`} key={`${note.id}-${index}`} />)}</div>}
+                    <footer><button type="button" onClick={(event) => { noteDetailReturnFocusRef.current = event.currentTarget; setNoteDetailId(note.id) }}>详情</button>{noteAnchor(note.excerpt) && <button type="button" onClick={() => { const anchor = noteAnchor(note.excerpt); if (anchor) goToPage(anchor.page, { sectionTitle: anchor.sectionTitle, label: '笔记定位前' }) }}>定位</button>}<span /> <button type="button" onClick={() => startEditingNote(note)}>编辑</button></footer>
                   </div>
                 </article>
               )) : <div className="reading-notes-empty"><div><img src="/assets/reading/notes-empty.svg" alt="" /><span>暂无笔记</span></div><p>请 <button type="button" onClick={activateNoteTool}>唤醒笔记</button> 进行添加</p></div>) : (
                 <article className={`reading-note-edit-card${noteEditorExpanded ? ' is-expanded' : ''}`}>
                   <span className="reading-note-color" style={{ background: notes.find((note) => note.id === editingNoteId)?.color ?? '#FFE4BA' }} />
-                  <header><strong>{notes.find((note) => note.id === editingNoteId)?.title ?? '多硫化物穿梭效应'}</strong></header>
+                  <header><strong>{notes.find((note) => note.id === editingNoteId)?.title ?? '新建阅读笔记'}</strong></header>
                   {noteEditStage >= 1 && <div className="reading-note-source">
-                    <section><b>英译：</b><p>Thiosulfate shuttle effect</p></section>
-                    {noteEditStage >= 2 && <section><b>解释：</b><p>{explainedExcerpt}</p></section>}
-                    {noteEditStage >= 3 && <section><b>图片：</b><div className="reading-note-images">{(uploadedNoteImages.length ? uploadedNoteImages : ['/assets/reading/note-image-1.png', '/assets/reading/note-image-2.png', '/assets/reading/note-image-3.png']).map((src, index) => <span className={`reading-note-image-tile reading-note-image-tile--${index + 1}`} key={src}><img src={src} alt={`笔记图片 ${index + 1}`} /></span>)}</div></section>}
-                    {noteEditStage >= 4 && <section><b>笔记：</b><p className="reading-note-existing">{pendingAddedNote || expandedNoteExcerpt}</p></section>}
+                    <section><b>来源 / 本地辅助释义：</b><p>{pendingAddedNote}</p></section>
+                    {noteEditStage >= 2 && <section><b>说明：</b><p>本地辅助释义不调用外部 AI，请结合所定位的原文段落核对。</p></section>}
+                    {noteEditStage >= 3 && uploadedNoteImages.length > 0 && <section><b>图片：</b><div className="reading-note-images">{uploadedNoteImages.map((src, index) => <span className={`reading-note-image-tile reading-note-image-tile--${index + 1}`} key={`${src.slice(0, 48)}-${index}`}><img src={src} alt={`笔记图片 ${index + 1}`} /></span>)}</div></section>}
+                    {noteEditStage >= 4 && pendingAddedNote && <section><b>笔记：</b><p className="reading-note-existing">{pendingAddedNote}</p></section>}
                   </div>}
                   <div className="reading-note-compose">
                     <textarea ref={noteTextareaRef} value={editingNoteText} onChange={(event) => setEditingNoteText(event.target.value)} placeholder="输入笔记内容" aria-label="编辑笔记内容" />
-                    <input ref={noteImageInputRef} className="reading-note-image-input" type="file" accept="image/*" multiple onChange={(event) => { uploadNoteImages(event.target.files); event.target.value = '' }} />
+                    <input ref={noteImageInputRef} className="reading-note-image-input" type="file" accept="image/*" multiple onChange={(event) => { void uploadNoteImages(event.target.files); event.target.value = '' }} />
                     <div className="reading-note-editor-tools"><span><button type="button" aria-label="翻译笔记" onClick={() => setNoteEditStage((stage) => Math.max(stage, 1))}><img src="/assets/reading/editor-translate.svg" alt="" /></button><button type="button" aria-label="AI 解释笔记" onClick={() => setNoteEditStage((stage) => Math.max(stage, 2))}><img src="/assets/reading/editor-ai.svg" alt="" /></button><button type="button" aria-label="插入笔记图片" onClick={() => noteImageInputRef.current?.click()}><img src="/assets/reading/editor-image.svg" alt="" /></button></span><button type="button" onClick={addNoteDraft}>添加</button></div>
                   </div>
-                  <footer><button type="button" onClick={() => { setEditingNoteId(null); setNoteEditorExpanded(false); setContextAction(null); setActiveTool(null); setNoteSelection(null); setNoteEditStage(0); setPendingAddedNote('') }}>取消</button><button type="button" onClick={commitEditedNote}>保存</button></footer>
+                  <footer><button type="button" onClick={() => noteDraftDirty ? setPendingDocumentId(-1) : discardEditedNote(false)}>取消</button><button type="button" onClick={commitEditedNote}>保存</button></footer>
                 </article>
               )}
             </div>
@@ -1408,18 +2135,18 @@ export function ReadingReader({
 
       <main className={`reading-canvas${activeTool === 'note' ? ' is-note-tool-active' : ''}${activeTool === 'screenshot' ? ' is-screenshot-tool-active' : ''}`} ref={canvasRef} onPointerDown={beginScreenshotDrag} onPointerMove={moveScreenshotPointer} onPointerUp={finishScreenshotDrag} onPointerCancel={cancelScreenshotDrag}>
         <div className="reading-paper-scroll" ref={paperScrollRef} onScroll={syncPageFromPaperScroll}>
-          <div ref={paperZoomStageRef} className="reading-paper-zoom-stage" style={{ '--paper-scale': zoom / 100, width: 812 * zoom / 100, minHeight: 2246 * zoom / 100 } as CSSProperties}>
+          <div ref={paperZoomStageRef} className={`reading-paper-zoom-stage${pageLayout === 'double' ? ' is-double' : ''}`} style={{ '--paper-scale': zoom / 100, width: (pageLayout === 'double' ? 1640 : 812) * zoom / 100, minHeight: 2246 * zoom / 100 } as CSSProperties}>
           <article
             className="reading-paper"
             ref={paperRef}
           >
             <img className="reading-paper-figma-top" src="/assets/reading/paper-top.png" alt="" />
-            <div className="reading-paper-page-number">第 {Math.min(page, 18)} 页 / 18</div>
-            <div className="paper-masthead"><span>Advanced Energy Materials</span><span>DOI: 10.1002/aenm.202301847</span></div>
+            <div className="reading-paper-page-number">第 {page} 页 / {totalPages}</div>
+            <div className="paper-masthead"><span>{paperAnalysis.metadata.journal}</span><span>DOI: {paperAnalysis.metadata.doi}</span></div>
             <header className="paper-title-block">
-              <h1>锂硫电池中多硫化物穿梭效应的抑制机制研究：<br />基于功能化碳纳米管界面的储能材料</h1>
-              <p>刘建国｜陈思远｜王磊</p>
-              <small>南方科技大学材料科学与工程系｜中科院深圳先进院</small>
+              <h1>{paperAnalysis.metadata.title}</h1>
+              <p>{paperAnalysis.metadata.authors.map((author) => author.name).join('｜')}</p>
+              <small>{paperAnalysis.metadata.affiliations.map((affiliation) => affiliation.name).join('｜')}</small>
             </header>
             <section className="paper-abstract" data-section="摘要">
               <h2>摘要</h2>
@@ -1428,36 +2155,50 @@ export function ReadingReader({
                 onMouseDown={(event) => beginPaperRange(event, '摘要')}
                 onMouseUp={(event) => selectPaperRange(event, '摘要')}
                 onClick={(event) => hitPaperLine(event, '摘要')}
-              >{renderSelectableText(articleAbstract, '摘要')}</p>
+                tabIndex={activeTool === 'note' ? 0 : undefined}
+                onKeyDown={(event) => selectPaperLineWithKeyboard(event, '摘要')}
+              >{renderSelectableText(paperAnalysis.metadata.abstract, '摘要')}</p>
+              {markersVisible && paperAnalysis.references.flatMap((reference) => reference.citationAnchors).filter((anchor) => resolvePaperSection(paperAnalysis, anchor.sectionId) === '摘要').map((anchor) => <button type="button" className="reading-paper-marker is-reference" key={anchor.id} onClick={() => { setSelectedReferenceId(anchor.referenceId); setRightPanel('references'); setMobileInsightsOpen(compactLayout) }}>{anchor.marker} 查看引文</button>)}
             </section>
             <div className="paper-body">
-              {articleSections.map((section) => (
+              {activeArticleSections.map((section) => (
                 <section data-section={section.title.replace(/[^\d\u4e00-\u9fa5]/g, '')} key={section.title}>
                   <h2>{section.title}</h2>
                   {section.parts.map((part) => (
                     <div data-section={part.title.replace(/[^\d\u4e00-\u9fa5]/g, '')} key={part.title || section.title}>
                       {part.title && <h3>{part.title}</h3>}
-                      <p data-note-selectable="true" onMouseDown={(event) => beginPaperRange(event, part.title)} onMouseUp={(event) => selectPaperRange(event, part.title)} onClick={(event) => hitPaperLine(event, part.title)} className={[
-                        locatedResult != null && part.title === aiSearchTargetSections[locatedResult] ? 'paper-selected-line is-located' : '',
-                      ].filter(Boolean).join(' ')}>{renderSelectableText(part.body, part.title)}</p>
+                      <p data-note-selectable="true" tabIndex={activeTool === 'note' ? 0 : undefined} onKeyDown={(event) => selectPaperLineWithKeyboard(event, part.title || section.title)} onMouseDown={(event) => beginPaperRange(event, part.title || section.title)} onMouseUp={(event) => selectPaperRange(event, part.title || section.title)} onClick={(event) => hitPaperLine(event, part.title || section.title)} className={[
+                        locatedResult != null && (part.title || section.title) === locatedSectionTitle ? 'paper-selected-line is-located' : '',
+                      ].filter(Boolean).join(' ')}>{renderSelectableText(part.body, part.title || section.title)}</p>
+                      {markersVisible && <div className="reading-paper-markers">
+                        {paperAnalysis.references.flatMap((reference) => reference.citationAnchors).filter((anchor) => resolvePaperSection(paperAnalysis, anchor.sectionId) === (part.title || section.title)).map((anchor) => <button type="button" className="reading-paper-marker is-reference" key={anchor.id} onClick={() => { setSelectedReferenceId(anchor.referenceId); setRightPanel('references'); setMobileInsightsOpen(compactLayout) }}>{anchor.marker} 引文</button>)}
+                        {paperAnalysis.figures.filter((figure) => resolvePaperSection(paperAnalysis, figure.sectionId) === (part.title || section.title)).map((figure) => <button type="button" className="reading-paper-marker is-figure" key={figure.id} onClick={() => { setSelectedFigureId(figure.id); setRightPanel('charts'); setMobileInsightsOpen(compactLayout) }}>{figure.label} {figure.kind === 'table' ? '表格' : '图表'}</button>)}
+                      </div>}
                       {part.title === '2.2.表征手段' && <div className="reading-paper-chart" aria-label="不同循环次数下的比容量对比图">{[42, 64, 78, 61, 72, 88, 66].map((height, index) => <i style={{ height }} className={index === 5 ? 'is-dark' : ''} key={index} />)}<small>图3. 不同循环次数下的比容量对比（mAh g⁻¹）</small></div>}
                     </div>
                   ))}
                 </section>
               ))}
             </div>
-            <footer className="paper-keywords">关键词：储能材料 · 锂硫电池 · 碳纳米管 · 多硫化物 · 穿梭效应</footer>
+            <footer className="paper-keywords">关键词：{paperAnalysis.metadata.keywords.join(' · ')}</footer>
           </article>
+          {pageLayout === 'double' && <article className="reading-paper reading-paper--companion" aria-label={`第 ${Math.min(totalPages, page + 1)} 页对页预览`}>
+            <div className="reading-paper-page-number">第 {Math.min(totalPages, page + 1)} 页 / {totalPages}</div>
+            <div className="paper-masthead"><span>{paperAnalysis.metadata.journal}</span><span>对页预览</span></div>
+            <header className="paper-title-block"><h1>{paperAnalysis.outline.find((section) => section.page >= page)?.title ?? '研究内容续页'}</h1></header>
+            <section className="paper-abstract"><h2>增强阅读提示</h2><p>双页模式已开启。目录、引文与图表定位仍以左页为当前操作页；使用页码输入或翻页按钮可继续浏览。</p></section>
+          </article>}
           </div>
         </div>
 
         <div className="reading-selection-toolbar" role="toolbar" aria-label="划词工具">
-          <button type="button" aria-label="AI检索" aria-pressed={activeTool === 'search'} className={activeTool === 'search' ? 'is-active' : ''} onClick={activateSearch}><span className="reading-search-tool-glyph" aria-hidden="true" /></button>
+          <button ref={(node) => { selectionToolRefs.current[0] = node; searchToolRef.current = node }} type="button" aria-label="AI检索" aria-pressed={activeTool === 'search'} className={activeTool === 'search' ? 'is-active' : ''} onKeyDown={(event) => handleSelectionToolbarKeyDown(event, 0)} onClick={activateSearch}><span className="reading-search-tool-glyph" aria-hidden="true" /></button>
           <span />
-          <button type="button" aria-label="标注与添加笔记" aria-pressed={activeTool === 'note'} className={activeTool === 'note' ? 'is-active' : ''} onClick={activateNoteTool}><span className="reading-note-tool-glyph" aria-hidden="true" /></button>
+          <button ref={(node) => { selectionToolRefs.current[1] = node }} type="button" aria-label="标注与添加笔记" aria-pressed={activeTool === 'note'} className={activeTool === 'note' ? 'is-active' : ''} onKeyDown={(event) => handleSelectionToolbarKeyDown(event, 1)} onClick={activateNoteTool}><span className="reading-note-tool-glyph" aria-hidden="true" /></button>
           <span />
-          <button type="button" aria-label="截图" aria-pressed={activeTool === 'screenshot'} className={activeTool === 'screenshot' ? 'is-active' : ''} onClick={activateScreenshotTool}><span className="reading-camera-tool-glyph" aria-hidden="true" /></button>
+          <button ref={(node) => { selectionToolRefs.current[2] = node }} type="button" aria-label="截图" aria-pressed={activeTool === 'screenshot'} className={activeTool === 'screenshot' ? 'is-active' : ''} onKeyDown={(event) => handleSelectionToolbarKeyDown(event, 2)} onClick={activateScreenshotTool}><span className="reading-camera-tool-glyph" aria-hidden="true" /></button>
         </div>
+        {activeTool === 'screenshot' && contextAction !== 'screenshot' && <button type="button" className="reading-screenshot-keyboard-capture" onClick={createKeyboardScreenshotSelection}>截取当前阅读区</button>}
 
         {activeTool === 'screenshot' && contextAction !== 'screenshot' && screenshotPointer && !screenshotDragStart && (
           <div className="reading-screenshot-crosshair" style={{ left: screenshotPointer.localX, top: screenshotPointer.localY }} aria-hidden="true"><i /><i /><small>坐标　{Math.round(screenshotPointer.clientX)}, {Math.round(screenshotPointer.clientY)}<br />色值　#E5E6EB</small></div>
@@ -1467,7 +2208,7 @@ export function ReadingReader({
         )}
 
         {contextAction === 'highlight' && (
-          <div className="reading-context-menu" style={{ left: contextMenuPosition.left, top: contextMenuPosition.top, right: 'auto' }} onMouseDown={(event) => event.preventDefault()}>
+          <div ref={contextMenuRef} className="reading-context-menu" role="menu" aria-label="段落标注操作" style={{ left: contextMenuPosition.left, top: contextMenuPosition.top, right: 'auto' }} onKeyDown={handleContextMenuKeyDown} onMouseDown={(event) => event.preventDefault()}>
             <button type="button" onClick={showTranslation}>翻译</button>
             <button type="button" onClick={showExplanation}>解释</button>
             <button type="button" className="reading-context-color" aria-label="选择背景颜色" onClick={() => setColorMenuOpen((open) => !open)}><i style={{ background: highlightColors[highlightColorIndex] }} /><span className={`reading-inline-chevron${colorMenuOpen ? ' is-up' : ''}`} aria-hidden="true" /></button>
@@ -1475,81 +2216,90 @@ export function ReadingReader({
             <button type="button" className="reading-context-note" aria-label="添加笔记" onClick={startAddingNote}><img src="/assets/reading/note-tool.svg" alt="" /></button>
           </div>
         )}
-        {contextAction === 'highlight' && colorMenuOpen && <div className="reading-color-palette" style={{ left: Math.max(8, contextMenuPosition.left - 54), top: contextMenuPosition.top + 32, right: 'auto' }}><strong>背景颜色</strong><div>{highlightColors.map((color, index) => <button type="button" className={highlightColorIndex === index ? 'is-active' : ''} style={{ background: color === 'transparent' ? '#fff' : color }} aria-label={`背景色 ${index + 1}`} onClick={() => { setHighlightColorIndex(index); setColorMenuOpen(false) }} key={`${color}-${index}`} />)}</div></div>}
+        {contextAction === 'highlight' && colorMenuOpen && <div className="reading-color-palette" style={{ left: Math.max(8, contextMenuPosition.left - 54), top: contextMenuPosition.top + 32, right: 'auto' }}><strong>背景颜色（自动保存）</strong><div>{highlightColors.map((color, index) => <button type="button" className={highlightColorIndex === index ? 'is-active' : ''} style={{ background: color === 'transparent' ? '#fff' : color }} aria-label={color === 'transparent' ? '移除高亮' : `背景色 ${index + 1}`} onClick={() => applyHighlightColor(index)} key={`${color}-${index}`} />)}</div></div>}
         {(resultCards.translationVisible || resultCards.explanationVisible) && contextAction !== 'highlight' && contextAction !== 'screenshot' && (
           <div className="reading-result-stack">
             {resultCards.translationVisible && (
               <div className={`reading-float-card reading-float-card--translate${resultCards.translationExpanded ? '' : ' reading-float-card--collapsed'}`}>
-                <header><strong><span className="reading-result-title-icon" aria-hidden="true" />实时翻译</strong><button type="button" className="reading-icon-close" aria-label="关闭实时翻译" onClick={() => closeResultCard('translation')} /></header>
-                {resultCards.translationExpanded && <><p><b>原文：</b>锂硫电池因具有较高的理论比容量和能量密度，被认为是具有应用前景的新一代储能体系。然而，在实际充放电过程</p><div className="reading-translation"><b>译文：</b>{translatedExcerpt}</div></>}
-                <footer><button type="button" onClick={() => void copyText(translatedExcerpt, '译文已复制')}>复制译文</button><button type="button" onClick={() => openNoteEditor('translation')}>添加笔记</button><span /><button type="button" className="reading-result-toggle" aria-label={resultCards.translationExpanded ? '收起实时翻译' : '展开实时翻译'} onClick={() => toggleResultCard('translation')}><img className={resultCards.translationExpanded ? '' : 'is-collapsed'} src="/assets/reading/result-toggle.svg" alt="" /></button></footer>
+                <header><strong><span className="reading-result-title-icon" aria-hidden="true" />本地辅助释义</strong><button type="button" className="reading-icon-close" aria-label="关闭本地辅助释义" onClick={() => closeResultCard('translation')} /></header>
+                {resultCards.translationExpanded && <><p><b>选中原文：</b>{noteSelection?.text}</p><div className="reading-translation"><b>本地词典：</b>{selectionAid.translation}</div><small className="reading-local-aid-notice">未连接外部翻译服务，结果需结合原文核对。</small></>}
+                <footer><button type="button" onClick={() => void copyText(selectionAid.translation, '释义已复制')}>复制释义</button><button type="button" onClick={() => openNoteEditor('translation')}>添加笔记</button><span /><button type="button" className="reading-result-toggle" aria-label={resultCards.translationExpanded ? '收起本地辅助释义' : '展开本地辅助释义'} onClick={() => toggleResultCard('translation')}><img className={resultCards.translationExpanded ? '' : 'is-collapsed'} src="/assets/reading/result-toggle.svg" alt="" /></button></footer>
               </div>
             )}
             {resultCards.explanationVisible && (
               <div className={`reading-float-card reading-float-card--explain${resultCards.explanationExpanded ? '' : ' reading-float-card--collapsed'}`}>
-                <header><strong><span className="reading-result-title-icon" aria-hidden="true" />AI解释</strong><button type="button" className="reading-icon-close" aria-label="关闭 AI 解释" onClick={() => closeResultCard('explanation')} /></header>
-                {resultCards.explanationExpanded && <><p><b>原文：</b>锂硫电池因具有较高的理论比容量和能量密度，被认为是具有应用前景的新一代储能体系。</p><div className="reading-ai-explain"><b>解释：</b>{explainedExcerpt}</div></>}
-                <footer><button type="button" onClick={() => void copyText(explainedExcerpt, '解释已复制')}>复制解释</button><button type="button" onClick={() => openNoteEditor('explanation')}>添加笔记</button><span /><button type="button" className="reading-result-toggle" aria-label={resultCards.explanationExpanded ? '收起 AI 解释' : '展开 AI 解释'} onClick={() => toggleResultCard('explanation')}><img className={resultCards.explanationExpanded ? '' : 'is-collapsed'} src="/assets/reading/result-toggle.svg" alt="" /></button></footer>
+                <header><strong><span className="reading-result-title-icon" aria-hidden="true" />本地概念解释</strong><button type="button" className="reading-icon-close" aria-label="关闭本地概念解释" onClick={() => closeResultCard('explanation')} /></header>
+                {resultCards.explanationExpanded && <><p><b>选中原文：</b>{noteSelection?.text}</p><div className="reading-ai-explain"><b>解释：</b>{selectionAid.definition}</div><small className="reading-local-aid-notice">本地辅助释义 · 不调用外部 AI</small></>}
+                <footer><button type="button" onClick={() => void copyText(selectionAid.definition, '解释已复制')}>复制解释</button><button type="button" onClick={() => openNoteEditor('explanation')}>添加笔记</button><span /><button type="button" className="reading-result-toggle" aria-label={resultCards.explanationExpanded ? '收起本地概念解释' : '展开本地概念解释'} onClick={() => toggleResultCard('explanation')}><img className={resultCards.explanationExpanded ? '' : 'is-collapsed'} src="/assets/reading/result-toggle.svg" alt="" /></button></footer>
               </div>
             )}
           </div>
         )}
         {contextAction === 'screenshot' && cropRect && (
-          createPortal(<div className="reading-screenshot-layer"><div className="reading-crop-area" style={{ left: cropRect.left, top: cropRect.top, width: cropRect.width, height: cropRect.height }}>{(['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'] as CropHandle[]).map((handle) => <span className={`reading-crop-handle is-${handle}`} aria-hidden="true" onPointerDown={(event) => beginCropResize(event, handle)} onPointerMove={moveCropResize} onPointerUp={finishCropResize} onPointerCancel={finishCropResize} key={handle} />)}<div className={`reading-crop-actions${cropRect.top + cropRect.height + 36 > window.innerHeight ? ' is-above' : ''}`}><button type="button" aria-label="下载截图" onClick={() => void downloadScreenshot()}><img src="/assets/reading/download.svg" alt="" /></button><span /><button type="button" aria-label="取消截图" onClick={cancelScreenshot}><span className="reading-icon-close" /></button><button type="button" aria-label="完成截图" onClick={() => void completeScreenshot()}><img src="/assets/selected-check.svg" alt="" /></button></div></div></div>, document.body)
+          createPortal(<div className="reading-screenshot-layer" role="dialog" aria-modal="true" aria-label="调整截图选区"><div className="reading-crop-area" style={{ left: cropRect.left, top: cropRect.top, width: cropRect.width, height: cropRect.height }}>{(['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'] as CropHandle[]).map((handle) => <button type="button" className={`reading-crop-handle is-${handle}`} aria-label={`调整${handle}方向选区，方向键微调`} onKeyDown={(event) => resizeCropWithKeyboard(event, handle)} onPointerDown={(event) => beginCropResize(event, handle)} onPointerMove={moveCropResize} onPointerUp={finishCropResize} onPointerCancel={finishCropResize} key={handle} />)}<div className={`reading-crop-actions${cropRect.top + cropRect.height + 36 > window.innerHeight ? ' is-above' : ''}`} role="toolbar" aria-label="截图操作"><button ref={cropActionFirstRef} type="button" aria-label="下载截图" onClick={() => void downloadScreenshot()}><img src="/assets/reading/download.svg" alt="" /></button><span /><button type="button" aria-label="取消截图" onClick={cancelScreenshot}><span className="reading-icon-close" /></button><button type="button" aria-label="完成截图" onClick={() => void completeScreenshot()}><img src="/assets/selected-check.svg" alt="" /></button></div></div></div>, document.body)
         )}
       </main>
 
       {searchOpen && (
-        <aside className="reading-search-drawer" aria-label="AI检索">
-          <header><span>AI检索</span><button type="button" className="reading-icon-close" aria-label="关闭 AI 检索抽屉" onClick={closeSearchDrawer} /></header>
+        <aside ref={searchDrawerRef} className="reading-search-drawer" role="dialog" aria-modal="true" aria-labelledby="reading-search-title" tabIndex={-1}>
+          <header><span id="reading-search-title">AI检索</span><button type="button" className="reading-icon-close" aria-label="关闭 AI 检索抽屉" onClick={closeSearchDrawer} /></header>
           <div className="reading-search-controls">
             <div className="reading-search-mode">
-              <button type="button" className={searchModeOpen ? 'is-open' : ''} onClick={() => setSearchModeOpen((open) => !open)}>{searchMode}<span className={`reading-inline-chevron${searchModeOpen ? ' is-up' : ''}`} aria-hidden="true" /></button>
-              {searchModeOpen && <div className="reading-search-mode-menu">{(['全文搜索', '智能关联', 'AI语义', '关键词'] as const).map((mode) => <button type="button" className={searchMode === mode ? 'is-active' : ''} onClick={() => { setSearchMode(mode); setSearchModeOpen(false) }} key={mode}>{mode}</button>)}</div>}
+              <button ref={searchModeTriggerRef} type="button" className={searchModeOpen ? 'is-open' : ''} aria-haspopup="menu" aria-expanded={searchModeOpen} onClick={() => { const index = ['全文搜索', '智能关联', 'AI语义', '关键词'].indexOf(searchMode); setSearchModeActiveIndex(index); setSearchModeOpen((open) => !open); window.requestAnimationFrame(() => searchModeItemRefs.current[index]?.focus({ preventScroll: true })) }}>{searchMode}<span className={`reading-inline-chevron${searchModeOpen ? ' is-up' : ''}`} aria-hidden="true" /></button>
+              {searchModeOpen && <div className="reading-search-mode-menu" role="menu" aria-label="检索模式">{(['全文搜索', '智能关联', 'AI语义', '关键词'] as const).map((mode, index) => <button ref={(node) => { searchModeItemRefs.current[index] = node }} type="button" role="menuitemradio" aria-checked={searchMode === mode} tabIndex={index === searchModeActiveIndex ? 0 : -1} className={searchMode === mode ? 'is-active' : ''} onFocus={() => setSearchModeActiveIndex(index)} onKeyDown={(event) => handleSearchModeKeyDown(event, index)} onClick={() => { setSearchMode(mode); setSearchModeOpen(false); searchModeTriggerRef.current?.focus({ preventScroll: true }) }} key={mode}>{mode}</button>)}</div>}
             </div>
-            <div className="reading-search-input"><input ref={searchInputRef} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') submitSearch() }} placeholder="请输入" /><button type="button" aria-label="提交检索" disabled={!searchQuery.trim()} onClick={submitSearch}><img src="/assets/reading/search-submit.svg" alt="" /></button></div>
+            <div className="reading-search-input"><input ref={searchInputRef} aria-label="搜索当前文献" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') submitSearch() }} placeholder="请输入" /><button type="button" aria-label="提交检索" disabled={!searchQuery.trim()} onClick={submitSearch}><img src="/assets/reading/search-submit.svg" alt="" /></button></div>
           </div>
           <p className="reading-search-help"><span>i</span><b>{searchMode}：</b>{searchMode === '全文搜索' ? '在整个文档中搜索匹配的关键词，显示所有包含该词的段落' : '根据当前语义在论文中发现相关内容与概念'}</p>
-          {!searchedQuery ? <div className="reading-search-empty"><img src="/assets/reading/ai-empty.png" alt="" /><p>支持全文搜索、智能关联、AI语义、关键词四种模式</p></div> : (
-            <div className="reading-search-results"><h3>检索 <b>4</b> 个结果</h3>{aiSearchResults.map((result, index) => <article className={translatedResult === index ? 'is-translated' : ''} key={result.page}><header><span /><strong>结果 {index + 1}/4</strong><small>第{result.page}页</small></header><p>{result.text.split('注意力').map((part, partIndex, parts) => <span key={`${part}-${partIndex}`}>{part}{partIndex < parts.length - 1 && <mark>注意力</mark>}</span>)}</p>{translatedResult === index && <div className="reading-search-translation"><header><b>英译：</b><span><button type="button" onClick={() => void copyText(searchTranslation, '英译已复制')}>复制</button><button type="button" className="reading-icon-close" aria-label="关闭英译" onClick={() => setTranslatedResult(null)} /></span></header><p>{searchTranslation}</p></div>}<footer><button type="button" onClick={() => setTranslatedResult((current) => current === index ? null : index)}>翻译</button><span /> <button type="button" onClick={() => locateSearchResult(index, result.page)}>定位</button></footer></article>)}</div>
-          )}
+          {!searchedQuery ? <div className="reading-search-empty"><img src="/assets/reading/ai-empty.png" alt="" /><p>支持全文搜索、智能关联、AI语义、关键词四种模式</p></div> : searchResults.length === 0 ? (
+            <div className="reading-search-empty" role="status"><img src="/assets/reading/ai-empty.png" alt="" /><p>未找到“{searchedQuery}”，可缩短关键词或切换 AI 语义模式。</p></div>
+          ) : <div className="reading-search-results"><h3 role="status">检索 <b>{searchResults.length}</b> 个结果</h3>{searchResults.map((result, index) => {
+            const aid = localLanguageAid(`${result.label} ${result.snippet}`)
+            return <article className={translatedResult === index || definedResult === index ? 'is-translated' : ''} key={result.id}>
+              <header><span /><strong>{result.label}</strong><small>第{result.page}页</small></header>
+              <p><mark>{searchedQuery}</mark> · {result.snippet}</p>
+              {translatedResult === index && <div className="reading-search-translation"><header><b>本地辅助释义：</b><span><button type="button" onClick={() => void copyText(aid.translation, '释义已复制')}>复制</button><button type="button" className="reading-icon-close" aria-label="关闭释义" onClick={() => setTranslatedResult(null)} /></span></header><p>{aid.translation}</p><small>本地词典结果，不调用外部 AI。</small></div>}
+              {definedResult === index && <div className="reading-search-translation"><header><b>概念定义：</b><button type="button" className="reading-icon-close" aria-label="关闭定义" onClick={() => setDefinedResult(null)} /></header><p>{aid.definition}</p><small>本地辅助释义，请结合原文核对。</small></div>}
+              <footer><button type="button" aria-expanded={translatedResult === index} onClick={() => { setTranslatedResult((current) => current === index ? null : index); setDefinedResult(null) }}>释义</button><button type="button" aria-expanded={definedResult === index} onClick={() => { setDefinedResult((current) => current === index ? null : index); setTranslatedResult(null) }}>定义</button><span /><button type="button" onClick={() => locateSearchResult(index, result)}>定位</button></footer>
+            </article>
+          })}</div>}
           {locatedResult != null && <button type="button" className="reading-location-tip" onClick={returnFromLocation}>取消定位，返回原处</button>}
         </aside>
       )}
 
       {detailedNote && (
-        <section className="reading-note-detail" role="dialog" aria-modal="false" aria-labelledby="reading-note-detail-title">
+        <section ref={noteDetailRef} className="reading-note-detail" role="dialog" aria-modal="true" aria-labelledby="reading-note-detail-title" tabIndex={-1}>
           <header><h2 id="reading-note-detail-title">笔记详情</h2><button type="button" className="reading-icon-close" aria-label="关闭笔记详情" onClick={() => setNoteDetailId(null)} /></header>
           <div className="reading-note-detail-title"><i />{detailedNote.title}</div>
           <dl>
-            <div><dt>英译</dt><dd>Thiosulfate shuttle effect</dd><button type="button" onClick={() => void copyText('Thiosulfate shuttle effect', '英译已复制')}>复制</button></div>
-            <div><dt>解释</dt><dd>{explainedExcerpt}</dd><button type="button" onClick={() => void copyText(explainedExcerpt, '解释已复制')}>复制</button></div>
-            <div><dt>图片</dt><dd className="reading-note-detail-images"><img src="/assets/reading/note-image-1.png" alt="实验表征图" /><img src="/assets/reading/note-image-2.png" alt="材料形貌图" /><img src="/assets/reading/note-image-3.png" alt="论文示意图" /></dd></div>
-            <div><dt>笔记</dt><dd className="reading-note-detail-copy">{detailedNote.excerpt} 多硫化物穿梭效应通常出现在锂硫电池中，功能化界面能够通过多位点锚定提升稳定性。<button type="button" onClick={() => onToast('已展开完整笔记')}>全部</button></dd></div>
+            {noteAnchor(detailedNote.excerpt) && <div><dt>来源</dt><dd>第{noteAnchor(detailedNote.excerpt)?.page}页 · {noteAnchor(detailedNote.excerpt)?.sectionTitle}</dd><button type="button" onClick={() => { const anchor = noteAnchor(detailedNote.excerpt); if (anchor) { setNoteDetailId(null); goToPage(anchor.page, { sectionTitle: anchor.sectionTitle, label: '笔记详情定位前' }) } }}>定位</button></div>}
+            <div><dt>笔记</dt><dd className="reading-note-detail-copy">{detailedNote.excerpt}</dd><button type="button" onClick={() => void copyText(detailedNote.excerpt, '笔记已复制')}>复制</button></div>
+            {detailedNote.imageDataUrls && detailedNote.imageDataUrls.length > 0 && <div><dt>附图</dt><dd className="reading-note-detail-images">{detailedNote.imageDataUrls.map((src, index) => <img src={src} alt={`笔记附图 ${index + 1}`} key={`${detailedNote.id}-${index}`} />)}</dd><span /></div>}
+            <div><dt>保存时间</dt><dd>{detailedNote.createdAt || '历史笔记 · 时间未记录'}</dd><span /></div>
           </dl>
-          <footer><button type="button" onClick={() => { setNoteDetailId(null); startEditingNote(detailedNote) }}>编辑</button><button type="button" className="is-danger" onClick={() => { onNotesChange(notes.filter((note) => note.id !== detailedNote.id)); setNoteDetailId(null); onToast('笔记已删除') }}>删除</button></footer>
+          <footer><button type="button" onClick={() => { setNoteDetailId(null); startEditingNote(detailedNote) }}>编辑</button><button type="button" className="is-danger" onClick={() => setPendingDeleteNoteId(detailedNote.id)}>删除</button></footer>
         </section>
       )}
 
       <aside className={`reading-right-panel${mobileInsightsOpen ? ' is-mobile-open' : ''}`} aria-hidden={compactLayout && !mobileInsightsOpen} inert={compactLayout && !mobileInsightsOpen ? true : undefined}>
         <button type="button" className="reading-mobile-insight-close reading-icon-close" aria-label="关闭智能解读面板" onClick={() => setMobileInsightsOpen(false)} />
         <div className="reading-insight-tabs" role="tablist" aria-label="智能阅读分析">
-          {insightTabs.map((tab) => <button type="button" id={`reading-insight-tab-${tab.id}`} role="tab" aria-controls={`reading-insight-panel-${tab.id}`} aria-selected={rightPanel === tab.id} tabIndex={rightPanel === tab.id ? 0 : -1} className={rightPanel === tab.id ? 'is-active' : ''} onClick={() => selectInsightPanel(tab.id)} key={tab.id}>{tab.label}</button>)}
+          {insightTabs.map((tab, index) => <button ref={(node) => { rightTabRefs.current[index] = node }} type="button" id={`reading-insight-tab-${tab.id}`} role="tab" aria-controls={`reading-insight-panel-${tab.id}`} aria-selected={rightPanel === tab.id} tabIndex={rightPanel === tab.id ? 0 : -1} className={rightPanel === tab.id ? 'is-active' : ''} onClick={() => selectInsightPanel(tab.id)} onKeyDown={(event) => handleRightTabKeyDown(event, index)} key={tab.id}>{tab.label}</button>)}
         </div>
         <div className="reading-insight-content" id={`reading-insight-panel-${rightPanel}`} role="tabpanel" aria-labelledby={`reading-insight-tab-${rightPanel}`}>
           {rightPanel === 'ai' && (
             <div className="reading-ai-panel">
-              <article className="reading-insight-card reading-insight-card--summary"><h3>AI总结</h3><p>功能化碳纳米管通过表面羧基、氨基对多硫化物的化学吸附，有效抑制锂硫电池穿梭效应，从而显著提升电池容量和长循环稳定性</p></article>
-              <article className="reading-insight-card reading-insight-card--contribution"><h3>核心贡献</h3><p>本文首次系统揭示了功能化CNT表面官能团与多硫化物的化学吸附机理，提出了基于多位点锚定的穿梭抑制策略，实现了186%的比容量提升</p></article>
-              <article className="reading-insight-card reading-insight-card--innovation"><h3>创新点</h3><ul><li>原位XRD追踪充放电过程中多硫化物演化</li><li>DFT计算揭示化学吸附能垒</li><li>1000次长循环验证稳定性</li></ul></article>
-              <article className="reading-insight-card reading-insight-card--limit"><h3>研究局限</h3><ul><li>原位XRD追踪充放电过程中多硫化物演化</li></ul></article>
+              <article className="reading-insight-card reading-insight-card--summary"><h3>解析摘要</h3><p>{paperAnalysis.metadata.abstract}</p></article>
+              <article className="reading-insight-card reading-insight-card--contribution"><h3>核心信息</h3><p>{paperAnalysis.metadata.researchField} · {paperAnalysis.metadata.keywords.join('、')}</p></article>
+              <article className="reading-insight-card reading-insight-card--innovation"><h3>关键贡献</h3><ul>{paperAnalysis.outline.filter((section) => section.kind === 'body').slice(0, 3).map((section) => <li key={section.id}>{section.excerpt}</li>)}</ul></article>
+              <article className="reading-insight-card reading-insight-card--limit"><h3>核验提示</h3><ul><li>当前解读来自本地结构化解析，请结合定位后的正文、引文与图表复核。</li></ul></article>
               {aiExchange && <article className="reading-ai-exchange" aria-live="polite"><p className="reading-ai-exchange-question">{aiExchange.question}</p><p className="reading-ai-exchange-answer">{aiExchange.answer}</p></article>}
             </div>
           )}
-          {rightPanel === 'charts' && <ReadingCharts onExport={exportChart} />}
-          {rightPanel === 'references' && <ReadingReferences onView={() => onToast('已打开参考文献详情')} />}
-          {rightPanel === 'metadata' && <ReadingMetadata />}
-          {rightPanel === 'graph' && <ReadingGraph onView={() => onToast('已打开关联论文详情')} />}
+          {rightPanel === 'charts' && <ReadingCharts figures={paperAnalysis.figures} selectedId={selectedFigureId} onSelect={setSelectedFigureId} onExport={exportChart} onLocate={(figure) => goToPage(figure.page, { sectionTitle: resolvePaperSection(paperAnalysis, figure.sectionId), label: `${figure.label}定位前` })} />}
+          {rightPanel === 'references' && <ReadingReferences references={paperAnalysis.references} selectedId={selectedReferenceId} onSelect={setSelectedReferenceId} onLocate={(reference, anchorIndex) => { const anchor = reference.citationAnchors[anchorIndex]; if (anchor) goToPage(anchor.page, { sectionTitle: resolvePaperSection(paperAnalysis, anchor.sectionId), label: `${anchor.marker}定位前` }) }} />}
+          {rightPanel === 'metadata' && <ReadingMetadata analysis={paperAnalysis} />}
+          {rightPanel === 'graph' && <ReadingGraph analysis={paperAnalysis} onLocate={(targetPage, sectionId, label) => goToPage(targetPage, { sectionTitle: resolvePaperSection(paperAnalysis, sectionId), label })} />}
         </div>
         {rightPanel === 'ai' && (
           <div className="reading-ai-question">
@@ -1574,14 +2324,45 @@ export function ReadingReader({
         )}
       </aside>
 
+      {pendingDocumentId != null && (
+        <Modal title="保存笔记草稿？" onClose={() => finishDraftGuard('continue')} hideFooter>
+          <div className="reading-draft-guard">
+            <p>当前笔记还有未保存的内容或图片。保存后继续，或明确放弃修改。</p>
+            <div>
+              <button className="button button--secondary" type="button" onClick={() => finishDraftGuard('continue')}>继续编辑</button>
+              <button className="button button--danger" type="button" onClick={() => finishDraftGuard('discard')}>放弃修改</button>
+              <button className="button button--primary" type="button" onClick={() => finishDraftGuard('save')}>保存并继续</button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {pendingDeleteNoteId != null && (
+        <Modal
+          title="删除笔记"
+          confirmText="删除"
+          confirmDanger
+          onClose={() => setPendingDeleteNoteId(null)}
+          onSubmit={(event) => {
+            event.preventDefault()
+            if (!onNotesChange(notes.filter((note) => note.id !== pendingDeleteNoteId))) return
+            setPendingDeleteNoteId(null)
+            setNoteDetailId(null)
+            onToast('笔记已删除')
+          }}
+        >
+          <p>删除后将同时移除该笔记的正文摘录和附图，此操作无法撤销。</p>
+        </Modal>
+      )}
+
       <footer className="reading-footer">
         <div className="reading-page-controls">
           <button type="button" onClick={() => goToPage(1)} aria-label="第一页"><span className="reading-first-page-icon" /></button>
           <button type="button" onClick={() => goToPage(page - 1)} aria-label="上一页"><span className="pager-chevron pager-chevron--prev" /></button>
-          <span>{pageLabel}</span>
+          <label className="reading-page-input"><span className="sr-only">跳转页码</span><input type="number" min="1" max={totalPages} value={pageInput} onChange={(event) => setPageInput(event.target.value)} onBlur={commitPageInput} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); commitPageInput() } }} aria-label={`跳转页码，共 ${totalPages} 页`} /><b>/{totalPages}</b></label>
           <button type="button" onClick={() => goToPage(page + 1)} aria-label="下一页"><span className="pager-chevron" /></button>
           <button type="button" onClick={() => goToPage(totalPages)} aria-label="最后一页"><span className="reading-last-page-icon" /></button>
-          <button type="button" className="reading-back-first" onClick={() => goToPage(1)}>回到第1页</button>
+          <button type="button" className="reading-back-first" disabled={locationDepth === 0} onClick={returnFromLocation}>返回上一位置{locationDepth > 0 ? ` (${locationDepth})` : ''}</button>
         </div>
         <div className="reading-zoom-controls">
           <div className="reading-zoom-selector" ref={zoomSelectorRef}>
@@ -1652,39 +2433,53 @@ export function ReadingReader({
             </button>
           </div>
           <button className="reading-fullscreen-button" type="button" aria-label={maximized ? '退出全屏' : '全屏'} onClick={() => void toggleReaderFullscreen()}><img src="./assets/reading/zoom-fullscreen.svg" alt="" /></button>
+          <button className="reading-view-toggle" type="button" aria-pressed={markersVisible} onClick={() => setMarkersVisible((visible) => !visible)}>{markersVisible ? '隐藏标记' : '显示标记'}</button>
+          <button className="reading-view-toggle" type="button" aria-pressed={pageLayout === 'double'} onClick={() => setPageLayout((layout) => layout === 'single' ? 'double' : 'single')}>{pageLayout === 'double' ? '双页' : '单页'}</button>
         </div>
       </footer>
     </section>
   )
 }
 
-function ReadingCharts({ onExport }: { onExport: (title: string, index: number) => void }) {
-  const charts = [
-    ['图1. F-CNT SEM形貌图', '第1页'],
-    ['图2. XPS表征图谱', '第1页'],
-    ['图3. 循环性能曲线', '第3页'],
-    ['图4. 倍率性能对比', '第4页'],
-    ['图5. DFT计算结果', '第5页'],
-  ]
-  return <div className="reading-figure-panel"><header><strong>图表提取</strong><span>5 张</span></header><div>{charts.map(([title, page], index) => <article key={title}><div className={`reading-figure-thumb reading-figure-thumb--${index % 3}`}><img src="/assets/reading/chart-exact.png" alt={title} /></div><div><strong>{title}</strong><small>{page}</small></div><button type="button" onClick={() => onExport(title, index)}>导出</button></article>)}</div></div>
+function ReadingCharts({ figures, selectedId, onSelect, onExport, onLocate }: {
+  figures: PaperFigure[]
+  selectedId: string | null
+  onSelect: (id: string | null) => void
+  onExport: (title: string, index: number) => void
+  onLocate: (figure: PaperFigure) => void
+}) {
+  return <div className="reading-figure-panel"><header><strong>图表提取</strong><span>{figures.length} 项</span></header><div>{figures.map((figure, index) => <article className={selectedId === figure.id ? 'is-selected' : ''} key={figure.id}><div className={`reading-figure-thumb reading-figure-thumb--${index % 3}`}><img src="/assets/reading/chart-exact.png" alt="" /></div><div><strong>{figure.label} · {figure.title}</strong><small>第{figure.page}页 · {figure.kind === 'table' ? '表格' : '图片'}</small>{selectedId === figure.id && <p>{figure.caption}<br />来源：{figure.sourceDescription}</p>}</div><footer><button type="button" onClick={() => { onSelect(figure.id); onLocate(figure) }}>定位</button><button type="button" onClick={() => onExport(`${figure.label}-${figure.title}`, index)}>导出</button></footer></article>)}</div></div>
 }
 
-function ReadingReferences({ onView }: { onView: () => void }) {
-  const references = [
-    ['Sulfide solid electrolytes for all...', 'Nature Energy ｜ 2023'],
-    ['硅碳负极材料的研究进展', '化学学报 ｜ 2024'],
-    ['Sulfide solid electrolytes for all...', 'Nature Energy ｜ 2023'],
-    ['硅碳负极材料的研究进展', '化学学报 ｜ 2024'],
-    ['Sulfide solid electrolytes for all...', 'Nature Energy ｜ 2023'],
-  ]
-  return <div className="reading-reference-panel"><header><strong>文献解析</strong><span>32 条</span></header><div>{references.map(([title, detail], index) => <article key={`${title}-${index}`}><span>[{index + 1}]</span><strong>{title}</strong><small>{detail}</small><footer><b>被引用·58</b><button type="button" onClick={onView}>查看</button></footer></article>)}</div></div>
+function ReadingReferences({ references, selectedId, onSelect, onLocate }: {
+  references: PaperReference[]
+  selectedId: string | null
+  onSelect: (id: string | null) => void
+  onLocate: (reference: PaperReference, anchorIndex: number) => void
+}) {
+  const selected = references.find((reference) => reference.id === selectedId)
+  if (selected) return <div className="reading-reference-panel reading-reference-detail"><header><button type="button" className="reading-panel-back" onClick={() => onSelect(null)}>← 返回文献列表</button><span>{selected.citationAnchors.length} 处引用</span></header><article><span>文献详情</span><strong>{selected.title}</strong><dl><div><dt>作者</dt><dd>{selected.authors.join('；')}</dd></div><div><dt>摘要</dt><dd>{selected.abstract}</dd></div><div><dt>期刊 / 日期</dt><dd>{selected.journal} · {selected.publicationDate}</dd></div><div><dt>DOI</dt><dd>{selected.doi}</dd></div></dl><div className="reading-reference-anchors"><b>正文引用位置</b>{selected.citationAnchors.map((anchor, index) => <button type="button" key={anchor.id} onClick={() => onLocate(selected, index)}><span>{anchor.marker} · 第{anchor.page}页</span><small>{anchor.context}</small></button>)}</div></article></div>
+  return <div className="reading-reference-panel"><header><strong>文献解析</strong><span>{references.length} 条</span></header><div>{references.map((reference, index) => <article key={reference.id}><span>[{index + 1}] · {reference.citationAnchors.length} 处引用</span><strong>{reference.title}</strong><small>{reference.authors.join('；')} · {reference.journal} · {reference.publicationDate}</small><footer><b>DOI · {reference.doi}</b><button type="button" onClick={() => onSelect(reference.id)}>查看</button></footer></article>)}</div></div>
 }
 
-function ReadingMetadata() {
-  return <div className="reading-metadata-panel"><header><strong>数据提炼</strong><span>9 条</span></header><dl><div><dt>期刊</dt><dd>Advanced Energy Materials</dd></div><div><dt>影响因子</dt><dd>27.8（2023）</dd></div><div><dt>发表年份</dt><dd>2024</dd></div><div><dt>DOI</dt><dd>10.1002/aenm.202301847</dd></div><div><dt>被引次数</dt><dd>47</dd></div><div><dt>访问类型</dt><dd>开放获取（OA）</dd></div><div><dt>语言</dt><dd>英文</dd></div><div><dt>页数</dt><dd>18页</dd></div><div><dt>数据共享</dt><dd>GitHub:github.com/liulab</dd></div></dl></div>
+function ReadingMetadata({ analysis }: { analysis: PaperAnalysis }) {
+  const { metadata } = analysis
+  return <div className="reading-metadata-panel"><header><strong>论文元数据</strong><span>已解析</span></header><section className="reading-metadata-lead"><b>标题</b><p>{metadata.title}</p><b>摘要</b><p>{metadata.abstract}</p></section><dl><div><dt>作者列表</dt><dd className="reading-author-list">{metadata.authors.map((author) => <span key={author.id}><b>{author.name}{author.corresponding ? '（通讯）' : ''}</b><small>{metadata.affiliations.filter((affiliation) => author.affiliationIds.includes(affiliation.id)).map((affiliation) => affiliation.name).join('；') || '机构待确认'}{author.email ? ` · ${author.email}` : ''}</small></span>)}</dd></div><div><dt>作者机构</dt><dd>{metadata.affiliations.map((affiliation) => <span className="reading-metadata-row" key={affiliation.id}>{affiliation.name}{affiliation.address ? ` · ${affiliation.address}` : ''}</span>)}</dd></div><div><dt>关键词</dt><dd className="reading-keyword-list">{metadata.keywords.map((keyword) => <span key={keyword}>{keyword}</span>)}</dd></div><div><dt>期刊 / 日期</dt><dd>{metadata.journal} · {metadata.publicationDate}</dd></div><div><dt>DOI</dt><dd>{metadata.doi}</dd></div><div><dt>研究领域</dt><dd>{metadata.researchField}</dd></div></dl></div>
 }
 
-function ReadingGraph({ onView }: { onView: () => void }) {
-  const recommendations = [['MXene基复合材料在锂硫电池中...', 'Adv Energy Mater ｜ 2023'], ['固态电解质界面工程与锂金属负...', 'Nature Energy ｜ 2024'], ['钠离子电池层状氧化物正极材料...', 'Energy Environ Sci ｜ 2025']]
-  return <div className="reading-graph-panel"><header><strong>图谱关联</strong><span>4 个</span></header><div className="reading-graph"><svg viewBox="0 0 236 137" role="img" aria-label="论文知识图谱"><line x1="118" y1="68" x2="38" y2="30" /><line x1="118" y1="68" x2="198" y2="30" /><line x1="118" y1="68" x2="38" y2="108" /><line x1="118" y1="68" x2="198" y2="108" /><g className="node-main"><circle cx="118" cy="68" r="20" /><text x="118" y="72">CNT</text></g><g className="node-cyan"><circle cx="38" cy="30" r="16" /><text x="38" y="34">锂硫</text></g><g className="node-blue"><circle cx="198" cy="30" r="16" /><text x="198" y="34">锂金属</text></g><g className="node-pink"><circle cx="38" cy="108" r="16" /><text x="38" y="112">多硫化物</text></g><g className="node-yellow"><circle cx="198" cy="108" r="16" /><text x="198" y="112">储能</text></g></svg></div><div className="reading-related-heading"><strong>关联论文推荐</strong><span>4 篇</span></div><div className="reading-related-list">{recommendations.map(([title, detail]) => <article key={title}><strong>{title}</strong><small>{detail}</small><footer><b>被引用·58</b><button type="button" onClick={onView}>查看</button></footer></article>)}</div></div>
+function ReadingGraph({ analysis, onLocate }: { analysis: PaperAnalysis; onLocate: (page: number, sectionId: string | undefined, label: string) => void }) {
+  const [query, setQuery] = useState('')
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(analysis.graph.nodes[0]?.id ?? null)
+  const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null)
+  useEffect(() => {
+    setQuery('')
+    setSelectedNodeId(analysis.graph.nodes[0]?.id ?? null)
+    setSelectedPaperId(null)
+  }, [analysis.documentId, analysis.graph.nodes])
+  const matchingNodeIds = useMemo(() => query.trim() ? new Set(searchPaperAnalysis(analysis, query).map((result) => result.target.nodeId).filter(Boolean)) : null, [analysis, query])
+  const visibleNodes = analysis.graph.nodes.filter((node) => !matchingNodeIds || matchingNodeIds.has(node.id) || `${node.label} ${node.description} ${node.keywords.join(' ')}`.toLocaleLowerCase('zh-CN').includes(query.trim().toLocaleLowerCase('zh-CN')))
+  const selectedNode = analysis.graph.nodes.find((node) => node.id === selectedNodeId)
+  const selectedPaper = analysis.references.find((reference) => reference.id === selectedPaperId)
+  if (selectedPaper) return <div className="reading-graph-panel reading-related-detail"><header><button type="button" className="reading-panel-back" onClick={() => setSelectedPaperId(null)}>← 返回图谱</button><span>关联论文</span></header><article><strong>{selectedPaper.title}</strong><small>{selectedPaper.authors.join('；')} · {selectedPaper.journal} · {selectedPaper.publicationDate}</small><p>{selectedPaper.abstract}</p><dl><dt>DOI</dt><dd>{selectedPaper.doi}</dd></dl>{selectedPaper.citationAnchors[0] && <button type="button" onClick={() => { const anchor = selectedPaper.citationAnchors[0]; onLocate(anchor.page, anchor.sectionId, '关联论文定位前') }}>定位正文引用</button>}</article></div>
+  return <div className="reading-graph-panel"><header><strong>图谱关联</strong><span>{analysis.graph.nodes.length} 节点 · {analysis.graph.edges.length} 关系</span></header><label className="reading-graph-search"><span className="sr-only">搜索图谱节点</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="语义搜索节点、作者或机构" /></label><div className="reading-graph-network" role="group" aria-label="论文知识图谱节点">{visibleNodes.map((node) => <button type="button" aria-pressed={selectedNodeId === node.id} className={`is-${node.type}${selectedNodeId === node.id ? ' is-active' : ''}`} onClick={() => setSelectedNodeId(node.id)} key={node.id}><span>{node.label}</span><small>{node.type}</small></button>)}</div>{visibleNodes.length === 0 && <p className="reading-graph-empty">未找到匹配节点，请缩短检索词。</p>}{selectedNode && <article className="reading-graph-node-detail"><strong>{selectedNode.label}</strong><p>{selectedNode.description}</p><small>{selectedNode.keywords.join(' · ')}</small>{selectedNode.page && <button type="button" onClick={() => onLocate(selectedNode.page ?? 1, selectedNode.sectionId, '图谱节点定位前')}>定位原文</button>}</article>}<div className="reading-related-heading"><strong>关联论文推荐</strong><span>{analysis.references.length} 篇</span></div><div className="reading-related-list">{analysis.references.map((reference) => <article key={reference.id}><strong>{reference.title}</strong><small>{reference.journal} · {reference.publicationDate}</small><footer><b>{reference.authors[0]}</b><button type="button" onClick={() => setSelectedPaperId(reference.id)}>查看</button></footer></article>)}</div></div>
 }

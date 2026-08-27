@@ -6,7 +6,7 @@
 - 运行方式：纯前端单页应用，本地热更新预览。
 - 生产构建：`pnpm build`。
 - 当前验证：17 项单元测试、TypeScript 检查和 Vite 生产构建均通过。
-- 发布状态：尚未发布新站点；`.openai/hosting.json` 不进入开发源码包。
+- 发布状态：已覆盖发布到既有 GitHub Pages 门户 `https://icapk.github.io/gkx-ai-strategy-portal/`；未创建新站点，`.openai/hosting.json` 不进入开发源码包。
 
 ## 已实现范围
 

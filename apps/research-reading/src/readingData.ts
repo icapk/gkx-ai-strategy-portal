@@ -16,6 +16,7 @@ export interface ReadingNote {
   excerpt: string
   createdAt: string
   color: string
+  imageDataUrls?: string[]
 }
 
 export const readingDocuments: ReadingDocument[] = [

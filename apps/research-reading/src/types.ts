@@ -121,11 +121,16 @@ export interface ResearchDocument {
   owner: string
   createdAt: string
   visitedAt: string
+  updatedAt?: string
+  favoritedAt?: string
+  recentHiddenAt?: string
+  deletedAt?: string
   size: string
   kind: DocumentKind
   favorite: boolean
   owned: boolean
   shared: boolean
+  spaceScope?: 'personal' | 'team'
   description?: string
   keywords?: string[]
   content?: string
@@ -147,6 +152,10 @@ export interface FolderItem {
   name: string
   count: number
   updatedAt: string
+  createdAt?: string
+  owner?: string
+  location?: string
+  size?: string
 }
 
 export interface TodoItem {

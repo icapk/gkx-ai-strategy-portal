@@ -50,4 +50,4 @@ pnpm dev
 
 - 文档、数据表格与个人设置仍保存在浏览器 `localStorage`；清理站点数据会清除本地修改。
 - 上传、分享、团队协作、AI 解释等为可操作原型闭环，不等同于生产后端服务。
-- 当前只部署本地可预览版本，未执行新站点发布。
+- 已覆盖发布到既有 GitHub Pages 门户 `https://icapk.github.io/gkx-ai-strategy-portal/`，同时保留本地可编辑预览；未创建新的独立站点。

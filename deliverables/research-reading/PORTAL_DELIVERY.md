@@ -1,5 +1,7 @@
 # 门户智能科研与智能阅读覆盖交付
 
+门户运行版更新日期：2026-08-27（Asia/Shanghai）
+
 本目录保存“工作台-需规”联合源码的原始交付物，以及从门户适配源码重新构建的运行版校验文件。
 
 ## 原始交付物
@@ -21,5 +23,14 @@ shasum -a 256 -c SHA256SUMS.txt
 
 - `EMBEDDED_BUILD_SHA256SUMS.txt`：门户 `dist/` 全部文件的 SHA-256 清单
 - `EMBEDDED_SOURCE_SHA256SUMS.txt`：门户可编辑源码、配置、测试和文档的 SHA-256 清单（排除 `node_modules/` 与 `dist/`）
+
+在仓库根目录可分别校验门户运行版构建与源码：
+
+```bash
+shasum -a 256 -c deliverables/research-reading/EMBEDDED_BUILD_SHA256SUMS.txt
+shasum -a 256 -c deliverables/research-reading/EMBEDDED_SOURCE_SHA256SUMS.txt
+```
+
+线上入口：<https://icapk.github.io/gkx-ai-strategy-portal/>
 
 源码与嵌合细节见 `apps/research-reading/docs/PORTAL_EMBEDDING.md`。

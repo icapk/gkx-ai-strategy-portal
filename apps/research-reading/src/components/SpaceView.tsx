@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import type { FolderItem, ResearchDocument } from '../types'
 import { DocumentTable } from './DocumentTable'
@@ -12,7 +12,7 @@ interface SpaceViewProps {
   page: number
   onPageChange: (page: number) => void
   onOpenFolder: (folder: FolderItem) => void
-  onRenameFolder: (id: number, name: string) => void
+  onRenameFolder: (id: number, name: string) => boolean
   onDeleteFolder: (id: number) => void
   onBack: () => void
   onNewFolder: () => void
@@ -21,11 +21,36 @@ interface SpaceViewProps {
   onToggleFavorite: (id: number) => void
   onDelete: (id: number) => void
   onShare: (id: number) => void
-  onRenameDocument: (id: number, title: string) => void
+  onRenameDocument: (id: number, title: string) => boolean
   onCreateNote: (documentItem: ResearchDocument) => void
   onOpenDocument: (documentItem: ResearchDocument) => void
   emptyTeam?: boolean
 }
+
+const sizeInBytes = (value: string) => {
+  const match = value.trim().match(/^([\d.]+)\s*(B|KB|MB|GB)$/i)
+  if (!match) return 0
+  const amount = Number(match[1])
+  const unit = match[2].toUpperCase()
+  const multiplier = unit === 'GB' ? 1024 ** 3 : unit === 'MB' ? 1024 ** 2 : unit === 'KB' ? 1024 : 1
+  return Number.isFinite(amount) ? amount * multiplier : 0
+}
+
+const aggregateSize = (documents: ResearchDocument[]) => {
+  const bytes = documents.reduce((total, documentItem) => total + sizeInBytes(documentItem.size), 0)
+  if (bytes < 1024) return `${Math.round(bytes)} B`
+  if (bytes < 1024 ** 2) return `${Math.max(1, Math.round(bytes / 1024))} KB`
+  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`
+  return `${(bytes / 1024 ** 3).toFixed(1)} GB`
+}
+
+const folderUpdatedAt = (folder: FolderItem, documents: ResearchDocument[]) => documents.reduce(
+  (latest, documentItem) => {
+    const candidate = documentItem.updatedAt ?? documentItem.createdAt
+    return candidate > latest ? candidate : latest
+  },
+  folder.updatedAt,
+)
 
 export function SpaceView({
   mode,
@@ -55,8 +80,13 @@ export function SpaceView({
   const [menuPosition, setMenuPosition] = useState<{ left: number; top: number } | null>(null)
   const [renamingFolderId, setRenamingFolderId] = useState<number | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [renameError, setRenameError] = useState('')
   const menuRef = useRef<HTMLDivElement | null>(null)
   const menuTriggerRefs = useRef(new Map<number, HTMLButtonElement>())
+  const renameInputRef = useRef<HTMLInputElement>(null)
+  const visibleDocuments = openFolderName
+    ? documents.filter((documentItem) => documentItem.location === `${label}/${openFolderName}`)
+    : documents
 
   const closeFolderMenu = (restoreFocus = false) => {
     const trigger = menuFolderId == null ? null : menuTriggerRefs.current.get(menuFolderId)
@@ -68,6 +98,7 @@ export function SpaceView({
   useEffect(() => {
     if (menuFolderId === null) return
     const trigger = menuTriggerRefs.current.get(menuFolderId)
+    const focusTimer = window.setTimeout(() => menuRef.current?.querySelector<HTMLButtonElement>('button')?.focus(), 0)
     const closeFromOutside = (event: PointerEvent) => {
       const target = event.target as Node
       if (menuRef.current?.contains(target) || trigger?.contains(target)) return
@@ -84,12 +115,26 @@ export function SpaceView({
     window.addEventListener('resize', closeFromViewportChange)
     window.addEventListener('scroll', closeFromViewportChange, true)
     return () => {
+      window.clearTimeout(focusTimer)
       document.removeEventListener('pointerdown', closeFromOutside, true)
       document.removeEventListener('keydown', closeFromKeyboard)
       window.removeEventListener('resize', closeFromViewportChange)
       window.removeEventListener('scroll', closeFromViewportChange, true)
     }
   }, [menuFolderId])
+
+  const navigateFolderMenu = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not([disabled])'))
+    const index = buttons.indexOf(document.activeElement as HTMLButtonElement)
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      const direction = event.key === 'ArrowDown' ? 1 : -1
+      buttons[(index + direction + buttons.length) % buttons.length]?.focus()
+    } else if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault()
+      buttons[event.key === 'Home' ? 0 : buttons.length - 1]?.focus()
+    }
+  }
 
   useEffect(() => {
     setMenuFolderId(null)
@@ -120,9 +165,27 @@ export function SpaceView({
 
   const finishRename = (folder: FolderItem) => {
     const nextName = renameValue.trim()
-    if (nextName && nextName !== folder.name) onRenameFolder(folder.id, nextName)
+    if (!nextName) {
+      setRenameError('请输入文件夹名称')
+      window.requestAnimationFrame(() => renameInputRef.current?.focus())
+      return
+    }
+    if (nextName !== folder.name && !onRenameFolder(folder.id, nextName)) {
+      setRenameError('名称未保存，请根据提示修改后重试')
+      window.requestAnimationFrame(() => renameInputRef.current?.focus())
+      return
+    }
     setRenamingFolderId(null)
     setRenameValue('')
+    setRenameError('')
+    window.requestAnimationFrame(() => menuTriggerRefs.current.get(folder.id)?.focus())
+  }
+
+  const cancelRename = (folderId: number) => {
+    setRenamingFolderId(null)
+    setRenameValue('')
+    setRenameError('')
+    window.requestAnimationFrame(() => menuTriggerRefs.current.get(folderId)?.focus())
   }
 
   return (
@@ -141,6 +204,10 @@ export function SpaceView({
         </div>
       </header>
       <div className={`view-body space-body${openFolderName ? ' space-body--folder' : ''}${emptyTeam ? ' space-body--empty' : ''}`}>
+        {mode === 'personal' && !emptyTeam && <div className="personal-space-note" role="note">
+          <span aria-hidden="true">🔒</span>
+          <span><strong>个人空间仅你可见</strong><small>除非主动分享，文件与文件夹不会进入团队空间。</small></span>
+        </div>}
         {emptyTeam ? (
           <div className="empty-team-view">
             <div className="empty-team-actions">
@@ -161,28 +228,39 @@ export function SpaceView({
               {folders.map((folder) => (
                 <article className={`folder-card${menuFolderId === folder.id ? ' is-selected' : ''}`} key={folder.id}>
                   {renamingFolderId === folder.id ? (
-                    <div className="folder-open">
+                    <form className="folder-open folder-rename-form" onSubmit={(event) => { event.preventDefault(); finishRename(folder) }}>
                       <img src={folder.id % 2 === 0 ? '/assets/folder-data.svg' : '/assets/folder-research.svg'} alt="" />
                       <input
+                        ref={renameInputRef}
                         className="folder-rename-input"
                         autoFocus
+                        maxLength={50}
                         value={renameValue}
                         aria-label="文件夹新名称"
+                        aria-invalid={Boolean(renameError)}
+                        aria-describedby={renameError ? `folder-rename-error-${folder.id}` : undefined}
                         onClick={(event) => event.stopPropagation()}
-                        onChange={(event) => setRenameValue(event.target.value)}
-                        onBlur={() => finishRename(folder)}
+                        onChange={(event) => { setRenameValue(event.target.value); if (renameError) setRenameError('') }}
                         onKeyDown={(event) => {
-                          if (event.key === 'Enter') finishRename(folder)
-                          if (event.key === 'Escape') setRenamingFolderId(null)
+                          if (event.key === 'Escape') {
+                            event.preventDefault()
+                            cancelRename(folder.id)
+                          }
                         }}
                       />
-                    </div>
+                      <span className="folder-rename-actions">
+                        <button type="submit">保存</button>
+                        <button type="button" onClick={() => cancelRename(folder.id)}>取消</button>
+                      </span>
+                      {renameError && <span className="sr-only" id={`folder-rename-error-${folder.id}`} role="alert">{renameError}</span>}
+                    </form>
                   ) : (
                     <button className="folder-open" type="button" onClick={() => onOpenFolder(folder)}>
                       <img src={folder.id % 2 === 0 ? '/assets/folder-data.svg' : '/assets/folder-research.svg'} alt="" />
                       <span className="folder-copy">
                         <strong>{folder.name}</strong>
-                        <small>{folder.count} 个项目&nbsp; 更新于 {folder.updatedAt}</small>
+                        <small>{documents.filter((documentItem) => documentItem.location === `${label}/${folder.name}`).length} 个项目&nbsp; 更新于 {folderUpdatedAt(folder, documents.filter((documentItem) => documentItem.location === `${label}/${folder.name}`))}</small>
+                        <span>{folder.owner ?? '当前用户'} · {aggregateSize(documents.filter((documentItem) => documentItem.location === `${label}/${folder.name}`))} · 创建于 {folder.createdAt ?? folder.updatedAt}</span>
                       </span>
                     </button>
                   )}
@@ -207,13 +285,13 @@ export function SpaceView({
           </section>
         ) : (
           <nav className="folder-breadcrumb" aria-label="文件夹路径">
-            <button type="button" onClick={onBack}>文件夹</button><span>/</span><button type="button" onClick={onBack}>{openFolderName}</button><span>/</span><strong>文档</strong>
+            <button type="button" onClick={onBack}>文件夹</button><span>/</span><strong aria-current="page">{openFolderName}</strong>
           </nav>
         )}
         {!emptyTeam && <section className="documents-section" aria-labelledby="documents-title">
           {!openFolderName && <h2 id="documents-title">文档</h2>}
           <DocumentTable
-            documents={documents}
+            documents={visibleDocuments}
             mode="space"
             page={page}
             onPageChange={onPageChange}
@@ -236,10 +314,15 @@ export function SpaceView({
             role="menu"
             aria-label={`${folder.name}操作`}
             style={{ left: menuPosition.left, top: menuPosition.top }}
+            onKeyDown={navigateFolderMenu}
           >
             <button type="button" role="menuitem" onClick={() => { closeFolderMenu(); onOpenFolder(folder) }}>查看</button>
-            <button type="button" role="menuitem" onClick={() => { closeFolderMenu(); setRenamingFolderId(folder.id); setRenameValue(folder.name) }}>重命名</button>
-            <button type="button" role="menuitem" className="danger-link" onClick={() => { closeFolderMenu(); onDeleteFolder(folder.id) }}>删除</button>
+            <button type="button" role="menuitem" onClick={() => { closeFolderMenu(); setRenamingFolderId(folder.id); setRenameValue(folder.name); setRenameError('') }}>重命名</button>
+            <button type="button" role="menuitem" className="danger-link" onClick={() => {
+              closeFolderMenu()
+              menuTriggerRefs.current.get(folder.id)?.focus()
+              onDeleteFolder(folder.id)
+            }}>删除</button>
           </div>,
           document.body,
         )

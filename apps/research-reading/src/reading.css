@@ -761,7 +761,8 @@
 }
 
 .reading-thumbnail-list > button:focus-visible {
-  outline: 0;
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 .thumbnail-paper {
@@ -2126,45 +2127,56 @@
 .reading-crop-handle {
   position: absolute;
   z-index: 2;
-  width: 6px;
-  height: 6px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+}
+
+.reading-crop-handle::after {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 8px;
+  height: 8px;
   border: 1px solid #fff;
   background: #165dff;
-  pointer-events: auto;
+  content: '';
 }
 
 .reading-crop-handle.is-nw,
 .reading-crop-handle.is-n,
 .reading-crop-handle.is-ne {
-  top: -4px;
+  top: -22px;
 }
 
 .reading-crop-handle.is-sw,
 .reading-crop-handle.is-s,
 .reading-crop-handle.is-se {
-  bottom: -4px;
+  bottom: -22px;
 }
 
 .reading-crop-handle.is-nw,
 .reading-crop-handle.is-w,
 .reading-crop-handle.is-sw {
-  left: -4px;
+  left: -22px;
 }
 
 .reading-crop-handle.is-ne,
 .reading-crop-handle.is-e,
 .reading-crop-handle.is-se {
-  right: -4px;
+  right: -22px;
 }
 
 .reading-crop-handle.is-n,
 .reading-crop-handle.is-s {
-  left: calc(50% - 3px);
+  left: calc(50% - 22px);
 }
 
 .reading-crop-handle.is-w,
 .reading-crop-handle.is-e {
-  top: calc(50% - 3px);
+  top: calc(50% - 22px);
 }
 
 .reading-crop-handle.is-nw,
@@ -2190,9 +2202,9 @@
 .reading-crop-actions {
   position: absolute;
   right: -1px;
-  bottom: -30px;
+  bottom: -50px;
   display: flex;
-  height: 24px;
+  min-height: 44px;
   align-items: center;
   gap: 10px;
   padding: 4px 8px;
@@ -2208,9 +2220,9 @@
 
 .reading-crop-actions button {
   display: grid;
-  width: 16px;
-  min-width: 16px;
-  height: 16px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
   place-items: center;
   color: #fff;
   background: transparent;
@@ -5096,7 +5108,7 @@
   }
 
   .reading-frame {
-    --reader-header-h: 58px;
+    --reader-header-h: 108px;
     --reader-footer-h: 44px;
     --reader-mobile-panel-w: min(240px, calc(100% - 40px));
     grid-template-columns: minmax(0, 1fr);
@@ -5106,14 +5118,14 @@
   }
 
   .reading-document-header {
-    min-height: 58px;
+    min-height: 108px;
     flex-wrap: wrap;
     gap: 6px;
     padding: 8px 10px;
   }
 
   .reading-document-picker {
-    width: calc(100% - 58px);
+    width: calc(100% - 72px);
   }
 
   .reading-document-menu {
@@ -5126,18 +5138,22 @@
   }
 
   .reading-document-actions {
-    position: absolute;
-    top: 8px;
-    right: 8px;
+    position: static;
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: thin;
   }
 
   .reading-document-actions button {
-    display: none;
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .reading-document-actions .reading-primary-button {
-    display: inline-flex;
-    min-width: 52px;
+    min-width: 58px;
   }
 
   .reading-left-panel {
@@ -5200,7 +5216,8 @@
   .reading-footer {
     gap: 8px;
     padding: 0 8px;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .reading-page-controls {
@@ -5258,5 +5275,389 @@
   .reading-upload-folder-control > button,
   .reading-upload-folder-menu {
     width: 100%;
+  }
+}
+
+/* Enhanced paper parsing and traceable reading interactions. */
+.reading-outline-group button {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reading-outline-group button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reading-outline-group button small {
+  flex: 0 0 auto;
+  color: var(--text-4);
+  font-size: 10px;
+}
+
+.reading-note-anchor {
+  display: block;
+  margin-top: 6px;
+  color: var(--primary);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.reading-paper-zoom-stage.is-double {
+  position: relative;
+}
+
+.reading-paper-zoom-stage.is-double > .reading-paper--companion {
+  position: absolute;
+  top: 0;
+  left: calc(828px * var(--paper-scale));
+}
+
+.reading-paper--companion {
+  color: var(--text-2);
+}
+
+.reading-paper-markers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reading-paper-marker {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  padding: 1px 7px;
+  border: 1px solid #b8d1ff;
+  border-radius: 4px;
+  color: var(--primary);
+  background: #f2f7ff;
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.reading-paper-marker.is-figure {
+  border-color: #bce4c8;
+  color: #008a45;
+  background: #f0fbf3;
+}
+
+.reading-local-aid-notice,
+.reading-search-translation > small {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-4);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.reading-figure-panel article.is-selected {
+  margin: 0 -8px;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--primary-soft);
+}
+
+.reading-figure-panel article > div:nth-child(2) p {
+  margin: 5px 0 0;
+  color: var(--text-3);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.reading-figure-panel article > footer {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.reading-figure-panel article > footer button,
+.reading-panel-back {
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.reading-reference-detail > article {
+  gap: 10px;
+}
+
+.reading-reference-detail dl,
+.reading-related-detail dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.reading-reference-detail dl > div {
+  display: grid;
+  gap: 3px;
+}
+
+.reading-reference-detail dt,
+.reading-related-detail dt {
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.reading-reference-detail dd,
+.reading-related-detail dd {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.reading-reference-anchors {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.reading-reference-anchors > button {
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border-radius: 4px;
+  color: var(--text-2);
+  background: var(--fill);
+  text-align: left;
+}
+
+.reading-reference-anchors > button span {
+  color: var(--primary);
+}
+
+.reading-reference-anchors > button small {
+  line-height: 18px;
+  white-space: normal;
+}
+
+.reading-metadata-lead {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid #d8e6ff;
+  border-radius: 6px;
+  background: #f7faff;
+}
+
+.reading-metadata-lead b {
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.reading-metadata-lead p {
+  margin: 0 0 5px;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.reading-author-list,
+.reading-author-list > span,
+.reading-metadata-row {
+  display: grid;
+  gap: 2px;
+}
+
+.reading-author-list > span + span,
+.reading-metadata-row + .reading-metadata-row {
+  margin-top: 7px;
+}
+
+.reading-author-list small {
+  color: var(--text-3);
+  line-height: 18px;
+}
+
+.reading-keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.reading-keyword-list > span {
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.reading-graph-search input {
+  width: 100%;
+  height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.reading-graph-search input:focus {
+  border-color: var(--primary);
+  outline: 2px solid rgba(22, 93, 255, 0.12);
+}
+
+.reading-graph-network {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(246, 241, 252, 0.5);
+}
+
+.reading-graph-network button {
+  display: grid;
+  min-height: 54px;
+  gap: 2px;
+  place-content: center;
+  padding: 6px;
+  border: 1px solid #d7c7f3;
+  border-radius: 28px;
+  color: var(--text-2);
+  background: #fff;
+  text-align: center;
+}
+
+.reading-graph-network button.is-active {
+  border-color: #7b61ff;
+  color: #5f45d8;
+  background: #f3efff;
+  box-shadow: 0 0 0 2px rgba(123, 97, 255, 0.12);
+}
+
+.reading-graph-network button span {
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reading-graph-network button small {
+  color: var(--text-4);
+  font-size: 9px;
+}
+
+.reading-graph-node-detail,
+.reading-related-detail > article {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.reading-graph-node-detail p,
+.reading-related-detail p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.reading-graph-node-detail small {
+  color: var(--text-3);
+}
+
+.reading-graph-node-detail button,
+.reading-related-detail article > button {
+  justify-self: end;
+  color: var(--primary);
+}
+
+.reading-graph-empty {
+  margin: 12px 0;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.reading-page-input {
+  display: flex;
+  width: 74px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.reading-page-input input {
+  width: 30px;
+  padding: 0;
+  border: 0;
+  color: var(--text-2);
+  font: inherit;
+  text-align: right;
+  outline: 0;
+  appearance: textfield;
+}
+
+.reading-page-input input::-webkit-inner-spin-button,
+.reading-page-input input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.reading-page-input b {
+  font-weight: 400;
+}
+
+.reading-page-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.reading-zoom-controls .reading-view-toggle {
+  width: auto;
+  min-width: 58px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.reading-zoom-controls .reading-view-toggle[aria-pressed='true'] {
+  border-color: #9dc0ff;
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+@media (max-width: 900px) {
+  .reading-zoom-controls .reading-view-toggle {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (pointer: coarse) {
+  .reading-document-actions button,
+  .reading-mobile-insight-button,
+  .reading-mobile-insight-close,
+  .reading-left-rail button,
+  .reading-selection-toolbar button,
+  .reading-note-editor-tools button,
+  .reading-note-edit-card > footer button,
+  .reading-search-drawer button,
+  .reading-note-detail button,
+  .reading-footer button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .reading-page-input {
+    min-height: 44px;
   }
 }

@@ -13,6 +13,8 @@ import { SpaceView } from './components/SpaceView'
 import { TeamPanel } from './components/TeamPanel'
 import { WorkspaceView } from './components/WorkspaceView'
 import { loadUserProfile, saveUserProfile, type UserProfile } from './profile'
+import { isPersonalDocument, isTeamDocument, favoriteDocuments, parentFolderLabel, recentDocuments } from './workbenchDocuments'
+import { loadFolders, persistFolders, type FolderScope } from './folderContent'
 import {
   createBlankResearchDataTable,
   estimateResearchDataTableSize,
@@ -28,6 +30,7 @@ import {
   loadResearchDocuments,
   persistRecycledResearchDocument,
   persistResearchDocument,
+  persistResearchDocumentsBatch,
   removePersistedResearchDocument,
 } from './documentContent'
 import type {
@@ -55,10 +58,24 @@ const DataTableWorkspace = lazy(() => import('./components/DataTableWorkspace').
 
 const formatDateTime = (date: Date) => {
   const pad = (value: number) => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
 
 const formatLocalDateTime = () => formatDateTime(new Date())
+const formatFileSize = (bytes: number) => bytes < 1024 * 1024
+  ? `${Math.max(1, Math.round(bytes / 1024))} KB`
+  : `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+
+interface ToastState {
+  message: string
+  tone: 'success' | 'error'
+  actionLabel?: string
+  onAction?: () => void
+}
+
+type PendingDeletion =
+  | { type: 'document'; id: number }
+  | { type: 'folder'; id: number; scope: FolderScope }
 
 const memberCandidates: MemberCandidate[] = [
   { id: 'member-zhang-1', name: '张三', email: 'zhangsan@example.com', date: '2025-12-05', color: '#3e84f5' },
@@ -111,8 +128,8 @@ export default function App() {
   const [researchDataTables, setResearchDataTables] = useState<ResearchDataTable[]>(() => loadResearchDataTables(initialResearchDataTables))
   const [researchNotes, setResearchNotes] = useState<ResearchNote[]>(initialResearchNotes)
   const [recycledDocuments, setRecycledDocuments] = useState<ResearchDocument[]>(() => loadRecycledResearchDocuments())
-  const [folders, setFolders] = useState<FolderItem[]>(initialFolders)
-  const [teamFolders, setTeamFolders] = useState<FolderItem[]>(initialFolders)
+  const [folders, setFolders] = useState<FolderItem[]>(() => loadFolders('personal', initialFolders))
+  const [teamFolders, setTeamFolders] = useState<FolderItem[]>(() => loadFolders('team', initialFolders.map((folder) => ({ ...folder, location: 'AI研究团队' }))))
   const [todos, setTodos] = useState<TodoItem[]>(initialTodos)
   const [comments, setComments] = useState<CommentItem[]>(initialComments)
   const [members, setMembers] = useState<MemberItem[]>(initialMembers)
@@ -130,10 +147,14 @@ export default function App() {
   const [activeDocumentSearchTarget, setActiveDocumentSearchTarget] = useState<(DocumentSearchTarget & { documentId: number }) | null>(null)
   const [profile, setProfile] = useState<UserProfile>(() => loadUserProfile())
   const [page, setPage] = useState(1)
-  const [toast, setToast] = useState('')
+  const [toast, setToast] = useState<ToastState | null>(null)
+  const [pendingDeletion, setPendingDeletion] = useState<PendingDeletion | null>(null)
+  const [previewDocumentId, setPreviewDocumentId] = useState<number | null>(null)
   const [isImporting, setIsImporting] = useState(false)
   const [importProgress, setImportProgress] = useState(0)
   const [importFileName, setImportFileName] = useState('')
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importError, setImportError] = useState('')
   const [documentType, setDocumentType] = useState<'document' | 'sheet'>('document')
   const [newContentSource, setNewContentSource] = useState<'space' | 'data-hub'>('space')
   const [dataTableTemplate, setDataTableTemplate] = useState<DataTableTemplate>('project-progress')
@@ -151,29 +172,38 @@ export default function App() {
   const [memberSearch, setMemberSearch] = useState('')
   const [createdTeams, setCreatedTeams] = useState<string[]>([])
   const toastTimer = useRef<number | null>(null)
+  const importAttemptRef = useRef(0)
   const highlightTimer = useRef<number | null>(null)
   const teamNameInputRef = useRef<HTMLInputElement | null>(null)
   const newDocumentTitleRef = useRef<HTMLInputElement | null>(null)
   const documentIdCounterRef = useRef(Math.max(0, ...documents.map((item) => item.id), ...recycledDocuments.map((item) => item.id)) + 1)
   const activeDocumentIdRef = useRef(activeDocumentId)
+  const documentsRef = useRef(documents)
+  const foldersRef = useRef(folders)
+  const teamFoldersRef = useRef(teamFolders)
   const dataTableHubOpenRef = useRef(dataTableHubOpen)
   const activeDataTableFromHubRef = useRef(false)
   const dataTableNavigationGuardRef = useRef<(() => boolean) | null>(null)
 
   activeDocumentIdRef.current = activeDocumentId
+  documentsRef.current = documents
+  foldersRef.current = folders
+  teamFoldersRef.current = teamFolders
   dataTableHubOpenRef.current = dataTableHubOpen
 
   const registerDataTableNavigationGuard = useCallback((guard: (() => boolean) | null) => {
     dataTableNavigationGuardRef.current = guard
   }, [])
 
-  const showToast = (message: string) => {
-    setToast(message)
+  const showToast = (message: string, action?: { label: string; run: () => void }, tone: ToastState['tone'] = 'success') => {
+    setToast({ message, tone, actionLabel: action?.label, onAction: action?.run })
     if (toastTimer.current) window.clearTimeout(toastTimer.current)
-    toastTimer.current = window.setTimeout(() => setToast(''), 2300)
+    toastTimer.current = window.setTimeout(() => setToast(null), action ? 5600 : 2300)
   }
+  const showError = (message: string) => showToast(message, undefined, 'error')
 
   useEffect(() => () => {
+    importAttemptRef.current += 1
     if (toastTimer.current) window.clearTimeout(toastTimer.current)
     if (highlightTimer.current) window.clearTimeout(highlightTimer.current)
   }, [])
@@ -219,16 +249,30 @@ export default function App() {
     dataTableAction?: 'import' | 'share' | 'files',
     historyMode: 'push' | 'none' = 'push',
   ) => {
-    if (documentItem.kind !== '在线文档' && documentItem.kind !== '数据表格') {
-      showToast('当前文件类型暂不支持在线打开')
-      return
-    }
     const timestamp = formatLocalDateTime()
-    const visitedDocument = { ...documentItem, visitedAt: timestamp }
-    persistResearchDocument(visitedDocument)
-    setDocuments((current) => current.map((item) => item.id === documentItem.id ? visitedDocument : item))
+    if (documentItem.kind === '数据表格') {
+      const existingTable = researchDataTables.find((item) => item.documentId === documentItem.id)
+      if (!existingTable) {
+        const blankTable = createBlankResearchDataTable(documentItem.id, 'project-progress', profile.name, timestamp)
+        const tableResult = persistResearchDataTable(blankTable)
+        if (!tableResult.ok) {
+          showError(tableResult.error)
+          return
+        }
+        setResearchDataTables((current) => [blankTable, ...current])
+      }
+    }
+    const visitedDocument = { ...documentItem, visitedAt: timestamp, recentHiddenAt: undefined }
+    const visitResult = persistResearchDocument(visitedDocument)
+    if (!visitResult.ok) showError(`${visitResult.error} 文件仍可查看，但本次访问不会进入最近浏览。`)
+    else setDocuments((current) => current.map((item) => item.id === documentItem.id ? visitedDocument : item))
     setSearchOpen(false)
     setModal(null)
+    if (documentItem.kind !== '在线文档' && documentItem.kind !== '数据表格') {
+      setPreviewDocumentId(documentItem.id)
+      return
+    }
+    setPreviewDocumentId(null)
     setActiveDocumentSearchTarget(target ? { ...target, documentId: documentItem.id } : null)
     setActiveDataTableAction(documentItem.kind === '数据表格' ? dataTableAction : undefined)
     if (documentItem.kind === '数据表格') {
@@ -237,16 +281,6 @@ export default function App() {
         ? Boolean(linkedHistoryState.fromHub)
         : dataTableHubOpenRef.current
       activeDataTableFromHubRef.current = openedFromHub
-      const existingTable = researchDataTables.find((item) => item.documentId === documentItem.id)
-      if (!existingTable) {
-        const blankTable = createBlankResearchDataTable(documentItem.id, 'project-progress', profile.name, timestamp)
-        const tableResult = persistResearchDataTable(blankTable)
-        if (!tableResult.ok) {
-          showToast(tableResult.error)
-          return
-        }
-        setResearchDataTables((current) => [blankTable, ...current])
-      }
       const tableHash = `#table=${documentItem.id}`
       if (historyMode === 'push' && window.location.hash !== tableHash) {
         window.history.pushState(
@@ -317,7 +351,7 @@ export default function App() {
             '',
             `${window.location.pathname}${window.location.search}#data-tables`,
           )
-          showToast('该数据表格已不存在，已返回数据表格列表')
+          showError('该数据表格已不存在，已返回数据表格列表')
         }
         return
       }
@@ -373,6 +407,7 @@ export default function App() {
       content: value.content,
       size: value.size,
       visitedAt: timestamp,
+      updatedAt: timestamp,
       description: value.content.trim()
         ? value.content.trim().replace(/\s+/g, ' ').slice(0, 120)
         : '空白在线文档，尚未添加内容摘要。',
@@ -397,6 +432,7 @@ export default function App() {
       ...target,
       title: value.title,
       visitedAt: timestamp,
+      updatedAt: timestamp,
       size: estimateResearchDataTableSize(value.table),
       shared: value.table.share.access !== 'private',
       description: value.table.rows.length
@@ -475,7 +511,7 @@ export default function App() {
 
   const openHubTable = (target: DataTableHubTarget, action?: 'import' | 'share' | 'files') => {
     if (!target.documentItem) {
-      showToast('该表格缺少索引信息，暂时无法打开')
+      showError('该表格缺少索引信息，暂时无法打开')
       return
     }
     openDocument(target.documentItem, undefined, action)
@@ -487,17 +523,25 @@ export default function App() {
       showToast(`已在科研数据管理中定位“${documentItem.title}”`)
       return
     }
+    let locateStorageWarning = ''
     setSearchOpen(false)
     setModal(null)
     setActiveProduct('research')
     setActiveSection('workbench')
     setWorkbenchTab('recent')
+    if (documentItem.recentHiddenAt) {
+      const locatedDocument = { ...documentItem, recentHiddenAt: undefined }
+      const result = persistResearchDocument(locatedDocument)
+      if (result.ok) setDocuments((current) => current.map((item) => item.id === documentItem.id ? locatedDocument : item))
+      else locateStorageWarning = result.error
+    }
     setOpenFolderName(null)
     setPage(1)
     setHighlightedDocumentId(documentItem.id)
     if (highlightTimer.current) window.clearTimeout(highlightTimer.current)
     highlightTimer.current = window.setTimeout(() => setHighlightedDocumentId(null), 2800)
-    showToast(`已定位“${documentItem.title}”`)
+    if (locateStorageWarning) showError(`已定位“${documentItem.title}”，但${locateStorageWarning}`)
+    else showToast(`已定位“${documentItem.title}”`)
   }
 
   const openNoteDetail = (note: ResearchNote) => {
@@ -524,9 +568,13 @@ export default function App() {
     setTeamTreeExpanded((expanded) => !expanded)
   }
 
-  const standardDocuments = useMemo(
-    () => documents.filter((documentItem) => documentItem.kind !== '数据表格'),
+  const personalDocuments = useMemo(
+    () => documents.filter(isPersonalDocument),
     [documents],
+  )
+  const teamDocuments = useMemo(
+    () => documents.filter((documentItem) => isTeamDocument(documentItem, activeTeam)),
+    [activeTeam, documents],
   )
   const activeDataTableDocuments = useMemo(
     () => documents.filter((documentItem) => documentItem.kind === '数据表格'),
@@ -538,38 +586,93 @@ export default function App() {
   }, [activeDataTableDocuments, researchDataTables])
 
   const visibleDocuments = useMemo(() => {
-    if (activeSection !== 'workbench') return standardDocuments
-    if (workbenchTab === 'favorites') return standardDocuments.filter((documentItem) => documentItem.favorite)
-    if (workbenchTab === 'owned') return standardDocuments.filter((documentItem) => documentItem.owned)
-    if (workbenchTab === 'shared') return standardDocuments.filter((documentItem) => documentItem.shared && !documentItem.owned)
-    return [...standardDocuments].sort((first, second) => second.visitedAt.localeCompare(first.visitedAt))
-  }, [activeSection, standardDocuments, workbenchTab])
+    if (activeSection !== 'workbench') return documents
+    if (workbenchTab === 'favorites') return favoriteDocuments(documents)
+    if (workbenchTab === 'owned') return documents.filter((documentItem) => documentItem.owned)
+    if (workbenchTab === 'shared') return documents.filter((documentItem) => documentItem.shared && !documentItem.owned)
+    return recentDocuments(documents)
+  }, [activeSection, documents, workbenchTab])
 
   const toggleFavorite = (id: number) => {
     const target = documents.find((doc) => doc.id === id)
     if (!target) return
-    const nextDocument = { ...target, favorite: !target.favorite }
+    const timestamp = formatLocalDateTime()
+    const nextDocument = {
+      ...target,
+      favorite: !target.favorite,
+      favoritedAt: target.favorite ? undefined : timestamp,
+    }
     const result = persistResearchDocument(nextDocument)
     if (!result.ok) {
-      showToast(result.error)
+      showError(result.error)
       return
     }
     setDocuments((current) => current.map((doc) => doc.id === id ? nextDocument : doc))
-    showToast('收藏状态已更新')
+    showToast(nextDocument.favorite ? '已加入我的收藏' : '已取消收藏', {
+      label: '撤销',
+      run: () => {
+        const rollback = persistResearchDocument(target)
+        if (!rollback.ok) {
+          showError(rollback.error)
+          return
+        }
+        setDocuments((current) => current.map((doc) => doc.id === id ? target : doc))
+        showToast('收藏状态已恢复')
+      },
+    })
   }
 
-  const deleteDocument = (id: number) => {
+  const removeFromRecent = (id: number) => {
     const target = documents.find((doc) => doc.id === id)
     if (!target) return
-    const recycledDocument = { ...target, visitedAt: formatLocalDateTime() }
+    const nextDocument = { ...target, recentHiddenAt: formatLocalDateTime() }
+    const result = persistResearchDocument(nextDocument)
+    if (!result.ok) {
+      showError(result.error)
+      return
+    }
+    setDocuments((current) => current.map((doc) => doc.id === id ? nextDocument : doc))
+    showToast(`已从最近浏览移除“${target.title}”`, {
+      label: '撤销',
+      run: () => {
+        const rollback = persistResearchDocument(target)
+        if (!rollback.ok) {
+          showError(rollback.error)
+          return
+        }
+        setDocuments((current) => current.map((doc) => doc.id === id ? target : doc))
+        showToast('已恢复到最近浏览')
+      },
+    })
+  }
+
+  const requestDeleteDocument = (id: number) => setPendingDeletion({ type: 'document', id })
+
+  const moveDocumentToRecycle = (id: number) => {
+    const target = documents.find((doc) => doc.id === id)
+    if (!target) return
+    const recycledDocument = { ...target, deletedAt: formatLocalDateTime() }
     const result = persistRecycledResearchDocument(recycledDocument)
     if (!result.ok) {
-      showToast(result.error)
+      showError(result.error)
       return
     }
     setDocuments((current) => current.filter((doc) => doc.id !== id))
     setRecycledDocuments((current) => [recycledDocument, ...current.filter((doc) => doc.id !== id)])
-    showToast(target.kind === '数据表格' ? '数据表格已移入回收站' : '文档已移入回收站')
+    setPendingDeletion(null)
+    showToast(target.kind === '数据表格' ? '数据表格已移入回收站' : '文档已移入回收站', {
+      label: '撤销',
+      run: () => {
+        const rollback = persistResearchDocument(target)
+        if (!rollback.ok) {
+          showError(rollback.error)
+          return
+        }
+        setRecycledDocuments((current) => current.filter((doc) => doc.id !== id))
+        setDocuments((current) => [target, ...current.filter((doc) => doc.id !== id)])
+        showToast('已从回收站恢复')
+      },
+    })
   }
 
   const permanentlyDeleteDocument = (id: number) => {
@@ -577,7 +680,7 @@ export default function App() {
     if (!target || !window.confirm(`彻底删除“${target.title}”？该操作无法恢复。`)) return
     const result = removePersistedResearchDocument(id)
     if (!result.ok) {
-      showToast(result.error)
+      showError(result.error)
       return
     }
     setRecycledDocuments((current) => current.filter((doc) => doc.id !== id))
@@ -585,7 +688,7 @@ export default function App() {
     if (target.kind === '数据表格') {
       const tableResult = removeResearchDataTable(id)
       if (!tableResult.ok) {
-        showToast(`文档已删除，但表格缓存清理失败：${tableResult.error}`)
+        showError(`文档已删除，但表格缓存清理失败：${tableResult.error}`)
         return
       }
       setResearchDataTables((current) => current.filter((table) => table.documentId !== id))
@@ -596,13 +699,14 @@ export default function App() {
   const restoreDocument = (id: number) => {
     const target = recycledDocuments.find((doc) => doc.id === id)
     if (!target) return
-    const result = persistResearchDocument(target)
+    const restoredDocument = { ...target, deletedAt: undefined }
+    const result = persistResearchDocument(restoredDocument)
     if (!result.ok) {
-      showToast(result.error)
+      showError(result.error)
       return
     }
     setRecycledDocuments((current) => current.filter((doc) => doc.id !== id))
-    setDocuments((current) => [target, ...current.filter((doc) => doc.id !== id)])
+    setDocuments((current) => [restoredDocument, ...current.filter((doc) => doc.id !== id)])
     showToast('文档已恢复')
   }
 
@@ -615,7 +719,7 @@ export default function App() {
     if (target.kind === '数据表格') {
       previousDataTable = researchDataTables.find((table) => table.documentId === id)
       if (!previousDataTable) {
-        showToast('无法读取数据表格，请先打开表格后重试')
+        showError('无法读取数据表格，请先打开表格后重试')
         return
       }
       const timestamp = formatLocalDateTime()
@@ -635,14 +739,14 @@ export default function App() {
       }
       const tableResult = persistResearchDataTable(nextDataTable)
       if (!tableResult.ok) {
-        showToast(tableResult.error)
+        showError(tableResult.error)
         return
       }
     }
     const result = persistResearchDocument(nextDocument)
     if (!result.ok) {
       const rollbackResult = previousDataTable ? persistResearchDataTable(previousDataTable) : null
-      showToast(rollbackResult && !rollbackResult.ok
+      showError(rollbackResult && !rollbackResult.ok
         ? `${result.error} 表格共享状态回滚失败，请打开表格核对权限。`
         : result.error)
       return
@@ -656,20 +760,21 @@ export default function App() {
 
   const renameDocument = (id: number, title: string) => {
     const target = documents.find((doc) => doc.id === id)
-    if (!target) return
+    if (!target) return false
     const normalizedTitle = title.normalize('NFC').trim()
     if (!normalizedTitle || Array.from(normalizedTitle).length > 50) {
-      showToast('文档名称应为 1 至 50 个字符')
-      return
+      showError('文档名称应为 1 至 50 个字符')
+      return false
     }
-    const nextDocument = { ...target, title: normalizedTitle }
+    const nextDocument = { ...target, title: normalizedTitle, updatedAt: formatLocalDateTime() }
     const result = persistResearchDocument(nextDocument)
     if (!result.ok) {
-      showToast(result.error)
-      return
+      showError(result.error)
+      return false
     }
     setDocuments((current) => current.map((doc) => doc.id === id ? nextDocument : doc))
     showToast('文档已重命名')
+    return true
   }
 
   const createDocumentNote = (documentItem: ResearchDocument) => {
@@ -718,10 +823,35 @@ export default function App() {
   const submitNewFolder = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
-    const name = String(form.get('folderName') ?? '').trim()
+    const name = String(form.get('folderName') ?? '').normalize('NFC').trim()
     if (!name) return
-    const setter = activeSection === 'team' ? setTeamFolders : setFolders
-    setter((current) => [...current, { id: nextId(current), name, count: 0, updatedAt: '2026-05-08 16:20' }])
+    const scope: FolderScope = activeSection === 'team' ? 'team' : 'personal'
+    const current = scope === 'team' ? teamFolders : folders
+    const foldersInScope = scope === 'team'
+      ? current.filter((folder) => folder.location === activeTeam)
+      : current
+    if (foldersInScope.some((folder) => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+      showError('同一空间内不能创建同名文件夹')
+      return
+    }
+    const timestamp = formatLocalDateTime()
+    const nextFolders = [...current, {
+      id: nextId(current),
+      name,
+      count: 0,
+      updatedAt: timestamp,
+      createdAt: timestamp,
+      owner: profile.name,
+      location: scope === 'team' ? activeTeam : '我的空间',
+      size: '0 KB',
+    }]
+    const result = persistFolders(scope, nextFolders)
+    if (!result.ok) {
+      showError(result.error)
+      return
+    }
+    if (scope === 'team') setTeamFolders(nextFolders)
+    else setFolders(nextFolders)
     if (activeSection === 'team') setCreatedTeams((current) => current.filter((team) => team !== activeTeam))
     setModal(null)
     showToast(`文件夹“${name}”创建成功`)
@@ -750,11 +880,13 @@ export default function App() {
       owner: profile.name,
       createdAt: timestamp,
       visitedAt: timestamp,
+      updatedAt: timestamp,
       size: '0 KB',
       kind: documentType === 'document' ? '在线文档' : '数据表格',
       favorite: false,
       owned: true,
       shared: activeSection === 'team',
+      spaceScope: activeSection === 'team' || newContentSource === 'data-hub' ? 'team' : 'personal',
       description: documentType === 'document' ? '空白在线文档，尚未添加内容摘要。' : '新建的数据表格。',
       keywords: [],
       content: '',
@@ -806,11 +938,82 @@ export default function App() {
     } else showToast(`在线文档“${title}”已创建`)
   }
 
-  const submitImport = (event: FormEvent<HTMLFormElement>) => {
+  const submitImport = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!importFileName || isImporting) return
-    setImportProgress(55)
+    if (!importFile || isImporting) return
+    const extension = importFile.name.toLocaleLowerCase().match(/\.(pdf|docx?)$/)?.[1]
+    if (!extension) {
+      setImportError('仅支持 PDF、DOC、DOCX 格式。')
+      return
+    }
+    if (importFile.size <= 0 || importFile.size > 50 * 1024 * 1024) {
+      setImportError(importFile.size <= 0 ? '文件为空，无法导入。' : '文件超过 50 MB，请压缩后重试。')
+      return
+    }
+    const attempt = importAttemptRef.current + 1
+    importAttemptRef.current = attempt
+    setImportError('')
+    setImportProgress(18)
     setIsImporting(true)
+    for (const progress of [48, 78, 100]) {
+      await new Promise((resolve) => window.setTimeout(resolve, 180))
+      if (importAttemptRef.current !== attempt) return
+      setImportProgress(progress)
+    }
+    const timestamp = formatLocalDateTime()
+    const id = documentIdCounterRef.current
+    documentIdCounterRef.current += 1
+    const importedDocument: ResearchDocument = {
+      id,
+      title: importFile.name.replace(/\.(pdf|docx?)$/i, '').normalize('NFC').trim().slice(0, 50) || `导入文档 ${id}`,
+      location: activeSection === 'team'
+        ? `${activeTeam}/${openFolderName ?? '文档'}`
+        : `我的空间/${openFolderName ?? '未分类'}`,
+      owner: profile.name,
+      createdAt: timestamp,
+      visitedAt: '',
+      updatedAt: timestamp,
+      size: formatFileSize(importFile.size),
+      kind: extension === 'pdf' ? 'PDF文档' : 'Word文档',
+      favorite: false,
+      owned: true,
+      shared: activeSection === 'team',
+      spaceScope: activeSection === 'team' ? 'team' : 'personal',
+      description: '用户导入的科研文档，可在空间中预览元数据、收藏、分享、重命名或移入回收站。',
+      keywords: ['导入文档'],
+      content: '',
+    }
+    const result = persistResearchDocument(importedDocument)
+    if (!result.ok) {
+      setImportError(result.error)
+      setIsImporting(false)
+      return
+    }
+    setDocuments((current) => [importedDocument, ...current])
+    setIsImporting(false)
+    setImportProgress(0)
+    setImportFile(null)
+    setImportFileName('')
+    setModal(null)
+    showToast(`“${importedDocument.title}”已导入到${activeSection === 'team' ? activeTeam : '个人空间'}`)
+  }
+
+  const openImportDialog = () => {
+    importAttemptRef.current += 1
+    setImportFile(null)
+    setImportFileName('')
+    setImportError('')
+    setImportProgress(0)
+    setIsImporting(false)
+    setModal('import-document')
+  }
+
+  const cancelImport = () => {
+    importAttemptRef.current += 1
+    setIsImporting(false)
+    setImportProgress(0)
+    setImportError('')
+    setModal(null)
   }
 
   const submitNewTeam = (event: FormEvent<HTMLFormElement>) => {
@@ -892,15 +1095,139 @@ export default function App() {
   }
 
   const renameFolder = (id: number, name: string) => {
-    const setter = activeSection === 'team' ? setTeamFolders : setFolders
-    setter((current) => current.map((folder) => folder.id === id ? { ...folder, name } : folder))
+    const scope: FolderScope = activeSection === 'team' ? 'team' : 'personal'
+    const current = scope === 'team' ? teamFolders : folders
+    const normalizedName = name.normalize('NFC').trim()
+    if (!normalizedName || Array.from(normalizedName).length > 50) {
+      showError('文件夹名称应为 1 至 50 个字符')
+      return false
+    }
+    const targetFolder = current.find((folder) => folder.id === id)
+    if (!targetFolder) return false
+    const folderRoot = scope === 'team' ? (targetFolder.location ?? activeTeam) : '我的空间'
+    if (scope === 'team' && folderRoot !== activeTeam) {
+      showError('该文件夹不属于当前团队，操作已停止')
+      return false
+    }
+    if (current.some((folder) => folder.id !== id && (scope === 'personal' || folder.location === folderRoot) && folder.name.toLocaleLowerCase() === normalizedName.toLocaleLowerCase())) {
+      showError('同一空间内不能使用重复的文件夹名称')
+      return false
+    }
+    const timestamp = formatLocalDateTime()
+    const nextFolders = current.map((folder) => folder.id === id
+      ? { ...folder, name: normalizedName, updatedAt: timestamp }
+      : folder)
+    const affectedDocuments = documents.filter((documentItem) => (
+      documentItem.location === `${folderRoot}/${targetFolder.name}`
+    ))
+    const nextDocuments = affectedDocuments.map((documentItem) => ({
+      ...documentItem,
+      location: `${documentItem.location.split('/').slice(0, -1).join('/')}/${normalizedName}`,
+      updatedAt: timestamp,
+    }))
+    const documentResult = persistResearchDocumentsBatch(nextDocuments)
+    if (!documentResult.ok) {
+      showError(documentResult.error)
+      return false
+    }
+    const result = persistFolders(scope, nextFolders)
+    if (!result.ok) {
+      const rollback = persistResearchDocumentsBatch(affectedDocuments)
+      showError(rollback.ok ? result.error : `${result.error} 文档位置回滚也失败，请刷新后核对。`)
+      return false
+    }
+    const nextDocumentById = new Map(nextDocuments.map((documentItem) => [documentItem.id, documentItem]))
+    setDocuments((items) => items.map((documentItem) => nextDocumentById.get(documentItem.id) ?? documentItem))
+    if (scope === 'team') setTeamFolders(nextFolders)
+    else setFolders(nextFolders)
     showToast('文件夹已重命名')
+    return true
   }
 
   const deleteFolder = (id: number) => {
-    const setter = activeSection === 'team' ? setTeamFolders : setFolders
-    setter((current) => current.filter((folder) => folder.id !== id))
-    showToast('文件夹已删除')
+    setPendingDeletion({ type: 'folder', id, scope: activeSection === 'team' ? 'team' : 'personal' })
+  }
+
+  const confirmFolderDeletion = (id: number, scope: FolderScope) => {
+    const current = scope === 'team' ? teamFolders : folders
+    const target = current.find((folder) => folder.id === id)
+    if (!target) {
+      setPendingDeletion(null)
+      return
+    }
+    const folderRoot = scope === 'team' ? (target.location ?? activeTeam) : '我的空间'
+    if (scope === 'team' && folderRoot !== activeTeam) {
+      showError('该文件夹不属于当前团队，操作已停止')
+      setPendingDeletion(null)
+      return
+    }
+    const nextFolders = current.filter((folder) => folder.id !== id)
+    const originalFolderIndex = current.findIndex((folder) => folder.id === id)
+    const timestamp = formatLocalDateTime()
+    const affectedDocuments = documents.filter((documentItem) => (
+      documentItem.location === `${folderRoot}/${target.name}`
+    ))
+    const relocatedDocuments = affectedDocuments.map((documentItem) => ({
+      ...documentItem,
+      location: `${documentItem.location.split('/').slice(0, -1).join('/')}/未分类`,
+      updatedAt: timestamp,
+    }))
+    const documentResult = persistResearchDocumentsBatch(relocatedDocuments)
+    if (!documentResult.ok) {
+      showError(documentResult.error)
+      return
+    }
+    const result = persistFolders(scope, nextFolders)
+    if (!result.ok) {
+      const rollback = persistResearchDocumentsBatch(affectedDocuments)
+      showError(rollback.ok ? result.error : `${result.error} 文档位置回滚也失败，请刷新后核对。`)
+      return
+    }
+    const relocatedById = new Map(relocatedDocuments.map((documentItem) => [documentItem.id, documentItem]))
+    setDocuments((items) => items.map((documentItem) => relocatedById.get(documentItem.id) ?? documentItem))
+    if (scope === 'team') setTeamFolders(nextFolders)
+    else setFolders(nextFolders)
+    setPendingDeletion(null)
+    showToast(`文件夹“${target.name}”已删除`, {
+      label: '撤销',
+      run: () => {
+        const currentFolders = scope === 'team' ? teamFoldersRef.current : foldersRef.current
+        if (currentFolders.some((folder) => folder.id === target.id)) {
+          showError('同一文件夹已恢复，无需重复撤销。')
+          return
+        }
+        if (currentFolders.some((folder) => folder.location === target.location && folder.name.toLocaleLowerCase() === target.name.toLocaleLowerCase())) {
+          showError('当前已存在同名文件夹，无法自动撤销；请先重命名冲突文件夹。')
+          return
+        }
+        const restored = [...currentFolders]
+        restored.splice(Math.min(originalFolderIndex, restored.length), 0, target)
+        const originalLocationById = new Map(affectedDocuments.map((documentItem) => [documentItem.id, documentItem.location]))
+        const restoredDocuments = documentsRef.current
+          .filter((documentItem) => originalLocationById.has(documentItem.id))
+          .map((documentItem) => ({ ...documentItem, location: originalLocationById.get(documentItem.id)! }))
+        const documentRollback = persistResearchDocumentsBatch(restoredDocuments)
+        if (!documentRollback.ok) {
+          showError(`${documentRollback.error} 文件夹恢复尚未完成。`)
+          return
+        }
+        const rollback = persistFolders(scope, restored)
+        if (!rollback.ok) {
+          const relocatedLocationById = new Map(relocatedDocuments.map((documentItem) => [documentItem.id, documentItem.location]))
+          const positionRollback = persistResearchDocumentsBatch(restoredDocuments.map((documentItem) => ({
+            ...documentItem,
+            location: relocatedLocationById.get(documentItem.id) ?? documentItem.location,
+          })))
+          showError(positionRollback.ok ? rollback.error : `${rollback.error} 文档位置回滚也失败，请刷新后核对。`)
+          return
+        }
+        if (scope === 'team') setTeamFolders(restored)
+        else setFolders(restored)
+        const restoredById = new Map(restoredDocuments.map((documentItem) => [documentItem.id, documentItem]))
+        setDocuments((items) => items.map((documentItem) => restoredById.get(documentItem.id) ?? documentItem))
+        showToast('文件夹已恢复')
+      },
+    })
   }
 
   const activeResearchNote = activeNoteId == null
@@ -914,6 +1241,14 @@ export default function App() {
     : documents.find((documentItem) => documentItem.id === activeDocumentId)
   const activeEditingDataTable = activeEditingDocument?.kind === '数据表格'
     ? researchDataTables.find((table) => table.documentId === activeEditingDocument.id)
+    : undefined
+  const previewDocument = previewDocumentId == null
+    ? undefined
+    : documents.find((documentItem) => documentItem.id === previewDocumentId)
+  const pendingDeletionTarget = pendingDeletion?.type === 'document'
+    ? documents.find((documentItem) => documentItem.id === pendingDeletion.id)
+    : pendingDeletion?.type === 'folder'
+    ? (pendingDeletion.scope === 'team' ? teamFolders : folders).find((folder) => folder.id === pendingDeletion.id)
     : undefined
 
   return (
@@ -964,7 +1299,8 @@ export default function App() {
                 onTabChange={(tab) => { setWorkbenchTab(tab); setPage(1) }}
                 onPageChange={setPage}
                 onToggleFavorite={toggleFavorite}
-                onDelete={deleteDocument}
+                onDelete={requestDeleteDocument}
+                onRemoveRecent={removeFromRecent}
                 onShare={shareDocument}
                 onOpenDocument={openDocument}
                 onOpenDataTableHub={openDataTableHub}
@@ -977,7 +1313,7 @@ export default function App() {
               <SpaceView
                 mode="personal"
                 folders={folders}
-                documents={standardDocuments}
+                documents={personalDocuments}
                 openFolderName={openFolderName}
                 page={page}
                 onPageChange={setPage}
@@ -987,9 +1323,9 @@ export default function App() {
                 onBack={() => setOpenFolderName(null)}
                 onNewFolder={() => setModal('new-folder')}
                 onNewDocument={openNewDocumentDialog}
-                onImportDocument={() => setModal('import-document')}
+                onImportDocument={openImportDialog}
                 onToggleFavorite={toggleFavorite}
-                onDelete={deleteDocument}
+                onDelete={requestDeleteDocument}
                 onShare={shareDocument}
                 onRenameDocument={renameDocument}
                 onCreateNote={createDocumentNote}
@@ -1000,8 +1336,8 @@ export default function App() {
               <SpaceView
                 mode="team"
                 teamName={activeTeam}
-                folders={createdTeams.includes(activeTeam) ? [] : teamFolders}
-                documents={createdTeams.includes(activeTeam) ? [] : standardDocuments}
+                folders={createdTeams.includes(activeTeam) ? [] : teamFolders.filter((folder) => folder.location === activeTeam)}
+                documents={createdTeams.includes(activeTeam) ? [] : teamDocuments}
                 openFolderName={openFolderName}
                 page={page}
                 onPageChange={setPage}
@@ -1011,9 +1347,9 @@ export default function App() {
                 onBack={() => setOpenFolderName(null)}
                 onNewFolder={() => setModal('new-folder')}
                 onNewDocument={openNewDocumentDialog}
-                onImportDocument={() => setModal('import-document')}
+                onImportDocument={openImportDialog}
                 onToggleFavorite={toggleFavorite}
-                onDelete={deleteDocument}
+                onDelete={requestDeleteDocument}
                 onShare={shareDocument}
                 onRenameDocument={renameDocument}
                 onCreateNote={createDocumentNote}
@@ -1076,7 +1412,7 @@ export default function App() {
           onCreateTable={openNewDataTableDialog}
           onImportToTable={(target) => openHubTable(target, 'import')}
           onShareTable={(target) => openHubTable(target, 'share')}
-          onMoveToRecycle={(target) => deleteDocument(target.documentId)}
+          onMoveToRecycle={(target) => requestDeleteDocument(target.documentId)}
         />
       )}
 
@@ -1125,6 +1461,48 @@ export default function App() {
         />
       )}
 
+      {previewDocument && (
+        <Modal title={`查看：${previewDocument.title}`} onClose={() => setPreviewDocumentId(null)} hideFooter wide bodyClassName="document-preview-body">
+          <div className="document-preview-summary">
+            <span className="document-preview-kind">{previewDocument.kind}</span>
+            <p>{previewDocument.description || '该文件暂无摘要。'}</p>
+          </div>
+          <dl className="document-preview-metadata">
+            <div><dt>所属父文件夹</dt><dd>{previewDocument.location.split('/').filter(Boolean).at(-1) ?? '未分类'}</dd></div>
+            <div><dt>文件大小</dt><dd>{previewDocument.size}</dd></div>
+            <div><dt>创建者</dt><dd>{previewDocument.owner}</dd></div>
+            <div><dt>创建时间</dt><dd>{previewDocument.createdAt}</dd></div>
+            <div><dt>最后修改</dt><dd>{previewDocument.updatedAt ?? previewDocument.createdAt}</dd></div>
+            <div><dt>最后打开</dt><dd>{previewDocument.visitedAt}</dd></div>
+          </dl>
+          <div className="document-preview-actions">
+            <button type="button" className="button button--secondary" onClick={() => toggleFavorite(previewDocument.id)}>{previewDocument.favorite ? '取消收藏' : '收藏'}</button>
+            <button type="button" className="button button--primary" onClick={() => setPreviewDocumentId(null)}>关闭</button>
+          </div>
+        </Modal>
+      )}
+
+      {activeProduct === 'research' && pendingDeletion && pendingDeletionTarget && (
+        <Modal
+          title={pendingDeletion.type === 'folder' ? '删除文件夹' : '移入回收站'}
+          onClose={() => setPendingDeletion(null)}
+          onSubmit={(event) => {
+            event.preventDefault()
+            if (pendingDeletion.type === 'folder') confirmFolderDeletion(pendingDeletion.id, pendingDeletion.scope)
+            else moveDocumentToRecycle(pendingDeletion.id)
+          }}
+          confirmText={pendingDeletion.type === 'folder' ? '删除文件夹' : '移入回收站'}
+          confirmDanger
+        >
+          <div className="delete-confirm-copy">
+            <strong>确定处理“{'name' in pendingDeletionTarget ? pendingDeletionTarget.name : pendingDeletionTarget.title}”吗？</strong>
+            <p>{pendingDeletion.type === 'folder'
+              ? `仅删除当前文件夹入口；文件仍保留在${pendingDeletion.scope === 'team' ? '当前团队' : '个人空间'}文档列表，可继续访问。操作完成后可撤销。`
+              : '文档将移入回收站，可在回收站恢复；本次操作完成后也可立即撤销。'}</p>
+          </div>
+        </Modal>
+      )}
+
       {modal === 'profile-settings' && (
         <ProfileSettingsModal
           profile={profile}
@@ -1155,7 +1533,7 @@ export default function App() {
       {activeProduct === 'research' && modal === 'new-folder' && (
         <Modal title="新建文件夹" onClose={() => setModal(null)} onSubmit={submitNewFolder} confirmText="确定">
           <label className="field-label" htmlFor="folder-name"><span className="required-mark">*</span> 文件夹名称：</label>
-          <input className="text-field" id="folder-name" name="folderName" autoFocus maxLength={30} placeholder="请输入" />
+          <input className="text-field" id="folder-name" name="folderName" autoFocus maxLength={50} placeholder="请输入" />
         </Modal>
       )}
 
@@ -1199,20 +1577,25 @@ export default function App() {
       {activeProduct === 'research' && modal === 'import-document' && (
         <Modal
           title="导入文档"
-          onClose={() => { if (!isImporting) setModal(null) }}
+          onClose={cancelImport}
           onSubmit={submitImport}
-          confirmText="确定"
-          confirmDisabled={!importFileName}
+          confirmText={isImporting ? '正在导入…' : '开始导入'}
+          confirmDisabled={!importFile || isImporting}
         >
+          {importError && <p className="field-error" role="alert">{importError}</p>}
           <label className={`upload-zone${importFileName ? ' has-file' : ''}`}>
             <span className="upload-icon" aria-hidden="true" />
-            <strong>点击或拖拽文件到此处上传</strong>
-            <small>支持Word、Pdf格式文件</small>
-            <input type="file" accept=".pdf,.doc,.docx" onChange={(event) => setImportFileName(event.target.files?.[0]?.name ?? '')} />
+            <strong>{importFileName || '点击选择需要导入的文件'}</strong>
+            <small>支持 PDF、DOC、DOCX，单文件不超过 50 MB</small>
+            <input type="file" accept=".pdf,.doc,.docx" disabled={isImporting} onChange={(event) => {
+              const file = event.target.files?.[0] ?? null
+              setImportFile(file)
+              setImportFileName(file?.name ?? '')
+              setImportError('')
+            }} />
           </label>
           {isImporting && <div className="import-file-list">
-            <article className="import-file-row is-progress"><img src="/assets/reading/pdf.svg" alt="" /><div><strong>高离子电导率硫化物固态电解质的界面稳定化策略.pdf</strong><small>共15页｜15.8M</small><span><i style={{ width: `${importProgress}%` }} /></span></div><b>{importProgress}%</b></article>
-            <article className="import-file-row"><img src="/assets/reading/docx.svg" alt="" /><div><strong>锂硫电池中多硫化物穿梭效应的抑制机制研究：基...docx</strong><small>共18页｜12.5M</small></div><button type="button" aria-label="移除待导入文档"><span aria-hidden="true" /></button></article>
+            <article className="import-file-row is-progress"><img src={importFileName.toLocaleLowerCase().endsWith('.pdf') ? '/assets/reading/pdf.svg' : '/assets/reading/docx.svg'} alt="" /><div><strong>{importFileName}</strong><small>{importProgress < 78 ? '正在上传并校验文件…' : '正在生成文档索引…'}</small><span><i style={{ width: `${importProgress}%` }} /></span></div><b>{importProgress}%</b></article>
           </div>}
         </Modal>
       )}
@@ -1321,7 +1704,15 @@ export default function App() {
         </Modal>
       )}
 
-      {toast && <div className="toast" role="status" aria-live="polite"><span className="icon-check" aria-hidden="true" />{toast}</div>}
+      {toast && <div className={`toast toast--${toast.tone}`} role={toast.tone === 'error' ? 'alert' : 'status'} aria-live={toast.tone === 'error' ? 'assertive' : 'polite'}>
+        <span className={toast.tone === 'error' ? 'toast-error-icon' : 'icon-check'} aria-hidden="true">{toast.tone === 'error' ? '!' : ''}</span>
+        <span className="toast-message">{toast.message}</span>
+        {toast.onAction && <button type="button" className="toast-action" onClick={() => {
+          const action = toast.onAction
+          setToast(null)
+          action?.()
+        }}>{toast.actionLabel ?? '撤销'}</button>}
+      </div>}
     </main>
   )
 }

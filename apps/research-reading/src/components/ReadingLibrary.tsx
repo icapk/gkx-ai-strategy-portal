@@ -4,7 +4,7 @@ import type { ReadingDocument } from '../readingData'
 
 interface ReadingLibraryProps {
   documents: ReadingDocument[]
-  onDocumentsChange: (documents: ReadingDocument[]) => void
+  onDocumentsChange: (documents: ReadingDocument[]) => boolean
   selectedDocumentId: number | null
   onSelectDocument: (documentId: number) => void
   onOpenDocument: (document: ReadingDocument) => void
@@ -12,7 +12,7 @@ interface ReadingLibraryProps {
   onUpload: () => void
   onToast: (message: string) => void
   folders: string[]
-  onFoldersChange: (folders: string[]) => void
+  onFoldersChange: (folders: string[]) => boolean
 }
 
 type LibrarySection = 'all' | 'favorites'
@@ -258,8 +258,11 @@ export function ReadingLibrary({
       focusNewFolderInput(true)
       return
     }
+    if (!onFoldersChange([name, ...folders])) {
+      focusNewFolderInput()
+      return
+    }
     newFolderCommittedRef.current = true
-    onFoldersChange([name, ...folders])
     setNewFolderName('')
     setNewFolderError('')
     setNewFolderOpen(false)
@@ -270,7 +273,7 @@ export function ReadingLibrary({
     if (renamingFolder == null) return
     const value = renameFolderValue.trim()
     if (value && value !== renamingFolder) {
-      onFoldersChange(folders.map((folder) => folder === renamingFolder ? value : folder))
+      if (!onFoldersChange(folders.map((folder) => folder === renamingFolder ? value : folder))) return
       if (activeFolder === renamingFolder) setActiveFolder(value)
       if (expandedFolder === renamingFolder) setExpandedFolder(value)
     }
@@ -280,7 +283,7 @@ export function ReadingLibrary({
 
   const confirmMove = () => {
     if (moveDocumentId == null) return
-    onDocumentsChange(documents.map((document) => document.id === moveDocumentId ? { ...document, folder: moveTarget } : document))
+    if (!onDocumentsChange(documents.map((document) => document.id === moveDocumentId ? { ...document, folder: moveTarget } : document))) return
     setMoveDocumentId(null)
     setActiveFolder(moveTarget)
   }

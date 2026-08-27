@@ -1,6 +1,6 @@
 # 智能科研与智能阅读门户覆盖版信息
 
-- 覆盖日期：2026-08-26（Asia/Shanghai）
+- 覆盖日期：2026-08-27（Asia/Shanghai）
 - 宿主：`gkx-ai-strategy-portal`
 - 应用目录：`apps/research-reading`
 - 包类型：完整、可编辑、可重建的智能科研与智能阅读联合源码
@@ -14,9 +14,10 @@
 
 - 上游源码 ZIP、可选预构建 ZIP 的外层 SHA-256 均通过。
 - 上游源码 ZIP 的逐文件 `PACKAGE_MANIFEST.txt` 全部通过。
-- 17/17 单元测试通过。
+- 38/38 单元测试通过。
 - TypeScript 项目检查通过。
-- Vite 本地预览构建通过，门户 `dist/` 已刷新。
+- Vite 本地预览与生产构建通过，门户 `dist/` 已刷新。
+- 门户运行版发布地址：`https://icapk.github.io/gkx-ai-strategy-portal/`。
 - `view=research`、`view=reading`、主脚本与阅读图片经本机静态服务检查均返回 HTTP 200。
 - 构建 JavaScript 中不存在 `"/assets/` 或 `"../assets/`，公共资源均指向门户子路径内的 `./assets/`。
 

@@ -134,11 +134,18 @@ const sanitizeDocument = (value: unknown): ResearchDocument | null => {
     owner: cleanString(item.owner, 60) || '未知用户',
     createdAt: cleanString(item.createdAt, 40),
     visitedAt: cleanString(item.visitedAt, 40),
+    updatedAt: cleanString(item.updatedAt, 40) || cleanString(item.createdAt, 40),
+    favoritedAt: cleanString(item.favoritedAt, 40) || undefined,
+    recentHiddenAt: cleanString(item.recentHiddenAt, 40) || undefined,
+    deletedAt: cleanString(item.deletedAt, 40) || undefined,
     size: cleanString(item.size, 30) || '0 KB',
     kind: item.kind as ResearchDocument['kind'],
     favorite: Boolean(item.favorite),
     owned: Boolean(item.owned),
     shared: Boolean(item.shared),
+    spaceScope: item.spaceScope === 'personal' || item.spaceScope === 'team'
+      ? item.spaceScope
+      : cleanString(item.location, 160).startsWith('我的空间/') ? 'personal' : 'team',
     description: cleanString(item.description, 500),
     keywords: Array.isArray(item.keywords)
       ? item.keywords.slice(0, 20).map((keyword) => cleanString(keyword, 60)).filter(Boolean)
@@ -277,6 +284,17 @@ export const persistResearchDocument = (documentItem: ResearchDocument): Storage
     documents: [documentItem, ...state.documents.filter((item) => item.id !== documentItem.id)],
     recycledDocuments: state.recycledDocuments.filter((item) => item.id !== documentItem.id),
     deletedDocumentIds: state.deletedDocumentIds.filter((id) => id !== documentItem.id),
+  })
+}
+
+export const persistResearchDocumentsBatch = (documentItems: ResearchDocument[]): StorageResult => {
+  if (!documentItems.length) return { ok: true }
+  const state = readStoredState()
+  const incomingIds = new Set(documentItems.map((documentItem) => documentItem.id))
+  return writeStoredState({
+    documents: [...documentItems, ...state.documents.filter((item) => !incomingIds.has(item.id))],
+    recycledDocuments: state.recycledDocuments.filter((item) => !incomingIds.has(item.id)),
+    deletedDocumentIds: state.deletedDocumentIds.filter((id) => !incomingIds.has(id)),
   })
 }
 
