@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react'
 import { createPortal } from 'react-dom'
 import type { ResearchDocument, WorkbenchTab } from '../types'
-import { favoriteTimeLabel, parentFolderLabel } from '../workbenchDocuments'
+import { displayResearchLocation, favoriteTimeLabel, parentFolderLabel } from '../workbenchDocuments'
 
 interface DocumentTableProps {
   documents: ResearchDocument[]
@@ -146,7 +146,7 @@ function Pagination({
 }
 
 const emptyCopy = (mode: DocumentTableProps['mode'], workbenchTab: WorkbenchTab) => {
-  if (mode === 'recycle') return { title: '回收站为空', detail: '删除的内容会暂存在这里，并可在保留期内恢复。' }
+  if (mode === 'recycle') return { title: '暂无存档内容', detail: '删除的内容会暂存在这里，并可在保留期内恢复。' }
   if (mode === 'space') return { title: '暂无文档', detail: '可以新建或导入内容，文档会按当前空间归档。' }
   if (workbenchTab === 'recent') return { title: '暂无最近浏览', detail: '打开文档后，最近访问记录会自动出现在这里。' }
   if (workbenchTab === 'favorites') return { title: '暂无收藏', detail: '收藏感兴趣的文档，之后可以从这里快速找到。' }
@@ -421,17 +421,17 @@ export function DocumentTable({
   const renderRow = (documentItem: ResearchDocument) => {
     const titleCell = <td className="title-cell">{renderTitle(documentItem)}</td>
     const actionCell = <td><span className="row-actions">{renderActions(documentItem)}</span></td>
-    if (isRecent) return <>{titleCell}<td>{documentItem.size}</td><td>{documentItem.visitedAt}</td><td title={documentItem.location}>{parentFolderLabel(documentItem.location)}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
+    if (isRecent) return <>{titleCell}<td>{documentItem.size}</td><td>{documentItem.visitedAt}</td><td title={displayResearchLocation(documentItem.location)}>{parentFolderLabel(documentItem.location)}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
     if (isFavorites) return <>{titleCell}<td>{favoriteTimeLabel(documentItem)}</td><td><KindTag kind={documentItem.kind} /></td><td>{documentItem.size}</td>{actionCell}</>
-    if (mode === 'space') return <>{titleCell}<td><KindTag kind={documentItem.kind} /></td><td>{documentItem.size}</td><td>{documentItem.updatedAt ?? documentItem.createdAt}</td><td title={documentItem.location}>{parentFolderLabel(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.createdAt}</td>{actionCell}</>
+    if (mode === 'space') return <>{titleCell}<td><KindTag kind={documentItem.kind} /></td><td>{documentItem.size}</td><td>{documentItem.updatedAt ?? documentItem.createdAt}</td><td title={displayResearchLocation(documentItem.location)}>{parentFolderLabel(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.createdAt}</td>{actionCell}</>
     if (isRecycle) return <>{titleCell}<td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.deletedAt ?? '时间未记录'}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
-    return <>{titleCell}<td title={documentItem.location}>{parentFolderLabel(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.size}</td><td>{documentItem.createdAt}</td><td>{documentItem.visitedAt}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
+    return <>{titleCell}<td title={displayResearchLocation(documentItem.location)}>{parentFolderLabel(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.size}</td><td>{documentItem.createdAt}</td><td>{documentItem.visitedAt}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
   }
 
   return (
     <div className={`table-region table-region--${tableProfile}`} ref={tableRegionRef}>
       <div className="table-scroll">
-        <table className={`document-table document-table--${tableProfile}`} aria-label={isRecent ? '最近浏览文档' : isFavorites ? '收藏文档' : mode === 'space' ? '空间文档' : isRecycle ? '回收站文档' : '工作台文档'}>
+        <table className={`document-table document-table--${tableProfile}`} aria-label={isRecent ? '最近浏览文档' : isFavorites ? '收藏文档' : mode === 'space' ? '空间文档' : isRecycle ? '存档管理文档' : '工作台文档'}>
           <thead><tr>{renderHeader()}</tr></thead>
           <tbody>
             {documents.length === 0 ? (

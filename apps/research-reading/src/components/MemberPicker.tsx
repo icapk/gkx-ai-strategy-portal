@@ -158,7 +158,7 @@ export function MemberPicker({
                     <button
                       className="selected-member-role"
                       type="button"
-                      aria-label={`${candidate.name}权限，当前${role}`}
+                      aria-label={`${candidate.name}管理员角色配置，当前${role}`}
                       aria-expanded={openRoleId === candidate.id}
                       aria-haspopup="menu"
                       aria-controls={`member-role-menu-${candidate.id}`}
@@ -194,7 +194,7 @@ export function MemberPicker({
                         id={`member-role-menu-${candidate.id}`}
                         ref={roleMenuRef}
                         role="menu"
-                        aria-label={`${candidate.name}权限选项`}
+                        aria-label={`管理员角色配置：${candidate.name}`}
                         onClick={(event) => event.stopPropagation()}
                         onKeyDown={handleRoleMenuKeyDown}
                       >

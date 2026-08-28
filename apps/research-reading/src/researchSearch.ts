@@ -109,12 +109,18 @@ export function makeResearchSearchSnippet(text: string, terms: string[], maximum
 }
 
 function documentFields(document: ResearchDocument): SearchField[] {
+  const displayLocation = document.location === '我的空间'
+    ? '个人空间'
+    : document.location.startsWith('我的空间/')
+      ? `个人空间${document.location.slice('我的空间'.length)}`
+      : document.location
   return [
     { label: '标题', value: document.title, weight: 360 },
     { label: '描述', value: document.description ?? '', weight: 230 },
     { label: '正文', value: document.content ?? '', weight: 220 },
     ...(document.keywords ?? []).map((keyword) => ({ label: '关键词', value: keyword, weight: 280 })),
     { label: '位置', value: document.location, weight: 160 },
+    ...(displayLocation === document.location ? [] : [{ label: '位置', value: displayLocation, weight: 160 }]),
     { label: '所有者', value: document.owner, weight: 150 },
     { label: '类型', value: document.kind, weight: 130 },
     { label: '创建时间', value: document.createdAt, weight: 80 },

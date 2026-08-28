@@ -75,7 +75,8 @@ export function SpaceView({
   onOpenDocument,
   emptyTeam = false,
 }: SpaceViewProps) {
-  const label = mode === 'personal' ? '我的空间' : teamName ?? 'AI研究团队'
+  const locationRoot = mode === 'personal' ? '我的空间' : teamName ?? 'AI研究团队'
+  const label = mode === 'personal' ? '个人空间' : locationRoot
   const [menuFolderId, setMenuFolderId] = useState<number | null>(null)
   const [menuPosition, setMenuPosition] = useState<{ left: number; top: number } | null>(null)
   const [renamingFolderId, setRenamingFolderId] = useState<number | null>(null)
@@ -85,7 +86,7 @@ export function SpaceView({
   const menuTriggerRefs = useRef(new Map<number, HTMLButtonElement>())
   const renameInputRef = useRef<HTMLInputElement>(null)
   const visibleDocuments = openFolderName
-    ? documents.filter((documentItem) => documentItem.location === `${label}/${openFolderName}`)
+    ? documents.filter((documentItem) => documentItem.location === `${locationRoot}/${openFolderName}`)
     : documents
 
   const closeFolderMenu = (restoreFocus = false) => {
@@ -259,8 +260,8 @@ export function SpaceView({
                       <img src={folder.id % 2 === 0 ? '/assets/folder-data.svg' : '/assets/folder-research.svg'} alt="" />
                       <span className="folder-copy">
                         <strong>{folder.name}</strong>
-                        <small>{documents.filter((documentItem) => documentItem.location === `${label}/${folder.name}`).length} 个项目&nbsp; 更新于 {folderUpdatedAt(folder, documents.filter((documentItem) => documentItem.location === `${label}/${folder.name}`))}</small>
-                        <span>{folder.owner ?? '当前用户'} · {aggregateSize(documents.filter((documentItem) => documentItem.location === `${label}/${folder.name}`))} · 创建于 {folder.createdAt ?? folder.updatedAt}</span>
+                        <small>{documents.filter((documentItem) => documentItem.location === `${locationRoot}/${folder.name}`).length} 个项目&nbsp; 更新于 {folderUpdatedAt(folder, documents.filter((documentItem) => documentItem.location === `${locationRoot}/${folder.name}`))}</small>
+                        <span>{folder.owner ?? '当前用户'} · {aggregateSize(documents.filter((documentItem) => documentItem.location === `${locationRoot}/${folder.name}`))} · 创建于 {folder.createdAt ?? folder.updatedAt}</span>
                       </span>
                     </button>
                   )}

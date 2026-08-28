@@ -73,6 +73,25 @@ test('文档摘要缺失时稳定回退到位置和所有者', () => {
   assert.equal(result.snippet, '我的空间/研究 · 张三')
 })
 
+test('个人空间展示名与历史内部名称都能检索同一文档', () => {
+  const document: ResearchDocument = {
+    id: 78,
+    title: '空间检索兼容文档',
+    location: '我的空间/研究',
+    owner: '张三',
+    createdAt: '2026-01-01 10:00',
+    visitedAt: '2026-01-01 10:00',
+    size: '1 KB',
+    kind: 'PDF文档',
+    favorite: false,
+    owned: true,
+    shared: false,
+  }
+
+  assert.equal(searchResearchContent([document], [], '个人空间')[0]?.id, 'document:78')
+  assert.equal(searchResearchContent([document], [], '我的空间')[0]?.id, 'document:78')
+})
+
 test('搜索函数仍保持空查询无命中的清晰语义', () => {
   assert.deepEqual(searchResearchContent(initialDocuments, initialResearchNotes, ''), [])
   assert.deepEqual(searchResearchContent(initialDocuments, initialResearchNotes, '   '), [])

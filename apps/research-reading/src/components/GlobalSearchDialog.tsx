@@ -9,6 +9,7 @@ import {
   type ResearchSearchResult,
   type ResearchSearchScope,
 } from '../researchSearch'
+import { displayResearchLocation } from '../workbenchDocuments'
 import { Modal } from './Modal'
 
 interface GlobalSearchDialogProps {
@@ -308,6 +309,7 @@ export function GlobalSearchDialog({
               {paginatedResults.map((result) => {
                 const title = result.type === 'document' ? result.document.title : result.note.title
                 const actionLabel = resultActionLabel(result)
+                const displayTerms = terms.map(displayResearchLocation)
                 return (
                 <article className={`global-search-result global-search-result--${result.type}`} key={result.id}>
                   <ResultIcon result={result} />
@@ -319,7 +321,7 @@ export function GlobalSearchDialog({
                     <ResultMetadata result={result} terms={terms} />
                     <div className="global-search-result-match">
                       <span>{hasSubmittedQuery ? `命中：${result.matchedFields.join('、')}` : result.type === 'document' ? '文档摘要' : '笔记摘要'}</span>
-                      <p><HighlightedText text={result.snippet} terms={terms} /></p>
+                      <p><HighlightedText text={displayResearchLocation(result.snippet)} terms={displayTerms} /></p>
                     </div>
                   </div>
                   <button

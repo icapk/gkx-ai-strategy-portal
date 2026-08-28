@@ -1359,7 +1359,7 @@ export default function App() {
             )}
             {activeSection === 'recycle' && (
               <section className="view view--recycle">
-                <header className="view-header"><h1><span className="title-accent" />回收站</h1></header>
+                <header className="view-header"><h1><span className="title-accent" />存档管理</h1></header>
                 <div className="view-body recycle-body">
                   <div className="recycle-note">回收站中的内容将在 30 天后自动清除</div>
                   <DocumentTable

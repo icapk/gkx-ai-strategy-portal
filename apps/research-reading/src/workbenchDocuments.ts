@@ -10,6 +10,12 @@ export const parentFolderLabel = (location: string) => {
   return parts.at(-1) ?? '未分类'
 }
 
+export const displayResearchLocation = (location: string) => {
+  if (location === '我的空间') return '个人空间'
+  if (location.startsWith('我的空间/')) return `个人空间${location.slice('我的空间'.length)}`
+  return location
+}
+
 export const isPersonalDocument = (documentItem: ResearchDocument) => (
   documentItem.spaceScope === 'personal'
   || (!documentItem.spaceScope && documentItem.location.startsWith('我的空间/'))

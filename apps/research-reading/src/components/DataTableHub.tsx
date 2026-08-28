@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { getResearchDataTableSearchText } from '../dataTableContent'
 import type { ResearchDataTable, ResearchDocument } from '../types'
+import { displayResearchLocation } from '../workbenchDocuments'
 import { Modal } from './Modal'
 
 type DataHubScope = 'all' | ResearchDataTable['template']
@@ -286,7 +287,7 @@ export function DataTableHub({
                 <thead><tr><th>名称</th><th>类型</th><th>状态</th><th>数据规模</th><th>共享权限</th><th>最近更新</th><th>操作</th></tr></thead>
                 <tbody>{visibleItems.map((item) => (
                   <tr key={item.documentId}>
-                    <td data-label="名称"><div className="data-hub-name-cell"><span aria-hidden="true"><img src="/assets/iconpark/grid-nine.svg" alt="" /></span><div><button type="button" onClick={() => onOpenTable(item)}>{item.title}</button><small>{item.location}</small></div></div></td>
+                    <td data-label="名称"><div className="data-hub-name-cell"><span aria-hidden="true"><img src="/assets/iconpark/grid-nine.svg" alt="" /></span><div><button type="button" onClick={() => onOpenTable(item)}>{item.title}</button><small>{displayResearchLocation(item.location)}</small></div></div></td>
                     <td data-label="类型">{item.table.template === 'project-progress' ? '项目进度' : '科研数据'}</td>
                     <td data-label="状态"><span className={`data-hub-status data-hub-status--${getStatusClass(item.status)}`}>{item.status}</span></td>
                     <td data-label="数据规模"><span>{item.table.rows.length} 条记录</span><small>{item.table.attachments.length} 个文件</small></td>

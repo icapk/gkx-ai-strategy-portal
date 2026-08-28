@@ -3082,7 +3082,7 @@
               <div class="mg-search-mode-row" id="mgClassicSearchModeRow">
                 <div class="mg-search-mode-tabs" id="mgHeroSearchModes" role="tablist" aria-label="搜索方式">
                   <button class="mg-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-hero-search-mode="fulltext">全文搜索</button>
-                  <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="association">关联搜索</button>
+                  <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="association">智能关联搜索</button>
                   <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="ai">AI搜索</button>
                   <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="keyword">关键词搜索</button>
                 </div>
@@ -3127,7 +3127,7 @@
               </div>
               <div class="mg-ai-search-guide" id="mgKeywordSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">词</span>
-                <span>支持单个或多个关键词、精确匹配、AND/OR组合，以及翻译和上下位词扩展</span>
+                <span>支持单个或多个关键词、精确查找、AND/OR组合，以及翻译、同义词与上下位概念的词位扩展</span>
               </div>
               <div class="mg-ai-search-guide" id="mgV2QaSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">问</span>
@@ -3692,13 +3692,13 @@
           <div class="recommendation-tabs" id="recommendationTabs" role="tablist" aria-label="推荐内容分类">
             <button class="recommendation-tab is-active" id="recommendationTabAll" type="button" role="tab" aria-selected="true" aria-controls="recommendationGrid" tabindex="0" data-recommendation-type="为你推荐">为你推荐</button>
             <button class="recommendation-tab" id="recommendationTabSimulation" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="仿真">仿真</button>
-            <button class="recommendation-tab" id="recommendationTabInfo" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="资讯">资讯</button>
-            <button class="recommendation-tab" id="recommendationTabPaper" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="文献">文献</button>
-            <button class="recommendation-tab" id="recommendationTabReport" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="报告">报告</button>
-            <button class="recommendation-tab" id="recommendationTabTalent" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="人才">人才</button>
-            <button class="recommendation-tab" id="recommendationTabMeeting" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="会议">会议</button>
-            <button class="recommendation-tab" id="recommendationTabCourse" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="课程">课程</button>
-            <button class="recommendation-tab" id="recommendationTabEvent" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="活动">活动</button>
+            <button class="recommendation-tab" id="recommendationTabInfo" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="资讯">资讯推荐</button>
+            <button class="recommendation-tab" id="recommendationTabPaper" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="文献">文献推荐</button>
+            <button class="recommendation-tab" id="recommendationTabReport" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="报告">报告推荐</button>
+            <button class="recommendation-tab" id="recommendationTabTalent" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="人才">人才推荐</button>
+            <button class="recommendation-tab" id="recommendationTabMeeting" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="会议">顶会推荐</button>
+            <button class="recommendation-tab" id="recommendationTabCourse" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="课程">课程推荐</button>
+            <button class="recommendation-tab" id="recommendationTabEvent" type="button" role="tab" aria-selected="false" aria-controls="recommendationGrid" tabindex="-1" data-recommendation-type="活动">活动推荐</button>
           </div>
 
           <div class="recommendation-grid" id="recommendationGrid" role="tabpanel" aria-labelledby="recommendationTabAll" aria-live="polite"></div>
@@ -3883,14 +3883,14 @@
     <section class="search-results-page portal-search-page" id="searchResultsPage" aria-labelledby="searchResultsTitle" hidden>
       <div class="portal-search-shell portal-search-inner">
         <header class="portal-search-header">
-          <h1 class="portal-search-title" id="searchResultsTitle">搜索结果</h1>
+          <h1 class="portal-search-title" id="searchResultsTitle">信息搜索</h1>
           <p class="portal-search-lead">查看并筛选符合条件的资源。</p>
           <span class="sr-only" id="searchResultQuery"></span>
         </header>
 
         <div class="portal-search-modes portal-search-mode-tabs" id="portalSearchModes" role="tablist" aria-label="搜索方式">
           <button class="portal-search-mode portal-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-search-mode="全文">全文搜索</button>
-          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="关联">关联搜索</button>
+          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="关联">智能关联搜索</button>
           <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="AI 搜索">AI搜索</button>
           <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="关键词">关键词搜索</button>
         </div>
@@ -3898,7 +3898,7 @@
         <div class="portal-search-toolbar">
           <form class="portal-search-form" id="portalResultSearchForm" role="search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 4.5 4.5"></path></svg>
-            <label class="sr-only" for="portalResultSearchInput">综合资源检索</label>
+            <label class="sr-only" for="portalResultSearchInput">信息搜索</label>
             <input class="portal-search-input" id="portalResultSearchInput" type="search" autocomplete="off" maxlength="120" aria-describedby="portalSearchFeedback" placeholder="搜索论文、专利、报告、人才、资讯、项目">
             <button class="portal-search-button" type="submit">搜索</button>
           </form>
@@ -3928,11 +3928,11 @@
         <section class="portal-association-panel" id="portalAssociationPanel" aria-labelledby="portalAssociationTitle" hidden>
           <div class="portal-mode-panel-header">
             <div>
-              <p class="portal-mode-panel-eyebrow">智能关联 · 五步可追溯</p>
+              <p class="portal-mode-panel-eyebrow">智能关联搜索 · 五步可追溯</p>
               <h2 id="portalAssociationTitle">从检索问题到关联知识推荐</h2>
             </div>
             <div class="portal-mode-panel-actions">
-              <button class="portal-personalization-toggle" id="portalPersonalizationToggle" type="button" aria-pressed="false">个性化关联：关闭</button>
+              <button class="portal-personalization-toggle" id="portalPersonalizationToggle" type="button" aria-pressed="false">个性化关联搜索：关闭</button>
               <button class="portal-panel-disclosure" id="portalAssociationDetailsToggle" type="button" aria-expanded="true" aria-controls="portalAssociationDetails">收起过程</button>
             </div>
           </div>
@@ -3940,7 +3940,7 @@
             <p class="portal-association-status" id="portalAssociationStatus" role="status" aria-live="polite">等待检索提问</p>
             <ol class="portal-association-workflow">
               <li>
-                <span class="portal-workflow-step">01 · 提问预处理</span>
+                <span class="portal-workflow-step">01 · 用户搜索</span>
                 <strong>识别主题、对象与资源意图</strong>
                 <p id="portalAssociationOriginalQuery">原始问题：—</p>
                 <div class="portal-association-entities" id="portalAssociationEntities" aria-label="识别结果"></div>
@@ -3959,19 +3959,19 @@
                   <button id="portalUserModelDisclosure" type="button" aria-expanded="false" aria-controls="portalUserModelPanel">查看模型与信号</button>
                 </div>
                 <div class="portal-interest-profile" id="portalInterestProfile" aria-label="本次排序使用的兴趣信号"></div>
-                <p id="portalProfileUpdateStatus">个性化关联关闭，不采集行为，结果仅依据当前提问和知识关系排序。</p>
+                <p id="portalProfileUpdateStatus">个性化关联搜索关闭，不采集行为，结果仅依据当前提问和知识关系排序。</p>
               </li>
               <li>
-                <span class="portal-workflow-step">04 · 知识库召回</span>
+                <span class="portal-workflow-step">04 · 知识检索</span>
                 <strong>跨资源查找相关或相似信息</strong>
-                <p id="portalAssociationRecallSummary">等待从原型知识库召回候选信息。</p>
+                <p id="portalAssociationRecallSummary">等待执行知识检索并召回候选信息。</p>
                 <div class="portal-association-sources" id="portalAssociationSources" aria-label="已召回资源来源"></div>
               </li>
               <li>
                 <span class="portal-workflow-step">05 · 分析过滤与推荐</span>
                 <strong>按需求排序并说明推荐依据</strong>
                 <p id="portalAssociationFilterSummary">等待分析候选信息。</p>
-                <div class="portal-association-scope" id="portalAssociationScope" role="group" aria-label="关联范围">
+                <div class="portal-association-scope" id="portalAssociationScope" role="group" aria-label="智能关联搜索范围">
                   <button class="is-active" type="button" aria-pressed="true" data-association-scope="all">全部</button>
                   <button type="button" aria-pressed="false" data-association-scope="topic">相关主题</button>
                   <button type="button" aria-pressed="false" data-association-scope="outcome">相似成果</button>
@@ -3990,7 +3990,7 @@
             </header>
             <section class="portal-user-model-consent" id="portalUserModelConsent" aria-labelledby="portalUserModelConsentTitle" hidden>
               <h4 id="portalUserModelConsentTitle" tabindex="-1">开启前确认信息处理范围</h4>
-              <p>开启后，原型只在本机浏览器中保存你明确提交的操作，用于调整智能关联排序；不会采集悬停、滚动、停留时长、受限资源正文或外部网站行为。</p>
+              <p>开启后，原型只在本机浏览器中保存你明确提交的操作，用于调整智能关联搜索排序；不会采集悬停、滚动、停留时长、受限资源正文或外部网站行为。</p>
               <fieldset aria-describedby="portalUserModelConsentHelp">
                 <legend>允许计入用户模型的信号</legend>
                 <label><input id="portalUserModelConsentSearch" type="checkbox" name="userModelConsentSource" value="search" checked> 搜索提问</label>
@@ -4035,7 +4035,7 @@
               <section class="portal-user-model-history" aria-labelledby="portalUserModelHistoryTitle">
                 <div class="portal-user-model-section-heading">
                   <div>
-                    <h4 id="portalUserModelHistoryTitle" tabindex="-1">行为明细</h4>
+                    <h4 id="portalUserModelHistoryTitle" tabindex="-1">行为分析</h4>
                     <p>每条权重都可回溯到具体操作；重复操作不会重复累计。</p>
                   </div>
                   <span id="portalUserModelSignalCount">0 条信号</span>
@@ -4056,7 +4056,7 @@
               </div>
             </div>
             <div class="portal-user-model-status" id="portalUserModelStatus" role="status" aria-live="polite">
-              <span>尚未开启个性化关联。</span>
+              <span>尚未开启个性化关联搜索。</span>
               <button id="portalUserModelUndo" type="button" hidden>撤销上次模型更新</button>
             </div>
           </section>
@@ -4085,13 +4085,13 @@
         <section class="portal-keyword-panel" id="portalKeywordPanel" aria-labelledby="portalKeywordTitle" hidden>
           <div class="portal-mode-panel-header">
             <div>
-              <p class="portal-mode-panel-eyebrow">关键词检索 · 检索式可复现</p>
+              <p class="portal-mode-panel-eyebrow">关键词搜索 · 检索式可复现</p>
               <h2 id="portalKeywordTitle">组合关键词并控制匹配范围</h2>
             </div>
             <div class="portal-keyword-controls" aria-label="关键词组合方式">
               <button class="is-active" type="button" data-keyword-logic="AND" aria-pressed="true">全部包含 AND</button>
               <button type="button" data-keyword-logic="OR" aria-pressed="false">任一包含 OR</button>
-              <button type="button" id="portalKeywordExactToggle" aria-pressed="false">精确短语</button>
+              <button type="button" id="portalKeywordExactToggle" aria-pressed="false">精确查找</button>
               <button type="button" id="portalExpansionToggle" aria-expanded="false" aria-controls="portalSearchCapabilities">词位扩展</button>
             </div>
           </div>
@@ -4137,7 +4137,7 @@
               <fieldset class="portal-search-filter-group" data-filter-mode="keyword">
                 <legend class="portal-search-filter-heading">匹配方式</legend>
                 <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="智能匹配" checked><span>智能匹配</span></label>
-                <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="精确匹配"><span>精确匹配</span></label>
+                <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="精确匹配"><span>精确查找</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="模糊匹配"><span>模糊匹配</span></label>
               </fieldset>
               <fieldset class="portal-search-filter-group portal-search-filter-fields" data-filter-mode="all">
@@ -4191,7 +4191,7 @@
             <header class="portal-results-header">
               <div class="portal-results-heading-row">
                 <div>
-                  <p class="portal-results-eyebrow">检索结果</p>
+                  <p class="portal-results-eyebrow">搜索结果展示</p>
                   <h2 id="portalSearchResultCount">0 条结果</h2>
                   <p class="portal-results-range" id="portalSearchResultRange">正在准备结果</p>
                 </div>
@@ -4336,10 +4336,10 @@
       <section class="portal-document-panel">
         <header class="portal-document-header">
           <div>
-            <p>全文定位 · 模拟预览</p>
-            <h2 id="portalDocumentTitle">原文定位</h2>
+            <p>搜索结果定位 · 模拟预览</p>
+            <h2 id="portalDocumentTitle">搜索结果定位</h2>
           </div>
-          <button class="portal-document-close" type="button" data-close-document-viewer aria-label="关闭全文预览">×</button>
+          <button class="portal-document-close" type="button" data-close-document-viewer aria-label="关闭搜索结果定位预览">×</button>
         </header>
         <div class="portal-document-toolbar">
           <button type="button" id="portalPreviousMatch">上一处</button>
@@ -4673,22 +4673,22 @@
 
       const SEARCH_MODE_CONFIG = {
         "全文": {
-          title: "搜索结果",
+          title: "信息搜索",
           placeholder: "输入关键词、题名、作者或机构",
           description: "查看并筛选符合条件的论文、专利、报告等资源。"
         },
         "关联": {
-          title: "关联搜索结果",
+          title: "智能关联搜索",
           placeholder: "输入研究主题、论文、专家或机构",
           description: "查看并筛选与当前主题相关的资源。"
         },
         "AI 搜索": {
-          title: "AI搜索结果",
+          title: "AI搜索",
           placeholder: "输入关键词或研究问题",
           description: "查看与当前问题相关的检索结果。"
         },
         "关键词": {
-          title: "关键词搜索结果",
+          title: "关键词搜索",
           placeholder: "输入一个或多个关键词",
           description: "按关键词和筛选条件查看资源。"
         }
@@ -4747,7 +4747,7 @@
       let userModelLastTrigger = null;
       let userModelStatusMessage = associationUserModel.consent
         ? (personalizationEnabled ? "已恢复本机用户模型。" : "用户模型已保留，个性化当前暂停。")
-        : "尚未开启个性化关联。";
+        : "尚未开启个性化关联搜索。";
       let activeDocumentItem = null;
       let activeDocumentMatchIndex = 0;
       let activeDocumentTrigger = null;
@@ -5854,7 +5854,7 @@
           },
           association: {
             placeholder: "输入研究主题、论文、专利、专家或机构，发现关联知识",
-            label: "开始关联搜索"
+            label: "开始智能关联搜索"
           },
           ai: {
             placeholder: "输入关键词或完整研究问题，AI将检索并解读相关科技资源",
@@ -6307,7 +6307,7 @@
           : personalizationEnabled
             ? `已开启 · ${associationInterests.size} 个主题`
             : `已暂停 · ${associationInterests.size} 个主题已保留`;
-        portalPersonalizationToggle.textContent = `个性化关联：${personalizationEnabled ? "开启" : "关闭"}`;
+        portalPersonalizationToggle.textContent = `个性化关联搜索：${personalizationEnabled ? "开启" : "关闭"}`;
         portalPersonalizationToggle.setAttribute("aria-pressed", String(personalizationEnabled));
         portalInterestProfile.hidden = !personalizationEnabled || associationInterests.size === 0;
         portalInterestProfile.innerHTML = [...associationInterests.entries()].sort((a, b) => b[1].score - a[1].score).slice(0, 3).map(([label, data]) => {
@@ -6319,7 +6319,7 @@
         const activeSignalCount = [...associationInterests.values()].reduce((count, interest) => count + interest.count, 0);
         const relevanceSortActive = portalSearchSort.value === "relevance";
         portalProfileUpdateStatus.textContent = !associationUserModel.consent
-          ? "个性化关联关闭，不采集行为，结果仅依据当前提问、知识关系与可核验性排序。"
+          ? "个性化关联搜索关闭，不采集行为，结果仅依据当前提问、知识关系与可核验性排序。"
           : personalizationEnabled
             ? activeSignalCount
               ? relevanceSortActive
@@ -6385,7 +6385,7 @@
                 <button type="button" data-user-model-undo-signal="${escapeHtml(signal.id)}" aria-label="撤销${escapeHtml(signal.label)}对${escapeHtml(signal.topic)}权重的影响">撤销</button>
               </li>`;
             }).join("")
-          : `<li class="portal-user-model-empty"><strong>暂无行为明细</strong><span>只有同意后的显式操作才会出现在这里。</span></li>`;
+          : `<li class="portal-user-model-empty"><strong>暂无行为分析记录</strong><span>只有同意后的显式操作才会出现在这里。</span></li>`;
         portalUserModelPause.textContent = personalizationEnabled ? "暂停个性化" : "重新开启个性化";
         portalUserModelStatus.querySelector("span").textContent = userModelStorageError || userModelStatusMessage;
         portalUserModelUndo.hidden = !userModelUndoSnapshot;
@@ -6562,7 +6562,7 @@
             : `结果按关联强度、可核验性${personalizationEnabled && associationInterests.size ? "与已授权用户模型" : ""}排序。`;
         portalAssociationFilterSummary.textContent = `候选 ${candidates.length} 条 → 按需求过滤 ${filteredItems.length} 条 → 当前展示 ${visibleItems.length} 条；${associationSortSummary}`;
         portalAssociationStatus.textContent = candidates.length
-          ? `知识检索完成：已完成提问预处理、规范化、信息处理、知识库召回和分析推荐，共获得 ${filteredItems.length} 条符合当前条件的信息。`
+          ? `知识检索完成：已完成用户搜索、规范化、行为分析、信息处理、知识检索和分析推荐，共获得 ${filteredItems.length} 条符合当前条件的信息。`
           : "知识检索完成，但当前原型知识库暂无匹配信息。";
         portalAssociationScope.querySelectorAll("[data-association-scope]").forEach((button) => {
           const active = button.dataset.associationScope === associationScope;
@@ -6592,7 +6592,7 @@
           }).join("");
         });
         portalExpansionNote.textContent = keywordExact
-          ? "精确短语已开启：翻译、同义词和上下位词扩展已停用。"
+          ? "精确查找已开启：词位扩展已停用。"
           : "扩展词来自模拟主题词表、术语库和模型建议；选择后生效，取消即可撤销。";
       }
 
@@ -6624,7 +6624,7 @@
         const expansionExpression = [...activeExpansionTerms].map((term) => `\"${term}\"`).join(" OR ");
         portalKeywordExpression.textContent = expansionExpression ? `(${baseExpression}) OR (${expansionExpression})` : baseExpression;
         portalKeywordStatus.textContent = keywordExact
-          ? "精确短语匹配已开启，不进行词义扩展；结果必须包含完整词项。"
+          ? "精确查找已开启，不进行词位扩展；结果必须包含完整词项。"
           : `原始关键词按 ${keywordLogic} 组合；扩展词作为可撤销的召回补充。`;
         portalKeywordExactToggle.classList.toggle("is-active", keywordExact);
         portalKeywordExactToggle.setAttribute("aria-pressed", String(keywordExact));
@@ -6745,7 +6745,7 @@
         const findings = isDrugQuery
           ? [
               "大模型可联合文献、组学数据与知识图谱，辅助发现潜在靶点及其作用关系。",
-              "语义检索能召回未直接包含原词但研究问题高度相关的成果，补充传统关键词检索。",
+              "语义检索能召回未直接包含原词但研究问题高度相关的成果，补充传统关键词搜索。",
               "当前证据仍受训练数据时效、实验验证不足与机制可解释性限制，不能替代湿实验验证。"
             ]
           : [
@@ -6888,7 +6888,7 @@
             <p>${escapeHtml(item.matches?.[0]?.text || item.detail || item.summary)}</p>
             <small>关联路径：${escapeHtml(associationProfile.path)} · 命中字段：${escapeHtml(getMatchFieldLabel(item, query))}</small>
             ${associationProfile.availableEvidence && item.matches?.length
-              ? `<button type="button" data-open-fulltext="${itemIndex}">查看原文命中 <i>第 ${item.matches[0].page} 页 · 第 ${item.matches[0].paragraph} 段</i></button>`
+              ? `<button type="button" data-open-fulltext="${itemIndex}">打开搜索结果定位 <i>第 ${item.matches[0].page} 页 · 第 ${item.matches[0].paragraph} 段</i></button>`
               : `<small>${associationProfile.availableEvidence ? "当前结果提供摘要与来源元数据，可进入详情继续核验。" : "该资源当前无访问权限，不能生成或采用虚构证据。"}</small>`}
           </section>` : "";
         const associationActionsMarkup = associationProfile ? `
@@ -7256,7 +7256,7 @@
             <li>来源对同一结论的支持强度可能不同，不能把相关性当作因果性。</li>
             <li>正式结论应补充相反证据、失效条件和最新数据核验。</li>
           </ul>
-          <aside class="portal-qa-boundary"><strong>结论边界</strong><p>以上为原型模拟答案，仅展示“问题—答案—引用—原文定位”的交互闭环，不代表真实检索覆盖、模型能力或引用准确率。</p></aside>`;
+          <aside class="portal-qa-boundary"><strong>结论边界</strong><p>以上为原型模拟答案，仅展示“问题—答案—引用—搜索结果定位”的交互闭环，不代表真实检索覆盖、模型能力或引用准确率。</p></aside>`;
       }
 
       function renderQaAnswer(question) {
@@ -7952,7 +7952,7 @@
       });
       portalPersonalizationToggle.addEventListener("click", () => {
         if (!associationUserModel.consent) {
-          userModelStatusMessage = "请先确认信息处理范围，再开启个性化关联。";
+          userModelStatusMessage = "请先确认信息处理范围，再开启个性化关联搜索。";
           setUserModelPanelOpen(true, portalPersonalizationToggle);
           return;
         }

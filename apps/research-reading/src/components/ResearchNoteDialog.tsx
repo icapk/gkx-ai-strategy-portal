@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type FormEvent } from 'react'
 import type { ResearchDocument, ResearchNote } from '../types'
+import { displayResearchLocation } from '../workbenchDocuments'
 import { Modal } from './Modal'
 
 interface NoteDetailDialogProps {
@@ -30,7 +31,7 @@ export function NoteDetailDialog({ note, documentItem, onClose, onEdit, onOpenDo
         <button className="research-note-source" type="button" onClick={onOpenDocument}>
           <span>来源文档</span>
           <strong>{documentItem.title}</strong>
-          <small>{documentItem.location}</small>
+          <small>{displayResearchLocation(documentItem.location)}</small>
           <i aria-hidden="true" />
         </button>
         <div className="research-note-content">
@@ -131,7 +132,7 @@ export function NoteEditorDialog({ note, documentItem, onClose, onSave }: NoteEd
       <div className="research-note-document-context">
         <span>关联文档</span>
         <strong>{documentItem.title}</strong>
-        <small>{documentItem.location}</small>
+        <small>{displayResearchLocation(documentItem.location)}</small>
       </div>
       <label className="field-label" htmlFor="research-note-title"><span className="required-mark">*</span> 笔记标题：</label>
       <input

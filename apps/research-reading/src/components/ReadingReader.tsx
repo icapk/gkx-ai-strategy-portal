@@ -99,7 +99,7 @@ interface ReaderArticleSection {
 const insightTabs: Array<{ id: InsightPanel; label: string }> = [
   { id: 'ai', label: 'AI解读' },
   { id: 'charts', label: '图表' },
-  { id: 'references', label: '参考文献' },
+  { id: 'references', label: '论文解析服务' },
   { id: 'metadata', label: '元数据' },
   { id: 'graph', label: '图谱' },
 ]
@@ -1974,7 +1974,8 @@ export function ReadingReader({
   }, [activeTool, colorMenuOpen, contextAction, documentMenuOpen, locatedResult, mobileInsightsOpen, mobileLeftOpen, noteDetailId, noteEditorExpanded, searchModeOpen, searchOpen, translatedResult])
 
   return (
-    <section ref={readingFrameRef} className={`reading-frame${maximized ? ' reading-frame--maximized' : ''}${editingNoteId != null && leftPanel === 'notes' && noteEditorExpanded ? ' reading-frame--notes-expanded' : ''}${activeTool === 'screenshot' ? ' reading-frame--screenshot-armed' : ''}`} aria-label="智能阅读器">
+    <section ref={readingFrameRef} className={`reading-frame${maximized ? ' reading-frame--maximized' : ''}${editingNoteId != null && leftPanel === 'notes' && noteEditorExpanded ? ' reading-frame--notes-expanded' : ''}${activeTool === 'screenshot' ? ' reading-frame--screenshot-armed' : ''}`} aria-label="PDF增强阅读">
+      <h2 className="sr-only">PDF增强阅读</h2>
       <header className="reading-document-header">
         <div className="reading-document-picker">
           <button
@@ -2020,7 +2021,7 @@ export function ReadingReader({
       </header>
 
       <aside className={`reading-left-panel${mobileLeftOpen ? ' is-mobile-open' : ''}`}>
-        <div className="reading-left-rail" role="tablist" aria-label="阅读辅助栏">
+        <div className="reading-left-rail" role="tablist" aria-label="菜单栏服务">
           <button ref={(node) => { leftTabRefs.current[0] = node }} type="button" id="reading-left-tab-outline" role="tab" aria-controls="reading-left-panel-outline" aria-selected={leftPanel === 'outline'} aria-expanded={leftOverlayLayout ? mobileLeftOpen && leftPanel === 'outline' : undefined} tabIndex={leftPanel === 'outline' ? 0 : -1} className={leftPanel === 'outline' ? 'is-active' : ''} onClick={() => selectLeftPanel('outline')} onKeyDown={(event) => handleLeftTabKeyDown(event, 0)} aria-label="目录">
             <img src={leftPanel === 'outline' ? '/assets/reading/outline.svg' : '/assets/reading/outline-inactive.svg'} alt="" />
           </button>
@@ -2191,7 +2192,7 @@ export function ReadingReader({
           </div>
         </div>
 
-        <div className="reading-selection-toolbar" role="toolbar" aria-label="划词工具">
+        <div className="reading-selection-toolbar" role="toolbar" aria-label="菜单栏服务：划词工具">
           <button ref={(node) => { selectionToolRefs.current[0] = node; searchToolRef.current = node }} type="button" aria-label="AI检索" aria-pressed={activeTool === 'search'} className={activeTool === 'search' ? 'is-active' : ''} onKeyDown={(event) => handleSelectionToolbarKeyDown(event, 0)} onClick={activateSearch}><span className="reading-search-tool-glyph" aria-hidden="true" /></button>
           <span />
           <button ref={(node) => { selectionToolRefs.current[1] = node }} type="button" aria-label="标注与添加笔记" aria-pressed={activeTool === 'note'} className={activeTool === 'note' ? 'is-active' : ''} onKeyDown={(event) => handleSelectionToolbarKeyDown(event, 1)} onClick={activateNoteTool}><span className="reading-note-tool-glyph" aria-hidden="true" /></button>
@@ -2282,8 +2283,9 @@ export function ReadingReader({
       )}
 
       <aside className={`reading-right-panel${mobileInsightsOpen ? ' is-mobile-open' : ''}`} aria-hidden={compactLayout && !mobileInsightsOpen} inert={compactLayout && !mobileInsightsOpen ? true : undefined}>
-        <button type="button" className="reading-mobile-insight-close reading-icon-close" aria-label="关闭智能解读面板" onClick={() => setMobileInsightsOpen(false)} />
-        <div className="reading-insight-tabs" role="tablist" aria-label="智能阅读分析">
+        <button type="button" className="reading-mobile-insight-close reading-icon-close" aria-label="关闭增强阅读服务面板" onClick={() => setMobileInsightsOpen(false)} />
+        <h2 className="sr-only">增强阅读服务</h2>
+        <div className="reading-insight-tabs" role="tablist" aria-label="增强阅读服务">
           {insightTabs.map((tab, index) => <button ref={(node) => { rightTabRefs.current[index] = node }} type="button" id={`reading-insight-tab-${tab.id}`} role="tab" aria-controls={`reading-insight-panel-${tab.id}`} aria-selected={rightPanel === tab.id} tabIndex={rightPanel === tab.id ? 0 : -1} className={rightPanel === tab.id ? 'is-active' : ''} onClick={() => selectInsightPanel(tab.id)} onKeyDown={(event) => handleRightTabKeyDown(event, index)} key={tab.id}>{tab.label}</button>)}
         </div>
         <div className="reading-insight-content" id={`reading-insight-panel-${rightPanel}`} role="tabpanel" aria-labelledby={`reading-insight-tab-${rightPanel}`}>
@@ -2459,7 +2461,7 @@ function ReadingReferences({ references, selectedId, onSelect, onLocate }: {
 }) {
   const selected = references.find((reference) => reference.id === selectedId)
   if (selected) return <div className="reading-reference-panel reading-reference-detail"><header><button type="button" className="reading-panel-back" onClick={() => onSelect(null)}>← 返回文献列表</button><span>{selected.citationAnchors.length} 处引用</span></header><article><span>文献详情</span><strong>{selected.title}</strong><dl><div><dt>作者</dt><dd>{selected.authors.join('；')}</dd></div><div><dt>摘要</dt><dd>{selected.abstract}</dd></div><div><dt>期刊 / 日期</dt><dd>{selected.journal} · {selected.publicationDate}</dd></div><div><dt>DOI</dt><dd>{selected.doi}</dd></div></dl><div className="reading-reference-anchors"><b>正文引用位置</b>{selected.citationAnchors.map((anchor, index) => <button type="button" key={anchor.id} onClick={() => onLocate(selected, index)}><span>{anchor.marker} · 第{anchor.page}页</span><small>{anchor.context}</small></button>)}</div></article></div>
-  return <div className="reading-reference-panel"><header><strong>文献解析</strong><span>{references.length} 条</span></header><div>{references.map((reference, index) => <article key={reference.id}><span>[{index + 1}] · {reference.citationAnchors.length} 处引用</span><strong>{reference.title}</strong><small>{reference.authors.join('；')} · {reference.journal} · {reference.publicationDate}</small><footer><b>DOI · {reference.doi}</b><button type="button" onClick={() => onSelect(reference.id)}>查看</button></footer></article>)}</div></div>
+  return <div className="reading-reference-panel"><header><strong>论文解析服务</strong><span>{references.length} 条</span></header><div>{references.map((reference, index) => <article key={reference.id}><span>[{index + 1}] · {reference.citationAnchors.length} 处引用</span><strong>{reference.title}</strong><small>{reference.authors.join('；')} · {reference.journal} · {reference.publicationDate}</small><footer><b>DOI · {reference.doi}</b><button type="button" onClick={() => onSelect(reference.id)}>查看</button></footer></article>)}</div></div>
 }
 
 function ReadingMetadata({ analysis }: { analysis: PaperAnalysis }) {

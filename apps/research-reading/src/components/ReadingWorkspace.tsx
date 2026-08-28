@@ -470,7 +470,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
           <button ref={(tab) => { productTabRefs.current[1] = tab }} id="reading-product-tab-reading" className="product-tab product-tab--active" type="button" role="tab" aria-selected="true" aria-controls="reading-product-panel" tabIndex={0} onKeyDown={(event) => handleProductTabKeyDown(event, 1)}>智能阅读</button>
         </div>
         <div className="reading-product-actions">
-          {(view === 'reader' || view === 'upload') && <button className="reading-library-launch" type="button" onClick={leaveUploadForLibrary}>智能阅读库</button>}
+          {(view === 'reader' || view === 'upload') && <button className="reading-library-launch" type="button" onClick={leaveUploadForLibrary}>PDF增强阅读</button>}
           {(view === 'library' || readerEditingNote) && view !== 'upload' && <button className="reading-upload-button" type="button" onClick={openUploadView}><img src="/assets/reading/upload.svg" alt="" />上传文件</button>}
           <button
             className="profile-button"
@@ -512,8 +512,8 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
         />
       ) : (
         <section className="reading-upload-page" aria-label="上传文件">
-          <h1>智能阅读</h1>
-          <p>上传PDF论文、享受智能解析、实时翻译、图表提取、知识图谱等增强阅读体验</p>
+          <h1>PDF增强阅读</h1>
+          <p>上传 PDF 论文，使用论文解析服务与增强阅读服务，包括实时翻译、图表提取、知识图谱等能力</p>
           <form onSubmit={submitUpload}>
             <label className={`reading-upload-page-dropzone${uploadFile ? ' has-file' : ''}`}>
               <span><img src="/assets/reading/docx.svg" alt="" /><img src="/assets/reading/pdf.svg" alt="" /></span>

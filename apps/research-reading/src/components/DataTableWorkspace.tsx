@@ -8,6 +8,7 @@ import type {
   ResearchDataTable,
   ResearchDocument,
 } from '../types'
+import { displayResearchLocation } from '../workbenchDocuments'
 import { Modal } from './Modal'
 
 type ViewMode = 'table' | 'form'
@@ -803,7 +804,7 @@ export function DataTableWorkspace({
       <header className="data-sheet-header" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
         <button ref={backButtonRef} className="data-sheet-back" type="button" onClick={handleClose}><span aria-hidden="true" />返回</button>
         <div className="data-sheet-title-area">
-          <div className="data-sheet-breadcrumb"><span>{documentItem.location}</span><i>/</i><strong>数据表格</strong></div>
+          <div className="data-sheet-breadcrumb"><span>{displayResearchLocation(documentItem.location)}</span><i>/</i><strong>数据表格</strong></div>
           <input aria-label="数据表格名称" maxLength={50} value={title} onChange={(event) => { setTitle(event.target.value); updateSaveState('dirty'); setSaveError('') }} />
         </div>
         <div className="data-sheet-save-area">

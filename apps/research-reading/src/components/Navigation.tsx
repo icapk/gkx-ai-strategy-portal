@@ -7,10 +7,10 @@ const stats: Array<{
   icon: string
   tone: string
 }> = [
-  { section: 'workbench', label: '工作台', count: 85, icon: '/assets/nav-workbench.svg', tone: 'blue' },
-  { section: 'personal', label: '我的空间', count: 128, icon: '/assets/nav-personal.svg', tone: 'cyan' },
+  { section: 'workbench', label: '快速访问', count: 85, icon: '/assets/nav-workbench.svg', tone: 'blue' },
+  { section: 'personal', label: '个人空间', count: 128, icon: '/assets/nav-personal.svg', tone: 'cyan' },
   { section: 'team', label: '团队空间', count: 342, icon: '/assets/nav-team.svg', tone: 'purple' },
-  { section: 'recycle', label: '回收站', count: 12, icon: '/assets/nav-trash.svg', tone: 'orange' },
+  { section: 'recycle', label: '存档管理', count: 12, icon: '/assets/nav-trash.svg', tone: 'orange' },
 ]
 
 interface TopNavigationProps {
@@ -105,9 +105,9 @@ interface SidebarProps {
 
 const primaryItems: Array<{ section: Section; label: string }> = [
   { section: 'workbench', label: '工作台' },
-  { section: 'personal', label: '我的空间' },
+  { section: 'personal', label: '个人空间' },
   { section: 'team', label: '团队空间' },
-  { section: 'recycle', label: '回收站' },
+  { section: 'recycle', label: '存档管理' },
 ]
 
 export function Sidebar({
@@ -121,7 +121,8 @@ export function Sidebar({
   onNewTeam,
 }: SidebarProps) {
   return (
-    <aside className="sidebar" aria-label="功能导航">
+    <aside className="sidebar" aria-label="基础模块">
+      <h2 className="sr-only">基础模块</h2>
       <div className="sidebar-scroll">
         {primaryItems.map((item) => (
           <div className="sidebar-group" key={item.section}>

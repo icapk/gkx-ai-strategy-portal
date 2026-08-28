@@ -342,10 +342,10 @@ export function ReadingLibrary({
   }
 
   return (
-    <section className="reading-library-frame" ref={libraryRef} aria-label="智能阅读库">
+    <section className="reading-library-frame" ref={libraryRef} aria-label="PDF增强阅读">
       <header className="reading-library-header">
-        <div><button type="button" aria-label="返回阅读" onClick={onBack}><img className="reading-library-back" src="/assets/reading/back.svg" alt="" /></button><h1>智能阅读库</h1></div>
-        <label className="reading-library-search"><img src="/assets/reading/search.svg" alt="" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜索文献标题、作者或期刊" aria-label="搜索智能阅读库" /></label>
+        <div><button type="button" aria-label="返回阅读" onClick={onBack}><img className="reading-library-back" src="/assets/reading/back.svg" alt="" /></button><h1>PDF增强阅读</h1></div>
+        <label className="reading-library-search"><img src="/assets/reading/search.svg" alt="" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜索文献标题、作者或期刊" aria-label="搜索PDF增强阅读文献库" /></label>
       </header>
 
       <aside className="reading-library-sidebar">

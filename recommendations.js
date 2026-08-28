@@ -6,25 +6,25 @@
       resultMode: "AI 搜索",
       label: "AI搜索",
       placeholder: "用自然语言描述你想找的内容，AI帮你理解搜索意图...",
-      guide: "使用人工智能理解你的搜索意图，找到语义相似和深度相关的内容"
+      guide: "通过语义检索理解搜索意图，并生成带来源依据的AI解读"
     },
     association: {
       resultMode: "关联",
-      label: "智能关联",
+      label: "智能关联搜索",
       placeholder: "输入主题、技术或专家，发现相关成果、人物与研究脉络...",
       guide: "结合主题关系与知识关联，发现相似内容、上下游成果和潜在合作对象"
     },
     fulltext: {
       resultMode: "全文",
-      label: "全文检索",
+      label: "全文搜索",
       placeholder: "输入论文、专利、专家或报告中的关键词...",
       guide: "检索题名、摘要与正文内容，并在结果页定位命中片段"
     },
     keyword: {
       resultMode: "关键词",
-      label: "关键词检索",
+      label: "关键词搜索",
       placeholder: "输入一个或多个关键词，可在结果页继续精确筛选...",
-      guide: "支持精确匹配、同义词与中英文扩展，并按资源字段继续筛选"
+      guide: "支持精确查找、同义词与中英文词位扩展，并按资源字段继续筛选"
     }
   };
 
@@ -1881,7 +1881,7 @@
     appendTags(body, item.tags);
     body.appendChild(createCourseChart(item));
     const actions = createElement("div", "rec-course-actions");
-    const detail = createElement("button", "", expanded ? "收起详情" : "查看课程详情");
+    const detail = createElement("button", "", expanded ? "收起详情" : "课程详情查看");
     detail.type = "button";
     detail.dataset.courseToggle = item.id;
     detail.setAttribute("aria-expanded", String(expanded));
@@ -1895,7 +1895,7 @@
       const details = createElement("div", "rec-course-detail");
       details.id = "rec-course-detail-" + item.id;
       details.append(
-        createElement("h4", "", "课程详情"),
+        createElement("h4", "", "课程详情查看"),
         createMetricGrid([
           ["课程名称", item.title],
           ["发布时间", formatPrototypeDate(item.publishedAt, true)],
@@ -2025,7 +2025,7 @@
       const detailPanel = createElement("div", "rec-event-detail");
       detailPanel.id = "rec-event-detail-" + item.id;
       detailPanel.append(
-        createElement("h4", "", "活动详情"),
+        createElement("h4", "", "活动详情查看"),
         createElement("p", "", "详情摘要：" + item.summary),
         createElement("p", "", "推荐原因：" + eventModeReason(item)),
         createMetricGrid([
@@ -2065,8 +2065,8 @@
     eventGrid.replaceChildren();
     if (!visible.length) {
       const empty = createElement("div", "rec-empty-state");
-      empty.append(createElement("strong", "", "暂无该分类活动"), createElement("p", "", "可切换综合推荐或往期记录查看其他活动。"));
-      const recover = createElement("button", "", "查看综合推荐");
+      empty.append(createElement("strong", "", "暂无该分类活动"), createElement("p", "", "可切换推荐活动列表或往期记录查看其他活动。"));
+      const recover = createElement("button", "", "查看推荐活动列表");
       recover.type = "button";
       recover.dataset.eventRecover = "combined";
       empty.appendChild(recover);

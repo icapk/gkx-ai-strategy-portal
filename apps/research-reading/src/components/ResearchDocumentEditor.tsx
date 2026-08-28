@@ -17,6 +17,7 @@ import type {
   DocumentTextBlock,
   ResearchDocument,
 } from '../types'
+import { displayResearchLocation } from '../workbenchDocuments'
 import { Modal } from './Modal'
 
 interface ResearchDocumentEditorProps {
@@ -641,11 +642,11 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
   }
 
   return (
-    <section className="research-document-editor" aria-label={`编辑文档：${title.trim() || '未命名文档'}`} ref={editorRef}>
+    <section className="research-document-editor" aria-label={`文档编辑：${title.trim() || '未命名文档'}`} ref={editorRef}>
       <header className="document-editor-header">
         <button className="document-editor-back" type="button" onClick={requestClose}><span aria-hidden="true" />返回</button>
         <div className="document-editor-title-area">
-          <div className="document-editor-breadcrumb"><span>{documentItem.location}</span><i>/</i><strong>在线文档</strong></div>
+          <div className="document-editor-breadcrumb"><span>{displayResearchLocation(documentItem.location)}</span><i>/</i><strong>文档编辑</strong></div>
           <input
             ref={titleRef}
             value={title}
