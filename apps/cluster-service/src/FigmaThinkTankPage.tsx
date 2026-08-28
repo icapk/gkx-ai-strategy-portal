@@ -97,14 +97,26 @@ const consultingReports: ConsultingReport[] = [
   },
 ];
 
-const reportSummary = consultingReports[0].summary;
+type TalentNewsItem = {
+  id: string;
+  title: string;
+  summary: string;
+  source: string;
+  publishedAt: string;
+  field: string;
+  scholars: string[];
+  likes: number;
+  valueScore: number;
+  details: string[];
+};
 
-const newsRows = [
-  "人工智能产业发展方向与关键能力建设研究",
-  "智能制造系统优化与智能化转型",
-  "区块链技术在供应链管理中的应用研究",
-  "可持续发展与绿色科技的未来趋势",
-  "量子计算的应用与挑战",
+const talentNewsItems: TalentNewsItem[] = [
+  { id: "embodied-intelligence", title: "具身智能青年学者团队完成多场景机器人协同验证", summary: "团队围绕感知、规划、控制与场景适配完成阶段性验证，形成跨学科人才协作和工程验证的新进展。", source: "中国科学院自动化研究所", publishedAt: "2026-08-26", field: "人工智能", scholars: ["张志康", "周岚"], likes: 4286, valueScore: 96, details: ["完成实验室、制造和公共服务三类场景的协同验证。", "研究团队新增机器人系统、控制算法与工程验证方向人才。", "下一阶段将重点推进真实场景稳定性与安全评测。"] },
+  { id: "multimodal-medical", title: "多模态医学智能团队发布跨机构联合评测进展", summary: "联合团队完成医学影像、临床文本和结构化数据的多模态评测，进一步明确青年人才培养与交叉合作方向。", source: "清华大学", publishedAt: "2026-08-25", field: "医学智能", scholars: ["李明", "陈宇"], likes: 3752, valueScore: 94, details: ["评测覆盖影像理解、临床问答和辅助决策三类任务。", "项目形成医学、计算机与数据治理人才的协同培养机制。", "后续将继续扩展多中心验证与可解释性评估。"] },
+  { id: "quantum-training", title: "量子精密测量青年人才入选联合培养计划", summary: "联合培养计划面向量子器件、精密测控和系统工程方向，推动高校与科研机构共享课程、实验平台和导师资源。", source: "中国科学技术大学", publishedAt: "2026-08-24", field: "量子信息", scholars: ["林澈", "顾远"], likes: 3018, valueScore: 91, details: ["培养计划覆盖基础理论、核心器件和系统验证环节。", "首批培养对象将进入联合实验室开展跨机构课题研究。", "计划同步建立培养质量与科研成果跟踪机制。"] },
+  { id: "synthetic-biology", title: "合成生物工程人才团队推进中试平台能力建设", summary: "团队围绕基因工程、生物制造和中试转化补充复合型人才，并完善公共技术平台的项目协同与成果转化能力。", source: "深圳合成生物研究院", publishedAt: "2026-08-22", field: "合成生物", scholars: ["唐若宁", "苏维", "韩启辰"], likes: 2864, valueScore: 89, details: ["中试平台新增工艺开发、质量控制和工程放大岗位。", "人才团队将按项目阶段参与技术验证和产业协同。", "平台同步完善安全规范、数据记录和成果评价机制。"] },
+  { id: "aerospace-intelligence", title: "空天智能研究团队完成卫星数据协同试验", summary: "研究团队在多源卫星数据处理、智能识别和任务协同方面取得新进展，形成算法、系统与应用人才协同机制。", source: "北京航空航天大学", publishedAt: "2026-08-20", field: "空天技术", scholars: ["邵清", "罗予安"], likes: 2516, valueScore: 86, details: ["试验验证多源数据接入和任务协同处理能力。", "团队重点补充遥感算法、系统工程和应用验证人才。", "后续将围绕应急保障和环境监测开展联合研究。"] },
+  { id: "trusted-ai", title: "可信人工智能人才网络发布安全评测协作共识", summary: "人才网络围绕模型安全、数据治理和效果评测形成协作共识，推动研究机构与产业团队共享方法和评价口径。", source: "中国计算机学会", publishedAt: "2026-08-18", field: "人工智能", scholars: ["沈璟", "陈嘉禾"], likes: 2208, valueScore: 84, details: ["共识明确模型风险、数据风险和应用风险三类评价维度。", "人才网络将持续组织评测工具与典型案例交流。", "后续计划建立跨机构问题反馈和版本复盘机制。"] },
 ];
 
 const migrationStops = [
@@ -526,12 +538,36 @@ function MobilitySection() {
 
 function NewsSection() {
   const [tab,setTab]=useState<"all"|"followed">("all");
+  const [query,setQuery]=useState("");
+  const [field,setField]=useState("全部领域");
+  const [sort,setSort]=useState<"latest"|"value"|"popular">("latest");
+  const [followedIds,setFollowedIds]=useState<Set<string>>(new Set(["multimodal-medical"]));
+  const [likedIds,setLikedIds]=useState<Set<string>>(new Set());
+  const [expandedId,setExpandedId]=useState<string|null>(null);
+  const fields=useMemo(()=>["全部领域",...Array.from(new Set(talentNewsItems.map((item)=>item.field)))],[ ]);
+  const visibleNews=useMemo(()=>{
+    const keyword=query.trim().toLocaleLowerCase("zh-CN");
+    return talentNewsItems
+      .filter((item)=>(tab==="all"||followedIds.has(item.id))&&(field==="全部领域"||item.field===field)&&(!keyword||`${item.title}${item.summary}${item.source}${item.scholars.join("")}`.toLocaleLowerCase("zh-CN").includes(keyword)))
+      .sort((left,right)=>sort==="value"?right.valueScore-left.valueScore:sort==="popular"?(right.likes+(likedIds.has(right.id)?1:0))-(left.likes+(likedIds.has(left.id)?1:0)):Date.parse(right.publishedAt)-Date.parse(left.publishedAt));
+  },[field,followedIds,likedIds,query,sort,tab]);
+  const toggleSet=(setter:typeof setFollowedIds,id:string)=>setter((current)=>{const next=new Set(current);if(next.has(id))next.delete(id);else next.add(id);return next;});
+  const clearFilters=()=>{setQuery("");setField("全部领域");setSort("latest");setTab("all");};
   return <section id="news" className="ttf-section ttf-news">
-    <SectionHeading title="人才动态资讯区" subtitle="科技动态与人才信息关联｜定向查询与关注"><MiniSelect label="领域" value="全部"/><MiniSelect value="按热度"/><MiniSelect value="全部"/></SectionHeading>
+    <SectionHeading title="人才动态资讯区" subtitle="科技资讯与人才信息关联｜定向查询｜关注追踪"><span className="ttf-news-heading-status"><ShieldCheck size={15}/>来源可追溯</span></SectionHeading>
     <article className="fp-card ttf-news-card">
-      <div className="ttf-news-tabs"><button className={tab==="all"?"active":""} type="button" onClick={()=>setTab("all")}>全部资讯</button><button className={tab==="followed"?"active":""} type="button" onClick={()=>setTab("followed")}>我的关注</button></div>
-      <div className="ttf-news-list">{newsRows.map((title,index)=><article key={title}><h3>{title}</h3><p>{index===0?reportSummary:"聚焦科技创新与产业发展，梳理最新研究进展、应用场景和人才动态。"}</p><footer><span><Building2 size={13}/>{index%2?"清华大学":"中国科学院"}</span><span><CalendarDays size={13}/>{index?"2025-08-20":"2026-02-14"}</span><span><UserRound size={13}/>{index?"李明":"张志康"}</span></footer><div className="ttf-news-actions"><span><Heart size={14}/>{index<3?"4,000":index===3?"5,000":"6,000"}</span>{index<3?<a href="#news">查看详情</a>:null}</div></article>)}</div>
-      <a className="ttf-view-all" href="#news">查看全部</a>
+      <div className="ttf-news-tabs"><div role="tablist" aria-label="人才动态资讯范围"><button className={tab==="all"?"active":""} type="button" role="tab" aria-selected={tab==="all"} onClick={()=>setTab("all")}>全部资讯</button><button className={tab==="followed"?"active":""} type="button" role="tab" aria-selected={tab==="followed"} onClick={()=>setTab("followed")}>我的关注 <small>{followedIds.size}</small></button></div><span>当前显示 {visibleNews.length} 条</span></div>
+      <div className="ttf-news-toolbar">
+        <label className="ttf-news-search"><span>定向查询</span><div><Search size={15}/><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="搜索资讯、来源或相关学者"/></div></label>
+        <label><span>领域</span><select value={field} onChange={(event)=>setField(event.target.value)}>{fields.map((item)=><option key={item}>{item}</option>)}</select></label>
+        <label><span>排序</span><select value={sort} onChange={(event)=>setSort(event.target.value as typeof sort)}><option value="latest">最新发布</option><option value="value">价值优先</option><option value="popular">关注度优先</option></select></label>
+      </div>
+      <div className="ttf-news-list">{visibleNews.length?visibleNews.map((item)=>{const liked=likedIds.has(item.id);const followed=followedIds.has(item.id);const expanded=expandedId===item.id;return <article className={expanded?"is-expanded":""} key={item.id}>
+        <div className="ttf-news-main"><header><span>{item.field}</span><h3>{item.title}</h3></header><p title={item.summary}>{item.summary}</p><div className="ttf-news-meta"><span><Building2 size={13}/>{item.source}</span><span><CalendarDays size={13}/><time dateTime={item.publishedAt}>{item.publishedAt}</time></span></div><div className="ttf-news-scholars"><UserRound size={13}/><span>相关学者</span>{item.scholars.map((scholar)=><button type="button" onClick={()=>{setQuery(scholar);setTab("all");}} key={scholar}>{scholar}</button>)}</div></div>
+        <div className="ttf-news-actions"><button className={liked?"is-active":""} type="button" aria-pressed={liked} onClick={()=>toggleSet(setLikedIds,item.id)}><Heart size={14} fill={liked?"currentColor":"none"}/>{new Intl.NumberFormat("zh-CN").format(item.likes+(liked?1:0))}</button><button className={followed?"is-active":""} type="button" aria-pressed={followed} onClick={()=>toggleSet(setFollowedIds,item.id)}><Star size={14} fill={followed?"currentColor":"none"}/>{followed?"已关注":"关注"}</button><button className="is-detail" type="button" aria-expanded={expanded} onClick={()=>setExpandedId((current)=>current===item.id?null:item.id)}>{expanded?"收起详情":"查看详情"}<ChevronDown size={14}/></button></div>
+        {expanded?<div className="ttf-news-detail"><strong>资讯详情</strong><ul>{item.details.map((detail)=><li key={detail}>{detail}</li>)}</ul><span><ShieldCheck size={14}/>来源：{item.source}</span></div>:null}
+      </article>}):<div className="ttf-news-empty"><strong>{tab==="followed"?"暂未找到关注资讯":"未找到符合条件的资讯"}</strong><p>{tab==="followed"?"关注人才动态后，可在这里集中查看。":"请调整搜索词、领域或排序条件。"}</p><button type="button" onClick={clearFilters}>查看全部资讯</button></div>}</div>
+      <footer className="ttf-news-summary"><span>已汇集 {talentNewsItems.length} 条人才动态</span><span>按发布时间、信息价值与关注度筛选</span></footer>
     </article>
   </section>;
 }

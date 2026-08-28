@@ -218,48 +218,66 @@ function NavigationContent({ onOpen }: { onOpen: (topicId: TopicId) => void }) {
   );
 }
 
+type OphNodeId = "path" | "symptom" | "treatment" | "check" | "department" | "population" | "region";
 type OphNode = {
-  id: string;
+  id: OphNodeId;
   label: string;
   detail: string;
-  examples: string;
   x: number;
   y: number;
 };
 
 const ophthalmologyNodes: OphNode[] = [
-  { id: "path", label: "临床路径", detail: "从初诊、鉴别诊断到随访管理的标准化诊疗步骤。", examples: "初筛评估、分级诊疗、术后随访", x: 280, y: 44 },
-  { id: "symptom", label: "临床表现", detail: "记录视力变化、视野缺损等可观察症状与体征。", examples: "视物模糊、飞蚊感、视野暗点", x: 445, y: 87 },
-  { id: "treatment", label: "治疗方式", detail: "按疾病阶段组织药物、手术及康复管理方式。", examples: "药物干预、激光治疗、玻璃体手术", x: 494, y: 202 },
-  { id: "check", label: "相关检查", detail: "关联支持诊断、分型与疗效评估的检查项目。", examples: "眼底照相、OCT、视野检查", x: 418, y: 318 },
-  { id: "department", label: "科室", detail: "标明诊疗过程涉及的专科与协同科室。", examples: "眼底病专科、屈光科、影像诊断科", x: 280, y: 350 },
-  { id: "population", label: "易感人群", detail: "按年龄、基础疾病和生活方式梳理风险群体。", examples: "老年人群、糖尿病患者、高度近视人群", x: 128, y: 318 },
-  { id: "region", label: "所在区域", detail: "用于关联疾病研究、医疗资源和样本来源区域。", examples: "华南地区、粤港澳大湾区、深圳市", x: 68, y: 202 },
+  { id: "path", label: "临床路径", detail: "从初诊、鉴别诊断到随访管理的标准化诊疗步骤。", x: 280, y: 44 },
+  { id: "symptom", label: "临床表现", detail: "记录视力变化、视野缺损等可观察症状与体征。", x: 445, y: 87 },
+  { id: "treatment", label: "治疗方式", detail: "按疾病阶段组织药物、手术及康复管理方式。", x: 494, y: 202 },
+  { id: "check", label: "相关检查", detail: "关联支持诊断、分型与疗效评估的检查项目。", x: 418, y: 318 },
+  { id: "department", label: "科室", detail: "标明诊疗过程涉及的专科与协同科室。", x: 280, y: 350 },
+  { id: "population", label: "易感人群", detail: "按年龄、基础疾病和生活方式梳理风险群体。", x: 128, y: 318 },
+  { id: "region", label: "所在区域", detail: "用于关联疾病研究、医疗资源和样本来源区域。", x: 68, y: 202 },
+];
+
+type OphDiseaseProfile = { id: string; label: string; summary: string; relations: Record<OphNodeId, string> };
+const ophthalmologyDiseases: OphDiseaseProfile[] = [
+  { id: "retinal", label: "视网膜疾病", summary: "覆盖糖尿病视网膜病变、黄斑变性与视网膜血管性疾病的筛查、诊断和长期管理。", relations: { path: "眼底筛查、分级诊断、专科转诊、治疗评估与长期随访", symptom: "视力下降、视物变形、中心暗点、飞蚊感", treatment: "抗VEGF治疗、激光治疗、玻璃体手术与康复管理", check: "眼底照相、OCT、OCTA、荧光素眼底血管造影", department: "眼底病专科、内分泌科、影像诊断科", population: "糖尿病患者、老年人群、高度近视人群", region: "华南眼病协作网络、粤港澳大湾区、深圳市" } },
+  { id: "glaucoma", label: "青光眼", summary: "围绕眼压、视神经损伤和视野变化组织早期发现、风险分层与终身随访知识。", relations: { path: "风险筛查、眼压复核、视神经评估、分期治疗与视野随访", symptom: "视野缺损、眼胀头痛、虹视、晚期中心视力下降", treatment: "降眼压药物、激光小梁成形、滤过手术与引流装置", check: "眼压、房角镜、视野、视神经OCT与角膜厚度", department: "青光眼专科、急诊眼科、视功能检查室", population: "青光眼家族史人群、高眼压人群、高龄人群", region: "社区筛查网络、区域眼科中心、基层转诊机构" } },
+  { id: "cataract", label: "白内障", summary: "以晶状体混浊及视觉质量变化为核心，连接术前评估、手术治疗和术后管理知识。", relations: { path: "视力评估、手术指征判断、人工晶体规划、术后复查", symptom: "渐进性视力下降、眩光、色觉改变、单眼复视", treatment: "超声乳化、人工晶体植入、并发症处理与视力康复", check: "裂隙灯、眼轴测量、角膜曲率、眼底评估", department: "白内障专科、屈光科、麻醉与日间手术中心", population: "老年人群、糖尿病患者、长期激素使用人群", region: "区域防盲体系、基层筛查点、眼科日间手术中心" } },
+  { id: "refractive", label: "屈光不正", summary: "连接近视、远视与散光的筛查、屈光矫正、视觉训练和近视防控知识。", relations: { path: "视力筛查、规范验光、矫正方案、进展监测与复查", symptom: "远近视物模糊、视疲劳、眯眼、阅读距离异常", treatment: "框架眼镜、角膜接触镜、屈光手术与近视防控", check: "裸眼视力、散瞳验光、角膜地形图、眼轴长度", department: "视光中心、屈光科、儿童眼科", population: "儿童青少年、长期近距离用眼人群、屈光参差人群", region: "校园筛查网络、社区视光服务、区域近视防控中心" } },
+];
+
+type OphCourse = { type: "学习课件" | "专家论坛" | "在线课程"; title: string; description: string; provider: string; format: string; audiences: string[]; href: string; target?: "_top" };
+const ophthalmologyCourses: OphCourse[] = [
+  { type: "学习课件", title: "眼底影像判读基础与临床路径", description: "从眼底照相、OCT到临床路径，建立影像特征与诊疗决策的对应关系。", provider: "眼科医学教育资源库", format: "24讲 · 图文课件", audiences: ["科研工作者", "高校学生"], href: "../../../education.html?topic=ophthalmology&resource=slides#services", target: "_top" },
+  { type: "学习课件", title: "青光眼数据采集与视野评估规范", description: "学习眼压、视野和视神经影像数据的采集、质控与规范表达。", provider: "专科医学课程中心", format: "18讲 · 案例课件", audiences: ["科研工作者", "产业技术人员"], href: "../../../education.html?topic=ophthalmology&resource=slides#services", target: "_top" },
+  { type: "专家论坛", title: "眼科多模态数据与精准诊疗论坛", description: "围绕影像、临床文本和随访数据探讨多模态研究与临床转化路径。", provider: "科技信息交流中心", format: "专题论坛 · 90分钟", audiences: ["科研工作者", "高校学生", "产业技术人员"], href: "./index.html?page=information-exchange&embed=portal#ie-events" },
+  { type: "专家论坛", title: "AI辅助眼病筛查与真实世界评价", description: "讨论智能筛查产品的评价指标、部署条件、数据偏差与安全边界。", provider: "科技信息交流中心", format: "专家圆桌 · 75分钟", audiences: ["科研工作者", "产业技术人员"], href: "./index.html?page=information-exchange&embed=portal#ie-events" },
+  { type: "在线课程", title: "常见眼病筛查与规范化随访", description: "系统学习白内障、青光眼、视网膜疾病与屈光不正的筛查和随访方法。", provider: "未来教育平台", format: "6周 · 在线学习", audiences: ["高校学生", "产业技术人员"], href: "../../../education.html?topic=ophthalmology&resource=course#services", target: "_top" },
+  { type: "在线课程", title: "眼科数据治理与质量控制", description: "掌握眼科数据标准、脱敏、标注、质量检查与研究数据管理方法。", provider: "未来教育平台", format: "4周 · 在线学习", audiences: ["科研工作者", "高校学生", "产业技术人员"], href: "../../../education.html?topic=ophthalmology&resource=course#services", target: "_top" },
 ];
 
 function OphthalmologyContent() {
   const [selectedNode, setSelectedNode] = useState<OphNode>(ophthalmologyNodes[0]);
-  const courses = [
-    { type: "学习课件", title: "眼底影像判读基础与临床路径", audience: "临床与科研入门" },
-    { type: "专家论坛", title: "眼科多模态数据与精准诊疗论坛", audience: "科研工作者与医生" },
-    { type: "在线课程", title: "常见眼病筛查与规范化随访", audience: "高校学生与产业人员" },
-  ];
+  const [selectedDiseaseId, setSelectedDiseaseId] = useState(ophthalmologyDiseases[0].id);
+  const [audience, setAudience] = useState("全部对象");
+  const selectedDisease = ophthalmologyDiseases.find((item) => item.id === selectedDiseaseId) ?? ophthalmologyDiseases[0];
+  const visibleCourses = audience === "全部对象" ? ophthalmologyCourses : ophthalmologyCourses.filter((course) => course.audiences.includes(audience));
   return (
     <>
       <ContentSection
         id="oph-graph"
         title="专科医学知识图谱"
-        description="以眼科疾病专题为中心，关联七类医学知识；选择节点可查看关系说明。"
+        description="以网络图展示眼科疾病与临床路径、临床表现、治疗方式、相关检查、科室、易感人群和所在区域的关联。"
       >
+        <div className="sdc-oph-toolbar"><div role="group" aria-label="选择眼科疾病专题"><span>疾病专题</span>{ophthalmologyDiseases.map((item) => <button type="button" className={selectedDisease.id === item.id ? "is-active" : ""} aria-pressed={selectedDisease.id === item.id} onClick={() => setSelectedDiseaseId(item.id)} key={item.id}>{item.label}</button>)}</div><a href="../../../education.html?topic=ophthalmology#services" target="_top">进入眼科医学教育<ChevronRight size={15} aria-hidden="true" /></a></div>
         <div className="sdc-knowledge-layout">
-          <div className="sdc-knowledge-canvas" role="group" aria-label="眼科医学知识图谱演示">
+          <div className="sdc-knowledge-canvas" role="group" aria-label={`${selectedDisease.label}专科医学知识图谱`}>
             <svg viewBox="0 0 560 390" aria-hidden="true">
               {ophthalmologyNodes.map((node) => (
                 <line key={node.id} x1="280" y1="202" x2={node.x} y2={node.y} />
               ))}
               <circle cx="280" cy="202" r="78" />
             </svg>
-            <div className="sdc-knowledge-center"><CircleDot size={23} /><strong>视网膜疾病专题</strong><small>中心疾病节点 · 演示</small></div>
+            <div className="sdc-knowledge-center"><CircleDot size={23} /><strong>{selectedDisease.label}</strong><small>眼科专科知识中心</small></div>
             {ophthalmologyNodes.map((node) => (
               <button
                 type="button"
@@ -274,14 +292,17 @@ function OphthalmologyContent() {
             ))}
           </div>
           <aside className="sdc-node-detail" aria-live="polite">
-            <span>当前节点</span>
+            <span>当前知识维度</span>
             <h4>{selectedNode.label}</h4>
             <p>{selectedNode.detail}</p>
+            <div className="sdc-oph-disease-summary"><strong>{selectedDisease.label}</strong><p>{selectedDisease.summary}</p></div>
             <dl>
-              <dt>示例关联</dt>
-              <dd>{selectedNode.examples}</dd>
-              <dt>数据状态</dt>
-              <dd>演示关系</dd>
+              <dt>当前专题</dt>
+              <dd>{selectedDisease.label}</dd>
+              <dt>关联内容</dt>
+              <dd>{selectedDisease.relations[selectedNode.id]}</dd>
+              <dt>图谱关系</dt>
+              <dd>{selectedDisease.label} → {selectedNode.label}</dd>
             </dl>
           </aside>
         </div>
@@ -290,17 +311,19 @@ function OphthalmologyContent() {
       <ContentSection
         id="oph-courses"
         title="优秀课程推荐"
-        description="面向科研工作者、高校学生和产业技术人员组织眼科数据课程目录。"
+        description="面向科研工作者、高校学生和产业技术人员推荐学习课件、专家论坛与在线课程，并链接眼科医学教育功能。"
       >
-        <div className="sdc-resource-list">
-          {courses.map((course) => (
-            <article key={course.type}>
+        <div className="sdc-course-toolbar"><div role="group" aria-label="按适用对象筛选课程"><span>适用对象</span>{["全部对象", "科研工作者", "高校学生", "产业技术人员"].map((item) => <button type="button" className={audience === item ? "is-active" : ""} aria-pressed={audience === item} onClick={() => setAudience(item)} key={item}>{item}</button>)}</div><span>推荐 {visibleCourses.length} 项</span></div>
+        <div className="sdc-resource-list sdc-course-list">
+          {visibleCourses.map((course) => (
+            <article key={course.title}>
               <span className="sdc-resource-type"><GraduationCap size={17} />{course.type}</span>
-              <div><h4>{course.title}</h4><p>适用对象：{course.audience}</p></div>
-              <EmptyResource />
+              <div className="sdc-course-copy"><h4>{course.title}</h4><p>{course.description}</p><div><span>{course.provider}</span><span>{course.format}</span></div><footer>{course.audiences.map((item) => <small key={item}>{item}</small>)}</footer></div>
+              <a className="sdc-course-link" href={course.href} target={course.target}>{course.type === "学习课件" ? "进入课件" : course.type === "专家论坛" ? "进入论坛" : "开始学习"}<ChevronRight size={14} aria-hidden="true" /></a>
             </article>
           ))}
         </div>
+        <div className="sdc-education-entry"><GraduationCap size={21} aria-hidden="true" /><div><strong>眼科医学教育相关功能</strong><p>进入未来教育服务，继续使用学习任务、课程资源与学习过程支持能力。</p></div><a href="../../../education.html?topic=ophthalmology#services" target="_top">进入教育服务<ChevronRight size={15} aria-hidden="true" /></a></div>
       </ContentSection>
     </>
   );

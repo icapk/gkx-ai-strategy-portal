@@ -258,7 +258,15 @@
 .sdc-note-strip strong { font-size: 13px; }
 .sdc-note-strip p { max-width: 70ch; margin: 4px 0 0; color: #60748d; font-size: 11px; line-height: 19px; }
 
-.sdc-knowledge-layout { display: grid; grid-template-columns: minmax(0, 1fr) 214px; gap: 16px; }
+.sdc-oph-toolbar { min-height: 48px; margin-bottom: 14px; padding: 7px 9px; display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #f7f9fc; border: 1px solid #e2e8f0; border-radius: 5px; }
+.sdc-oph-toolbar > div { display: flex; align-items: center; gap: 5px; }
+.sdc-oph-toolbar > div > span { margin-right: 4px; color: #64778e; font-size: 11px; }
+.sdc-oph-toolbar button { min-height: 30px; padding: 0 10px; color: #5d7187; background: #fff; border: 1px solid #dbe3ec; border-radius: 4px; font-size: 11px; }
+.sdc-oph-toolbar button:hover { color: #1769c8; border-color: #9dbede; }
+.sdc-oph-toolbar button.is-active { color: #1769c8; background: #eaf3ff; border-color: #95bce7; font-weight: 650; }
+.sdc-oph-toolbar > a { min-height: 31px; padding: 0 10px; display: inline-flex; align-items: center; gap: 5px; flex: none; color: #1769c8; background: #fff; border: 1px solid #bfd6ec; border-radius: 4px; font-size: 11px; text-decoration: none; }
+.sdc-oph-toolbar > a:hover { color: #fff; background: #1769c8; border-color: #1769c8; }
+.sdc-knowledge-layout { display: grid; grid-template-columns: minmax(0, 1fr) 238px; gap: 16px; }
 .sdc-knowledge-canvas {
   position: relative;
   height: 390px;
@@ -323,7 +331,10 @@
 .sdc-carbon-summary > span { color: #6783a1; font-size: 11px; }
 .sdc-node-detail h4 { margin: 7px 0 10px; color: #213750; font-size: 18px; }
 .sdc-node-detail > p { margin: 0; font-size: 12px; line-height: 20px; }
-.sdc-node-detail dl { margin: 24px 0 0; padding-top: 18px; border-top: 1px solid #dfe7ef; }
+.sdc-oph-disease-summary { margin-top: 16px; padding: 11px; color: #49637d; background: #fff; border: 1px solid #e1e8f0; border-radius: 4px; }
+.sdc-oph-disease-summary strong { color: #285b88; font-size: 11px; }
+.sdc-oph-disease-summary p { margin: 4px 0 0; font-size: 10px; line-height: 17px; }
+.sdc-node-detail dl { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid #dfe7ef; }
 .sdc-node-detail dt { margin-top: 12px; color: #7c8ba0; font-size: 11px; }
 .sdc-node-detail dt:first-child { margin-top: 0; }
 .sdc-node-detail dd { margin: 4px 0 0; color: #43566e; font-size: 11px; line-height: 18px; }
@@ -342,6 +353,27 @@
 .sdc-resource-list h4 { margin: 0; color: #263a53; font-size: 13px; }
 .sdc-resource-list p { margin: 4px 0 0; color: #738299; font-size: 11px; }
 .sdc-resource-pending { display: inline-flex; min-height: 25px; padding: 0 7px; align-items: center; justify-content: center; color: #747f8d; background: #f1f3f5; border: 1px solid #e0e4e8; border-radius: 3px; font-size: 11px; white-space: nowrap; cursor: not-allowed; }
+.sdc-course-toolbar { min-height: 48px; margin-bottom: 10px; padding: 7px 9px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #f7f9fc; border: 1px solid #e2e8f0; border-radius: 5px; }
+.sdc-course-toolbar > div { display: flex; align-items: center; gap: 5px; }
+.sdc-course-toolbar > div > span { margin-right: 4px; color: #64778e; font-size: 11px; }
+.sdc-course-toolbar button { min-height: 30px; padding: 0 10px; color: #5d7187; background: #fff; border: 1px solid #dbe3ec; border-radius: 4px; font-size: 11px; }
+.sdc-course-toolbar button:hover { color: #1769c8; border-color: #9dbede; }
+.sdc-course-toolbar button.is-active { color: #1769c8; background: #eaf3ff; border-color: #95bce7; font-weight: 650; }
+.sdc-course-toolbar > span { color: #6b7d92; font-size: 11px; }
+.sdc-course-list > article { min-height: 106px; grid-template-columns: 130px minmax(0, 1fr) 96px; }
+.sdc-course-copy { min-width: 0; }
+.sdc-course-copy > p { max-width: 70ch; line-height: 18px; }
+.sdc-course-copy > div { margin-top: 7px; display: flex; align-items: center; gap: 15px; color: #61768c; font-size: 10px; }
+.sdc-course-copy footer { margin-top: 7px; display: flex; gap: 5px; }
+.sdc-course-copy footer small { padding: 2px 6px; color: #52708d; background: #f0f5fa; border-radius: 3px; font-size: 9px; }
+.sdc-course-link { min-height: 31px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; color: #1769c8; background: #fff; border: 1px solid #b9d3ed; border-radius: 4px; font-size: 11px; text-decoration: none; white-space: nowrap; }
+.sdc-course-link:hover { color: #fff; background: #1769c8; border-color: #1769c8; }
+.sdc-education-entry { min-height: 74px; margin-top: 14px; padding: 13px 15px; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 11px; color: #4d657e; background: #f3f8fe; border: 1px solid #d9e7f5; border-radius: 5px; }
+.sdc-education-entry > svg { color: #2370bd; }
+.sdc-education-entry strong { color: #294761; font-size: 12px; }
+.sdc-education-entry p { margin: 3px 0 0; font-size: 10px; line-height: 17px; }
+.sdc-education-entry > a { min-height: 32px; padding: 0 10px; display: inline-flex; align-items: center; gap: 5px; color: #fff; background: #1769c8; border-radius: 4px; font-size: 11px; text-decoration: none; }
+.sdc-education-entry > a:hover { background: #125aa9; }
 
 .sdc-segmented { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #dfe7f1; border-radius: 5px; }
 .sdc-segmented button { min-height: 58px; padding: 8px 13px; display: flex; align-items: baseline; gap: 8px; color: #5d6f86; background: #fff; border: 0; text-align: left; }

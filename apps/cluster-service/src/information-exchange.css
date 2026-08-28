@@ -117,11 +117,16 @@
 .ie-debates { margin-top: 86px; }
 .ie-select { position: relative; display: block; width: 220px; height: 36px; }
 .ie-select select { width: 100%; height: 100%; padding: 0 36px 0 14px; border: 1px solid #e5e6eb; border-radius: 2px; outline: none; appearance: none; color: #4e5969; background: #fff linear-gradient(45deg,transparent 50%,#86909c 50%) calc(100% - 15px) 15px/6px 6px no-repeat; font-size: 14px; }
+.ie-debate-filters { display: flex; align-items: center; gap: 8px; }
+.ie-debate-filters .ie-select:nth-child(1) { width: 150px; }
+.ie-debate-filters .ie-select:nth-child(2) { width: 168px; }
+.ie-debate-filters .ie-select:nth-child(3) { width: 136px; }
+.ie-debate-filters .ie-select select { padding-right: 28px; padding-left: 10px; font-size: 12px; }
 .ie-debate-list { display: grid; gap: 16px; margin-top: 26px; }
-.ie-debate-card { display: grid; grid-template-columns: minmax(0, 1fr) 494px 96px; min-height: 212px; padding: 24px 24px 24px 32px; }
+.ie-debate-card { display: grid; grid-template-columns: minmax(0, 1fr) 478px 112px; min-height: 212px; padding: 24px 24px 24px 32px; }
 .ie-debate-card.is-expanded { row-gap: 16px; }
 .ie-debate-copy h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; }
-.ie-debate-copy > p { max-width: 515px; margin: 9px 0 14px; color: #4e5969; font-size: 14px; line-height: 23px; }
+.ie-debate-copy > p { max-width: 515px; margin: 9px 0 14px; display: -webkit-box; overflow: hidden; color: #4e5969; font-size: 13px; line-height: 21px; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .ie-debate-meta { display: flex; align-items: center; gap: 12px; margin-top: 16px; color: #86909c; font-size: 13px; }
 .ie-debate-meta span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .ie-debate-meta i { width: 1px; height: 14px; background: #c9cdd4; }
@@ -133,20 +138,24 @@
 .ie-expert > span { display: grid; grid-template-columns: auto auto; align-items: baseline; }
 .ie-expert b { font-size: 14px; font-weight: 500; }
 .ie-expert em { color: #86909c; font-size: 12px; font-style: normal; }
-.ie-expert small { grid-column: 1 / -1; margin-top: 2px; color: #86909c; font-size: 12px; }
-.ie-more-experts { margin-top: auto; color: #4e5969; font-size: 13px; }
-.ie-more-experts b { color: #165dff; font-size: 15px; }
-.ie-debate-state { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; padding: 0 0 5px 14px; }
+.ie-expert small { grid-column: 1 / -1; max-width: 124px; margin-top: 2px; overflow: hidden; color: #6f7f93; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.ie-more-experts { margin-top: auto; color: #5f7187; font-size: 11px; }
+.ie-debate-state { display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 14px; padding: 0 0 5px 14px; }
 .ie-debate-state > span { padding: 4px 9px; border: 1px solid #c9cdd4; border-radius: 3px; color: #4e5969; font-size: 12px; }
 .ie-debate-state > span.is-live { color: #00b42a; border-color: #00b42a; background: #e8ffea; }
-.ie-debate-state button { padding: 0; color: #165dff; background: transparent; border: 0; font-size: 14px; cursor: pointer; }
+.ie-debate-state button { min-height: 28px; padding: 0 7px; color: #165dff; background: transparent; border: 1px solid transparent; border-radius: 3px; font-size: 12px; cursor: pointer; white-space: nowrap; }
 .ie-debate-state button:hover { text-decoration: underline; }
 .ie-debate-state button:focus-visible { outline: 2px solid #165dff; outline-offset: 2px; }
+.ie-debate-state button.is-voted { color: #1769d2; background: #edf5ff; border-color: #b8d2eb; }
+.ie-debate-state button:disabled { color: #8a97a7; cursor: not-allowed; text-decoration: none; }
 .ie-debate-detail { grid-column: 1 / -1; min-height: 74px; padding: 12px 16px; display: grid; grid-template-columns: 90px 1fr; align-items: center; gap: 5px 14px; color: #5f7187; background: #f7faff; border: 1px solid #e0e9f4; border-radius: 5px; }
 .ie-debate-detail strong { color: #2e4763; font-size: 12px; }
 .ie-debate-detail span { font-size: 12px; }
 .ie-debate-detail p { grid-column: 1 / -1; margin: 0; font-size: 12px; line-height: 19px; }
 .ie-debates .ie-more-link { margin-top: 28px; }
+.ie-debate-empty { min-height: 260px; display: grid; place-items: center; align-content: center; gap: 7px; color: #687b90; background: #fff; border: 1px dashed #cbd8e5; border-radius: 8px; text-align: center; }
+.ie-debate-empty strong { color: #304a64; font-size: 14px; }.ie-debate-empty p { margin: 0; font-size: 12px; }
+.ie-debate-empty button { min-height: 32px; margin-top: 5px; padding: 0 12px; color: #1769d2; background: #edf5ff; border: 1px solid #b9d3ed; border-radius: 4px; cursor: pointer; }
 .ie-list-summary { margin: 22px 0 0; color: #728197; font-size: 12px; text-align: center; }
 
 .ie-hot { margin-top: 70px; }
@@ -154,16 +163,27 @@
 .ie-inline-filter b { color: #4e5969; font-weight: 500; }
 .ie-sort-icon { color: #86909c; }
 .ie-filter-divider { width: 1px; height: 22px; background: #e5e6eb; }
-.ie-hot-list { display: grid; gap: 16px; margin-top: 47px; }
-.ie-hot-card { min-height: 506px; padding: 28px 32px 24px; }
-.ie-hot-card > header { display: flex; justify-content: space-between; min-height: 134px; padding-bottom: 22px; border-bottom: 1px solid #e5e6eb; }
-.ie-hot-card h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; }
-.ie-hot-card header p { max-width: 690px; margin: 8px 0 12px; overflow: hidden; color: #4e5969; font-size: 14px; line-height: 22px; text-overflow: ellipsis; white-space: nowrap; }
-.ie-hot-meta { display: flex; align-items: flex-end; gap: 12px; padding-bottom: 8px; color: #86909c; font-size: 13px; }
-.ie-hot-meta span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.ie-hot-meta i { width: 1px; height: 14px; background: #c9cdd4; }
-.ie-comments-title { position: relative; margin-top: 18px; padding-left: 12px; color: #1d2129; font-size: 14px; line-height: 24px; }
+.ie-ranking-note { min-height: 48px; margin-top: 30px; padding: 0 14px; display: flex; align-items: center; gap: 18px; color: #65788f; background: #f7f9fc; border: 1px solid #e3e9f0; border-radius: 6px; font-size: 11px; }
+.ie-ranking-note strong { color: #315675; font-size: 12px; }
+.ie-ranking-note span { padding-left: 18px; border-left: 1px solid #dce4ec; }
+.ie-hot-list { display: grid; gap: 16px; margin-top: 14px; }
+.ie-hot-card { min-height: 506px; padding: 26px 30px 22px; }
+.ie-hot-card > header { min-height: 148px; padding-bottom: 20px; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; border-bottom: 1px solid #e5e6eb; }
+.ie-hot-copy { min-width: 0; }
+.ie-hot-rank { margin-bottom: 7px; display: flex; align-items: center; gap: 9px; }
+.ie-hot-rank b { color: #1769d2; font-size: 11px; }
+.ie-hot-rank span { padding: 2px 6px; color: #5e7389; background: #f0f4f8; border-radius: 3px; font-size: 10px; }
+.ie-hot-card h3 { margin: 0; font-size: 17px; line-height: 25px; font-weight: 600; }
+.ie-hot-card h3 a { color: #223b56; text-decoration: none; }
+.ie-hot-card h3 a:hover { color: #1769d2; text-decoration: underline; text-underline-offset: 3px; }
+.ie-hot-card header p { max-width: 690px; margin: 8px 0 12px; overflow: hidden; color: #4e5969; font-size: 13px; line-height: 21px; text-overflow: ellipsis; white-space: nowrap; }
+.ie-hot-meta { padding: 9px 0 0 18px; display: grid; align-content: start; gap: 11px; color: #65788d; border-left: 1px solid #e4e9ef; font-size: 11px; }
+.ie-hot-meta span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ie-hot-meta i { display: none; }
+.ie-hot-meta time { color: #3e5872; }
+.ie-comments-title { position: relative; margin-top: 18px; padding-left: 12px; display: flex; align-items: center; gap: 9px; color: #1d2129; font-size: 14px; line-height: 24px; }
 .ie-comments-title::before { content: ""; position: absolute; left: 0; top: 4px; width: 3px; height: 16px; border-radius: 2px; background: #165dff; }
+.ie-comments-title span { color: #75859a; font-size: 10px; }
 .ie-comment-list { margin-top: 12px; padding: 0 20px; background: #f7f8fa; }
 .ie-comment { position: relative; min-height: 82px; padding: 14px 0; }
 .ie-comment + .ie-comment { border-top: 1px solid #e5e6eb; }
@@ -175,7 +195,32 @@
 .ie-comment > button { position: absolute; right: 0; bottom: 17px; padding: 0; display: flex; align-items: center; gap: 4px; color: #697789; background: transparent; border: 0; font-size: 12px; cursor: pointer; }
 .ie-comment > button.is-liked { color: #165dff; }
 .ie-comment > button:focus-visible { outline: 2px solid #165dff; outline-offset: 2px; }
-.ie-hot .ie-more-link { margin-top: 30px; }
+.ie-topic-detail-link { min-height: 34px; margin-top: 15px; display: inline-flex; align-items: center; gap: 5px; color: #1769d2; font-size: 12px; font-weight: 600; text-decoration: none; }
+.ie-topic-detail-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ie-sort-select { display: flex; align-items: center; }
 .ie-sort-select > svg { position: absolute; z-index: 1; left: 11px; color: #697789; pointer-events: none; }
 .ie-sort-select select { padding-left: 34px; }
+
+.ie-topic-detail-page { min-height: 100vh; padding-bottom: 48px; }
+.ie-topic-detail-shell { width: 1200px; margin: 32px auto 0; }
+.ie-topic-back { min-height: 34px; display: inline-flex; align-items: center; gap: 5px; color: #526b84; font-size: 12px; text-decoration: none; }
+.ie-topic-back:hover { color: #1769d2; }
+.ie-topic-detail-panel { margin-top: 12px; padding: 30px 34px; }
+.ie-topic-detail-panel > header { padding-bottom: 22px; border-bottom: 1px solid #e2e8ef; }
+.ie-topic-detail-panel h1 { margin: 13px 0 8px; color: #213951; font-size: 26px; line-height: 38px; }
+.ie-topic-detail-panel > header > p { max-width: 78ch; margin: 0; color: #5b7087; font-size: 13px; line-height: 22px; }
+.ie-topic-detail-panel > dl { margin: 20px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #f7f9fc; border: 1px solid #e2e8ef; }
+.ie-topic-detail-panel > dl > div { min-height: 78px; padding: 13px 16px; display: grid; align-content: center; gap: 5px; border-left: 1px solid #e2e8ef; }
+.ie-topic-detail-panel > dl > div:first-child { border-left: 0; }
+.ie-topic-detail-panel dt { color: #6e8196; font-size: 11px; }
+.ie-topic-detail-panel dd { margin: 0; color: #2e5274; font-size: 15px; font-weight: 650; }
+.ie-topic-detail-panel > section { margin-top: 26px; }
+.ie-topic-detail-panel > section h2 { margin: 0 0 9px; color: #29445f; font-size: 16px; }
+.ie-topic-detail-panel > section > p { max-width: 80ch; margin: 0; color: #5c7187; font-size: 12px; line-height: 21px; }
+.ie-topic-detail-comments { overflow: hidden; background: #f8fafc; border: 1px solid #e2e8ef; border-radius: 6px; }
+.ie-topic-detail-comments article { min-height: 84px; padding: 14px 16px; }
+.ie-topic-detail-comments article + article { border-top: 1px solid #e2e8ef; }
+.ie-topic-detail-comments p { margin: 0 0 9px; color: #4f647a; font-size: 12px; line-height: 20px; }
+.ie-topic-detail-comments span { display: flex; align-items: center; gap: 7px; color: #5f7389; font-size: 11px; }
+.ie-topic-detail-comments img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+.ie-topic-detail-comments b { font-weight: 600; }.ie-topic-detail-comments small { color: #8190a2; }
