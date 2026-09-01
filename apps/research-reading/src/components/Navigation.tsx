@@ -122,8 +122,8 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <aside className="sidebar" aria-label="基础模块">
-      <h2 className="sr-only">基础模块</h2>
       <div className="sidebar-scroll">
+        <h2 className="sidebar-capability-title"><span aria-hidden="true" />基础模块</h2>
         {primaryItems.map((item) => (
           <div className="sidebar-group" key={item.section}>
             <div className={item.section === 'team' ? 'sidebar-parent-row' : undefined}>

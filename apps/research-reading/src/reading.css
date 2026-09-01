@@ -4913,7 +4913,7 @@
   }
 
   .reading-library-frame {
-    min-height: 700px;
+    min-height: 0;
     grid-template-columns: 42px minmax(0, 1fr);
   }
 
@@ -5048,7 +5048,7 @@
   }
 
   .reading-library-frame {
-    min-height: calc(100dvh - 56px);
+    min-height: 0;
     grid-template-columns: 40px minmax(0, 1fr);
     grid-template-rows: 58px minmax(0, 1fr);
     margin: 0;

@@ -229,7 +229,10 @@ export function TeamPanel({
       {tab === 'members' && (
         <div className="panel-content members-panel">
           <div className="panel-heading-row">
-            <strong>成员管理·{members.length}人</strong>
+            <div className="member-management-heading">
+              <strong>成员管理·{members.length}人</strong>
+              <span>管理员角色配置</span>
+            </div>
             <button type="button" className="primary-link" onClick={onInvite}><img src="/assets/figma/invite-member.svg" alt="" />邀请</button>
           </div>
           <div className="member-list">

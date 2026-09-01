@@ -8,6 +8,7 @@ import { Modal } from './components/Modal'
 import { Sidebar, TopNavigation } from './components/Navigation'
 import { ProfileSettingsModal } from './components/ProfileSettingsModal'
 import { ReadingWorkspace } from './components/ReadingWorkspace'
+import { ServiceCapabilityPath } from './components/ServiceCapabilityPath'
 import { NoteDetailDialog, NoteEditorDialog } from './components/ResearchNoteDialog'
 import { SpaceView } from './components/SpaceView'
 import { TeamPanel } from './components/TeamPanel'
@@ -1273,6 +1274,7 @@ export default function App() {
           profileName={profile.name}
           profileAvatar={profile.avatarDataUrl}
         />
+        <ServiceCapabilityPath product="research" items={['基础服务', '智能科研']} />
         <div className={`workspace-grid${activeSection === 'team' ? ' workspace-grid--team' : ''}`}>
           <Sidebar
             activeSection={activeSection}

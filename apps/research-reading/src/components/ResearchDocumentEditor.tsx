@@ -646,7 +646,8 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
       <header className="document-editor-header">
         <button className="document-editor-back" type="button" onClick={requestClose}><span aria-hidden="true" />返回</button>
         <div className="document-editor-title-area">
-          <div className="document-editor-breadcrumb"><span>{displayResearchLocation(documentItem.location)}</span><i>/</i><strong>文档编辑</strong></div>
+          <div className="document-editor-breadcrumb"><span>基础服务</span><i>/</i><span>智能科研</span><i>/</i><span>{displayResearchLocation(documentItem.location)}</span><i>/</i><strong>文档编辑</strong></div>
+          <p className="mobile-capability-context" aria-label="功能路径：基础服务，智能科研，文档编辑"><span>基础服务</span><i>/</i><span>智能科研</span><i>/</i><strong>文档编辑</strong></p>
           <input
             ref={titleRef}
             value={title}

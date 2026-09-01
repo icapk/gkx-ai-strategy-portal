@@ -2944,6 +2944,116 @@
   <link rel="stylesheet" href="home-additions.css">
   <link rel="stylesheet" href="portal-extras.css?v=20260826-search-model">
   <link rel="stylesheet" href="mastergo-v2.css">
+  <style>
+    .search-service-path {
+      display: flex;
+      width: 100%;
+      min-width: 0;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px 10px;
+      border: 1px solid rgba(105, 126, 218, 0.2);
+      border-radius: 9px;
+      padding: 8px 10px;
+      color: #59677c;
+      background: linear-gradient(90deg, rgba(244, 247, 255, 0.96), rgba(250, 252, 255, 0.96));
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .search-service-path-label {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 6px;
+      color: #526175;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .search-service-path-label::before {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #5367e8;
+      box-shadow: 0 0 0 3px rgba(83, 103, 232, 0.1);
+      content: "";
+    }
+
+    .search-service-path-route,
+    .search-service-path-features {
+      display: flex;
+      min-width: 0;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .search-service-path-route {
+      color: #657389;
+    }
+
+    .search-service-path-separator {
+      color: #a6b0c0;
+      font-size: 12px;
+    }
+
+    .search-service-path-node {
+      white-space: nowrap;
+    }
+
+    .search-service-path-node.is-current {
+      border-radius: 5px;
+      padding: 3px 7px;
+      color: #4055d3;
+      background: #e9edff;
+      font-weight: 650;
+    }
+
+    .search-service-path-features {
+      border-left: 1px solid #d8e0f2;
+      padding-left: 10px;
+    }
+
+    .search-service-path-feature {
+      border: 1px solid #dce3f6;
+      border-radius: 999px;
+      padding: 2px 7px;
+      color: #526481;
+      background: rgba(255, 255, 255, 0.88);
+      white-space: nowrap;
+    }
+
+    .mg-search-card {
+      height: auto;
+      min-height: 212px;
+    }
+
+    .mg-search-card .search-service-path {
+      margin-top: 8px;
+    }
+
+    .portal-search-page .search-service-path {
+      margin: 12px 0;
+    }
+
+    @media (max-width: 720px) {
+      .search-service-path {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .search-service-path-features {
+        border-left: 0;
+        padding-left: 0;
+      }
+
+      .mg-search-card {
+        min-height: 0;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="site-header" id="siteHeader">
@@ -3132,6 +3242,21 @@
               <div class="mg-ai-search-guide" id="mgV2QaSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">问</span>
                 <span>从可访问的论文、专利、专家与报告中检索证据，生成带编号引用和边界说明的回答</span>
+              </div>
+              <div class="search-service-path" data-search-service-path="hero" aria-label="当前功能路径：基础服务，智能搜索，全文搜索；服务能力：信息搜索、搜索结果展示、搜索结果定位">
+                <span class="search-service-path-label">服务能力</span>
+                <span class="search-service-path-route">
+                  <span class="search-service-path-node">基础服务</span>
+                  <span class="search-service-path-separator" aria-hidden="true">›</span>
+                  <span class="search-service-path-node">智能搜索</span>
+                  <span class="search-service-path-separator" aria-hidden="true">›</span>
+                  <strong class="search-service-path-node is-current" data-search-service-mode>全文搜索</strong>
+                </span>
+                <span class="search-service-path-features" data-search-service-features>
+                  <span class="search-service-path-feature">信息搜索</span>
+                  <span class="search-service-path-feature">搜索结果展示</span>
+                  <span class="search-service-path-feature">搜索结果定位</span>
+                </span>
               </div>
               <div class="mg-search-actions">
                 <button class="mg-voice-input" id="mgVoiceInputButton" type="button" aria-label="开始语音输入" aria-pressed="false" aria-controls="mgHeroSearchInput" title="语音输入">
@@ -3895,6 +4020,22 @@
           <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="关键词">关键词搜索</button>
         </div>
 
+        <div class="search-service-path" data-search-service-path="results" aria-label="当前功能路径：基础服务，智能搜索，全文搜索；服务能力：信息搜索、搜索结果展示、搜索结果定位">
+          <span class="search-service-path-label">功能路径</span>
+          <span class="search-service-path-route">
+            <span class="search-service-path-node">基础服务</span>
+            <span class="search-service-path-separator" aria-hidden="true">›</span>
+            <span class="search-service-path-node">智能搜索</span>
+            <span class="search-service-path-separator" aria-hidden="true">›</span>
+            <strong class="search-service-path-node is-current" data-search-service-mode>全文搜索</strong>
+          </span>
+          <span class="search-service-path-features" data-search-service-features>
+            <span class="search-service-path-feature">信息搜索</span>
+            <span class="search-service-path-feature">搜索结果展示</span>
+            <span class="search-service-path-feature">搜索结果定位</span>
+          </span>
+        </div>
+
         <div class="portal-search-toolbar">
           <form class="portal-search-form" id="portalResultSearchForm" role="search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 4.5 4.5"></path></svg>
@@ -4561,6 +4702,8 @@
       const mgAssociationSearchGuide = document.getElementById("mgAssociationSearchGuide");
       const mgKeywordSearchGuide = document.getElementById("mgKeywordSearchGuide");
       const mgV2QaSearchGuide = document.getElementById("mgV2QaSearchGuide");
+      const mgHeroSearchServicePath = document.querySelector('[data-search-service-path="hero"]');
+      const portalSearchServicePath = document.querySelector('[data-search-service-path="results"]');
       const profilePage = document.getElementById("profilePage");
       const ticketServiceButton = document.getElementById("ticketServiceButton");
       const portalTicketService = document.getElementById("portalTicketService");
@@ -4692,6 +4835,30 @@
           placeholder: "输入一个或多个关键词",
           description: "按关键词和筛选条件查看资源。"
         }
+      };
+      const SEARCH_SERVICE_PATH_CONFIG = {
+        fulltext: {
+          mode: "全文搜索",
+          features: ["信息搜索", "搜索结果展示", "搜索结果定位"]
+        },
+        association: {
+          mode: "智能关联搜索",
+          features: ["用户搜索", "行为分析", "信息处理", "知识检索"]
+        },
+        ai: {
+          mode: "AI搜索",
+          features: ["语义检索", "AI解读"]
+        },
+        keyword: {
+          mode: "关键词搜索",
+          features: ["精确查找", "词位扩展"]
+        }
+      };
+      const RESULT_MODE_SERVICE_PATH = {
+        "全文": "fulltext",
+        "关联": "association",
+        "AI 搜索": "ai",
+        "关键词": "keyword"
       };
       // Keep the unverified AI/keyword summaries hidden; the association workflow below is an explicitly labelled local prototype.
       const RESULT_MODE_PANELS_ENABLED = false;
@@ -5812,6 +5979,23 @@
         window.location.href = route;
       }
 
+      function updateSearchServicePath(path, mode) {
+        const config = SEARCH_SERVICE_PATH_CONFIG[mode] || SEARCH_SERVICE_PATH_CONFIG.fulltext;
+        if (!path) return;
+        const modeNode = path.querySelector("[data-search-service-mode]");
+        const featureList = path.querySelector("[data-search-service-features]");
+        if (modeNode) modeNode.textContent = config.mode;
+        if (featureList) {
+          featureList.replaceChildren(...config.features.map((label) => {
+            const feature = document.createElement("span");
+            feature.className = "search-service-path-feature";
+            feature.textContent = label;
+            return feature;
+          }));
+        }
+        path.setAttribute("aria-label", `当前功能路径：基础服务，智能搜索，${config.mode}；服务能力：${config.features.join("、")}`);
+      }
+
       function setSearchMode(mode) {
         const previousMode = activeSearchMode;
         activeSearchMode = SEARCH_MODE_CONFIG[mode] ? mode : "全文";
@@ -5826,6 +6010,7 @@
         portalResultSearchInput.placeholder = SEARCH_MODE_CONFIG[activeSearchMode].placeholder;
         searchResultsTitle.textContent = SEARCH_MODE_CONFIG[activeSearchMode].title;
         document.querySelector(".portal-search-lead").textContent = SEARCH_MODE_CONFIG[activeSearchMode].description;
+        updateSearchServicePath(portalSearchServicePath, RESULT_MODE_SERVICE_PATH[activeSearchMode]);
         if (portalSearchAssistant) portalSearchAssistant.hidden = activeSearchMode === "AI 搜索";
         portalSearchFilters.querySelectorAll("[data-filter-mode='keyword']").forEach((group) => {
           group.hidden = activeSearchMode !== "关键词";
@@ -5881,6 +6066,7 @@
         mgKeywordSearchGuide.hidden = activeHeroSearchMode !== "keyword";
         mgV2QaSearchGuide.hidden = true;
         mgHeroSearchInput.placeholder = modes[activeHeroSearchMode].placeholder;
+        updateSearchServicePath(mgHeroSearchServicePath, activeHeroSearchMode);
         const submit = mgHeroSearchForm.querySelector(".mg-search-submit");
         submit.setAttribute("aria-label", modes[activeHeroSearchMode].label);
         if (focusInput) mgHeroSearchInput.focus();
@@ -5923,6 +6109,7 @@
         mgHeroSearchForm.dataset.searchExperience = activeHeroExperience;
         mgClassicSearchModeRow.hidden = isV2;
         mgV2SearchModeRow.hidden = !isV2;
+        if (mgHeroSearchServicePath) mgHeroSearchServicePath.hidden = isV2;
         mgV2ExperienceSwitch.setAttribute("aria-expanded", String(isV2));
         if (isV2) {
           setV2HeroMode(activeV2HeroMode, false);

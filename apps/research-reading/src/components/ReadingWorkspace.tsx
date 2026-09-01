@@ -9,6 +9,7 @@ import {
 import { Modal } from './Modal'
 import { ReadingLibrary } from './ReadingLibrary'
 import { ReadingReader, type ReadingDraftController } from './ReadingReader'
+import { ServiceCapabilityPath } from './ServiceCapabilityPath'
 
 interface ReadingWorkspaceProps {
   onSwitchToResearch: () => void
@@ -481,6 +482,11 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
           ><img className={profileAvatar ? 'is-custom-avatar' : undefined} src={profileAvatar || '/assets/avatar-user.svg'} alt="" /></button>
         </div>
       </div>
+
+      <ServiceCapabilityPath
+        product="reading"
+        items={['基础服务', '智能阅读', 'PDF增强阅读', '菜单栏服务', '论文解析服务', '增强阅读服务']}
+      />
 
       <div id="reading-product-panel" className="reading-product-panel" role="tabpanel" aria-labelledby="reading-product-tab-reading">
       {view === 'reader' && activeDocument ? (

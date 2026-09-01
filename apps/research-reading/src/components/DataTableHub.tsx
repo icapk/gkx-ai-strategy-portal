@@ -249,7 +249,7 @@ export function DataTableHub({
           <button ref={backButtonRef} className="data-hub-back" type="button" onClick={onClose}>
             <img src="/assets/iconpark/left.svg" alt="" />返回
           </button>
-          <div><p className="data-hub-breadcrumb">工作台&nbsp;&nbsp;/&nbsp;&nbsp;数据表格</p><h1 id="data-hub-title">数据表格</h1></div>
+          <div><p className="data-hub-breadcrumb">基础服务&nbsp;&nbsp;/&nbsp;&nbsp;智能科研&nbsp;&nbsp;/&nbsp;&nbsp;工作台&nbsp;&nbsp;/&nbsp;&nbsp;数据表格</p><p className="mobile-capability-context" aria-label="功能路径：基础服务，智能科研，数据表格"><span>基础服务</span><i>/</i><span>智能科研</span><i>/</i><strong>数据表格</strong></p><h1 id="data-hub-title">数据表格</h1></div>
         </div>
         <button className="button button--primary" type="button" onClick={onCreateTable}><span className="icon-plus" aria-hidden="true" />新建数据表格</button>
       </header>

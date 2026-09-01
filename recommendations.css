@@ -366,6 +366,60 @@ select:focus-visible {
   font-size: 15px;
 }
 
+.rec-service-path {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: -7px auto 16px;
+  border: 1px solid rgba(91, 110, 215, 0.2);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #617086;
+  background: linear-gradient(90deg, rgba(246, 248, 255, 0.94), rgba(251, 252, 255, 0.94));
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.rec-service-path-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 2px;
+  color: #58667a;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.rec-service-path-label::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5367e8;
+  box-shadow: 0 0 0 3px rgba(83, 103, 232, 0.1);
+  content: "";
+}
+
+.rec-service-path-node,
+.rec-service-path-separator {
+  white-space: nowrap;
+}
+
+.rec-service-path-separator {
+  color: #a4aec0;
+}
+
+.rec-service-path-node.is-current {
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: #4055d3;
+  background: #e9edff;
+  font-weight: 650;
+}
+
 .rec-search-card,
 .rec-panel {
   border: 1px solid rgba(255, 255, 255, 0.78);
@@ -602,6 +656,33 @@ select:focus-visible {
   font-size: 11px;
   font-weight: 400;
   line-height: 1.55;
+}
+
+.rec-visible-capabilities {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  color: #65758d;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+.rec-visible-capabilities > span:not(.rec-visible-capabilities-label) {
+  border: 1px solid #dce4f5;
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: #4f6382;
+  background: rgba(249, 251, 255, 0.96);
+  white-space: nowrap;
+}
+
+.rec-visible-capabilities-label {
+  color: #8490a2;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .rec-panel--hot .rec-panel-title { color: #ef4444; }
@@ -3615,6 +3696,7 @@ select:focus-visible {
   .rec-breadcrumb a { min-height: 44px; }
   .rec-hero-heading h1 { font-size: 25px; }
   .rec-hero-heading p { font-size: 13px; }
+  .rec-service-path { width: 100%; border-radius: 10px; }
   .rec-search-card { padding: 16px; }
   .rec-search-mode-row { display: block; }
   .rec-search-mode-row > span { display: block; margin-bottom: 8px; }
