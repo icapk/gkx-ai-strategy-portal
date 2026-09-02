@@ -17,6 +17,7 @@ interface SearchResultBase {
   sourceIndex: number
   snippet: string
   targetBlockId?: string
+  targetPageNumber?: number
 }
 
 export interface DocumentSearchResult extends SearchResultBase {
@@ -118,6 +119,9 @@ function documentFields(document: ResearchDocument): SearchField[] {
     { label: '标题', value: document.title, weight: 360 },
     { label: '描述', value: document.description ?? '', weight: 230 },
     { label: '正文', value: document.content ?? '', weight: 220 },
+    ...(document.pdfArchive && document.pdfTextContent
+      ? [{ label: 'PDF全文', value: document.pdfTextContent, weight: 220 }]
+      : []),
     ...(document.keywords ?? []).map((keyword) => ({ label: '关键词', value: keyword, weight: 280 })),
     { label: '位置', value: document.location, weight: 160 },
     ...(displayLocation === document.location ? [] : [{ label: '位置', value: displayLocation, weight: 160 }]),
@@ -153,6 +157,7 @@ function documentBrowseSnippet(document: ResearchDocument) {
   const blockContent = document.blocks?.map(blockSearchText).filter(Boolean).join(' ')
   return document.description?.trim()
     || document.content?.trim()
+    || document.pdfTextContent?.trim()
     || blockContent?.trim()
     || `${document.location} · ${document.owner}`
 }
@@ -200,7 +205,15 @@ function documentSearchTarget(document: ResearchDocument, terms: string[]) {
   const targetBlockId = document.blocks?.find((block) => (
     terms.some((term) => normalize(blockSearchText(block)).includes(term))
   ))?.id
-  return { targetBlockId }
+  const normalizedPages = document.pdfArchive && document.pdfTextContent
+    ? document.pdfTextContent.split('\n').map(normalize)
+    : []
+  let pageIndex = normalizedPages.findIndex((pageText) => terms.every((term) => pageText.includes(term)))
+  if (pageIndex < 0) pageIndex = normalizedPages.findIndex((pageText) => terms.some((term) => pageText.includes(term)))
+  return {
+    targetBlockId,
+    targetPageNumber: pageIndex >= 0 ? pageIndex + 1 : undefined,
+  }
 }
 
 export function searchResearchContent(

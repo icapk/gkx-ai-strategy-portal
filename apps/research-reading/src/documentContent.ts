@@ -119,13 +119,27 @@ const sanitizeBlocks = (value: unknown): DocumentBlock[] => {
 const sanitizeDocument = (value: unknown): ResearchDocument | null => {
   if (!value || typeof value !== 'object') return null
   const item = value as Partial<ResearchDocument> & Record<string, unknown>
-  // Hide records created by the retired PDF archive feature. Its binary data is
-  // left untouched in IndexedDB so rollback does not destroy local source files.
-  if (item.pdfArchive && typeof item.pdfArchive === 'object') return null
   if (!Number.isInteger(item.id) || Number(item.id) <= 0) return null
   if (!documentKinds.has(String(item.kind))) return null
   const title = cleanString(item.title, 50).trim()
   if (!title) return null
+  const archive = item.pdfArchive && typeof item.pdfArchive === 'object'
+    ? item.pdfArchive
+    : null
+  const pdfArchive = archive && item.kind === 'PDF文档'
+    && cleanString(archive.storageKey, 120).trim()
+    && cleanString(archive.originalName, 200).trim()
+    && Number.isInteger(archive.pageCount)
+    && Number(archive.pageCount) > 0
+      ? {
+          storageKey: cleanString(archive.storageKey, 120).trim(),
+          originalName: cleanString(archive.originalName, 200).trim(),
+          byteSize: Math.min(200 * 1024 * 1024, Math.max(0, Number(archive.byteSize) || 0)),
+          pageCount: Math.min(100_000, Number(archive.pageCount)),
+          annotationCount: Math.min(10_000, Math.max(0, Number(archive.annotationCount) || 0)),
+          parsedAt: cleanString(archive.parsedAt, 40),
+        }
+      : undefined
 
   return {
     id: Number(item.id),
@@ -152,6 +166,8 @@ const sanitizeDocument = (value: unknown): ResearchDocument | null => {
       : [],
     content: cleanString(item.content, 120_000),
     blocks: sanitizeBlocks(item.blocks),
+    pdfTextContent: cleanString(item.pdfTextContent, 100_000),
+    pdfArchive,
   }
 }
 
@@ -186,6 +202,20 @@ const readStoredState = (): StoredDocumentState => {
     return { documents, recycledDocuments, deletedDocumentIds }
   } catch {
     return emptyStoredState()
+  }
+}
+
+export const canReconcilePdfArchiveStorage = () => {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (!raw) return false
+    const parsed = JSON.parse(raw) as Partial<StoredDocuments>
+    return parsed.version === STORAGE_VERSION
+      && Array.isArray(parsed.documents)
+      && Array.isArray(parsed.recycledDocuments)
+      && Array.isArray(parsed.deletedDocumentIds)
+  } catch {
+    return false
   }
 }
 

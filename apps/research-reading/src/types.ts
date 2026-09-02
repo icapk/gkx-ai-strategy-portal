@@ -6,6 +6,36 @@ export type TeamPanelTab = 'todo' | 'comments' | 'members'
 
 export type DocumentKind = '在线文档' | '数据表格' | 'PDF文档' | 'Word文档' | 'Excel文档'
 
+export interface PdfArchiveMetadata {
+  storageKey: string
+  originalName: string
+  byteSize: number
+  pageCount: number
+  annotationCount: number
+  parsedAt: string
+}
+
+export interface PdfAnnotationRect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export interface PdfArchiveAnnotation {
+  id: string
+  documentId: number
+  kind: 'highlight' | 'screenshot'
+  pageNumber: number
+  quote: string
+  imageDataUrl?: string
+  imageAssetKey?: string
+  note: string
+  rects: PdfAnnotationRect[]
+  createdAt: string
+  updatedAt: string
+}
+
 export type DataTableTemplate = 'project-progress' | 'research-data'
 
 export type DataTableColumnType = 'text' | 'number' | 'select' | 'date' | 'percent' | 'file'
@@ -135,11 +165,15 @@ export interface ResearchDocument {
   keywords?: string[]
   content?: string
   blocks?: DocumentBlock[]
+  pdfTextContent?: string
+  pdfArchive?: PdfArchiveMetadata
 }
 
 export interface ResearchNote {
   id: number
   documentId: number
+  pdfAnnotationId?: string
+  pageNumber?: number
   title: string
   content: string
   createdAt: string

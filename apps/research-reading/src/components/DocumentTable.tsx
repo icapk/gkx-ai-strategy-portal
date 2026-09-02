@@ -17,6 +17,7 @@ interface DocumentTableProps {
   onRename?: (id: number, title: string) => boolean | void
   onCreateNote?: (documentItem: ResearchDocument) => void
   onOpenDocument?: (documentItem: ResearchDocument) => void
+  onDownloadDocument?: (documentItem: ResearchDocument) => void
   highlightedDocumentId?: number | null
 }
 
@@ -157,6 +158,7 @@ const emptyCopy = (mode: DocumentTableProps['mode'], workbenchTab: WorkbenchTab)
 const openActionLabel = (documentItem: ResearchDocument) => {
   if (documentItem.kind === '在线文档') return `编辑“${documentItem.title}”`
   if (documentItem.kind === '数据表格') return `打开表格“${documentItem.title}”`
+  if (documentItem.pdfArchive) return `阅读与笔记“${documentItem.title}”`
   return `预览“${documentItem.title}”`
 }
 
@@ -174,6 +176,7 @@ export function DocumentTable({
   onRename,
   onCreateNote,
   onOpenDocument,
+  onDownloadDocument,
   highlightedDocumentId = null,
 }: DocumentTableProps) {
   const [spaceMenuId, setSpaceMenuId] = useState<number | null>(null)
@@ -481,10 +484,13 @@ export function DocumentTable({
             onClick={(event) => event.stopPropagation()}
             onKeyDown={navigateMenu}
           >
-            {onOpenDocument && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onOpenDocument(documentItem))}>{isNativeDocument(documentItem) ? (documentItem.kind === '数据表格' ? '打开表格' : '编辑文档') : '预览文档'}</button>}
+            {onOpenDocument && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onOpenDocument(documentItem))}>{documentItem.pdfArchive ? '阅读与笔记' : isNativeDocument(documentItem) ? (documentItem.kind === '数据表格' ? '打开表格' : '编辑文档') : '预览文档'}</button>}
             <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onCreateNote?.(documentItem))}>笔记</button>
             <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleFavorite(documentItem.id))}>{documentItem.favorite ? '取消收藏' : '收藏'}</button>
-            <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => downloadFallback(documentItem))}>下载</button>
+            <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => {
+              if (documentItem.pdfArchive && onDownloadDocument) onDownloadDocument(documentItem)
+              else downloadFallback(documentItem)
+            })}>{documentItem.pdfArchive ? '下载原文' : '下载'}</button>
             <button type="button" role="menuitem" onClick={() => beginRename(documentItem)}>重命名</button>
             <button type="button" role="menuitem" className="danger-link" onClick={() => runSpaceMenuAction(documentItem.id, () => onDelete(documentItem.id))}>删除</button>
           </div>

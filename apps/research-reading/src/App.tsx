@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { initialComments, initialDocuments, initialFolders, initialMembers, initialResearchNotes, initialTodos, teamNames as defaultTeamNames } from './data'
 import { DocumentTable } from './components/DocumentTable'
 import { DataTableHub, type DataTableHubTarget } from './components/DataTableHub'
@@ -7,6 +7,7 @@ import { MemberPicker, type CandidateRole, type MemberCandidate } from './compon
 import { Modal } from './components/Modal'
 import { Sidebar, TopNavigation } from './components/Navigation'
 import { ProfileSettingsModal } from './components/ProfileSettingsModal'
+import { PdfArchiveTable } from './components/PdfArchiveTable'
 import { ReadingWorkspace } from './components/ReadingWorkspace'
 import { ServiceCapabilityPath } from './components/ServiceCapabilityPath'
 import { NoteDetailDialog, NoteEditorDialog } from './components/ResearchNoteDialog'
@@ -26,6 +27,7 @@ import {
   removeResearchDataTable,
 } from './dataTableContent'
 import {
+  canReconcilePdfArchiveStorage,
   createDocumentBlock,
   loadRecycledResearchDocuments,
   loadResearchDocuments,
@@ -34,6 +36,18 @@ import {
   persistResearchDocumentsBatch,
   removePersistedResearchDocument,
 } from './documentContent'
+import {
+  deletePdfArchive,
+  downloadPdfArchive,
+  exportPdfNotes,
+  hasPdfArchiveFile,
+  loadPdfAnnotations,
+  pdfArchiveStorageKey,
+  reconcilePdfArchiveStorage,
+  savePdfAnnotations,
+  savePdfArchiveFile,
+} from './pdfArchive'
+import { parsePdfData } from './pdfParsing'
 import type {
   CommentItem,
   DocumentBlock,
@@ -43,6 +57,7 @@ import type {
   ResearchDocument,
   ResearchDataTable,
   ResearchNote,
+  PdfArchiveAnnotation,
   Section,
   TeamPanelTab,
   DataTableTemplate,
@@ -54,8 +69,26 @@ import './reading.css'
 
 const nextId = (items: Array<{ id: number }>) => Math.max(0, ...items.map((item) => item.id)) + 1
 
+const pdfAnnotationToResearchNote = (
+  annotation: PdfArchiveAnnotation,
+  documentId: number,
+  id: number,
+): ResearchNote => ({
+  id,
+  documentId,
+  pdfAnnotationId: annotation.id,
+  pageNumber: annotation.pageNumber,
+  title: `第 ${annotation.pageNumber} 页 · ${annotation.kind === 'highlight' ? '划词笔记' : '截图笔记'}`,
+  content: [annotation.quote, annotation.note].map((value) => value.trim()).filter(Boolean).join('\n\n') || 'PDF 页面标注',
+  createdAt: annotation.createdAt,
+  updatedAt: annotation.updatedAt,
+  tags: ['PDF笔记', annotation.kind === 'highlight' ? '划词标注' : '截图标注'],
+})
+
 const ResearchDocumentEditor = lazy(() => import('./components/ResearchDocumentEditor').then((module) => ({ default: module.ResearchDocumentEditor })))
 const DataTableWorkspace = lazy(() => import('./components/DataTableWorkspace').then((module) => ({ default: module.DataTableWorkspace })))
+const PdfArchiveReader = lazy(() => import('./components/PdfArchiveReader').then((module) => ({ default: module.PdfArchiveReader })))
+const PdfImportDialog = lazy(() => import('./components/PdfImportDialog').then((module) => ({ default: module.PdfImportDialog })))
 
 const formatDateTime = (date: Date) => {
   const pad = (value: number) => String(value).padStart(2, '0')
@@ -67,6 +100,14 @@ const formatFileSize = (bytes: number) => bytes < 1024 * 1024
   ? `${Math.max(1, Math.round(bytes / 1024))} KB`
   : `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 
+const readablePdfImportError = (error: unknown) => {
+  const message = error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+  if (message === 'password-protected') return '该 PDF 已加密，请解除密码后重新导入。'
+  if (message === 'invalid-pdf') return '文件内容损坏或不是有效的 PDF。'
+  if (message === 'document-id-conflict') return '存档编号冲突，请重新选择文件后再试。'
+  return message.trim().slice(0, 180) || 'PDF 在线解析失败，请检查文件后重试。'
+}
+
 interface ToastState {
   message: string
   tone: 'success' | 'error'
@@ -77,6 +118,8 @@ interface ToastState {
 type PendingDeletion =
   | { type: 'document'; id: number }
   | { type: 'folder'; id: number; scope: FolderScope }
+
+type ArchiveTab = 'documents' | 'recycle'
 
 const memberCandidates: MemberCandidate[] = [
   { id: 'member-zhang-1', name: '张三', email: 'zhangsan@example.com', date: '2025-12-05', color: '#3e84f5' },
@@ -97,6 +140,8 @@ const defaultRoles = (ids: string[]): Record<string, CandidateRole> => Object.fr
 interface DocumentSearchTarget {
   blockId?: string
   query?: string
+  pageNumber?: number
+  annotationId?: string
 }
 
 interface DataTableHistoryState {
@@ -146,6 +191,10 @@ export default function App() {
   const [dataTableHubOpen, setDataTableHubOpen] = useState(false)
   const [activeDataTableAction, setActiveDataTableAction] = useState<'import' | 'share' | 'files' | undefined>()
   const [activeDocumentSearchTarget, setActiveDocumentSearchTarget] = useState<(DocumentSearchTarget & { documentId: number }) | null>(null)
+  const [activePdfDocumentId, setActivePdfDocumentId] = useState<number | null>(null)
+  const [activePdfSearchTarget, setActivePdfSearchTarget] = useState<(DocumentSearchTarget & { documentId: number }) | null>(null)
+  const [archiveTab, setArchiveTab] = useState<ArchiveTab>('documents')
+  const [pdfArchiveImportOpen, setPdfArchiveImportOpen] = useState(false)
   const [profile, setProfile] = useState<UserProfile>(() => loadUserProfile())
   const [page, setPage] = useState(1)
   const [toast, setToast] = useState<ToastState | null>(null)
@@ -185,6 +234,7 @@ export default function App() {
   const dataTableHubOpenRef = useRef(dataTableHubOpen)
   const activeDataTableFromHubRef = useRef(false)
   const dataTableNavigationGuardRef = useRef<(() => boolean) | null>(null)
+  const pdfNoteLoadGenerationRef = useRef(0)
 
   activeDocumentIdRef.current = activeDocumentId
   documentsRef.current = documents
@@ -218,14 +268,14 @@ export default function App() {
 
   useEffect(() => {
     const openSearchFromKeyboard = (event: KeyboardEvent) => {
-      if (activeProduct !== 'research' || activeDocumentId !== null || dataTableHubOpen || event.defaultPrevented || modal !== null || searchOpen) return
+      if (activeProduct !== 'research' || activeDocumentId !== null || activePdfDocumentId !== null || dataTableHubOpen || event.defaultPrevented || modal !== null || pdfArchiveImportOpen || searchOpen) return
       if (!(event.metaKey || event.ctrlKey) || event.key.toLocaleLowerCase() !== 'k') return
       event.preventDefault()
       setSearchOpen(true)
     }
     window.addEventListener('keydown', openSearchFromKeyboard)
     return () => window.removeEventListener('keydown', openSearchFromKeyboard)
-  }, [activeDocumentId, activeProduct, dataTableHubOpen, modal, searchOpen])
+  }, [activeDocumentId, activePdfDocumentId, activeProduct, dataTableHubOpen, modal, pdfArchiveImportOpen, searchOpen])
 
   const selectSection = (section: Section) => {
     setActiveSection(section)
@@ -269,6 +319,12 @@ export default function App() {
     else setDocuments((current) => current.map((item) => item.id === documentItem.id ? visitedDocument : item))
     setSearchOpen(false)
     setModal(null)
+    if (documentItem.kind === 'PDF文档' && documentItem.pdfArchive) {
+      setPreviewDocumentId(null)
+      setActivePdfSearchTarget(target ? { ...target, documentId: documentItem.id } : null)
+      setActivePdfDocumentId(documentItem.id)
+      return
+    }
     if (documentItem.kind !== '在线文档' && documentItem.kind !== '数据表格') {
       setPreviewDocumentId(documentItem.id)
       return
@@ -395,6 +451,20 @@ export default function App() {
     setActiveDocumentSearchTarget(null)
     setActiveDataTableAction(undefined)
   }
+
+  const closePdfDocument = () => {
+    setActivePdfDocumentId(null)
+    setActivePdfSearchTarget(null)
+  }
+
+  useEffect(() => {
+    if (activePdfDocumentId == null) return
+    const isAvailable = documents.some((documentItem) => documentItem.id === activePdfDocumentId && Boolean(documentItem.pdfArchive))
+    if (!isAvailable) {
+      setActivePdfDocumentId(null)
+      setActivePdfSearchTarget(null)
+    }
+  }, [activePdfDocumentId, documents])
 
   const saveDocumentContent = (value: { title: string; blocks: DocumentBlock[]; content: string; size: string }) => {
     if (activeDocumentId == null) return '无法确认当前文档，请返回列表后重试。'
@@ -547,6 +617,17 @@ export default function App() {
 
   const openNoteDetail = (note: ResearchNote) => {
     setSearchOpen(false)
+    if (note.pdfAnnotationId) {
+      const parentDocument = documentsRef.current.find((documentItem) => documentItem.id === note.documentId && Boolean(documentItem.pdfArchive))
+      if (parentDocument) {
+        openDocument(parentDocument, {
+          annotationId: note.pdfAnnotationId,
+          pageNumber: note.pageNumber,
+          query: note.content,
+        })
+        return
+      }
+    }
     setActiveNoteId(note.id)
     setNoteDocumentId(note.documentId)
     setModal('note-detail')
@@ -581,6 +662,69 @@ export default function App() {
     () => documents.filter((documentItem) => documentItem.kind === '数据表格'),
     [documents],
   )
+  const archivedPdfDocuments = useMemo(
+    () => documents.filter((documentItem) => documentItem.kind === 'PDF文档' && Boolean(documentItem.pdfArchive)),
+    [documents],
+  )
+  const archivedPdfDocumentIdsKey = useMemo(
+    () => archivedPdfDocuments.map((documentItem) => documentItem.id).sort((left, right) => left - right).join(','),
+    [archivedPdfDocuments],
+  )
+  const knownPdfDocumentIdsKey = useMemo(
+    () => [...documents, ...recycledDocuments]
+      .filter((documentItem) => documentItem.kind === 'PDF文档' && Boolean(documentItem.pdfArchive))
+      .map((documentItem) => documentItem.id)
+      .sort((left, right) => left - right)
+      .join(','),
+    [documents, recycledDocuments],
+  )
+  const existingPdfFiles = useMemo(
+    () => [...documents, ...recycledDocuments].flatMap((documentItem) => documentItem.pdfArchive
+      ? [{ name: documentItem.pdfArchive.originalName, size: documentItem.pdfArchive.byteSize }]
+      : []),
+    [documents, recycledDocuments],
+  )
+
+  useEffect(() => {
+    if (!canReconcilePdfArchiveStorage()) return
+    const knownIds = knownPdfDocumentIdsKey.split(',').map(Number).filter((id) => Number.isInteger(id) && id > 0)
+    void reconcilePdfArchiveStorage(knownIds)
+  }, [knownPdfDocumentIdsKey])
+
+  useEffect(() => {
+    let cancelled = false
+    const generation = ++pdfNoteLoadGenerationRef.current
+    const documentIds = archivedPdfDocumentIdsKey.split(',').map(Number).filter((id) => Number.isInteger(id) && id > 0)
+    void Promise.all(documentIds.map(async (documentId) => ({
+      documentId,
+      result: await loadPdfAnnotations(documentId),
+    }))).then((loadedDocuments) => {
+      if (cancelled || generation !== pdfNoteLoadGenerationRef.current) return
+      const activeDocumentIds = new Set(documentIds)
+      const successfullyLoadedIds = new Set(loadedDocuments.filter(({ result }) => result.ok).map(({ documentId }) => documentId))
+      setResearchNotes((current) => {
+        const existingByAnnotation = new Map(current
+          .filter((note) => note.pdfAnnotationId)
+          .map((note) => [`${note.documentId}:${note.pdfAnnotationId}`, note]))
+        const retained = current.filter((note) => {
+          if (!note.pdfAnnotationId) return true
+          if (!activeDocumentIds.has(note.documentId)) return false
+          return !successfullyLoadedIds.has(note.documentId)
+        })
+        let nextNoteId = nextId(current)
+        const restoredNotes = loadedDocuments.flatMap(({ documentId, result }) => {
+          if (!result.ok) return []
+          return result.value.map((annotation) => {
+            const existing = existingByAnnotation.get(`${documentId}:${annotation.id}`)
+            return pdfAnnotationToResearchNote(annotation, documentId, existing?.id ?? nextNoteId++)
+          })
+        })
+        return [...restoredNotes, ...retained]
+      })
+    })
+    return () => { cancelled = true }
+  }, [archivedPdfDocumentIdsKey])
+
   const hubDataTables = useMemo(() => {
     const activeIds = new Set(activeDataTableDocuments.map((documentItem) => documentItem.id))
     return researchDataTables.filter((table) => activeIds.has(table.documentId))
@@ -676,13 +820,23 @@ export default function App() {
     })
   }
 
-  const permanentlyDeleteDocument = (id: number) => {
+  const permanentlyDeleteDocument = async (id: number) => {
     const target = recycledDocuments.find((doc) => doc.id === id)
     if (!target || !window.confirm(`彻底删除“${target.title}”？该操作无法恢复。`)) return
     const result = removePersistedResearchDocument(id)
     if (!result.ok) {
       showError(result.error)
       return
+    }
+    if (target.pdfArchive) {
+      const archiveResult = await deletePdfArchive(id)
+      if (!archiveResult.ok) {
+        const rollback = persistRecycledResearchDocument(target)
+        showError(rollback.ok
+          ? `${archiveResult.error} 文献仍保留在回收站，可稍后重试。`
+          : `${archiveResult.error} 回收站索引恢复也失败，请刷新页面核对。`)
+        return
+      }
     }
     setRecycledDocuments((current) => current.filter((doc) => doc.id !== id))
     setResearchNotes((current) => current.filter((note) => note.documentId !== id))
@@ -939,6 +1093,100 @@ export default function App() {
     } else showToast(`在线文档“${title}”已创建`)
   }
 
+  const importPdfFile = async (
+    file: File,
+    onProgress: (progress: number) => void,
+    targetLocation = '我的空间/文献存档',
+    targetScope: 'personal' | 'team' = 'personal',
+  ) => {
+    if (!/\.pdf$/i.test(file.name.trim())) return { ok: false as const, error: '仅支持导入 PDF 文件。' }
+    if (file.size <= 0) return { ok: false as const, error: '文件为空，无法导入。' }
+    if (file.size > 50 * 1024 * 1024) return { ok: false as const, error: '单个 PDF 不能超过 50 MB。' }
+    const normalizedName = file.name.normalize('NFC').trim().toLocaleLowerCase('zh-CN')
+    const matchesFile = (documentItem: ResearchDocument) => (
+      documentItem.pdfArchive?.originalName.normalize('NFC').trim().toLocaleLowerCase('zh-CN') === normalizedName
+      && documentItem.pdfArchive.byteSize === file.size
+    )
+    const recycledDuplicate = recycledDocuments.find(matchesFile)
+    if (recycledDuplicate) return { ok: false as const, error: '同名且大小相同的 PDF 已在回收站，请先恢复或彻底删除后再导入。' }
+    const activeDuplicate = documentsRef.current.find(matchesFile)
+    if (activeDuplicate) {
+      onProgress(4)
+      if (await hasPdfArchiveFile(activeDuplicate.id)) {
+        onProgress(100)
+        return { ok: true as const, documentItem: activeDuplicate }
+      }
+    }
+
+    try {
+      onProgress(2)
+      const data = await file.arrayBuffer()
+      onProgress(6)
+      const parsed = await parsePdfData(data, onProgress)
+      const id = activeDuplicate?.id ?? documentIdCounterRef.current
+      if (!activeDuplicate) documentIdCounterRef.current += 1
+      const timestamp = formatLocalDateTime()
+      const archivedDocument: ResearchDocument = {
+        ...(activeDuplicate ?? {
+          id,
+          title: file.name.replace(/\.pdf$/i, '').normalize('NFC').trim().slice(0, 50) || `PDF 文献 ${id}`,
+          location: targetLocation,
+          owner: profile.name,
+          createdAt: timestamp,
+          visitedAt: '',
+          kind: 'PDF文档' as const,
+          favorite: false,
+          owned: true,
+          shared: targetScope === 'team',
+          spaceScope: targetScope,
+        }),
+        id,
+        updatedAt: timestamp,
+        size: formatFileSize(file.size),
+        kind: 'PDF文档',
+        description: `已在线解析并存档的 PDF 文献，共 ${parsed.pageCount} 页；可打开原文进行划词、截图和笔记整理。`,
+        keywords: ['PDF文献', '文献存档', '在线解析'],
+        content: '',
+        pdfTextContent: parsed.textContent,
+        pdfArchive: {
+          storageKey: pdfArchiveStorageKey(id),
+          originalName: file.name.normalize('NFC').trim().slice(0, 200),
+          byteSize: file.size,
+          pageCount: parsed.pageCount,
+          annotationCount: activeDuplicate?.pdfArchive?.annotationCount ?? 0,
+          parsedAt: new Date().toISOString(),
+        },
+      }
+      onProgress(97)
+      const archiveResult = await savePdfArchiveFile(id, file, data)
+      if (!archiveResult.ok) return { ok: false as const, error: readablePdfImportError(archiveResult.error) }
+      onProgress(99)
+      const documentResult = persistResearchDocument(archivedDocument)
+      if (!documentResult.ok) {
+        if (activeDuplicate) {
+          onProgress(100)
+          return { ok: true as const, documentItem: activeDuplicate }
+        }
+        const rollback = await deletePdfArchive(id)
+        return {
+          ok: false as const,
+          error: rollback.ok
+            ? documentResult.error
+            : `${documentResult.error} 已写入的 PDF 存档清理失败，请刷新后重试。`,
+        }
+      }
+      setDocuments((current) => {
+        const next = [archivedDocument, ...current.filter((documentItem) => documentItem.id !== id)]
+        documentsRef.current = next
+        return next
+      })
+      onProgress(100)
+      return { ok: true as const, documentItem: archivedDocument }
+    } catch (error) {
+      return { ok: false as const, error: readablePdfImportError(error) }
+    }
+  }
+
   const submitImport = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!importFile || isImporting) return
@@ -954,8 +1202,32 @@ export default function App() {
     const attempt = importAttemptRef.current + 1
     importAttemptRef.current = attempt
     setImportError('')
-    setImportProgress(18)
+    setImportProgress(extension === 'pdf' ? 2 : 18)
     setIsImporting(true)
+    if (extension === 'pdf') {
+      const targetLocation = activeSection === 'team'
+        ? `${activeTeam}/${openFolderName ?? '文档'}`
+        : `我的空间/${openFolderName ?? '文献存档'}`
+      const result = await importPdfFile(
+        importFile,
+        (progress) => { if (importAttemptRef.current === attempt) setImportProgress(progress) },
+        targetLocation,
+        activeSection === 'team' ? 'team' : 'personal',
+      )
+      if (importAttemptRef.current !== attempt) return
+      if (!result.ok) {
+        setImportError(result.error)
+        setIsImporting(false)
+        return
+      }
+      setIsImporting(false)
+      setImportProgress(0)
+      setImportFile(null)
+      setImportFileName('')
+      setModal(null)
+      showToast(`“${result.documentItem.title}”已在线解析并存入文献存档`)
+      return
+    }
     for (const progress of [48, 78, 100]) {
       await new Promise((resolve) => window.setTimeout(resolve, 180))
       if (importAttemptRef.current !== attempt) return
@@ -975,7 +1247,7 @@ export default function App() {
       visitedAt: '',
       updatedAt: timestamp,
       size: formatFileSize(importFile.size),
-      kind: extension === 'pdf' ? 'PDF文档' : 'Word文档',
+      kind: 'Word文档',
       favorite: false,
       owned: true,
       shared: activeSection === 'team',
@@ -1243,6 +1515,9 @@ export default function App() {
   const activeEditingDataTable = activeEditingDocument?.kind === '数据表格'
     ? researchDataTables.find((table) => table.documentId === activeEditingDocument.id)
     : undefined
+  const activePdfDocument = activePdfDocumentId == null
+    ? undefined
+    : documents.find((documentItem) => documentItem.id === activePdfDocumentId && Boolean(documentItem.pdfArchive))
   const previewDocument = previewDocumentId == null
     ? undefined
     : documents.find((documentItem) => documentItem.id === previewDocumentId)
@@ -1252,11 +1527,97 @@ export default function App() {
     ? (pendingDeletion.scope === 'team' ? teamFolders : folders).find((folder) => folder.id === pendingDeletion.id)
     : undefined
 
+  const openPdfDocumentById = (documentId: number) => {
+    const documentItem = documentsRef.current.find((item) => item.id === documentId && Boolean(item.pdfArchive))
+    if (!documentItem) {
+      showError('该 PDF 文献已不存在或尚未完成存档。')
+      return
+    }
+    openDocument(documentItem)
+  }
+
+  const downloadArchivedPdf = async (documentItem: ResearchDocument) => {
+    const result = await downloadPdfArchive(documentItem)
+    if (!result.ok) showError(result.error)
+  }
+
+  const saveActivePdfAnnotations = async (
+    nextAnnotations: PdfArchiveAnnotation[],
+    previousAnnotations: PdfArchiveAnnotation[],
+  ) => {
+    if (!activePdfDocument?.pdfArchive) return { ok: false as const, error: '当前 PDF 文献已关闭，请重新打开后保存。' }
+    pdfNoteLoadGenerationRef.current += 1
+    const documentId = activePdfDocument.id
+    const annotationResult = await savePdfAnnotations(documentId, nextAnnotations, previousAnnotations)
+    if (!annotationResult.ok) return annotationResult
+    const currentDocument = documentsRef.current.find((item) => item.id === documentId)
+    if (!currentDocument?.pdfArchive) {
+      await savePdfAnnotations(documentId, previousAnnotations, annotationResult.value)
+      return { ok: false as const, error: '文献存档索引已不存在，请返回列表后重新打开。' }
+    }
+    const updatedDocument: ResearchDocument = {
+      ...currentDocument,
+      updatedAt: formatLocalDateTime(),
+      pdfArchive: {
+        ...currentDocument.pdfArchive,
+        annotationCount: annotationResult.value.length,
+      },
+    }
+    const documentResult = persistResearchDocument(updatedDocument)
+    if (!documentResult.ok) {
+      const rollback = await savePdfAnnotations(documentId, previousAnnotations, annotationResult.value)
+      return {
+        ok: false as const,
+        error: rollback.ok
+          ? documentResult.error
+          : `${documentResult.error} 笔记数据回滚失败，请关闭阅读器后重新打开核对。`,
+      }
+    }
+    setDocuments((current) => {
+      const updated = current.map((item) => item.id === documentId ? updatedDocument : item)
+      documentsRef.current = updated
+      return updated
+    })
+    setResearchNotes((current) => {
+      const existingByAnnotationId = new Map(current
+        .filter((note) => note.documentId === documentId && note.pdfAnnotationId)
+        .map((note) => [note.pdfAnnotationId!, note]))
+      const unrelatedNotes = current.filter((note) => note.documentId !== documentId || !note.pdfAnnotationId)
+      let nextNoteId = nextId(current)
+      const pdfNotes: ResearchNote[] = annotationResult.value.map((annotation) => {
+        const existing = existingByAnnotationId.get(annotation.id)
+        return pdfAnnotationToResearchNote(annotation, documentId, existing?.id ?? nextNoteId++)
+      })
+      return [...pdfNotes, ...unrelatedNotes]
+    })
+    return { ok: true as const, annotations: annotationResult.value }
+  }
+
+  const selectArchiveTab = (nextTab: ArchiveTab) => {
+    setArchiveTab(nextTab)
+    setPage(1)
+  }
+
+  const handleArchiveTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, tab: ArchiveTab) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    const tabs: ArchiveTab[] = ['documents', 'recycle']
+    const currentIndex = tabs.indexOf(tab)
+    const nextIndex = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? tabs.length - 1
+        : (currentIndex + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length
+    const nextTab = tabs[nextIndex]
+    selectArchiveTab(nextTab)
+    window.requestAnimationFrame(() => document.getElementById(`archive-tab-${nextTab}`)?.focus())
+  }
+
   return (
     <main className={`app-stage${activeProduct === 'reading' ? ' app-stage--reading' : ''}`}>
       <div className="ambient ambient--left" aria-hidden="true" />
       <div className="ambient ambient--top" aria-hidden="true" />
-      <div className="app-shell" aria-hidden={activeEditingDocument || dataTableHubOpen ? true : undefined} inert={activeEditingDocument || dataTableHubOpen ? true : undefined}>
+      <div className="app-shell" aria-hidden={activeEditingDocument || activePdfDocumentId !== null || dataTableHubOpen ? true : undefined} inert={activeEditingDocument || activePdfDocumentId !== null || dataTableHubOpen ? true : undefined}>
         {activeProduct === 'reading' ? (
           <ReadingWorkspace
             onSwitchToResearch={() => setActiveProduct('research')}
@@ -1332,6 +1693,7 @@ export default function App() {
                 onRenameDocument={renameDocument}
                 onCreateNote={createDocumentNote}
                 onOpenDocument={openDocument}
+                onDownloadDocument={(documentItem) => { void downloadArchivedPdf(documentItem) }}
               />
             )}
             {activeSection === 'team' && (
@@ -1356,24 +1718,73 @@ export default function App() {
                 onRenameDocument={renameDocument}
                 onCreateNote={createDocumentNote}
                 onOpenDocument={openDocument}
+                onDownloadDocument={(documentItem) => { void downloadArchivedPdf(documentItem) }}
                 emptyTeam={createdTeams.includes(activeTeam)}
               />
             )}
             {activeSection === 'recycle' && (
-              <section className="view view--recycle">
-                <header className="view-header"><h1><span className="title-accent" />存档管理</h1></header>
-                <div className="view-body recycle-body">
-                  <div className="recycle-note">回收站中的内容将在 30 天后自动清除</div>
-                  <DocumentTable
-                    documents={recycledDocuments}
-                    mode="recycle"
-                    page={page}
-                    onPageChange={setPage}
-                    onToggleFavorite={() => undefined}
-                    onDelete={permanentlyDeleteDocument}
-                    onShare={() => undefined}
-                    onRestore={restoreDocument}
-                  />
+              <section className="view view--space view--recycle">
+                <header className="view-header">
+                  <h1><span className="title-accent" />存档管理</h1>
+                  {archiveTab === 'documents' && (
+                    <div className="header-actions">
+                      <button className="button button--primary" type="button" onClick={() => setPdfArchiveImportOpen(true)}>
+                        <span className="button-plus" aria-hidden="true">＋</span>批量导入 PDF
+                      </button>
+                    </div>
+                  )}
+                </header>
+                <div className="view-body workbench-body">
+                  <div className="subtabs" role="tablist" aria-label="存档管理分类">
+                    <button
+                      id="archive-tab-documents"
+                      type="button"
+                      className={archiveTab === 'documents' ? 'is-active' : ''}
+                      role="tab"
+                      aria-selected={archiveTab === 'documents'}
+                      aria-controls="archive-panel"
+                      tabIndex={archiveTab === 'documents' ? 0 : -1}
+                      onClick={() => selectArchiveTab('documents')}
+                      onKeyDown={(event) => handleArchiveTabKeyDown(event, 'documents')}
+                    >文献存档 <span aria-label={`${archivedPdfDocuments.length} 篇`}>（{archivedPdfDocuments.length}）</span></button>
+                    <button
+                      id="archive-tab-recycle"
+                      type="button"
+                      className={archiveTab === 'recycle' ? 'is-active' : ''}
+                      role="tab"
+                      aria-selected={archiveTab === 'recycle'}
+                      aria-controls="archive-panel"
+                      tabIndex={archiveTab === 'recycle' ? 0 : -1}
+                      onClick={() => selectArchiveTab('recycle')}
+                      onKeyDown={(event) => handleArchiveTabKeyDown(event, 'recycle')}
+                    >回收站 <span aria-label={`${recycledDocuments.length} 项`}>（{recycledDocuments.length}）</span></button>
+                  </div>
+                  <div id="archive-panel" role="tabpanel" aria-labelledby={`archive-tab-${archiveTab}`} style={{ display: 'flex', minHeight: 0, flex: '1 1 auto', flexDirection: 'column' }}>
+                    {archiveTab === 'documents' ? <>
+                      <div className="recycle-note" style={{ color: '#165dff', background: '#f2f7ff' }}>
+                        PDF 导入后会在线解析并自动存档；打开原文可进行划词、截图和笔记，笔记可导出为 PDF。
+                      </div>
+                      <PdfArchiveTable
+                        documents={archivedPdfDocuments}
+                        onOpen={openDocument}
+                        onDownload={(documentItem) => { void downloadArchivedPdf(documentItem) }}
+                        onToggleFavorite={toggleFavorite}
+                        onMoveToRecycle={requestDeleteDocument}
+                      />
+                    </> : <>
+                      <div className="recycle-note">回收站中的内容可恢复或彻底删除；PDF 原件将在彻底删除前保留。</div>
+                      <DocumentTable
+                        documents={recycledDocuments}
+                        mode="recycle"
+                        page={page}
+                        onPageChange={setPage}
+                        onToggleFavorite={() => undefined}
+                        onDelete={(id) => { void permanentlyDeleteDocument(id) }}
+                        onShare={() => undefined}
+                        onRestore={restoreDocument}
+                      />
+                    </>}
+                  </div>
                 </div>
               </section>
             )}
@@ -1419,13 +1830,39 @@ export default function App() {
       )}
 
       {activeEditingDocument?.kind === '在线文档' && (
-        <Suspense fallback={<div className="document-editor-loading" role="status"><span /><strong>正在打开文档编辑器…</strong></div>}>
-          <ResearchDocumentEditor
-            documentItem={activeEditingDocument}
-            initialBlockId={activeDocumentSearchTarget?.documentId === activeEditingDocument.id ? activeDocumentSearchTarget.blockId : undefined}
-            initialSearchQuery={activeDocumentSearchTarget?.documentId === activeEditingDocument.id ? activeDocumentSearchTarget.query : undefined}
-            onClose={closeActiveDocument}
-            onSave={saveDocumentContent}
+        <div className="document-editor-host" aria-hidden={activePdfDocument ? true : undefined} inert={activePdfDocument ? true : undefined}>
+          <Suspense fallback={<div className="document-editor-loading" role="status"><span /><strong>正在打开文档编辑器…</strong></div>}>
+            <ResearchDocumentEditor
+              documentItem={activeEditingDocument}
+              pdfDocuments={archivedPdfDocuments}
+              initialBlockId={activeDocumentSearchTarget?.documentId === activeEditingDocument.id ? activeDocumentSearchTarget.blockId : undefined}
+              initialSearchQuery={activeDocumentSearchTarget?.documentId === activeEditingDocument.id ? activeDocumentSearchTarget.query : undefined}
+              onClose={closeActiveDocument}
+              onSave={saveDocumentContent}
+              onImportPdfFile={(file, onProgress) => importPdfFile(
+                file,
+                onProgress,
+                activeEditingDocument.location,
+                activeEditingDocument.spaceScope ?? (activeEditingDocument.location.startsWith('我的空间/') ? 'personal' : 'team'),
+              )}
+              onOpenPdfDocument={openPdfDocumentById}
+            />
+          </Suspense>
+        </div>
+      )}
+
+      {activePdfDocument && (
+        <Suspense fallback={<div className="document-editor-loading" role="status"><span /><strong>正在打开 PDF 文献…</strong></div>}>
+          <PdfArchiveReader
+            key={`pdf-archive-reader-${activePdfDocument.id}`}
+            document={activePdfDocument}
+            initialAnnotationId={activePdfSearchTarget?.documentId === activePdfDocument.id ? activePdfSearchTarget.annotationId : undefined}
+            initialPageNumber={activePdfSearchTarget?.documentId === activePdfDocument.id ? activePdfSearchTarget.pageNumber : undefined}
+            initialSearchQuery={activePdfSearchTarget?.documentId === activePdfDocument.id ? activePdfSearchTarget.query : undefined}
+            onClose={closePdfDocument}
+            onSaveAnnotations={saveActivePdfAnnotations}
+            onDownload={() => downloadPdfArchive(activePdfDocument)}
+            onExport={(annotations) => exportPdfNotes(activePdfDocument, annotations)}
           />
         </Suspense>
       )}
@@ -1461,6 +1898,21 @@ export default function App() {
           onLocateDocument={locateDocument}
           onOpenNote={openNoteDetail}
         />
+      )}
+
+      {pdfArchiveImportOpen && (
+        <Suspense fallback={<div className="document-editor-loading" role="status"><span /><strong>正在打开 PDF 导入工具…</strong></div>}>
+          <PdfImportDialog
+            open
+            existingFiles={existingPdfFiles}
+            onClose={() => setPdfArchiveImportOpen(false)}
+            onImportFile={(file, onProgress) => importPdfFile(file, onProgress, '我的空间/文献存档', 'personal')}
+            onOpenDocument={(documentId) => {
+              setPdfArchiveImportOpen(false)
+              openPdfDocumentById(documentId)
+            }}
+          />
+        </Suspense>
       )}
 
       {previewDocument && (

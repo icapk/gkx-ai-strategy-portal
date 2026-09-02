@@ -1,0 +1,341 @@
+.pdf-archive-region {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.pdf-archive-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-bottom: 12px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.pdf-archive-summary strong {
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+.pdf-archive-scroll {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.pdf-archive-table {
+  width: 100%;
+  min-width: 1080px;
+  border-spacing: 0;
+  border-collapse: separate;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.pdf-archive-table th,
+.pdf-archive-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.pdf-archive-table th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  color: var(--text-2);
+  background: #f7f9fc;
+  font-weight: 500;
+}
+
+.pdf-archive-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.pdf-archive-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.pdf-archive-title {
+  display: inline-flex;
+  max-width: 310px;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-1);
+  text-align: left;
+}
+
+.pdf-archive-title:hover strong,
+.pdf-archive-title:focus-visible strong {
+  color: var(--primary);
+}
+
+.pdf-archive-title > span:last-child {
+  min-width: 0;
+}
+
+.pdf-archive-title strong,
+.pdf-archive-title small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-archive-title strong {
+  font-weight: 500;
+}
+
+.pdf-archive-title small {
+  margin-top: 3px;
+  color: var(--text-4);
+  font-size: 12px;
+}
+
+.pdf-archive-file-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 38px;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  color: #e5484d;
+  background: #fff0f0;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.pdf-archive-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #16835d;
+  white-space: nowrap;
+}
+
+.pdf-archive-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #19a974;
+}
+
+.pdf-archive-actions {
+  display: inline-flex;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.pdf-archive-actions button {
+  padding: 2px 0;
+  color: var(--primary);
+}
+
+.pdf-archive-actions button:hover,
+.pdf-archive-actions button:focus-visible {
+  text-decoration: underline;
+}
+
+.pdf-archive-actions button.is-danger {
+  color: #e5484d;
+}
+
+.pdf-archive-empty {
+  display: flex;
+  min-height: 300px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 32px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.pdf-archive-empty-icon {
+  display: inline-flex;
+  width: 62px;
+  height: 70px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  border-radius: 9px;
+  color: #e5484d;
+  background: #fff0f0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pdf-archive-empty strong {
+  color: var(--text-1);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.pdf-archive-empty p {
+  max-width: 440px;
+  margin: 8px 0 0;
+  line-height: 1.6;
+}
+
+.pdf-archive-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 14px;
+  color: var(--text-3);
+}
+
+.pdf-archive-pagination button {
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-2);
+  background: #fff;
+}
+
+.pdf-archive-pagination button:hover:not(:disabled),
+.pdf-archive-pagination button:focus-visible {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pdf-archive-pagination button:disabled {
+  opacity: 0.45;
+}
+
+@media (max-width: 680px) {
+  .pdf-archive-summary {
+    display: grid;
+  }
+
+  .pdf-archive-scroll {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .pdf-archive-table {
+    display: block;
+    min-width: 0;
+  }
+
+  .pdf-archive-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .pdf-archive-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .pdf-archive-table tbody tr {
+    display: grid;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(54, 78, 112, 0.04);
+  }
+
+  .pdf-archive-table tbody tr:hover {
+    background: #fff;
+  }
+
+  .pdf-archive-table td,
+  .pdf-archive-table tr:last-child td {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 0;
+  }
+
+  .pdf-archive-table td::before {
+    color: var(--text-4);
+    content: attr(data-label);
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .pdf-archive-table td:first-child {
+    display: block;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .pdf-archive-table td:first-child::before {
+    display: none;
+  }
+
+  .pdf-archive-title {
+    width: 100%;
+    max-width: none;
+  }
+
+  .pdf-archive-status {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .pdf-archive-table td:last-child {
+    display: block;
+    margin-top: 5px;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .pdf-archive-table td:last-child::before {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .pdf-archive-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    white-space: normal;
+  }
+
+  .pdf-archive-actions button {
+    min-height: 44px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    text-align: center;
+  }
+
+  .pdf-archive-actions button:hover,
+  .pdf-archive-actions button:focus-visible {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    text-decoration: none;
+  }
+
+  .pdf-archive-actions button.is-danger:hover,
+  .pdf-archive-actions button.is-danger:focus-visible {
+    border-color: #ffb4a8;
+    background: #fff1f0;
+  }
+
+  .pdf-archive-pagination button {
+    min-height: 44px;
+  }
+}

@@ -96,3 +96,34 @@ test('搜索函数仍保持空查询无命中的清晰语义', () => {
   assert.deepEqual(searchResearchContent(initialDocuments, initialResearchNotes, ''), [])
   assert.deepEqual(searchResearchContent(initialDocuments, initialResearchNotes, '   '), [])
 })
+
+test('在线解析后的 PDF 全文可被科研搜索命中', () => {
+  const document: ResearchDocument = {
+    id: 79,
+    title: '已存档文献',
+    location: '我的空间/研究',
+    owner: '张三',
+    createdAt: '2026-09-01 10:00',
+    visitedAt: '2026-09-01 10:00',
+    size: '2.4 MB',
+    kind: 'PDF文档',
+    favorite: false,
+    owned: true,
+    shared: false,
+    pdfTextContent: '第一页介绍研究背景。\n本文研究多模态知识蒸馏与小样本分类。',
+    pdfArchive: {
+      storageKey: 'pdf-79',
+      originalName: 'paper.pdf',
+      byteSize: 2_400_000,
+      pageCount: 18,
+      annotationCount: 2,
+      parsedAt: '2026-09-01T10:00:00.000Z',
+    },
+  }
+
+  const [result] = searchResearchContent([document], [], '知识蒸馏')
+  assert.equal(result?.id, 'document:79')
+  assert.deepEqual(result?.matchedFields, ['PDF全文'])
+  assert.match(result?.snippet ?? '', /知识蒸馏/)
+  assert.equal(result?.targetPageNumber, 2)
+})

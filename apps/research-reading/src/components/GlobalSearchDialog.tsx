@@ -16,7 +16,7 @@ interface GlobalSearchDialogProps {
   documents: ResearchDocument[]
   notes: ResearchNote[]
   onClose: () => void
-  onOpenDocument: (document: ResearchDocument, target?: { blockId?: string; query?: string }) => void
+  onOpenDocument: (document: ResearchDocument, target?: { blockId?: string; query?: string; pageNumber?: number }) => void
   onLocateDocument: (document: ResearchDocument) => void
   onOpenNote: (note: ResearchNote) => void
 }
@@ -139,6 +139,7 @@ function ResultIcon({ result }: { result: ResearchSearchResult }) {
 function resultActionLabel(result: ResearchSearchResult) {
   if (result.type === 'note') return '查看笔记'
   if (result.document.kind === '数据表格') return '打开表格'
+  if (result.document.pdfArchive) return result.targetPageNumber ? '打开并定位' : '打开阅读'
   if (result.document.kind !== '在线文档') return '定位文档'
   return result.targetBlockId || result.matchedFields.includes('正文') ? '打开并定位' : '打开文档'
 }
@@ -227,10 +228,11 @@ export function GlobalSearchDialog({
 
   const openResult = (result: ResearchSearchResult) => {
     if (result.type === 'document') {
-      if (result.document.kind === '在线文档' || result.document.kind === '数据表格') {
+      if (result.document.kind === '在线文档' || result.document.kind === '数据表格' || result.document.pdfArchive) {
         onOpenDocument(result.document, {
           blockId: result.targetBlockId,
           query: submittedQuery || undefined,
+          pageNumber: result.targetPageNumber,
         })
       } else onLocateDocument(result.document)
     } else onOpenNote(result.note)

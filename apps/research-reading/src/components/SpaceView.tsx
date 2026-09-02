@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
+import { downloadPdfArchive } from '../pdfArchive'
 import type { FolderItem, ResearchDocument } from '../types'
 import { DocumentTable } from './DocumentTable'
 
@@ -24,7 +25,14 @@ interface SpaceViewProps {
   onRenameDocument: (id: number, title: string) => boolean
   onCreateNote: (documentItem: ResearchDocument) => void
   onOpenDocument: (documentItem: ResearchDocument) => void
+  onDownloadDocument?: (documentItem: ResearchDocument) => void
   emptyTeam?: boolean
+}
+
+const downloadArchivedPdf = (documentItem: ResearchDocument) => {
+  void downloadPdfArchive(documentItem).then((result) => {
+    if (!result.ok) window.alert(result.error)
+  }).catch(() => window.alert('PDF 下载失败，请稍后重试。'))
 }
 
 const sizeInBytes = (value: string) => {
@@ -73,6 +81,7 @@ export function SpaceView({
   onRenameDocument,
   onCreateNote,
   onOpenDocument,
+  onDownloadDocument = downloadArchivedPdf,
   emptyTeam = false,
 }: SpaceViewProps) {
   const locationRoot = mode === 'personal' ? '我的空间' : teamName ?? 'AI研究团队'
@@ -302,6 +311,7 @@ export function SpaceView({
             onRename={onRenameDocument}
             onCreateNote={onCreateNote}
             onOpenDocument={onOpenDocument}
+            onDownloadDocument={onDownloadDocument}
           />
         </section>}
       </div>

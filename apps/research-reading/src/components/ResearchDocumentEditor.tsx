@@ -11,6 +11,7 @@ import {
 } from '../documentContent'
 import type {
   DocumentBlock,
+  DocumentBookmarkBlock,
   DocumentFormulaBlock,
   DocumentImageBlock,
   DocumentListBlock,
@@ -19,11 +20,15 @@ import type {
 } from '../types'
 import { displayResearchLocation } from '../workbenchDocuments'
 import { Modal } from './Modal'
+import { PdfImportDialog, type PdfImportDialogProps, type PdfImportResult } from './PdfImportDialog'
 
 interface ResearchDocumentEditorProps {
   documentItem: ResearchDocument
   initialBlockId?: string
   initialSearchQuery?: string
+  pdfDocuments: ResearchDocument[]
+  onImportPdfFile: PdfImportDialogProps['onImportFile']
+  onOpenPdfDocument: (documentId: number) => void
   onClose: () => void
   onSave: (value: { title: string; blocks: DocumentBlock[]; content: string; size: string }) => string | null
 }
@@ -61,6 +66,77 @@ const MAX_IMAGE_DATA_URL_LENGTH = 1_500_000
 const MAX_DOCUMENT_BLOCKS = 200
 const MAX_LIST_ITEMS = 100
 const MAX_DOCUMENT_TEXT_CHARACTERS = 120_000
+const PDF_REFERENCE_ORIGIN = 'https://pdf-archive.local'
+let pdfReferenceSequence = 0
+
+interface PdfReferenceMetadata {
+  documentId: number
+  originalName: string
+  pageCount: number
+  byteSize: number
+  annotationCount: number
+}
+
+const getPdfReferenceMetadata = (block: DocumentBlock): PdfReferenceMetadata | null => {
+  if (block.type !== 'bookmark') return null
+  try {
+    const referenceUrl = new URL(block.url)
+    const pathMatch = referenceUrl.pathname.match(/^\/document\/(\d+)$/)
+    if (referenceUrl.origin !== PDF_REFERENCE_ORIGIN || !pathMatch) return null
+    const documentId = Number(pathMatch[1])
+    if (!Number.isInteger(documentId) || documentId <= 0) return null
+    return {
+      documentId,
+      originalName: (referenceUrl.searchParams.get('name') || block.title || 'PDF 文献').slice(0, 200),
+      pageCount: Math.min(100_000, Math.max(0, Number(referenceUrl.searchParams.get('pages')) || 0)),
+      byteSize: Math.min(200 * 1024 * 1024, Math.max(0, Number(referenceUrl.searchParams.get('bytes')) || 0)),
+      annotationCount: Math.min(10_000, Math.max(0, Number(referenceUrl.searchParams.get('notes')) || 0)),
+    }
+  } catch {
+    return null
+  }
+}
+
+const createPdfReferenceBlock = (documentItem: ResearchDocument): DocumentBookmarkBlock => {
+  pdfReferenceSequence += 1
+  const archive = documentItem.pdfArchive
+  const referenceUrl = new URL(`${PDF_REFERENCE_ORIGIN}/document/${documentItem.id}`)
+  referenceUrl.searchParams.set('name', archive?.originalName || documentItem.title)
+  referenceUrl.searchParams.set('pages', String(archive?.pageCount ?? 0))
+  referenceUrl.searchParams.set('bytes', String(archive?.byteSize ?? 0))
+  referenceUrl.searchParams.set('notes', String(archive?.annotationCount ?? 0))
+  return {
+    id: `pdf-reference-${Date.now().toString(36)}-${pdfReferenceSequence.toString(36)}`,
+    type: 'bookmark',
+    url: referenceUrl.toString(),
+    title: documentItem.title,
+    description: 'PDF 文献来源已归入存档管理；删除本卡片不会删除存档原文。',
+  }
+}
+
+const formatPdfFileSize = (bytes: number, fallback: string) => {
+  if (!bytes) return fallback || '大小未知'
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)} MB`
+}
+
+const getEditorBlockText = (block: DocumentBlock) => {
+  const pdfReference = getPdfReferenceMetadata(block)
+  if (pdfReference && block.type === 'bookmark') return block.title || pdfReference.originalName
+  return documentBlocksToText([block])
+}
+
+const getEditorBlocksText = (blocks: DocumentBlock[]) => blocks
+  .map(getEditorBlockText)
+  .map((part) => part.trim())
+  .filter(Boolean)
+  .join('\n')
+
+const getEditorBlockLabel = (block: DocumentBlock) => getPdfReferenceMetadata(block) ? 'PDF 文献来源' : blockLabels[block.type]
+const getEditorBlockSymbol = (block: DocumentBlock) => getPdfReferenceMetadata(block)
+  ? 'PDF'
+  : blockOptions.find((option) => option.type === block.type)?.symbol
 
 const getFormulaHtml = (latex: string) => {
   if (!latex.trim()) return ''
@@ -187,7 +263,16 @@ function InsertMenu({ onInsert, onClose }: { onInsert: (type: BlockType) => void
   )
 }
 
-export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSearchQuery, onClose, onSave }: ResearchDocumentEditorProps) {
+export function ResearchDocumentEditor({
+  documentItem,
+  initialBlockId,
+  initialSearchQuery,
+  pdfDocuments,
+  onImportPdfFile,
+  onOpenPdfDocument,
+  onClose,
+  onSave,
+}: ResearchDocumentEditorProps) {
   const initialBlocksRef = useRef<DocumentBlock[]>(getDocumentBlocks(documentItem))
   const [title, setTitle] = useState(documentItem.title)
   const [blocks, setBlocks] = useState<DocumentBlock[]>(() => cloneDocumentBlocks(initialBlocksRef.current))
@@ -202,22 +287,35 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
   const [removedBlock, setRemovedBlock] = useState<{ block: DocumentBlock; index: number; replacedOnly?: boolean } | null>(null)
   const [notice, setNotice] = useState('')
   const [imageBusy, setImageBusy] = useState<Record<string, boolean>>({})
+  const [pdfImportOpen, setPdfImportOpen] = useState(false)
   const editorRef = useRef<HTMLElement | null>(null)
   const titleRef = useRef<HTMLInputElement | null>(null)
   const saveButtonRef = useRef<HTMLButtonElement | null>(null)
   const insertTriggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map())
   const noticeTimerRef = useRef<number | null>(null)
+  const blocksRef = useRef(blocks)
+  const pdfInsertAfterBlockIdRef = useRef<string | null>(null)
+
+  blocksRef.current = blocks
 
   const currentSnapshot = useMemo(() => JSON.stringify({ title, blocks }), [title, blocks])
   const dirty = currentSnapshot !== savedSnapshot
-  const documentText = useMemo(() => documentBlocksToText(blocks), [blocks])
+  const documentText = useMemo(() => getEditorBlocksText(blocks), [blocks])
   const characterCount = Array.from(documentText.replace(/\s/g, '')).length
+  const archivedPdfDocuments = useMemo(
+    () => pdfDocuments.filter((item) => item.kind === 'PDF文档' && item.pdfArchive && !item.deletedAt),
+    [pdfDocuments],
+  )
+  const existingPdfFiles = useMemo(() => archivedPdfDocuments.map((item) => ({
+    name: item.pdfArchive?.originalName || item.title,
+    size: item.pdfArchive?.byteSize || 0,
+  })), [archivedPdfDocuments])
   const searchTargetBlockId = useMemo(() => {
     if (initialBlockId) return initialBlockId
     const terms = initialSearchQuery?.trim().toLocaleLowerCase('zh-CN').split(/\s+/).filter(Boolean) ?? []
     if (!terms.length) return undefined
     return blocks.find((block) => {
-      const value = documentBlocksToText([block]).toLocaleLowerCase('zh-CN')
+      const value = getEditorBlockText(block).toLocaleLowerCase('zh-CN')
       return terms.some((term) => value.includes(term))
     })?.id
   }, [blocks, initialBlockId, initialSearchQuery])
@@ -272,6 +370,7 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
         '.document-image-fields input',
         '.document-formula-editor textarea',
         '.document-bookmark-fields input',
+        '.document-pdf-reference-open',
         '.document-divider-editor button:not(:disabled)',
       ].join(', '))
       const fallbackTarget = block?.querySelector<HTMLElement>('.document-block-content textarea, .document-block-content input, .document-block-content select, .document-block-content button:not(:disabled)')
@@ -318,6 +417,66 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
     setRemovedBlock(null)
     showNotice(`${blockLabels[type]}已插入`)
     focusBlock(nextBlock.id)
+  }
+
+  const openPdfImport = () => {
+    if (blocksRef.current.length >= MAX_DOCUMENT_BLOCKS) {
+      showNotice(`每篇文档最多可添加 ${MAX_DOCUMENT_BLOCKS} 个内容元素，请先删除一个内容元素`)
+      return
+    }
+    pdfInsertAfterBlockIdRef.current = activeBlockId
+    setInsertIndex(null)
+    setPdfImportOpen(true)
+  }
+
+  const closePdfImport = () => {
+    setPdfImportOpen(false)
+    const latestReferenceId = pdfInsertAfterBlockIdRef.current
+    if (latestReferenceId) focusBlock(latestReferenceId)
+  }
+
+  const insertPdfReference = (documentItem: ResearchDocument) => {
+    const existingReference = blocksRef.current.find((block) => getPdfReferenceMetadata(block)?.documentId === documentItem.id)
+    if (existingReference) {
+      pdfInsertAfterBlockIdRef.current = existingReference.id
+      setActiveBlockId(existingReference.id)
+      showNotice('该 PDF 已关联到当前报告')
+      return
+    }
+
+    const referenceBlock = createPdfReferenceBlock(documentItem)
+    const anchorId = pdfInsertAfterBlockIdRef.current
+    setBlocks((current) => {
+      const anchorIndex = anchorId ? current.findIndex((block) => block.id === anchorId) : -1
+      const targetIndex = anchorIndex >= 0 ? anchorIndex + 1 : current.length
+      const next = [...current.slice(0, targetIndex), referenceBlock, ...current.slice(targetIndex)]
+      blocksRef.current = next
+      return next
+    })
+    pdfInsertAfterBlockIdRef.current = referenceBlock.id
+    setActiveBlockId(referenceBlock.id)
+    setRemovedBlock(null)
+    setSaveError('')
+    showNotice(`“${documentItem.title}”已解析、存档并关联到报告`)
+  }
+
+  const importPdfAndInsertReference: PdfImportDialogProps['onImportFile'] = async (file, onProgress): Promise<PdfImportResult> => {
+    const alreadyLinked = blocksRef.current.some((block) => {
+      const reference = getPdfReferenceMetadata(block)
+      const archivedDocument = reference
+        ? archivedPdfDocuments.find((item) => item.id === reference.documentId)
+        : undefined
+      return archivedDocument?.pdfArchive?.originalName === file.name
+        && archivedDocument.pdfArchive.byteSize === file.size
+    })
+    if (!alreadyLinked && blocksRef.current.length >= MAX_DOCUMENT_BLOCKS) {
+      return { ok: false, error: `当前报告已达到 ${MAX_DOCUMENT_BLOCKS} 个内容元素，无法建立 PDF 来源关联。` }
+    }
+
+    const result = await onImportPdfFile(file, onProgress)
+    if (!result.ok) return result
+    insertPdfReference(result.documentItem)
+    return result
   }
 
   const moveBlock = (index: number, direction: -1 | 1) => {
@@ -429,7 +588,7 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
       return
     }
 
-    const normalizedContent = documentBlocksToText(normalized)
+    const normalizedContent = getEditorBlocksText(normalized)
     if (normalizedContent.length > MAX_DOCUMENT_TEXT_CHARACTERS) {
       setSaveError(`文档正文不能超过 ${MAX_DOCUMENT_TEXT_CHARACTERS.toLocaleString('zh-CN')} 个字符，请精简内容后重试。`)
       return
@@ -517,6 +676,47 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
   }
 
   const renderBlockBody = (block: DocumentBlock) => {
+    const pdfReference = getPdfReferenceMetadata(block)
+    if (pdfReference) {
+      const archivedDocument = archivedPdfDocuments.find((item) => item.id === pdfReference.documentId)
+      const archive = archivedDocument?.pdfArchive
+      const displayTitle = archivedDocument?.title || (block.type === 'bookmark' ? block.title : '') || pdfReference.originalName
+      const originalName = archive?.originalName || pdfReference.originalName
+      const pageCount = archive?.pageCount || pdfReference.pageCount
+      const byteSize = archive?.byteSize || pdfReference.byteSize
+      const annotationCount = archive?.annotationCount ?? pdfReference.annotationCount
+      const available = Boolean(archive)
+
+      return <section className={`document-pdf-reference${available ? '' : ' is-unavailable'}`} aria-label={`PDF 文献来源：${displayTitle}`}>
+        <span className="document-pdf-reference-icon" aria-hidden="true"><b>PDF</b></span>
+        <div className="document-pdf-reference-copy">
+          <div className="document-pdf-reference-heading">
+            <div><strong title={displayTitle}>{displayTitle}</strong><small title={originalName}>{originalName}</small></div>
+            <span className={available ? 'is-archived' : 'is-unavailable'}>{available ? '已存档' : '存档不可用'}</span>
+          </div>
+          <p>{available
+            ? '在线解析已完成，可打开原文进行划词标记、截图标记并集中管理笔记。'
+            : '当前报告仍保留来源关联，但浏览器中未找到对应存档，可从“PDF文献”重新导入。'}</p>
+          <div className="document-pdf-reference-meta" aria-label="PDF 文献信息">
+            <span>{pageCount > 0 ? `${pageCount} 页` : '页数未知'}</span>
+            <i aria-hidden="true" />
+            <span>{formatPdfFileSize(byteSize, archivedDocument?.size || '')}</span>
+            <i aria-hidden="true" />
+            <span>{annotationCount} 条笔记</span>
+          </div>
+        </div>
+        <div className="document-pdf-reference-actions">
+          <button
+            className="button button--secondary button--small document-pdf-reference-open"
+            type="button"
+            disabled={!available}
+            onClick={() => onOpenPdfDocument(pdfReference.documentId)}
+          >阅读与笔记</button>
+          <small>删除卡片不影响存档</small>
+        </div>
+      </section>
+    }
+
     if (block.type === 'text') {
       return <>
         <div className="document-text-tools" role="group" aria-label="文本样式">
@@ -669,6 +869,7 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
         <div className="document-editor-toolbar-label"><strong>插入内容</strong><span>将添加到当前内容之后</span></div>
         <div className="document-editor-tools">
           {blockOptions.map((option) => <button type="button" key={option.type} onClick={() => addBlock(option.type)} title={option.description}><span>{option.symbol}</span>{option.label}</button>)}
+          <button className="document-editor-pdf-tool" type="button" onClick={openPdfImport} title="批量导入、在线解析并存档 PDF 文献"><span>PDF</span>PDF文献</button>
         </div>
         <kbd>{navigator.platform.toLocaleLowerCase().includes('mac') ? '⌘ S' : 'Ctrl S'} 保存</kbd>
       </div>
@@ -681,35 +882,37 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
         </div>
         {saveError && <div className="document-editor-save-error" role="alert"><strong>保存失败</strong><span>{saveError}</span><div className="document-editor-save-error-actions"><button type="button" onClick={saveDocument}>重试</button><button type="button" onClick={() => setSaveError('')}>关闭</button></div></div>}
         <main className="document-editor-paper">
-          {blocks.map((block, index) => (
-            <div className="document-editor-block-wrap" key={block.id}>
+          {blocks.map((block, index) => {
+            const blockLabel = getEditorBlockLabel(block)
+            const isPdfReference = Boolean(getPdfReferenceMetadata(block))
+            return <div className="document-editor-block-wrap" key={block.id}>
               <article
-                className={`document-editor-block document-editor-block--${block.type}${activeBlockId === block.id ? ' is-active' : ''}${searchTargetBlockId === block.id ? ' is-search-target' : ''}${blockErrors[block.id] ? ' has-error' : ''}`}
+                className={`document-editor-block document-editor-block--${isPdfReference ? 'pdf-reference' : block.type}${activeBlockId === block.id ? ' is-active' : ''}${searchTargetBlockId === block.id ? ' is-search-target' : ''}${blockErrors[block.id] ? ' has-error' : ''}`}
                 data-editor-block-id={block.id}
                 onMouseDown={() => setActiveBlockId(block.id)}
               >
                 <header className="document-block-header">
-                  <span className="document-block-type"><i aria-hidden="true">{blockOptions.find((option) => option.type === block.type)?.symbol}</i>{blockLabels[block.type]}</span>
+                  <span className="document-block-type"><i className={isPdfReference ? 'is-pdf' : ''} aria-hidden="true">{getEditorBlockSymbol(block)}</i>{blockLabel}</span>
                   <div className="document-block-actions">
                     <button type="button" aria-label="上移内容" disabled={index === 0} onClick={() => moveBlock(index, -1)}><span className="document-block-chevron is-up" aria-hidden="true" /></button>
                     <button type="button" aria-label="下移内容" disabled={index === blocks.length - 1} onClick={() => moveBlock(index, 1)}><span className="document-block-chevron" aria-hidden="true" /></button>
-                    <button type="button" className="is-danger" aria-label={`删除${blockLabels[block.type]}`} onClick={() => removeBlock(index)}><span className="icon-close" aria-hidden="true" /></button>
+                    <button type="button" className="is-danger" aria-label={`删除${blockLabel}（不会删除存档原文）`} onClick={() => removeBlock(index)}><span className="icon-close" aria-hidden="true" /></button>
                   </div>
                 </header>
                 <div className="document-block-content">{renderBlockBody(block)}</div>
                 {blockErrors[block.id] && <p className="document-block-error" role="alert">{blockErrors[block.id]}</p>}
               </article>
               <div className={`document-block-insert${insertIndex === index + 1 ? ' is-open' : ''}`}>
-                <button ref={(node) => { if (node) insertTriggerRefs.current.set(index + 1, node); else insertTriggerRefs.current.delete(index + 1) }} type="button" aria-label={`在${blockLabels[block.type]}后插入内容`} aria-haspopup="menu" aria-expanded={insertIndex === index + 1} onClick={() => setInsertIndex((current) => current === index + 1 ? null : index + 1)}><span className="icon-plus" aria-hidden="true" /></button>
+                <button ref={(node) => { if (node) insertTriggerRefs.current.set(index + 1, node); else insertTriggerRefs.current.delete(index + 1) }} type="button" aria-label={`在${blockLabel}后插入内容`} aria-haspopup="menu" aria-expanded={insertIndex === index + 1} onClick={() => setInsertIndex((current) => current === index + 1 ? null : index + 1)}><span className="icon-plus" aria-hidden="true" /></button>
                 {insertIndex === index + 1 && <InsertMenu onInsert={(type) => addBlock(type, index + 1)} onClose={(restoreFocus) => { if (restoreFocus) closeInsertMenu(index + 1); else setInsertIndex(null) }} />}
               </div>
             </div>
-          ))}
+          })}
           <footer className="document-editor-paper-footer"><span>文档内容将保存在当前浏览器，可通过全文搜索立即检索。</span></footer>
         </main>
       </div>
 
-      {removedBlock && <div className="document-editor-undo" role="status"><span>已删除{blockLabels[removedBlock.block.type]}</span><button type="button" onClick={undoRemove}>撤销</button><button type="button" aria-label="关闭撤销提示" onClick={() => setRemovedBlock(null)}><span className="icon-close" aria-hidden="true" /></button></div>}
+      {removedBlock && <div className="document-editor-undo" role="status"><span>已删除{getEditorBlockLabel(removedBlock.block)}{getPdfReferenceMetadata(removedBlock.block) ? '，存档原文仍保留' : ''}</span><button type="button" onClick={undoRemove}>撤销</button><button type="button" aria-label="关闭撤销提示" onClick={() => setRemovedBlock(null)}><span className="icon-close" aria-hidden="true" /></button></div>}
       {notice && <div className="document-editor-notice" role="status" aria-live="polite"><span className="icon-check" aria-hidden="true" />{notice}</div>}
 
       {confirmDiscard && <Modal
@@ -720,6 +923,14 @@ export function ResearchDocumentEditor({ documentItem, initialBlockId, initialSe
         confirmText="放弃修改"
         confirmDanger
       ><p className="discard-message">当前文档还有未保存的修改，离开后本次修改将无法恢复。</p></Modal>}
+
+      <PdfImportDialog
+        open={pdfImportOpen}
+        onClose={closePdfImport}
+        onImportFile={importPdfAndInsertReference}
+        onOpenDocument={onOpenPdfDocument}
+        existingFiles={existingPdfFiles}
+      />
     </section>
   )
 }

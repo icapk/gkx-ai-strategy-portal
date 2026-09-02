@@ -7200,6 +7200,26 @@ td.data-sheet-row-actions button.is-danger:hover {
   line-height: 20px;
 }
 
+.document-editor-tools > .document-editor-pdf-tool {
+  color: #2458a6;
+  background: #f5f9ff;
+}
+
+.document-editor-tools > .document-editor-pdf-tool:hover,
+.document-editor-tools > .document-editor-pdf-tool:focus-visible {
+  color: #0e4fc4;
+  background: #eaf3ff;
+}
+
+.document-editor-tools > .document-editor-pdf-tool > span {
+  min-width: 30px;
+  border-color: #ffd2ce;
+  color: #cf2922;
+  background: #fff6f5;
+  font-size: 9px;
+  letter-spacing: -0.2px;
+}
+
 .document-editor-toolbar > kbd {
   padding: 2px 7px;
   border: 1px solid var(--border);
@@ -7844,6 +7864,166 @@ td.data-sheet-row-actions button.is-danger:hover {
   background: var(--primary-soft);
 }
 
+.document-block-type i.is-pdf {
+  width: 30px;
+  color: #cf2922;
+  background: #fff1f0;
+  font-size: 9px;
+}
+
+.document-editor-block--pdf-reference {
+  padding-bottom: 12px;
+}
+
+.document-pdf-reference {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 112px;
+  padding: 15px 16px;
+  border: 1px solid #dbe9ff;
+  border-radius: 7px;
+  background: linear-gradient(110deg, #f7faff 0%, #fff 66%);
+}
+
+.document-pdf-reference.is-unavailable {
+  border-color: var(--border);
+  background: var(--fill);
+}
+
+.document-pdf-reference-icon {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 52px;
+  place-items: end center;
+  padding-bottom: 8px;
+  overflow: hidden;
+  border: 1px solid #ffccc7;
+  border-radius: 5px;
+  color: #cf2922;
+  background: #fff;
+  box-shadow: 0 3px 9px rgba(207, 41, 34, 0.08);
+}
+
+.document-pdf-reference-icon::before {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  transform: rotate(45deg);
+  border-bottom: 1px solid #ffccc7;
+  background: #fff1f0;
+  content: '';
+}
+
+.document-pdf-reference-icon b {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.document-pdf-reference-copy {
+  min-width: 0;
+}
+
+.document-pdf-reference-heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.document-pdf-reference-heading > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.document-pdf-reference-heading strong,
+.document-pdf-reference-heading small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-pdf-reference-heading strong {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.document-pdf-reference-heading small {
+  margin-top: 1px;
+  color: var(--text-3);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.document-pdf-reference-heading > span {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.document-pdf-reference-heading > span.is-archived {
+  color: #008f2d;
+  background: #e8ffea;
+}
+
+.document-pdf-reference-heading > span.is-unavailable {
+  color: var(--text-3);
+  background: #eef0f3;
+}
+
+.document-pdf-reference-copy > p {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.document-pdf-reference-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+  color: var(--text-3);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.document-pdf-reference-meta i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #c9cdd4;
+}
+
+.document-pdf-reference-actions {
+  display: flex;
+  width: 112px;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+}
+
+.document-pdf-reference-actions .button {
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.document-pdf-reference-actions small {
+  color: var(--text-3);
+  font-size: 10px;
+  line-height: 16px;
+}
+
 .document-divider-editor {
   display: flex;
   align-items: center;
@@ -8312,6 +8492,41 @@ td.data-sheet-row-actions button.is-danger:hover {
   .document-bookmark-preview > a {
     grid-column: 2;
     justify-self: start;
+  }
+
+  .document-pdf-reference {
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    padding: 13px 12px;
+  }
+
+  .document-pdf-reference-icon {
+    width: 38px;
+    height: 48px;
+  }
+
+  .document-pdf-reference-heading {
+    flex-direction: column-reverse;
+    gap: 5px;
+  }
+
+  .document-pdf-reference-copy > p {
+    line-height: 19px;
+  }
+
+  .document-pdf-reference-meta {
+    flex-wrap: wrap;
+    gap: 5px 7px;
+  }
+
+  .document-pdf-reference-actions {
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+
+  .document-pdf-reference-actions .button {
+    min-height: 44px;
   }
 
   .document-block-insert > button {
