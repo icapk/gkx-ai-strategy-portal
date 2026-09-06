@@ -468,7 +468,6 @@
     const tickets = [
       {
         id: "TK20260819003",
-        type: "报告服务",
         title: "低空经济报告下载后无法打开",
         desc: "在新型高端智库中生成的低空经济报告下载后提示文件损坏，希望确认是否可以重新生成。",
         status: "reply",
@@ -479,7 +478,6 @@
       },
       {
         id: "TK20260818002",
-        type: "政策咨询",
         title: "企业是否符合人工智能专项申报条件",
         desc: "企业主营业务为工业视觉检测，想确认是否符合 2026 年人工智能专项申报范围。",
         status: "close",
@@ -490,7 +488,6 @@
       },
       {
         id: "TK20260817001",
-        type: "账号权限",
         title: "无法查看某智库报告详情",
         desc: "点击量子计算专题报告后提示无权限，需确认是否和机构账号授权有关。",
         status: "wait",
@@ -550,7 +547,6 @@
               <p class="ticket-title">${escapeHtml(ticket.title)}</p>
               <div class="ticket-meta">
                 <span>${escapeHtml(ticket.id)}</span>
-                <span>${escapeHtml(ticket.type)}</span>
                 <span>${escapeHtml(ticket.time)}</span>
               </div>
             </div>
@@ -592,7 +588,6 @@
             <h2 class="detail-title" tabindex="-1">${escapeHtml(ticket.title)}</h2>
             <div class="detail-meta">
               <span>${escapeHtml(ticket.id)}</span>
-              <span>${escapeHtml(ticket.type)}</span>
               <span>提交时间：${escapeHtml(ticket.time)}</span>
             </div>
           </div>

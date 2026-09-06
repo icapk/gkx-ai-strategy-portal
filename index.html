@@ -2942,7 +2942,7 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css?v=20260826-search-model">
+  <link rel="stylesheet" href="portal-extras.css?v=20260907-message-no-search">
   <link rel="stylesheet" href="mastergo-v2.css">
   <style>
     .search-service-path {
@@ -3142,7 +3142,7 @@
   </aside>
 
   <section class="portal-ticket-service" id="portalTicketService" aria-hidden="true" hidden>
-    <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20260821-todo-center-label" title="待办中心"></iframe>
+    <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20260907-ticket-no-type" title="待办中心"></iframe>
   </section>
 
   <section class="portal-message-center" id="portalMessageCenter" aria-hidden="true" hidden>
@@ -3163,11 +3163,6 @@
 
       <div class="portal-message-toolbar">
         <div class="portal-message-tabs" id="portalMessageTabs" role="tablist" aria-label="消息状态"></div>
-        <label class="portal-message-search-wrap">
-          <span class="sr-only">搜索消息</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-          <input class="portal-message-search" id="portalMessageSearch" type="search" autocomplete="off" placeholder="搜索标题、详情、子系统或标签">
-        </label>
       </div>
 
       <div class="portal-message-list-wrap">
@@ -4714,7 +4709,6 @@
       const portalMessageOverlay = document.getElementById("portalMessageOverlay");
       const portalMessageClose = document.getElementById("portalMessageClose");
       const portalMessageTabs = document.getElementById("portalMessageTabs");
-      const portalMessageSearch = document.getElementById("portalMessageSearch");
       const portalMessageList = document.getElementById("portalMessageList");
       const portalMessageEmpty = document.getElementById("portalMessageEmpty");
       const portalMessageToast = document.getElementById("portalMessageToast");
@@ -4933,7 +4927,6 @@
       let announcementDismissed = false;
       let ticketServiceReturnFocus = null;
       let activeMessageStatus = "UNREAD";
-      let messageKeyword = "";
       const expandedPortalMessageIds = new Set();
       let messageReturnFocus = null;
       let messageCenterCloseTimer = null;
@@ -5578,13 +5571,7 @@
       }
 
       function getFilteredPortalMessages() {
-        const keyword = messageKeyword.trim().toLowerCase();
-        return PORTAL_MESSAGES.filter((message) => {
-          const statusMatches = activeMessageStatus === "UNREAD" ? message.unread : !message.unread;
-          const actionDetails = message.actions.flatMap((action) => [action.name, action.targetSystem, action.targetPage, action.url]);
-          const searchable = [message.title, message.summary, message.source, message.due, ...message.tags, ...actionDetails].join(" ").toLowerCase();
-          return statusMatches && (!keyword || searchable.includes(keyword));
-        });
+        return PORTAL_MESSAGES.filter((message) => activeMessageStatus === "UNREAD" ? message.unread : !message.unread);
       }
 
       function updateMessageIndicators() {
@@ -5640,9 +5627,7 @@
         `;
         }).join("");
         portalMessageEmpty.hidden = messages.length !== 0;
-        portalMessageEmpty.textContent = messageKeyword.trim()
-          ? "当前状态下没有匹配的消息"
-          : activeMessageStatus === "UNREAD" ? "暂无未读消息" : "暂无已读消息";
+        portalMessageEmpty.textContent = activeMessageStatus === "UNREAD" ? "暂无未读消息" : "暂无已读消息";
       }
 
       function renderMessageCenter() {
@@ -8417,10 +8402,6 @@
         renderMessageTabs();
         renderMessageList();
         portalMessageTabs.querySelector(`[data-message-status="${activeMessageStatus}"]`)?.focus();
-      });
-      portalMessageSearch.addEventListener("input", (event) => {
-        messageKeyword = event.target.value;
-        renderMessageList();
       });
       portalMessageList.addEventListener("click", (event) => {
         const card = event.target.closest("[data-message-id]");
