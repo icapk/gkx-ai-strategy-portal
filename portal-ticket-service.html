@@ -304,9 +304,8 @@
       white-space: nowrap;
     }
 
-    .status.wait { color: var(--orange); background: #fff7ed; }
-    .status.reply { color: var(--blue); background: var(--blue-soft); }
-    .status.close { color: var(--green); background: #ecfdf3; }
+    .status.pending { color: var(--orange); background: #fff7ed; }
+    .status.done { color: var(--green); background: #ecfdf3; }
 
     .detail-pane {
       min-width: 0;
@@ -470,8 +469,7 @@
         id: "TK20260819003",
         title: "低空经济报告下载后无法打开",
         desc: "在新型高端智库中生成的低空经济报告下载后提示文件损坏，希望确认是否可以重新生成。",
-        status: "reply",
-        statusText: "已回复",
+        status: "done",
         time: "2026-08-19 10:22",
         replyTime: "2026-08-19 11:05",
         reply: "已为你重新生成报告文件，请进入原报告详情页重新下载。如仍无法打开，可继续补充反馈。"
@@ -480,8 +478,7 @@
         id: "TK20260818002",
         title: "企业是否符合人工智能专项申报条件",
         desc: "企业主营业务为工业视觉检测，想确认是否符合 2026 年人工智能专项申报范围。",
-        status: "close",
-        statusText: "已关闭",
+        status: "done",
         time: "2026-08-18 15:40",
         replyTime: "2026-08-18 17:20",
         reply: "根据你提供的信息，企业方向与智能制造场景较匹配。建议查看政策详情中的申报主体、研发投入和知识产权要求。"
@@ -490,8 +487,7 @@
         id: "TK20260817001",
         title: "无法查看某智库报告详情",
         desc: "点击量子计算专题报告后提示无权限，需确认是否和机构账号授权有关。",
-        status: "wait",
-        statusText: "待处理",
+        status: "pending",
         time: "2026-08-17 09:18",
         replyTime: "",
         reply: ""
@@ -499,14 +495,12 @@
     ];
 
     const statusMap = {
-      all: "全部",
-      wait: "待处理",
-      reply: "已回复",
-      close: "已关闭"
+      pending: "待办",
+      done: "已办"
     };
 
-    let currentStatus = "all";
-    let currentId = tickets[0].id;
+    let currentStatus = "pending";
+    let currentId = tickets.find((ticket) => ticket.status === currentStatus)?.id || null;
 
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -514,14 +508,8 @@
       })[character]);
     }
 
-    function statusClass(status) {
-      if (status === "reply") return "reply";
-      if (status === "close") return "close";
-      return "wait";
-    }
-
     function filteredTickets() {
-      return tickets.filter((ticket) => currentStatus === "all" || ticket.status === currentStatus);
+      return tickets.filter((ticket) => ticket.status === currentStatus);
     }
 
     function renderTabs() {
@@ -533,7 +521,7 @@
         tab.addEventListener("click", () => {
           currentStatus = tab.dataset.status;
           const list = filteredTickets();
-          currentId = list[0]?.id || tickets[0].id;
+          currentId = list[0]?.id || null;
           render();
         });
       });
@@ -550,9 +538,9 @@
                 <span>${escapeHtml(ticket.time)}</span>
               </div>
             </div>
-            <span class="status ${statusClass(ticket.status)}">${escapeHtml(ticket.statusText)}</span>
+            <span class="status ${escapeHtml(ticket.status)}">${escapeHtml(statusMap[ticket.status])}</span>
           </button>
-          ${ticket.status === "wait" ? `
+          ${ticket.status === "pending" ? `
             <div class="ticket-actions">
               <button class="ticket-process" type="button" data-process-id="${escapeHtml(ticket.id)}">去处理</button>
             </div>
@@ -581,7 +569,11 @@
     }
 
     function renderDetail() {
-      const ticket = tickets.find((item) => item.id === currentId) || tickets[0];
+      const ticket = filteredTickets().find((item) => item.id === currentId);
+      if (!ticket) {
+        document.getElementById("detail").innerHTML = `<div class="empty-reply">暂无${escapeHtml(statusMap[currentStatus])}事项</div>`;
+        return;
+      }
       document.getElementById("detail").innerHTML = `
         <div class="detail-top">
           <div>
@@ -591,7 +583,7 @@
               <span>提交时间：${escapeHtml(ticket.time)}</span>
             </div>
           </div>
-          <span class="status ${statusClass(ticket.status)}">${escapeHtml(ticket.statusText)}</span>
+          <span class="status ${escapeHtml(ticket.status)}">${escapeHtml(statusMap[ticket.status])}</span>
         </div>
 
         <div class="block">
