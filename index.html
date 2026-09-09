@@ -2942,7 +2942,7 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css?v=20260907-message-no-search">
+  <link rel="stylesheet" href="portal-extras.css?v=20260909-message-details">
   <link rel="stylesheet" href="mastergo-v2.css">
   <style>
     .search-service-path {
@@ -4927,7 +4927,6 @@
       let announcementDismissed = false;
       let ticketServiceReturnFocus = null;
       let activeMessageStatus = "UNREAD";
-      const expandedPortalMessageIds = new Set();
       let messageReturnFocus = null;
       let messageCenterCloseTimer = null;
       let messageToastTimer = null;
@@ -5594,8 +5593,6 @@
         const messages = getFilteredPortalMessages();
         portalMessageList.innerHTML = messages.map((message) => {
           const primaryAction = message.actions[0];
-          const detailId = `portal-message-detail-${escapeHtml(message.id)}`;
-          const expanded = expandedPortalMessageIds.has(message.id);
           return `
           <article class="portal-message-card ${message.unread ? "is-unread" : "is-read"}" data-message-id="${escapeHtml(message.id)}">
             <header class="portal-message-card-head">
@@ -5605,11 +5602,7 @@
               </div>
               <time class="portal-message-time">${escapeHtml(message.time)}</time>
             </header>
-            <button class="portal-message-detail-toggle ${expanded ? "is-expanded" : ""}" type="button" data-message-detail-toggle aria-expanded="${expanded}" aria-controls="${detailId}">
-              <span>详情</span>
-              <span class="portal-message-detail-action"><span class="portal-message-detail-state">${expanded ? "收起" : "展开"}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"></path></svg></span>
-            </button>
-            <div class="portal-message-detail" id="${detailId}" ${expanded ? "" : "hidden"}>
+            <div class="portal-message-detail">
               <p>${escapeHtml(message.summary)}</p>
             </div>
             <div class="portal-message-fields">
@@ -5640,7 +5633,6 @@
         const message = PORTAL_MESSAGES.find((item) => item.id === id);
         if (!message?.unread) return;
         message.unread = false;
-        expandedPortalMessageIds.delete(id);
         updateMessageIndicators();
         renderMessageTabs();
         renderMessageList();
@@ -8406,19 +8398,6 @@
       portalMessageList.addEventListener("click", (event) => {
         const card = event.target.closest("[data-message-id]");
         if (!card) return;
-
-        const detailToggle = event.target.closest("[data-message-detail-toggle]");
-        if (detailToggle) {
-          const expanded = detailToggle.getAttribute("aria-expanded") !== "true";
-          const detail = card.querySelector(`#${detailToggle.getAttribute("aria-controls")}`);
-          detailToggle.setAttribute("aria-expanded", String(expanded));
-          detailToggle.classList.toggle("is-expanded", expanded);
-          detailToggle.querySelector(".portal-message-detail-state").textContent = expanded ? "收起" : "展开";
-          if (detail) detail.hidden = !expanded;
-          if (expanded) expandedPortalMessageIds.add(card.dataset.messageId);
-          else expandedPortalMessageIds.delete(card.dataset.messageId);
-          return;
-        }
 
         const actionButton = event.target.closest("[data-message-action]");
         if (!actionButton) return;

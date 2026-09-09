@@ -4101,62 +4101,13 @@ body.has-message-center {
   white-space: nowrap;
 }
 
-.portal-message-detail-toggle {
-  display: flex;
-  width: 100%;
-  min-height: 34px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 10px;
-  border: 0;
-  border-radius: 6px;
-  padding: 7px 9px;
-  color: #586478;
-  background: #f6f8fb;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 620;
-}
-
-.portal-message-detail-toggle:hover {
-  color: #315fbd;
-  background: #eff4fb;
-}
-
-.portal-message-detail-toggle:focus-visible,
 .portal-message-link:focus-visible {
   outline: 2px solid rgba(0, 110, 255, 0.35);
   outline-offset: 2px;
 }
 
-.portal-message-detail-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: #748197;
-  font-weight: 500;
-}
-
-.portal-message-detail-action svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-  transition: transform 160ms ease;
-}
-
-.portal-message-detail-toggle.is-expanded .portal-message-detail-action svg {
-  transform: rotate(180deg);
-}
-
 .portal-message-detail {
-  margin-top: 7px;
-  border-left: 2px solid #c9dcf7;
-  padding: 2px 10px;
+  margin-top: 10px;
 }
 
 .portal-message-detail p {
@@ -4164,6 +4115,8 @@ body.has-message-center {
   color: #5d687a;
   font-size: 13px;
   line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .portal-message-fields {
