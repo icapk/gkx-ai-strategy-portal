@@ -2942,7 +2942,7 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css?v=20260909-message-details">
+  <link rel="stylesheet" href="portal-extras.css?v=20260909-center-lists">
   <link rel="stylesheet" href="mastergo-v2.css">
   <style>
     .search-service-path {
@@ -3141,8 +3141,11 @@
     <nav class="mobile-nav" id="mobileNav"></nav>
   </aside>
 
-  <section class="portal-ticket-service" id="portalTicketService" aria-hidden="true" hidden>
-    <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20260909-todo-view" title="待办中心"></iframe>
+  <section class="portal-ticket-service portal-message-center" id="portalTicketService" aria-hidden="true" hidden>
+    <button class="portal-message-overlay" id="portalTicketServiceOverlay" type="button" aria-label="关闭待办中心"></button>
+    <aside class="portal-message-drawer portal-ticket-drawer" aria-label="待办中心">
+      <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20260909-center-lists" title="待办中心"></iframe>
+    </aside>
   </section>
 
   <section class="portal-message-center" id="portalMessageCenter" aria-hidden="true" hidden>
@@ -3162,6 +3165,13 @@
       </header>
 
       <div class="portal-message-toolbar">
+        <form class="portal-list-search" id="portalMessageSearchForm" role="search">
+          <label class="portal-list-search-field">
+            <input id="portalMessageTitleInput" type="search" aria-label="消息标题" placeholder="输入标题关键词" autocomplete="off">
+          </label>
+          <button class="portal-list-search-submit" type="submit">查询</button>
+          <button class="portal-list-search-reset" id="portalMessageSearchReset" type="button">重置</button>
+        </form>
         <div class="portal-message-tabs" id="portalMessageTabs" role="tablist" aria-label="消息状态"></div>
       </div>
 
@@ -3169,6 +3179,14 @@
         <div class="portal-message-list" id="portalMessageList" aria-live="polite"></div>
         <div class="portal-message-empty" id="portalMessageEmpty" hidden>当前没有符合条件的消息</div>
       </div>
+      <footer class="portal-list-pagination" aria-label="消息列表分页">
+        <span class="portal-list-pagination-summary" id="portalMessagePaginationSummary">共 0 条 / 每页 10 条</span>
+        <div class="portal-list-pagination-controls">
+          <button id="portalMessagePreviousPage" type="button" disabled>上一页</button>
+          <span class="portal-list-pagination-page" id="portalMessagePaginationPage" aria-live="polite">0 / 0</span>
+          <button id="portalMessageNextPage" type="button" disabled>下一页</button>
+        </div>
+      </footer>
       <div class="portal-message-toast" id="portalMessageToast" role="status" aria-live="polite"></div>
     </aside>
   </section>
@@ -4712,6 +4730,12 @@
       const portalMessageList = document.getElementById("portalMessageList");
       const portalMessageEmpty = document.getElementById("portalMessageEmpty");
       const portalMessageToast = document.getElementById("portalMessageToast");
+      const portalMessageTitleInput = document.getElementById("portalMessageTitleInput");
+      const portalMessageListWrap = portalMessageList.closest(".portal-message-list-wrap");
+      const portalMessagePaginationSummary = document.getElementById("portalMessagePaginationSummary");
+      const portalMessagePaginationPage = document.getElementById("portalMessagePaginationPage");
+      const portalMessagePreviousPage = document.getElementById("portalMessagePreviousPage");
+      const portalMessageNextPage = document.getElementById("portalMessageNextPage");
       const portalResultSearchForm = document.getElementById("portalResultSearchForm");
       const portalResultSearchInput = document.getElementById("portalResultSearchInput");
       const portalSearchFeedback = document.getElementById("portalSearchFeedback");
@@ -4926,7 +4950,11 @@
       let activeAnnouncement = DEFAULT_HOME_ANNOUNCEMENT;
       let announcementDismissed = false;
       let ticketServiceReturnFocus = null;
+      let ticketServiceCloseTimer = null;
+      const MESSAGE_PAGE_SIZE = 10;
       let activeMessageStatus = "UNREAD";
+      let messageTitleQuery = "";
+      let messageCurrentPage = 1;
       let messageReturnFocus = null;
       let messageCenterCloseTimer = null;
       let messageToastTimer = null;
@@ -5569,8 +5597,13 @@
         })[character]);
       }
 
+      function matchesPortalMessageTitle(message) {
+        return message.title.toLocaleLowerCase().includes(messageTitleQuery.toLocaleLowerCase());
+      }
+
       function getFilteredPortalMessages() {
-        return PORTAL_MESSAGES.filter((message) => activeMessageStatus === "UNREAD" ? message.unread : !message.unread);
+        return PORTAL_MESSAGES.filter((message) => matchesPortalMessageTitle(message) &&
+          (activeMessageStatus === "UNREAD" ? message.unread : !message.unread));
       }
 
       function updateMessageIndicators() {
@@ -5583,7 +5616,7 @@
       function renderMessageTabs() {
         portalMessageTabs.innerHTML = MESSAGE_STATUS_TABS.map((status) => {
           const unread = status.value === "UNREAD";
-          const count = PORTAL_MESSAGES.filter((message) => message.unread === unread).length;
+          const count = PORTAL_MESSAGES.filter((message) => matchesPortalMessageTitle(message) && message.unread === unread).length;
           const active = activeMessageStatus === status.value;
           return `<button class="portal-message-tab ${active ? "is-active" : ""}" type="button" role="tab" aria-selected="${active}" data-message-status="${status.value}"><span>${status.label}</span><span class="portal-message-tab-count">${count}</span></button>`;
         }).join("");
@@ -5591,7 +5624,12 @@
 
       function renderMessageList() {
         const messages = getFilteredPortalMessages();
-        portalMessageList.innerHTML = messages.map((message) => {
+        const pageCount = Math.ceil(messages.length / MESSAGE_PAGE_SIZE);
+        const previousPage = messageCurrentPage;
+        messageCurrentPage = Math.min(Math.max(messageCurrentPage, 1), Math.max(pageCount, 1));
+        if (messageCurrentPage !== previousPage) portalMessageListWrap.scrollTop = 0;
+        const visibleMessages = messages.slice((messageCurrentPage - 1) * MESSAGE_PAGE_SIZE, messageCurrentPage * MESSAGE_PAGE_SIZE);
+        portalMessageList.innerHTML = visibleMessages.map((message) => {
           const primaryAction = message.actions[0];
           return `
           <article class="portal-message-card ${message.unread ? "is-unread" : "is-read"}" data-message-id="${escapeHtml(message.id)}">
@@ -5620,7 +5658,13 @@
         `;
         }).join("");
         portalMessageEmpty.hidden = messages.length !== 0;
-        portalMessageEmpty.textContent = activeMessageStatus === "UNREAD" ? "暂无未读消息" : "暂无已读消息";
+        portalMessageEmpty.textContent = messageTitleQuery
+          ? (activeMessageStatus === "UNREAD" ? "暂无匹配标题的未读消息" : "暂无匹配标题的已读消息")
+          : (activeMessageStatus === "UNREAD" ? "暂无未读消息" : "暂无已读消息");
+        portalMessagePaginationSummary.textContent = `共 ${messages.length} 条 / 每页 ${MESSAGE_PAGE_SIZE} 条`;
+        portalMessagePaginationPage.textContent = `${pageCount ? messageCurrentPage : 0} / ${pageCount}`;
+        portalMessagePreviousPage.disabled = pageCount === 0 || messageCurrentPage <= 1;
+        portalMessageNextPage.disabled = pageCount === 0 || messageCurrentPage >= pageCount;
       }
 
       function renderMessageCenter() {
@@ -5679,7 +5723,8 @@
       }
 
       function openTicketService(returnFocus = ticketServiceButton) {
-        if (!portalTicketService.hidden) return;
+        window.clearTimeout(ticketServiceCloseTimer);
+        if (!portalTicketService.hidden && portalTicketService.classList.contains("is-open")) return;
         closeMessageCenter();
         closeProfileMenu();
         closeSearchPanel();
@@ -5692,6 +5737,7 @@
         ticketServiceButton.setAttribute("aria-expanded", "true");
         document.body.classList.add("has-ticket-service");
         requestAnimationFrame(() => {
+          portalTicketService.classList.add("is-open");
           try {
             portalTicketServiceFrame.contentWindow?.focus();
             portalTicketServiceFrame.contentDocument?.querySelector(".close")?.focus();
@@ -5703,10 +5749,14 @@
 
       function closeTicketService(restoreFocus = false) {
         if (portalTicketService.hidden) return;
-        portalTicketService.hidden = true;
+        window.clearTimeout(ticketServiceCloseTimer);
+        portalTicketService.classList.remove("is-open");
         portalTicketService.setAttribute("aria-hidden", "true");
         ticketServiceButton.setAttribute("aria-expanded", "false");
         document.body.classList.remove("has-ticket-service");
+        ticketServiceCloseTimer = window.setTimeout(() => {
+          portalTicketService.hidden = true;
+        }, reduceCarouselMotion.matches ? 0 : 240);
         if (restoreFocus) ticketServiceReturnFocus?.focus?.();
       }
 
@@ -8365,7 +8415,11 @@
         }, 0);
       });
       renderMessageCenter();
-      ticketServiceButton.addEventListener("click", () => openTicketService(ticketServiceButton));
+      ticketServiceButton.addEventListener("click", () => {
+        if (!portalTicketService.hidden && portalTicketService.classList.contains("is-open")) closeTicketService(true);
+        else openTicketService(ticketServiceButton);
+      });
+      document.getElementById("portalTicketServiceOverlay").addEventListener("click", () => closeTicketService(true));
       window.addEventListener("message", (event) => {
         if (event.source !== portalTicketServiceFrame.contentWindow) return;
         if (window.location.origin !== "null" && event.origin !== window.location.origin) return;
@@ -8381,8 +8435,10 @@
         const tab = event.target.closest("[data-message-status]");
         if (!tab) return;
         activeMessageStatus = tab.dataset.messageStatus;
+        messageCurrentPage = 1;
         renderMessageTabs();
         renderMessageList();
+        portalMessageListWrap.scrollTop = 0;
       });
       portalMessageTabs.addEventListener("keydown", (event) => {
         if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
@@ -8391,9 +8447,37 @@
         const currentIndex = tabs.findIndex((tab) => tab.dataset.messageStatus === activeMessageStatus);
         const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
         activeMessageStatus = tabs[nextIndex].dataset.messageStatus;
+        messageCurrentPage = 1;
         renderMessageTabs();
         renderMessageList();
+        portalMessageListWrap.scrollTop = 0;
         portalMessageTabs.querySelector(`[data-message-status="${activeMessageStatus}"]`)?.focus();
+      });
+      document.getElementById("portalMessageSearchForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        messageTitleQuery = portalMessageTitleInput.value.trim();
+        messageCurrentPage = 1;
+        renderMessageTabs();
+        renderMessageList();
+        portalMessageListWrap.scrollTop = 0;
+      });
+      document.getElementById("portalMessageSearchReset").addEventListener("click", () => {
+        portalMessageTitleInput.value = "";
+        messageTitleQuery = "";
+        messageCurrentPage = 1;
+        renderMessageTabs();
+        renderMessageList();
+        portalMessageListWrap.scrollTop = 0;
+      });
+      portalMessagePreviousPage.addEventListener("click", () => {
+        messageCurrentPage -= 1;
+        renderMessageList();
+        portalMessageListWrap.scrollTop = 0;
+      });
+      portalMessageNextPage.addEventListener("click", () => {
+        messageCurrentPage += 1;
+        renderMessageList();
+        portalMessageListWrap.scrollTop = 0;
       });
       portalMessageList.addEventListener("click", (event) => {
         const card = event.target.closest("[data-message-id]");

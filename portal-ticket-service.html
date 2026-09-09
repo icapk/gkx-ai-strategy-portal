@@ -4,36 +4,32 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>门户待办中心原型</title>
-  <link rel="stylesheet" href="portal-extras.css">
+  <link rel="stylesheet" href="portal-extras.css?v=20260909-center-lists">
   <style>
     :root {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
       color: #1f2937;
       font-size: 14px;
     }
 
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; overflow: hidden; background: transparent; }
+    html, body { width: 100%; height: 100%; }
+    body { margin: 0; overflow: hidden; background: #fff; -webkit-font-smoothing: antialiased; }
     button { font: inherit; cursor: pointer; }
 
     .overlay {
-      position: fixed;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: rgba(15, 23, 42, .38);
+      width: 100%;
+      height: 100%;
     }
 
     .ticket-popup {
-      width: min(920px, calc(100vw - 36px));
-      height: min(680px, calc(100vh - 36px));
+      width: 100%;
+      height: 100%;
+      min-height: 0;
       display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
       overflow: hidden;
-      border-radius: 8px;
       background: #fff;
-      box-shadow: 0 24px 72px rgba(15, 23, 42, .24);
     }
 
     .ticket-content {
@@ -58,34 +54,11 @@
     .ticket-status.done { color: #52806d; background: #edf6f1; }
     .ticket-process { flex-shrink: 0; }
 
-    .toast {
-      position: fixed;
-      right: 24px;
-      bottom: 24px;
-      z-index: 20;
-      max-width: calc(100vw - 48px);
-      padding: 10px 14px;
-      border-radius: 6px;
-      color: #fff;
-      background: #111827;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, .22);
-      opacity: 0;
-      transform: translateY(8px);
-      pointer-events: none;
-      transition: opacity .18s ease, transform .18s ease;
-    }
-
-    .toast.show { opacity: 1; transform: translateY(0); }
-
-    @media (max-width: 760px) {
-      .overlay { padding: 0; place-items: stretch; }
-      .ticket-popup { width: 100vw; height: 100vh; border-radius: 0; }
-    }
   </style>
 </head>
-<body>
+<body class="portal-ticket-content">
   <main class="overlay" id="ticketOverlay">
-    <section class="ticket-popup" role="dialog" aria-modal="true" aria-labelledby="ticketServiceTitle">
+    <section class="ticket-popup" role="dialog" aria-labelledby="ticketServiceTitle">
       <header class="portal-message-head">
         <div class="portal-message-head-row">
           <div class="portal-message-title-wrap">
@@ -94,7 +67,7 @@
             </span>
             <div>
               <h1 class="portal-message-title" id="ticketServiceTitle">待办中心</h1>
-              <p class="portal-message-subtitle">查看工单标题与内容，处理待办事项</p>
+              <p class="portal-message-subtitle">按待处理和已处理状态集中查看待办事项</p>
             </div>
           </div>
           <button class="portal-message-close close" type="button" title="关闭" aria-label="关闭待办中心">
@@ -104,19 +77,34 @@
       </header>
 
       <div class="portal-message-toolbar">
-        <div class="portal-message-tabs" id="tabs" aria-label="工单状态筛选">
-          <button class="portal-message-tab" type="button" data-status="pending" aria-pressed="true">待处理 <span class="portal-message-tab-count" data-count="pending">0</span></button>
-          <button class="portal-message-tab" type="button" data-status="done" aria-pressed="false">已处理 <span class="portal-message-tab-count" data-count="done">0</span></button>
+        <form class="portal-list-search" id="ticketSearchForm" role="search">
+          <label class="portal-list-search-field">
+            <input id="ticketTitleInput" type="search" aria-label="待办标题" placeholder="输入标题关键词" autocomplete="off">
+          </label>
+          <button class="portal-list-search-submit" type="submit">查询</button>
+          <button class="portal-list-search-reset" id="ticketSearchReset" type="button">重置</button>
+        </form>
+        <div class="portal-message-tabs" id="tabs" role="tablist" aria-label="工单状态筛选">
+          <button class="portal-message-tab" type="button" data-status="pending" role="tab" aria-selected="true">待处理 <span class="portal-message-tab-count" data-count="pending">0</span></button>
+          <button class="portal-message-tab" type="button" data-status="done" role="tab" aria-selected="false">已处理 <span class="portal-message-tab-count" data-count="done">0</span></button>
         </div>
       </div>
 
       <div class="portal-message-list-wrap">
         <div class="portal-message-list" id="ticketList" aria-live="polite"></div>
       </div>
+      <footer class="portal-list-pagination" aria-label="待办列表分页">
+        <span class="portal-list-pagination-summary" id="ticketPaginationSummary">共 0 条 / 每页 10 条</span>
+        <div class="portal-list-pagination-controls">
+          <button id="ticketPreviousPage" type="button" disabled>上一页</button>
+          <span class="portal-list-pagination-page" id="ticketPaginationPage" aria-live="polite">0 / 0</span>
+          <button id="ticketNextPage" type="button" disabled>下一页</button>
+        </div>
+      </footer>
     </section>
   </main>
 
-  <div class="toast" id="toast" role="status"></div>
+  <div class="portal-message-toast" id="toast" role="status"></div>
 
   <script>
     const tickets = [
@@ -144,7 +132,10 @@
     ];
 
     const statusMap = { pending: "待处理", done: "已处理" };
+    const pageSize = 10;
     let currentStatus = "pending";
+    let titleQuery = "";
+    let currentPage = 1;
 
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -153,15 +144,19 @@
     }
 
     function render() {
+      const titleMatches = tickets.filter((ticket) => ticket.title.toLocaleLowerCase().includes(titleQuery.toLocaleLowerCase()));
       document.querySelectorAll("[data-status]").forEach((button) => {
         const selected = button.dataset.status === currentStatus;
         button.classList.toggle("is-active", selected);
-        button.setAttribute("aria-pressed", String(selected));
-        button.querySelector("[data-count]").textContent = tickets.filter((ticket) => ticket.status === button.dataset.status).length;
+        button.setAttribute("aria-selected", String(selected));
+        button.querySelector("[data-count]").textContent = titleMatches.filter((ticket) => ticket.status === button.dataset.status).length;
       });
 
-      const list = tickets.filter((ticket) => ticket.status === currentStatus);
-      document.getElementById("ticketList").innerHTML = list.length ? list.map((ticket) => `
+      const list = titleMatches.filter((ticket) => ticket.status === currentStatus);
+      const pageCount = Math.ceil(list.length / pageSize);
+      currentPage = pageCount ? Math.min(Math.max(currentPage, 1), pageCount) : 1;
+      const visibleTickets = list.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+      document.getElementById("ticketList").innerHTML = visibleTickets.length ? visibleTickets.map((ticket) => `
         <article class="portal-message-card">
           <div class="portal-message-card-head">
             <h2 class="portal-message-card-title">${escapeHtml(ticket.title)}</h2>
@@ -184,15 +179,61 @@
             `}
           </div>
         </article>
-      `).join("") : `<div class="portal-message-empty">暂无${escapeHtml(statusMap[currentStatus])}事项</div>`;
+      `).join("") : `<div class="portal-message-empty">${titleQuery ? `暂无匹配标题的${escapeHtml(statusMap[currentStatus])}事项` : `暂无${escapeHtml(statusMap[currentStatus])}事项`}</div>`;
+      document.getElementById("ticketPaginationSummary").textContent = `共 ${list.length} 条 / 每页 ${pageSize} 条`;
+      document.getElementById("ticketPaginationPage").textContent = `${pageCount ? currentPage : 0} / ${pageCount}`;
+      document.getElementById("ticketPreviousPage").disabled = pageCount === 0 || currentPage <= 1;
+      document.getElementById("ticketNextPage").disabled = pageCount === 0 || currentPage >= pageCount;
     }
+
+    function renderFromTop() {
+      render();
+      document.querySelector(".portal-message-list-wrap").scrollTop = 0;
+    }
+
+    document.getElementById("ticketSearchForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      titleQuery = document.getElementById("ticketTitleInput").value.trim();
+      currentPage = 1;
+      renderFromTop();
+    });
+
+    document.getElementById("ticketSearchReset").addEventListener("click", () => {
+      document.getElementById("ticketTitleInput").value = "";
+      titleQuery = "";
+      currentPage = 1;
+      renderFromTop();
+    });
 
     document.getElementById("tabs").addEventListener("click", (event) => {
       const button = event.target.closest("[data-status]");
       if (!button) return;
       currentStatus = button.dataset.status;
-      render();
-      document.querySelector(".portal-message-list-wrap").scrollTop = 0;
+      currentPage = 1;
+      renderFromTop();
+    });
+
+    document.getElementById("tabs").addEventListener("keydown", (event) => {
+      if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const states = Object.keys(statusMap);
+      const index = states.indexOf(currentStatus);
+      const nextIndex = event.key === "Home" ? 0 : event.key === "End" ? states.length - 1
+        : (index + (event.key === "ArrowRight" ? 1 : -1) + states.length) % states.length;
+      currentStatus = states[nextIndex];
+      currentPage = 1;
+      renderFromTop();
+      document.querySelector(`[data-status="${currentStatus}"]`).focus();
+    });
+
+    document.getElementById("ticketPreviousPage").addEventListener("click", () => {
+      currentPage -= 1;
+      renderFromTop();
+    });
+
+    document.getElementById("ticketNextPage").addEventListener("click", () => {
+      currentPage += 1;
+      renderFromTop();
     });
 
     document.getElementById("ticketList").addEventListener("click", (event) => {
@@ -205,9 +246,9 @@
     function showToast(text) {
       const toast = document.getElementById("toast");
       toast.textContent = text;
-      toast.classList.add("show");
+      toast.classList.add("is-visible");
       window.clearTimeout(showToast.timer);
-      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2500);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("is-visible"), 2500);
     }
 
     function requestClose() {
@@ -220,9 +261,6 @@
     }
 
     document.querySelector(".close").addEventListener("click", requestClose);
-    document.getElementById("ticketOverlay").addEventListener("click", (event) => {
-      if (event.target === event.currentTarget) requestClose();
-    });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") requestClose();
     });

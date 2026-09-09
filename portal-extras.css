@@ -3779,12 +3779,6 @@ body.has-ticket-service {
   display: none;
 }
 
-.portal-ticket-service {
-  position: fixed;
-  z-index: 3000;
-  inset: 0;
-}
-
 .portal-ticket-service iframe {
   display: block;
   width: 100%;
@@ -3859,9 +3853,13 @@ body.has-message-center {
   border-left: 1px solid #dbe3ee;
   background: #fff;
   box-shadow: -20px 24px 60px rgba(22, 36, 58, 0.24);
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   transform: translateX(100%);
   transition: transform 240ms ease;
+}
+
+.portal-message-drawer.portal-ticket-drawer {
+  display: block;
 }
 
 .portal-message-center.is-open .portal-message-overlay {
@@ -3968,6 +3966,107 @@ body.has-message-center {
   background: #f8fafc;
 }
 
+.portal-list-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.portal-list-search-field {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  border: 1px solid #d5dfeb;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.portal-list-search-field:focus-within {
+  border-color: #80a9ee;
+  box-shadow: 0 0 0 2px rgba(0, 110, 255, 0.12);
+}
+
+.portal-list-search-field input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: inherit;
+  padding: 0 11px;
+  outline: none;
+  color: #223148;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+}
+
+.portal-list-search-field input::placeholder {
+  color: #8791a1;
+}
+
+.portal-list-search-submit,
+.portal-list-search-reset {
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid #d5dfeb;
+  border-radius: 6px;
+  padding: 0 13px;
+  color: #526174;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.portal-list-search-submit {
+  border-color: #0052d9;
+  color: #fff;
+  background: #0052d9;
+}
+
+.portal-list-search-submit:hover { background: #0046b9; }
+.portal-list-search-reset:hover { background: #edf5ff; }
+
+.portal-list-search button:focus-visible,
+.portal-list-pagination button:focus-visible {
+  outline: 2px solid rgba(0, 110, 255, 0.35);
+  outline-offset: 2px;
+}
+
+.portal-list-pagination {
+  display: flex;
+  min-height: 60px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #e1e7ef;
+  padding: 13px 17px;
+  color: #66778d;
+  background: #fff;
+  font-size: 12px;
+}
+
+.portal-list-pagination-summary { white-space: nowrap; }
+.portal-list-pagination-controls { display: flex; align-items: center; gap: 8px; }
+.portal-list-pagination-page { min-width: 42px; text-align: center; font-variant-numeric: tabular-nums; }
+
+.portal-list-pagination button {
+  min-width: 62px;
+  height: 32px;
+  border: 1px solid #d5dfeb;
+  border-radius: 6px;
+  padding: 0 10px;
+  color: #526174;
+  background: #fff;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.portal-list-pagination button:hover:not(:disabled) { color: #0052d9; border-color: #a9c7ed; background: #edf5ff; }
+.portal-list-pagination button:disabled { color: #adb5c1; border-color: #e4e9f0; background: #f8fafc; cursor: not-allowed; }
+
 .portal-message-tabs {
   display: grid;
   width: min(360px, 100%);
@@ -4029,6 +4128,7 @@ body.has-message-center {
 }
 
 .portal-message-list-wrap {
+  min-height: 0;
   overflow: auto;
   padding: 14px 16px 20px;
   background: #f5f7fb;
@@ -4252,42 +4352,42 @@ body.has-message-center {
     min-width: 40px;
   }
 
-  .portal-message-head {
+  body:not(.portal-ticket-content) .portal-message-head {
     padding: 18px 16px 16px;
   }
 
-  .portal-message-title {
+  body:not(.portal-ticket-content) .portal-message-title {
     font-size: 21px;
   }
 
-  .portal-message-toolbar {
+  body:not(.portal-ticket-content) .portal-message-toolbar {
     padding: 11px 12px;
   }
 
-  .portal-message-list-wrap {
+  body:not(.portal-ticket-content) .portal-message-list-wrap {
     padding: 12px;
   }
 
-  .portal-message-card {
+  body:not(.portal-ticket-content) .portal-message-card {
     padding: 13px;
   }
 }
 
 @media (max-width: 560px) {
-  .portal-message-tabs {
+  body:not(.portal-ticket-content) .portal-message-tabs {
     width: 100%;
   }
 
-  .portal-message-fields {
+  body:not(.portal-ticket-content) .portal-message-fields {
     gap: 10px;
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .portal-message-title-wrap {
+  body:not(.portal-ticket-content) .portal-message-title-wrap {
     gap: 9px;
   }
 
-  .portal-message-bell {
+  body:not(.portal-ticket-content) .portal-message-bell {
     width: 38px;
     min-width: 38px;
     height: 38px;
