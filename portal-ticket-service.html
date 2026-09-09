@@ -177,7 +177,11 @@
               <button class="portal-message-link ticket-process" type="button" data-process-id="${escapeHtml(ticket.id)}">
                 去处理 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"></path></svg>
               </button>
-            ` : ""}
+            ` : `
+              <button class="portal-message-link ticket-process" type="button" data-view-id="${escapeHtml(ticket.id)}">
+                去查看 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"></path></svg>
+              </button>
+            `}
           </div>
         </article>
       `).join("") : `<div class="portal-message-empty">暂无${escapeHtml(statusMap[currentStatus])}事项</div>`;
@@ -192,10 +196,10 @@
     });
 
     document.getElementById("ticketList").addEventListener("click", (event) => {
-      const button = event.target.closest("[data-process-id]");
+      const button = event.target.closest("[data-process-id], [data-view-id]");
       if (!button) return;
-      // 示例数据尚无来源系统处理地址；点击不能视为已处理。
-      showToast("暂未配置该工单的处理地址");
+      // 示例数据尚无来源系统处理或查看地址；点击不改变工单状态。
+      showToast(button.hasAttribute("data-view-id") ? "暂未配置该工单的查看地址" : "暂未配置该工单的处理地址");
     });
 
     function showToast(text) {
