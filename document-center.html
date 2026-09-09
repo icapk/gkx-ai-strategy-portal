@@ -40,26 +40,11 @@
     .nav-link.active { color:var(--blue); border-left-color:var(--blue); background:#edf3ff; font-weight:500; }
     .empty-state { margin:28px 2px; text-align:center; color:var(--muted); font-size:13px; line-height:1.9; }
     .empty-state button { margin-top:10px; border:0; background:transparent; color:var(--blue); }
-    .sidebar-footer { padding:16px 20px 18px; border-top:1px solid var(--line); }
-    .sidebar-footer a { display:inline-flex; align-items:center; gap:7px; font-size:13px; color:#596575; }
-    .sidebar-footer small { display:block; margin-top:10px; color:#9aa2ad; font-size:11px; }
     .workspace { margin-left:var(--sidebar-width); padding:27px 36px 48px; }
-    .breadcrumb { display:flex; flex-wrap:wrap; align-items:center; gap:7px; min-height:22px; margin-bottom:30px; font-size:13px; color:#969ca6; }
-    .breadcrumb a { color:#858e9b; }
-    .breadcrumb svg { width:12px; height:12px; color:#a1a7b0; }
-    .breadcrumb .current { color:var(--blue); }
-    .reading-layout { display:grid; grid-template-columns:minmax(0,1fr) 170px; gap:30px; align-items:start; }
-    .document { min-width:0; max-width:1180px; }
+    .reading-layout { display:block; }
+    .document { min-width:0; width:100%; }
     h1 { margin:0 0 15px; font-size:30px; line-height:1.45; font-weight:500; color:#22262d; }
-    .meta-row { position:relative; display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:25px; color:var(--muted); font-size:12px; }
-    .document-tools { display:flex; align-items:center; gap:8px; white-space:nowrap; }
-    .document-tools .icon-button { width:24px; height:28px; }
-    .file-icon { width:17px; height:20px; border:1.5px solid currentColor; font-size:7px; line-height:17px; font-weight:700; }
-    .tool-divider { width:1px; height:12px; margin:0 5px; background:#dde2e9; }
-    .text-button { padding:4px 0; background:transparent; border:0; color:#757e8a; font-size:12px; }
-    .text-button:hover,.text-button[aria-pressed="true"] { color:var(--blue); }
-    #favoriteButton[aria-pressed="true"] { color:var(--blue); }
-    #favoriteButton[aria-pressed="true"] svg { fill:#e4efff; }
+    .meta-row { margin-bottom:25px; color:var(--muted); font-size:12px; }
     .article-content { font-size:14px; line-height:1.95; color:#414852; }
     .article-content > p { margin:0 0 20px; }
     .article-content h3 { margin:22px 0 10px; font-size:17px; line-height:1.7; color:#303844; }
@@ -72,7 +57,6 @@
     .article-content hr { margin:28px 0; border:0; border-top:1px solid var(--line); }
     .document-status { padding:28px 0; color:var(--muted); line-height:1.8; }
     .document-status button { margin-left:10px; border:0; padding:0; color:var(--blue); background:none; }
-    .document-tools button:disabled { opacity:.45; cursor:default; }
 
     .article-content h2,.article-content h3,.article-content h4 { scroll-margin-top:26px; }
     .article-content h2 { margin:24px 0 12px; color:#232932; font-weight:600; font-size:21px; line-height:1.6; }
@@ -89,21 +73,9 @@
     .next-docs a:last-child { margin-left:auto; text-align:right; }
     .next-docs span { color:#929ba7; font-size:12px; }
     .document-footer { margin-top:32px; color:#9aa2ad; font-size:11px; }
-    .toc { position:sticky; top:35px; margin-top:145px; font-size:13px; line-height:1.8; }
-    .toc p { color:#303844; margin:0 0 12px; font-size:14px; }
-    .toc nav { border-left:1px solid #e1e5ec; }
-    .toc a { display:block; color:#77818e; padding:6px 0 6px 14px; border-left:2px solid transparent; margin-left:-1px; text-decoration:none; }
-    .toc a:hover,.toc a.active { color:var(--blue); }
-    .toc a.active { border-left-color:var(--blue); }
-    .toc .back-top { display:flex; align-items:center; gap:5px; margin:22px 0 0 14px; color:#8a939f; background:transparent; border:0; padding:0; font-size:12px; }
-    .share-panel { z-index:3; position:absolute; right:0; top:37px; width:350px; padding:16px; color:#4c5664; border:1px solid var(--line); border-radius:6px; background:#fff; box-shadow:0 6px 25px #21375c18; }
-    .share-panel label { display:block; margin-bottom:9px; }
-    .share-panel input { width:100%; padding:8px; border:1px solid #dce2eb; border-radius:3px; color:#6b7481; font-size:12px; }
-    .share-panel p { margin:10px 0 0; font-size:12px; color:#8a939f; }
-    .toast { position:fixed; bottom:28px; left:calc(50% + 126px); transform:translateX(-50%); z-index:10; padding:11px 20px; max-width:550px; color:#fff; background:#293442; border-radius:5px; box-shadow:0 4px 20px #1b2b4020; font-size:13px; }
     @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
     @media print {
-      html { min-width:0; } .sidebar,.breadcrumb,.toc,.document-tools,.skip-link,.next-docs,.share-panel,.toast { display:none !important; }
+      html { min-width:0; } .sidebar,.skip-link,.next-docs { display:none !important; }
       .workspace { margin:0; padding:0; } .reading-layout { display:block; } .document { max-width:none; } .meta-row { margin-bottom:20px; }
       .article-content { break-inside:auto; } h2 { break-after:avoid; } tr,blockquote { break-inside:avoid; } a { color:inherit; }
     }
@@ -116,31 +88,21 @@
     <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="directorySearch" type="search" placeholder="搜索系统名称" aria-label="搜索系统名称" autocomplete="off"><button id="clearSearch" class="icon-button" type="button" aria-label="清空搜索" hidden>×</button></label>
     <p id="searchStatus" class="search-status" role="status" hidden></p>
     <nav id="docNavigation" class="doc-navigation" aria-label="文档目录"></nav>
-    <footer class="sidebar-footer"><a href="index.html" target="_top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6-6 6 6 6m-6-6h17"/></svg>返回门户首页</a><small>深圳国际科技信息中心 · 文档中心</small></footer>
   </aside>
   <main class="workspace">
-    <nav class="breadcrumb" id="breadcrumb" aria-label="当前位置"></nav>
     <div class="reading-layout">
       <article class="document" id="article" tabindex="-1">
         <h1 id="documentTitle"></h1>
-        <div class="meta-row"><span id="documentUpdated"></span><div class="document-tools">
-          <button class="icon-button" id="downloadMarkdown" type="button" title="下载 Markdown" aria-label="下载 Markdown"><span class="file-icon" aria-hidden="true">MD</span></button>
-          <button class="icon-button" id="printDocument" type="button" title="打印 / 另存为 PDF" aria-label="打印 / 另存为 PDF"><span class="file-icon" aria-hidden="true">PDF</span></button>
-          <button class="icon-button" id="shareButton" type="button" title="分享文档" aria-label="分享文档" aria-expanded="false" aria-controls="sharePanel"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4m-6.8 7 6.8 4"/></svg></button>
-          <button class="icon-button" id="favoriteButton" type="button" title="收藏文档" aria-label="收藏文档" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.3.9-4.5 4.4 1 6.2-5.6-3-5.6 3 1-6.2L3 9.6l6.2-.9z"/></svg></button>
-          <span class="tool-divider" aria-hidden="true"></span><button class="text-button" id="myFavorites" type="button" aria-pressed="false">我的收藏</button>
-        </div><div class="share-panel" id="sharePanel" hidden><label for="shareUrl">文档链接</label><input id="shareUrl" readonly aria-label="可复制的文档链接"><p id="shareHint">选择链接后复制，分享当前文档。</p></div></div>
+        <div class="meta-row"><span id="documentUpdated"></span></div>
         <div class="document-status" id="documentStatus" role="status">正在加载文档…</div>
         <div class="article-content" id="articleContent"></div>
         <nav class="next-docs" id="nextDocs" aria-label="相邻文档"></nav>
         <footer class="document-footer">智慧服务门户使用指南 · 示例内容</footer>
       </article>
-      <aside class="toc" aria-label="本页目录" hidden><p>本页目录：</p><nav id="pageToc"></nav><button class="back-top" id="backTop" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg>回到顶部</button></aside>
     </div>
   </main>
-  <div class="toast" id="toast" role="status" hidden></div>
   <script src="assets/vendor/marked-18.0.12.min.js"></script>
   <script src="assets/vendor/purify-3.4.15.min.js"></script>
-  <script src="document-center.js?v=20260909-system-docs"></script>
+  <script src="document-center.js?v=20260909-doc-cleanup"></script>
 </body>
 </html>
