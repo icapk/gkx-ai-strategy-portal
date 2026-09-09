@@ -1,0 +1,50 @@
+[
+  {
+    "id": "portal",
+    "title": "智慧服务门户",
+    "path": "docs/systems/portal.md",
+    "updated": "2026-09-09"
+  },
+  {
+    "id": "technology-topic",
+    "title": "科技专题服务系统",
+    "path": "docs/systems/technology-topic.md",
+    "updated": "2026-09-09"
+  },
+  {
+    "id": "technology-information",
+    "title": "科技信息展示系统",
+    "path": "docs/systems/technology-information.md",
+    "updated": "2026-09-09"
+  },
+  {
+    "id": "ai-distribution",
+    "title": "AI 分析与智能分发工作台",
+    "path": "docs/systems/ai-distribution.md",
+    "updated": "2026-09-09"
+  },
+  {
+    "id": "voice-enhancement",
+    "title": "语音增强与适配工作台",
+    "path": "docs/systems/voice-enhancement.md",
+    "updated": "2026-09-09"
+  },
+  {
+    "id": "portal-admin",
+    "title": "管理后台",
+    "path": "docs/systems/portal-admin.md",
+    "updated": "2026-09-09"
+  },
+  {
+    "id": "cluster-service",
+    "title": "集群服务",
+    "path": "docs/systems/cluster-service.md",
+    "updated": "2026-09-09"
+  },
+  {
+    "id": "research-reading",
+    "title": "智能科研与智能阅读",
+    "path": "docs/systems/research-reading.md",
+    "updated": "2026-09-09"
+  }
+]

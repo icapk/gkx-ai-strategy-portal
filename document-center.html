@@ -18,14 +18,13 @@
     button { cursor:pointer; }
     button:disabled { cursor:default; }
     button { color:inherit; }
-    button:focus-visible,a:focus-visible,summary:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+    button:focus-visible,a:focus-visible,button[aria-current]:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
     svg { width:19px; height:19px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:1.65; stroke-linecap:round; stroke-linejoin:round; vertical-align:middle; }
     .skip-link { position:fixed; top:-60px; left:280px; z-index:5; padding:10px 16px; background:white; border:1px solid var(--blue); }
     .skip-link:focus { top:10px; }
     .sidebar { position:fixed; inset:0 auto 0 0; width:var(--sidebar-width); display:flex; flex-direction:column; background:var(--sidebar); border-right:1px solid var(--line); }
     .sidebar-brand { display:flex; align-items:center; gap:9px; padding:23px 19px 18px; font-size:18px; font-weight:600; }
     .sidebar-brand > svg { width:21px; height:21px; }
-    .sidebar-brand .icon-button { margin-left:auto; }
     .icon-button { border:0; background:transparent; display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:4px; color:var(--muted); }
     .icon-button:hover { color:var(--blue); background:#e9eef6; }
     .search-box { display:flex; align-items:center; height:38px; margin:0 18px 18px; padding:0 10px; gap:8px; background:#fff; border:1px solid #e0e5ed; }
@@ -36,16 +35,9 @@
     .search-box .icon-button { width:20px; height:24px; }
     .search-status { margin:-5px 20px 13px; font-size:12px; color:var(--muted); }
     .doc-navigation { flex:1; min-height:0; overflow-y:auto; padding:0 17px 24px; scrollbar-width:thin; }
-    .nav-group { margin-bottom:7px; }
-    .nav-group > summary { display:flex; align-items:center; justify-content:space-between; padding:11px 3px; list-style:none; cursor:pointer; font-weight:600; font-size:14px; }
-    .nav-group > summary::-webkit-details-marker { display:none; }
-    .nav-group > summary svg { width:15px; height:15px; color:#9aa4b3; transition:transform .15s; }
-    .nav-group[open] > summary svg { transform:rotate(180deg); }
-    .nav-items { margin:2px 0 9px 2px; border-left:2px solid #e3e7ed; }
-    .nav-link { display:block; margin-left:-2px; padding:9px 9px 9px 16px; border-left:2px solid transparent; color:#616b78; font-size:13px; line-height:1.65; text-decoration:none; }
+    .nav-link { display:block; padding:12px 13px; margin:3px 0; border-left:2px solid transparent; border-radius:0 4px 4px 0; color:#616b78; font-size:14px; line-height:1.7; text-decoration:none; }
     .nav-link:hover { background:#edf1f6; color:var(--blue); text-decoration:none; }
     .nav-link.active { color:var(--blue); border-left-color:var(--blue); background:#edf3ff; font-weight:500; }
-    .nav-link mark { color:inherit; background:#ffefbc; }
     .empty-state { margin:28px 2px; text-align:center; color:var(--muted); font-size:13px; line-height:1.9; }
     .empty-state button { margin-top:10px; border:0; background:transparent; color:var(--blue); }
     .sidebar-footer { padding:16px 20px 18px; border-top:1px solid var(--line); }
@@ -68,26 +60,30 @@
     .text-button:hover,.text-button[aria-pressed="true"] { color:var(--blue); }
     #favoriteButton[aria-pressed="true"] { color:var(--blue); }
     #favoriteButton[aria-pressed="true"] svg { fill:#e4efff; }
-    .notice { display:flex; gap:10px; padding:16px 18px; margin:0 0 18px; background:var(--blue-soft); border-left:3px solid var(--blue); font-size:14px; line-height:1.9; }
-    .notice > svg { width:18px; height:18px; margin-top:4px; color:var(--blue); }
-    .notice strong { display:block; margin-bottom:3px; }
-    .notice p { margin:0; }
     .article-content { font-size:14px; line-height:1.95; color:#414852; }
     .article-content > p { margin:0 0 20px; }
-    .article-section { scroll-margin-top:26px; }
-    .article-section h2 { margin:24px 0 12px; color:#232932; font-weight:600; font-size:21px; line-height:1.6; }
-    .article-section p { margin:10px 0 14px; }
-    .article-section ul,.article-section ol { margin:10px 0 18px; padding-left:22px; }
-    .article-section li { padding-left:3px; margin:5px 0; }
-    .article-section .primary-link { display:inline-flex; align-items:center; gap:8px; padding:7px 17px; margin:0 0 8px; background:var(--blue); border:1px solid var(--blue); color:white; font-size:14px; line-height:1.7; }
-    .primary-link:hover { text-decoration:none; background:#005cdb; }
-    .primary-link svg { width:15px; height:15px; }
-    .article-section strong { font-weight:600; color:#343b45; }
+    .article-content h3 { margin:22px 0 10px; font-size:17px; line-height:1.7; color:#303844; }
+    .article-content blockquote { margin:18px 0; padding:10px 18px; border-left:3px solid var(--blue); background:var(--blue-soft); color:#526176; }
+    .article-content blockquote p { margin:4px 0; }
+    .article-content code { padding:2px 5px; border-radius:3px; background:#f2f4f7; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:13px; }
+    .article-content pre { padding:16px; overflow:auto; border:1px solid var(--line); background:#f7f9fc; line-height:1.7; }
+    .article-content pre code { padding:0; background:none; }
+    .article-content img { max-width:100%; }
+    .article-content hr { margin:28px 0; border:0; border-top:1px solid var(--line); }
+    .document-status { padding:28px 0; color:var(--muted); line-height:1.8; }
+    .document-status button { margin-left:10px; border:0; padding:0; color:var(--blue); background:none; }
+    .document-tools button:disabled { opacity:.45; cursor:default; }
+
+    .article-content h2,.article-content h3,.article-content h4 { scroll-margin-top:26px; }
+    .article-content h2 { margin:24px 0 12px; color:#232932; font-weight:600; font-size:21px; line-height:1.6; }
+    .article-content p { margin:10px 0 14px; }
+    .article-content ul,.article-content ol { margin:10px 0 18px; padding-left:22px; }
+    .article-content li { padding-left:3px; margin:5px 0; }
+    .article-content strong { font-weight:600; color:#343b45; }
     table { width:100%; margin:17px 0 20px; border-collapse:collapse; font-size:13px; line-height:1.8; }
     th,td { padding:11px 14px; border:1px solid #e4e8ef; text-align:left; vertical-align:top; }
     th { background:#f7f9fc; font-weight:500; color:#3b4555; }
     td:first-child { width:24%; color:#3a4556; }
-    .inline-note { padding:11px 15px; background:#f8f9fb; border-left:3px solid #cfd7e3; color:#677180; font-size:13px; }
     .next-docs { display:flex; justify-content:space-between; gap:20px; border-top:1px solid var(--line); margin-top:38px; padding-top:23px; }
     .next-docs a { display:flex; flex-direction:column; gap:7px; font-size:13px; }
     .next-docs a:last-child { margin-left:auto; text-align:right; }
@@ -105,19 +101,19 @@
     .share-panel input { width:100%; padding:8px; border:1px solid #dce2eb; border-radius:3px; color:#6b7481; font-size:12px; }
     .share-panel p { margin:10px 0 0; font-size:12px; color:#8a939f; }
     .toast { position:fixed; bottom:28px; left:calc(50% + 126px); transform:translateX(-50%); z-index:10; padding:11px 20px; max-width:550px; color:#fff; background:#293442; border-radius:5px; box-shadow:0 4px 20px #1b2b4020; font-size:13px; }
-    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .nav-group > summary svg { transition:none; } }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
     @media print {
       html { min-width:0; } .sidebar,.breadcrumb,.toc,.document-tools,.skip-link,.next-docs,.share-panel,.toast { display:none !important; }
       .workspace { margin:0; padding:0; } .reading-layout { display:block; } .document { max-width:none; } .meta-row { margin-bottom:20px; }
-      .article-section { break-inside:auto; } h2 { break-after:avoid; } tr,.notice { break-inside:avoid; } a { color:inherit; } .primary-link { color:#222 !important; background:#fff !important; border:1px solid #aaa !important; }
+      .article-content { break-inside:auto; } h2 { break-after:avoid; } tr,blockquote { break-inside:avoid; } a { color:inherit; }
     }
   </style>
 </head>
 <body>
   <a class="skip-link" href="#article">跳转到文档正文</a>
   <aside class="sidebar" aria-label="文档导航">
-    <div class="sidebar-brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H4zM13 7a3 3 0 0 1 3-3h5v15h-4a4 4 0 0 0-4 2"/></svg><span>智慧服务门户</span><button class="icon-button" id="collapseAll" type="button" title="收起全部目录" aria-label="收起全部目录" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6m-12 5 6-6 6 6"/></svg></button></div>
-    <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="directorySearch" type="search" placeholder="在目录中搜索" aria-label="在目录中搜索" autocomplete="off"><button id="clearSearch" class="icon-button" type="button" aria-label="清空搜索" hidden>×</button></label>
+    <div class="sidebar-brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H4zM13 7a3 3 0 0 1 3-3h5v15h-4a4 4 0 0 0-4 2"/></svg><span>文档中心</span></div>
+    <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="directorySearch" type="search" placeholder="搜索系统名称" aria-label="搜索系统名称" autocomplete="off"><button id="clearSearch" class="icon-button" type="button" aria-label="清空搜索" hidden>×</button></label>
     <p id="searchStatus" class="search-status" role="status" hidden></p>
     <nav id="docNavigation" class="doc-navigation" aria-label="文档目录"></nav>
     <footer class="sidebar-footer"><a href="index.html" target="_top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6-6 6 6 6m-6-6h17"/></svg>返回门户首页</a><small>深圳国际科技信息中心 · 文档中心</small></footer>
@@ -127,191 +123,24 @@
     <div class="reading-layout">
       <article class="document" id="article" tabindex="-1">
         <h1 id="documentTitle"></h1>
-        <div class="meta-row"><span>最近更新时间：2026-09-08</span><div class="document-tools">
+        <div class="meta-row"><span id="documentUpdated"></span><div class="document-tools">
           <button class="icon-button" id="downloadMarkdown" type="button" title="下载 Markdown" aria-label="下载 Markdown"><span class="file-icon" aria-hidden="true">MD</span></button>
           <button class="icon-button" id="printDocument" type="button" title="打印 / 另存为 PDF" aria-label="打印 / 另存为 PDF"><span class="file-icon" aria-hidden="true">PDF</span></button>
           <button class="icon-button" id="shareButton" type="button" title="分享文档" aria-label="分享文档" aria-expanded="false" aria-controls="sharePanel"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4m-6.8 7 6.8 4"/></svg></button>
           <button class="icon-button" id="favoriteButton" type="button" title="收藏文档" aria-label="收藏文档" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.3.9-4.5 4.4 1 6.2-5.6-3-5.6 3 1-6.2L3 9.6l6.2-.9z"/></svg></button>
           <span class="tool-divider" aria-hidden="true"></span><button class="text-button" id="myFavorites" type="button" aria-pressed="false">我的收藏</button>
         </div><div class="share-panel" id="sharePanel" hidden><label for="shareUrl">文档链接</label><input id="shareUrl" readonly aria-label="可复制的文档链接"><p id="shareHint">选择链接后复制，分享当前文档。</p></div></div>
-        <div class="notice" id="documentNotice"></div>
+        <div class="document-status" id="documentStatus" role="status">正在加载文档…</div>
         <div class="article-content" id="articleContent"></div>
         <nav class="next-docs" id="nextDocs" aria-label="相邻文档"></nav>
         <footer class="document-footer">智慧服务门户使用指南 · 示例内容</footer>
       </article>
-      <aside class="toc" aria-label="本页目录"><p>本页目录：</p><nav id="pageToc"></nav><button class="back-top" id="backTop" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg>回到顶部</button></aside>
+      <aside class="toc" aria-label="本页目录" hidden><p>本页目录：</p><nav id="pageToc"></nav><button class="back-top" id="backTop" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg>回到顶部</button></aside>
     </div>
   </main>
   <div class="toast" id="toast" role="status" hidden></div>
-  <script>
-    (() => {
-      'use strict';
-      const icons = {
-        chevron:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 8 8-8 8"/></svg>',
-        down:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 9 7 7 7-7"/></svg>',
-        info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/></svg>',
-        external:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14m0-10H4v16h16v-6"/></svg>'
-      };
-      const portalLink = (label='打开智慧服务门户', path='index.html') => `<a class="primary-link" href="${path}" target="_top">${label}</a>`;
-      const docs = [
-        { id:'start', group:'新手指引', title:'文档阅读指引', note:'根据当前任务选择文档。首次使用门户，建议从「快速使用智慧服务门户」开始。', intro:'文档中心按门户使用任务组织内容，你可以在左侧查找主题，也可以使用右侧目录跳转到当前文档的具体步骤。', sections:[
-          {id:'choose',title:'选择适合你的使用指南',html:'<table><thead><tr><th>你想完成的任务</th><th>推荐文档</th></tr></thead><tbody><tr><td>第一次使用门户</td><td><a href="#quickstart">快速使用智慧服务门户</a></td></tr><tr><td>查找论文、专利或报告</td><td><a href="#search">检索科技资源</a></td></tr><tr><td>进入具体业务系统</td><td><a href="#services">访问应用与集群服务</a></td></tr><tr><td>查看通知与待处理事项</td><td><a href="#messages">使用消息与待办中心</a></td></tr></tbody></table>'},
-          {id:'navigate',title:'查找与阅读文档',html:'<p>在左侧「在目录中搜索」输入关键词，可筛选文档标题。点击分类名称可展开或收起目录，点击右侧「本页目录」可跳转到对应章节。</p>'},
-          {id:'save',title:'保存常用文档',html:'<p>使用标题旁的星形按钮收藏当前文档，再通过「我的收藏」筛选已收藏的目录。收藏保存在当前浏览器中。</p><p>MD 按钮可下载当前文档；PDF 按钮打开打印窗口，可在打印目标中选择另存为 PDF。</p>'}
-        ]},
-        { id:'overview', group:'产品简介', title:'智慧服务门户概述', note:'门户将科技信息资源和业务系统入口汇集到同一个访问界面。各服务入口对应的业务内容可在进入后查看。', intro:'智慧服务门户面向科研、产业研究和科技服务场景，组织科学研究、未来教育、科技评价、战略咨询、应用管理、集群服务与工作台等入口。', sections:[
-          {id:'structure',title:'门户页面结构',html:'<p>首页主要包括顶部导航、资源检索区、推荐内容，以及右上角的账户、消息和待办入口。通过业务导航选择服务，通过检索区查找具体资源。</p>'},
-          {id:'scope',title:'业务与服务入口',html:'<table><thead><tr><th>导航分类</th><th>内容示例</th></tr></thead><tbody><tr><td>科学研究</td><td>数据库导航、期刊导航、精选论文库、PaperLink</td></tr><tr><td>战略咨询</td><td>科技专题服务系统、科技信息展示系统、未来产业图谱</td></tr><tr><td>应用管理</td><td>AI 分析与智能分发工作台、语音增强与适配工作台、文档中心</td></tr><tr><td>集群服务</td><td>科技信息交流、科技资源服务、科技决策支持、科学数据中心</td></tr><tr><td>工作台</td><td>智能科研、智能阅读</td></tr></tbody></table>'},
-          {id:'begin',title:'开始使用',html:'<p>可先用一个明确的研究主题体验资源检索，再根据资源内容进入相关服务。</p><p><a href="#quickstart">阅读快速入门指南 →</a></p>'}
-        ]},
-        { id:'quickstart', group:'快速入门', title:'快速使用智慧服务门户', note:'如果您是首次使用智慧服务门户，建议按照本指南完成「进入门户 → 检索资源 → 使用服务」。也可以通过左侧目录直接查看具体功能的操作说明。', intro:'本文介绍如何从门户首页开始，查找所需科技信息，并进入对应的业务服务。以「人工智能」为例，您可以完成一次从资源发现到内容阅读的基本操作。', sections:[
-          {id:'step-1',title:'步骤1：进入智慧服务门户',html:'<p>打开门户首页，查看顶部业务导航与首页检索区。顶部导航按业务场景组织服务，您可以先了解各类服务，再选择具体入口。</p>'+portalLink()},
-          {id:'step-2',title:'步骤2：检索所需科技资源',html:'<p>在首页搜索框中输入研究主题、资源名称或关键词，例如「人工智能」，发起检索。进入结果页后，根据资源类型、来源与时间等条件缩小查找范围。</p><table><thead><tr><th>操作</th><th>使用说明</th></tr></thead><tbody><tr><td>输入检索内容</td><td>优先使用明确的技术名称或研究对象，例如「具身智能」「固态电池」。</td></tr><tr><td>筛选检索结果</td><td>选择与当前任务相关的资源类型，结合来源与时间筛选结果。</td></tr><tr><td>查看资源详情</td><td>阅读标题、摘要和来源信息，再打开与任务相关的资源。</td></tr></tbody></table><p>详细操作请参见 <a href="#search">检索科技资源</a>。</p>'},
-          {id:'step-3',title:'步骤3：进入对应业务服务',html:'<p>根据当前任务，从顶部导航选择服务。需要开展专题研究时，可进入「战略咨询」下的科技专题服务系统；需要查看专题信息时，可进入科技信息展示系统。</p><p>「应用管理」集中提供工作台、管理后台与文档中心等入口。点击「文档中心」后，本使用指南将在门户顶部导航下方加载，您可继续使用顶部导航切换服务。</p>'},
-          {id:'next',title:'下一步操作：关注消息与待办',html:'<p>通过门户右上角的消息入口查看通知，通过待办入口查看待处理事项。消息用于了解发生了什么，待办用于找到需要继续处理的工作。</p><p><a href="#messages">查看消息与待办中心使用说明 →</a></p>'},
-          {id:'help',title:'遇到问题？',html:'<p>若暂时没有找到合适资源，可调整检索关键词或减少筛选条件。若业务页面未能打开，可返回门户重新选择服务入口。</p><p>更多说明请查看 <a href="#faq">常见问题</a>。</p>'}
-        ]},
-        { id:'navigation', group:'快速入门', title:'认识门户导航与工作区', note:'从业务分类进入服务，从资源检索寻找内容。文档中心在门户工作区内加载，顶部业务导航保持可用。', intro:'门户提供多个业务导航分类。先确定当前任务，再选择对应服务，可以减少在不同系统之间查找入口的时间。', sections:[
-          {id:'nav',title:'顶部业务导航',html:'<p>顶部导航包括科学研究、未来教育、科技评价、战略咨询等业务分类。展开分类后，点击对应服务名称进入页面。</p>'},
-          {id:'workbench',title:'应用管理与工作台',html:'<p>「应用管理」提供专题系统、AI 分析与智能分发工作台、语音增强与适配工作台等入口。「工作台」提供智能科研、智能阅读入口。</p><p>选择已提供的入口后，页面会在门户工作区加载，或在新的浏览器标签页打开。可根据浏览器当前状态切换回门户。</p>'},
-          {id:'home',title:'返回门户首页',html:'<p>使用门户左上角的品牌标识返回首页。在文档中心可使用左下角的「返回门户首页」。</p>'+portalLink()}
-        ]},
-        { id:'search', group:'操作指南', title:'检索科技资源', note:'明确检索对象有助于缩小查找范围。建议从技术主题、论文标题、机构或专家名称开始。', intro:'通过门户检索区查找科技资源，并结合结果摘要、来源信息和原文判断内容是否符合当前任务。', sections:[
-          {id:'query',title:'输入检索关键词',html:'<p>在首页搜索框中输入需要查找的内容。以「人工智能」为例，可先查看结果分布，再使用更具体的技术主题继续检索。</p>'+portalLink('查看「人工智能」检索示例','index.html?query=%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD')},
-          {id:'filter',title:'筛选与浏览结果',html:'<p>进入结果页后，选择资源类型，并按页面提供的来源、时间等筛选条件缩小范围。每次调整条件后，关注结果列表与当前筛选条件的变化。</p><ul><li>查找文献：先看标题、摘要、作者与来源。</li><li>查找近期研究：结合时间条件筛选。</li><li>结果过少：移除部分条件，或换用同义关键词。</li></ul>'},
-          {id:'read',title:'查看来源与原文',html:'<p>打开匹配资源，核对摘要及来源。对于仅显示题录或摘要的资源，先确认当前页面提供的访问范围，再继续查找可阅读内容。</p><p>需要汇总研究线索时，可以继续使用相关业务服务。返回结果页后，也可以修改关键词重新检索。</p>'}
-        ]},
-        { id:'services', group:'操作指南', title:'访问应用与集群服务', note:'服务入口按业务分类组织。选择入口前，可先根据服务名称确认当前要开展的任务。', intro:'应用管理提供专题系统与工作台入口；集群服务提供面向科技信息交流、资源查询与决策支持的服务页面。', sections:[
-          {id:'apps',title:'使用应用管理入口',html:'<p>在门户顶部展开「应用管理」，选择科技专题服务系统、科技信息展示系统、AI 分析与智能分发工作台或语音增强与适配工作台等入口。</p><p>需要查看使用指南时，点击同一菜单中的「文档中心」。</p>'},
-          {id:'cluster',title:'访问集群服务',html:'<table><thead><tr><th>服务</th><th>适用任务</th></tr></thead><tbody><tr><td>科技信息交流</td><td>浏览科技交流内容与话题。</td></tr><tr><td>科技资源服务</td><td>查找相关科技资源与服务信息。</td></tr><tr><td>科技决策支持</td><td>浏览决策支持相关信息。</td></tr><tr><td>科学数据中心</td><td>查看科学数据资源。</td></tr><tr><td>科技专题服务</td><td>围绕特定主题查看研究资料。</td></tr></tbody></table>'},
-          {id:'return',title:'切换与返回门户',html:'<p>在门户内打开的服务，可继续使用顶部导航切换。独立标签页中的服务，可以通过浏览器标签切换回门户。文档中心左下角也提供返回入口。</p>'+portalLink()}
-        ]},
-        { id:'messages', group:'操作指南', title:'使用消息与待办中心', note:'消息与待办分别对应「获知信息」和「处理工作」。阅读消息不等同于完成待办事项。', intro:'从门户右上角查看消息通知和待办事项，了解消息正文、工单内容与当前显示的状态。', sections:[
-          {id:'message',title:'查看消息通知',html:'<p>点击门户右上角的消息图标，查看消息列表。消息中心从门户右侧滑出，使用“未读消息”和“已读消息”切换列表，每条消息直接显示正文、来源与相关信息。</p><p>输入标题关键词，点击“查询”或按回车筛选消息，点击“重置”清空条件。消息卡片同时提供关联操作信息，可查看操作名称与目标页面说明。</p><p>列表每页显示 10 条，使用底部的“上一页”和“下一页”翻页；查询、重置或切换状态后回到第 1 页。</p>'},
-          {id:'todo',title:'查看待处理事项',html:'<p>点击门户右上角的待办入口，从右侧抽屉查看工单列表。每条工单直接展示标题、内容、编号、时间和当前状态。</p><p>通过“待处理”和“已处理”切换列表，待处理工单提供“去处理”入口，已处理工单提供“去查看”入口。</p><p>输入标题关键词，点击“查询”或按回车筛选待办，点击“重置”清空条件。列表每页显示 10 条，使用底部分页按钮翻页；查询、重置或切换状态后回到第 1 页。</p>'},
-          {id:'difference',title:'区分阅读与完成',html:'<table><thead><tr><th>对象</th><th>需要关注的状态</th><th>操作含义</th></tr></thead><tbody><tr><td>消息</td><td>未读、已读</td><td>表示是否已查看消息。</td></tr><tr><td>待办事项</td><td>待处理、已处理</td><td>待处理表示尚需处理，已处理表示已完成办理。</td></tr></tbody></table><p>待办中心默认显示「待处理」，切换至「已处理」可查看已完成处理的事项。消息已读不代表事项已处理，具体请以事项当前状态为准。</p>'}
-        ]},
-        { id:'account', group:'操作指南', title:'查看个人中心', note:'门户账户菜单提供「个人中心1」和「个人中心2」。查看关注与收藏时，选择「个人中心2」。', intro:'个人中心1连接统一用户中心，个人中心2展示我的内容记录。以下介绍个人中心2中的关注与收藏。', sections:[
-          {id:'open',title:'打开个人中心',html:'<p>点击门户右上角的用户头像，展开账户菜单。选择「个人中心2 · 我的内容记录」，进入「关注与收藏」页面。</p>'},
-          {id:'profile',title:'查看我的关注',html:'<p>在「我的关注」区域查看关注类型和关注对象，可以根据关注类型筛选记录。关注对象包括学者、产业方向、学术分类和热词等。</p>'},
-          {id:'interests',title:'查看我的收藏',html:'<p>在「我的收藏」区域查看已收藏的具体内容。关注用于记录感兴趣的对象，收藏用于保存某篇文献、报告、课程或活动，便于后续回看。</p><p>文档中心标题旁的「我的收藏」仅筛选当前浏览器保存的文档，与个人中心内的内容收藏分别展示。</p>'}
-        ]},
-        { id:'faq', group:'常见问题', title:'常见问题', note:'可先根据问题发生的位置，分别排查检索条件、页面访问和文档使用方式。', intro:'以下汇总门户使用过程中常见的操作问题。', sections:[
-          {id:'no-results',title:'没有找到需要的资源怎么办？',html:'<p>减少过于具体的限制条件，尝试同义词或更宽泛的技术主题。检查是否选中了不符合目标内容的资源类型，再重新检索。</p>'},
-          {id:'access',title:'服务页面未能打开怎么办？',html:'<p>检查网络连接，并返回门户重新选择服务入口。若在新标签页打开，确认浏览器是否拦截了该页面；若服务页面要求登录，按页面提示操作。</p>'},
-          {id:'favorites',title:'为什么其他浏览器看不到文档收藏？',html:'<p>文档中心的收藏记录保存在当前浏览器中，不会在不同浏览器之间同步。清除网站数据后，已保存的收藏也会被清除。</p>'},
-          {id:'export',title:'如何下载或分享当前文档？',html:'<p>点击 MD 图标下载 Markdown 文档。点击 PDF 图标打开打印窗口，选择「另存为 PDF」。点击分享图标可复制当前文档链接。</p><p>若使用本地预览地址，接收方需要能够访问同一地址才能打开文档。</p>'}
-        ]}
-      ];
-      const $ = (id) => document.getElementById(id);
-      const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-      const storageKey = 'gkx.document-center.favorites.v1';
-      let favoriteIds = new Set();
-      try { const saved = JSON.parse(localStorage.getItem(storageKey) || '[]'); if (Array.isArray(saved)) favoriteIds = new Set(saved.filter(id => docs.some(doc => doc.id === id))); } catch {}
-      let currentDoc, favoritesOnly = false, searchTerm = '', toastTimer;
-      const expandedGroups = new Set(['快速入门']);
-      function toast(message) { clearTimeout(toastTimer); $('toast').textContent = message; $('toast').hidden = false; toastTimer = setTimeout(() => $('toast').hidden = true, 3000); }
-      function renderNavigation() {
-        const visible = docs.filter(doc => (!favoritesOnly || favoriteIds.has(doc.id)) && doc.title.toLocaleLowerCase().includes(searchTerm.toLocaleLowerCase()));
-        const groups = [...new Set(docs.map(doc => doc.group))];
-        $('docNavigation').innerHTML = groups.map(group => {
-          const items = visible.filter(doc => doc.group === group);
-          if (!items.length) return '';
-          return `<details class="nav-group" data-group="${group}" ${searchTerm || favoritesOnly || expandedGroups.has(group) ? 'open' : ''}><summary>${group}${icons.down}</summary><div class="nav-items">${items.map(doc => `<a class="nav-link ${doc.id === currentDoc.id ? 'active' : ''}" href="#${doc.id}" ${doc.id === currentDoc.id ? 'aria-current="page"' : ''}>${escape(doc.title)}</a>`).join('')}</div></details>`;
-        }).join('') || `<div class="empty-state"><p>${favoritesOnly ? (searchTerm ? '收藏中没有匹配的文档' : '还没有收藏文档<br>点击正文上方的星形按钮添加') : '没有找到匹配的文档<br>试试「检索」或「门户」'}</p><button type="button" id="resetNavigation">查看全部文档</button></div>`;
-        $('docNavigation').querySelectorAll('details').forEach(group => group.addEventListener('toggle', () => { if (group.open) expandedGroups.add(group.dataset.group); else expandedGroups.delete(group.dataset.group); }));
-        $('resetNavigation')?.addEventListener('click', resetNavigation);
-        $('searchStatus').hidden = !searchTerm && !favoritesOnly;
-        $('searchStatus').textContent = `${favoritesOnly ? '我的收藏' : '搜索结果'} · ${visible.length} 篇文档`;
-        $('clearSearch').hidden = !searchTerm;
-        $('myFavorites').setAttribute('aria-pressed', String(favoritesOnly));
-        const anyOpen = !!$('docNavigation').querySelector('details[open]');
-        $('collapseAll').setAttribute('aria-expanded', String(anyOpen));
-        $('collapseAll').title = anyOpen ? '收起全部目录' : '展开全部目录';
-        $('collapseAll').setAttribute('aria-label', $('collapseAll').title);
-      }
-      function resetNavigation() { favoritesOnly = false; searchTerm = ''; $('directorySearch').value = ''; renderNavigation(); }
-      function updateFavorite() { const saved = favoriteIds.has(currentDoc.id); $('favoriteButton').setAttribute('aria-pressed', String(saved)); $('favoriteButton').title = saved ? '取消收藏' : '收藏文档'; $('favoriteButton').setAttribute('aria-label', $('favoriteButton').title); }
-      function updateToc(id) { $('pageToc').querySelectorAll('a').forEach(link => { const active = link.dataset.section === id; link.classList.toggle('active', active); if (active) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current'); }); }
-      function renderDocument(doc) {
-        currentDoc = doc;
-        document.title = `${doc.title} - 文档中心 · 智慧服务门户`;
-        expandedGroups.add(doc.group);
-        $('documentTitle').textContent = doc.title;
-        $('breadcrumb').innerHTML = `<a href="#start">文档中心</a>${icons.chevron}<a href="#overview">智慧服务门户</a>${icons.chevron}<span>${doc.group}</span>${icons.chevron}<span class="current" aria-current="page">${doc.title}</span>`;
-        $('documentNotice').innerHTML = `${icons.info}<div><strong>说明</strong><p>${doc.note}</p></div>`;
-        $('articleContent').innerHTML = `<p>${doc.intro}</p>${doc.sections.map(section => `<section class="article-section" id="${doc.id}-${section.id}"><h2>${section.title}</h2>${section.html}</section>`).join('')}`;
-        $('pageToc').innerHTML = doc.sections.map(section => `<a href="#${doc.id}/${section.id}" data-section="${section.id}">${section.title}</a>`).join('');
-        const index = docs.indexOf(doc), prev = docs[index-1], next = docs[index+1];
-        $('nextDocs').innerHTML = `${prev ? `<a href="#${prev.id}"><span>上一篇</span>← ${prev.title}</a>` : ''}${next ? `<a href="#${next.id}"><span>下一篇</span>${next.title} →</a>` : ''}`;
-        $('sharePanel').hidden = true; $('shareButton').setAttribute('aria-expanded','false');
-        updateFavorite(); renderNavigation(); updateToc(doc.sections[0].id);
-      }
-      function route() {
-        if (location.hash === '#article') { if (!currentDoc) renderDocument(docs.find(doc => doc.id === 'quickstart')); $('article').focus(); return; }
-        const [id, sectionId] = location.hash.slice(1).split('/');
-        const doc = docs.find(item => item.id === id) || docs.find(item => item.id === 'quickstart');
-        const changed = currentDoc?.id !== doc.id;
-        if (changed) renderDocument(doc);
-        requestAnimationFrame(() => {
-          const section = doc.sections.find(item => item.id === sectionId);
-          if (section) { $(doc.id + '-' + section.id).scrollIntoView(); updateToc(section.id); }
-          else { window.scrollTo({top:0, behavior:'instant'}); updateToc(doc.sections[0].id); }
-        });
-      }
-      $('directorySearch').addEventListener('input', event => { searchTerm = event.target.value.trim(); renderNavigation(); });
-      $('clearSearch').addEventListener('click', () => { searchTerm = ''; $('directorySearch').value = ''; renderNavigation(); $('directorySearch').focus(); });
-      $('collapseAll').addEventListener('click', () => {
-        const groups = [...$('docNavigation').querySelectorAll('details')], open = !groups.some(group => group.open);
-        groups.forEach(group => { group.open = open; if (open) expandedGroups.add(group.dataset.group); else expandedGroups.delete(group.dataset.group); });
-        $('collapseAll').setAttribute('aria-expanded', String(open));
-        $('collapseAll').title = open ? '收起全部目录' : '展开全部目录'; $('collapseAll').setAttribute('aria-label', $('collapseAll').title);
-      });
-      $('myFavorites').addEventListener('click', () => { favoritesOnly = !favoritesOnly; renderNavigation(); });
-      $('favoriteButton').addEventListener('click', () => {
-        const next = new Set(favoriteIds); if (next.has(currentDoc.id)) next.delete(currentDoc.id); else next.add(currentDoc.id);
-        try { localStorage.setItem(storageKey, JSON.stringify([...next])); favoriteIds = next; updateFavorite(); renderNavigation(); toast(next.has(currentDoc.id) ? '已收藏到当前浏览器' : '已取消收藏'); }
-        catch { toast('浏览器未能保存收藏，请检查网站存储设置'); }
-      });
-      $('printDocument').addEventListener('click', () => window.print());
-      function toMarkdown(html) {
-        const element = document.createElement('div'); element.innerHTML = html;
-        element.querySelectorAll('svg').forEach(node => node.remove());
-        element.querySelectorAll('a').forEach(link => { const href = link.getAttribute('href'); link.replaceWith(`[${link.textContent}](${new URL(href, location.href).href})`); });
-        element.querySelectorAll('table').forEach(table => {
-          const rows = [...table.rows].map(row => '| ' + [...row.cells].map(cell => cell.textContent.trim().replace(/\|/g, '\\|')).join(' | ') + ' |');
-          rows.splice(1, 0, '| ' + [...table.rows[0].cells].map(() => '---').join(' | ') + ' |'); table.replaceWith('\n' + rows.join('\n') + '\n');
-        });
-        element.querySelectorAll('strong').forEach(node => node.replaceWith('**' + node.textContent + '**'));
-        element.querySelectorAll('li').forEach(node => node.replaceWith('- ' + node.textContent + '\n'));
-        element.querySelectorAll('p,ul,ol').forEach(node => node.replaceWith(node.textContent + '\n\n'));
-        return element.textContent.trim();
-      }
-      $('downloadMarkdown').addEventListener('click', () => {
-        const content = `# ${currentDoc.title}\n\n最近更新时间：2026-09-08\n\n> 说明：${currentDoc.note}\n\n${currentDoc.intro}\n\n` + currentDoc.sections.map(section => `## ${section.title}\n\n${toMarkdown(section.html)}`).join('\n\n') + '\n\n---\n智慧服务门户使用指南 · 示例内容\n';
-        const url = URL.createObjectURL(new Blob([content],{type:'text/markdown;charset=utf-8'})), link = document.createElement('a');
-        link.href = url; link.download = `${currentDoc.title}.md`; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
-      });
-      $('shareButton').addEventListener('click', async () => {
-        const opening = $('sharePanel').hidden; $('sharePanel').hidden = !opening; $('shareButton').setAttribute('aria-expanded',String(opening));
-        if (!opening) return;
-        const url = new URL(location.href); url.hash = currentDoc.id; $('shareUrl').value = url.href;
-        $('shareHint').textContent = '选择链接后复制，分享当前文档。';
-        try { await navigator.clipboard.writeText(url.href); $('shareHint').textContent = '链接已复制。'; }
-        catch { $('shareUrl').focus(); $('shareUrl').select(); }
-      });
-      document.addEventListener('click', event => {
-        if (!$('sharePanel').contains(event.target) && !$('shareButton').contains(event.target)) { $('sharePanel').hidden = true; $('shareButton').setAttribute('aria-expanded','false'); }
-        const link = event.target.closest('a[href^="#"]');
-        if (link && link.getAttribute('href') === location.hash) { event.preventDefault(); route(); }
-      });
-      document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('sharePanel').hidden) { $('sharePanel').hidden = true; $('shareButton').setAttribute('aria-expanded','false'); $('shareButton').focus(); } });
-      $('backTop').addEventListener('click', () => { history.replaceState(null,'',`#${currentDoc.id}`); window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'}); });
-      let scrollScheduled = false;
-      window.addEventListener('scroll', () => { if (scrollScheduled) return; scrollScheduled = true; requestAnimationFrame(() => { scrollScheduled = false; const sections = [...$('articleContent').querySelectorAll('section')]; const atBottom = window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 3; const current = atBottom ? sections.at(-1) : sections.filter(section => section.getBoundingClientRect().top <= 110).pop() || sections[0]; if (current) updateToc(current.id.slice(currentDoc.id.length+1)); }); },{passive:true});
-      window.addEventListener('hashchange', route);
-      route();
-    })();
-  </script>
+  <script src="assets/vendor/marked-18.0.12.min.js"></script>
+  <script src="assets/vendor/purify-3.4.15.min.js"></script>
+  <script src="document-center.js?v=20260909-system-docs"></script>
 </body>
 </html>
