@@ -1,8 +1,6 @@
 import {
   getDocument,
   GlobalWorkerOptions,
-  InvalidPDFException,
-  PasswordException,
   type OnProgressParameters,
 } from 'pdfjs-dist'
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
@@ -64,8 +62,9 @@ export async function parsePdfData(data: ArrayBuffer, onProgress: (progress: num
       textContent: textParts.join('\n').slice(0, MAX_INDEXED_TEXT),
     }
   } catch (error) {
-    if (error instanceof PasswordException) throw new Error('password-protected')
-    if (error instanceof InvalidPDFException) throw new Error('invalid-pdf')
+    const errorName = error instanceof Error ? error.name : ''
+    if (errorName === 'PasswordException') throw new Error('password-protected')
+    if (errorName === 'InvalidPDFException') throw new Error('invalid-pdf')
     throw error
   } finally {
     try {

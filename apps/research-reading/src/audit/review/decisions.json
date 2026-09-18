@@ -1,0 +1,3620 @@
+{
+  "SRR-038-001": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“工作台入口展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:22 · export function"
+  },
+  "SRR-038-002": {
+    "status": "pending",
+    "reason": "对应“工作台入口选中”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-038-003": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“工作台统计数量展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:22 · export function"
+  },
+  "SRR-038-004": {
+    "status": "pending",
+    "reason": "对应“工作台最近浏览快速访问”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-038-005": {
+    "status": "pending",
+    "reason": "对应“工作台我的收藏快速访问”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-038-006": {
+    "status": "noncompliant",
+    "reason": "仅有归我所有页签，没有我创建的筛选；visibleDocuments返回全部文档。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:7 · label: '归我所有'"
+  },
+  "SRR-038-007": {
+    "status": "noncompliant",
+    "reason": "与我共享方向不同于我共享的，且没有对应共享者过滤。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:8 · label: '与我共享'"
+  },
+  "SRR-038-008": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“个人空间快速访问”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-038-009": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“团队空间快速访问”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-038-010": {
+    "status": "pending",
+    "reason": "对应“团队树快速展开”已核对Navigation.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:22 · export function"
+  },
+  "SRR-038-011": {
+    "status": "pending",
+    "reason": "对应“团队名称快速切换”已核对Navigation.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:22 · export function"
+  },
+  "SRR-038-012": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“新建团队快速入口”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:22 · export function"
+  },
+  "SRR-038-013": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“回收站快速访问”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-038-014": {
+    "status": "pending",
+    "reason": "对应“快速访问重置页码”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-038-015": {
+    "status": "pending",
+    "reason": "对应“快速访问清理文件夹层级”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-038-016": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“产品切换到智能科研”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:26 · className=\"product-tabs\""
+  },
+  "SRR-038-017": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“产品切换到智能阅读”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:26 · className=\"product-tabs\""
+  },
+  "SRR-038-018": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“当前产品高亮”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:26 · className=\"product-tabs\""
+  },
+  "SRR-038-019": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“个人中心入口展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-profile",
+    "evidence": "src/components/Navigation.tsx:34 · className=\"profile-button\""
+  },
+  "SRR-038-020": {
+    "status": "noncompliant",
+    "reason": "个人中心button没有onClick或链接，无法进入个人中心。",
+    "targetId": "research-profile",
+    "evidence": "src/components/Navigation.tsx:34 · className=\"profile-button\""
+  },
+  "SRR-039-001": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览页签展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-039-002": {
+    "status": "pending",
+    "reason": "对应“最近浏览页签切换”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-039-003": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览页签选中样式”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-039-004": {
+    "status": "pending",
+    "reason": "对应“最近浏览列表展示”已核对DocumentTable.tsx中的className=\"row-actions\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-039-005": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览文档标题展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:204 · doc.title"
+  },
+  "SRR-039-006": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览文档位置展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:206 · doc.location"
+  },
+  "SRR-039-007": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览归属人展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:210 · doc.owner"
+  },
+  "SRR-039-008": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览创建时间展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:214 · createdAt"
+  },
+  "SRR-039-009": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览最后访问时间展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:216 · visitedAt"
+  },
+  "SRR-039-011": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览文件类型展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:217 · doc.kind"
+  },
+  "SRR-039-028": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览行操作区展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-039-034": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览列表列头展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-039-010": {
+    "status": "noncompliant",
+    "reason": "工作台表格明确不渲染size列。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:93 · !isWorkbench && !isRecycle"
+  },
+  "SRR-039-012": {
+    "status": "noncompliant",
+    "reason": "visibleDocuments直接返回documents，无最近访问时间排序。",
+    "targetId": "research-recent",
+    "evidence": "src/App.tsx:125 · const visibleDocuments"
+  },
+  "SRR-039-013": {
+    "status": "pending",
+    "reason": "对应“最近浏览收藏操作”已核对DocumentTable.tsx中的onToggleFavorite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:11 · onToggleFavorite"
+  },
+  "SRR-039-014": {
+    "status": "pending",
+    "reason": "对应“最近浏览取消收藏”已核对DocumentTable.tsx中的onToggleFavorite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:11 · onToggleFavorite"
+  },
+  "SRR-039-029": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览已收藏状态展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-039-015": {
+    "status": "noncompliant",
+    "reason": "从列表移除与删除共用onDelete，实际进入回收站，非仅移除最近记录。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:235 · doc.id !== 1"
+  },
+  "SRR-039-016": {
+    "status": "pending",
+    "reason": "对应“最近浏览删除操作”已核对DocumentTable.tsx中的onDelete相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:12 · onDelete"
+  },
+  "SRR-039-031": {
+    "status": "pending",
+    "reason": "对应“最近浏览删除入回收站”已核对DocumentTable.tsx中的onDelete相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:12 · onDelete"
+  },
+  "SRR-039-017": {
+    "status": "noncompliant",
+    "reason": "recent分支只有收藏及删除/移除，无分享按钮。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:227 · workbenchTab === 'owned'"
+  },
+  "SRR-039-018": {
+    "status": "noncompliant",
+    "reason": "recent分支无分享入口，无法从本列表完成共享状态更新。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:227 · workbenchTab === 'owned'"
+  },
+  "SRR-039-021": {
+    "status": "noncompliant",
+    "reason": "recent分支无分享入口，不能触发所需分享提示。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:227 · workbenchTab === 'owned'"
+  },
+  "SRR-039-030": {
+    "status": "noncompliant",
+    "reason": "recent没有分享操作入口，所述分享后保留行链路缺失。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:227 · workbenchTab === 'owned'"
+  },
+  "SRR-039-019": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-recent",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-039-020": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-recent",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-039-022": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“最近浏览分页展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:254 · <Pagination"
+  },
+  "SRR-039-023": {
+    "status": "noncompliant",
+    "reason": "分页只改page，表格仍documents.map全部数据，没有分页切片。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:185 · documents.map"
+  },
+  "SRR-039-024": {
+    "status": "noncompliant",
+    "reason": "下一页只改页码，未切换列表数据。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:185 · documents.map"
+  },
+  "SRR-039-025": {
+    "status": "noncompliant",
+    "reason": "页码选择不参与文档切片，数据不随页码变更。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:185 · documents.map"
+  },
+  "SRR-039-026": {
+    "status": "pending",
+    "reason": "对应“最近浏览页码重置”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-039-027": {
+    "status": "pending",
+    "reason": "对应“最近浏览空状态”已核对DocumentTable.tsx中的className=\"empty-cell\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:179 · className=\"empty-cell\""
+  },
+  "SRR-039-032": {
+    "status": "noncompliant",
+    "reason": "移入回收站的时间写死为2026-05-08 16:30，未记录实际删除时间。",
+    "targetId": "research-recent",
+    "evidence": "src/App.tsx:139 · visitedAt: '2026-05-08"
+  },
+  "SRR-039-033": {
+    "status": "pending",
+    "reason": "对应“最近浏览当前页保持”已核对DocumentTable.tsx中的className=\"row-actions\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-recent",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-040-001": {
+    "status": "pending",
+    "reason": "对应“我的收藏页签展示”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-040-002": {
+    "status": "pending",
+    "reason": "对应“我的收藏页签切换”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-040-003": {
+    "status": "pending",
+    "reason": "对应“我的收藏选中样式”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-040-021": {
+    "status": "pending",
+    "reason": "对应“收藏页签页码重置”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-040-004": {
+    "status": "noncompliant",
+    "reason": "收藏页直接使用全部documents，未过滤favorite。",
+    "targetId": "research-favorites",
+    "evidence": "src/App.tsx:125 · const visibleDocuments"
+  },
+  "SRR-040-022": {
+    "status": "noncompliant",
+    "reason": "未按favorite过滤，取消所有收藏也不能形成对应空列表。",
+    "targetId": "research-favorites",
+    "evidence": "src/App.tsx:125 · const visibleDocuments"
+  },
+  "SRR-040-025": {
+    "status": "noncompliant",
+    "reason": "取消收藏更新favorite但列表不过滤，行不会移出收藏集合。",
+    "targetId": "research-favorites",
+    "evidence": "src/App.tsx:125 · const visibleDocuments"
+  },
+  "SRR-040-005": {
+    "status": "pending",
+    "reason": "对应“收藏文档标题展示”已核对DocumentTable.tsx中的doc.title相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:204 · doc.title"
+  },
+  "SRR-040-007": {
+    "status": "pending",
+    "reason": "对应“收藏文档类型标识展示”已核对DocumentTable.tsx中的doc.kind相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:217 · doc.kind"
+  },
+  "SRR-040-009": {
+    "status": "pending",
+    "reason": "对应“收藏文档位置展示”已核对DocumentTable.tsx中的doc.location相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:206 · doc.location"
+  },
+  "SRR-040-010": {
+    "status": "pending",
+    "reason": "对应“收藏文档归属人展示”已核对DocumentTable.tsx中的doc.owner相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:210 · doc.owner"
+  },
+  "SRR-040-023": {
+    "status": "pending",
+    "reason": "对应“收藏行操作区展示”已核对DocumentTable.tsx中的className=\"row-actions\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-040-027": {
+    "status": "pending",
+    "reason": "对应“收藏列表列头展示”已核对DocumentTable.tsx中的className=\"row-actions\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-040-006": {
+    "status": "noncompliant",
+    "reason": "收藏时间单元格绑定createdAt，没有收藏时间字段。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:214 · isFavorites && <td>{doc.createdAt}"
+  },
+  "SRR-040-008": {
+    "status": "noncompliant",
+    "reason": "工作台收藏分支无大小列。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:93 · !isWorkbench && !isRecycle"
+  },
+  "SRR-040-011": {
+    "status": "noncompliant",
+    "reason": "收藏页只有收藏时间列，没有创建时间列。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:169 · isWorkbench && !isFavorites"
+  },
+  "SRR-040-012": {
+    "status": "pending",
+    "reason": "对应“收藏列表取消收藏”已核对DocumentTable.tsx中的onToggleFavorite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:11 · onToggleFavorite"
+  },
+  "SRR-040-013": {
+    "status": "noncompliant",
+    "reason": "收藏分支无条件显示取消收藏，无法区分未收藏项提供重新收藏文案。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:231 · workbenchTab === 'favorites' || doc.favorite"
+  },
+  "SRR-040-024": {
+    "status": "noncompliant",
+    "reason": "收藏页对所有行固定显示取消收藏，不反映当前favorite。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:231 · workbenchTab === 'favorites' || doc.favorite"
+  },
+  "SRR-040-014": {
+    "status": "noncompliant",
+    "reason": "收藏页无分享入口。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:227 · workbenchTab === 'owned'"
+  },
+  "SRR-040-026": {
+    "status": "noncompliant",
+    "reason": "收藏页没有分享入口，无法触发本条成功提示。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:227 · workbenchTab === 'owned'"
+  },
+  "SRR-040-028": {
+    "status": "noncompliant",
+    "reason": "收藏页没有分享入口，完整行为缺失。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:227 · workbenchTab === 'owned'"
+  },
+  "SRR-040-015": {
+    "status": "noncompliant",
+    "reason": "当前删除操作移入回收站，没有仅从收藏列表移除的处理。",
+    "targetId": "research-favorites",
+    "evidence": "src/App.tsx:135 · const deleteDocument"
+  },
+  "SRR-040-016": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-favorites",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-040-017": {
+    "status": "pending",
+    "reason": "对应“收藏列表分页展示”已核对DocumentTable.tsx中的<Pagination相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:254 · <Pagination"
+  },
+  "SRR-040-018": {
+    "status": "noncompliant",
+    "reason": "分页不切片documents。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:185 · documents.map"
+  },
+  "SRR-040-019": {
+    "status": "noncompliant",
+    "reason": "分页不切片documents。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:185 · documents.map"
+  },
+  "SRR-040-020": {
+    "status": "noncompliant",
+    "reason": "页码选择不改变列表切片。",
+    "targetId": "research-favorites",
+    "evidence": "src/components/DocumentTable.tsx:185 · documents.map"
+  },
+  "SRR-041-001": {
+    "status": "pending",
+    "reason": "对应“个人空间入口展示”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-041-002": {
+    "status": "pending",
+    "reason": "对应“个人空间进入”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-041-003": {
+    "status": "pending",
+    "reason": "对应“个人空间标题展示”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-041-004": {
+    "status": "pending",
+    "reason": "对应“个人空间新建文件夹按钮”已核对App.tsx中的submitNewFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-folder",
+    "evidence": "src/App.tsx:195 · submitNewFolder"
+  },
+  "SRR-041-005": {
+    "status": "pending",
+    "reason": "对应“个人空间新建在线文档按钮”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-006": {
+    "status": "pending",
+    "reason": "对应“个人空间导入文档按钮”已核对App.tsx中的submitImport相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-import",
+    "evidence": "src/App.tsx:233 · submitImport"
+  },
+  "SRR-041-007": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹区展示”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-008": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹名称展示”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-009": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹数量展示”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-010": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹更新时间展示”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-011": {
+    "status": "noncompliant",
+    "reason": "openFolderName只改变层级显示，visibleDocuments未按文件夹过滤。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:125 · const visibleDocuments"
+  },
+  "SRR-041-012": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹面包屑”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-013": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹返回”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-014": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹菜单打开”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-015": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹重命名入口”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-016": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹重命名输入”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-017": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹重命名提交”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-019": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹删除入口”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-018": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-041-021": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-041-033": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-041-035": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-041-037": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-041-039": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-041-045": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-new-folder",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-041-054": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-041-020": {
+    "status": "pending",
+    "reason": "对应“个人空间文件夹删除”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-041-022": {
+    "status": "pending",
+    "reason": "对应“个人空间文档列表展示”已核对DocumentTable.tsx中的className=\"row-actions\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-041-023": {
+    "status": "pending",
+    "reason": "对应“个人空间文档名称展示”已核对DocumentTable.tsx中的doc.title相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:204 · doc.title"
+  },
+  "SRR-041-024": {
+    "status": "pending",
+    "reason": "对应“个人空间文档类型展示”已核对DocumentTable.tsx中的doc.kind相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:217 · doc.kind"
+  },
+  "SRR-041-025": {
+    "status": "pending",
+    "reason": "对应“个人空间文档大小展示”已核对DocumentTable.tsx中的doc.size相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:213 · doc.size"
+  },
+  "SRR-041-026": {
+    "status": "pending",
+    "reason": "对应“个人空间最后修改时间展示”已核对DocumentTable.tsx中的visitedAt相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:216 · visitedAt"
+  },
+  "SRR-041-028": {
+    "status": "pending",
+    "reason": "对应“个人空间创建者展示”已核对DocumentTable.tsx中的doc.owner相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:210 · doc.owner"
+  },
+  "SRR-041-030": {
+    "status": "pending",
+    "reason": "对应“个人空间文档收藏”已核对DocumentTable.tsx中的onToggleFavorite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:11 · onToggleFavorite"
+  },
+  "SRR-041-031": {
+    "status": "pending",
+    "reason": "对应“个人空间文档取消收藏”已核对DocumentTable.tsx中的onToggleFavorite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:11 · onToggleFavorite"
+  },
+  "SRR-041-034": {
+    "status": "pending",
+    "reason": "对应“个人空间文档重命名”已核对DocumentTable.tsx中的beginRename相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:136 · beginRename"
+  },
+  "SRR-041-036": {
+    "status": "pending",
+    "reason": "对应“个人空间文档删除”已核对DocumentTable.tsx中的onDelete相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:12 · onDelete"
+  },
+  "SRR-041-027": {
+    "status": "noncompliant",
+    "reason": "位置列只在isWorkbench时渲染，个人空间缺少所属位置。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:206 · isWorkbench && <td>{doc.location}"
+  },
+  "SRR-041-029": {
+    "status": "noncompliant",
+    "reason": "创建时间列仅工作台非收藏分支渲染，空间无该字段。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:169 · isWorkbench && !isFavorites"
+  },
+  "SRR-041-032": {
+    "status": "noncompliant",
+    "reason": "createDocumentNote仅产生成功字符串，没有新笔记数据或编辑器。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:166 · const createDocumentNote"
+  },
+  "SRR-041-038": {
+    "status": "pending",
+    "reason": "对应“个人空间文档分享”已核对DocumentTable.tsx中的onShare相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:13 · onShare"
+  },
+  "SRR-041-040": {
+    "status": "pending",
+    "reason": "对应“新建文件夹弹窗打开”已核对App.tsx中的submitNewFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-folder",
+    "evidence": "src/App.tsx:195 · submitNewFolder"
+  },
+  "SRR-041-041": {
+    "status": "pending",
+    "reason": "对应“新建文件夹名称必填”已核对App.tsx中的submitNewFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-folder",
+    "evidence": "src/App.tsx:195 · submitNewFolder"
+  },
+  "SRR-041-042": {
+    "status": "pending",
+    "reason": "对应“新建文件夹名称最大30字”已核对App.tsx中的submitNewFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-folder",
+    "evidence": "src/App.tsx:195 · submitNewFolder"
+  },
+  "SRR-041-043": {
+    "status": "pending",
+    "reason": "对应“新建文件夹名称为空不提交”已核对App.tsx中的submitNewFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-folder",
+    "evidence": "src/App.tsx:195 · submitNewFolder"
+  },
+  "SRR-041-044": {
+    "status": "pending",
+    "reason": "对应“新建文件夹提交”已核对App.tsx中的submitNewFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-folder",
+    "evidence": "src/App.tsx:195 · submitNewFolder"
+  },
+  "SRR-041-046": {
+    "status": "pending",
+    "reason": "对应“新建在线文档弹窗打开”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-047": {
+    "status": "pending",
+    "reason": "对应“新建在线文档类型必选”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-048": {
+    "status": "pending",
+    "reason": "对应“新建在线文档选择文档”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-049": {
+    "status": "pending",
+    "reason": "对应“新建在线文档选择表格”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-050": {
+    "status": "pending",
+    "reason": "对应“新建在线文档名称必填”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-051": {
+    "status": "pending",
+    "reason": "对应“新建在线文档名称最大50字”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-052": {
+    "status": "pending",
+    "reason": "对应“新建在线文档名称为空不提交”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-053": {
+    "status": "pending",
+    "reason": "对应“新建在线文档提交”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-055": {
+    "status": "pending",
+    "reason": "对应“个人空间空状态展示”已核对DocumentTable.tsx中的className=\"empty-cell\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/DocumentTable.tsx:179 · className=\"empty-cell\""
+  },
+  "SRR-041-056": {
+    "status": "pending",
+    "reason": "对应“个人空间空状态导入入口”已核对App.tsx中的submitImport相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:233 · submitImport"
+  },
+  "SRR-041-057": {
+    "status": "pending",
+    "reason": "对应“个人空间空状态新建文档入口”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-041-058": {
+    "status": "pending",
+    "reason": "对应“个人空间空状态添加文件夹入口”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-personal",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-042-001": {
+    "status": "pending",
+    "reason": "对应“团队空间入口展示”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-002": {
+    "status": "pending",
+    "reason": "对应“团队空间进入”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-003": {
+    "status": "pending",
+    "reason": "对应“团队空间树展开”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-004": {
+    "status": "pending",
+    "reason": "对应“团队空间树收起”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-005": {
+    "status": "pending",
+    "reason": "对应“团队列表展示”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-006": {
+    "status": "pending",
+    "reason": "对应“团队选择”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-007": {
+    "status": "pending",
+    "reason": "对应“团队空间标题展示”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-008": {
+    "status": "pending",
+    "reason": "对应“团队空间面包屑展示”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-009": {
+    "status": "pending",
+    "reason": "对应“团队空间新建文件夹”已核对App.tsx中的submitNewFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-folder",
+    "evidence": "src/App.tsx:195 · submitNewFolder"
+  },
+  "SRR-042-010": {
+    "status": "pending",
+    "reason": "对应“团队空间新建在线文档”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-042-015": {
+    "status": "pending",
+    "reason": "对应“团队空间文件夹重命名”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-042-016": {
+    "status": "pending",
+    "reason": "对应“团队空间文件夹删除”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-042-011": {
+    "status": "pending",
+    "reason": "对应“团队空间导入文档”已核对App.tsx中的submitImport相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-import",
+    "evidence": "src/App.tsx:233 · submitImport"
+  },
+  "SRR-042-012": {
+    "status": "pending",
+    "reason": "对应“团队空间文件夹列表”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-042-017": {
+    "status": "pending",
+    "reason": "对应“团队空间文档列表”已核对DocumentTable.tsx中的className=\"row-actions\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-042-013": {
+    "status": "noncompliant",
+    "reason": "文件夹进入仅切换名称上下文，没有对应文档过滤。",
+    "targetId": "research-team",
+    "evidence": "src/App.tsx:125 · const visibleDocuments"
+  },
+  "SRR-042-014": {
+    "status": "pending",
+    "reason": "对应“团队空间文件夹返回”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-042-018": {
+    "status": "pending",
+    "reason": "对应“团队空间文档收藏”已核对DocumentTable.tsx中的onToggleFavorite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:11 · onToggleFavorite"
+  },
+  "SRR-042-019": {
+    "status": "pending",
+    "reason": "对应“团队空间文档取消收藏”已核对DocumentTable.tsx中的onToggleFavorite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:11 · onToggleFavorite"
+  },
+  "SRR-042-021": {
+    "status": "pending",
+    "reason": "对应“团队空间文档重命名”已核对DocumentTable.tsx中的beginRename相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:136 · beginRename"
+  },
+  "SRR-042-022": {
+    "status": "pending",
+    "reason": "对应“团队空间文档删除”已核对DocumentTable.tsx中的onDelete相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:12 · onDelete"
+  },
+  "SRR-042-020": {
+    "status": "noncompliant",
+    "reason": "新建文档笔记仅调用showToast，没有生成笔记。",
+    "targetId": "research-team",
+    "evidence": "src/App.tsx:166 · const createDocumentNote"
+  },
+  "SRR-042-023": {
+    "status": "pending",
+    "reason": "对应“团队空间文档分享”已核对DocumentTable.tsx中的onShare相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:13 · onShare"
+  },
+  "SRR-042-046": {
+    "status": "pending",
+    "reason": "对应“团队空间成员可见边界”已核对App.tsx中的aria-label=\"选择邀请成员\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:548 · aria-label=\"选择邀请成员\""
+  },
+  "SRR-042-047": {
+    "status": "pending",
+    "reason": "对应“团队空间当前团队共享目标”已核对DocumentTable.tsx中的className=\"row-actions\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-042-024": {
+    "status": "pending",
+    "reason": "对应“团队空间空状态展示”已核对DocumentTable.tsx中的className=\"empty-cell\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:179 · className=\"empty-cell\""
+  },
+  "SRR-042-025": {
+    "status": "pending",
+    "reason": "对应“团队空间空状态导入入口”已核对App.tsx中的submitImport相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/App.tsx:233 · submitImport"
+  },
+  "SRR-042-026": {
+    "status": "pending",
+    "reason": "对应“团队空间空状态新建文档入口”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-042-027": {
+    "status": "pending",
+    "reason": "对应“团队空间空状态添加文件夹入口”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-042-028": {
+    "status": "noncompliant",
+    "reason": "团队空状态管理团队空间按钮没有onClick或链接，点击不执行管理入口行为。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:148 · empty-team-actions 管理button无处理器"
+  },
+  "SRR-042-029": {
+    "status": "pending",
+    "reason": "对应“新建团队空间入口”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-030": {
+    "status": "pending",
+    "reason": "对应“新建团队空间弹窗”已核对SpaceView.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:29 · export function"
+  },
+  "SRR-042-031": {
+    "status": "pending",
+    "reason": "对应“团队空间名称必填”已核对App.tsx中的submitNewTeam相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:240 · submitNewTeam"
+  },
+  "SRR-042-032": {
+    "status": "pending",
+    "reason": "对应“团队空间名称最大30字”已核对App.tsx中的submitNewTeam相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:240 · submitNewTeam"
+  },
+  "SRR-042-033": {
+    "status": "pending",
+    "reason": "对应“团队空间名称为空聚焦”已核对App.tsx中的submitNewTeam相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:240 · submitNewTeam"
+  },
+  "SRR-042-034": {
+    "status": "pending",
+    "reason": "对应“团队空间邀请成员必填”已核对App.tsx中的aria-label=\"选择邀请成员\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:548 · aria-label=\"选择邀请成员\""
+  },
+  "SRR-042-035": {
+    "status": "pending",
+    "reason": "对应“团队空间未选成员跳转选择”已核对App.tsx中的aria-label=\"选择邀请成员\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:548 · aria-label=\"选择邀请成员\""
+  },
+  "SRR-042-036": {
+    "status": "pending",
+    "reason": "对应“团队空间成员选择确认”已核对App.tsx中的aria-label=\"选择邀请成员\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:548 · aria-label=\"选择邀请成员\""
+  },
+  "SRR-042-037": {
+    "status": "pending",
+    "reason": "对应“团队空间成员选择取消”已核对App.tsx中的aria-label=\"选择邀请成员\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:548 · aria-label=\"选择邀请成员\""
+  },
+  "SRR-042-038": {
+    "status": "pending",
+    "reason": "对应“团队空间创建提交”已核对App.tsx中的submitNewTeam相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:240 · submitNewTeam"
+  },
+  "SRR-042-040": {
+    "status": "pending",
+    "reason": "对应“团队空间创建后切换”已核对App.tsx中的submitNewTeam相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:240 · submitNewTeam"
+  },
+  "SRR-042-041": {
+    "status": "pending",
+    "reason": "对应“团队空间创建后成员页签”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-042-039": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-new-team",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-042-042": {
+    "status": "pending",
+    "reason": "对应“团队待办页签展示”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-042-043": {
+    "status": "pending",
+    "reason": "对应“团队评论页签展示”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-042-044": {
+    "status": "pending",
+    "reason": "对应“团队成员页签展示”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-042-045": {
+    "status": "pending",
+    "reason": "对应“团队协作页签切换”已核对WorkspaceView.tsx中的className=\"subtabs\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-042-048": {
+    "status": "pending",
+    "reason": "对应“团队空间切换清理文件夹”已核对SpaceView.tsx中的className=\"folder-open\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/SpaceView.tsx:162 · className=\"folder-open\""
+  },
+  "SRR-042-049": {
+    "status": "pending",
+    "reason": "对应“团队空间页码重置”已核对DocumentTable.tsx中的<Pagination相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-team",
+    "evidence": "src/components/DocumentTable.tsx:254 · <Pagination"
+  },
+  "SRR-043-001": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“智能科研基础页面展示”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/App.tsx:45 · export default function"
+  },
+  "SRR-043-004": {
+    "status": "pending",
+    "reason": "对应“智能科研文档信息列表”已核对DocumentTable.tsx中的className=\"row-actions\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-043-002": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“智能科研文档全文搜索入口”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1556 · reading-search-mode"
+  },
+  "SRR-043-003": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“智能科研笔记入口”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1357 · reading-left-tab-notes"
+  },
+  "SRR-043-005": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“智能科研个人中心入口”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-profile",
+    "evidence": "src/components/Navigation.tsx:34 · className=\"profile-button\""
+  },
+  "SRR-043-006": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“基础模块产品切换”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/Navigation.tsx:26 · className=\"product-tabs\""
+  },
+  "SRR-043-007": {
+    "status": "noncompliant",
+    "reason": "科研Toast渲染为sr-only状态，视觉用户没有可见操作结果提示。",
+    "targetId": "research-workbench",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-043-008": {
+    "status": "pending",
+    "reason": "对应“基础模块模态弹窗”已核对App.tsx中的submitImport相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:233 · submitImport"
+  },
+  "SRR-043-009": {
+    "status": "pending",
+    "reason": "对应“基础模块弹窗关闭”已核对App.tsx中的export default function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:45 · export default function"
+  },
+  "SRR-043-010": {
+    "status": "pending",
+    "reason": "对应“基础模块弹窗确认”已核对App.tsx中的export default function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-document",
+    "evidence": "src/App.tsx:45 · export default function"
+  },
+  "SRR-043-011": {
+    "status": "pending",
+    "reason": "对应“基础模块确认按钮禁用”已核对App.tsx中的export default function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/App.tsx:45 · export default function"
+  },
+  "SRR-043-012": {
+    "status": "pending",
+    "reason": "对应“基础模块文件选择”已核对App.tsx中的submitImport相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-import",
+    "evidence": "src/App.tsx:233 · submitImport"
+  },
+  "SRR-043-013": {
+    "status": "pending",
+    "reason": "对应“基础模块文件格式限制”已核对App.tsx中的submitImport相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-import",
+    "evidence": "src/App.tsx:233 · submitImport"
+  },
+  "SRR-043-014": {
+    "status": "noncompliant",
+    "reason": "分页只有页码状态，文档列表无分页切片。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/DocumentTable.tsx:185 · documents.map"
+  },
+  "SRR-043-015": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“基础模块列表操作”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/DocumentTable.tsx:219 · className=\"row-actions\""
+  },
+  "SRR-043-016": {
+    "status": "pending",
+    "reason": "对应“基础模块状态保持”已核对App.tsx中的export default function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/App.tsx:45 · export default function"
+  },
+  "SRR-043-017": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“基础模块状态清理”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1220 · closeTemporaryUi"
+  },
+  "SRR-043-018": {
+    "status": "pending",
+    "reason": "对应“基础模块空状态”已核对DocumentTable.tsx中的className=\"empty-cell\"相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/DocumentTable.tsx:179 · className=\"empty-cell\""
+  },
+  "SRR-043-019": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“基础模块选中状态”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/components/WorkspaceView.tsx:38 · className=\"subtabs\""
+  },
+  "SRR-043-020": {
+    "status": "compliant",
+    "reason": "既有独立页面观察已见“基础模块禁用状态”对应控件/状态；与本次固定源码对应。仅按本原子展示范围通过，不代表相关完整业务链路。",
+    "targetId": "research-workbench",
+    "evidence": "src/App.tsx:45 · export default function"
+  },
+  "SRR-044-001": {
+    "status": "pending",
+    "reason": "对应“笔记编辑器打开”已核对ReadingReader.tsx中的commitEditedNote相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1063 · commitEditedNote"
+  },
+  "SRR-044-002": {
+    "status": "compliant",
+    "reason": "既有035编辑器实测显示笔记标题。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1433 · reading-note-edit-card"
+  },
+  "SRR-044-003": {
+    "status": "compliant",
+    "reason": "035在真实编辑器输入测试草稿，内容可编辑。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1063 · commitEditedNote"
+  },
+  "SRR-044-004": {
+    "status": "compliant",
+    "reason": "034/035编辑器输入区placeholder为输入笔记内容。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1063 · commitEditedNote"
+  },
+  "SRR-044-005": {
+    "status": "pending",
+    "reason": "对应“笔记编辑翻译工具”已核对ReadingReader.tsx中的翻译笔记相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1445 · 翻译笔记"
+  },
+  "SRR-044-006": {
+    "status": "pending",
+    "reason": "对应“笔记编辑AI解释工具”已核对ReadingReader.tsx中的AI 解释笔记相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1445 · AI 解释笔记"
+  },
+  "SRR-044-007": {
+    "status": "pending",
+    "reason": "对应“笔记编辑插图工具”已核对ReadingReader.tsx中的插入笔记图片相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1445 · 插入笔记图片"
+  },
+  "SRR-044-008": {
+    "status": "pending",
+    "reason": "对应“笔记图片选择”已核对ReadingReader.tsx中的uploadNoteImages相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1096 · uploadNoteImages"
+  },
+  "SRR-044-009": {
+    "status": "pending",
+    "reason": "对应“笔记图片数量限制”已核对ReadingReader.tsx中的uploadNoteImages相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1096 · uploadNoteImages"
+  },
+  "SRR-044-010": {
+    "status": "pending",
+    "reason": "对应“笔记图片预览”已核对ReadingReader.tsx中的uploadNoteImages相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1096 · uploadNoteImages"
+  },
+  "SRR-044-011": {
+    "status": "compliant",
+    "reason": "034已观察英译来源区，内容展示存在；不代表翻译准确。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1437 · Thiosulfate shuttle effect"
+  },
+  "SRR-044-012": {
+    "status": "compliant",
+    "reason": "034已观察解释来源区域。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:78 · explainedExcerpt"
+  },
+  "SRR-044-013": {
+    "status": "compliant",
+    "reason": "034已观察图片来源区域及图片节点。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1096 · uploadNoteImages"
+  },
+  "SRR-044-014": {
+    "status": "compliant",
+    "reason": "034/035既有笔记来源正文存在。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1440 · reading-note-existing"
+  },
+  "SRR-044-015": {
+    "status": "pending",
+    "reason": "对应“笔记添加草稿”已核对ReadingReader.tsx中的addNoteDraft相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1088 · addNoteDraft"
+  },
+  "SRR-044-016": {
+    "status": "pending",
+    "reason": "对应“笔记空输入不添加”已核对ReadingReader.tsx中的addNoteDraft相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1088 · addNoteDraft"
+  },
+  "SRR-044-017": {
+    "status": "pending",
+    "reason": "对应“新笔记保存”已核对ReadingReader.tsx中的commitEditedNote相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1063 · commitEditedNote"
+  },
+  "SRR-044-018": {
+    "status": "pending",
+    "reason": "对应“已有笔记更新”已核对ReadingReader.tsx中的commitEditedNote相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1063 · commitEditedNote"
+  },
+  "SRR-044-019": {
+    "status": "pending",
+    "reason": "对应“笔记保存标题截取”已核对ReadingReader.tsx中的commitEditedNote相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1063 · commitEditedNote"
+  },
+  "SRR-044-020": {
+    "status": "pending",
+    "reason": "对应“笔记保存空值拦截”已核对ReadingReader.tsx中的commitEditedNote相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1063 · commitEditedNote"
+  },
+  "SRR-044-021": {
+    "status": "pending",
+    "reason": "对应“笔记保存成功提示”已核对ReadingReader.tsx中的笔记已更新相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1085 · 笔记已更新"
+  },
+  "SRR-044-022": {
+    "status": "compliant",
+    "reason": "035真实取消测试草稿并保持原4条笔记。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1072 · setEditingNoteId(null)"
+  },
+  "SRR-044-023": {
+    "status": "compliant",
+    "reason": "035真实打开笔记详情。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1429 · setNoteDetailId(note.id)"
+  },
+  "SRR-044-024": {
+    "status": "pending",
+    "reason": "对应“笔记详情编辑”已核对ReadingReader.tsx中的setNoteDetailId(note.id)相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1429 · setNoteDetailId(note.id)"
+  },
+  "SRR-044-025": {
+    "status": "compliant",
+    "reason": "035空状态补查真实从详情删除4条演示笔记，并刷新复原。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1429 · setNoteDetailId(note.id)"
+  },
+  "SRR-044-026": {
+    "status": "compliant",
+    "reason": "035补查每次删除均看到笔记已删除。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1580 · 笔记已删除"
+  },
+  "SRR-045-001": {
+    "status": "pending",
+    "reason": "对应“智能阅读上传页进入”已核对ReadingWorkspace.tsx中的reading-upload-page相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:138 · reading-upload-page"
+  },
+  "SRR-045-002": {
+    "status": "pending",
+    "reason": "对应“上传页标题展示”已核对ReadingWorkspace.tsx中的reading-upload-page相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:138 · reading-upload-page"
+  },
+  "SRR-045-003": {
+    "status": "pending",
+    "reason": "对应“上传页说明展示”已核对ReadingWorkspace.tsx中的reading-upload-page相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:138 · reading-upload-page"
+  },
+  "SRR-045-005": {
+    "status": "pending",
+    "reason": "对应“上传格式提示”已核对ReadingWorkspace.tsx中的reading-upload-page-dropzone相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:142 · reading-upload-page-dropzone"
+  },
+  "SRR-045-004": {
+    "status": "pending",
+    "reason": "对应“上传区展示”已核对ReadingWorkspace.tsx中的reading-upload-page-dropzone相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:142 · reading-upload-page-dropzone"
+  },
+  "SRR-045-006": {
+    "status": "pending",
+    "reason": "对应“上传文件选择”已核对ReadingWorkspace.tsx中的reading-upload-page-dropzone相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:142 · reading-upload-page-dropzone"
+  },
+  "SRR-045-007": {
+    "status": "pending",
+    "reason": "对应“上传文件名展示”已核对ReadingWorkspace.tsx中的reading-upload-page-dropzone相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:142 · reading-upload-page-dropzone"
+  },
+  "SRR-045-008": {
+    "status": "pending",
+    "reason": "对应“上传按钮展示”已核对ReadingWorkspace.tsx中的submitUpload相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:74 · submitUpload"
+  },
+  "SRR-045-009": {
+    "status": "pending",
+    "reason": "对应“上传空文件拦截”已核对ReadingWorkspace.tsx中的submitUpload相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:74 · submitUpload"
+  },
+  "SRR-045-010": {
+    "status": "pending",
+    "reason": "对应“上传重复提交拦截”已核对ReadingWorkspace.tsx中的submitUpload相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:74 · submitUpload"
+  },
+  "SRR-045-011": {
+    "status": "pending",
+    "reason": "对应“上传中状态展示”已核对ReadingWorkspace.tsx中的reading-upload-page-progress相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:149 · reading-upload-page-progress"
+  },
+  "SRR-045-013": {
+    "status": "pending",
+    "reason": "对应“上传中文件图标展示”已核对ReadingWorkspace.tsx中的reading-upload-page-progress相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:149 · reading-upload-page-progress"
+  },
+  "SRR-045-012": {
+    "status": "pending",
+    "reason": "对应“上传进度百分比展示”已核对ReadingWorkspace.tsx中的reading-upload-page-progress相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:149 · reading-upload-page-progress"
+  },
+  "SRR-045-014": {
+    "status": "pending",
+    "reason": "对应“上传中文件页数展示”已核对ReadingWorkspace.tsx中的reading-upload-page-progress相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:149 · reading-upload-page-progress"
+  },
+  "SRR-045-015": {
+    "status": "pending",
+    "reason": "对应“上传中文件大小展示”已核对ReadingWorkspace.tsx中的reading-upload-page-progress相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:149 · reading-upload-page-progress"
+  },
+  "SRR-045-016": {
+    "status": "pending",
+    "reason": "对应“上传目标展示”已核对ReadingWorkspace.tsx中的uploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:22 · uploadFolder"
+  },
+  "SRR-045-017": {
+    "status": "pending",
+    "reason": "对应“上传目标下拉打开”已核对ReadingWorkspace.tsx中的uploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:22 · uploadFolder"
+  },
+  "SRR-045-018": {
+    "status": "pending",
+    "reason": "对应“上传目标选择”已核对ReadingWorkspace.tsx中的uploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:22 · uploadFolder"
+  },
+  "SRR-045-019": {
+    "status": "pending",
+    "reason": "对应“上传目标选中状态”已核对ReadingWorkspace.tsx中的uploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:22 · uploadFolder"
+  },
+  "SRR-045-020": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹入口”已核对ReadingWorkspace.tsx中的uploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload",
+    "evidence": "src/components/ReadingWorkspace.tsx:22 · uploadFolder"
+  },
+  "SRR-045-021": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹弹窗”已核对ReadingWorkspace.tsx中的createUploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload-folder",
+    "evidence": "src/components/ReadingWorkspace.tsx:81 · createUploadFolder"
+  },
+  "SRR-045-022": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹名称必填”已核对ReadingWorkspace.tsx中的createUploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload-folder",
+    "evidence": "src/components/ReadingWorkspace.tsx:81 · createUploadFolder"
+  },
+  "SRR-045-023": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹空值拦截”已核对ReadingWorkspace.tsx中的createUploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload-folder",
+    "evidence": "src/components/ReadingWorkspace.tsx:81 · createUploadFolder"
+  },
+  "SRR-045-024": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹重复校验”已核对ReadingWorkspace.tsx中的createUploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload-folder",
+    "evidence": "src/components/ReadingWorkspace.tsx:81 · createUploadFolder"
+  },
+  "SRR-045-025": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹重复提示”已核对ReadingWorkspace.tsx中的createUploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload-folder",
+    "evidence": "src/components/ReadingWorkspace.tsx:81 · createUploadFolder"
+  },
+  "SRR-045-026": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹成功”已核对ReadingWorkspace.tsx中的createUploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload-folder",
+    "evidence": "src/components/ReadingWorkspace.tsx:81 · createUploadFolder"
+  },
+  "SRR-045-027": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹自动选中”已核对ReadingWorkspace.tsx中的createUploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload-folder",
+    "evidence": "src/components/ReadingWorkspace.tsx:81 · createUploadFolder"
+  },
+  "SRR-045-028": {
+    "status": "pending",
+    "reason": "对应“上传新建文件夹成功提示”已核对ReadingWorkspace.tsx中的createUploadFolder相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-upload-folder",
+    "evidence": "src/components/ReadingWorkspace.tsx:81 · createUploadFolder"
+  },
+  "SRR-045-029": {
+    "status": "pending",
+    "reason": "对应“智能阅读库进入”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-045-030": {
+    "status": "pending",
+    "reason": "对应“智能阅读库返回阅读”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-library",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-045-031": {
+    "status": "pending",
+    "reason": "对应“阅读库上传入口”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-library",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-045-032": {
+    "status": "pending",
+    "reason": "对应“阅读库文献存档列表”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-library",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-045-033": {
+    "status": "pending",
+    "reason": "对应“阅读库文献编辑打开”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-library",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-045-034": {
+    "status": "pending",
+    "reason": "对应“阅读库文献删除”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-library",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-045-035": {
+    "status": "pending",
+    "reason": "对应“阅读库文献下载”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-library",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-045-036": {
+    "status": "pending",
+    "reason": "对应“阅读库文献移动”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-library",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-045-037": {
+    "status": "pending",
+    "reason": "对应“阅读库空状态上传入口”已核对ReadingLibrary.tsx中的export function相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "reading-library",
+    "evidence": "src/components/ReadingLibrary.tsx:114 · export function"
+  },
+  "SRR-046-001": {
+    "status": "pending",
+    "reason": "对应“表格文档类型展示”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-002": {
+    "status": "pending",
+    "reason": "对应“表格文档类型说明”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-003": {
+    "status": "pending",
+    "reason": "对应“表格类型选择”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-004": {
+    "status": "pending",
+    "reason": "对应“表格类型选中标识”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-005": {
+    "status": "pending",
+    "reason": "对应“文档类型切换为表格”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-006": {
+    "status": "pending",
+    "reason": "对应“表格文档名称填写”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-007": {
+    "status": "pending",
+    "reason": "对应“表格文档名称最大50字”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-008": {
+    "status": "pending",
+    "reason": "对应“表格文档创建”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-009": {
+    "status": "pending",
+    "reason": "对应“表格文档列表展示”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-046-010": {
+    "status": "pending",
+    "reason": "对应“表格文档大小初始化”已核对App.tsx中的submitNewDocument相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-sheet",
+    "evidence": "src/App.tsx:207 · submitNewDocument"
+  },
+  "SRR-047-001": {
+    "status": "pending",
+    "reason": "对应“成员页签进入”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-047-002": {
+    "status": "pending",
+    "reason": "对应“团队成员数量展示”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-047-003": {
+    "status": "pending",
+    "reason": "对应“邀请成员入口”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-047-004": {
+    "status": "pending",
+    "reason": "对应“邀请成员弹窗打开”已核对MemberPicker.tsx中的selectedCandidates相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:47 · selectedCandidates"
+  },
+  "SRR-047-005": {
+    "status": "pending",
+    "reason": "对应“候选成员列表展示”已核对MemberPicker.tsx中的filteredCandidates.map相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:123 · filteredCandidates.map"
+  },
+  "SRR-047-006": {
+    "status": "pending",
+    "reason": "对应“候选成员姓名展示”已核对MemberPicker.tsx中的filteredCandidates.map相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:123 · filteredCandidates.map"
+  },
+  "SRR-047-007": {
+    "status": "pending",
+    "reason": "对应“候选成员邮箱展示”已核对MemberPicker.tsx中的filteredCandidates.map相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:123 · filteredCandidates.map"
+  },
+  "SRR-047-008": {
+    "status": "noncompliant",
+    "reason": "MemberPicker候选行只渲染姓名/邮箱/头像，没有candidate.date字段。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:138 · className=\"member-identity\""
+  },
+  "SRR-047-009": {
+    "status": "pending",
+    "reason": "对应“候选成员搜索”已核对MemberPicker.tsx中的normalizedSearch相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:41 · normalizedSearch"
+  },
+  "SRR-047-010": {
+    "status": "pending",
+    "reason": "对应“候选成员勾选”已核对MemberPicker.tsx中的filteredCandidates.map相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:123 · filteredCandidates.map"
+  },
+  "SRR-047-011": {
+    "status": "pending",
+    "reason": "对应“候选成员取消勾选”已核对MemberPicker.tsx中的filteredCandidates.map相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:123 · filteredCandidates.map"
+  },
+  "SRR-047-012": {
+    "status": "pending",
+    "reason": "对应“已选成员列表展示”已核对MemberPicker.tsx中的selectedCandidates相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:47 · selectedCandidates"
+  },
+  "SRR-047-013": {
+    "status": "pending",
+    "reason": "对应“已选成员移除”已核对MemberPicker.tsx中的selectedCandidates相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:47 · selectedCandidates"
+  },
+  "SRR-047-014": {
+    "status": "pending",
+    "reason": "对应“邀请角色默认查看员”已核对MemberPicker.tsx中的openRoleMenu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:74 · openRoleMenu"
+  },
+  "SRR-047-015": {
+    "status": "pending",
+    "reason": "对应“邀请角色下拉打开”已核对MemberPicker.tsx中的openRoleMenu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:74 · openRoleMenu"
+  },
+  "SRR-047-016": {
+    "status": "pending",
+    "reason": "对应“邀请角色设置管理员”已核对MemberPicker.tsx中的openRoleMenu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:74 · openRoleMenu"
+  },
+  "SRR-047-017": {
+    "status": "pending",
+    "reason": "对应“邀请角色设置编辑者”已核对MemberPicker.tsx中的openRoleMenu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:74 · openRoleMenu"
+  },
+  "SRR-047-018": {
+    "status": "pending",
+    "reason": "对应“邀请角色设置查看员”已核对MemberPicker.tsx中的openRoleMenu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:74 · openRoleMenu"
+  },
+  "SRR-047-019": {
+    "status": "pending",
+    "reason": "对应“邀请无成员确认禁用”已核对App.tsx中的submitInvite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/App.tsx:297 · submitInvite"
+  },
+  "SRR-047-020": {
+    "status": "pending",
+    "reason": "对应“邀请成员确认”已核对App.tsx中的submitInvite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/App.tsx:297 · submitInvite"
+  },
+  "SRR-047-021": {
+    "status": "pending",
+    "reason": "对应“邀请成员取消”已核对App.tsx中的submitInvite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/App.tsx:297 · submitInvite"
+  },
+  "SRR-047-022": {
+    "status": "pending",
+    "reason": "对应“邀请成员去重”已核对MemberPicker.tsx中的selectedCandidates相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:47 · selectedCandidates"
+  },
+  "SRR-047-023": {
+    "status": "pending",
+    "reason": "对应“邀请成功切换成员页签”已核对App.tsx中的submitInvite相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/App.tsx:297 · submitInvite"
+  },
+  "SRR-047-024": {
+    "status": "noncompliant",
+    "reason": "对应操作的反馈仅由App写入sr-only的role=status，视觉界面不显示成功提示；存在字符串不代表可见提示完成。",
+    "targetId": "research-invite",
+    "evidence": "src/App.tsx:607 · className=\"sr-only\""
+  },
+  "SRR-047-025": {
+    "status": "pending",
+    "reason": "对应“成员头像展示”已核对TeamPanel.tsx中的member.initials相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:237 · member.initials"
+  },
+  "SRR-047-027": {
+    "status": "pending",
+    "reason": "对应“成员姓名展示”已核对TeamPanel.tsx中的member.name相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:238 · member.name"
+  },
+  "SRR-047-028": {
+    "status": "pending",
+    "reason": "对应“成员角色展示”已核对TeamPanel.tsx中的member.name相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:238 · member.name"
+  },
+  "SRR-047-029": {
+    "status": "pending",
+    "reason": "对应“成员加入时间展示”已核对TeamPanel.tsx中的member.joinedAt相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:256 · member.joinedAt"
+  },
+  "SRR-047-030": {
+    "status": "pending",
+    "reason": "对应“成员角色菜单打开”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-047-026": {
+    "status": "pending",
+    "reason": "对应“成员在线状态展示”已核对TeamPanel.tsx中的member.initials相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:237 · member.initials"
+  },
+  "SRR-047-031": {
+    "status": "pending",
+    "reason": "对应“成员角色修改为管理员”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-047-032": {
+    "status": "pending",
+    "reason": "对应“成员角色修改为编辑者”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-047-033": {
+    "status": "pending",
+    "reason": "对应“成员角色修改为查看员”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-047-034": {
+    "status": "pending",
+    "reason": "对应“成员移除”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-048-001": {
+    "status": "pending",
+    "reason": "对应“管理员角色标识”已核对TeamPanel.tsx中的disabled={member.role === '管理员'}相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:245 · disabled={member.role === '管理员'}"
+  },
+  "SRR-048-002": {
+    "status": "pending",
+    "reason": "对应“编辑者角色标识”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-048-003": {
+    "status": "pending",
+    "reason": "对应“查看员角色标识”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-048-014": {
+    "status": "pending",
+    "reason": "对应“角色颜色区分”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-048-004": {
+    "status": "pending",
+    "reason": "对应“管理员角色按钮禁用”已核对TeamPanel.tsx中的disabled={member.role === '管理员'}相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:245 · disabled={member.role === '管理员'}"
+  },
+  "SRR-048-005": {
+    "status": "pending",
+    "reason": "对应“管理员不可从列表菜单移除”已核对TeamPanel.tsx中的disabled={member.role === '管理员'}相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:245 · disabled={member.role === '管理员'}"
+  },
+  "SRR-048-006": {
+    "status": "pending",
+    "reason": "对应“非管理员角色可配置”已核对TeamPanel.tsx中的member-list相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:234 · member-list"
+  },
+  "SRR-048-007": {
+    "status": "pending",
+    "reason": "对应“角色菜单管理员选项”已核对TeamPanel.tsx中的member-role-menu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:249 · member-role-menu"
+  },
+  "SRR-048-008": {
+    "status": "pending",
+    "reason": "对应“角色菜单编辑者选项”已核对TeamPanel.tsx中的member-role-menu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:249 · member-role-menu"
+  },
+  "SRR-048-009": {
+    "status": "pending",
+    "reason": "对应“角色菜单查看员选项”已核对TeamPanel.tsx中的member-role-menu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:249 · member-role-menu"
+  },
+  "SRR-048-010": {
+    "status": "pending",
+    "reason": "对应“当前角色菜单标识”已核对TeamPanel.tsx中的member-role-menu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:249 · member-role-menu"
+  },
+  "SRR-048-011": {
+    "status": "pending",
+    "reason": "对应“角色修改后菜单关闭”已核对TeamPanel.tsx中的member-role-menu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:249 · member-role-menu"
+  },
+  "SRR-048-012": {
+    "status": "pending",
+    "reason": "对应“成员移除后菜单关闭”已核对TeamPanel.tsx中的member-role-menu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:249 · member-role-menu"
+  },
+  "SRR-048-013": {
+    "status": "pending",
+    "reason": "对应“点击外部关闭角色菜单”已核对TeamPanel.tsx中的member-role-menu相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-members",
+    "evidence": "src/components/TeamPanel.tsx:249 · member-role-menu"
+  },
+  "SRR-048-015": {
+    "status": "pending",
+    "reason": "对应“新建团队成员角色配置”已核对MemberPicker.tsx中的selected-member-role相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-new-team",
+    "evidence": "src/components/MemberPicker.tsx:157 · selected-member-role"
+  },
+  "SRR-048-016": {
+    "status": "pending",
+    "reason": "对应“邀请成员角色配置”已核对MemberPicker.tsx中的selected-member-role相关实现。截止模式下仅完成源码核对，未在所需页面/输入/数据条件下实测该点，暂不确认其交互或可见结果。",
+    "targetId": "research-invite",
+    "evidence": "src/components/MemberPicker.tsx:157 · selected-member-role"
+  },
+  "SRR-034-001": {
+    "status": "compliant",
+    "reason": "默认进入智能阅读器，存在正文及阅读工具；ReadingWorkspace 默认 view=reader 且库内 onOpenDocument 设置 reader。",
+    "targetId": "reading-reader",
+    "evidence": "src/components/ReadingReader.tsx:1307 · ReadingReader / ReadingWorkspace.view；src/components/ReadingWorkspace.tsx:15 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-002": {
+    "status": "compliant",
+    "reason": "顶栏标题正确更新为所选文档名称；正文切换缺陷另列006。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1317 · ReadingReader documentTitle"
+  },
+  "SRR-034-003": {
+    "status": "compliant",
+    "reason": "展开4项文档菜单，aria-expanded 为 true。",
+    "targetId": "reading-document-menu",
+    "evidence": "src/components/ReadingReader.tsx:1315 · documentMenuOpen"
+  },
+  "SRR-034-004": {
+    "status": "compliant",
+    "reason": "菜单消失，顶栏显示新名称；定位只展开菜单，不替用户选择文档。",
+    "targetId": "reading-document-menu",
+    "evidence": "src/components/ReadingReader.tsx:1326 · 文档菜单 onClick"
+  },
+  "SRR-034-005": {
+    "status": "compliant",
+    "reason": "4项中仅当前文档为true，其他为false。",
+    "targetId": "reading-document-menu",
+    "evidence": "src/components/ReadingReader.tsx:1324 · menuitemradio"
+  },
+  "SRR-034-006": {
+    "status": "noncompliant",
+    "reason": "顶栏切换成功但论文题名、作者、正文仍为锂硫电池文章；仅更新 activeDocumentId，没有按文档切换阅读内容。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1327 · onSelectDocument / paper-title-block"
+  },
+  "SRR-034-007": {
+    "status": "compliant",
+    "reason": "当前文档按钮变为已收藏，并更新对应文档 favorite。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1339 · onFavorite / ReadingWorkspace.toggleFavorite；src/components/ReadingWorkspace.tsx:59 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-008": {
+    "status": "compliant",
+    "reason": "按钮变为收藏，状态可以再次切换。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1339 · onFavorite / ReadingWorkspace.toggleFavorite；src/components/ReadingWorkspace.tsx:59 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-009": {
+    "status": "compliant",
+    "reason": "文案在收藏与已收藏之间同步切换。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1340 · favorite 条件文案；src/components/ReadingWorkspace.tsx:59 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-010": {
+    "status": "compliant",
+    "reason": "页面提示分享链接已复制，代码等待 Clipboard.writeText 当前URL成功；工具读取剪贴板为空，未据此声称读回URL。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1342 · copyText(window.location.href)"
+  },
+  "SRR-034-011": {
+    "status": "compliant",
+    "reason": "实际观察到分享链接已复制提示；早期独立页曾无反馈，重建独立页后复现成功。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1102 · copyText / ReadingWorkspace.showToast；src/components/ReadingWorkspace.tsx:155 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-012": {
+    "status": "noncompliant",
+    "reason": "能触发文本下载并提示文档已下载，但导出摘要仅固定首句，且任意文档均拼接同一 articleSections，无法完整导出当前文档内容。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1168 · downloadDocument"
+  },
+  "SRR-034-013": {
+    "status": "compliant",
+    "reason": "处理器按当前 activeDocumentId 将 page、zoom、scrollTop 写入 localStorage，浏览器显示成功提示；本次未读取存储内容或验证重新打开恢复。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1199 · saveReadingProgress"
+  },
+  "SRR-034-014": {
+    "status": "compliant",
+    "reason": "实际显示阅读进度已保存。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1208 · saveReadingProgress / showToast；src/components/ReadingWorkspace.tsx:155 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-015": {
+    "status": "pending",
+    "reason": "存在阅读进度保存失败分支，本次未触发存储异常，失败提示是否实际呈现待验证。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1209 · saveReadingProgress catch"
+  },
+  "SRR-034-016": {
+    "status": "noncompliant",
+    "reason": "正文显示第1页/18，底栏1/24；末页正文被截为18而底栏24，当前页和总页数口径不一致。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1467 · reading-paper-page-number / totalPages"
+  },
+  "SRR-034-017": {
+    "status": "compliant",
+    "reason": "论文题名存在显式br换行；切换文档不更新题名另列006。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1470 · paper-title-block"
+  },
+  "SRR-034-018": {
+    "status": "compliant",
+    "reason": "显示刘建国、陈思远、王磊作者信息。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1471 · paper-title-block"
+  },
+  "SRR-034-019": {
+    "status": "compliant",
+    "reason": "显示南方科技大学材料科学与工程系及中科院深圳先进院。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1472 · paper-title-block"
+  },
+  "SRR-034-020": {
+    "status": "compliant",
+    "reason": "显示期刊 Advanced Energy Materials 与 DOI。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1468 · paper-masthead"
+  },
+  "SRR-034-021": {
+    "status": "compliant",
+    "reason": "摘要标题及完整示例摘要文本已呈现。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1474 · articleAbstract / paper-abstract"
+  },
+  "SRR-034-022": {
+    "status": "compliant",
+    "reason": "引言、实验材料与方法、结果与讨论、结论四个一级标题存在。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1486 · articleSections 一级章节"
+  },
+  "SRR-034-023": {
+    "status": "compliant",
+    "reason": "研究背景与意义、表征手段、电化学测试等二级章节存在。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1489 · articleSections 二级章节"
+  },
+  "SRR-034-024": {
+    "status": "compliant",
+    "reason": "显示储能材料、锂硫电池、碳纳米管等关键词。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1499 · paper-keywords"
+  },
+  "SRR-034-025": {
+    "status": "compliant",
+    "reason": "正文指定章节嵌入柱状图及图题；展示功能允许模拟图表数据。",
+    "targetId": "reading-paper",
+    "evidence": "src/components/ReadingReader.tsx:1493 · reading-paper-chart"
+  },
+  "SRR-034-026": {
+    "status": "pending",
+    "reason": "代码由scrollTop/可滚动距离计算页码；本次浏览器scroll调用未产生可确认的滚动变化，仍需在真实滚动后核验同步，不能把翻页按钮改变页码当滚动证据。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:558 · syncPageFromPaperScroll"
+  },
+  "SRR-034-027": {
+    "status": "compliant",
+    "reason": "返回1/24；goToPage 同时滚动至正文起点。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1629 · goToPage"
+  },
+  "SRR-034-028": {
+    "status": "compliant",
+    "reason": "实际从2/24返回1/24。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1630 · goToPage(page - 1)"
+  },
+  "SRR-034-029": {
+    "status": "compliant",
+    "reason": "实际从1/24变为2/24，处理器按比例滚动正文。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1632 · goToPage(page + 1)"
+  },
+  "SRR-034-030": {
+    "status": "compliant",
+    "reason": "底栏到24/24；与正文18页矛盾另列016。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1633 · goToPage(totalPages)"
+  },
+  "SRR-034-031": {
+    "status": "compliant",
+    "reason": "底栏返回1/24。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1634 · goToPage(1)"
+  },
+  "SRR-034-032": {
+    "status": "compliant",
+    "reason": "仍为1/24，不向0或负页越界。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:356 · goToPage clamp"
+  },
+  "SRR-034-033": {
+    "status": "compliant",
+    "reason": "仍为24/24，不越过上界。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:356 · goToPage clamp"
+  },
+  "SRR-034-034": {
+    "status": "compliant",
+    "reason": "显示1/24、2/24、24/24等当前页/总页数格式；总数一致性单列016。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:273 · pageLabel"
+  },
+  "SRR-034-035": {
+    "status": "compliant",
+    "reason": "显示50%、25%、75%、100%并随操作更新。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1649 · zoom 文案"
+  },
+  "SRR-034-036": {
+    "status": "compliant",
+    "reason": "出现25%、50%、75%、100%四项预设菜单。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1646 · openZoomMenu"
+  },
+  "SRR-034-037": {
+    "status": "compliant",
+    "reason": "滑杆aria-valuenow变为25，缩小按钮禁用，页面变小。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1666 · selectZoomPreset(25)"
+  },
+  "SRR-034-038": {
+    "status": "compliant",
+    "reason": "滑杆aria-valuenow恢复50，菜单收起。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1666 · selectZoomPreset(50)"
+  },
+  "SRR-034-039": {
+    "status": "compliant",
+    "reason": "实际比例更新为75，菜单收起。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1666 · selectZoomPreset(75)"
+  },
+  "SRR-034-040": {
+    "status": "compliant",
+    "reason": "实际比例更新为100，放大按钮禁用。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1666 · selectZoomPreset(100)"
+  },
+  "SRR-034-041": {
+    "status": "compliant",
+    "reason": "实际比例变为100%，步进5%。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1700 · applyZoom(zoom + 5)"
+  },
+  "SRR-034-042": {
+    "status": "compliant",
+    "reason": "实际比例变为95%，步进5%。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1676 · applyZoom(zoom - 5)"
+  },
+  "SRR-034-045": {
+    "status": "compliant",
+    "reason": "aria-valuemin=25，applyZoom将低于25请求钳制为25。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:393 · applyZoom clamp"
+  },
+  "SRR-034-046": {
+    "status": "compliant",
+    "reason": "aria-valuemax=100，applyZoom将高于100请求钳制为100。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:393 · applyZoom clamp"
+  },
+  "SRR-034-047": {
+    "status": "compliant",
+    "reason": "isEnabled=false，确实禁用。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1676 · disabled={zoom === 25}"
+  },
+  "SRR-034-048": {
+    "status": "compliant",
+    "reason": "isEnabled=false，确实禁用。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:1700 · disabled={zoom === 100}"
+  },
+  "SRR-034-043": {
+    "status": "compliant",
+    "reason": "实测50%拖动到80%，aria-valuenow同步改变。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:490 · updateZoomFromPointer / scheduleZoom"
+  },
+  "SRR-034-044": {
+    "status": "compliant",
+    "reason": "实际依次得到55、50、55、50、60、50、25、100，全部八种按键有效。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:518 · handleZoomRangeKeyDown"
+  },
+  "SRR-034-049": {
+    "status": "pending",
+    "reason": "代码记录视口中心并在两帧中恢复偏移；本次未量化中心保持误差及边缘钳制行为，完整性待验证。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:392 · applyZoom anchor restoration"
+  },
+  "SRR-034-050": {
+    "status": "compliant",
+    "reason": "实际切换为退出全屏按钮及最大化阅读状态。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:575 · toggleReaderFullscreen"
+  },
+  "SRR-034-051": {
+    "status": "compliant",
+    "reason": "恢复全屏按钮与普通布局。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:589 · toggleReaderFullscreen"
+  },
+  "SRR-034-052": {
+    "status": "pending",
+    "reason": "有fullscreenFallbackRef和maximized兜底状态，但本次未确认全屏能力不可用分支被触发。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:583 · toggleReaderFullscreen fallback"
+  },
+  "SRR-034-053": {
+    "status": "pending",
+    "reason": "Escape监听只对fullscreenFallbackRef生效；缺少已进入兜底后的运行验证。",
+    "targetId": "reading-footer",
+    "evidence": "src/components/ReadingReader.tsx:307 · closeFallbackFullscreen"
+  },
+  "SRR-034-054": {
+    "status": "compliant",
+    "reason": "检索抽屉显示，AI检索按钮为pressed。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:687 · activateSearch"
+  },
+  "SRR-034-055": {
+    "status": "compliant",
+    "reason": "检索抽屉消失。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:688 · activateSearch / closeSearchDrawer"
+  },
+  "SRR-034-056": {
+    "status": "compliant",
+    "reason": "按钮pressed，正文进入可选状态，左侧切到笔记。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:697 · activateNoteTool"
+  },
+  "SRR-034-057": {
+    "status": "compliant",
+    "reason": "aria-pressed恢复false，清除临时选择状态。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:698 · activateNoteTool"
+  },
+  "SRR-034-058": {
+    "status": "compliant",
+    "reason": "截图按钮pressed，正文进入框选状态。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:712 · activateScreenshotTool"
+  },
+  "SRR-034-059": {
+    "status": "compliant",
+    "reason": "aria-pressed恢复false，框选状态退出。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:713 · activateScreenshotTool"
+  },
+  "SRR-034-060": {
+    "status": "compliant",
+    "reason": "原选中mark与菜单清除，检索抽屉显示，笔记按钮不再pressed，三工具互斥。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:658 · resetToolSurfaces"
+  },
+  "SRR-034-061": {
+    "status": "compliant",
+    "reason": "整个摘要包入is-field高亮mark，菜单出现。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:734 · hitPaperLine"
+  },
+  "SRR-034-064": {
+    "status": "compliant",
+    "reason": "mark文本等于选区，背景CSS变量跟随所选颜色。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:834 · renderSelectableText"
+  },
+  "SRR-034-066": {
+    "status": "compliant",
+    "reason": "存在翻译按钮并能打开卡片；结果绑定问题单列070。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:1521 · showTranslation 入口"
+  },
+  "SRR-034-067": {
+    "status": "compliant",
+    "reason": "存在解释按钮并能打开卡片；结果绑定问题单列077。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:1522 · showExplanation 入口"
+  },
+  "SRR-034-068": {
+    "status": "compliant",
+    "reason": "存在背景颜色按钮，点击可展开调色板。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:1523 · setColorMenuOpen"
+  },
+  "SRR-034-069": {
+    "status": "compliant",
+    "reason": "存在添加笔记按钮，绑定openNoteEditor(selection)；本次该菜单入口未单独提交创建笔记。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:1525 · startAddingNote 入口"
+  },
+  "SRR-034-062": {
+    "status": "compliant",
+    "reason": "实际仅选中“本研究系统性探究了功能”，mark为is-range，非整段。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:768 · beginPaperRange / selectPaperRange"
+  },
+  "SRR-034-063": {
+    "status": "pending",
+    "reason": "代码含anchor/focus范围识别，本次拖拽命中自定义索引路径，尚未单独覆盖原生Selection分支。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:803 · selectPaperRange browserSelection fallback"
+  },
+  "SRR-034-065": {
+    "status": "compliant",
+    "reason": "两种选择后均出现邻近划词菜单，位置由选区矩形限制在画布内。",
+    "targetId": "reading-selection",
+    "evidence": "src/components/ReadingReader.tsx:723 · placeContextMenu"
+  },
+  "SRR-034-070": {
+    "status": "noncompliant",
+    "reason": "卡片原文仍为固定的“锂硫电池因具有…”引言片段，非选中摘要；译文不绑定选区，违反对选中文本展示结果。",
+    "targetId": "reading-translation",
+    "evidence": "src/components/ReadingReader.tsx:1534 · 实时翻译卡片 固定原文与translatedExcerpt"
+  },
+  "SRR-034-071": {
+    "status": "compliant",
+    "reason": "恢复原文与译文区域；内容绑定缺陷另列070。",
+    "targetId": "reading-translation",
+    "evidence": "src/components/ReadingReader.tsx:1535 · toggleResultCard(translation)"
+  },
+  "SRR-034-072": {
+    "status": "compliant",
+    "reason": "展开按钮出现，原文译文主体收起。",
+    "targetId": "reading-translation",
+    "evidence": "src/components/ReadingReader.tsx:1535 · toggleResultCard(translation)"
+  },
+  "SRR-034-073": {
+    "status": "compliant",
+    "reason": "实时翻译卡片从页面移除。",
+    "targetId": "reading-translation",
+    "evidence": "src/components/ReadingReader.tsx:1134 · closeResultCard(translation)"
+  },
+  "SRR-034-074": {
+    "status": "compliant",
+    "reason": "显示译文已复制；处理器复制与卡片相同的translatedExcerpt。工具剪贴板读回为空，因此无读回内容验证。",
+    "targetId": "reading-translation",
+    "evidence": "src/components/ReadingReader.tsx:1535 · copyText(translatedExcerpt)"
+  },
+  "SRR-034-075": {
+    "status": "compliant",
+    "reason": "实际显示译文已复制。",
+    "targetId": "reading-translation",
+    "evidence": "src/components/ReadingReader.tsx:1106 · copyText success callback；src/components/ReadingWorkspace.tsx:155 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-076": {
+    "status": "noncompliant",
+    "reason": "编辑器英译显示固定Thiosulfate shuttle effect，与卡片长段译文不同；pendingAddedNote虽被赋值但阶段1不展示该译文来源。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1042 · openNoteEditor(translation) / noteEditStage=1"
+  },
+  "SRR-034-077": {
+    "status": "noncompliant",
+    "reason": "解释卡片原文为另一段固定引言，未展示所选摘要；解释固定不随选区变化，问题是输入输出未绑定。",
+    "targetId": "reading-explanation",
+    "evidence": "src/components/ReadingReader.tsx:1541 · AI解释卡片 固定原文与explainedExcerpt"
+  },
+  "SRR-034-078": {
+    "status": "compliant",
+    "reason": "解释主体恢复；输入绑定缺陷另列077。",
+    "targetId": "reading-explanation",
+    "evidence": "src/components/ReadingReader.tsx:1542 · toggleResultCard(explanation)"
+  },
+  "SRR-034-079": {
+    "status": "compliant",
+    "reason": "解释主体收起且出现展开按钮。",
+    "targetId": "reading-explanation",
+    "evidence": "src/components/ReadingReader.tsx:1542 · toggleResultCard(explanation)"
+  },
+  "SRR-034-080": {
+    "status": "compliant",
+    "reason": "AI解释卡片消失，其他卡片按自身状态保留。",
+    "targetId": "reading-explanation",
+    "evidence": "src/components/ReadingReader.tsx:1134 · closeResultCard(explanation)"
+  },
+  "SRR-034-081": {
+    "status": "compliant",
+    "reason": "显示解释已复制，复制参数等于卡片解释文本；未通过工具读取剪贴板实际内容。",
+    "targetId": "reading-explanation",
+    "evidence": "src/components/ReadingReader.tsx:1542 · copyText(explainedExcerpt)"
+  },
+  "SRR-034-082": {
+    "status": "compliant",
+    "reason": "实际显示解释已复制。",
+    "targetId": "reading-explanation",
+    "evidence": "src/components/ReadingReader.tsx:1106 · copyText success callback；src/components/ReadingWorkspace.tsx:155 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-083": {
+    "status": "compliant",
+    "reason": "左侧编辑器解释区域显示与卡片一致的explainedExcerpt；原解释不绑定选区另列077。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1038 · openNoteEditor(explanation)"
+  },
+  "SRR-034-084": {
+    "status": "compliant",
+    "reason": "调色板显示背景颜色标题和16个按钮。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:1528 · colorMenuOpen"
+  },
+  "SRR-034-085": {
+    "status": "compliant",
+    "reason": "选择后所有调色板色块从DOM移除，面板收起。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:1528 · 颜色选择 onClick"
+  },
+  "SRR-034-086": {
+    "status": "compliant",
+    "reason": "背景色8具有is-active类，当前颜色被标识。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:1528 · highlightColorIndex"
+  },
+  "SRR-034-087": {
+    "status": "compliant",
+    "reason": "选区背景变量变为transparent。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:64 · highlightColors[0]"
+  },
+  "SRR-034-088": {
+    "status": "compliant",
+    "reason": "选区背景变量变为#F2F3F5灰色。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:64 · highlightColors[1]"
+  },
+  "SRR-034-089": {
+    "status": "compliant",
+    "reason": "选区背景变量变为#FABFBD红色。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:64 · highlightColors[2]"
+  },
+  "SRR-034-090": {
+    "status": "compliant",
+    "reason": "选区背景变量变为#FADC19黄色。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:64 · highlightColors[4]"
+  },
+  "SRR-034-091": {
+    "status": "compliant",
+    "reason": "选区背景变量变为#C6EFC1绿色。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:64 · highlightColors[5]"
+  },
+  "SRR-034-092": {
+    "status": "compliant",
+    "reason": "选区背景变量变为#BDE3FF蓝色。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:64 · highlightColors[6]"
+  },
+  "SRR-034-093": {
+    "status": "compliant",
+    "reason": "选区背景变量变为#DCC9FB紫色。",
+    "targetId": "reading-colors",
+    "evidence": "src/components/ReadingReader.tsx:64 · highlightColors[7]"
+  },
+  "SRR-034-094": {
+    "status": "compliant",
+    "reason": "鼠标移动更新clientX/clientY，渲染坐标与固定色值提示#E5E6EB；本条仅要求提示展示，未要求真实取色，本次源码核验为主。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:1513 · screenshotPointer"
+  },
+  "SRR-034-095": {
+    "status": "compliant",
+    "reason": "实际得到190×70的确认框及下载/取消/完成控件。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:852 · beginScreenshotDrag / finishScreenshotDrag"
+  },
+  "SRR-034-096": {
+    "status": "compliant",
+    "reason": "5×5未进入确认，190×70进入；源码对宽高均>=12判断，精确12像素边界本次未另测。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:909 · finishScreenshotDrag 尺寸判断"
+  },
+  "SRR-034-097": {
+    "status": "compliant",
+    "reason": "cropRect清除，无确认框，仍可继续框选。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:910 · finishScreenshotDrag else"
+  },
+  "SRR-034-098": {
+    "status": "compliant",
+    "reason": "DOM具有nw/n/ne/e/se/s/sw/w八手柄；东南拖动使190×70变225×95，其余方向核对共用方向判断代码，未逐个拖动。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:913 · beginCropResize / updateCropResize"
+  },
+  "SRR-034-099": {
+    "status": "compliant",
+    "reason": "实际显示截图已下载；代码生成PNG Blob并下载为科研阅读截图.png，另一路添加笔记已验证data:image/png。未读取磁盘下载文件。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:1014 · downloadScreenshot / captureViewportCrop"
+  },
+  "SRR-034-100": {
+    "status": "compliant",
+    "reason": "实际显示截图已下载。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:1018 · downloadScreenshot success；src/components/ReadingWorkspace.tsx:155 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-101": {
+    "status": "pending",
+    "reason": "存在截图下载失败提示分支，本次未触发，运行展示待验证。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:1019 · downloadScreenshot catch"
+  },
+  "SRR-034-107": {
+    "status": "pending",
+    "reason": "有截图生成失败，请重新选择提示及保留选区逻辑，但本次没有触发生成失败。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:1004 · completeScreenshot catch"
+  },
+  "SRR-034-102": {
+    "status": "compliant",
+    "reason": "确认框关闭，截图工具退出。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:990 · completeScreenshot"
+  },
+  "SRR-034-103": {
+    "status": "compliant",
+    "reason": "实际显示截图已完成。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:1011 · completeScreenshot 非编辑分支；src/components/ReadingWorkspace.tsx:155 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-104": {
+    "status": "compliant",
+    "reason": "编辑器出现笔记图片1，src为data:image/png，图片实际加入编辑区。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:995 · completeScreenshot 编辑分支"
+  },
+  "SRR-034-105": {
+    "status": "compliant",
+    "reason": "实际显示截图已添加到笔记。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:1011 · completeScreenshot 编辑分支；src/components/ReadingWorkspace.tsx:155 · ReadingWorkspace.view/toggleFavorite/showToast"
+  },
+  "SRR-034-106": {
+    "status": "compliant",
+    "reason": "确认框消失，截图按钮aria-pressed=false，临时状态清理。",
+    "targetId": "reading-screenshot",
+    "evidence": "src/components/ReadingReader.tsx:974 · cancelScreenshot"
+  },
+  "SRR-035-001": {
+    "status": "compliant",
+    "reason": "1280×720默认阅读器左侧存在阅读辅助栏，含目录、缩略图、笔记三个可操作页签。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1349 · ReadingReader 左侧aside/reading-left-rail"
+  },
+  "SRR-035-002": {
+    "status": "compliant",
+    "reason": "目录页签存在，具备固定id、role=tab及选中状态。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1351 · reading-left-tab-outline"
+  },
+  "SRR-035-005": {
+    "status": "compliant",
+    "reason": "从其他页签点击目录后，目录被选中并显示目录结构。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:601 · selectLeftPanel / outline条件渲染"
+  },
+  "SRR-035-008": {
+    "status": "compliant",
+    "reason": "目录面板有可见的目录h2标题。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1364 · reading-outline h2"
+  },
+  "SRR-035-009": {
+    "status": "compliant",
+    "reason": "摘要以可展开按钮展示，关联reading-outline-main-sections。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1367 · 摘要disclosure按钮"
+  },
+  "SRR-035-010": {
+    "status": "compliant",
+    "reason": "摘要收起时正文目录项从可访问树移除；再次点击后一级、二级目录重新显示。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1372 · setOutlineMainExpanded / collapse inert"
+  },
+  "SRR-035-011": {
+    "status": "compliant",
+    "reason": "点击已展开的摘要后正文目录隐藏，仅保留摘要及静态参考文献。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1372 · setOutlineMainExpanded / collapse inert"
+  },
+  "SRR-035-012": {
+    "status": "compliant",
+    "reason": "目录展开后可见引言、实验材料与方法、结果与讨论、结论四个一级目录项。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1378 · outlineGroups.map 顶级button；src/readingData.ts:113 · outlineGroups"
+  },
+  "SRR-035-013": {
+    "status": "compliant",
+    "reason": "目录展开后可见研究背景与意义、研究现状、原料制备等8个二级目录项。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1381 · group.children.map"
+  },
+  "SRR-035-016": {
+    "status": "compliant",
+    "reason": "参考文献在目录底部以静态div展示，无点击跳转；本条明确只要求静态展示。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1388 · reading-outline-static"
+  },
+  "SRR-035-003": {
+    "status": "compliant",
+    "reason": "缩略图页签存在，具备固定id、role=tab及选中状态。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1354 · reading-left-tab-thumbnails"
+  },
+  "SRR-035-006": {
+    "status": "compliant",
+    "reason": "点击缩略图后选中该页签，面板显示尺寸工具和24张页卡。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:601 · selectLeftPanel / thumbnails条件渲染"
+  },
+  "SRR-035-004": {
+    "status": "compliant",
+    "reason": "笔记页签存在，具备固定id、role=tab及选中状态；该页签与被隐藏的面板标题是不同对象。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1357 · reading-left-tab-notes"
+  },
+  "SRR-035-007": {
+    "status": "compliant",
+    "reason": "点击笔记后选中该页签并展示4张已有笔记卡片。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:601 · selectLeftPanel / notes条件渲染"
+  },
+  "SRR-035-014": {
+    "status": "compliant",
+    "reason": "稳定展开后点击2.1.原料制备，正文对应标题定位到y=238；另测3.结果与讨论也定位到y=238，目标与点击目录项一致。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:348 · scrollPaperToSection / jumpToSection"
+  },
+  "SRR-035-015": {
+    "status": "compliant",
+    "reason": "实测正文滚动容器顶部y=166，目录目标标题y=238，保留72像素顶部偏移；源码明确减72。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:348 · scrollPaperToSection 顶部偏移"
+  },
+  "SRR-035-017": {
+    "status": "compliant",
+    "reason": "缩略图面板展示减号按钮、大小滑杆和加号按钮，组合工具完整。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1397 · reading-thumbnail-tools"
+  },
+  "SRR-035-018": {
+    "status": "compliant",
+    "reason": "点击缩小按钮后大小按100→75→50→25递减，页卡宽度176→144→112→80像素。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1398 · 缩小缩略图 onClick"
+  },
+  "SRR-035-019": {
+    "status": "compliant",
+    "reason": "点击放大按钮后大小按25→50→75→100递增，页卡宽度80→112→144→176像素。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1400 · 放大缩略图 onClick"
+  },
+  "SRR-035-021": {
+    "status": "compliant",
+    "reason": "实测缩略图大小可到25档，纸张预览宽度32像素，符合thumbnailZoom×1.28尺寸计算。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1406 · thumbnailZoom CSS尺寸变量"
+  },
+  "SRR-035-022": {
+    "status": "compliant",
+    "reason": "实测缩略图大小可到50档，纸张预览宽度64像素，符合thumbnailZoom×1.28尺寸计算。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1406 · thumbnailZoom CSS尺寸变量"
+  },
+  "SRR-035-023": {
+    "status": "compliant",
+    "reason": "实测缩略图大小可到75档，纸张预览宽度96像素，符合thumbnailZoom×1.28尺寸计算。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1406 · thumbnailZoom CSS尺寸变量"
+  },
+  "SRR-035-024": {
+    "status": "compliant",
+    "reason": "实测缩略图大小可到100档，纸张预览宽度128像素，符合thumbnailZoom×1.28尺寸计算。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1406 · thumbnailZoom CSS尺寸变量"
+  },
+  "SRR-035-025": {
+    "status": "compliant",
+    "reason": "25档时缩小缩略图按钮disabled=true；提高到50档后恢复可用。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1398 · 缩小按钮 disabled={thumbnailZoom===25}"
+  },
+  "SRR-035-026": {
+    "status": "compliant",
+    "reason": "100档时放大缩略图按钮disabled=true；降低到75档后恢复可用。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1400 · 放大按钮 disabled={thumbnailZoom===100}"
+  },
+  "SRR-035-020": {
+    "status": "compliant",
+    "reason": "原生range滑杆可用键盘Home/End及ArrowRight调整；实测End=100，Home后ArrowRight=50，预览同步变化。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1399 · thumbnailZoom range onChange"
+  },
+  "SRR-035-027": {
+    "status": "compliant",
+    "reason": "DOM和可访问树均展示第1页至第24页共24个可点击页卡。均使用同一模拟预览图，本条只要求页卡列表展示，不因重复模拟图本身判不合规。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1411 · Array.from(totalPages) / thumbnail buttons"
+  },
+  "SRR-035-028": {
+    "status": "compliant",
+    "reason": "当前页通过唯一aria-current=page标记；实测当前第7页及点击后的第24页标识随页码变化。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:1412 · thumbnail aria-current"
+  },
+  "SRR-035-029": {
+    "status": "noncompliant",
+    "reason": "点击第24页后页卡与底部页码为24/24，但正文页码被限制为18/18；稳定后scrollTop=1792，正文可视区没有任何标题或段落。goToPage按整段滚动范围比例滚动，没有24页正文映射，不能正确到达对应页。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:356 · goToPage / totalPages / 正文Math.min(page,18)"
+  },
+  "SRR-035-030": {
+    "status": "compliant",
+    "reason": "先在目录面板将页码切到24，再切缩略图，列表自动scrollTop=5230.5；当前第24页卡top431.04/bottom652.06，列表可视范围210至652，当前卡片已自动进入可视范围。",
+    "targetId": "reading-thumbnails",
+    "evidence": "src/components/ReadingReader.tsx:321 · useEffect thumbnail current scrollIntoView"
+  },
+  "SRR-035-031": {
+    "status": "noncompliant",
+    "reason": "笔记面板标题节点虽写入源码，但.reading-notes > .reading-panel-heading被display:none隐藏；浏览器宽高均0，可访问树没有笔记h2标题。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1421 · reading-panel-heading h2；src/reading.css:826 · .reading-notes > .reading-panel-heading display:none"
+  },
+  "SRR-035-032": {
+    "status": "noncompliant",
+    "reason": "标题区添加笔记按钮与标题共用display:none容器，不可见也不可从UI点击；已有卡片编辑按钮不能替代标题区添加入口。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1421 · reading-panel-heading 添加笔记按钮；src/reading.css:826 · .reading-notes > .reading-panel-heading display:none"
+  },
+  "SRR-035-033": {
+    "status": "compliant",
+    "reason": "笔记面板显示4张已有卡片，来自notes数组的直接渲染。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1422 · filteredNotes.map"
+  },
+  "SRR-035-034": {
+    "status": "compliant",
+    "reason": "4张卡片颜色分别为#FFE4BA、#FABFBD、#C6EFC1、#DCC9FB，与各自note.color一致。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1424 · reading-note-color / note.color"
+  },
+  "SRR-035-035": {
+    "status": "compliant",
+    "reason": "每张笔记卡片显示note.title，当前四条模拟标题均为多硫化物穿梭效应。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1426 · reading-note-card-content strong / note.title"
+  },
+  "SRR-035-036": {
+    "status": "compliant",
+    "reason": "卡片摘录显示note.excerpt，当前为多硫化物穿梭效应通常出现在锂硫电池中，...。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1428 · reading-note-excerpt"
+  },
+  "SRR-035-037": {
+    "status": "compliant",
+    "reason": "各卡片提供有可访问名称的复制笔记按钮；实际点击后提示笔记已复制，代码将该卡片excerpt传给copyText。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1427 · 卡片copyText(note.excerpt)"
+  },
+  "SRR-035-038": {
+    "status": "compliant",
+    "reason": "卡片详情按钮可打开笔记详情对话框，显示选中笔记标题和摘录；本条只要求按钮入口。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1429 · setNoteDetailId(note.id)"
+  },
+  "SRR-035-039": {
+    "status": "compliant",
+    "reason": "卡片编辑按钮可打开该笔记编辑区，展示来源摘录并允许输入测试草稿；取消后原4条笔记保持。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1025 · startEditingNote(note)"
+  },
+  "SRR-035-040": {
+    "status": "compliant",
+    "reason": "在本人新开的独立测试页中，经真实详情删除按钮依次删除4条初始内存演示笔记后，卡片数量4→3→2→1→0，页面可见暂无笔记；文字实际48×20像素。刷新该测试页后恢复原4条，ID及可见文本逐条完全一致。此前未触发条件已完成实测，改为已合规。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1432 · filteredNotes.length 分支 / reading-notes-empty；src/components/ReadingWorkspace.tsx:19 · useState(initialReadingNotes)"
+  },
+  "SRR-035-041": {
+    "status": "compliant",
+    "reason": "在同一专用测试页真实空笔记状态中，唤醒笔记按钮可见（48×20像素）；实际点击后标注与添加笔记工具由aria-pressed=false变true并显示is-active，左侧笔记页签保持选中。此入口唤醒标注工具，不会直接新建或提交笔记；本条所需响应已验证，改为已合规。",
+    "targetId": "reading-notes",
+    "evidence": "src/components/ReadingReader.tsx:1432 · 空状态唤醒按钮 / activateNoteTool"
+  },
+  "SRR-035-042": {
+    "status": "compliant",
+    "reason": "编辑时有拓展笔记区域按钮；点击后卡片宽度由168增至408像素，按钮变为收起笔记区域，测试草稿035独立验证草稿保持。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1456 · reading-note-panel-handle setNoteEditorExpanded"
+  },
+  "SRR-035-043": {
+    "status": "compliant",
+    "reason": "拓展后点击收起笔记区域，卡片宽度408恢复168像素，按钮恢复拓展笔记区域，草稿保持。",
+    "targetId": "reading-editor",
+    "evidence": "src/components/ReadingReader.tsx:1456 · reading-note-panel-handle setNoteEditorExpanded"
+  },
+  "SRR-035-044": {
+    "status": "compliant",
+    "reason": "桌面宽度下右侧智能阅读分析面板可见，包含五页签及当前分析内容。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1584 · reading-right-panel / insight tablist"
+  },
+  "SRR-035-045": {
+    "status": "compliant",
+    "reason": "AI解读页签存在，选中后显示AI总结、核心贡献、创新点等内容。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1587 · insightTabs ai"
+  },
+  "SRR-035-050": {
+    "status": "compliant",
+    "reason": "依次点击图表、参考文献、元数据、图谱、AI解读，选中页签和对应tabpanel id及内容逐次切换正确。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1214 · selectInsightPanel / rightPanel条件渲染"
+  },
+  "SRR-035-046": {
+    "status": "compliant",
+    "reason": "页签简写为图表，切换后内容标题为图表提取并有图表列表，属于要求的图表提取入口。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1587 · insightTabs charts / ReadingCharts"
+  },
+  "SRR-035-047": {
+    "status": "compliant",
+    "reason": "页签名为参考文献，切换后内容标题为文献解析并显示文献卡片，提供了对应入口；本条不扩展为文献解析全部能力验收。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1587 · insightTabs references / ReadingReferences"
+  },
+  "SRR-035-048": {
+    "status": "compliant",
+    "reason": "页签名为元数据，切换后内容标题为数据提炼并展示9个元数据字段，提供了对应页签入口。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1587 · insightTabs metadata / ReadingMetadata"
+  },
+  "SRR-035-049": {
+    "status": "compliant",
+    "reason": "页签名为图谱，切换后显示图谱关联和论文知识图谱，提供了对应入口。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1587 · insightTabs graph / ReadingGraph"
+  },
+  "SRR-035-051": {
+    "status": "compliant",
+    "reason": "在1000×800紧凑视口下顶部显示AI解读按钮，点击可打开右侧浮层，aria-hidden由true变false。",
+    "targetId": "reading-header",
+    "evidence": "src/components/ReadingReader.tsx:1346 · reading-mobile-insight-button；src/reading.css:4802 · @media(max-width:1180px) 移动入口"
+  },
+  "SRR-035-052": {
+    "status": "compliant",
+    "reason": "1000×800下打开智能面板后有24像素关闭按钮，点击使is-mobile-open移除，aria-hidden恢复true。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1585 · reading-mobile-insight-close；src/reading.css:4815 · 紧凑关闭按钮样式"
+  },
+  "SRR-035-053": {
+    "status": "compliant",
+    "reason": "800×800下目录、缩略图、笔记三个页签分别能打开左浮层，所选tab aria-expanded=true，内容display=block。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:601 · selectLeftPanel 窄屏打开；src/reading.css:4936 · .reading-left-panel.is-mobile-open"
+  },
+  "SRR-035-054": {
+    "status": "compliant",
+    "reason": "800×800下再次点击当前目录、缩略图、笔记页签均关闭浮层，is-mobile-open移除且内容display=none。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:604 · selectLeftPanel willClose；src/reading.css:4932 · .reading-left-content display:none"
+  },
+  "SRR-035-055": {
+    "status": "compliant",
+    "reason": "实测Escape分别关闭文档菜单、左右移动浮层、笔记详情、带定位标记的检索抽屉及截图确认区；200×80截图框被清除且截图工具取消选中。源码同一处理器还清理颜色/翻译等临时状态，不保存或删除笔记。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1220 · closeTemporaryUi / closeSearchDrawer"
+  },
+  "SRR-036-001": {
+    "status": "compliant",
+    "reason": "从AI解读点击参考文献页签后，aria-selected变true，显示文献解析标题及引用卡片。页签简写不妨碍其对应功能。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1587 · insightTabs / selectInsightPanel；src/components/ReadingReader.tsx:1600 · references条件渲染"
+  },
+  "SRR-036-002": {
+    "status": "compliant",
+    "reason": "右侧面板可见标题为文献解析，DOM为header内strong。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-009": {
+    "status": "compliant",
+    "reason": "5条参考文献各自有一个type=button的查看按钮，按钮可见且可点。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-017": {
+    "status": "compliant",
+    "reason": "每条以带边框圆角卡片组织，顺序为序号、标题、来源年份、被引标签和查看操作；截图及DOM结构吻合。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences；src/reading.css:3138 · 参考文献卡片grid/border/padding"
+  },
+  "SRR-036-018": {
+    "status": "compliant",
+    "reason": "分别实点5张卡片中的查看，均成功产生要求的提示；点击期间引用列表保持，不是仅核对按钮存在。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-019": {
+    "status": "compliant",
+    "reason": "参考文献页签属于右侧智能阅读分析tablist，对应reading-insight-panel-references内容区，位置及关联正确。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1584 · reading-right-panel / insight tabs"
+  },
+  "SRR-036-022": {
+    "status": "compliant",
+    "reason": "点击参考文献后按钮class=is-active、aria-selected=true，并显示蓝色激活文字及下划线。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1587 · rightPanel选中状态；src/reading.css:2595 · .reading-insight-tabs button.is-active"
+  },
+  "SRR-036-023": {
+    "status": "compliant",
+    "reason": "从参考文献切至AI解读后，该按钮class为空且aria-selected=false；再次切回恢复is-active/true，取消激活可逆。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1587 · rightPanel非选中状态"
+  },
+  "SRR-036-024": {
+    "status": "compliant",
+    "reason": "参考文献卡片操作区仅有查看，面板无新增、删除、修改、输入框或编辑状态；点击查看也未产生模态编辑框。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-025": {
+    "status": "compliant",
+    "reason": "5张卡片分别提供并可点击自己的查看按钮，逐条实测均产生提示。它们共用无条目参数的onView回调，因此本条按逐条独立操作入口通过，不声称能打开各自论文详情。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-003": {
+    "status": "compliant",
+    "reason": "标题旁实际显示32 条，满足本条明确要求的数值展示。列表只有5条模拟卡片，不能据此认定已解析32篇；该数量不一致另记上层缺口。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-021": {
+    "status": "compliant",
+    "reason": "文献解析标题旁右侧有32 条数量标识；当前只展示5张卡片的限制单列，不将此标识通过扩大为32条完整解析。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-004": {
+    "status": "compliant",
+    "reason": "5张卡片依次显示[1]至[5]，无漏号、跳号。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-005": {
+    "status": "compliant",
+    "reason": "英文及中文条目均有标题strong；英文示例文本本身以all...结尾，当前按原型短标题展示。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-006": {
+    "status": "compliant",
+    "reason": "英文引用展示Nature Energy，中文引用展示化学学报，来源名称可见。当前与年份共用small，需增加不改文案的字段标记以精确定位来源。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-007": {
+    "status": "compliant",
+    "reason": "英文条目显示2023，中文条目显示2024，发表年份清晰可见。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-008": {
+    "status": "compliant",
+    "reason": "每条引用卡片均显示被引用·58；该条只验展示，不将固定模拟被引数判为缺陷。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-011": {
+    "status": "compliant",
+    "reason": "右侧内容区clientHeight=446、scrollHeight=690；手动向下滚动使scrollTop从0到244，第5条top524/bottom636落在面板206至652内，确实可滚动查看后续条目。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences；src/reading.css:2610 · .reading-insight-content overflow:auto"
+  },
+  "SRR-036-012": {
+    "status": "compliant",
+    "reason": "[1]/[3]/[5]显示英文标题Sulfide solid electrolytes for all...，浏览器实际可见。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-013": {
+    "status": "compliant",
+    "reason": "[2]/[4]显示中文标题硅碳负极材料的研究进展，浏览器实际可见。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-014": {
+    "status": "compliant",
+    "reason": "英文引用在[1]/[3]/[5]重复，中文引用在[2]/[4]重复；源码数组顺序及实际列表一致。本条明确要求原型重复展示，不能因重复判不合规。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1723 · references模拟数组"
+  },
+  "SRR-036-026": {
+    "status": "compliant",
+    "reason": "来源与年份组合为Nature Energy ｜ 2023及化学学报 ｜ 2024，包含可见竖线分隔。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-036-027": {
+    "status": "compliant",
+    "reason": "被引次数使用被引用·58标签展示，标签背景、文字均可见，符合被引用标签要求。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences；src/reading.css:3176 · 被引标签背景与字号"
+  },
+  "SRR-036-028": {
+    "status": "compliant",
+    "reason": "完整列表按数组原顺序英/中/英/中/英渲染，序号1至5；逐条点击查看后顺序仍一致，没有排序或去重。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1723 · references.map原顺序"
+  },
+  "SRR-036-010": {
+    "status": "compliant",
+    "reason": "实点[1]至[5]各自查看按钮后均显示已打开参考文献详情的Toast；没有实际详情页。此原子条明确要求打开提示/反馈，按提示行为通过，实际论文详情缺失记在上层。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1600 · ReadingReferences onView → onToast；src/components/ReadingWorkspace.tsx:42 · showToast 2200ms临时提示"
+  },
+  "SRR-036-015": {
+    "status": "compliant",
+    "reason": "实点[1]至[5]各自查看按钮后均显示已打开参考文献详情的Toast；没有实际详情页。此原子条明确要求打开提示/反馈，按提示行为通过，实际论文详情缺失记在上层。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1600 · ReadingReferences onView → onToast；src/components/ReadingWorkspace.tsx:42 · showToast 2200ms临时提示"
+  },
+  "SRR-036-020": {
+    "status": "compliant",
+    "reason": "实点[1]至[5]各自查看按钮后均显示已打开参考文献详情的Toast；没有实际详情页。此原子条明确要求打开提示/反馈，按提示行为通过，实际论文详情缺失记在上层。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1600 · ReadingReferences onView → onToast；src/components/ReadingWorkspace.tsx:42 · showToast 2200ms临时提示"
+  },
+  "SRR-036-029": {
+    "status": "compliant",
+    "reason": "5次查看后均只有非模态Toast，role=dialog及原生dialog数量均0、URL保持原页；源码回调也仅onToast，无详情或编辑模态。符合本条仅给出打开提示的明确范围。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1600 · onView仅触发Toast；src/components/ReadingWorkspace.tsx:42 · showToast"
+  },
+  "SRR-036-016": {
+    "status": "compliant",
+    "reason": "该面板只显示参考文献序号、标题、来源/年份、被引数及查看提示，没有混入正文分析、图表或元数据。原子正文限定展示范围，未要求此点完成真实Bibtex解析；真实解析缺失另记上层。",
+    "targetId": "reading-references",
+    "evidence": "src/components/ReadingReader.tsx:1730 · ReadingReferences"
+  },
+  "SRR-037-001": {
+    "status": "compliant",
+    "reason": "点击图表页签后显示图表提取和5张图表列表。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1587 · selectInsightPanel"
+  },
+  "SRR-037-002": {
+    "status": "compliant",
+    "reason": "面板标题实际为图表提取。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1719 · ReadingCharts header"
+  },
+  "SRR-037-003": {
+    "status": "compliant",
+    "reason": "数量标识5 张与实际5条图表一致。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1719 · ReadingCharts count"
+  },
+  "SRR-037-005": {
+    "status": "compliant",
+    "reason": "图1至图5标题分别展示SEM形貌、XPS、循环性能、倍率性能和DFT结果。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1712 · charts data/title"
+  },
+  "SRR-037-006": {
+    "status": "compliant",
+    "reason": "五条页码依次第1/1/3/4/5页，字段可见；本点仅验页码展示。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1712 · charts page"
+  },
+  "SRR-037-007": {
+    "status": "compliant",
+    "reason": "每张图表都有独立导出按钮。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1719 · onExport(title,index)"
+  },
+  "SRR-037-004": {
+    "status": "compliant",
+    "reason": "5条均有可加载缩略图，复用同一模拟图；按缩略展示要求通过。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1719 · charts.map thumbnails"
+  },
+  "SRR-037-008": {
+    "status": "noncompliant",
+    "reason": "实际导出图3生成有效SVG，但文件只有5根固定柱（108/176/132/224/188），界面对应图表为7根柱；exportChart重新拼无关固定数据，不能忠实导出当前图表。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1186 · exportChart"
+  },
+  "SRR-037-009": {
+    "status": "compliant",
+    "reason": "实点图3导出后显示图表已导出；提示通过不代表008的导出内容正确。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1196 · exportChart onToast"
+  },
+  "SRR-037-010": {
+    "status": "compliant",
+    "reason": "点击图表页签后正文滚到2.2表征手段，scrollTop=340，章节顶部y238；该章节包含正文图3，形成页签到图表相关位置的联动。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1214 · selectInsightPanel goToPage(sectionTitle)"
+  },
+  "SRR-037-011": {
+    "status": "compliant",
+    "reason": "正文实际显示7柱不同循环次数下比容量对比图及图3说明。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1493 · 正文chart"
+  },
+  "SRR-037-016": {
+    "status": "compliant",
+    "reason": "复用035实测：点击2.1及3章节均滚动到对应标题，正文保留72px顶部偏移。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:348 · scrollPaperToSection"
+  },
+  "SRR-037-017": {
+    "status": "compliant",
+    "reason": "点击图表页签后正文滚到2.2表征手段，scrollTop=340，章节顶部y238；该章节包含正文图3，形成页签到图表相关位置的联动。",
+    "targetId": "reading-charts",
+    "evidence": "src/components/ReadingReader.tsx:1214 · selectInsightPanel goToPage(sectionTitle)"
+  },
+  "SRR-037-012": {
+    "status": "compliant",
+    "reason": "目录有摘要展开按钮，复用035独立实测并核对本条仅目录展示。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1367 · outline摘要"
+  },
+  "SRR-037-013": {
+    "status": "compliant",
+    "reason": "目录展开后四个正文一级章节可见。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1378 · outlineGroups.map"
+  },
+  "SRR-037-014": {
+    "status": "compliant",
+    "reason": "目录展开后8个二级章节可见。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1381 · outline children"
+  },
+  "SRR-037-015": {
+    "status": "compliant",
+    "reason": "目录底部存在参考文献静态项；本条要求结构中展示，未以静态项冒充点击跳转。",
+    "targetId": "reading-outline",
+    "evidence": "src/components/ReadingReader.tsx:1388 · outline静态参考文献"
+  },
+  "SRR-037-018": {
+    "status": "compliant",
+    "reason": "点击AI解读后展示四类解读卡片及问答输入。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1587 · insightTabs"
+  },
+  "SRR-037-023": {
+    "status": "compliant",
+    "reason": "AI面板底部输入框存在，标签AI问答关联reading-ai-question。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1605 · AI question input"
+  },
+  "SRR-037-024": {
+    "status": "compliant",
+    "reason": "输入框占位文案为向AI提问关于这篇论文...。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1615 · question placeholder"
+  },
+  "SRR-037-025": {
+    "status": "compliant",
+    "reason": "空字符串及全空格没有提交按钮；空格按Enter也不产生问答，trim守卫有效。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:633 · submitAiQuestion空值守卫"
+  },
+  "SRR-037-019": {
+    "status": "compliant",
+    "reason": "AI总结提供功能化碳纳米管抑制穿梭效应和稳定性摘要。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1592 · AI解读卡片"
+  },
+  "SRR-037-020": {
+    "status": "compliant",
+    "reason": "核心贡献展示多位点锚定和186%容量提升说明。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1593 · AI解读卡片"
+  },
+  "SRR-037-021": {
+    "status": "compliant",
+    "reason": "创新点以3条ul/li列出XRD、DFT及1000次长循环。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1594 · AI解读卡片"
+  },
+  "SRR-037-022": {
+    "status": "noncompliant",
+    "reason": "研究局限栏目只有原位XRD追踪充放电过程中多硫化物演化，重复创新点中的研究方法，没有表达局限或不足。栏目标题存在不能代替论文局限内容。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1595 · 研究局限固定内容"
+  },
+  "SRR-037-026": {
+    "status": "compliant",
+    "reason": "填写本文为何改善循环性能后点击提交，问题进入问句区、输入清空并有提交提示。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:633 · submitAiQuestion按钮"
+  },
+  "SRR-037-027": {
+    "status": "compliant",
+    "reason": "填写作者邮箱是什么后按Enter，问句正确替换且显示问题已提交。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1612 · AI input onKeyDown"
+  },
+  "SRR-037-028": {
+    "status": "pending",
+    "reason": "源码明确Enter且!nativeEvent.isComposing才提交；本次浏览器输入工具未形成真实中文组合事件，不能用直接填入中文代替IME验证。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1613 · IME isComposing guard"
+  },
+  "SRR-037-029": {
+    "status": "compliant",
+    "reason": "按钮及回车两次真实提交均显示问题已提交。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:641 · submitAiQuestion onToast"
+  },
+  "SRR-037-030": {
+    "status": "compliant",
+    "reason": "两次不同问句均逐字出现在问句区，后提交覆盖前问句。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:1596 · aiExchange.question"
+  },
+  "SRR-037-031": {
+    "status": "compliant",
+    "reason": "提交后回答区展示机制说明；目前任何问句均返回同一模拟回答。按本条回答展示通过，未认定可回答邮箱等任意问题，真实问答关联另记上层。",
+    "targetId": "reading-ai",
+    "evidence": "src/components/ReadingReader.tsx:636 · aiExchange.answer"
+  },
+  "SRR-037-032": {
+    "status": "compliant",
+    "reason": "元数据页签打开数据提炼面板和9个字段。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1587 · metadata tab"
+  },
+  "SRR-037-033": {
+    "status": "compliant",
+    "reason": "面板标题数据提炼可见。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata header"
+  },
+  "SRR-037-034": {
+    "status": "compliant",
+    "reason": "9 条标识与实际9个dl字段一致。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata count"
+  },
+  "SRR-037-035": {
+    "status": "compliant",
+    "reason": "期刊字段和Advanced Energy Materials值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata 期刊"
+  },
+  "SRR-037-036": {
+    "status": "compliant",
+    "reason": "影响因子字段和27.8（2023）值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata 影响因子"
+  },
+  "SRR-037-037": {
+    "status": "compliant",
+    "reason": "发表年份字段和2024值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata 发表年份"
+  },
+  "SRR-037-038": {
+    "status": "compliant",
+    "reason": "DOI字段和10.1002/aenm.202301847值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata DOI"
+  },
+  "SRR-037-039": {
+    "status": "compliant",
+    "reason": "被引次数字段和47值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata 被引次数"
+  },
+  "SRR-037-040": {
+    "status": "compliant",
+    "reason": "访问类型字段和开放获取（OA）值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata 访问类型"
+  },
+  "SRR-037-041": {
+    "status": "compliant",
+    "reason": "语言字段和英文值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata 语言"
+  },
+  "SRR-037-042": {
+    "status": "compliant",
+    "reason": "页数字段和18页值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata 页数"
+  },
+  "SRR-037-043": {
+    "status": "compliant",
+    "reason": "数据共享字段和GitHub:github.com/liulab值均实际展示；该点按字段展示验收。",
+    "targetId": "reading-metadata",
+    "evidence": "src/components/ReadingReader.tsx:1734 · ReadingMetadata 数据共享"
+  },
+  "SRR-037-044": {
+    "status": "compliant",
+    "reason": "图谱页签进入图谱关联和推荐论文列表。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1587 · graph tab"
+  },
+  "SRR-037-045": {
+    "status": "compliant",
+    "reason": "图谱关联标题可见。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1739 · ReadingGraph header"
+  },
+  "SRR-037-046": {
+    "status": "compliant",
+    "reason": "SVG有CNT、锂硫、锂金属、多硫化物、储能5个独立节点。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1739 · graph nodes"
+  },
+  "SRR-037-047": {
+    "status": "compliant",
+    "reason": "4条中心到外围节点的关联线存在；DOMRect宽80、高38/40，均非零，支持逐线几何框选。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1739 · graph edges"
+  },
+  "SRR-037-048": {
+    "status": "compliant",
+    "reason": "关联论文推荐标题可见。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1739 · related header"
+  },
+  "SRR-037-053": {
+    "status": "compliant",
+    "reason": "3条推荐各有查看按钮，实点MXene条目按钮可响应。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1739 · related onView"
+  },
+  "SRR-037-049": {
+    "status": "noncompliant",
+    "reason": "推荐数量显示4 篇，但实际完整recommendations数组及列表只有3篇，无分页或加载更多；本条未指定固定示例数量，当前数量与推荐条数不符。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1738 · recommendations / count"
+  },
+  "SRR-037-050": {
+    "status": "compliant",
+    "reason": "3条推荐标题按原型短标题显示，分别为MXene、固态电解质、钠离子正极主题。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1738 · recommendations titles"
+  },
+  "SRR-037-051": {
+    "status": "compliant",
+    "reason": "来源年份分别Adv Energy Mater ｜ 2023、Nature Energy ｜ 2024、Energy Environ Sci ｜ 2025。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1738 · recommendations details"
+  },
+  "SRR-037-052": {
+    "status": "compliant",
+    "reason": "每条推荐显示被引用·58标签。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1739 · related citation labels"
+  },
+  "SRR-037-054": {
+    "status": "compliant",
+    "reason": "实点MXene推荐查看显示已打开关联论文详情；原子只要求提示，真实详情缺失单列。",
+    "targetId": "reading-graph",
+    "evidence": "src/components/ReadingReader.tsx:1602 · ReadingGraph onToast"
+  },
+  "SRR-037-055": {
+    "status": "compliant",
+    "reason": "点击AI检索工具后打开AI检索抽屉，具备模式选择、输入和结果区域。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1553 · AI search drawer"
+  },
+  "SRR-037-056": {
+    "status": "compliant",
+    "reason": "模式菜单有全文搜索选项，实点后按钮当前模式更新。按模式选择入口通过；真正检索逻辑未随模式变化，见065/066及上层缺口。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1558 · searchMode options"
+  },
+  "SRR-037-057": {
+    "status": "compliant",
+    "reason": "模式菜单有智能关联选项，实点后按钮当前模式更新。按模式选择入口通过；真正检索逻辑未随模式变化，见065/066及上层缺口。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1558 · searchMode options"
+  },
+  "SRR-037-058": {
+    "status": "compliant",
+    "reason": "模式菜单有AI语义选项，实点后按钮当前模式更新。按模式选择入口通过；真正检索逻辑未随模式变化，见065/066及上层缺口。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1558 · searchMode options"
+  },
+  "SRR-037-059": {
+    "status": "compliant",
+    "reason": "模式菜单有关键词选项，实点后按钮当前模式更新。按模式选择入口通过；真正检索逻辑未随模式变化，见065/066及上层缺口。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1558 · searchMode options"
+  },
+  "SRR-037-060": {
+    "status": "compliant",
+    "reason": "点击当前模式按钮，展开4个模式选项。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1557 · setSearchModeOpen"
+  },
+  "SRR-037-061": {
+    "status": "compliant",
+    "reason": "依次切换智能关联、AI语义、关键词、全文搜索，当前模式按钮更新，菜单每次自动关闭。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1558 · setSearchMode / close menu"
+  },
+  "SRR-037-062": {
+    "status": "compliant",
+    "reason": "抽屉有可编辑检索输入框。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1560 · search input"
+  },
+  "SRR-037-063": {
+    "status": "compliant",
+    "reason": "检索输入框占位为请输入。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1560 · search placeholder"
+  },
+  "SRR-037-064": {
+    "status": "compliant",
+    "reason": "空输入时提交检索disabled=true，源码还对trim空白禁用并拦截提交。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1560 · search empty disabled"
+  },
+  "SRR-037-067": {
+    "status": "compliant",
+    "reason": "全文搜索说明为匹配关键词，另外三种模式显示语义发现说明，标题前缀随当前模式逐次更新。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1562 · searchMode help"
+  },
+  "SRR-037-068": {
+    "status": "compliant",
+    "reason": "独立新页未检索时显示支持全文搜索、智能关联、AI语义、关键词四种模式。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1563 · !searchedQuery empty"
+  },
+  "SRR-037-065": {
+    "status": "noncompliant",
+    "reason": "按钮接收锂硫检索，但返回4条注意力/Transformer固定文本，不含查询词；submitSearch仅保存字符串，未用关键词检索当前正文。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:654 · submitSearch / fixed aiSearchResults"
+  },
+  "SRR-037-066": {
+    "status": "noncompliant",
+    "reason": "Enter提交完全不存在037XYZ后仍返回相同4条注意力结果；回车绑定虽然存在，但没有执行与输入匹配的检索。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1560 · search Enter → submitSearch"
+  },
+  "SRR-037-069": {
+    "status": "compliant",
+    "reason": "提交后显示检索4个结果，与实际4张结果卡数量相等；匹配质量缺陷另见065/066。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1564 · results count"
+  },
+  "SRR-037-070": {
+    "status": "compliant",
+    "reason": "结果序号实际为结果1/4至4/4。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1564 · result ordinal"
+  },
+  "SRR-037-071": {
+    "status": "compliant",
+    "reason": "四条结果显示第1/5/6/8页；本点仅展示页码，不代表定位正确。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1564 · result.page"
+  },
+  "SRR-037-072": {
+    "status": "noncompliant",
+    "reason": "查询锂硫及不存在词时仍只高亮注意力；源码固定split注意力，未高亮用户检索命中词。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1564 · hardcoded highlight"
+  },
+  "SRR-037-073": {
+    "status": "noncompliant",
+    "reason": "结果1和结果3不同中文摘要均展开相同固定译文，且包含ThiosulfateThe…shuttle effect拼接错误，不能正确翻译该条结果。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:81 · searchTranslation fixed literal / setTranslatedResult"
+  },
+  "SRR-037-074": {
+    "status": "compliant",
+    "reason": "点击单条翻译后该卡片展开英译区域；切到结果3时展开归属随之变化。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1564 · translatedResult conditional"
+  },
+  "SRR-037-075": {
+    "status": "compliant",
+    "reason": "点击关闭英译后翻译区数量由1变0，正确关闭。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1564 · setTranslatedResult(null)"
+  },
+  "SRR-037-076": {
+    "status": "compliant",
+    "reason": "点击译文复制后显示英译已复制，将剪贴板粘贴到本人测试输入框，逐字等于显示译文；复制正确不表示译文本身正确。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:1564 · copyText(searchTranslation)"
+  },
+  "SRR-037-077": {
+    "status": "noncompliant",
+    "reason": "结果1是注意力模型文本，定位却高亮1.1锂硫电池背景段落；结果索引固定映射aiSearchTargetSections，与检索文本不关联，不能跳到原文出处。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:613 · locateSearchResult / aiSearchTargetSections"
+  },
+  "SRR-037-078": {
+    "status": "compliant",
+    "reason": "实点定位后显示已定位到原文出处Toast；本条提示行为通过，但077证实所指内容错误。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:621 · locateSearchResult onToast"
+  },
+  "SRR-037-079": {
+    "status": "compliant",
+    "reason": "从page5/24、scrollTop340开始，先定位结果1再定位结果3，点取消定位后回到5/24及340；高亮和返回按钮均清除。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:624 · returnFromLocation"
+  },
+  "SRR-037-080": {
+    "status": "compliant",
+    "reason": "连续两次定位后取消仍回首次定位前5/24、scrollTop340，证明第二次定位未覆盖原位置；源码仅!locationOriginRef.current时记录。",
+    "targetId": "reading-search",
+    "evidence": "src/components/ReadingReader.tsx:616 · locationOriginRef first-write guard"
+  }
+}

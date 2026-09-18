@@ -14,6 +14,7 @@ interface ModalProps {
   cancelText?: string
   confirmDanger?: boolean
   bodyClassName?: string
+  auditTarget?: string
 }
 
 export function Modal({
@@ -30,6 +31,7 @@ export function Modal({
   cancelText = '取消',
   confirmDanger = false,
   bodyClassName = '',
+  auditTarget,
 }: ModalProps) {
   const dialogRef = useRef<HTMLFormElement | null>(null)
   const onCloseRef = useRef(onClose)
@@ -83,6 +85,7 @@ export function Modal({
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <form
         ref={dialogRef}
+        data-compliance-target={auditTarget}
         className={`modal-card${wide ? ' modal-card--wide' : ''}${extraWide ? ' modal-card--extra-wide' : ''}${tall ? ' modal-card--tall' : ''}`}
         role="dialog"
         aria-modal="true"

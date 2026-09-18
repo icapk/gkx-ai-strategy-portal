@@ -1,4 +1,5 @@
 import type { ResearchDocument, ResearchNote } from './types'
+import { minute } from './researchSort.ts'
 
 export type ResearchSearchScope = 'all' | 'documents' | 'notes'
 
@@ -38,9 +39,13 @@ export interface ResearchSearchCounts {
   notes: number
 }
 
-const kindOrder: Record<ResearchSearchResult['type'], number> = {
-  document: 0,
-  note: 1,
+const collator = new Intl.Collator('zh-Hans-CN-u-co-pinyin', {numeric:true,sensitivity:'base'})
+function compareResults(a:ResearchSearchResult,b:ResearchSearchResult) {
+ const time=(r:ResearchSearchResult)=>minute(r.type==='document'?r.document.visitedAt:r.note.updatedAt)
+ const created=(r:ResearchSearchResult)=>minute(r.type==='document'?r.document.createdAt:r.note.createdAt)
+ const title=(r:ResearchSearchResult)=>r.type==='document'?r.document.title:r.note.title
+ const stable=a.type==='document'&&b.type==='document'?a.document.id-b.document.id:a.type==='note'&&b.type==='note'?a.note.id-b.note.id:a.id.localeCompare(b.id)
+ return time(b).localeCompare(time(a))||created(b).localeCompare(created(a))||collator.compare(title(a),title(b))||stable
 }
 
 function normalize(value: string) {
@@ -110,38 +115,13 @@ export function makeResearchSearchSnippet(text: string, terms: string[], maximum
 }
 
 function documentFields(document: ResearchDocument): SearchField[] {
-  const displayLocation = document.location === '我的空间'
-    ? '个人空间'
-    : document.location.startsWith('我的空间/')
-      ? `个人空间${document.location.slice('我的空间'.length)}`
-      : document.location
-  return [
-    { label: '标题', value: document.title, weight: 360 },
-    { label: '描述', value: document.description ?? '', weight: 230 },
-    { label: '正文', value: document.content ?? '', weight: 220 },
-    ...(document.pdfArchive && document.pdfTextContent
-      ? [{ label: 'PDF全文', value: document.pdfTextContent, weight: 220 }]
-      : []),
-    ...(document.keywords ?? []).map((keyword) => ({ label: '关键词', value: keyword, weight: 280 })),
-    { label: '位置', value: document.location, weight: 160 },
-    ...(displayLocation === document.location ? [] : [{ label: '位置', value: displayLocation, weight: 160 }]),
-    { label: '所有者', value: document.owner, weight: 150 },
-    { label: '类型', value: document.kind, weight: 130 },
-    { label: '创建时间', value: document.createdAt, weight: 80 },
-    { label: '最近访问', value: document.visitedAt, weight: 80 },
-    { label: '大小', value: document.size, weight: 60 },
-  ]
+ return [
+  {label:'标题',value:document.title,weight:360},
+  {label:'正文',value:[document.content,document.pdfTextContent,document.blocks?.map(blockSearchText).join(' ')].filter(Boolean).join(' '),weight:220},
+ ]
 }
-
-function noteFields(note: ResearchNote, documentTitle: string): SearchField[] {
-  return [
-    { label: '标题', value: note.title, weight: 340 },
-    { label: '正文', value: note.content, weight: 240 },
-    ...note.tags.map((tag) => ({ label: '标签', value: tag, weight: 290 })),
-    { label: '所属文档', value: documentTitle, weight: 120 },
-    { label: '创建时间', value: note.createdAt, weight: 70 },
-    { label: '更新时间', value: note.updatedAt, weight: 80 },
-  ]
+function noteFields(note:ResearchNote, _documentTitle:string):SearchField[] {
+ return [{label:'标题',value:note.title,weight:360},{label:'正文',value:note.content,weight:220}]
 }
 
 function blockSearchText(block: NonNullable<ResearchDocument['blocks']>[number]) {
@@ -180,7 +160,7 @@ export function listResearchContent(
   }))
   const noteResults: NoteSearchResult[] = notes.flatMap((note, sourceIndex) => {
     const parentDocument = documentsById.get(note.documentId)
-    if (!parentDocument) return []
+    if (!parentDocument?.pdfArchive || !note.pdfAnnotationId || !note.pageNumber) return []
     return [{
       id: `note:${note.id}`,
       type: 'note',
@@ -194,11 +174,7 @@ export function listResearchContent(
     }]
   })
 
-  return [...documentResults, ...noteResults].sort((first, second) => (
-    kindOrder[first.type] - kindOrder[second.type]
-    || first.sourceIndex - second.sourceIndex
-    || first.id.localeCompare(second.id)
-  ))
+  return [...documentResults, ...noteResults].sort(compareResults)
 }
 
 function documentSearchTarget(document: ResearchDocument, terms: string[]) {
@@ -228,9 +204,7 @@ export function searchResearchContent(
   const documentResults: DocumentSearchResult[] = documents.flatMap((document, sourceIndex) => {
     const match = evaluateFields(documentFields(document), query)
     if (!match) return []
-    const snippetSource = document.description && terms.some((term) => normalize(document.description ?? '').includes(term))
-      ? document.description
-      : match.snippet
+    const snippetSource = documentFields(document).find(f=>f.label==='正文')?.value || match.snippet
     const target = documentSearchTarget(document, terms)
     return [{
       id: `document:${document.id}`,
@@ -248,7 +222,7 @@ export function searchResearchContent(
 
   const noteResults: NoteSearchResult[] = notes.flatMap((note, sourceIndex) => {
     const parentDocument = documentsById.get(note.documentId)
-    if (!parentDocument) return []
+    if (!parentDocument?.pdfArchive || !note.pdfAnnotationId || !note.pageNumber) return []
     const documentTitle = parentDocument.title
     const match = evaluateFields(noteFields(note, documentTitle), query)
     if (!match) return []
@@ -267,10 +241,8 @@ export function searchResearchContent(
   })
 
   return [...documentResults, ...noteResults].sort((first, second) => (
-    second.score - first.score
-    || kindOrder[first.type] - kindOrder[second.type]
-    || first.sourceIndex - second.sourceIndex
-    || first.id.localeCompare(second.id)
+    Number(second.matchedFields.includes('标题')) - Number(first.matchedFields.includes('标题'))
+    || compareResults(first, second)
   ))
 }
 

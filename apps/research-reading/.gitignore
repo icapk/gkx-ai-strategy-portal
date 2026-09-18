@@ -1,14 +1,2 @@
 node_modules/
-.pnpm-store/
-dist/
-# 门户直接加载本目录的静态构建，需将覆盖版 dist 纳入项目交付。
-!dist/
-!dist/**
-.DS_Store
-*.local
-*.log
-.env
-.env.*
-!.env.example
-.openai/hosting.json
-*.zip
+.local/

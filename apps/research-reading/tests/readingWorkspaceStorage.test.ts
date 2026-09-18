@@ -79,6 +79,7 @@ test('收藏、文件夹归属和分文献笔记可完整持久化与恢复', ()
       createdAt: '2026-08-27',
       color: '#C6EFC1',
       imageDataUrls: ['data:image/png;base64,aGVsbG8='],
+      tags: ['figure-1'],
     },
   ]
 
@@ -87,6 +88,7 @@ test('收藏、文件夹归属和分文献笔记可完整持久化与恢复', ()
   const loaded = loadReadingWorkspaceState(createDefaultState(), storage)
 
   assert.equal(loaded.recovered, false)
+  assert.deepEqual(loaded.state.notes.find((note) => note.documentId === secondId)?.tags, ['figure-1'])
   assert.equal(loaded.state.documents.find((document) => document.id === secondId)?.favorite, true)
   assert.equal(loaded.state.documents.find((document) => document.id === secondId)?.folder, '固态电池资料')
   assert.equal(loaded.state.notes.filter((note) => note.documentId === firstId).length, 4)
@@ -99,11 +101,12 @@ test('笔记图片只保留可持久化的安全 data URL，不保留 blob 临�
   state.notes[0].imageDataUrls = [
     'blob:https://example.test/temporary',
     'javascript:alert(1)',
+    '/antenna/figure-1.png',
     'data:image/jpeg;base64,aGVsbG8=',
   ]
 
   const sanitized = sanitizeReadingWorkspaceState(state)
-  assert.deepEqual(sanitized.notes[0].imageDataUrls, ['data:image/jpeg;base64,aGVsbG8='])
+  assert.deepEqual(sanitized.notes[0].imageDataUrls, ['/antenna/figure-1.png', 'data:image/jpeg;base64,aGVsbG8='])
 })
 
 test('显式删除全部文献后不会被示例数据重新覆盖', () => {

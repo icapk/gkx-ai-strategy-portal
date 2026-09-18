@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 
-export type CandidateRole = '查看员' | '编辑者' | '管理员'
+export type CandidateRole = '可查看' | '可编辑' | '管理员'
 
 export interface MemberCandidate {
   id: string
@@ -21,7 +21,7 @@ interface MemberPickerProps {
   onRoleChange: (id: string, role: CandidateRole) => void
 }
 
-const roleOptions: CandidateRole[] = ['管理员', '编辑者', '查看员']
+const roleOptions: CandidateRole[] = ['管理员', '可编辑', '可查看']
 const roleMenuHeight = 104
 
 export function MemberPicker({
@@ -60,7 +60,7 @@ export function MemberPicker({
 
   useEffect(() => {
     if (openRoleId == null) return
-    const currentRole = roles[openRoleId] ?? '查看员'
+    const currentRole = roles[openRoleId] ?? '可查看'
     const currentOption = roleMenuRef.current?.querySelector<HTMLButtonElement>(`button[data-role="${currentRole}"]`)
     currentOption?.focus()
   }, [openRoleId, roles])
@@ -145,7 +145,7 @@ export function MemberPicker({
         <h3>已选：<b>{selectedCandidates.length}</b> 人</h3>
         <div className="selected-member-list" role="list">
           {selectedCandidates.map((candidate) => {
-            const role = roles[candidate.id] ?? '查看员'
+            const role = roles[candidate.id] ?? '可查看'
             return (
               <article key={candidate.id} role="listitem">
                 <span className="member-avatar" style={{ background: candidate.color }}>{candidate.name[0]}</span>

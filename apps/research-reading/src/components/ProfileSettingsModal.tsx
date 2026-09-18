@@ -284,6 +284,7 @@ export function ProfileSettingsModal({ profile, onClose, onSave }: ProfileSettin
   if (confirmClose) {
     return (
       <Modal
+        auditTarget="research-profile"
         title="放弃修改？"
         onClose={() => setConfirmClose(false)}
         onSubmit={discardChanges}
@@ -304,6 +305,7 @@ export function ProfileSettingsModal({ profile, onClose, onSave }: ProfileSettin
 
   return (
     <Modal
+      auditTarget="research-profile"
       title="个人信息设置"
       onClose={requestClose}
       onSubmit={submitProfile}

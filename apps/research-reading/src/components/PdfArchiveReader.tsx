@@ -407,7 +407,7 @@ export function PdfArchiveReader({
         if (locatedAnnotation) {
           setPage(locatedAnnotation.pageNumber)
           setMobileNotesOpen(true)
-        }
+        } else if(initialAnnotationId) setAnnotationError('该笔记已删除或不可用，无法定位。')
       } else setAnnotationError(annotationResult.error)
 
       if (!fileResult.ok) {
@@ -636,6 +636,12 @@ export function PdfArchiveReader({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [crop, deleteTarget, discardPromptOpen, isSaving, mobileNotesOpen, onClose, passwordPrompt, runAfterDraftExit])
+
+  useEffect(()=>{
+    if(!initialAnnotationId||isLoading)return
+    const frame=requestAnimationFrame(()=>document.querySelector('.pdf-archive-reader__note-list .is-located')?.scrollIntoView({block:'nearest'}))
+    return()=>cancelAnimationFrame(frame)
+  },[initialAnnotationId,annotations,isLoading])
 
   const sortedAnnotations = useMemo(() => [...annotations].sort((left, right) => {
     const timeDifference = Date.parse(right.updatedAt) - Date.parse(left.updatedAt)
@@ -1023,7 +1029,7 @@ export function PdfArchiveReader({
             <img src="/assets/reading/download.svg" alt="" />
             <span>{busyAction === 'download' ? '下载中' : '下载原文'}</span>
           </button>
-          <button className="is-primary" type="button" title={!annotations.length ? '完成划词或截图笔记后可导出' : undefined} disabled={busyAction != null || isSaving || !annotations.length || draftDirty} onClick={() => void runDocumentAction('export')}>
+          <button data-focus-id="research-pdf-export" className="is-primary" type="button" title={!annotations.length ? '完成划词或截图笔记后可导出' : undefined} disabled={busyAction != null || isSaving || !annotations.length || draftDirty} onClick={() => void runDocumentAction('export')}>
             <span>{busyAction === 'export' ? '生成中' : '导出笔记 PDF'}</span>
             <i className="pdf-archive-reader__export-icon" aria-hidden="true" />
           </button>
@@ -1038,7 +1044,7 @@ export function PdfArchiveReader({
           <img src="/assets/reading/note-tool.svg" alt="" />
           <span>划词</span>
         </button>
-        <button className={tool === 'screenshot' ? 'is-active' : ''} type="button" aria-pressed={tool === 'screenshot'} disabled={isSaving} onClick={() => changeTool('screenshot')}>
+        <button data-focus-id="research-pdf-screenshot" className={tool === 'screenshot' ? 'is-active' : ''} type="button" aria-pressed={tool === 'screenshot'} disabled={isSaving} onClick={() => changeTool('screenshot')}>
           <img src="/assets/reading/camera-tool.svg" alt="" />
           <span>截图</span>
         </button>
@@ -1137,6 +1143,7 @@ export function PdfArchiveReader({
               <div><span className={`is-${draft.kind}`}>{draft.kind === 'highlight' ? '划词' : '截图'}</span><strong>{draftBaseline ? '编辑笔记' : '新建笔记'}</strong></div>
               <small>原文第 {draft.pageNumber} 页</small>
             </header>
+            {draft.kind === 'highlight' && <a href={`https://translate.google.com/?sl=auto&tl=zh-CN&text=${encodeURIComponent(draft.quote)}&op=translate`} target="_blank" rel="noopener noreferrer" title="将在 Google 翻译中打开所选文字">翻译所选文字 ↗</a>}
             {draft.kind === 'highlight' ? <blockquote>{draft.quote}</blockquote> : draft.imageDataUrl ? <img className="pdf-archive-reader__editor-image" src={draft.imageDataUrl} alt={`第 ${draft.pageNumber} 页截图`} /> : null}
             <label htmlFor="pdf-archive-note-draft">笔记内容</label>
             <textarea

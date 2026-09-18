@@ -1,5 +1,7 @@
+import { SpreadsheetGrid } from './SpreadsheetGrid'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { exportResearchDataTableCsv, parseDelimitedData } from '../dataTableContent'
+import { usePrototypeFocus } from '../prototypeFocus/FocusContext'
 import type {
   DataTableColumn,
   DataTableColumnType,
@@ -184,6 +186,13 @@ export function DataTableWorkspace({
     ? table.attachments.find((attachment) => attachment.id === previewAttachmentId)
     : undefined
   const nestedModalOpen = recordEditorOpen || importOpen || shareOpen || Boolean(fieldDraft) || filesOpen || Boolean(previewAttachment)
+  const {request: focusRequest, ready: focusReady, reject: focusReject} = usePrototypeFocus()
+  useEffect(() => {
+    if (focusRequest?.module !== 'research' || focusRequest.target?.surface !== 'table') return
+    if (nestedModalOpen || formDirty) { focusReject(focusRequest.sequence, `${focusRequest.id}：请先处理当前表格中的表单或弹窗，定位已停止。`); return }
+    setViewMode(focusRequest.id === 'R9.9' ? 'form' : 'table')
+    focusReady(focusRequest.sequence)
+  }, [focusRequest, focusReady, focusReject])
 
   useEffect(() => {
     const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -209,7 +218,7 @@ export function DataTableWorkspace({
       for (const column of candidate.columns) {
         const value = row.values[column.id]?.trim() ?? ''
         if (column.required && !value) return `“${column.name}”为必填字段，请补齐后保存。`
-        if (column.type === 'number' && value && !Number.isFinite(Number(value))) return `“${column.name}”中存在无效数字。`
+        if (column.type === 'number' && value && !value.startsWith('=') && !Number.isFinite(Number(value))) return `“${column.name}”中存在无效数字。`
         if (column.type === 'select' && value && !column.options?.includes(value)) return `“${column.name}”中存在不属于选项的值。`
         if (column.type === 'date' && value && !isValidIsoDate(value)) return `“${column.name}”中存在无效日期。`
         if (column.type === 'percent' && value && (Number(value) < 0 || Number(value) > 100 || !Number.isFinite(Number(value)))) {
@@ -405,7 +414,7 @@ export function DataTableWorkspace({
     table.columns.forEach((column) => {
       const value = formValues[column.id]?.trim() ?? ''
       if (column.required && !value) errors[column.id] = `请输入${column.name}`
-      if (column.type === 'number' && value && !Number.isFinite(Number(value))) errors[column.id] = '请输入有效数字'
+      if (column.type === 'number' && value && !value.startsWith('=') && !Number.isFinite(Number(value))) errors[column.id] = '请输入有效数字'
       if (column.type === 'percent' && value && (Number(value) < 0 || Number(value) > 100 || !Number.isFinite(Number(value)))) {
         errors[column.id] = '请输入 0 至 100 之间的数字'
       }
@@ -734,7 +743,7 @@ export function DataTableWorkspace({
   }
 
   const exportCsv = () => {
-    downloadText(exportResearchDataTableCsv(table), `${title.replace(/[\\/:*?"<>|]/g, '-') || '科研数据表格'}.csv`)
+    downloadText(exportResearchDataTableCsv(table), `${title.replace(/[\\/:*?"<>|]/g, '-') || '在线表格格'}.csv`)
     onToast('CSV 已导出，可用于分享或备份')
   }
 
@@ -823,10 +832,8 @@ export function DataTableWorkspace({
           <button id="data-sheet-tab-form" type="button" role="tab" aria-controls="data-sheet-panel-form" aria-selected={viewMode === 'form'} tabIndex={viewMode === 'form' ? 0 : -1} className={viewMode === 'form' ? 'is-active' : ''} onKeyDown={(event) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); setViewMode('table'); event.currentTarget.previousElementSibling instanceof HTMLElement && event.currentTarget.previousElementSibling.focus() } }} onClick={() => setViewMode('form')}><img className="data-sheet-tab-icon" src="/assets/iconpark/form-one.svg" alt="" />表单视图</button>
         </div>
         <div className="data-sheet-toolbar-actions">
-          <button className="button button--secondary" type="button" onClick={openImportDialog}><img className="iconpark-control-icon" src="/assets/iconpark/upload-logs.svg" alt="" />导入数据</button>
+          <button data-focus-id="research-table-import" className="button button--secondary" type="button" onClick={openImportDialog}><img className="iconpark-control-icon" src="/assets/iconpark/upload-logs.svg" alt="" />导入数据</button>
           <button className="button button--secondary" type="button" onClick={exportCsv}><img className="iconpark-control-icon" src="/assets/iconpark/download.svg" alt="" />导出 CSV</button>
-          <button className="button button--secondary data-sheet-toolbar-share" type="button" onClick={openShareDialog}><img className="iconpark-control-icon" src="/assets/iconpark/share.svg" alt="" />分享</button>
-          <button className="button button--primary" type="button" onClick={openNewRecord}><span className="icon-plus" aria-hidden="true" />新增记录</button>
         </div>
       </div>
 
@@ -838,62 +845,15 @@ export function DataTableWorkspace({
       )}
 
       <div className="data-sheet-body" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
-        <div className="data-sheet-local-notice"><span aria-hidden="true">i</span><p><strong>本地可编辑预览</strong> 数据保存在当前浏览器；团队权限为交互演示，不会向真实成员发送通知。</p></div>
-        <section className="data-sheet-summary" aria-label="表格概览">
-          <article><span>全部记录</span><strong>{table.rows.length}</strong><small>支持随时编辑与检索</small></article>
-          <article><span>{isProjectProgress ? '已完成' : '完整记录'}</span><strong>{isProjectProgress ? completedCount : completeDataRows}</strong><small>{isProjectProgress ? '当前项目完成项' : '必填信息均已补齐'}</small></article>
-          <article><span>{isProjectProgress ? '平均进度' : '数据完整度'}</span><strong>{isProjectProgress ? averageProgress : dataCompleteness}%</strong><small><i><b style={{ width: `${isProjectProgress ? averageProgress : dataCompleteness}%` }} /></i></small></article>
-          <button type="button" onClick={() => setFilesOpen(true)}><span>数据文件</span><strong>{table.attachments.length}</strong><small>查看导入记录 <b aria-hidden="true">›</b></small></button>
-        </section>
-
         {viewMode === 'table' ? (
           <section id="data-sheet-panel-table" className="data-sheet-panel" role="tabpanel" aria-labelledby="data-sheet-tab-table">
-            <div className="data-sheet-filters">
-              {selectedRows.length ? (
-                <div className="data-sheet-selection"><strong>已选 {selectedRows.length} 条</strong><button type="button" onClick={() => deleteRows(selectedRows)}>删除所选</button><button type="button" onClick={() => setSelectedRows([])}>取消选择</button></div>
-              ) : <>
-                <label className="data-sheet-search"><img src="/assets/reading/search.svg" alt="" /><input aria-label="搜索表格记录" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索记录、负责人或阶段" /><span>{filteredRows.length} 条结果</span></label>
-                {statusOptions.length > 0 && <select aria-label="筛选状态" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option>全部状态</option>{statusOptions.map((option) => <option key={option}>{option}</option>)}</select>}
-                <button className="data-sheet-field-add" type="button" onClick={openAddField}><span className="icon-plus" aria-hidden="true" />添加字段</button>
-              </>}
-            </div>
-            {table.rows.length === 0 ? (
-              <div className="data-sheet-empty">
-                <img src="/assets/document-sheet.svg" alt="" /><strong>从第一条科研数据开始</strong><p>可以手动新增记录，也可以批量导入 CSV / TSV 文件。</p>
-                <div><button className="button button--primary" type="button" onClick={openNewRecord}>新增记录</button><button className="button button--secondary" type="button" onClick={openImportDialog}>导入数据</button></div>
-              </div>
-            ) : filteredRows.length === 0 ? (
-              <div className="data-sheet-empty" role="status">
-                <img src="/assets/document-sheet.svg" alt="" /><strong>没有符合条件的记录</strong><p>调整搜索条件，或清除当前筛选后再试。</p>
-                <div><button className="button button--secondary" type="button" onClick={() => { setQuery(''); setStatusFilter('全部状态') }}>清除筛选</button></div>
-              </div>
-            ) : (
-              <div className="data-sheet-grid-scroll">
-                <table className="data-sheet-grid">
-                  <thead><tr>
-                    <th className="data-sheet-check-column"><input type="checkbox" aria-label="选择当前页全部记录" checked={pagedRows.length > 0 && pagedRows.every((row) => selectedRows.includes(row.id))} onChange={(event) => setSelectedRows((current) => event.target.checked ? Array.from(new Set([...current, ...pagedRows.map((row) => row.id)])) : current.filter((id) => !pagedRows.some((row) => row.id === id)))} /></th>
-                    <th className="data-sheet-row-number"><img className="data-sheet-row-number-icon" src="/assets/iconpark/list-numbers.svg" alt="" aria-hidden="true" /><span className="sr-only">序号</span></th>
-                    {table.columns.map((column) => <th key={column.id}>
-                      <div><button type="button" className="data-sheet-sort" aria-label={`按${column.name}排序`} onClick={() => cycleSort(column.id)}>{column.name}{column.required && <em>*</em>}<span className={sort?.columnId === column.id ? `is-${sort.direction}` : ''} aria-hidden="true" /></button><button type="button" className="data-sheet-column-menu" aria-label={`设置字段${column.name}`} onClick={() => openEditField(column)}><img src="/assets/iconpark/more.svg" alt="" /></button></div>
-                    </th>)}
-                    <th className="data-sheet-row-actions">记录操作</th>
-                  </tr></thead>
-                  <tbody>{pagedRows.map((row, index) => <tr key={row.id} className={selectedRows.includes(row.id) ? 'is-selected' : ''}>
-                    <td className="data-sheet-check-column"><input type="checkbox" aria-label={`选择${row.values[table.columns[0]?.id] || '未命名记录'}`} checked={selectedRows.includes(row.id)} onChange={(event) => setSelectedRows((current) => event.target.checked ? [...current, row.id] : current.filter((id) => id !== row.id))} /></td>
-                    <td className="data-sheet-row-number">{(currentPage - 1) * pageSize + index + 1}</td>
-                    {table.columns.map((column) => <td key={column.id} className={column.type === 'select' ? `data-sheet-select-cell ${statusClass(row.values[column.id] ?? '')}` : ''}>{renderCellEditor(row, column)}</td>)}
-                    <td className="data-sheet-row-actions"><button type="button" onClick={() => openRecord(row)}>编辑记录</button><button type="button" className="is-danger" onClick={() => deleteRows([row.id])}>删除</button></td>
-                  </tr>)}</tbody>
-                </table>
-              </div>
-            )}
-            {filteredRows.length > 0 && <footer className="data-sheet-pagination"><span>共 {filteredRows.length} 条</span><label>每页 <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}><option value="20">20</option><option value="50">50</option><option value="100">100</option></select> 条</label><div><button type="button" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)} aria-label="上一页">‹</button><strong>{currentPage} / {pageCount}</strong><button type="button" disabled={currentPage >= pageCount} onClick={() => setPage(currentPage + 1)} aria-label="下一页">›</button></div></footer>}
+            <SpreadsheetGrid table={table} onChange={next => markChanged(() => next)} />
           </section>
         ) : (
           <section id="data-sheet-panel-form" className="data-sheet-form-view" role="tabpanel" aria-labelledby="data-sheet-tab-form">
             {table.rows.length === 0 ? (
               <div className="data-sheet-empty data-sheet-form-empty">
-                <img src="/assets/document-sheet.svg" alt="" /><strong>从第一条科研数据开始</strong><p>新增或导入记录后，可在表单视图中逐条查看全部字段。</p>
+                <img src="/assets/document-sheet.svg" alt="" /><strong>暂无记录</strong><p>新增或导入记录后，可在表单视图中逐条查看全部字段。</p>
                 <div><button className="button button--primary" type="button" onClick={openNewRecord}>新增记录</button><button className="button button--secondary" type="button" onClick={openImportDialog}>导入数据</button></div>
               </div>
             ) : <>
@@ -904,7 +864,7 @@ export function DataTableWorkspace({
                 </header>
                 <label>
                   <img src="/assets/reading/search.svg" alt="" />
-                  <input aria-label="搜索表单视图记录" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索记录、负责人或阶段" />
+                  <input aria-label="搜索表单视图记录" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索记录" />
                 </label>
                 <div role="listbox" aria-label="记录列表">
                   {filteredRows.map((row, index) => {

@@ -225,10 +225,10 @@ export const initialComments: CommentItem[] = [
 
 export const initialMembers: MemberItem[] = [
   { id: 1, name: '张研究员', role: '管理员', initials: '张', color: '#5b8ff9', status: '在线', joinedAt: '2025-12-05' },
-  { id: 2, name: '李助理', role: '编辑者', initials: '李', color: '#7c3aed', status: '在线', joinedAt: '2025-12-05' },
-  { id: 3, name: '陈博士', role: '编辑者', initials: '陈', color: '#0891b2', status: '离线', joinedAt: '2025-12-02' },
-  { id: 4, name: '王分析师', role: '查看员', initials: '王', color: '#f97316', status: '在线', joinedAt: '2025-12-01' },
-  { id: 5, name: '刘研究员', role: '查看员', initials: '刘', color: '#14b8a6', status: '离线', joinedAt: '2025-12-01' },
+  { id: 2, name: '李助理', role: '可编辑', initials: '李', color: '#7c3aed', status: '在线', joinedAt: '2025-12-05' },
+  { id: 3, name: '陈博士', role: '可编辑', initials: '陈', color: '#0891b2', status: '离线', joinedAt: '2025-12-02' },
+  { id: 4, name: '王分析师', role: '可查看', initials: '王', color: '#f97316', status: '在线', joinedAt: '2025-12-01' },
+  { id: 5, name: '刘研究员', role: '可查看', initials: '刘', color: '#14b8a6', status: '离线', joinedAt: '2025-12-01' },
 ]
 
 export const teamNames = ['AI研究团队', '产品研发部', '数据分析组', '技术架构组', '实验室管理']

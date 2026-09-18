@@ -12,7 +12,7 @@ import type {
 const STORAGE_KEY = 'intelligent-research-portal:documents:v1'
 const STORAGE_VERSION = 1
 const MAX_STORAGE_CHARACTERS = 4_200_000
-const documentKinds = new Set(['在线文档', '数据表格', 'PDF文档', 'Word文档', 'Excel文档'])
+const documentKinds = new Set(['在线文档', '数据表格', 'PDF文档', 'Word文档', 'Excel文档', '附件'])
 let blockCounter = 0
 
 type DocumentBlockType = DocumentBlock['type']
@@ -152,6 +152,7 @@ const sanitizeDocument = (value: unknown): ResearchDocument | null => {
     favoritedAt: cleanString(item.favoritedAt, 40) || undefined,
     recentHiddenAt: cleanString(item.recentHiddenAt, 40) || undefined,
     deletedAt: cleanString(item.deletedAt, 40) || undefined,
+    originalFileName: cleanString(item.originalFileName, 255) || undefined,
     size: cleanString(item.size, 30) || '0 KB',
     kind: item.kind as ResearchDocument['kind'],
     favorite: Boolean(item.favorite),
@@ -165,6 +166,7 @@ const sanitizeDocument = (value: unknown): ResearchDocument | null => {
       ? item.keywords.slice(0, 20).map((keyword) => cleanString(keyword, 60)).filter(Boolean)
       : [],
     content: cleanString(item.content, 120_000),
+    richHtml: cleanString(item.richHtml, 3_000_000),
     blocks: sanitizeBlocks(item.blocks),
     pdfTextContent: cleanString(item.pdfTextContent, 100_000),
     pdfArchive,

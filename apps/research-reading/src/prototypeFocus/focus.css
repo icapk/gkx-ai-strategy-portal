@@ -1,0 +1,10 @@
+.prototype-focus-layer{position:fixed;inset:0;pointer-events:none;z-index:500;letter-spacing:0}
+.prototype-focus-frame{position:fixed;box-sizing:border-box;border:2px solid #dc3746;border-radius:3px;background:#dc37460c;pointer-events:none}
+.prototype-focus-frame[data-context]{border-style:dashed;border-color:#b17a16;background:#b17a160b}
+.prototype-focus-feedback{position:fixed;left:max(12px,calc(var(--prototype-review-edge,0px) + 12px));right:16px;bottom:16px;display:flex;gap:12px;align-items:center;padding:10px 12px;background:#fff;color:#30353b;border:1px solid #bfc9d3;border-radius:6px;box-shadow:0 3px 14px #0002;font-size:12px;line-height:1.6;pointer-events:auto;max-width:760px;overflow-wrap:anywhere}
+.prototype-focus-feedback button{margin-left:auto;flex:0 0 24px;width:24px;height:24px;font-size:20px;cursor:pointer}
+.research-review{z-index:190}
+.app-stage--research-review .continuous-editor,.app-stage--research-review>.data-sheet-workspace,.app-stage--research-review>.pdf-archive-reader{left:calc(var(--prototype-review-edge,0px) + 12px)!important;width:auto!important}
+.research-review .review-point-meta .review-point-details{margin-left:auto;display:inline-flex;gap:4px;align-items:center;font-size:11px;color:#506071}
+.research-review .review-point-details img{width:14px;height:14px}
+@media(max-width:1279px){.prototype-focus-feedback{left:56px;right:8px;bottom:8px}.research-review{z-index:190}}

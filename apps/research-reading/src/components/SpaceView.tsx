@@ -5,6 +5,9 @@ import type { FolderItem, ResearchDocument } from '../types'
 import { DocumentTable } from './DocumentTable'
 
 interface SpaceViewProps {
+  onManageSpace?: () => void
+  quickAccess: string[]
+  onToggleQuickAccess: (key: string) => void
   mode: 'personal' | 'team'
   teamName?: string
   folders: FolderItem[]
@@ -18,6 +21,7 @@ interface SpaceViewProps {
   onBack: () => void
   onNewFolder: () => void
   onNewDocument: () => void
+  onNewTable: () => void
   onImportDocument: () => void
   onToggleFavorite: (id: number) => void
   onDelete: (id: number) => void
@@ -61,6 +65,7 @@ const folderUpdatedAt = (folder: FolderItem, documents: ResearchDocument[]) => d
 )
 
 export function SpaceView({
+  quickAccess, onToggleQuickAccess, onManageSpace,
   mode,
   teamName,
   folders,
@@ -73,7 +78,7 @@ export function SpaceView({
   onDeleteFolder,
   onBack,
   onNewFolder,
-  onNewDocument,
+  onNewDocument, onNewTable,
   onImportDocument,
   onToggleFavorite,
   onDelete,
@@ -108,7 +113,7 @@ export function SpaceView({
   useEffect(() => {
     if (menuFolderId === null) return
     const trigger = menuTriggerRefs.current.get(menuFolderId)
-    const focusTimer = window.setTimeout(() => menuRef.current?.querySelector<HTMLButtonElement>('button')?.focus(), 0)
+    const focusTimer = window.setTimeout(() => menuRef.current?.querySelector<HTMLButtonElement>('button')?.focus({preventScroll:true}), 0)
     const closeFromOutside = (event: PointerEvent) => {
       const target = event.target as Node
       if (menuRef.current?.contains(target) || trigger?.contains(target)) return
@@ -119,7 +124,11 @@ export function SpaceView({
       event.preventDefault()
       closeFolderMenu(true)
     }
-    const closeFromViewportChange = () => closeFolderMenu()
+    const closeFromViewportChange = () => {
+      const rect=trigger?.getBoundingClientRect()
+      if(!rect||rect.bottom<0||rect.top>window.innerHeight){closeFolderMenu();return}
+      setMenuPosition({left:Math.max(8,Math.min(rect.left,window.innerWidth-188)),top:Math.max(8,Math.min(rect.bottom+10,window.innerHeight-188))})
+    }
     document.addEventListener('pointerdown', closeFromOutside, true)
     document.addEventListener('keydown', closeFromKeyboard)
     window.addEventListener('resize', closeFromViewportChange)
@@ -157,8 +166,8 @@ export function SpaceView({
       return
     }
     const rect = trigger.getBoundingClientRect()
-    const menuWidth = 94
-    const menuHeight = 140
+    const menuWidth = 180
+    const menuHeight = 180
     const viewportGap = 8
     const anchorGap = 10
     const left = Math.min(
@@ -199,121 +208,34 @@ export function SpaceView({
   }
 
   return (
-    <section className={`view view--space${mode === 'team' ? ' view--team' : ''}${emptyTeam ? ' view--empty-team' : ''}`}>
-      <header className="view-header view-header--actions">
-        <h1>
-          <span className="title-accent" />
-          {mode === 'team' ? (
-            <span className="breadcrumb"><span>团队空间</span><span>/</span><strong>{label}</strong></span>
-          ) : label}
-        </h1>
+    <section data-compliance-target={`research-${mode}`} className={`view view--space${mode === 'team' ? ' view--team' : ''}${emptyTeam ? ' view--empty-team' : ''}`}>
+      <header className="view-header view-header--actions space-toolbar">
         <div className="header-actions">
-          <button className="button button--secondary" type="button" onClick={onImportDocument}>导入文档</button>
-          <button className="button button--secondary" type="button" onClick={onNewDocument}>新建内容</button>
-          <button className="button button--primary" type="button" onClick={onNewFolder}><span className="button-plus icon-plus" aria-hidden="true" />新建文件夹</button>
+          <details className="create-dropdown"><summary className="button button--primary">新建 ▾</summary><div className="create-dropdown-menu">
+            <button type="button" onClick={(event) => { event.currentTarget.closest('details')?.removeAttribute('open'); onNewFolder() }}>新建在线文件夹</button>
+            <button type="button" onClick={(event) => { event.currentTarget.closest('details')?.removeAttribute('open'); onNewDocument() }}>新建在线文档</button>
+            <button type="button" onClick={(event) => { event.currentTarget.closest('details')?.removeAttribute('open'); onNewTable() }}>新建在线表格</button>
+          </div></details>
+          <button className="button button--secondary" type="button" onClick={onImportDocument}>上传</button>
+          {mode === 'team' && onManageSpace && <button className="button button--secondary" type="button" onClick={onManageSpace}>空间管理 <span className="space-admin-info" title="此功能仅对管理员开放，其他成员不可见。" aria-label="此功能仅对管理员开放，其他成员不可见。">ⓘ</span></button>}
         </div>
+        {mode === 'personal' && <div className="space-inline-note" role="note">🔒 个人空间仅你可见；除非主动分享，文件与文件夹不会进入团队空间。</div>}
       </header>
       <div className={`view-body space-body${openFolderName ? ' space-body--folder' : ''}${emptyTeam ? ' space-body--empty' : ''}`}>
-        {mode === 'personal' && !emptyTeam && <div className="personal-space-note" role="note">
-          <span aria-hidden="true">🔒</span>
-          <span><strong>个人空间仅你可见</strong><small>除非主动分享，文件与文件夹不会进入团队空间。</small></span>
-        </div>}
-        {emptyTeam ? (
-          <div className="empty-team-view">
-            <div className="empty-team-actions">
-              <button type="button" onClick={onImportDocument}><span className="empty-action-icon"><img src="/assets/action-pdf.svg" alt="" /></span><span><strong>导入</strong><small>导入PDF文档</small></span></button>
-              <button type="button" onClick={onNewDocument}><span className="empty-action-icon"><img src="/assets/action-word.svg" alt="" /></span><span><strong>新建</strong><small>新建文档或表格</small></span></button>
-              <button type="button" onClick={onNewFolder}><span className="empty-action-icon"><img src="/assets/action-folder.svg" alt="" /></span><span><strong>添加</strong><small>添加文件夹</small></span></button>
-              <button type="button"><span className="empty-action-icon"><img src="/assets/action-manage.svg" alt="" /></span><span><strong>管理</strong><small>管理团队空间</small></span></button>
-            </div>
-            <div className="empty-state">
-              <img src="/assets/empty-team.svg" alt="" />
-              <p>这里暂无数据，点击上面按钮增添内容</p>
-            </div>
-          </div>
-        ) : !openFolderName ? (
-          <section className="folder-section" aria-labelledby="folder-title">
-            <h2 id="folder-title">文件夹</h2>
-            <div className="folder-grid">
-              {folders.map((folder) => (
-                <article className={`folder-card${menuFolderId === folder.id ? ' is-selected' : ''}`} key={folder.id}>
-                  {renamingFolderId === folder.id ? (
-                    <form className="folder-open folder-rename-form" onSubmit={(event) => { event.preventDefault(); finishRename(folder) }}>
-                      <img src={folder.id % 2 === 0 ? '/assets/folder-data.svg' : '/assets/folder-research.svg'} alt="" />
-                      <input
-                        ref={renameInputRef}
-                        className="folder-rename-input"
-                        autoFocus
-                        maxLength={50}
-                        value={renameValue}
-                        aria-label="文件夹新名称"
-                        aria-invalid={Boolean(renameError)}
-                        aria-describedby={renameError ? `folder-rename-error-${folder.id}` : undefined}
-                        onClick={(event) => event.stopPropagation()}
-                        onChange={(event) => { setRenameValue(event.target.value); if (renameError) setRenameError('') }}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Escape') {
-                            event.preventDefault()
-                            cancelRename(folder.id)
-                          }
-                        }}
-                      />
-                      <span className="folder-rename-actions">
-                        <button type="submit">保存</button>
-                        <button type="button" onClick={() => cancelRename(folder.id)}>取消</button>
-                      </span>
-                      {renameError && <span className="sr-only" id={`folder-rename-error-${folder.id}`} role="alert">{renameError}</span>}
-                    </form>
-                  ) : (
-                    <button className="folder-open" type="button" onClick={() => onOpenFolder(folder)}>
-                      <img src={folder.id % 2 === 0 ? '/assets/folder-data.svg' : '/assets/folder-research.svg'} alt="" />
-                      <span className="folder-copy">
-                        <strong>{folder.name}</strong>
-                        <small>{documents.filter((documentItem) => documentItem.location === `${locationRoot}/${folder.name}`).length} 个项目&nbsp; 更新于 {folderUpdatedAt(folder, documents.filter((documentItem) => documentItem.location === `${locationRoot}/${folder.name}`))}</small>
-                        <span>{folder.owner ?? '当前用户'} · {aggregateSize(documents.filter((documentItem) => documentItem.location === `${locationRoot}/${folder.name}`))} · 创建于 {folder.createdAt ?? folder.updatedAt}</span>
-                      </span>
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="folder-more"
-                    ref={(node) => {
-                      if (node) menuTriggerRefs.current.set(folder.id, node)
-                      else menuTriggerRefs.current.delete(folder.id)
-                    }}
-                    aria-label={`${folder.name}更多操作`}
-                    aria-haspopup="menu"
-                    aria-expanded={menuFolderId === folder.id}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      toggleFolderMenu(folder.id, event.currentTarget)
-                    }}
-                  ><span className="more-dots" aria-hidden="true"><i /><i /><i /></span></button>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : (
-          <nav className="folder-breadcrumb" aria-label="文件夹路径">
-            <button type="button" onClick={onBack}>文件夹</button><span>/</span><strong aria-current="page">{openFolderName}</strong>
-          </nav>
-        )}
-        {!emptyTeam && <section className="documents-section" aria-labelledby="documents-title">
-          {!openFolderName && <h2 id="documents-title">文档</h2>}
-          <DocumentTable
-            documents={visibleDocuments}
-            mode="space"
-            page={page}
-            onPageChange={onPageChange}
-            onToggleFavorite={onToggleFavorite}
-            onDelete={onDelete}
-            onShare={onShare}
-            onRename={onRenameDocument}
-            onCreateNote={onCreateNote}
-            onOpenDocument={onOpenDocument}
-            onDownloadDocument={onDownloadDocument}
-          />
-        </section>}
+        {openFolderName && <nav className="folder-breadcrumb" aria-label="文件夹路径"><button type="button" onClick={onBack}>{label}</button><span>/</span><strong>{openFolderName}</strong></nav>}
+        <DocumentTable
+          folderEntries={folders.filter((folder) => (folder.location ?? locationRoot) === `${locationRoot}${openFolderName ? '/' + openFolderName : ''}`).map((folder) => ({
+            key: `folder:${mode}:${folder.id}`,
+            item: { id: -folder.id, title: folder.name, location: folder.location ?? locationRoot, owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? folder.updatedAt, updatedAt: folderUpdatedAt(folder, documents.filter((item) => item.location === `${folder.location ?? locationRoot}/${folder.name}`)), visitedAt: '', size: aggregateSize(documents.filter((item) => item.location.startsWith(`${folder.location ?? locationRoot}/${folder.name}/`) || item.location === `${folder.location ?? locationRoot}/${folder.name}`)), kind: '在线文档', favorite: false, owned: true, shared: false },
+            onOpen: () => onOpenFolder(folder),
+            title: renamingFolderId === folder.id ? <form className="document-rename-form" onSubmit={(event) => { event.preventDefault(); finishRename(folder) }}><input ref={renameInputRef} autoFocus aria-label="文件夹新名称" value={renameValue} onChange={(event) => setRenameValue(event.target.value)} /><button type="submit">保存</button><button type="button" onClick={() => cancelRename(folder.id)}>取消</button>{renameError && <span role="alert">{renameError}</span>}</form> : undefined,
+            actions: <><button data-focus-id="research-folder-pin" type="button" onClick={() => onToggleQuickAccess(`folder:${mode}:${folder.id}`)}>{quickAccess.includes(`folder:${mode}:${folder.id}`) ? '从快速访问中移除' : '加入快速访问'}</button><button type="button" onClick={() => onToggleQuickAccess(`favorite-folder:${mode}:${folder.id}`)}>{quickAccess.includes(`favorite-folder:${mode}:${folder.id}`) ? '取消收藏' : '收藏'}</button><button type="button" className="more-button" ref={(node) => { if (node) menuTriggerRefs.current.set(folder.id, node); else menuTriggerRefs.current.delete(folder.id) }} aria-label={`${folder.name}更多操作`} aria-haspopup="menu" aria-expanded={menuFolderId === folder.id} onClick={(event) => toggleFolderMenu(folder.id, event.currentTarget)}><span className="more-dots" aria-hidden="true"><i /><i /><i /></span></button></>,
+          }))}
+          quickAccess={quickAccess} onToggleQuickAccess={onToggleQuickAccess}
+          documents={visibleDocuments} mode="space" page={page} onPageChange={onPageChange}
+          onToggleFavorite={onToggleFavorite} onDelete={onDelete} onShare={onShare}
+          onRename={onRenameDocument} onCreateNote={onCreateNote} onOpenDocument={onOpenDocument} onDownloadDocument={onDownloadDocument}
+        />
       </div>
       {menuFolderId != null && menuPosition && (() => {
         const folder = folders.find((item) => item.id === menuFolderId)
@@ -328,6 +250,7 @@ export function SpaceView({
             onKeyDown={navigateFolderMenu}
           >
             <button type="button" role="menuitem" onClick={() => { closeFolderMenu(); onOpenFolder(folder) }}>查看</button>
+            <button type="button" role="menuitem" onClick={() => { closeFolderMenu(); onToggleQuickAccess(`folder:${mode}:${folder.id}`) }}>{quickAccess.includes(`folder:${mode}:${folder.id}`) ? '从快速访问中移除' : '加入快速访问'}</button>
             <button type="button" role="menuitem" onClick={() => { closeFolderMenu(); setRenamingFolderId(folder.id); setRenameValue(folder.name); setRenameError('') }}>重命名</button>
             <button type="button" role="menuitem" className="danger-link" onClick={() => {
               closeFolderMenu()

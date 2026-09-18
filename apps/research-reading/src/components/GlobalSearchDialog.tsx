@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import type { ResearchDocument, ResearchNote } from '../types'
 import {
   countResearchSearchResults,
@@ -10,6 +11,7 @@ import {
   type ResearchSearchScope,
 } from '../researchSearch'
 import { displayResearchLocation } from '../workbenchDocuments'
+import { minute } from '../researchSort'
 import { Modal } from './Modal'
 
 interface GlobalSearchDialogProps {
@@ -26,6 +28,7 @@ const maximumRecentSearches = 6
 const searchResultsPageSize = 10
 
 const documentResultIcons: Record<ResearchDocument['kind'], string> = {
+  附件: '/assets/action-word.svg',
   在线文档: '/assets/document-word.svg',
   数据表格: '/assets/document-sheet.svg',
   PDF文档: '/assets/action-pdf.svg',
@@ -95,9 +98,9 @@ function ResultMetadata({ result, terms }: { result: ResearchSearchResult; terms
   if (result.type === 'document') {
     return (
       <div className="global-search-result-metadata" aria-label="文档信息">
-        <span><b>文档类型：</b><HighlightedText text={result.document.kind} terms={terms} /></span>
+        <span><b>最近访问：</b>{minute(result.document.visitedAt)||"—"}</span>
         <span><b>所有者：</b><HighlightedText text={result.document.owner} terms={terms} /></span>
-        <span><b>创建时间：</b><HighlightedText text={result.document.createdAt} terms={terms} /></span>
+        <span><b>创建时间：</b><HighlightedText text={minute(result.document.createdAt)||'—'} terms={terms} /></span>
         <span><b>文件大小：</b><HighlightedText text={result.document.size} terms={terms} /></span>
       </div>
     )
@@ -105,22 +108,9 @@ function ResultMetadata({ result, terms }: { result: ResearchSearchResult; terms
 
   return (
     <div className="global-search-result-metadata" aria-label="笔记信息">
-      <span><b>信息类型：</b>笔记</span>
+      <span><b>创建时间：</b>{minute(result.note.createdAt)||"—"}</span>
       <span><b>所属文档：</b><HighlightedText text={result.documentTitle} terms={terms} /></span>
-      <span><b>更新时间：</b><HighlightedText text={result.note.updatedAt} terms={terms} /></span>
-    </div>
-  )
-}
-
-function ResultTags({ result, terms }: { result: ResearchSearchResult; terms: string[] }) {
-  const tags = result.type === 'document' ? result.document.keywords ?? [] : result.note.tags
-  if (tags.length === 0) return null
-  const visibleTags = tags.slice(0, 3)
-  const remainingTagCount = tags.length - visibleTags.length
-  return (
-    <div className="global-search-result-tags" aria-label={result.type === 'document' ? '文档关键词' : '笔记标签'}>
-      {visibleTags.map((tag, index) => <span title={tag} key={`${tag}-${index}`}><HighlightedText text={tag} terms={terms} /></span>)}
-      {remainingTagCount > 0 && <span className="global-search-result-tag-count" title={`另有 ${remainingTagCount} 个标签`}>+{remainingTagCount}</span>}
+      <span><b>更新时间：</b><HighlightedText text={minute(result.note.updatedAt)||"—"} terms={terms} /></span>
     </div>
   )
 }
@@ -178,7 +168,6 @@ export function GlobalSearchDialog({
     const firstPage = Math.max(1, Math.min(resultPage - 2, totalResultPages - 4))
     return Array.from({ length: Math.min(5, totalResultPages) }, (_, index) => firstPage + index)
   }, [resultPage, totalResultPages])
-  const currentScopeLabel = scope === 'documents' ? '全部文档' : scope === 'notes' ? '全部笔记' : '全部科研内容'
 
   useEffect(() => {
     const animationFrame = window.requestAnimationFrame(() => inputRef.current?.focus())
@@ -197,7 +186,7 @@ export function GlobalSearchDialog({
 
   const runSearch = (query: string) => {
     const value = query.trim()
-    if (!value) return
+    if (!value) {setSubmittedQuery('');setResultPage(1);return}
     setDraftQuery(value)
     setSubmittedQuery(value)
     setResultPage(1)
@@ -244,7 +233,7 @@ export function GlobalSearchDialog({
     window.requestAnimationFrame(() => { if (resultListRef.current) resultListRef.current.scrollTop = 0 })
   }
 
-  return (
+  return createPortal(
     <Modal
       title="全文搜索"
       onClose={onClose}
@@ -264,9 +253,9 @@ export function GlobalSearchDialog({
               type="search"
               value={draftQuery}
               maxLength={100}
-              placeholder="输入标题、关键词、文档信息或笔记内容"
+              placeholder="输入文档或PDF笔记的标题、正文关键词"
               autoComplete="off"
-              onChange={(event) => setDraftQuery(event.target.value)}
+              onChange={(event) => {setDraftQuery(event.target.value);if(!event.target.value.trim()){setSubmittedQuery('');setResultPage(1)}}}
             />
           </label>
           {(draftQuery || submittedQuery) && <button className="global-search-clear" type="button" onClick={clearSearch} aria-label="清空搜索">清空</button>}
@@ -294,10 +283,6 @@ export function GlobalSearchDialog({
           </section>
         ) : (
           <section className="global-search-results" aria-label={hasSubmittedQuery ? '搜索结果' : '科研内容列表'}>
-            <div className="global-search-summary" role="status" aria-live="polite">
-              <span>{hasSubmittedQuery ? '找到' : currentScopeLabel} <b>{visibleResults.length}</b> 条{hasSubmittedQuery ? '结果' : ''}</span>
-              <small>{hasSubmittedQuery ? `搜索“${submittedQuery}”` : '打开即可浏览，输入关键词可全文检索'}</small>
-            </div>
             {!hasSubmittedQuery && recentSearches.length > 0 && (
               <div className="global-search-recent-inline" aria-label="最近搜索">
                 <span>最近搜索</span>
@@ -311,20 +296,21 @@ export function GlobalSearchDialog({
               {paginatedResults.map((result) => {
                 const title = result.type === 'document' ? result.document.title : result.note.title
                 const actionLabel = resultActionLabel(result)
-                const displayTerms = terms.map(displayResearchLocation)
+
                 return (
                 <article className={`global-search-result global-search-result--${result.type}`} key={result.id}>
                   <ResultIcon result={result} />
                   <div className="global-search-result-main">
                     <header className="global-search-result-header">
-                      <h3 title={title}><HighlightedText text={title} terms={terms} /></h3>
-                      <ResultTags result={result} terms={terms} />
+                      <h3 title={title}><button type="button" onClick={()=>openResult(result)}><HighlightedText text={title} terms={terms} /></button></h3>
+
                     </header>
                     <ResultMetadata result={result} terms={terms} />
-                    <div className="global-search-result-match">
+                    {result.type==="document"&&<div className="global-search-result-metadata" title={displayResearchLocation(result.document.location)}>位置：{displayResearchLocation(result.document.location)}</div>}
+                    {hasSubmittedQuery && result.matchedFields.includes("正文") && <div className="global-search-result-match">
                       <span>{hasSubmittedQuery ? `命中：${result.matchedFields.join('、')}` : result.type === 'document' ? '文档摘要' : '笔记摘要'}</span>
-                      <p><HighlightedText text={displayResearchLocation(result.snippet)} terms={displayTerms} /></p>
-                    </div>
+                      <p><HighlightedText text={result.snippet} terms={terms} /></p>
+                    </div>}
                   </div>
                   <button
                     className={`global-search-result-action${result.type === 'note' || (result.type === 'document' && (result.document.kind === '在线文档' || result.document.kind === '数据表格')) ? ' global-search-result-action--primary' : ''}`}
@@ -355,6 +341,6 @@ export function GlobalSearchDialog({
           </section>
         )}
       </div>
-    </Modal>
+    </Modal>, document.body
   )
 }

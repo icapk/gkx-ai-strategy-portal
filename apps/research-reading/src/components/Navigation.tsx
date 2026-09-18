@@ -1,33 +1,16 @@
 import type { Section } from '../types'
 
-const stats: Array<{
-  section: Section
-  label: string
-  count: number
-  icon: string
-  tone: string
-}> = [
-  { section: 'workbench', label: '快速访问', count: 85, icon: '/assets/nav-workbench.svg', tone: 'blue' },
-  { section: 'personal', label: '个人空间', count: 128, icon: '/assets/nav-personal.svg', tone: 'cyan' },
-  { section: 'team', label: '团队空间', count: 342, icon: '/assets/nav-team.svg', tone: 'purple' },
-  { section: 'recycle', label: '存档管理', count: 12, icon: '/assets/nav-trash.svg', tone: 'orange' },
-]
-
 interface TopNavigationProps {
   activeSection: Section
   onSelect: (section: Section) => void
   onReadingSelect: () => void
-  onSearchOpen: () => void
   onProfileOpen: () => void
   profileName: string
   profileAvatar?: string | null
 }
 
 export function TopNavigation({
-  activeSection,
-  onSelect,
   onReadingSelect,
-  onSearchOpen,
   onProfileOpen,
   profileName,
   profileAvatar,
@@ -45,18 +28,7 @@ export function TopNavigation({
         </div>
         <div className="top-utilities">
           <button
-            className="global-search-trigger"
-            type="button"
-            aria-label="全文搜索笔记和文档"
-            aria-haspopup="dialog"
-            aria-keyshortcuts="Meta+K Control+K"
-            onClick={onSearchOpen}
-          >
-            <img src="/assets/reading/search.svg" alt="" />
-            <span>搜索笔记、文档</span>
-            <kbd>⌘ K</kbd>
-          </button>
-          <button
+            data-compliance-target="research-profile"
             className="profile-button"
             type="button"
             aria-label={`打开个人信息设置（${profileName}）`}
@@ -67,27 +39,7 @@ export function TopNavigation({
           </button>
         </div>
       </div>
-      <nav className="stats-nav" aria-label="科研空间概览">
-        <div className="stats-track">
-          {stats.map((item, index) => (
-            <div className="stat-wrap" key={item.section}>
-              <button
-                type="button"
-                className={`stat-item${activeSection === item.section ? ' is-current' : ''}`}
-                onClick={() => onSelect(item.section)}
-                aria-current={activeSection === item.section ? 'page' : undefined}
-              >
-                <span className={`stat-icon stat-icon--${item.tone}`}>
-                  <img src={item.icon} alt="" />
-                </span>
-                <span>{item.label}</span>
-                <strong>{item.count}</strong>
-              </button>
-              {index < stats.length - 1 && <span className="stat-divider" aria-hidden="true" />}
-            </div>
-          ))}
-        </div>
-      </nav>
+
     </>
   )
 }
@@ -107,7 +59,7 @@ const primaryItems: Array<{ section: Section; label: string }> = [
   { section: 'workbench', label: '工作台' },
   { section: 'personal', label: '个人空间' },
   { section: 'team', label: '团队空间' },
-  { section: 'recycle', label: '存档管理' },
+  { section: 'recycle', label: '回收站' },
 ]
 
 export function Sidebar({
@@ -123,7 +75,6 @@ export function Sidebar({
   return (
     <aside className="sidebar" aria-label="基础模块">
       <div className="sidebar-scroll">
-        <h2 className="sidebar-capability-title"><span aria-hidden="true" />基础模块</h2>
         {primaryItems.map((item) => (
           <div className="sidebar-group" key={item.section}>
             <div className={item.section === 'team' ? 'sidebar-parent-row' : undefined}>

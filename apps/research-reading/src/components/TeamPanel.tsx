@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CommentItem, MemberItem, TeamPanelTab, TodoItem } from '../types'
 
 interface TeamPanelProps {
+  canManage?: boolean
   tab: TeamPanelTab
   todos: TodoItem[]
   comments: CommentItem[]
@@ -54,7 +55,7 @@ export function TeamPanel({
   onAddComment,
   onInvite,
   onMemberRoleChange,
-  onRemoveMember,
+  onRemoveMember, canManage = false,
 }: TeamPanelProps) {
   const [comment, setComment] = useState('')
   const [attachment, setAttachment] = useState('')
@@ -109,7 +110,7 @@ export function TeamPanel({
   }
 
   return (
-    <aside className="team-panel" aria-label="空间管理">
+    <aside data-compliance-target={`research-${tab}`} className="team-panel" aria-label="空间管理">
       <h2 className="sr-only">空间管理</h2>
       <div className="team-panel-tabs" role="tablist">
         {tabs.map((item) => (
@@ -233,7 +234,7 @@ export function TeamPanel({
               <strong>成员管理·{members.length}人</strong>
               <span>管理员角色配置</span>
             </div>
-            <button type="button" className="primary-link" onClick={onInvite}><img src="/assets/figma/invite-member.svg" alt="" />邀请</button>
+            <button type="button" className="primary-link" disabled={!canManage} onClick={onInvite}><img src="/assets/figma/invite-member.svg" alt="" />邀请</button>
           </div>
           <div className="member-list">
             {members.map((member) => (
@@ -243,17 +244,17 @@ export function TeamPanel({
                 <span className="member-role-wrap">
                   <button
                     type="button"
-                    className={`role-badge role-badge--${member.role === '管理员' ? 'admin' : member.role === '编辑者' ? 'editor' : 'viewer'}`}
+                    className={`role-badge role-badge--${member.role === '管理员' ? 'admin' : member.role === '可编辑' ? 'editor' : 'viewer'}`}
                     aria-label={`${member.name}管理员角色配置，当前${member.role}`}
                     aria-expanded={roleMenuMemberId === member.id}
-                    disabled={member.role === '管理员'}
+                    disabled={!canManage}
                     onClick={(event) => { event.stopPropagation(); setRoleMenuMemberId((current) => current === member.id ? null : member.id) }}
                   >{member.role}{member.role !== '管理员' && <img src="/assets/direction-down.svg" alt="" />}</button>
                   {roleMenuMemberId === member.id && (
                     <div className="member-role-menu" role="menu" aria-label={`管理员角色配置：${member.name}`} onClick={(event) => event.stopPropagation()}>
                       <button type="button" role="menuitem" onClick={() => { onMemberRoleChange(member.id, '管理员'); setRoleMenuMemberId(null) }}>管理员</button>
-                      <button type="button" role="menuitem" className={member.role === '编辑者' ? 'is-current' : ''} onClick={() => { onMemberRoleChange(member.id, '编辑者'); setRoleMenuMemberId(null) }}>编辑者</button>
-                      <button type="button" role="menuitem" className={member.role === '查看员' ? 'is-current' : ''} onClick={() => { onMemberRoleChange(member.id, '查看员'); setRoleMenuMemberId(null) }}>查看员</button>
+                      <button type="button" role="menuitem" className={member.role === '可编辑' ? 'is-current' : ''} onClick={() => { onMemberRoleChange(member.id, '可编辑'); setRoleMenuMemberId(null) }}>可编辑</button>
+                      <button type="button" role="menuitem" className={member.role === '可查看' ? 'is-current' : ''} onClick={() => { onMemberRoleChange(member.id, '可查看'); setRoleMenuMemberId(null) }}>可查看</button>
                       <button type="button" role="menuitem" className="is-danger" onClick={() => { onRemoveMember(member.id); setRoleMenuMemberId(null) }}>可移除</button>
                     </div>
                   )}

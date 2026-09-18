@@ -2,9 +2,9 @@ import type { ReadingDocument, ReadingNote } from './readingData'
 
 export const READING_WORKSPACE_STORAGE_KEY = 'gkx-reading-workspace-v1'
 
-const MAX_DOCUMENTS = 200
+const MAX_DOCUMENTS = 201
 const MAX_FOLDERS = 80
-const MAX_NOTES = 2_000
+const MAX_NOTES = 2_001
 const MAX_NOTE_IMAGES = 3
 const MAX_NOTE_IMAGE_DATA_URL_LENGTH = 4_000_000
 
@@ -19,6 +19,7 @@ export interface PersistedReadingNote extends ReadingNote {
 
 export interface ReadingWorkspaceState {
   version: 1
+  sampleVersion?: 1
   documents: ReadingDocument[]
   folders: string[]
   notes: PersistedReadingNote[]
@@ -63,6 +64,7 @@ const defaultFolders = ['我的笔记库1', '我的笔记库2', '我的笔记库
 
 const cloneState = (state: ReadingWorkspaceState): ReadingWorkspaceState => ({
   version: 1,
+  ...(state.sampleVersion === 1 ? { sampleVersion: 1 as const } : {}),
   documents: state.documents.map((document) => ({ ...document })),
   folders: state.folders.slice(),
   notes: state.notes.map((note) => ({ ...note, imageDataUrls: note.imageDataUrls?.slice() })),
@@ -99,6 +101,7 @@ function sanitizeDocument(value: unknown): ReadingDocument | null {
     size: cleanText(candidate.size, 32, '大小待解析'),
     favorite: candidate.favorite === true,
     folder: cleanText(candidate.folder, 60, '我的笔记库1'),
+    ...(typeof candidate.visitedAt === 'string' && Number.isFinite(Date.parse(candidate.visitedAt)) ? { visitedAt: candidate.visitedAt } : {}),
   }
 }
 
@@ -117,7 +120,7 @@ function sanitizeNote(value: unknown, fallbackDocumentId: number | null): Persis
       .filter((image): image is string => (
         typeof image === 'string'
         && image.length <= MAX_NOTE_IMAGE_DATA_URL_LENGTH
-        && /^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(image)
+        && (/^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(image) || /^(?:\.\/|\/)antenna\/[\w/-]+\.(?:png|jpe?g|webp)$/i.test(image))
       ))
       .slice(0, MAX_NOTE_IMAGES)
     : []
@@ -129,6 +132,10 @@ function sanitizeNote(value: unknown, fallbackDocumentId: number | null): Persis
     excerpt,
     createdAt: cleanText(candidate.createdAt, 64),
     color,
+    ...(Array.isArray(candidate.tags) ? { tags: candidate.tags.filter((tag): tag is string => typeof tag === 'string' && tag.length <= 100).slice(0, 30) } : {}),
+    ...(candidate.sourceAnchor && Number.isInteger(candidate.sourceAnchor.page) && candidate.sourceAnchor.page > 0 && [candidate.sourceAnchor.x, candidate.sourceAnchor.y].every(v => Number.isFinite(v) && v >= 0 && v <= 1)
+      ? { sourceAnchor: { page: candidate.sourceAnchor.page, x: candidate.sourceAnchor.x, y: candidate.sourceAnchor.y },
+          sourceRects: (Array.isArray(candidate.sourceRects) ? candidate.sourceRects : []).filter(r => r && [r.x, r.y, r.width, r.height].every(v => Number.isFinite(v) && v >= 0 && v <= 1)).slice(0, 300) } : {}),
     ...(imageDataUrls.length > 0 ? { imageDataUrls } : {}),
   }
 }
@@ -178,7 +185,7 @@ export function sanitizeReadingWorkspaceState(value: unknown, fallbackState?: Re
     notes.push(note)
   }
 
-  return { version: 1, documents: sanitizedDocuments, folders, notes }
+  return { version: 1, ...(candidate.sampleVersion === 1 ? { sampleVersion: 1 as const } : {}), documents: sanitizedDocuments, folders, notes }
 }
 
 function browserStorage(): StorageLike | null {

@@ -74,6 +74,7 @@ export type PaperGraphNodeType =
   | 'author'
   | 'institution'
   | 'keyword'
+  | 'theory'
   | 'reference'
   | 'figure'
 
@@ -91,7 +92,7 @@ export interface PaperGraphEdge {
   id: string
   source: string
   target: string
-  relation: 'authored-by' | 'affiliated-with' | 'has-keyword' | 'cites' | 'contains'
+  relation: 'authored-by' | 'affiliated-with' | 'has-keyword' | 'grounded-in' | 'cites' | 'contains'
 }
 
 export interface PaperKnowledgeGraph {
@@ -103,9 +104,40 @@ export interface PaperAnalysis {
   documentId: number
   metadata: PaperMetadata
   outline: PaperOutlineSection[]
+  /** Raw bibtex block as it appears at the end of the PDF, before structuring. */
+  bibtexSource: string
   references: PaperReference[]
   figures: PaperFigure[]
   graph: PaperKnowledgeGraph
+}
+
+export interface ParsedBibtexEntry {
+  citationKey: string
+  entryType: string
+  fields: Record<string, string>
+}
+
+/**
+ * Parses a bibtex block into structured entries. The reference list printed at the
+ * end of a paper is unstructured text; structured fields only exist after parsing.
+ */
+export function parseBibtexEntries(source: string): ParsedBibtexEntry[] {
+  const entries: ParsedBibtexEntry[] = []
+  const entryPattern = /@(\w+)\s*\{\s*([^,\s]+)\s*,([\s\S]*?)\n\}/g
+  let match = entryPattern.exec(source)
+  while (match) {
+    const [, entryType, citationKey, body] = match
+    const fields: Record<string, string> = {}
+    const fieldPattern = /(\w+)\s*=\s*\{([\s\S]*?)\}\s*,?\s*(?=\n\s*\w+\s*=|\s*$)/g
+    let fieldMatch = fieldPattern.exec(body)
+    while (fieldMatch) {
+      fields[fieldMatch[1].toLocaleLowerCase('en-US')] = fieldMatch[2].replace(/\s+/g, ' ').trim()
+      fieldMatch = fieldPattern.exec(body)
+    }
+    entries.push({ citationKey, entryType: entryType.toLocaleLowerCase('en-US'), fields })
+    match = entryPattern.exec(source)
+  }
+  return entries
 }
 
 export type PaperAnalysisSearchKind =
@@ -234,6 +266,36 @@ const lithiumSulfurAnalysis: PaperAnalysis = {
       excerpt: '列出本文引用的电化学储能与界面材料研究。',
     },
   ],
+  bibtexSource: `@article{manthiram2014lisulfur,
+  title = {Challenges and prospects of lithium--sulfur batteries},
+  author = {Manthiram, Arumugam and Fu, Yongzhu and Chung, Sheng-Heng},
+  journal = {Chemical Reviews},
+  year = {2014},
+  month = {3},
+  day = {14},
+  doi = {10.1021/cr500062v}
+}
+
+@article{liang2016polarhosts,
+  title = {Polar hosts for sulfur cathodes with strong polysulfide anchoring},
+  author = {Liang, Xia and Nazar, Linda F.},
+  journal = {ACS Nano},
+  year = {2016},
+  month = {6},
+  day = {22},
+  doi = {10.1021/acsnano.6b03254}
+}
+
+@article{zhao2021operando,
+  title = {Operando visualization of sulfur redox pathways},
+  author = {Zhao, Ming and Zhang, Qiang and Huang, Jia-Qi},
+  journal = {Energy \\& Environmental Science},
+  year = {2021},
+  month = {9},
+  day = {3},
+  doi = {10.1039/d1ee01234a}
+}
+`,
   references: [
     {
       id: 'ref-li-s-review',
@@ -358,6 +420,24 @@ const lithiumSulfurAnalysis: PaperAnalysis = {
         page: 8,
       },
       {
+        id: 'graph-theory-dft',
+        type: 'theory',
+        label: '密度泛函理论（DFT）',
+        description: '用于计算极性位点与多硫化物的吸附能，为界面锚定机制提供理论依据。',
+        keywords: ['学术理论', '第一性原理', '吸附能', 'DFT'],
+        sectionId: 'interface-characterization',
+        page: 5,
+      },
+      {
+        id: 'graph-theory-shuttle',
+        type: 'theory',
+        label: '穿梭效应理论',
+        description: '解释可溶性长链多硫化物在正负极间往返迁移导致容量衰减的经典理论模型。',
+        keywords: ['学术理论', '穿梭效应', '容量衰减机制'],
+        sectionId: 'introduction',
+        page: 2,
+      },
+      {
         id: 'graph-ref-polar-host',
         type: 'reference',
         label: 'Polar hosts for sulfur cathodes',
@@ -389,6 +469,18 @@ const lithiumSulfurAnalysis: PaperAnalysis = {
         source: 'paper-1',
         target: 'graph-interface-adsorption',
         relation: 'has-keyword',
+      },
+      {
+        id: 'edge-1-theory-dft',
+        source: 'paper-1',
+        target: 'graph-theory-dft',
+        relation: 'grounded-in',
+      },
+      {
+        id: 'edge-1-theory-shuttle',
+        source: 'paper-1',
+        target: 'graph-theory-shuttle',
+        relation: 'grounded-in',
       },
       {
         id: 'edge-1-reference',
@@ -495,6 +587,26 @@ const solidElectrolyteAnalysis: PaperAnalysis = {
       excerpt: '列出固态电解质、界面涂层和原位表征相关研究。',
     },
   ],
+  bibtexSource: `@article{janek2023interfaces,
+  title = {Interfaces and interphases in all-solid-state batteries},
+  author = {Jan, Janek and Zeier, Wolfgang G.},
+  journal = {Nature Energy},
+  year = {2023},
+  month = {2},
+  day = {2},
+  doi = {10.1038/s41560-022-01173-x}
+}
+
+@article{kato2022graded,
+  title = {Compositionally graded cathode interfaces for sulfide electrolytes},
+  author = {Kato, Aya and Saito, Hiroshi and Tatsumisago, Minoru},
+  journal = {Advanced Functional Materials},
+  year = {2022},
+  month = {8},
+  day = {19},
+  doi = {10.1002/adfm.202204918}
+}
+`,
   references: [
     {
       id: 'ref-solid-state-roadmap',
@@ -602,6 +714,24 @@ const solidElectrolyteAnalysis: PaperAnalysis = {
         page: 5,
       },
       {
+        id: 'graph-theory-space-charge',
+        type: 'theory',
+        label: '空间电荷层理论',
+        description: '描述固态电解质与电极接触时因化学势差形成的载流子重分布区，是界面阻抗的理论来源。',
+        keywords: ['学术理论', '空间电荷层', '界面阻抗'],
+        sectionId: 'background',
+        page: 2,
+      },
+      {
+        id: 'graph-theory-solid-ionics',
+        type: 'theory',
+        label: '固态离子学',
+        description: '研究固体中离子输运规律的学科理论，支撑梯度缓冲层的离子通道设计。',
+        keywords: ['学术理论', '离子输运', '固态离子学'],
+        sectionId: 'design',
+        page: 5,
+      },
+      {
         id: 'graph-ref-interface',
         type: 'reference',
         label: 'Interfaces and interphases in all-solid-state batteries',
@@ -624,6 +754,18 @@ const solidElectrolyteAnalysis: PaperAnalysis = {
         source: 'paper-2',
         target: 'graph-gradient-buffer',
         relation: 'has-keyword',
+      },
+      {
+        id: 'edge-2-theory-space-charge',
+        source: 'paper-2',
+        target: 'graph-theory-space-charge',
+        relation: 'grounded-in',
+      },
+      {
+        id: 'edge-2-theory-solid-ionics',
+        source: 'paper-2',
+        target: 'graph-theory-solid-ionics',
+        relation: 'grounded-in',
       },
       {
         id: 'edge-2-reference',
@@ -764,6 +906,26 @@ function buildFallbackAnalysis(documentId: number, requestedTitle?: string): Pap
         excerpt: '列出正文引用且可回溯至引用位置的相关文献。',
       },
     ],
+    bibtexSource: `@article{method${documentId},
+  title = {${profile.field}中的可复核研究方法},
+  author = {赵研 and 钱思},
+  journal = {科研方法与实践},
+  year = {2022},
+  month = {10},
+  day = {12},
+  doi = {10.5555/method.${documentId}}
+}
+
+@article{review${documentId},
+  title = {${profile.keywords[0]}研究进展},
+  author = {吴知行 and 郑远},
+  journal = {前沿科学评论},
+  year = {2023},
+  month = {7},
+  day = {8},
+  doi = {10.5555/review.${documentId}}
+}
+`,
     references: [
       {
         id: `ref-${documentId}-method`,

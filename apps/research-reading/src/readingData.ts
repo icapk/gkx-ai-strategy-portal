@@ -8,6 +8,7 @@ export interface ReadingDocument {
   size: string
   favorite: boolean
   folder: string
+  visitedAt?: string
 }
 
 export interface ReadingNote {
@@ -16,7 +17,10 @@ export interface ReadingNote {
   excerpt: string
   createdAt: string
   color: string
+  tags?: string[]
   imageDataUrls?: string[]
+  sourceAnchor?: { page: number; x: number; y: number; width?: number; height?: number }
+  sourceRects?: { x: number; y: number; width: number; height: number }[]
 }
 
 export const readingDocuments: ReadingDocument[] = [
@@ -164,3 +168,18 @@ export const articleSections = [
     ],
   },
 ]
+
+// Paragraph-level English renderings keyed by section title, so划词翻译 always has
+// a sentence-level result even when the selection matches no term in the glossary.
+export const paragraphTranslations: Record<string, string> = {
+  摘要: 'To address capacity fading caused by polysulfide migration during lithium-sulfur battery cycling, this work constructs a functionalized carbon nanotube interface and combines in-situ characterization with theoretical calculations to reveal how polar sites adsorb and catalytically convert polysulfides. The results show that the interface balances electron transport and chemical anchoring, markedly improving long-cycle stability.',
+  '1.1.研究背景与意义': 'Lithium-sulfur batteries are regarded as a promising next-generation energy storage system owing to their high theoretical specific capacity and energy density. During practical charge and discharge, however, the sulfur cathode generates soluble long-chain polysulfides Li₂Sₙ (4≤n≤8) that migrate between the cathode and anode, producing the well-known shuttle effect. This process causes loss of active material, reduced Coulombic efficiency, rapid capacity decay, and severely shortened cycle life.',
+  '1.2.研究现状': 'To address this problem, the present study employs functionalized carbon nanotubes as the cathode host material and introduces carboxyl and amino groups on their surface to strengthen chemical adsorption of long-chain polysulfides. It investigates how the functionalized carbon nanotube interface suppresses polysulfide migration, providing a basis for improving lithium-sulfur battery stability.',
+  '2.1.原料制备': 'Functionalized carbon nanotubes were prepared by combining acid treatment with surface grafting. By controlling reaction temperature, duration, and functional group ratio, the material retains a continuous conductive network while acquiring uniformly distributed polar active sites.',
+  '2.2.表征手段': 'In-situ XRD, cryogenic electron microscopy, and density functional theory calculations were used to jointly analyze polysulfide evolution during charge and discharge together with interfacial adsorption behavior, with experimental characterization and theoretical calculations corroborating each other.',
+  '2.3.电化学测试': 'Testing shows that the functionalized carbon nanotube cathode host raises specific capacity by 186% relative to the control group and retains 92.3% of its capacity after 1000 cycles, demonstrating excellent long-cycle stability.',
+  '3.1.材料形貌分析': 'The functionalized carbon nanotubes retain their one-dimensional conductive network, while surface carboxyl and amino groups transform them from a purely conductive support into a functional interface material combining conductivity with chemical adsorption capability.',
+  '3.2.储能机制研究': 'Stable interfacial interactions form between the polar functional groups and long-chain polysulfides, keeping polysulfides preferentially within the cathode region and promoting their reversible conversion into lower-order lithium sulfide species.',
+  '3.3.电化学性能评估': 'The functionalized interface restricts polysulfide migration over the long term, reducing active material loss and slowing electrode structural degradation, thereby markedly improving the reaction activity, charge transport efficiency, and capacity retention of the sulfur cathode.',
+  '4.结论': 'This study systematically reveals the mechanism by which a functionalized carbon nanotube interface regulates polysulfide adsorption and conversion, offering an effective design route for high-performance lithium-sulfur battery cathode host materials.',
+}

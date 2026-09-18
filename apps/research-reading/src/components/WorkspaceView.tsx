@@ -1,15 +1,20 @@
 import { useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import type { ResearchDocument, WorkbenchTab } from '../types'
+import type { FolderItem, ResearchDocument, WorkbenchTab } from '../types'
 import { DocumentTable } from './DocumentTable'
+import { QuickFolderActions } from './QuickFolderActions'
 
 const tabs: Array<{ id: WorkbenchTab; label: string }> = [
+  { id: 'quick', label: '快速访问' },
   { id: 'recent', label: '最近浏览' },
   { id: 'favorites', label: '我的收藏' },
-  { id: 'owned', label: '归我所有' },
-  { id: 'shared', label: '与我共享' },
 ]
 
 interface WorkspaceViewProps {
+  onSearchOpen: () => void
+  quickAccess: string[]
+  onToggleQuickAccess: (key: string) => void
+  quickFolders: (FolderItem & { scope: 'personal' | 'team' })[]
+  onOpenQuickFolder: (folder: FolderItem & { scope: 'personal' | 'team' }) => void
   documents: ResearchDocument[]
   tab: WorkbenchTab
   page: number
@@ -19,14 +24,14 @@ interface WorkspaceViewProps {
   onDelete: (id: number) => void
   onShare: (id: number) => void
   onRemoveRecent?: (id: number) => void
+  onDownloadDocument: (documentItem: ResearchDocument) => void
   onOpenDocument: (documentItem: ResearchDocument) => void
-  onOpenDataTableHub: () => void
-  dataTableCount: number
-  dataRecordCount: number
   highlightedDocumentId?: number | null
 }
 
 export function WorkspaceView({
+  onSearchOpen,
+  quickAccess, onToggleQuickAccess, quickFolders, onOpenQuickFolder,
   documents,
   tab,
   page,
@@ -36,10 +41,8 @@ export function WorkspaceView({
   onDelete,
   onShare,
   onRemoveRecent,
+  onDownloadDocument,
   onOpenDocument,
-  onOpenDataTableHub,
-  dataTableCount,
-  dataRecordCount,
   highlightedDocumentId,
 }: WorkspaceViewProps) {
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
@@ -69,17 +72,9 @@ export function WorkspaceView({
   }
 
   return (
-    <section className="view view--workbench">
-      <header className="view-header">
-        <h1><span className="title-accent" />工作台</h1>
-        <button className="workbench-data-hub-entry" type="button" onClick={onOpenDataTableHub}>
-          <img src="/assets/iconpark/grid-nine.svg" alt="" />
-          <span><strong>数据表格</strong><small>{dataTableCount} 个表格 · {dataRecordCount} 条记录</small></span>
-          <i aria-hidden="true">›</i>
-        </button>
-      </header>
-      <div className="view-body workbench-body">
-        <div className="subtabs" role="tablist" aria-label="工作台筛选" aria-orientation="horizontal">
+    <section data-compliance-target="research-workbench" className="view view--workbench">
+      <div data-compliance-target={`research-${tab}`} className="view-body workbench-body">
+        <div className="workbench-controls"><div className="subtabs" role="tablist" aria-label="工作台筛选" aria-orientation="horizontal">
           {tabs.map((item, index) => (
             <button
               type="button"
@@ -98,13 +93,18 @@ export function WorkspaceView({
             </button>
           ))}
         </div>
+        <button className="global-search-trigger" type="button" aria-label="全文搜索笔记和文档" aria-haspopup="dialog" aria-keyshortcuts="Meta+K Control+K" onClick={onSearchOpen}><img src="/assets/reading/search.svg" alt=""/><span>搜索笔记、文档</span><kbd>⌘ K</kbd></button>
+        </div>
         <div
           className="workbench-tabpanel"
           id="workbench-panel"
           role="tabpanel"
           aria-labelledby={`workbench-tab-${tabs[activeTabIndex]?.id ?? tab}`}
         >
-          <DocumentTable
+          <DocumentTable onDownloadDocument={onDownloadDocument}
+            folderEntries={tab === 'quick' || tab === 'favorites' ? quickFolders.map((folder) => ({ key: `folder:${folder.scope}:${folder.id}`, item: { id: -(folder.id * 2 + (folder.scope === 'team' ? 1 : 0)), title: folder.name, location: folder.location ?? '我的空间', owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? folder.updatedAt, updatedAt: folder.updatedAt, visitedAt: '', size: folder.size ?? '0 B', kind: '在线文档', favorite: false, owned: true, shared: false }, onOpen: () => onOpenQuickFolder(folder), actions: <QuickFolderActions name={folder.name} isFavoriteTab={tab==='favorites'} favorite={quickAccess.includes(`favorite-folder:${folder.scope}:${folder.id}`)} onOpen={()=>onOpenQuickFolder(folder)} onUnpin={()=>onToggleQuickAccess(`folder:${folder.scope}:${folder.id}`)} onFavorite={()=>onToggleQuickAccess(`favorite-folder:${folder.scope}:${folder.id}`)}/> })) : []}
+            quickAccess={quickAccess}
+            onToggleQuickAccess={onToggleQuickAccess}
             documents={documents}
             mode="workbench"
             workbenchTab={tab}

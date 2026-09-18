@@ -630,7 +630,7 @@ const createPdfFromImages = (pages: ExportPageImage[]) => {
   return new Blob(chunks, { type: 'application/pdf' })
 }
 
-export async function exportPdfNotes(documentItem: ResearchDocument, annotations: PdfArchiveAnnotation[]): Promise<ArchiveResult> {
+export async function exportPdfNotes(documentItem: ResearchDocument, annotations: PdfArchiveAnnotation[], consume?: (blob: Blob) => Promise<void>): Promise<ArchiveResult> {
   if (!annotations.length) return { ok: false, error: '当前文献还没有笔记，请先完成划词或截图笔记。' }
   try {
     await document.fonts?.ready
@@ -659,6 +659,7 @@ export async function exportPdfNotes(documentItem: ResearchDocument, annotations
       })
     }
     const pdf = createPdfFromImages(pages)
+    if (consume) { await consume(pdf); return { ok: true, value: undefined } }
     const objectUrl = URL.createObjectURL(pdf)
     const anchor = document.createElement('a')
     anchor.href = objectUrl
@@ -675,4 +676,25 @@ export async function exportPdfNotes(documentItem: ResearchDocument, annotations
     }
     return { ok: false, error: '笔记 PDF 生成失败，请减少截图数量后重试。' }
   }
+}
+
+export async function downloadAnnotatedPdf(item: ResearchDocument): Promise<ArchiveResult> {
+  const source = await loadPdfArchiveFile(item.id)
+  if (!source.ok) return source
+  const notes = await loadPdfAnnotations(item.id)
+  if (!notes.ok) return notes
+  return exportPdfNotes(item, notes.value, async (appendix) => {
+    const { PDFDocument, PDFName, PDFHexString, rgb } = await import('pdf-lib')
+    const pdf = await PDFDocument.load(source.value.data)
+    for (const note of notes.value) {
+      const page = pdf.getPages()[note.pageNumber - 1]
+      if (!page) continue
+      for (const rect of note.rects) page.drawRectangle({ x: rect.x * page.getWidth(), y: (1 - rect.y - rect.height) * page.getHeight(), width: rect.width * page.getWidth(), height: rect.height * page.getHeight(), color: rgb(1, .85, .15), opacity: .25 })
+      const annotation = pdf.context.obj({ Type: 'Annot', Subtype: 'Text', Rect: [12, page.getHeight()-36, 32, page.getHeight()-16], Contents: PDFHexString.fromText(`${note.quote}\n${note.note}`), Name: 'Comment' })
+      page.node.addAnnot(pdf.context.register(annotation))
+    }
+    const notePdf = await PDFDocument.load(await appendix.arrayBuffer())
+    for (const page of await pdf.copyPages(notePdf, notePdf.getPageIndices())) pdf.addPage(page)
+    const bytes = await pdf.save(); const url = URL.createObjectURL(new Blob([new Uint8Array(bytes)], {type:'application/pdf'})); const link = document.createElement('a'); link.href=url; link.download=`${item.title}-带笔记.pdf`; link.click(); setTimeout(()=>URL.revokeObjectURL(url),1000)
+  })
 }

@@ -223,7 +223,7 @@ export const sanitizeResearchDataTable = (value: unknown): ResearchDataTable | n
   const documentId = Number(table.documentId)
   if (!Number.isInteger(documentId) || documentId <= 0) return null
 
-  const template: DataTableTemplate = table.template === 'research-data' ? 'research-data' : 'project-progress'
+  const template: DataTableTemplate = table.template === 'blank' ? 'blank' : table.template === 'research-data' ? 'research-data' : 'project-progress'
   const columns = sanitizeColumns(table.columns)
   if (!columns.length) return null
 
@@ -262,7 +262,7 @@ export const createBlankResearchDataTable = (
   return {
     documentId,
     template,
-    columns: template === 'research-data' ? researchDataColumns() : projectProgressColumns(),
+    columns: template === 'blank' ? Array.from({ length: 5 }, (_, index) => ({ id: `column-${index + 1}`, name: String.fromCharCode(65 + index), type: 'text' as const, required: false })) : template === 'research-data' ? researchDataColumns() : projectProgressColumns(),
     rows: [],
     attachments: [],
     share: {

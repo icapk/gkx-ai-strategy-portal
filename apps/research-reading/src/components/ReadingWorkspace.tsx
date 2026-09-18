@@ -6,10 +6,14 @@ import {
   persistReadingWorkspaceState,
   type ReadingWorkspaceState,
 } from '../readingWorkspaceStorage'
+import { useAudit } from '../audit/AuditContext'
+import { targets } from '../audit/targets'
 import { Modal } from './Modal'
-import { ReadingLibrary } from './ReadingLibrary'
+import { ReadingLibrary, type LibraryViewState } from './ReadingLibraryList'
 import { ReadingReader, type ReadingDraftController } from './ReadingReader'
-import { ServiceCapabilityPath } from './ServiceCapabilityPath'
+import { ANTENNA_ID, antennaDocument, antennaSeedNote } from '../antennaPaper'
+import { usePrototypeFocus } from '../prototypeFocus/FocusContext'
+import { AntennaReader } from './AntennaReader'
 
 interface ReadingWorkspaceProps {
   onSwitchToResearch: () => void
@@ -65,11 +69,24 @@ async function validateUploadFile(file: File): Promise<string | null> {
 }
 
 export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileName, profileAvatar }: ReadingWorkspaceProps) {
-  const [initialLoad] = useState(() => loadReadingWorkspaceState(createDefaultReadingWorkspaceState(readingDocuments, initialReadingNotes)))
+  const [initialLoad] = useState(() => {
+    const loaded = loadReadingWorkspaceState(createDefaultReadingWorkspaceState(readingDocuments, initialReadingNotes))
+    let addedSample = false
+    if (loaded.state.sampleVersion !== 1 && !loaded.state.documents.some(d => d.id === ANTENNA_ID)) {
+      loaded.state = { ...loaded.state, documents: [antennaDocument, ...loaded.state.documents],
+        folders: loaded.state.folders.includes(antennaDocument.folder) ? loaded.state.folders : [...loaded.state.folders, antennaDocument.folder],
+        notes: [...loaded.state.notes, { ...antennaSeedNote, documentId: ANTENNA_ID }] }
+      loaded.recovered = true
+      addedSample = true
+    }
+    if (loaded.state.sampleVersion !== 1) { loaded.state = { ...loaded.state, sampleVersion: 1 }; loaded.recovered = true }
+    return { ...loaded, addedSample }
+  })
   const [workspace, setWorkspace] = useState<ReadingWorkspaceState>(initialLoad.state)
   const workspaceRef = useRef(workspace)
-  const [view, setView] = useState<'reader' | 'library' | 'upload'>('reader')
-  const [activeDocumentId, setActiveDocumentId] = useState(initialLoad.state.documents[0]?.id ?? 0)
+  const libraryViewRef = useRef<LibraryViewState>({section:'all',search:'',page:1,pageSize:10})
+  const [view, setView] = useState<'reader' | 'library' | 'upload'>('library')
+  const [activeDocumentId, setActiveDocumentId] = useState(ANTENNA_ID)
   const [librarySelectedDocumentId, setLibrarySelectedDocumentId] = useState<number | null>(initialLoad.state.documents[0]?.id ?? null)
   const [readerEditingNote, setReaderEditingNote] = useState(false)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
@@ -90,12 +107,40 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
   const readerDraftControllerRef = useRef<ReadingDraftController | null>(null)
   const pendingReaderExitRef = useRef<(() => void) | null>(null)
   const [readerExitGuardOpen, setReaderExitGuardOpen] = useState(false)
+  const { request: auditRequest } = useAudit()
+  const { request: focusRequest, reject: rejectFocus, ready: readyFocus } = usePrototypeFocus()
+  const preparedFocusSequence = useRef(0)
 
   const { documents, folders: uploadFolders } = workspace
   const activeDocument = documents.find((document) => document.id === activeDocumentId) ?? documents[0] ?? null
   const activeNotes = activeDocument
     ? workspace.notes.filter((note) => note.documentId === activeDocument.id)
     : []
+  useEffect(() => {
+    if (!focusRequest || focusRequest.module !== 'reading' || preparedFocusSequence.current === focusRequest.sequence) return
+    const sequence = focusRequest.sequence
+    preparedFocusSequence.current = sequence
+    if(focusRequest.location?.navigationTarget==='reading-review'){readyFocus(sequence);return}
+    if(focusRequest.target?.readingView==='library'||focusRequest.target?.readingView==='upload'){
+      if(readerEditingNote||(view==='upload'&&(uploadFile||uploadState.phase!=='idle'))){rejectFocus(sequence,'请先保存或取消当前笔记、上传，再定位。');return}
+      setView(focusRequest.target.readingView)
+      requestAnimationFrame(()=>readyFocus(sequence))
+      return
+    }
+    if (view === 'upload' && (uploadFile || uploadState.phase !== 'idle')) {
+      rejectFocus(sequence, '请先完成或取消当前上传，再定位阅读功能。')
+      return
+    }
+    if (!activeDocument || activeDocument.id !== ANTENNA_ID) {
+      rejectFocus(sequence, '当前文献不支持这组原型定位。请返回文献库，打开天线论文后重试；当前文献已保留。')
+      return
+    }
+    if (view !== 'reader') {
+      if (readerEditingNote) { rejectFocus(sequence, '请先保存或取消当前笔记，再进入阅读器。'); return }
+      setView('reader')
+    }
+  }, [focusRequest?.sequence, activeDocument?.id, view, rejectFocus])
+
   const isUploading = uploadState.phase === 'uploading' || uploadState.phase === 'parsing'
 
   const showToast = (message: string) => {
@@ -163,9 +208,14 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
   }, [])
 
   useEffect(() => {
+    document.documentElement.dataset.readingDraftDirty = readerEditingNote ? 'true' : 'false'
+    return () => { delete document.documentElement.dataset.readingDraftDirty }
+  }, [readerEditingNote])
+
+  useEffect(() => {
     if (!initialLoad.recovered) return
     const result = persistReadingWorkspaceState(initialLoad.state)
-    showToast(result.ok ? '已清理异常的本地阅读数据' : (initialLoad.error ?? result.error))
+    showToast(result.ok ? initialLoad.addedSample ? '已加入新的PDF示例，原有文献与笔记已保留' : '已清理异常的本地阅读数据' : (initialLoad.error ?? result.error))
   }, [initialLoad])
 
   useEffect(() => {
@@ -263,6 +313,8 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
   }
 
   const openDocument = (document: ReadingDocument) => {
+    const current = workspaceRef.current
+    if (!commitWorkspace({ ...current, documents: current.documents.map(d => d.id === document.id ? { ...d, visitedAt: new Date().toISOString() } : d) })) return
     setLibrarySelectedDocumentId(document.id)
     setActiveDocumentId(document.id)
     setView('reader')
@@ -270,6 +322,8 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
 
   const selectReaderDocument = (documentId: number) => {
     if (!documents.some((document) => document.id === documentId)) return
+    const current = workspaceRef.current
+    if (!commitWorkspace({ ...current, documents: current.documents.map(d => d.id === documentId ? { ...d, visitedAt: new Date().toISOString() } : d) })) return
     setReaderEditingNote(false)
     setLibrarySelectedDocumentId(documentId)
     setActiveDocumentId(documentId)
@@ -418,6 +472,21 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
     })
   }
 
+  useEffect(() => {
+    if (!auditRequest) return
+    const target = targets[auditRequest.targetId]
+    if (!target || target.product !== 'reading' || auditRequest.location?.preserveSurface) return
+    const nextView = target.view ?? 'reader'
+    const applyTarget = () => {
+      if (isUploading && nextView !== 'upload') cancelUpload(false)
+      setView(nextView)
+      setUploadFolderOpen(false)
+      setUploadNewFolderOpen(nextView === 'upload' && target.action === 'upload-folder')
+    }
+    if (view === nextView) applyTarget()
+    else requestReaderExit(applyTarget)
+  }, [auditRequest])
+
   const handleProductTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
     if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
     event.preventDefault()
@@ -428,6 +497,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
         : index
     productTabRefs.current[nextIndex]?.focus()
     if (nextIndex === 0) switchToResearch()
+    else leaveUploadForLibrary()
   }
 
   const handleUploadFolderTriggerKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
@@ -468,11 +538,9 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
       <div className="product-row reading-product-row">
         <div className="product-tabs" role="tablist" aria-label="产品切换">
           <button ref={(tab) => { productTabRefs.current[0] = tab }} id="reading-product-tab-research" className="product-tab" type="button" role="tab" aria-selected="false" aria-controls="reading-product-panel" tabIndex={-1} onKeyDown={(event) => handleProductTabKeyDown(event, 0)} onClick={switchToResearch}>智能科研</button>
-          <button ref={(tab) => { productTabRefs.current[1] = tab }} id="reading-product-tab-reading" className="product-tab product-tab--active" type="button" role="tab" aria-selected="true" aria-controls="reading-product-panel" tabIndex={0} onKeyDown={(event) => handleProductTabKeyDown(event, 1)}>智能阅读</button>
+          <button ref={(tab) => { productTabRefs.current[1] = tab }} id="reading-product-tab-reading" className="product-tab product-tab--active" type="button" role="tab" aria-selected="true" aria-controls="reading-product-panel" tabIndex={0} onKeyDown={(event) => handleProductTabKeyDown(event, 1)} onClick={leaveUploadForLibrary}>智能阅读</button>
         </div>
         <div className="reading-product-actions">
-          {(view === 'reader' || view === 'upload') && <button className="reading-library-launch" type="button" onClick={leaveUploadForLibrary}>PDF增强阅读</button>}
-          {(view === 'library' || readerEditingNote) && view !== 'upload' && <button className="reading-upload-button" type="button" onClick={openUploadView}><img src="/assets/reading/upload.svg" alt="" />上传文件</button>}
           <button
             className="profile-button"
             type="button"
@@ -483,14 +551,9 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
         </div>
       </div>
 
-      <ServiceCapabilityPath
-        product="reading"
-        items={['基础服务', '智能阅读', 'PDF增强阅读', '菜单栏服务', '论文解析服务', '增强阅读服务']}
-      />
-
       <div id="reading-product-panel" className="reading-product-panel" role="tabpanel" aria-labelledby="reading-product-tab-reading">
       {view === 'reader' && activeDocument ? (
-        <ReadingReader
+        activeDocument.id === ANTENNA_ID ? <AntennaReader onBack={leaveUploadForLibrary} notes={activeNotes} onNotesChange={updateActiveNotes} onEditingNoteChange={handleReaderEditingNoteChange} /> : <ReadingReader
           key={activeDocument.id}
           documents={documents}
           activeDocumentId={activeDocument.id}
@@ -505,6 +568,8 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
         />
       ) : view === 'library' ? (
         <ReadingLibrary
+          initialViewState={libraryViewRef.current}
+          onViewStateChange={state => { libraryViewRef.current = state }}
           documents={documents}
           onDocumentsChange={updateDocuments}
           selectedDocumentId={librarySelectedDocumentId}
@@ -517,9 +582,9 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
           onFoldersChange={updateFolders}
         />
       ) : (
-        <section className="reading-upload-page" aria-label="上传文件">
-          <h1>PDF增强阅读</h1>
-          <p>上传 PDF 论文，使用论文解析服务与增强阅读服务，包括实时翻译、图表提取、知识图谱等能力</p>
+        <section data-compliance-target="reading-upload" className="reading-upload-page" aria-label="上传文件">
+          <button className="reading-upload-return" type="button" onClick={leaveUploadForLibrary}>‹ 返回文件列表</button>
+          <h1>上传文件</h1>
           <form onSubmit={submitUpload}>
             <label className={`reading-upload-page-dropzone${uploadFile ? ' has-file' : ''}`}>
               <span><img src="/assets/reading/docx.svg" alt="" /><img src="/assets/reading/pdf.svg" alt="" /></span>
@@ -535,7 +600,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
       )}
       </div>
 
-      {uploadNewFolderOpen && <Modal title="新建文件夹" onClose={() => setUploadNewFolderOpen(false)} onSubmit={createUploadFolder}><label className="field-label" htmlFor="reading-upload-folder-name"><span className="required-mark">*</span> 文件夹名称：</label><input className="text-field" id="reading-upload-folder-name" name="folderName" autoFocus placeholder="请输入" /></Modal>}
+      {uploadNewFolderOpen && <Modal auditTarget="reading-upload-folder" title="新建文件夹" onClose={() => setUploadNewFolderOpen(false)} onSubmit={createUploadFolder}><label className="field-label" htmlFor="reading-upload-folder-name"><span className="required-mark">*</span> 文件夹名称：</label><input className="text-field" id="reading-upload-folder-name" name="folderName" autoFocus placeholder="请输入" /></Modal>}
       {readerExitGuardOpen && <Modal title="保存笔记草稿？" onClose={() => finishReaderExit('continue')} hideFooter>
         <div className="reading-draft-guard">
           <p>当前笔记还有未保存的内容或图片。保存后继续，或明确放弃修改。</p>

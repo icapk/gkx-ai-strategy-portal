@@ -7,35 +7,29 @@ import {
   listResearchContent,
   searchResearchContent,
 } from '../src/researchSearch.ts'
+import { compareResearchDocuments } from '../src/researchSort.ts'
 import type { ResearchDocument, ResearchNote } from '../src/types.ts'
+
+test('搜索标题命中优先，组内按访问和创建时间而非匹配分数排序',()=>{
+ const base=initialDocuments[0]
+ const docs:ResearchDocument[]=[{...base,id:100,title:'needle',content:'',visitedAt:'2026-09-01 10:00',createdAt:'2026-09-01 09:00'},
+ { ...base,id:101,title:'prefix needle suffix',content:'',visitedAt:'2026-09-02 10:00',createdAt:'2026-09-01 09:00'},
+ { ...base,id:102,title:'仅正文',content:'needle',visitedAt:'2026-09-03 10:00',createdAt:'2026-09-03 09:00'}]
+ assert.deepEqual(searchResearchContent(docs,[],'needle').map(r=>r.documentId),[101,100,102])
+})
 
 test('空查询浏览列表与界面计数使用同一份数据', () => {
   const results = listResearchContent(initialDocuments, initialResearchNotes)
 
-  assert.deepEqual(countResearchSearchResults(results), { all: 14, documents: 9, notes: 5 })
+  assert.deepEqual(countResearchSearchResults(results), { all: 9, documents: 9, notes: 0 })
   assert.equal(filterResearchSearchResults(results, 'documents').length, 9)
-  assert.equal(filterResearchSearchResults(results, 'notes').length, 5)
+  assert.equal(filterResearchSearchResults(results, 'notes').length, 0)
 })
 
-test('默认列表顺序稳定，文档在前、笔记在后', () => {
-  const results = listResearchContent(initialDocuments, initialResearchNotes)
-
-  assert.deepEqual(results.map((result) => result.id), [
-    'document:1',
-    'document:2',
-    'document:3',
-    'document:4',
-    'document:5',
-    'document:6',
-    'document:7',
-    'document:9',
-    'document:10',
-    'note:1',
-    'note:2',
-    'note:3',
-    'note:4',
-    'note:5',
-  ])
+test('默认文档顺序与最近浏览排序一致，不展示非PDF示例笔记',()=>{
+ const results=listResearchContent(initialDocuments,initialResearchNotes)
+ const sorted=[...initialDocuments].sort(compareResearchDocuments)
+ assert.deepEqual(results.map(r=>r.id),sorted.map(d=>'document:'+d.id))
 })
 
 test('孤立笔记不会进入列表或计数', () => {
@@ -51,7 +45,7 @@ test('孤立笔记不会进入列表或计数', () => {
   const results = listResearchContent(initialDocuments, [...initialResearchNotes, orphanNote])
 
   assert.equal(results.some((result) => result.id === 'note:99'), false)
-  assert.deepEqual(countResearchSearchResults(results), { all: 14, documents: 9, notes: 5 })
+  assert.deepEqual(countResearchSearchResults(results), { all: 9, documents: 9, notes: 0 })
 })
 
 test('文档摘要缺失时稳定回退到位置和所有者', () => {
@@ -73,7 +67,7 @@ test('文档摘要缺失时稳定回退到位置和所有者', () => {
   assert.equal(result.snippet, '我的空间/研究 · 张三')
 })
 
-test('个人空间展示名与历史内部名称都能检索同一文档', () => {
+test('元信息不作为标题正文检索命中', () => {
   const document: ResearchDocument = {
     id: 78,
     title: '空间检索兼容文档',
@@ -88,8 +82,8 @@ test('个人空间展示名与历史内部名称都能检索同一文档', () =>
     shared: false,
   }
 
-  assert.equal(searchResearchContent([document], [], '个人空间')[0]?.id, 'document:78')
-  assert.equal(searchResearchContent([document], [], '我的空间')[0]?.id, 'document:78')
+  assert.equal(searchResearchContent([document], [], '个人空间')[0]?.id, undefined)
+  assert.equal(searchResearchContent([document], [], '我的空间')[0]?.id, undefined)
 })
 
 test('搜索函数仍保持空查询无命中的清晰语义', () => {
@@ -123,7 +117,7 @@ test('在线解析后的 PDF 全文可被科研搜索命中', () => {
 
   const [result] = searchResearchContent([document], [], '知识蒸馏')
   assert.equal(result?.id, 'document:79')
-  assert.deepEqual(result?.matchedFields, ['PDF全文'])
+  assert.deepEqual(result?.matchedFields, ['正文'])
   assert.match(result?.snippet ?? '', /知识蒸馏/)
   assert.equal(result?.targetPageNumber, 2)
 })

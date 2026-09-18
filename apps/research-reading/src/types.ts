@@ -1,10 +1,10 @@
 export type Section = 'workbench' | 'personal' | 'team' | 'recycle'
 
-export type WorkbenchTab = 'recent' | 'favorites' | 'owned' | 'shared'
+export type WorkbenchTab = 'quick' | 'recent' | 'favorites' | 'owned' | 'shared'
 
 export type TeamPanelTab = 'todo' | 'comments' | 'members'
 
-export type DocumentKind = '在线文档' | '数据表格' | 'PDF文档' | 'Word文档' | 'Excel文档'
+export type DocumentKind = '在线文档' | '数据表格' | 'PDF文档' | 'Word文档' | 'Excel文档' | '附件'
 
 export interface PdfArchiveMetadata {
   storageKey: string
@@ -36,7 +36,7 @@ export interface PdfArchiveAnnotation {
   updatedAt: string
 }
 
-export type DataTableTemplate = 'project-progress' | 'research-data'
+export type DataTableTemplate = 'blank' | 'project-progress' | 'research-data'
 
 export type DataTableColumnType = 'text' | 'number' | 'select' | 'date' | 'percent' | 'file'
 
@@ -145,6 +145,8 @@ export type DocumentBlock =
   | DocumentDividerBlock
 
 export interface ResearchDocument {
+  richHtml?: string
+  originalFileName?: string
   id: number
   title: string
   location: string

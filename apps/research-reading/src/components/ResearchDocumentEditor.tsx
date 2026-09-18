@@ -1,6 +1,4 @@
-import katex from 'katex'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import 'katex/dist/katex.min.css'
 import {
   cloneDocumentBlocks,
   createDocumentBlock,
@@ -139,17 +137,22 @@ const getEditorBlockSymbol = (block: DocumentBlock) => getPdfReferenceMetadata(b
   : blockOptions.find((option) => option.type === block.type)?.symbol
 
 const getFormulaHtml = (latex: string) => {
-  if (!latex.trim()) return ''
-  try {
-    return katex.renderToString(latex, {
-      displayMode: true,
-      throwOnError: true,
-      trust: false,
-      strict: 'ignore',
-    })
-  } catch {
-    return ''
+  const source = latex.trim()
+  if (!source) return ''
+  let depth = 0
+  for (const character of source) {
+    if (character === '{') depth += 1
+    if (character === '}') depth -= 1
+    if (depth < 0) return ''
   }
+  if (depth !== 0) return ''
+  const escaped = source
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+  return `<span class="document-local-formula" aria-label="LaTeX 公式">${escaped}</span>`
 }
 
 const loadImage = (source: string) => new Promise<HTMLImageElement>((resolve, reject) => {
@@ -894,6 +897,7 @@ export function ResearchDocumentEditor({
                 <header className="document-block-header">
                   <span className="document-block-type"><i className={isPdfReference ? 'is-pdf' : ''} aria-hidden="true">{getEditorBlockSymbol(block)}</i>{blockLabel}</span>
                   <div className="document-block-actions">
+                    <button type="button" aria-label="复制内容块" onClick={() => { if (blocks.length >= 200) { showNotice('内容块已达上限'); return }; const copy = { ...cloneDocumentBlocks([block])[0], id: `${block.id}-copy-${Date.now()}` }; setBlocks((current) => [...current.slice(0, index + 1), copy, ...current.slice(index + 1)]); focusBlock(copy.id) }}>复制</button>
                     <button type="button" aria-label="上移内容" disabled={index === 0} onClick={() => moveBlock(index, -1)}><span className="document-block-chevron is-up" aria-hidden="true" /></button>
                     <button type="button" aria-label="下移内容" disabled={index === blocks.length - 1} onClick={() => moveBlock(index, 1)}><span className="document-block-chevron" aria-hidden="true" /></button>
                     <button type="button" className="is-danger" aria-label={`删除${blockLabel}（不会删除存档原文）`} onClick={() => removeBlock(index)}><span className="icon-close" aria-hidden="true" /></button>

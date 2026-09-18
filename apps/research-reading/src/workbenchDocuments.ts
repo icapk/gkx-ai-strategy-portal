@@ -13,7 +13,9 @@ export const parentFolderLabel = (location: string) => {
 export const displayResearchLocation = (location: string) => {
   if (location === '我的空间') return '个人空间'
   if (location.startsWith('我的空间/')) return `个人空间${location.slice('我的空间'.length)}`
-  return location
+  if (!location.trim()) return '—'
+  if (/^(个人空间|团队空间)(\/|$)/.test(location)) return location
+  return `团队空间/${location}`
 }
 
 export const isPersonalDocument = (documentItem: ResearchDocument) => (

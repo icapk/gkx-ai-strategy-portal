@@ -185,6 +185,7 @@ export function DataTableHub({
 
   const scopeCounts = useMemo(() => ({
     all: items.length,
+    'blank': items.filter((item) => item.table.template === 'blank').length,
     'project-progress': items.filter((item) => item.table.template === 'project-progress').length,
     'research-data': items.filter((item) => item.table.template === 'research-data').length,
   }), [items])
