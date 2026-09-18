@@ -1,0 +1,3 @@
+export type DocumentLanguage = 'zh' | 'en'
+export function DocumentLanguageSelect({value,onChange,label='文档语言',disabled=false}:{value?:DocumentLanguage;onChange:(value:DocumentLanguage)=>void;label?:string;disabled?:boolean}){return <label><span className="document-language-label">语言 </span><select aria-label={label} required value={value??''} disabled={disabled} onChange={e=>{if(e.target.value==='zh'||e.target.value==='en')onChange(e.target.value)}}><option value="" disabled>请选择中文 / 英文</option><option value="zh">中文文档</option><option value="en">英文文档</option></select></label>}
+export const translationDirection=(language?:DocumentLanguage)=>language==='zh'?'中译英':language==='en'?'英译中':'请先选择文档语言'

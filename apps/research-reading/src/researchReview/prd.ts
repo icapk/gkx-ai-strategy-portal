@@ -1,3 +1,4 @@
+import { applyConfirmedAreas } from '../reviewDecisions'
 import { expandPrd } from './prdDetails'
 import { featureRules, type PrdRule } from './prdRules'
 export interface PrdFeature {
@@ -29,7 +30,7 @@ export const prdOverview = {
   users: '主要用户是高校课题组、研究机构和企业研发团队中的研究人员、科研助理与项目负责人。研究人员沉淀个人材料，成员共同维护项目资料，空间管理员管理成员与角色；相同的文档协作方式也适用于非科研项目团队。',
   scenario: '以一个课题从立项到结题为例：成员先在个人空间上传文献、整理笔记，再把可协作的内容共享给团队；项目过程中用工作台找回最近打开或收藏的材料，用数据表格记录实验结果与进度；误删资料从回收站恢复，形成“收集—整理—协作—找回”的闭环。',
   value: '解决资料散落、反复查找、个人稿与团队稿混淆、误删后无法找回的问题。产品价值是让成员找得到资料、接得上工作、清楚谁能看和改。',
-  scope: '本 PRD 以智能科研当前原型为设计基线，覆盖工作台、个人空间、团队空间和回收站，文档编辑、PDF存档与数据表格归入内容管理流程。智能阅读的增强阅读能力由另一模块承接；本模块不包含飞书的即时通讯、会议与日历等完整办公套件。',
+  scope: '本 PRD 以智能科研当前原型为设计基线，覆盖工作台、个人空间、团队空间和回收站，文档编辑、PDF存档与数据表格归入内容管理流程。智能阅读为完全独立产品，资料和笔记不互传；本模块不包含飞书的即时通讯、会议与日历等完整办公套件。',
   delivery: '当前为本机交互原型，资料与审核记录保存在浏览器。下文“交付规则”是正式产品实现时需要达成的约定，不代表已接入后台、多账号同步或服务端权限。涉及原文冲突或未确定策略的部分，分别列在对应功能的“现状与待确认”中。',
   sourceTitle: '飞书官方：快速上手云盘',
   sourceUrl: 'https://www.feishu.cn/hc/zh-CN/articles/778513900437-%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E5%A4%B9',
@@ -70,7 +71,7 @@ export const legacyPrdAreas: PrdArea[] = [
   ]},
 ]
 
-export const prdAreas = expandPrd(legacyPrdAreas)
+export const prdAreas = applyConfirmedAreas(expandPrd(legacyPrdAreas))
 export function prdMarkdown(areas = prdAreas, version = 'v2.0 细化评审稿') {
   const overview = prdOverview
   return ['# 智能科研 PRD',version,'## 需求概述',overview.positioning,overview.users,overview.scenario,overview.value,'### 产品范围',overview.scope,`参照：[${overview.sourceTitle}](${overview.sourceUrl})`,...areas.flatMap(area=>['## '+area.title,area.purpose,'### 页面布局',area.layout,...area.features.flatMap(feature=>['### '+feature.id+' '+feature.title,'优先级：'+(feature.priority??'未分级')+' · 计划版本：'+(feature.release??'历史原稿'),'合规关联：'+(feature.compliance?.join('、')||'待关联'),...featureRules(feature).flatMap(group=>['#### '+group.title,group.items.map((text,i)=>`${i+1}. ${text}`).join('\n')]),'原型关联：'+feature.links.map(link=>link.id+' '+link.label).join('；')])])].join('\n\n')+'\n'

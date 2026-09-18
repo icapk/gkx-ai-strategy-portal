@@ -13,6 +13,11 @@ import { ReadingLibrary, type LibraryViewState } from './ReadingLibraryList'
 import { ReadingReader, type ReadingDraftController } from './ReadingReader'
 import { ANTENNA_ID, antennaDocument, antennaSeedNote } from '../antennaPaper'
 import { usePrototypeFocus } from '../prototypeFocus/FocusContext'
+import { DocumentLanguageSelect, type DocumentLanguage } from './DocumentLanguage'
+import { ReadingLanguageScope } from './ReadingLanguageContext'
+import { ReadingUploadedPdf } from './ReadingUploadedPdf'
+import { saveReadingFile, removeReadingFile } from '../readingFiles'
+import { parsePdfData } from '../pdfParsing'
 import { AntennaReader } from './AntennaReader'
 
 interface ReadingWorkspaceProps {
@@ -49,7 +54,7 @@ const uniqueDocumentTitle = (fileName: string, documents: ReadingDocument[]) => 
 
 async function validateUploadFile(file: File): Promise<string | null> {
   const extension = file.name.toLocaleLowerCase().match(/\.(pdf|docx?)$/)?.[1] ?? ''
-  if (!['pdf', 'doc', 'docx'].includes(extension)) return '仅支持 PDF、DOC、DOCX 格式，请重新选择文件。'
+  if (extension !== 'pdf') return '仅支持 PDF 格式，请重新选择文件。'
   if (file.size <= 0) return '文件为空，无法进行解析。'
   if (file.size > maxUploadBytes) return '文件超过 50 MB，请压缩后重试。'
 
@@ -58,7 +63,7 @@ async function validateUploadFile(file: File): Promise<string | null> {
     const isPdf = header[0] === 0x25 && header[1] === 0x50 && header[2] === 0x44 && header[3] === 0x46 && header[4] === 0x2d
     const isZip = header[0] === 0x50 && header[1] === 0x4b
     const isLegacyWord = header[0] === 0xd0 && header[1] === 0xcf && header[2] === 0x11 && header[3] === 0xe0
-    if ((extension === 'pdf' && !isPdf) || (extension === 'docx' && !isZip) || (extension === 'doc' && !isLegacyWord)) {
+    if (!isPdf) {
       return '文件结构与扩展名不一致，解析已停止，请检查文件后重试。'
     }
   } catch {
@@ -89,6 +94,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
   const [activeDocumentId, setActiveDocumentId] = useState(ANTENNA_ID)
   const [librarySelectedDocumentId, setLibrarySelectedDocumentId] = useState<number | null>(initialLoad.state.documents[0]?.id ?? null)
   const [readerEditingNote, setReaderEditingNote] = useState(false)
+  const [uploadLanguage,setUploadLanguage]=useState<DocumentLanguage>()
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [uploadFolder, setUploadFolder] = useState(initialLoad.state.folders[0] ?? '我的笔记库1')
   const [uploadFolderOpen, setUploadFolderOpen] = useState(false)
@@ -213,7 +219,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
   }, [readerEditingNote])
 
   useEffect(() => {
-    if (!initialLoad.recovered) return
+    if (!initialLoad.recovered || initialLoad.error) return
     const result = persistReadingWorkspaceState(initialLoad.state)
     showToast(result.ok ? initialLoad.addedSample ? '已加入新的PDF示例，原有文献与笔记已保留' : '已清理异常的本地阅读数据' : (initialLoad.error ?? result.error))
   }, [initialLoad])
@@ -362,7 +368,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
 
   const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
     cancelUpload(false)
-    setUploadFile(event.target.files?.[0] ?? null)
+    setUploadFile(event.target.files?.[0] ?? null);setUploadLanguage(undefined)
   }
 
   const startUpload = async () => {
@@ -382,50 +388,16 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
       return
     }
 
-    let progress = 8
-    uploadTimerRef.current = window.setInterval(() => {
-      if (uploadAttemptRef.current !== attempt) {
-        clearUploadTimer()
-        return
-      }
-      progress = Math.min(100, progress + (progress < 68 ? 12 : 8))
-      if (progress < 76) {
-        setUploadState({ phase: 'uploading', progress, error: '' })
-        return
-      }
-      if (progress < 100) {
-        setUploadState({ phase: 'parsing', progress, error: '' })
-        return
-      }
-
-      clearUploadTimer()
-      const current = workspaceRef.current
-      const folder = current.folders.includes(uploadFolder) ? uploadFolder : (current.folders[0] ?? '我的笔记库1')
-      const documentId = Math.max(0, ...current.documents.map((document) => document.id)) + 1
-      const document: ReadingDocument = {
-        id: documentId,
-        title: uniqueDocumentTitle(file.name, current.documents),
-        authors: '作者待补充',
-        journal: '用户上传',
-        year: String(new Date().getFullYear()),
-        type: file.name.toLocaleLowerCase().endsWith('.pdf') ? 'PDF' : 'Word',
-        size: formatFileSize(file.size),
-        favorite: false,
-        folder,
-      }
-      const foldersNext = current.folders.includes(folder) ? current.folders : [folder, ...current.folders]
-      if (!commitWorkspace({ ...current, folders: foldersNext, documents: [...current.documents, document] })) {
-        setUploadState({ phase: 'failed', progress: 100, error: '文件解析完成，但保存到阅读库失败。请释放浏览器存储空间后重试。' })
-        return
-      }
-      setActiveDocumentId(documentId)
-      setLibrarySelectedDocumentId(documentId)
-      setUploadFile(null)
-      if (uploadInputRef.current) uploadInputRef.current.value = ''
-      setUploadState(idleUploadState)
-      setView('library')
-      showToast('解析完成，文献已加入阅读库，可立即打开')
-    }, 180)
+    if(!uploadLanguage){setUploadState({phase:'failed',progress:0,error:'请选择中文文档或英文文档'});return}
+    const current=workspaceRef.current,folder=uploadFolder,title=file.name.replace(/\.pdf$/i,'').trim();
+    if(current.documents.some(d=>d.folder===folder&&d.title.toLocaleLowerCase()===title.toLocaleLowerCase())){setUploadState({phase:'failed',progress:0,error:'同目录已存在同名 PDF'});return}
+    const documentId=Math.max(0,...current.documents.map(d=>d.id))+1;let saved=false;
+    try{await parsePdfData(await file.arrayBuffer(),progress=>{if(uploadAttemptRef.current===attempt)setUploadState({phase:'parsing',progress,error:''})});if(uploadAttemptRef.current!==attempt)return;await saveReadingFile(documentId,file);saved=true;if(uploadAttemptRef.current!==attempt){await removeReadingFile(documentId);return}
+      const latest=workspaceRef.current;
+      if(latest.documents.some(d=>d.id===documentId))throw Error('编号冲突，请重试');
+      if(!commitWorkspace({...latest,documents:[...latest.documents,{id:documentId,title,authors:'未提供',journal:'用户上传',year:'未提供',type:'PDF',language:uploadLanguage,originalFile:true,size:formatFileSize(file.size),favorite:false,folder}]}))throw Error('阅读库保存失败');
+      setActiveDocumentId(documentId);setLibrarySelectedDocumentId(documentId);setUploadFile(null);setUploadLanguage(undefined);if(uploadInputRef.current)uploadInputRef.current.value='';setUploadState(idleUploadState);setView('library');showToast('PDF 原件已保存到独立阅读库；AI 能力为模拟演示')
+    }catch(e){if(saved)await removeReadingFile(documentId);setUploadState({phase:'failed',progress:0,error:String(e)})}
   }
 
   const submitUpload = (event: FormEvent<HTMLFormElement>) => {
@@ -537,7 +509,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
     <>
       <div className="product-row reading-product-row">
         <div className="product-tabs" role="tablist" aria-label="产品切换">
-          <button ref={(tab) => { productTabRefs.current[0] = tab }} id="reading-product-tab-research" className="product-tab" type="button" role="tab" aria-selected="false" aria-controls="reading-product-panel" tabIndex={-1} onKeyDown={(event) => handleProductTabKeyDown(event, 0)} onClick={switchToResearch}>智能科研</button>
+          <span className="prototype-notice">独立阅读演示 · AI、翻译及图谱未接入服务</span>
           <button ref={(tab) => { productTabRefs.current[1] = tab }} id="reading-product-tab-reading" className="product-tab product-tab--active" type="button" role="tab" aria-selected="true" aria-controls="reading-product-panel" tabIndex={0} onKeyDown={(event) => handleProductTabKeyDown(event, 1)} onClick={leaveUploadForLibrary}>智能阅读</button>
         </div>
         <div className="reading-product-actions">
@@ -553,7 +525,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
 
       <div id="reading-product-panel" className="reading-product-panel" role="tabpanel" aria-labelledby="reading-product-tab-reading">
       {view === 'reader' && activeDocument ? (
-        activeDocument.id === ANTENNA_ID ? <AntennaReader onBack={leaveUploadForLibrary} notes={activeNotes} onNotesChange={updateActiveNotes} onEditingNoteChange={handleReaderEditingNoteChange} /> : <ReadingReader
+        <ReadingLanguageScope language={activeDocument.language} onChange={language=>commitWorkspace({...workspaceRef.current,documents:workspaceRef.current.documents.map(d=>d.id===activeDocument.id?{...d,language}:d)})}>{activeDocument.originalFile ? <ReadingUploadedPdf onLanguageChange={language=>commitWorkspace({...workspaceRef.current,documents:workspaceRef.current.documents.map(d=>d.id===activeDocument.id?{...d,language}:d)})} document={activeDocument} notes={activeNotes} onNotesChange={updateActiveNotes} onBack={leaveUploadForLibrary}/> : activeDocument.id === ANTENNA_ID ? <AntennaReader onBack={leaveUploadForLibrary} notes={activeNotes} onNotesChange={updateActiveNotes} onEditingNoteChange={handleReaderEditingNoteChange} /> : <ReadingReader
           key={activeDocument.id}
           documents={documents}
           activeDocumentId={activeDocument.id}
@@ -565,7 +537,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
           onNotesChange={updateActiveNotes}
           onEditingNoteChange={handleReaderEditingNoteChange}
           onToast={handleChildToast}
-        />
+        />}</ReadingLanguageScope>
       ) : view === 'library' ? (
         <ReadingLibrary
           initialViewState={libraryViewRef.current}
@@ -588,10 +560,10 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
           <form onSubmit={submitUpload}>
             <label className={`reading-upload-page-dropzone${uploadFile ? ' has-file' : ''}`}>
               <span><img src="/assets/reading/docx.svg" alt="" /><img src="/assets/reading/pdf.svg" alt="" /></span>
-              <strong>{uploadFile?.name || '点击选择文件，支持 Word、PDF 格式'}</strong>
-              <input ref={uploadInputRef} type="file" accept=".pdf,.doc,.docx" disabled={isUploading} onChange={handleFile} />
+              <strong>{uploadFile?.name || '点击选择 PDF 文件'}</strong>
+              <input ref={uploadInputRef} type="file" accept=".pdf" disabled={isUploading} onChange={handleFile} />
             </label>
-            <div className="reading-upload-page-folder"><span>上传至：</span><div ref={uploadFolderControlRef} className="reading-upload-folder-control"><button ref={uploadFolderTriggerRef} type="button" className={uploadFolderOpen ? 'is-open' : ''} aria-label="选择笔记库" aria-haspopup="listbox" aria-controls="reading-upload-folder-list" aria-expanded={uploadFolderOpen} disabled={isUploading} onKeyDown={handleUploadFolderTriggerKeyDown} onClick={() => { if (uploadFolderOpen) closeUploadFolderMenu(); else openUploadFolderMenu() }}><span>{uploadFolder}</span><img src="/assets/direction-down.svg" alt="" /></button>{uploadFolderOpen && <div id="reading-upload-folder-list" className="reading-upload-folder-menu" role="listbox" aria-label="选择上传文件夹" onKeyDown={handleUploadFolderMenuKeyDown}>{uploadFolders.map((folder, index) => <button ref={(option) => { uploadFolderOptionRefs.current[index] = option }} type="button" role="option" aria-selected={uploadFolder === folder} tabIndex={-1} className={uploadFolder === folder ? 'is-active' : ''} key={folder} onClick={() => selectUploadFolder(folder)}>{folder}</button>)}</div>}</div><button className="reading-upload-new-folder" type="button" aria-label="新建文件夹" disabled={isUploading} onClick={() => { closeUploadFolderMenu(); setUploadNewFolderOpen(true) }}><img src="/assets/reading/create-folder.svg" alt="" /></button></div>
+            <DocumentLanguageSelect value={uploadLanguage} disabled={isUploading} onChange={setUploadLanguage}/><div className="reading-upload-page-folder"><span>上传至：</span><div ref={uploadFolderControlRef} className="reading-upload-folder-control"><button ref={uploadFolderTriggerRef} type="button" className={uploadFolderOpen ? 'is-open' : ''} aria-label="选择笔记库" aria-haspopup="listbox" aria-controls="reading-upload-folder-list" aria-expanded={uploadFolderOpen} disabled={isUploading} onKeyDown={handleUploadFolderTriggerKeyDown} onClick={() => { if (uploadFolderOpen) closeUploadFolderMenu(); else openUploadFolderMenu() }}><span>{uploadFolder}</span><img src="/assets/direction-down.svg" alt="" /></button>{uploadFolderOpen && <div id="reading-upload-folder-list" className="reading-upload-folder-menu" role="listbox" aria-label="选择上传文件夹" onKeyDown={handleUploadFolderMenuKeyDown}>{uploadFolders.map((folder, index) => <button ref={(option) => { uploadFolderOptionRefs.current[index] = option }} type="button" role="option" aria-selected={uploadFolder === folder} tabIndex={-1} className={uploadFolder === folder ? 'is-active' : ''} key={folder} onClick={() => selectUploadFolder(folder)}>{folder}</button>)}</div>}</div><button className="reading-upload-new-folder" type="button" aria-label="新建文件夹" disabled={isUploading} onClick={() => { closeUploadFolderMenu(); setUploadNewFolderOpen(true) }}><img src="/assets/reading/create-folder.svg" alt="" /></button></div>
             {uploadFile && uploadState.phase === 'idle' && <button className="reading-upload-page-submit reading-primary-button" type="submit">上传文件</button>}
             {isUploading && <><div className="reading-upload-page-progress"><article><img src={uploadFile?.name.toLowerCase().endsWith('.pdf') ? '/assets/reading/pdf.svg' : '/assets/reading/docx.svg'} alt="" /><div><strong>{uploadFile?.name}</strong><small role="status" aria-live="polite" aria-atomic="true">{uploadState.phase === 'parsing' ? '上传完成，正在解析文献结构…' : `正在上传至“${uploadFolder}”`}</small><span role="progressbar" aria-label={`${uploadFile?.name ?? '文件'}上传进度`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={uploadState.progress} aria-valuetext={`${uploadState.progress}%`}><i style={{ width: `${uploadState.progress}%` }} /></span></div><b aria-hidden="true">{uploadState.progress}%</b></article></div><button className="reading-upload-page-submit" type="button" onClick={() => cancelUpload(true)}>取消上传</button></>}
             {uploadState.phase === 'failed' && <><div className="reading-upload-page-progress" role="alert"><article><img src={uploadFile?.name.toLowerCase().endsWith('.pdf') ? '/assets/reading/pdf.svg' : '/assets/reading/docx.svg'} alt="" /><div><strong>{uploadFile?.name || '文件解析失败'}</strong><small>{uploadState.error}</small></div><b>失败</b></article></div>{uploadFile && <button className="reading-upload-page-submit reading-primary-button" type="button" onClick={() => void startUpload()}>重试</button>}<button className="reading-upload-page-submit" type="button" onClick={clearUploadSelection}>取消</button></>}

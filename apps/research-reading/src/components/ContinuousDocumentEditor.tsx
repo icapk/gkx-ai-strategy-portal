@@ -43,6 +43,7 @@ export function ContinuousDocumentEditor({ documentItem, onClose, onSave }: Prop
     setMessage(error ?? '已保存'); if (!error) setDirty(false)
   }
   const saveRef = useRef(save); saveRef.current = save
+  useEffect(()=>{if(!dirty)return;const timer=window.setTimeout(()=>saveRef.current(),850);return()=>window.clearTimeout(timer)},[dirty,title,editor?.getHTML()])
   useEffect(() => {
     const key = (event: KeyboardEvent) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); saveRef.current() } }
     const unload = (event: BeforeUnloadEvent) => { if (dirty) event.preventDefault() }

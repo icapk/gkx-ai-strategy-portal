@@ -94,6 +94,8 @@ function sanitizeDocument(value: unknown): ReadingDocument | null {
   return {
     id,
     title,
+    language: candidate.language === 'zh' || candidate.language === 'en' ? candidate.language : undefined,
+    originalFile: candidate.originalFile === true || undefined,
     authors: cleanText(candidate.authors, 180, '作者待补充'),
     journal: cleanText(candidate.journal, 160, '用户上传'),
     year: cleanText(candidate.year, 12, String(new Date().getFullYear())),
@@ -120,7 +122,7 @@ function sanitizeNote(value: unknown, fallbackDocumentId: number | null): Persis
       .filter((image): image is string => (
         typeof image === 'string'
         && image.length <= MAX_NOTE_IMAGE_DATA_URL_LENGTH
-        && (/^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(image) || /^(?:\.\/|\/)antenna\/[\w/-]+\.(?:png|jpe?g|webp)$/i.test(image))
+        && (/^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(image) || /^\/antenna\/[\w/-]+\.(?:png|jpe?g|webp)$/i.test(image))
       ))
       .slice(0, MAX_NOTE_IMAGES)
     : []
@@ -130,6 +132,7 @@ function sanitizeNote(value: unknown, fallbackDocumentId: number | null): Persis
     documentId,
     title: cleanText(candidate.title, 120, excerpt.slice(0, 18)),
     excerpt,
+    ...(candidate.pdfAnnotation && candidate.pdfAnnotation.documentId===documentId && ['highlight','screenshot'].includes(candidate.pdfAnnotation.kind) && Number.isInteger(candidate.pdfAnnotation.pageNumber) && candidate.pdfAnnotation.pageNumber>0 && typeof candidate.pdfAnnotation.quote==='string' && typeof candidate.pdfAnnotation.note==='string' && Array.isArray(candidate.pdfAnnotation.rects) ? {pdfAnnotation: {...candidate.pdfAnnotation, imageAssetKey:undefined, imageDataUrl:imageDataUrls[0], rects:candidate.pdfAnnotation.rects.filter(r=>r&&[r.x,r.y,r.width,r.height].every(v=>Number.isFinite(v)&&v>=0&&v<=1)).slice(0,60)}} : {}),
     createdAt: cleanText(candidate.createdAt, 64),
     color,
     ...(Array.isArray(candidate.tags) ? { tags: candidate.tags.filter((tag): tag is string => typeof tag === 'string' && tag.length <= 100).slice(0, 30) } : {}),

@@ -1,4 +1,7 @@
 export interface ReadingDocument {
+  language?: 'zh' | 'en'
+  originalFile?: boolean
+
   id: number
   title: string
   authors: string
@@ -12,6 +15,7 @@ export interface ReadingDocument {
 }
 
 export interface ReadingNote {
+  pdfAnnotation?: import('./types').PdfArchiveAnnotation
   id: number
   title: string
   excerpt: string

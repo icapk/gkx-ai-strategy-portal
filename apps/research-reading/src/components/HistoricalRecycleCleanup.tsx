@@ -1,0 +1,9 @@
+import {useState} from 'react'
+import {createPortal} from 'react-dom'
+import {captureProduct} from '../demoBackup'
+import {Modal} from './Modal'
+export function HistoricalRecycleCleanup({name,onClose,onConfirm}:{name:string;onClose:()=>void;onConfirm:()=>Promise<boolean>}){
+ const [backup,setBackup]=useState<Awaited<ReturnType<typeof captureProduct>>|null>(null),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const download=async()=>{setBusy(true);setError('');try{const data=await captureProduct('research'),url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='科研资料-历史清理前备份-'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);setBackup(data);setConfirmed(false)}catch(e){setError(String(e))}finally{setBusy(false)}};
+ return createPortal(<Modal title="备份后清理历史资料" bodyClassName="demo-data-body" confirmText="确认永久清理" confirmDanger confirmDisabled={!backup||!confirmed||busy} onClose={()=>{if(!busy)onClose()}} onSubmit={async e=>{e.preventDefault();if(!backup||!confirmed||busy)return;setBusy(true);setError('');try{const current=await captureProduct('research');if(JSON.stringify({...current,createdAt:''})!==JSON.stringify({...backup,createdAt:''}))throw Error('备份后资料已变化，请重新下载备份');if(await onConfirm())onClose();else setError('清理未全部完成，剩余资料保留；请保留备份并重试')}catch(e){setError(String(e))}finally{setBusy(false)}}}><p>“{name}”属于规则启用前的历史回收站资料。不会自动删除；确认后将永久清理所选内容及关联原件。</p><button type="button" disabled={busy} onClick={()=>void download()}>下载科研资料完整备份</button>{backup&&<label><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>备份已下载完成，我确认永久清理所选历史资料</label>}{error&&<p role="alert">{error}</p>}</Modal>,document.body)
+}

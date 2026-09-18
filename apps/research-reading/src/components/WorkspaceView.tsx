@@ -10,6 +10,10 @@ const tabs: Array<{ id: WorkbenchTab; label: string }> = [
 ]
 
 interface WorkspaceViewProps {
+  onLanguageChange?: (id:number,language:'zh'|'en')=>void
+  onNew: () => void
+  onNewTable: () => void
+  onUpload: () => void
   onSearchOpen: () => void
   quickAccess: string[]
   onToggleQuickAccess: (key: string) => void
@@ -30,6 +34,8 @@ interface WorkspaceViewProps {
 }
 
 export function WorkspaceView({
+  onLanguageChange,
+  onNew, onNewTable, onUpload,
   onSearchOpen,
   quickAccess, onToggleQuickAccess, quickFolders, onOpenQuickFolder,
   documents,
@@ -74,7 +80,7 @@ export function WorkspaceView({
   return (
     <section data-compliance-target="research-workbench" className="view view--workbench">
       <div data-compliance-target={`research-${tab}`} className="view-body workbench-body">
-        <div className="workbench-controls"><div className="subtabs" role="tablist" aria-label="工作台筛选" aria-orientation="horizontal">
+        <div className="workbench-create"><button onClick={onNew}>新建文档</button><button onClick={onNewTable}>新建表格</button><button onClick={onUpload}>上传文件</button><span>保存至个人空间；最近浏览保留一个月。</span></div><div className="workbench-controls"><div className="subtabs" role="tablist" aria-label="工作台筛选" aria-orientation="horizontal">
           {tabs.map((item, index) => (
             <button
               type="button"
@@ -101,7 +107,7 @@ export function WorkspaceView({
           role="tabpanel"
           aria-labelledby={`workbench-tab-${tabs[activeTabIndex]?.id ?? tab}`}
         >
-          <DocumentTable onDownloadDocument={onDownloadDocument}
+          <DocumentTable onLanguageChange={onLanguageChange} onDownloadDocument={onDownloadDocument}
             folderEntries={tab === 'quick' || tab === 'favorites' ? quickFolders.map((folder) => ({ key: `folder:${folder.scope}:${folder.id}`, item: { id: -(folder.id * 2 + (folder.scope === 'team' ? 1 : 0)), title: folder.name, location: folder.location ?? '我的空间', owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? folder.updatedAt, updatedAt: folder.updatedAt, visitedAt: '', size: folder.size ?? '0 B', kind: '在线文档', favorite: false, owned: true, shared: false }, onOpen: () => onOpenQuickFolder(folder), actions: <QuickFolderActions name={folder.name} isFavoriteTab={tab==='favorites'} favorite={quickAccess.includes(`favorite-folder:${folder.scope}:${folder.id}`)} onOpen={()=>onOpenQuickFolder(folder)} onUnpin={()=>onToggleQuickAccess(`folder:${folder.scope}:${folder.id}`)} onFavorite={()=>onToggleQuickAccess(`favorite-folder:${folder.scope}:${folder.id}`)}/> })) : []}
             quickAccess={quickAccess}
             onToggleQuickAccess={onToggleQuickAccess}

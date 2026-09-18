@@ -8,6 +8,8 @@ import { useReadingPrd } from './useReadingPrd'
 import { ReadingPrdWorkspace } from './ReadingPrdWorkspace'
 
 export function ReadingReviewSidebar() {
+  useEffect(()=>{const element=document.querySelector('.reading-review');if(!element)return;const update=()=>document.documentElement.style.setProperty('--reading-review-offset',Math.ceil(element.getBoundingClientRect().right+12)+'px');const observer=new ResizeObserver(update);observer.observe(element);window.addEventListener('resize',update);update();return()=>{observer.disconnect();window.removeEventListener('resize',update);document.documentElement.style.removeProperty('--reading-review-offset')}},[])
+
   const { requestFocus } = usePrototypeFocus()
   const sharedPrd=useReadingPrd()
   const [prdMode,setPrdMode]=useState(()=>new URLSearchParams(location.search).get('review')==='prd')

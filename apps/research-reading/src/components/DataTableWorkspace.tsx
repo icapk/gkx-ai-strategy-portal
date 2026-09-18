@@ -22,6 +22,7 @@ interface DataTableWorkspaceProps {
   table: ResearchDataTable
   currentUser: string
   teamName: string
+  onShareMove?: () => void
   collaboratorOptions: string[]
   initialSearchQuery?: string
   initialAction?: 'import' | 'share' | 'files'
@@ -115,6 +116,7 @@ export function DataTableWorkspace({
   table: initialTable,
   currentUser,
   teamName,
+  onShareMove,
   collaboratorOptions,
   initialSearchQuery = '',
   initialAction,
@@ -767,7 +769,7 @@ export function DataTableWorkspace({
     updateSaveState('dirty')
     setShareOpen(false)
     window.setTimeout(() => saveNow(next), 0)
-    onToast(shareAccess === 'private' ? '已取消团队共享' : '本地分享权限已保存')
+    onToast(shareAccess === 'private' ? '已取消团队分享' : '本地分享权限已保存')
   }
 
   const copyLocalLink = async () => {
@@ -965,16 +967,7 @@ export function DataTableWorkspace({
         </Modal>
       )}
 
-      {shareOpen && (
-        <Modal title="分享与权限" onClose={() => setShareOpen(false)} onSubmit={submitShare} confirmText="保存权限">
-          <div className="data-sheet-modal-intro"><strong>{teamName}</strong><span>当前为本地交互预览，不会向真实成员发送通知。</span></div>
-          <label className="field-label" htmlFor="data-sheet-share-access">访问权限</label>
-          <select id="data-sheet-share-access" className="text-field" value={shareAccess} onChange={(event) => setShareAccess(event.target.value as DataTableShareAccess)}><option value="private">仅自己可见</option><option value="team-view">团队成员可查看</option><option value="team-edit">团队成员可编辑</option></select>
-          {shareAccess !== 'private' && <fieldset className="data-sheet-collaborators"><legend>共享成员</legend>{collaboratorOptions.map((name) => <label key={name}><input type="checkbox" checked={shareCollaborators.includes(name)} onChange={(event) => setShareCollaborators((current) => event.target.checked ? [...current, name] : current.filter((item) => item !== name))} /><span>{name.slice(0, 1)}</span><strong>{name}</strong></label>)}</fieldset>}
-          {shareAccess !== 'private' && shareCollaborators.length === 0 && <p className="field-error">请至少选择一位共享成员。</p>}
-          <div className="data-sheet-copy-link"><div><strong>本地预览链接</strong><span>仅在本机开发服务运行时有效</span></div><button className="button button--secondary" type="button" onClick={() => void copyLocalLink()}>复制链接</button></div>
-        </Modal>
-      )}
+      {shareOpen && <Modal title="分享文件" onClose={()=>setShareOpen(false)} onSubmit={e=>{e.preventDefault();if(formDirty){onToast('请先保存表单记录');return}if(!saveNow())return;setShareOpen(false);onShareMove?.()}} confirmText="选择目标位置"><p>分享将移动此表格。访问权限跟随目标空间，原位置不保留，不按文件单独指定成员。</p></Modal>}
 
       {fieldDraft && (
         <Modal title={fieldDraft.mode === 'add' ? '添加字段' : '字段设置'} onClose={() => setFieldDraft(null)} onSubmit={submitField} confirmText="保存字段">

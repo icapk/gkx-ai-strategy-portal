@@ -2,12 +2,15 @@ import DOMPurify from 'dompurify'
 import { loadResearchDataTables, exportResearchDataTableCsv } from '../dataTableContent'
 import { useEffect, useRef, useState, type ReactNode, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react'
 import { createPortal } from 'react-dom'
+import { retentionLabel } from '../researchPolicy'
+import { DocumentLanguageSelect } from './DocumentLanguage'
 import type { ResearchDocument, WorkbenchTab } from '../types'
 import { displayResearchLocation, favoriteTimeLabel } from '../workbenchDocuments'
-import { compareResearchDocuments } from '../researchSort'
+import { compareResearchDocuments, minute } from '../researchSort'
 
 export type FolderTableEntry = { item: ResearchDocument; key: string; onOpen: () => void; actions: ReactNode; title?: ReactNode }
 interface DocumentTableProps {
+  onLanguageChange?: (id:number, language:'zh'|'en')=>void
   folderEntries?: FolderTableEntry[]
   quickAccess?: string[]
   onToggleQuickAccess?: (key: string) => void
@@ -175,7 +178,7 @@ const emptyCopy = (mode: DocumentTableProps['mode'], workbenchTab: WorkbenchTab)
   if (workbenchTab === 'recent') return { title: '暂无最近浏览', detail: '打开文档后，最近访问记录会自动出现在这里。' }
   if (workbenchTab === 'favorites') return { title: '暂无收藏', detail: '收藏感兴趣的文档，之后可以从这里快速找到。' }
   if (workbenchTab === 'owned') return { title: '暂无归我所有的文档', detail: '新建内容后，会自动归入“归我所有”。' }
-  return { title: '暂无共享文档', detail: '团队成员共享给你的内容会显示在这里。' }
+  return { title: '暂无分享文档', detail: '团队成员分享给你的内容会显示在这里。' }
 }
 
 const openActionLabel = (documentItem: ResearchDocument) => {
@@ -186,6 +189,7 @@ const openActionLabel = (documentItem: ResearchDocument) => {
 }
 
 export function DocumentTable({
+  onLanguageChange,
   folderEntries = [],
   quickAccess = [], onToggleQuickAccess,
   documents,
@@ -417,10 +421,10 @@ export function DocumentTable({
 
   const renderHeader = () => {
 
-    if (isFavorites) return <><th>标题</th><th>收藏时间</th><th>类型</th><th>文档大小</th><th>操作</th></>
+    if (isFavorites) return <><th>标题</th><th>所有者</th><th>收藏时间</th><th>类型</th><th>文档大小</th><th>操作</th></>
     if (mode === 'space') return <><th>名称</th><th>类型</th><th>文档大小</th><th>最后修改</th><th>位置 <span className="location-header-info" tabIndex={0} aria-label="可查看所属父文件夹">i<span className="location-header-tooltip" role="tooltip">可查看所属父文件夹</span></span></th><th>创建者</th>{sortHeader('createdAt', '创建时间')}<th>操作</th></>
     if (isRecycle) return <><th>标题</th><th>所有者</th><th>删除时间</th><th>类型</th><th>原位置</th><th>操作</th></>
-    return <><th>标题</th><th>位置 <span className="location-header-info" tabIndex={0} aria-label="可查看所属父文件夹">i<span className="location-header-tooltip" role="tooltip">可查看所属父文件夹</span></span></th><th>所有者</th><th>文档大小</th>{sortHeader('createdAt', '创建时间')}{sortHeader('visitedAt', '最近访问')}<th>类型</th><th>操作</th></>
+    return <><th>标题</th><th>位置 <span className="location-header-info" tabIndex={0} aria-label="可查看所属父文件夹">i<span className="location-header-tooltip" role="tooltip">可查看所属父文件夹</span></span></th><th>所有者</th><th>文档大小</th>{sortHeader('createdAt', '创建时间')}{sortHeader('visitedAt', '最近浏览')}<th>类型</th><th>操作</th></>
   }
 
   const renderActions = (documentItem: ResearchDocument) => {
@@ -442,29 +446,29 @@ export function DocumentTable({
     if (folder) {
       const title = <td className="title-cell">{folder.title ?? <button type="button" className="document-title-link" onClick={folder.onOpen}>📁 {documentItem.title}</button>}</td>
       const actions = <td><span className="row-actions">{folder.actions}</span></td>
-      if(isRecycle)return <>{title}<td>{documentItem.owner}</td><td>{documentItem.deletedAt}</td><td>文件夹</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actions}</>
-      if (isFavorites) return <>{title}<td>—</td><td>文件夹</td><td>{sizeInMegabytes(documentItem)}</td>{actions}</>
-      if (mode === 'space') return <>{title}<td>文件夹</td><td>{sizeInMegabytes(documentItem)}</td><td>{documentItem.updatedAt}</td><td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.createdAt}</td>{actions}</>
-      return <>{title}<td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{sizeInMegabytes(documentItem)}</td><td>{documentItem.createdAt}</td><td>—</td><td>文件夹</td>{actions}</>
+      if(isRecycle)return <>{title}<td>{documentItem.owner}</td><td>{documentItem.deletedAt}<small className="retention-label">{retentionLabel(documentItem)}</small></td><td>文件夹</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actions}</>
+      if (isFavorites) return <>{title}<td>{documentItem.owner}</td><td>—</td><td>文件夹</td><td>{sizeInMegabytes(documentItem)}</td>{actions}</>
+      if (mode === 'space') return <>{title}<td>文件夹</td><td>{sizeInMegabytes(documentItem)}</td><td>{documentItem.updatedAt}</td><td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{minute(documentItem.createdAt)||'—'}</td>{actions}</>
+      return <>{title}<td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{sizeInMegabytes(documentItem)}</td><td>{minute(documentItem.createdAt)||'—'}</td><td>—</td><td>文件夹</td>{actions}</>
     }
     const titleCell = <td className="title-cell">{renderTitle(documentItem)}</td>
     const actionCell = <td><span className="row-actions">{renderActions(documentItem)}</span></td>
 
-    if (isFavorites) return <>{titleCell}<td>{favoriteTimeLabel(documentItem)}</td><td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td>{actionCell}</>
-    if (mode === 'space') return <>{titleCell}<td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td><td>{documentItem.updatedAt ?? documentItem.createdAt}</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.createdAt}</td>{actionCell}</>
-    if (isRecycle) return <>{titleCell}<td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.deletedAt ?? '时间未记录'}</td><td><KindTag kind={documentItem.kind} /></td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actionCell}</>
-    return <>{titleCell}<td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{sizeInMegabytes(documentItem)}</td><td>{documentItem.createdAt}</td><td>{documentItem.visitedAt}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
+    if (isFavorites) return <>{titleCell}<td>{documentItem.owner}</td><td>{favoriteTimeLabel(documentItem)}</td><td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td>{actionCell}</>
+    if (mode === 'space') return <>{titleCell}<td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td><td>{documentItem.updatedAt ?? documentItem.createdAt}</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{minute(documentItem.createdAt)||'—'}</td>{actionCell}</>
+    if (isRecycle) return <>{titleCell}<td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.deletedAt ?? '时间未记录'}<small className="retention-label">{retentionLabel(documentItem)}</small></td><td><KindTag kind={documentItem.kind} /></td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actionCell}</>
+    return <>{titleCell}<td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{sizeInMegabytes(documentItem)}</td><td>{minute(documentItem.createdAt)||'—'}</td><td>{minute(documentItem.visitedAt)||'—'}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
   }
 
   return (
     <div className={`table-region table-region--${tableProfile}`} ref={tableRegionRef}>
       <div className="table-scroll">
         <table className={`document-table document-table--${tableProfile}`} aria-label={isRecent ? '最近浏览文档' : isFavorites ? '收藏文档' : mode === 'space' ? '空间文档' : isRecycle ? '回收站内容' : '工作台文档'}>
-          <thead><tr>{renderHeader()}</tr></thead>
+          <thead><tr>{renderHeader()}<th>语言</th></tr></thead>
           <tbody>
             {allItems.length === 0 ? (
               <tr>
-                <td className="empty-cell" colSpan={columnCount}>
+                <td className="empty-cell" colSpan={columnCount+1+(isFavorites?1:0)}>
                   <span className="empty-mark" aria-hidden="true">⌁</span>
                   <strong>{emptyState.title}</strong>
                   <span>{emptyState.detail}</span>
@@ -477,7 +481,7 @@ export function DocumentTable({
                 data-document-kind={folderEntries.some(entry => entry.item.id === documentItem.id) ? "文件夹" : documentItem.kind}
                 className={highlightedDocumentId === documentItem.id ? 'is-search-target' : undefined}
               >
-                {renderRow(documentItem)}
+                {renderRow(documentItem)}<td>{documentItem.kind==='PDF文档'&&!folderEntries.some(f=>f.item.id===documentItem.id)?<DocumentLanguageSelect label={documentItem.title+'语言'} value={documentItem.language} disabled={!onLanguageChange||isRecycle} onChange={language=>onLanguageChange?.(documentItem.id,language)}/>: '—'}</td>
               </tr>
             ))}
           </tbody>
@@ -509,7 +513,7 @@ export function DocumentTable({
             {onCreateNote && documentItem.pdfArchive && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onCreateNote(documentItem))}>笔记</button>}
             {onToggleQuickAccess && (workbenchTab === 'quick' || !quickAccess.includes(`document:${documentItem.id}`)) && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleQuickAccess(`document:${documentItem.id}`))}>{quickAccess.includes(`document:${documentItem.id}`) ? '取消快速访问' : '加入快速访问'}</button>}
             {!isFavorites && <button data-focus-id="research-favorite" type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleFavorite(documentItem.id))}>{documentItem.favorite ? '取消收藏' : '收藏'}</button>}
-            {isWorkbench && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onShare(documentItem.id))}>共享到团队</button>}
+            {isWorkbench && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onShare(documentItem.id))}>分享</button>}
             <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => {
               if ((documentItem.pdfArchive || documentItem.originalFileName) && onDownloadDocument) onDownloadDocument(documentItem)
               else downloadFallback(documentItem)

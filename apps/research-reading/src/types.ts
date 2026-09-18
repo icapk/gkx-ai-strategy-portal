@@ -145,6 +145,8 @@ export type DocumentBlock =
   | DocumentDividerBlock
 
 export interface ResearchDocument {
+  language?: 'zh' | 'en'
+
   richHtml?: string
   originalFileName?: string
   id: number
@@ -157,6 +159,7 @@ export interface ResearchDocument {
   favoritedAt?: string
   recentHiddenAt?: string
   deletedAt?: string
+  retentionPolicy?: '30-days-v1'
   size: string
   kind: DocumentKind
   favorite: boolean

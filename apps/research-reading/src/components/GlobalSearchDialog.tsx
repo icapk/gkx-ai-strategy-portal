@@ -276,6 +276,7 @@ export function GlobalSearchDialog({
           ))}
         </div>
 
+        <p className="search-boundary">检索可读取的正文与 PDF 笔记。Word / Excel 检索已提取正文（Excel 每表前501行，正文最多12万字符）；旧文件或提取失败时仅支持标题搜索；扫描 PDF 不做 OCR。解析失败不会生成虚构正文。</p>
         {visibleResults.length === 0 ? (
           <section className="global-search-empty" role="status">
             <h3>{hasSubmittedQuery ? '未找到匹配内容' : '暂无可浏览内容'}</h3>

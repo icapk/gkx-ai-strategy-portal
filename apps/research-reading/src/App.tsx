@@ -1,3 +1,7 @@
+import { extractUploadText } from './uploadText'
+import { HistoricalRecycleCleanup } from './components/HistoricalRecycleCleanup'
+import { automaticRecycleDue, historicalRecycleDue, canChange, sameName, moveResearchDocument } from './researchPolicy'
+import { DemoDataControls } from './components/DemoDataControls'
 import { PdfDownloadOptions } from './components/PdfDownloadOptions'
 import { LocalFilePreview } from './components/LocalFilePreview'
 import { TeamSpaceDialog } from './components/TeamSpaceDialog'
@@ -215,6 +219,12 @@ export default function App() {
   const isTeamAdmin = members.some((member) => member.id === 1 && member.role === '管理员')
   const [openFolderName, setOpenFolderName] = useState<string | null>(null)
   const [modal, setModal] = useState<ModalKind>(null)
+  const [historicalCleanup,setHistoricalCleanup]=useState<{kind:'document'|'folder';id:number;name:string}|null>(null)
+  const [maintenanceTick,setMaintenanceTick]=useState(0)
+  const maintenanceBusy=useRef(false)
+  const maintenanceAttempts=useRef(new Map<string,number>())
+  const [sharingId, setSharingId] = useState<number|null>(null)
+  const [shareTarget, setShareTarget] = useState('我的空间')
   const [searchOpen, setSearchOpen] = useState(false)
   const [highlightedDocumentId, setHighlightedDocumentId] = useState<number | null>(null)
   const [activeNoteId, setActiveNoteId] = useState<number | null>(null)
@@ -283,10 +293,10 @@ export default function App() {
   const { request: focusRequest, ready: focusReady, reject: focusReject } = usePrototypeFocus()
 
   useEffect(() => {
-    if (!focusRequest || focusRequest.module !== 'research' || !focusRequest.target) return
+    if (activeProduct !== 'research' || !focusRequest || focusRequest.module !== 'research' || !focusRequest.target) return
     const {sequence, target, location} = focusRequest
     const stop = (message: string) => focusReject(sequence, `${focusRequest.id}：${message}`)
-    if (activeProduct === 'reading' && document.documentElement.dataset.readingDraftDirty === 'true') { stop('阅读笔记有未保存内容，请先保存或放弃。'); return }
+
     const editing = documents.find(item => item.id === activeDocumentId)
     const sameSurface = (target.surface === 'editor' && editing?.kind === '在线文档') || (target.surface === 'table' && editing?.kind === '数据表格') || (target.surface === 'pdf' && activePdfDocumentId !== null)
     if ((activeDocumentId !== null || activePdfDocumentId !== null || dataTableHubOpen || previewDocumentId !== null) && !sameSurface) { stop('请先返回当前文档或表格，保留现有编辑内容后再定位。'); return }
@@ -344,6 +354,7 @@ export default function App() {
       return
     }
 
+    if(target.product!==activeProduct)return
     setActiveProduct(target.product)
     if (target.product !== 'research' || auditRequest.location?.preserveSurface) return
 
@@ -571,6 +582,8 @@ export default function App() {
     if (activeDocumentId == null) return '无法确认当前文档，请返回列表后重试。'
     const target = documents.find((item) => item.id === activeDocumentId)
     if (!target) return '文档已不存在，请返回列表刷新后重试。'
+    if(!canChange(target.location,teamSpaces))return '当前角色仅可查看'
+    if(documents.some(d=>d.id!==target.id&&d.location===target.location&&d.kind===target.kind&&sameName(d.title,value.title)))return '同目录已有同类型同名文件'
     const timestamp = formatLocalDateTime()
     const nextDocument: ResearchDocument = {
       ...target,
@@ -595,6 +608,8 @@ export default function App() {
     if (activeDocumentId == null) return '无法确认当前数据表格，请返回列表后重试。'
     const target = documents.find((item) => item.id === activeDocumentId)
     if (!target || target.kind !== '数据表格') return '数据表格已不存在，请返回列表刷新后重试。'
+    if(!canChange(target.location,teamSpaces))return '当前角色仅可查看'
+    if(documents.some(d=>d.id!==target.id&&d.location===target.location&&d.kind===target.kind&&sameName(d.title,value.title)))return '同目录已有同类型同名文件'
     if (value.table.documentId !== target.id) return '检测到表格与文档不匹配，已阻止保存，请返回列表后重新打开。'
     const previousTable = researchDataTables.find((item) => item.documentId === target.id)
     const tableResult = persistResearchDataTable(value.table)
@@ -769,13 +784,14 @@ export default function App() {
   )
 
   useEffect(() => {
-    if (!canReconcilePdfArchiveStorage()) return
+    if (activeProduct !== 'research' || !canReconcilePdfArchiveStorage()) return
     const knownIds = knownPdfDocumentIdsKey.split(',').map(Number).filter((id) => Number.isInteger(id) && id > 0)
     void reconcilePdfArchiveStorage(knownIds)
-  }, [knownPdfDocumentIdsKey])
+  }, [knownPdfDocumentIdsKey,activeProduct])
 
   useEffect(() => {
     let cancelled = false
+    if(activeProduct!=='research')return
     const generation = ++pdfNoteLoadGenerationRef.current
     const documentIds = archivedPdfDocumentIdsKey.split(',').map(Number).filter((id) => Number.isInteger(id) && id > 0)
     void Promise.all(documentIds.map(async (documentId) => ({
@@ -880,7 +896,8 @@ export default function App() {
   const moveDocumentToRecycle = (id: number) => {
     const target = documents.find((doc) => doc.id === id)
     if (!target) return
-    const recycledDocument = { ...target, deletedAt: formatLocalDateTime() }
+    if(!canChange(target.location,teamSpaces)){showError('仅管理员或可编辑成员可删除');return}
+    const recycledDocument = { ...target, deletedAt: formatLocalDateTime(), retentionPolicy:'30-days-v1' as const }
     const result = persistRecycledResearchDocument(recycledDocument)
     if (!result.ok) {
       showError(result.error)
@@ -906,6 +923,8 @@ export default function App() {
 
   const permanentlyDeleteDocument = async (id: number, confirmed = false) => {
     const target = recycledDocuments.find((doc) => doc.id === id)
+    if(target&&!canChange(target.location,teamSpaces,true)){showError('仅团队管理员可永久删除');return false}
+    if(target&&!confirmed&&historicalRecycleDue(target)){setHistoricalCleanup({kind:'document',id:target.id,name:target.title});return false}
     if (!target || (!confirmed && !window.confirm(`彻底删除“${target.title}”？该操作无法恢复。`))) return false
     const result = removePersistedResearchDocument(id)
     if (!result.ok) {
@@ -944,11 +963,11 @@ export default function App() {
     const target = recycledDocuments.find((doc) => doc.id === id)
     if (!target) return
     const root=target.location.split('/')[0],scope=isPersonalDocument(target)?'personal':'team'
-    if(scope==='team'&&!teamSpaces.some(s=>s.name===root&&s.members.some(m=>m.id===1))){showError('原团队已不存在或当前账号无权恢复，内容仍保留在回收站。');return}
+    if(!canChange(target.location,teamSpaces)){showError('原团队已不存在或当前账号无权恢复，内容仍保留在回收站。');return}
     const allFolders=scope==='personal'?folders:teamFolders
     if(target.location!==root&&!allFolders.some(f=>`${f.location??root}/${f.name}`===target.location)){showError('原目录已不存在，请先恢复原文件夹；内容仍保留在回收站。');return}
     if(documents.some(d=>d.location===target.location&&d.title.toLocaleLowerCase()===target.title.toLocaleLowerCase())){showError('原位置存在同名内容，请先重命名冲突内容再恢复。');return}
-    const restoredDocument = { ...target, deletedAt: undefined }
+    const restoredDocument = { ...target, deletedAt: undefined, retentionPolicy:undefined }
     const result = persistResearchDocument(restoredDocument)
     if (!result.ok) {
       showError(result.error)
@@ -959,62 +978,20 @@ export default function App() {
     showToast(`文档已恢复至 ${target.location.replace(/^我的空间/, '个人空间')}`)
   }
 
-  const shareDocument = (id: number) => {
-    const target = documents.find((doc) => doc.id === id)
-    if (!target) return
-    const nextDocument = { ...target, shared: true }
-    let nextDataTable: ResearchDataTable | undefined
-    let previousDataTable: ResearchDataTable | undefined
-    if (target.kind === '数据表格') {
-      previousDataTable = researchDataTables.find((table) => table.documentId === id)
-      if (!previousDataTable) {
-        showError('无法读取数据表格，请先打开表格后重试')
-        return
-      }
-      const timestamp = formatLocalDateTime()
-      const fallbackCollaborators = members.map((member) => member.name).filter((name) => name !== profile.name)
-      nextDataTable = {
-        ...previousDataTable,
-        share: {
-          access: previousDataTable.share.access === 'private' ? 'team-view' : previousDataTable.share.access,
-          collaborators: previousDataTable.share.collaborators.length
-            ? previousDataTable.share.collaborators
-            : fallbackCollaborators,
-          updatedAt: timestamp,
-          updatedBy: profile.name,
-        },
-        updatedAt: timestamp,
-        updatedBy: profile.name,
-      }
-      const tableResult = persistResearchDataTable(nextDataTable)
-      if (!tableResult.ok) {
-        showError(tableResult.error)
-        return
-      }
-    }
-    const result = persistResearchDocument(nextDocument)
-    if (!result.ok) {
-      const rollbackResult = previousDataTable ? persistResearchDataTable(previousDataTable) : null
-      showError(rollbackResult && !rollbackResult.ok
-        ? `${result.error} 表格共享状态回滚失败，请打开表格核对权限。`
-        : result.error)
-      return
-    }
-    if (nextDataTable) {
-      setResearchDataTables((current) => current.map((table) => table.documentId === id ? nextDataTable! : table))
-    }
-    setDocuments((current) => current.map((doc) => doc.id === id ? nextDocument : doc))
-    showToast(`已共享到${activeTeam}`)
-  }
+  const shareDocument = (id:number) => {const item=documents.find(d=>d.id===id);if(!item)return;if(!canChange(item.location,teamSpaces)){showError('当前角色无权分享此文件');return}setShareTarget(isPersonalDocument(item)?teamSpaces.find(t=>canChange(t.name,teamSpaces))?.name??'我的空间':'我的空间');setSharingId(id)}
+  const confirmShare = () => {const item=documents.find(d=>d.id===sharingId);if(!item)return;try{const allowed=['我的空间',...folders.map(f=>(f.location??'我的空间')+'/'+f.name),...teamSpaces.map(t=>t.name),...teamFolders.map(f=>(f.location??activeTeam)+'/'+f.name)];if(!allowed.includes(shareTarget))throw Error('目标目录已不存在');const moved=moveResearchDocument(item,shareTarget,documents,teamSpaces,formatLocalDateTime());const result=persistResearchDocument(moved);if(!result.ok)throw Error(result.error);setDocuments(current=>{const next=current.map(d=>d.id===item.id?moved:d);documentsRef.current=next;return next});setSharingId(null);showToast('分享完成，文件已移动至 '+shareTarget.replace(/^我的空间/,'个人空间'))}catch(e){showError(e instanceof Error?e.message:String(e))}}
 
+  const changeLanguage = (id:number,language:'zh'|'en') => {const item=documents.find(d=>d.id===id);if(!item)return;if(!canChange(item.location,teamSpaces)){showError('当前角色仅可查看');return}const next={...item,language};const result=persistResearchDocument(next);if(!result.ok){showError(result.error);return}setDocuments(items=>items.map(d=>d.id===id?next:d))}
   const renameDocument = (id: number, title: string) => {
     const target = documents.find((doc) => doc.id === id)
     if (!target) return false
+    if(!canChange(target.location,teamSpaces)){showError('当前角色仅可查看');return false}
     const normalizedTitle = title.normalize('NFC').trim()
     if (!normalizedTitle || Array.from(normalizedTitle).length > 50) {
       showError('文档名称应为 1 至 50 个字符')
       return false
     }
+    if(documents.some(d=>d.id!==id&&d.location===target.location&&d.kind===target.kind&&sameName(d.title,normalizedTitle))){showError('同目录已有同类型同名文件');return false}
     const nextDocument = { ...target, title: normalizedTitle, updatedAt: formatLocalDateTime() }
     const result = persistResearchDocument(nextDocument)
     if (!result.ok) {
@@ -1076,6 +1053,8 @@ export default function App() {
     const scope: FolderScope = activeSection === 'team' ? 'team' : 'personal'
     const current = scope === 'team' ? teamFolders : folders
     const folderLocation = `${scope === 'team' ? activeTeam : '我的空间'}${openFolderName ? '/' + openFolderName : ''}`
+    if(!canChange(folderLocation,teamSpaces)){showError('当前角色仅可查看');return}
+    if(/[/\\]/.test(name)){showError('文件夹名称不能包含路径分隔符');return}
     const foldersInScope = current.filter((folder) => (folder.location ?? '我的空间') === folderLocation)
     if (foldersInScope.some((folder) => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
       showError('同一空间内不能创建同名文件夹')
@@ -1121,10 +1100,10 @@ export default function App() {
       id: documentId,
       title,
       location: !directType && newContentSource === 'data-hub'
-        ? '科研数据管理/全部数据表'
+        ? '我的空间'
         : activeSection === 'team'
-        ? `${activeTeam}/${openFolderName ?? '文档'}`
-        : `我的空间/${openFolderName ?? '研究'}`,
+        ? `${activeTeam}${openFolderName?'/'+openFolderName:''}`
+        : `我的空间${openFolderName?'/'+openFolderName:''}`,
       owner: profile.name,
       createdAt: timestamp,
       visitedAt: timestamp,
@@ -1134,12 +1113,14 @@ export default function App() {
       favorite: false,
       owned: true,
       shared: activeSection === 'team',
-      spaceScope: activeSection === 'team' || !directType && newContentSource === 'data-hub' ? 'team' : 'personal',
+      spaceScope: activeSection === 'team' ? 'team' : 'personal',
       description: effectiveType === 'document' ? '空白在线文档，尚未添加内容摘要。' : '新建的数据表格。',
       keywords: [],
       content: '',
       blocks: effectiveType === 'document' ? [createDocumentBlock('text')] : undefined,
     }
+    if(!canChange(createdDocument.location,teamSpaces)){showError('当前角色仅可查看');return}
+    if(documents.some(d=>d.location===createdDocument.location&&d.kind===createdDocument.kind&&sameName(d.title,createdDocument.title))){if(directType){let n=2;while(documents.some(d=>d.location===createdDocument.location&&d.kind===createdDocument.kind&&sameName(d.title,title+' '+n)))n++;createdDocument.title=title+' '+n}else{setNewDocumentError('同目录已存在同类型同名文件');return}}
     const documentResult = persistResearchDocument(createdDocument)
     if (!documentResult.ok) {
       setNewDocumentStorageError(documentResult.error)
@@ -1193,7 +1174,11 @@ export default function App() {
     onProgress: (progress: number) => void,
     targetLocation = '我的空间/文献存档',
     targetScope: 'personal' | 'team' = 'personal',
+    language?: 'zh' | 'en',
   ) => {
+    if (!language) return {ok:false as const,error:'请选择中文文档或英文文档'}
+    if (!canChange(targetLocation,teamSpaces))return {ok:false as const,error:'当前角色仅可查看'}
+    if (documentsRef.current.some(d=>d.location===targetLocation&&d.kind==='PDF文档'&&sameName(d.title,file.name.replace(/\.pdf$/i,'').normalize('NFC').trim().slice(0,50))))return {ok:false as const,error:'同目录已存在同名 PDF'}
     if (!/\.pdf$/i.test(file.name.trim())) return { ok: false as const, error: '仅支持导入 PDF 文件。' }
     if (file.size <= 0) return { ok: false as const, error: '文件为空，无法导入。' }
     if (file.size > 50 * 1024 * 1024) return { ok: false as const, error: '单个 PDF 不能超过 50 MB。' }
@@ -1237,6 +1222,7 @@ export default function App() {
         }),
         id,
         updatedAt: timestamp,
+        language,
         size: formatFileSize(file.size),
         kind: 'PDF文档',
         description: `已在线解析并存档的 PDF 文献，共 ${parsed.pageCount} 页；可打开原文进行划词、截图和笔记整理。`,
@@ -1282,12 +1268,13 @@ export default function App() {
     }
   }
 
-  const uploadLocalFile = async (file: File) => {
+  const uploadLocalFile = async (file: File, language?: 'zh' | 'en') => {
     if (!/\.(docx?|xlsx?|pdf)$/i.test(file.name)) throw new Error('仅支持 Word、Excel 和 PDF，暂不支持 PPT 及其他格式')
     if (!file.size) throw new Error('文件为空，无法上传')
     if (file.size > 50 * 1024 * 1024) throw new Error('单文件不能超过 50 MB')
     const scope: FolderScope = activeSection === 'team' ? 'team' : 'personal'
     const root = scope === 'team' ? activeTeam : '我的空间'
+    if(!canChange(root,teamSpaces))throw Error('当前角色仅可查看')
     const base = `${root}${openFolderName ? '/' + openFolderName : ''}`
     const parts = (file.webkitRelativePath || file.name).split('/').filter(Boolean)
     if (parts.some((part) => part === '.' || part === '..')) throw new Error('文件路径无效')
@@ -1305,11 +1292,13 @@ export default function App() {
       if (scope === 'team') { teamFoldersRef.current = nextFolders; setTeamFolders(nextFolders) } else { foldersRef.current = nextFolders; setFolders(nextFolders) }
     }
     if (/\.pdf$/i.test(file.name)) {
-      const result = await importPdfFile(file, () => undefined, location, scope)
+      const result = await importPdfFile(file, () => undefined, location, scope, language)
       if (!result.ok) throw new Error(result.error)
     } else {
+      if(documentsRef.current.some(d=>d.location===location&&sameName(d.title,file.name.slice(0,50))))throw Error('同目录已存在同名文件')
       const id = documentIdCounterRef.current++
       const item: ResearchDocument = { id, title: file.name.slice(0, 50), originalFileName: file.name, location, owner: profile.name, createdAt: timestamp, updatedAt: timestamp, visitedAt: '', size: formatFileSize(file.size), kind: /\.docx?$/i.test(file.name) ? 'Word文档' : /\.(xlsx?|csv)$/i.test(file.name) ? 'Excel文档' : '附件', favorite: false, owned: true, shared: scope === 'team', spaceScope: scope, content: /\.(txt|md|csv)$/i.test(file.name) ? (await file.text()).slice(0, 120000) : '' }
+      Object.assign(item,await extractUploadText(file))
       await saveOriginalFile(id, file)
       const result = persistResearchDocument(item)
       if (!result.ok) { await deleteOriginalFile(id); throw new Error(result.error) }
@@ -1354,15 +1343,8 @@ export default function App() {
       teamNameInputRef.current?.focus()
       return
     }
-    if (!teamInviteSelection.length) {
-      setTeamInviteDraftSelection([])
-      setTeamInviteDraftRoles({})
-      setMemberSearch('')
-      setTeamMemberPickerOpen(true)
-      return
-    }
-    const selectedMembers = memberCandidates.filter((candidate) => teamInviteSelection.includes(candidate.id))
-    const newSpace: TeamSpace = { name, description: teamDescription.trim(), members: [{ id: 1, name: profile.name, role: '管理员', initials: profile.name[0], color: '#5b8ff9', status: '在线', joinedAt: new Date().toISOString().slice(0, 10) }, ...selectedMembers.filter((candidate) => candidate.name !== profile.name).map((candidate, index) => ({ id: index + 2, name: candidate.name, role: teamInviteRoles[candidate.id] ?? '可查看', initials: candidate.name[0], color: candidate.color, status: '在线' as const, joinedAt: candidate.date }))] }
+    const selectedMembers = memberCandidates.filter((candidate,index,all)=>all.findIndex(c=>c.email===candidate.email)===index)
+    const newSpace: TeamSpace = { name, description: teamDescription.trim(), members: [{ id: 1, name: profile.name, role: '管理员', initials: profile.name[0], color: '#5b8ff9', status: '在线', joinedAt: new Date().toISOString().slice(0, 10) }, ...selectedMembers.filter((candidate) => candidate.name !== profile.name).map((candidate, index) => ({ id: index + 2, name: candidate.name, role: '可查看', initials: candidate.name[0], color: candidate.color, status: '在线' as const, joinedAt: candidate.date }))] }
     const saveError = validateTeamSpace(newSpace, teamSpaces) || persistTeamSpaces([...teamSpaces, newSpace])
     if (saveError) { showError(saveError); return }
     setCreatedTeams((current) => [...current, name])
@@ -1378,7 +1360,7 @@ export default function App() {
     showToast(`团队空间“${name}”创建成功`)
   }
 
-  const openTeamMemberPicker = () => {
+  const _openTeamMemberPicker = () => {
     setTeamInviteDraftSelection(teamInviteSelection)
     setTeamInviteDraftRoles(teamInviteRoles)
     setMemberSearch('')
@@ -1431,6 +1413,8 @@ export default function App() {
     const targetFolder = current.find((folder) => folder.id === id)
     if (!targetFolder) return false
     const folderRoot = targetFolder.location ?? (scope === 'team' ? activeTeam : '我的空间')
+    if(!canChange(folderRoot,teamSpaces)){showError('当前角色仅可查看');return false}
+    if(/[/\\]/.test(normalizedName)){showError('文件夹名称不能包含路径分隔符');return false}
     if (scope === 'team' && folderRoot !== activeTeam && !folderRoot.startsWith(activeTeam + '/')) {
       showError('该文件夹不属于当前团队，操作已停止')
       return false
@@ -1478,30 +1462,30 @@ export default function App() {
     const current=scope==='team'?teamFolders:folders, root=current.find(f=>f.id===id)
     if(!root)return
     const parent=root.location??(scope==='team'?activeTeam:'我的空间'), path=parent+'/'+root.name
-    if(scope==='team'&&!isTeamAdmin){showError('当前原型仅允许管理员删除团队文件夹。');return}
+    if(!canChange(parent,teamSpaces)){showError('当前原型仅允许管理员删除团队文件夹。');return}
     const tree=current.filter(f=>f.id===id||f.location===path||f.location?.startsWith(path+'/'))
     const affected=documents.filter(d=>d.location===path||d.location.startsWith(path+'/'))
-    const deletedAt=formatLocalDateTime(),bundle:RecycledFolder={id:Date.now(),scope,root:{...root,location:parent},folders:tree,documentIds:affected.map(d=>d.id),deletedAt}
+    const deletedAt=formatLocalDateTime(),bundle:RecycledFolder={id:Date.now(),scope,root:{...root,location:parent},folders:tree,documentIds:affected.map(d=>d.id),deletedAt,retentionPolicy:'30-days-v1'}
     const nextFolders=current.filter(f=>!tree.some(t=>t.id===f.id)),nextTrash=[bundle,...recycledFolders]
     const error=folderTransaction(()=>{
-      for(const item of affected){const result=persistRecycledResearchDocument({...item,deletedAt});if(!result.ok)throw Error(result.error)}
+      for(const item of affected){const result=persistRecycledResearchDocument({...item,deletedAt,retentionPolicy:'30-days-v1'});if(!result.ok)throw Error(result.error)}
       const result=persistFolders(scope,nextFolders);if(!result.ok)throw Error(result.error)
       localStorage.setItem(folderRecycleKey,JSON.stringify(nextTrash))
     })
     if(error){showError(error);return}
     if(scope==='team')setTeamFolders(nextFolders);else setFolders(nextFolders)
     setDocuments(items=>items.filter(d=>!bundle.documentIds.includes(d.id)))
-    setRecycledDocuments(items=>[...affected.map(d=>({...d,deletedAt})),...items])
+    setRecycledDocuments(items=>[...affected.map(d=>({...d,deletedAt,retentionPolicy:'30-days-v1' as const})),...items])
     setRecycledFolders(nextTrash);setPendingDeletion(null);setOpenFolderName(null)
     showToast('文件夹及其内容已移入回收站，原目录结构已保留。')
   }
 
   const restoreFolder = (bundle:RecycledFolder) => {
     const current=bundle.scope==='team'?teamFolders:folders, parent=bundle.root.location!,space=parent.split('/')[0]
-    if(bundle.scope==='team'&&!teamSpaces.some(s=>s.name===space&&s.members.some(m=>m.id===1&&m.role==='管理员'))){showError('原团队不存在或当前角色无恢复权限。');return}
+    if(!canChange(parent,teamSpaces)){showError('原团队不存在或当前角色无恢复权限。');return}
     if(parent!==space&&!current.some(f=>(f.location??space)+'/'+f.name===parent)){showError('原父目录不存在，请先恢复父文件夹。');return}
     if(bundle.folders.some(f=>current.some(c=>c.id===f.id||((c.location??space)===(f.location??space)&&c.name.toLowerCase()===f.name.toLowerCase())))){showError('原目录存在同名或同标识文件夹，请先处理冲突。');return}
-    const items=recycledDocuments.filter(d=>bundle.documentIds.includes(d.id)).map(d=>({...d,deletedAt:undefined}))
+    const items=recycledDocuments.filter(d=>bundle.documentIds.includes(d.id)).map(d=>({...d,deletedAt:undefined,retentionPolicy:undefined}))
     if(items.some(d=>documents.some(c=>c.location===d.location&&c.title.toLowerCase()===d.title.toLowerCase()))){showError('原目录存在同名文件，请先处理冲突。');return}
     const nextFolders=[...current,...bundle.folders],nextTrash=recycledFolders.filter(f=>f.id!==bundle.id)
     const error=folderTransaction(()=>{
@@ -1515,15 +1499,23 @@ export default function App() {
     showToast('文件夹及内容已恢复至 '+parent.replace(/^我的空间/,'个人空间'))
   }
 
-  const purgeFolder = async (bundle:RecycledFolder) => {
-    if(!window.confirm('彻底删除“'+bundle.root.name+'”及全部内容？此操作不可恢复。'))return
-    for(const id of bundle.documentIds){
-      const target=loadRecycledResearchDocuments().find(d=>d.id===id)
-      if(!target)continue
-      if(!(await permanentlyDeleteDocument(id,true)))return
-    }
-    try{const next=recycledFolders.filter(f=>f.id!==bundle.id);localStorage.setItem(folderRecycleKey,JSON.stringify(next));setRecycledFolders(next);showToast('文件夹已彻底删除')}catch{showError('回收站记录清理失败，请重试。')}
+  const purgeFolder = async (bundle:RecycledFolder, confirmed=false) => {
+    if(!canChange(bundle.root.location??activeTeam,teamSpaces,true)){showError('仅管理员可永久删除团队资料');return false}
+    if(!confirmed&&historicalRecycleDue(bundle)){setHistoricalCleanup({kind:'folder',id:bundle.id,name:bundle.root.name});return false}
+    if(!confirmed&&!window.confirm('彻底删除“'+bundle.root.name+'”及全部内容？此操作不可恢复。'))return false
+    for(const id of bundle.documentIds){const target=loadRecycledResearchDocuments().find(d=>d.id===id);if(target&&!(await permanentlyDeleteDocument(id,true)))return false}
+    try{const next=loadRecycledFolders().filter(f=>f.id!==bundle.id);localStorage.setItem(folderRecycleKey,JSON.stringify(next));setRecycledFolders(next);showToast('文件夹已彻底删除');return true}catch{showError('回收站记录清理失败，请重试。');return false}
   }
+  useEffect(()=>{const timer=window.setInterval(()=>setMaintenanceTick(t=>t+1),60000);return()=>window.clearInterval(timer)},[])
+  useEffect(()=>{
+    if(activeProduct!=='research'||historicalCleanup||maintenanceBusy.current)return
+    const foldersDue=recycledFolders.filter(f=>automaticRecycleDue(f)&&canChange(f.root.location??activeTeam,teamSpaces,true))
+    const docsDue=recycledDocuments.filter(d=>automaticRecycleDue(d)&&canChange(d.location,teamSpaces,true)&&!recycledFolders.some(f=>f.documentIds.includes(d.id)))
+    const attempt=(key:string)=>{if(maintenanceAttempts.current.get(key)===maintenanceTick)return false;maintenanceAttempts.current.set(key,maintenanceTick);return true}
+    const work=[...foldersDue.filter(f=>attempt('folder:'+f.id)).map(f=>()=>purgeFolder(f,true)),...docsDue.filter(d=>attempt('document:'+d.id)).map(d=>()=>permanentlyDeleteDocument(d.id,true))]
+    if(!work.length)return;maintenanceBusy.current=true
+    void(async()=>{try{for(const run of work)await run()}catch(e){showError('到期清理未完成，可在回收站重试：'+String(e))}finally{maintenanceBusy.current=false}})()
+  },[recycledDocuments,recycledFolders,teamSpaces,activeProduct,maintenanceTick,historicalCleanup])
 
   const activeResearchNote = activeNoteId == null
     ? undefined
@@ -1569,6 +1561,7 @@ export default function App() {
     nextAnnotations: PdfArchiveAnnotation[],
     previousAnnotations: PdfArchiveAnnotation[],
   ) => {
+    if(activePdfDocument&&!canChange(activePdfDocument.location,teamSpaces))return {ok:false as const,error:'当前角色仅可查看，不能修改笔记'}
     if (!activePdfDocument?.pdfArchive) return { ok: false as const, error: '当前 PDF 文献已关闭，请重新打开后保存。' }
     pdfNoteLoadGenerationRef.current += 1
     const documentId = activePdfDocument.id
@@ -1619,6 +1612,7 @@ export default function App() {
 
   return (
     <main className={`app-stage${activeProduct === 'reading' ? ' app-stage--reading' : ' app-stage--research-review'}`}>
+      <DemoDataControls product={activeProduct} />
       {activeProduct === 'reading' && <ReadingReviewSidebar />}
       {activeProduct === 'research' && <ResearchReviewSidebar />}
       <div className="ambient ambient--left" aria-hidden="true" />
@@ -1626,7 +1620,7 @@ export default function App() {
       <div className="app-shell" aria-hidden={activeEditingDocument || activePdfDocumentId !== null || dataTableHubOpen ? true : undefined} inert={activeEditingDocument || activePdfDocumentId !== null || dataTableHubOpen ? true : undefined}>
         {activeProduct === 'reading' ? (
           <ReadingWorkspace
-            onSwitchToResearch={() => setActiveProduct('research')}
+            onSwitchToResearch={() => undefined}
             onProfileOpen={openProfileSettings}
             profileName={profile.name}
             profileAvatar={profile.avatarDataUrl}
@@ -1635,7 +1629,7 @@ export default function App() {
         <TopNavigation
           activeSection={activeSection}
           onSelect={selectSection}
-          onReadingSelect={() => { setModal(null); setSearchOpen(false); setActiveProduct('reading') }}
+          onReadingSelect={() => undefined}
           onProfileOpen={openProfileSettings}
           profileName={profile.name}
           profileAvatar={profile.avatarDataUrl}
@@ -1659,7 +1653,7 @@ export default function App() {
           />
           <div className="main-pane">
             {activeSection === 'workbench' && (
-              <WorkspaceView onSearchOpen={openGlobalSearch} onDownloadDocument={item => { void downloadArchivedPdf(item) }}
+              <WorkspaceView onLanguageChange={changeLanguage} onNew={openNewDocumentDialog} onNewTable={openNewDataTableDialog} onUpload={() => { setOpenFolderName(null); openImportDialog() }} onSearchOpen={openGlobalSearch} onDownloadDocument={item => { void downloadArchivedPdf(item) }}
                 documents={visibleDocuments}
                 quickFolders={[...folders.map((folder) => ({ ...folder, scope: 'personal' as const })), ...teamFolders.map((folder) => ({ ...folder, scope: 'team' as const }))].filter((folder) => quickAccess.includes(`${workbenchTab === 'favorites' ? 'favorite-folder' : 'folder'}:${folder.scope}:${folder.id}`))}
                 onOpenQuickFolder={(folder) => { setActiveSection(folder.scope); if (folder.scope === 'team') { setActiveTeam(folder.location ?? activeTeam); setTeamTreeExpanded(true) }; setOpenFolderName(`${folder.location ?? (folder.scope === 'team' ? activeTeam : '我的空间')}/${folder.name}`.split('/').slice(1).join('/')); setPage(1) }}
@@ -1678,7 +1672,7 @@ export default function App() {
               />
             )}
             {activeSection === 'personal' && (
-              <SpaceView
+              <SpaceView onLanguageChange={changeLanguage}
                 mode="personal"
                 folders={folders}
                 documents={personalDocuments}
@@ -1705,7 +1699,7 @@ export default function App() {
               />
             )}
             {activeSection === 'team' && (
-              <SpaceView
+              <SpaceView onLanguageChange={changeLanguage}
                 mode="team"
                 onManageSpace={isTeamAdmin ? () => setSpaceManagementOpen(true) : undefined}
                 teamName={activeTeam}
@@ -1736,8 +1730,8 @@ export default function App() {
             )}
             {activeSection === 'recycle' && (
               <section data-compliance-target="research-recycle" className="view view--space view--recycle">
-                <div className="view-body workbench-body"><div className="recycle-note">回收站中的内容可恢复或彻底删除。</div>
-                  <DocumentTable documents={recycledDocuments.filter(d=>!recycledFolders.some(f=>f.documentIds.includes(d.id)))} folderEntries={recycledFolders.map(bundle=>({key:String(bundle.id),item:{id:-bundle.id,title:bundle.root.name,location:bundle.root.location!,owner:bundle.root.owner??'当前用户',createdAt:bundle.root.createdAt??'',visitedAt:'',deletedAt:bundle.deletedAt,size:bundle.root.size??'0 B',kind:'附件',favorite:false,owned:true,shared:false},title:<span>{bundle.root.name}</span>,onOpen:()=>undefined,actions:<><button onClick={()=>restoreFolder(bundle)}>恢复</button><button className="danger-link" onClick={()=>void purgeFolder(bundle)}>彻底删除</button></>}))} mode="recycle" page={page} onPageChange={setPage} onToggleFavorite={() => undefined} onDelete={(id) => { void permanentlyDeleteDocument(id) }} onShare={() => undefined} onRestore={restoreDocument} />
+                <div className="view-body workbench-body"><div className="recycle-note">新删除资料保留30天；仅在页面打开或运行且具备清理权限时自动清理。历史资料不自动删除，过期后需先备份再确认清理。</div>
+                  <DocumentTable documents={recycledDocuments.filter(d=>canReadDocument(d)&&!recycledFolders.some(f=>f.documentIds.includes(d.id)))} folderEntries={recycledFolders.filter(bundle=>bundle.scope==='personal'||teamSpaces.some(t=>t.name===bundle.root.location?.split('/')[0]&&t.members.some(m=>m.id===1))).map(bundle=>({key:String(bundle.id),item:{id:-bundle.id,title:bundle.root.name,location:bundle.root.location!,owner:bundle.root.owner??'当前用户',createdAt:bundle.root.createdAt??'',visitedAt:'',deletedAt:bundle.deletedAt,retentionPolicy:bundle.retentionPolicy,size:bundle.root.size??'0 B',kind:'附件',favorite:false,owned:true,shared:false},title:<span>{bundle.root.name}</span>,onOpen:()=>undefined,actions:<><button onClick={()=>restoreFolder(bundle)}>恢复</button><button className="danger-link" onClick={()=>void purgeFolder(bundle)}>彻底删除</button></>}))} mode="recycle" page={page} onPageChange={setPage} onToggleFavorite={() => undefined} onDelete={(id) => { void permanentlyDeleteDocument(id) }} onShare={() => undefined} onRestore={restoreDocument} />
                 </div>
               </section>
             )}
@@ -1765,7 +1759,7 @@ export default function App() {
 
       {activePdfDocument && (
         <Suspense fallback={<div className="document-editor-loading" role="status"><span /><strong>正在打开 PDF 文献…</strong></div>}>
-          <PdfArchiveReader
+          <PdfArchiveReader onLanguageChange={language=>{if(activePdfDocument)changeLanguage(activePdfDocument.id,language)}}
             key={`pdf-archive-reader-${activePdfDocument.id}`}
             document={activePdfDocument}
             initialAnnotationId={activePdfSearchTarget?.documentId === activePdfDocument.id ? activePdfSearchTarget.annotationId : undefined}
@@ -1787,6 +1781,7 @@ export default function App() {
             table={activeEditingDataTable}
             currentUser={profile.name}
             teamName={activeTeam}
+            onShareMove={() => { if(activeEditingDocument){const id=activeEditingDocument.id;closeActiveDocument();shareDocument(id)} }}
             collaboratorOptions={Array.from(new Set([
               ...activeEditingDataTable.share.collaborators,
               ...members.map((member) => member.name),
@@ -1818,7 +1813,7 @@ export default function App() {
             open
             existingFiles={existingPdfFiles}
             onClose={() => setPdfArchiveImportOpen(false)}
-            onImportFile={(file, onProgress) => importPdfFile(file, onProgress, '我的空间/文献存档', 'personal')}
+            onImportFile={(file, onProgress, language) => importPdfFile(file, onProgress, '我的空间/文献存档', 'personal', language)}
             onOpenDocument={(documentId) => {
               setPdfArchiveImportOpen(false)
               openPdfDocumentById(documentId)
@@ -1849,8 +1844,8 @@ export default function App() {
           <div className="delete-confirm-copy">
             <strong>确定处理“{'name' in pendingDeletionTarget ? pendingDeletionTarget.name : pendingDeletionTarget.title}”吗？</strong>
             <p>{pendingDeletion.type === 'folder'
-              ? '文件夹及其全部子目录和文件将移入回收站，保留原位置与目录结构，可整体恢复。'
-              : '文档将移入回收站，可在回收站恢复；本次操作完成后也可立即撤销。'}</p>
+              ? '文件夹及其全部子目录和文件将移入回收站，保留原位置与目录结构，30天内可整体恢复，到期自动清理。'
+              : '文档将移入回收站，保留30天后自动清理；本次操作完成后也可立即撤销。'}</p>
           </div>
         </Modal>
       )}
@@ -1943,6 +1938,8 @@ export default function App() {
         </Modal>
       )}
 
+      {historicalCleanup&&<HistoricalRecycleCleanup name={historicalCleanup.name} onClose={()=>setHistoricalCleanup(null)} onConfirm={async()=>{if(historicalCleanup.kind==='document')return Boolean(await permanentlyDeleteDocument(historicalCleanup.id,true));const folder=recycledFolders.find(f=>f.id===historicalCleanup.id);return folder?purgeFolder(folder,true):false}}/>}
+      {sharingId!==null&&<Modal title="分享文件" confirmText="确认移动" onClose={()=>setSharingId(null)} onSubmit={e=>{e.preventDefault();confirmShare()}}><p>分享将移动原文件，完成后原位置不保留。文件编号、笔记和表格内容保持不变。</p><label>目标空间 / 文件夹<select className="text-field" value={shareTarget} onChange={e=>setShareTarget(e.target.value)}>{Array.from(new Set(['我的空间',...folders.map(f=>(f.location??'我的空间')+'/'+f.name),...teamSpaces.map(t=>t.name),...teamFolders.map(f=>(f.location??activeTeam)+'/'+f.name)])).filter(path=>canChange(path,teamSpaces)).map(path=><option key={path} value={path}>{path.replace(/^我的空间/,'个人空间')}</option>)}</select></label></Modal>}
       {spaceManagementOpen && isTeamAdmin && currentSpace && <TeamSpaceDialog space={currentSpace} candidates={memberCandidates} onSave={saveManagedSpace} onClose={() => setSpaceManagementOpen(false)} />}
       {activeProduct === 'research' && modal === 'new-team' && !teamMemberPickerOpen && (
         <Modal
@@ -1965,22 +1962,7 @@ export default function App() {
           />
           <label className="field-label" htmlFor="team-description">空间简介：</label>
           <textarea id="team-description" className="text-field" rows={3} maxLength={500} value={teamDescription} placeholder="请输入空间简介" onChange={(event) => setTeamDescription(event.target.value)} />
-          <label className="field-label" id="team-invite-label"><span className="required-mark">*</span> 邀请成员：</label>
-          <div className="invite-compound" id="team-invite" role="group" aria-labelledby="team-invite-label">
-            <div className="invite-compound-content">
-              {teamInviteSelection.length === 0
-                ? <span className="invite-placeholder">请输入</span>
-                : memberCandidates.filter((candidate) => teamInviteSelection.includes(candidate.id)).map((candidate) => (
-                  <span className="invite-chip" key={candidate.id}>
-                    <i style={{ background: candidate.color }}>{candidate.name[0]}</i>
-                    <b>{candidate.name}</b>
-                  </span>
-                ))}
-            </div>
-            <button type="button" aria-label="选择邀请成员" onClick={openTeamMemberPicker}>
-              <img src="/assets/figma/add-member.svg" alt="" />
-            </button>
-          </div>
+          <p>默认加入当前机构全员（演示机构，共 {new Set(memberCandidates.filter(m=>m.name!==profile.name).map(m=>m.email)).size+1} 人）。创建者为管理员，其他成员默认可查看；管理员可在空间管理中移除成员或调整角色。</p>
         </Modal>
       )}
 

@@ -26,7 +26,7 @@ test('最近浏览按访问时间倒序且移除后再次打开可恢复', () =>
     documentItem(2, { visitedAt: '2026-08-23 10:00', recentHiddenAt: '2026-08-22 10:00' }),
     documentItem(3, { visitedAt: '2026-08-24 10:00' }),
   ]
-  assert.deepEqual(recentDocuments(documents).map(({ id }) => id), [3, 2])
+  assert.deepEqual(recentDocuments(documents, new Date(2026, 8, 1)).map(({ id }) => id), [3, 2])
 })
 
 test('从未打开的导入文档不会伪造最近浏览记录', () => {
@@ -58,3 +58,5 @@ test('团队文档按完整团队根路径隔离，同名文件夹不会串入',
   assert.equal(isTeamDocument(first, 'AI研究团队'), true)
   assert.equal(isTeamDocument(second, 'AI研究团队'), false)
 })
+
+test('最近浏览按日历月裁剪、文档去重、同分钟按创建时间和自然标题排序',()=>{const now=new Date(2026,2,31,12);const docs=[documentItem(1,{visitedAt:'2026-02-28 12:00',title:'文档10',createdAt:'2026-01-01 10:00'}),documentItem(2,{visitedAt:'2026-02-28 11:59'}),documentItem(1,{visitedAt:'2026-03-01 10:00',title:'文档10',createdAt:'2026-01-01 10:00'}),documentItem(3,{visitedAt:'2026-03-01 10:00',title:'文档2',createdAt:'2026-01-01 10:00'})];assert.deepEqual(recentDocuments(docs,now).map(d=>d.id),[3,1])})

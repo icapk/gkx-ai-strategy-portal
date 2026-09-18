@@ -258,7 +258,7 @@ export function DataTableHub({
       <div className="data-hub-body" aria-hidden={hubInert} inert={hubInert}>
         <section className="data-hub-library" aria-labelledby="data-hub-library-title">
           <header className="data-hub-section-header">
-            <div><h2 id="data-hub-library-title">科研数据管理</h2><p>集中查看和管理科研项目数据、项目进度、导入文件与共享权限</p></div>
+            <div><h2 id="data-hub-library-title">科研数据管理</h2><p>集中查看和管理科研项目数据、项目进度、导入文件与分享权限</p></div>
             <span>共 {items.length} 个表格</span>
           </header>
 
@@ -285,14 +285,14 @@ export function DataTableHub({
           {visibleItems.length ? (
             <div className="data-hub-table-scroll">
               <table className="data-hub-table">
-                <thead><tr><th>名称</th><th>类型</th><th>状态</th><th>数据规模</th><th>共享权限</th><th>最近更新</th><th>操作</th></tr></thead>
+                <thead><tr><th>名称</th><th>类型</th><th>状态</th><th>数据规模</th><th>分享权限</th><th>最近更新</th><th>操作</th></tr></thead>
                 <tbody>{visibleItems.map((item) => (
                   <tr key={item.documentId}>
                     <td data-label="名称"><div className="data-hub-name-cell"><span aria-hidden="true"><img src="/assets/iconpark/grid-nine.svg" alt="" /></span><div><button type="button" onClick={() => onOpenTable(item)}>{item.title}</button><small>{displayResearchLocation(item.location)}</small></div></div></td>
                     <td data-label="类型">{item.table.template === 'project-progress' ? '项目进度' : '科研数据'}</td>
                     <td data-label="状态"><span className={`data-hub-status data-hub-status--${getStatusClass(item.status)}`}>{item.status}</span></td>
                     <td data-label="数据规模"><span>{item.table.rows.length} 条记录</span><small>{item.table.attachments.length} 个文件</small></td>
-                    <td data-label="共享权限">{accessLabels[item.table.share.access]}</td>
+                    <td data-label="分享权限">{accessLabels[item.table.share.access]}</td>
                     <td data-label="最近更新"><time dateTime={item.table.updatedAt}>{shortDateTime(item.table.updatedAt)}</time><small>{item.table.updatedBy}</small></td>
                     <td data-label="操作">
                       <div className="data-hub-table-actions">

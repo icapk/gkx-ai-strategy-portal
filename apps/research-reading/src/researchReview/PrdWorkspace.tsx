@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { PrdPanel } from './PrdPanel'
-import { exportPrd, type PrdFeature } from './prd'
+import { prdMarkdown, exportPrd, type PrdFeature } from './prd'
 import { comparePrd, reviseFeature, type PrdBook } from './prdStore'
 import { PrdEditor } from './PrdEditor'
 import { ManualFocusEditor } from './ManualFocusEditor'
@@ -18,6 +18,8 @@ export function PrdWorkspace({query,view,onViewChange,onClearQuery,onLocate,onCo
  query:string;view:{chapter:string;opened:string[]};onViewChange:(v:{chapter:string;opened:string[]})=>void;onClearQuery:()=>void;onLocate:(id:string,label:string)=>void;onCompliance:(id:string)=>void;book:PrdBook;onBookChange:(book:PrdBook)=>Promise<boolean>
 }) {
  const [version,setVersion]=useState(book.current),[priority,setPriority]=useState(''),[history,setHistory]=useState(false),[compare,setCompare]=useState(book.revisions[0].id)
+ const previousCurrent=useRef(book.current)
+ useEffect(()=>{const prior=previousCurrent.current;previousCurrent.current=book.current;setVersion(selected=>selected===prior?book.current:selected)},[book.current])
  const [editing,setEditing]=useState<{area:string;before?:PrdFeature;draft:PrdFeature}|null>(null),[boxing,setBoxing]=useState<PrdFeature|null>(null)
  const [newVersion,setNewVersion]=useState(false),[name,setName]=useState(''),[plan,setPlan]=useState(''),[error,setError]=useState('')
  const revision=book.revisions.find(v=>v.id===version)??book.revisions.at(-1)!,editable=revision.id===book.current
@@ -26,6 +28,7 @@ export function PrdWorkspace({query,view,onViewChange,onClearQuery,onLocate,onCo
  return <div className="prd-panel">
   <nav className="prd-navigation"><label>版本<select aria-label="PRD版本" value={revision.id} onChange={e=>{setVersion(e.target.value);onViewChange({chapter:'overview',opened:[]})}}>{book.revisions.map(v=><option key={v.id} value={v.id}>{v.name}{v.id===book.current?' · 当前':''}</option>)}</select></label>
    {history&&<div className="prd-toolbar"><button onClick={()=>exportPrd(revision.areas,revision.name)}>导出此版本</button><button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(book,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='智能科研-PRD版本与改动记录.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}}>导出版本记录</button></div>}
+   <div className="prd-toolbar"><button onClick={()=>exportPrd(revision.areas,revision.name)}>导出 Markdown</button><span>{prdMarkdown(revision.areas,revision.name).replace(/\s/g,'').length} 字</span></div>
    <div className="prd-toolbar"><button onClick={()=>setHistory(!history)}>{history?'返回需求':'版本与改动记录'}</button><button onClick={()=>setNewVersion(!newVersion)}>创建大版本</button></div>
    <label>优先级<select aria-label="PRD优先级筛选" value={priority} onChange={e=>setPriority(e.target.value)}><option value="">全部</option>{['P0','P1','P2'].map(p=><option key={p}>{p}</option>)}</select></label>
   </nav>

@@ -1,3 +1,4 @@
+import { compareResearchDocuments } from './researchSort.ts'
 import type { ResearchDocument } from './types'
 
 const isTimestamp = (value?: string) => {
@@ -28,12 +29,12 @@ export const isTeamDocument = (documentItem: ResearchDocument, teamName: string)
   && documentItem.location.split('/').map((part) => part.trim()).filter(Boolean)[0] === teamName.trim()
 )
 
-export const recentDocuments = (documents: ResearchDocument[]) => documents
-  .filter((documentItem) => (
-    isTimestamp(documentItem.visitedAt)
-    && (!documentItem.recentHiddenAt || documentItem.visitedAt > documentItem.recentHiddenAt)
-  ))
-  .sort((first, second) => second.visitedAt.localeCompare(first.visitedAt) || second.id - first.id)
+export const recentDocuments = (documents: ResearchDocument[], now = new Date()) => {
+ const cutoff = new Date(now);const day=cutoff.getDate();cutoff.setDate(1);cutoff.setMonth(cutoff.getMonth()-1);cutoff.setDate(Math.min(day,new Date(cutoff.getFullYear(),cutoff.getMonth()+1,0).getDate()))
+ const latest = new Map<number,ResearchDocument>()
+ for(const item of documents){const visited=Date.parse(item.visitedAt.replace(' ','T'));if(!isTimestamp(item.visitedAt)||visited<cutoff.getTime()||visited>now.getTime()||(item.recentHiddenAt&&item.visitedAt<=item.recentHiddenAt))continue;const prior=latest.get(item.id);if(!prior||item.visitedAt>prior.visitedAt)latest.set(item.id,item)}
+ return [...latest.values()].sort((a,b)=>compareResearchDocuments(a,b))
+}
 
 export const favoriteDocuments = (documents: ResearchDocument[]) => documents
   .filter((documentItem) => documentItem.favorite)

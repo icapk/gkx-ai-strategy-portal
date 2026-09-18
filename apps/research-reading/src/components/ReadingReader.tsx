@@ -1,3 +1,5 @@
+import { useReadingLanguage } from './ReadingLanguageContext'
+import { translationDirection } from './DocumentLanguage'
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { articleSections, paragraphTranslations, type ReadingDocument, type ReadingNote } from '../readingData'
@@ -380,6 +382,7 @@ export function ReadingReader({
   onEditingNoteChange,
   onToast,
 }: ReadingReaderProps) {
+  const {language,requireLanguage}=useReadingLanguage()
   const { request: auditRequest } = useAudit()
   const paperAnalysis = useMemo(() => getPaperAnalysis(activeDocumentId, documentTitle), [activeDocumentId, documentTitle])
   const activeArticleSections = useMemo(() => readerArticleSections(paperAnalysis), [paperAnalysis])
@@ -1784,6 +1787,7 @@ export function ReadingReader({
   }
 
   const showTranslation = () => {
+    if(!requireLanguage())return
     setColorMenuOpen(false)
     setContextAction('translate')
     setResultCards({
@@ -1795,6 +1799,7 @@ export function ReadingReader({
   }
 
   const showExplanation = () => {
+    if(!requireLanguage())return
     setColorMenuOpen(false)
     setContextAction('explain')
     setResultCards({
@@ -2289,7 +2294,7 @@ export function ReadingReader({
             {resultCards.translationVisible && (
               <div data-compliance-target="reading-translation" className={`reading-float-card reading-float-card--translate${resultCards.translationExpanded ? '' : ' reading-float-card--collapsed'}`}>
                 <header><strong><span className="reading-result-title-icon" aria-hidden="true" />本地辅助释义</strong><button type="button" className="reading-icon-close" aria-label="关闭本地辅助释义" onClick={() => closeResultCard('translation')} /></header>
-                {resultCards.translationExpanded && <><p><b>选中原文：</b>{noteSelection?.text}</p><div className="reading-translation"><b>本地词典：</b>{selectionAid.translation}</div><small className="reading-local-aid-notice">未连接外部翻译服务，结果需结合原文核对。</small></>}
+                {resultCards.translationExpanded && <><p><b>选中原文：</b>{noteSelection?.text}</p><div className="reading-translation"><b>{translationDirection(language)} · 模拟：</b>{language==='zh'?'[中译英模拟] Translation preview — 未接入翻译服务。':selectionAid.translation}</div><small className="reading-local-aid-notice">未连接外部翻译服务，结果需结合原文核对。</small></>}
                 <footer><button type="button" onClick={() => void copyText(selectionAid.translation, '释义已复制')}>复制释义</button><button type="button" onClick={() => openNoteEditor('translation')}>添加笔记</button><span /><button type="button" className="reading-result-toggle" aria-label={resultCards.translationExpanded ? '收起本地辅助释义' : '展开本地辅助释义'} onClick={() => toggleResultCard('translation')}><img className={resultCards.translationExpanded ? '' : 'is-collapsed'} src="/assets/reading/result-toggle.svg" alt="" /></button></footer>
               </div>
             )}

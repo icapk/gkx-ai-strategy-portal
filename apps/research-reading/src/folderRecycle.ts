@@ -1,5 +1,5 @@
 import type { FolderItem } from './types'
-export interface RecycledFolder {id:number;scope:'personal'|'team';root:FolderItem;folders:FolderItem[];documentIds:number[];deletedAt:string}
+export interface RecycledFolder {id:number;scope:'personal'|'team';root:FolderItem;folders:FolderItem[];documentIds:number[];deletedAt:string;retentionPolicy?:'30-days-v1'}
 export const folderRecycleKey='research-folder-recycle-v1'
 export function loadRecycledFolders():RecycledFolder[] {
  try {const value=JSON.parse(localStorage.getItem(folderRecycleKey)||'[]');return Array.isArray(value)?value.filter(v=>v.root&&Array.isArray(v.folders)&&Array.isArray(v.documentIds)):[]}catch{return []}

@@ -143,3 +143,16 @@ test('损坏 JSON 会安全恢复默认状态并标记需要修复', () => {
   assert.ok(loaded.state.documents.length > 0)
   assert.match(loaded.error ?? '', /恢复安全默认数据/)
 })
+
+test('阅读语言和完整PDF标注向后兼容，旧文件不自动判定语言', () => {
+  const state = createDefaultState()
+  state.documents[0] = { ...state.documents[0], type: 'PDF', language: 'zh', originalFile: true }
+  const original = '真实原文'.repeat(80)
+  state.notes[0].pdfAnnotation = { id: String(state.notes[0].id), documentId: state.documents[0].id, kind: 'highlight', pageNumber: 2, quote: original, note: '独立阅读备注', rects: [{x:0.1,y:0.2,width:0.3,height:0.04}], createdAt:'2026-09-18T10:00:00Z', updatedAt:'2026-09-18T10:01:00Z' }
+  const roundtrip = sanitizeReadingWorkspaceState(JSON.parse(JSON.stringify(state)))
+  assert.equal(roundtrip.documents[0].language, 'zh')
+  assert.equal(roundtrip.documents[0].originalFile, true)
+  assert.equal(roundtrip.notes[0].pdfAnnotation?.quote, original)
+  assert.equal(roundtrip.notes[0].pdfAnnotation?.note, '独立阅读备注')
+  assert.equal(roundtrip.documents[1].language, undefined)
+})

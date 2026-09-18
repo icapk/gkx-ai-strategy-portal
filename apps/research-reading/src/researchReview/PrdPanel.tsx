@@ -15,8 +15,9 @@ export function PrdPanel({query, view, onViewChange, onClearQuery, onLocate, cat
     <button className="prd-feature-heading" aria-expanded={!!normalized||opened.includes(feature.id)} aria-controls={`prd-content-${feature.id}`} onClick={()=>onViewChange({chapter,opened:opened.includes(feature.id)?opened.filter(id=>id!==feature.id):[...opened,feature.id]})}><span>{feature.id}</span><strong>{feature.title}</strong><b className={`prd-priority priority-${feature.priority}`}>{feature.priority??'—'}</b><i aria-hidden="true">{normalized||opened.includes(feature.id)?'−':'+'}</i></button>
     {(!!normalized||opened.includes(feature.id))&&<div className="prd-feature-body" id={`prd-content-${feature.id}`}>
       <div className="prd-feature-meta"><b className={`prd-priority priority-${feature.priority}`}>{feature.priority??'未分级'}</b><span>{feature.release??'历史版本'}</span></div>
-      {featureRules(feature).map((group,index)=><section className="prd-rule-group" key={index}><h4>{group.title}</h4><ol>{group.items.map((item,i)=><li key={i}>{item}</li>)}</ol></section>)}
       <div className="prd-links" aria-label={`${feature.id} 原型关联`}>{feature.links.map(link=><button key={link.id} title={`定位原型：${link.label}`} onClick={()=>onLocate(`${feature.id}::${link.id}`,link.label)}><img src="/assets/reading/search.svg" alt=""/><span>{link.label}</span></button>)}</div>{featureTools?.(feature)}
+      {featureRules(feature).map((group,index)=><section className="prd-rule-group" key={index}><h4>{group.title}</h4><ol>{group.items.map((item,i)=><li key={i}>{item}</li>)}</ol></section>)}
+      
     </div>}
   </section>
   return <div className="prd-panel">

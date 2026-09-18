@@ -9796,3 +9796,19 @@ td.data-sheet-row-actions button.is-danger:hover {
 .location-header-info:hover .location-header-tooltip, .location-header-info:focus .location-header-tooltip { display: block; }
 
 .document-table th:has(.location-header-info) { overflow: visible; }
+
+.demo-data-control{position:fixed;bottom:12px;left:16px;z-index:100;background:white;border:1px solid #cad5e8;border-radius:8px;padding:8px 12px;color:#334867;box-shadow:0 2px 8px #20305018}
+
+.workbench-create{display:flex;gap:12px;align-items:center;padding:12px 0;flex-wrap:wrap}.workbench-create button{padding:8px 14px;background:#fff;border:1px solid #dce1ed;border-radius:6px}.workbench-create span{font-size:12px;color:#687387}
+
+.prototype-notice{font-size:12px;color:#63718b;padding:12px}.reading-language-toolbar{position:fixed;left:12px;bottom:52px;z-index:3100;background:#fff;border:1px solid #d5deee;border-radius:8px;padding:8px;max-width:70vw;display:flex;gap:10px;flex-wrap:wrap;font-size:12px}.reading-language-toolbar select{max-width:160px}
+
+.document-table select{max-width:135px;font-size:12px}.document-table label{font-size:0}.document-table label select{font-size:12px}
+
+.app-stage--reading .pdf-archive-reader{left:var(--reading-review-offset,386px)}.app-stage--reading .reading-language-toolbar{left:var(--reading-review-offset,386px);max-width:calc(100vw - var(--reading-review-offset,386px) - 20px);bottom:52px}.search-boundary{font-size:12px;color:#657186;padding:0 20px}
+.sidebar-parent-row{position:relative}.sidebar-parent-row>.sidebar-item{padding-right:54px}.sidebar-team-add{position:relative;z-index:2;flex-shrink:0}
+.sidebar-parent-row>.sidebar-team-add{opacity:1;pointer-events:auto;z-index:5}
+
+.modal-backdrop:has(.demo-data-body){position:fixed;inset:0;z-index:12000;padding:16px;display:flex;align-items:center;justify-content:center}.modal-backdrop:has(.demo-data-body) .modal{max-height:calc(100dvh - 32px);overflow:auto}.demo-data-body label{display:block;margin-top:16px}.reading-files-table-scroll .document-language-label{display:none}.reading-files-table-scroll select{max-width:130px}
+
+.retention-label{display:block;max-width:210px;white-space:normal;font-size:11px;color:#6b7280;margin-top:4px}

@@ -5,6 +5,7 @@ import type { FolderItem, ResearchDocument } from '../types'
 import { DocumentTable } from './DocumentTable'
 
 interface SpaceViewProps {
+  onLanguageChange?: (id:number,language:'zh'|'en')=>void
   onManageSpace?: () => void
   quickAccess: string[]
   onToggleQuickAccess: (key: string) => void
@@ -65,6 +66,7 @@ const folderUpdatedAt = (folder: FolderItem, documents: ResearchDocument[]) => d
 )
 
 export function SpaceView({
+  onLanguageChange,
   quickAccess, onToggleQuickAccess, onManageSpace,
   mode,
   teamName,
@@ -223,7 +225,7 @@ export function SpaceView({
       </header>
       <div className={`view-body space-body${openFolderName ? ' space-body--folder' : ''}${emptyTeam ? ' space-body--empty' : ''}`}>
         {openFolderName && <nav className="folder-breadcrumb" aria-label="文件夹路径"><button type="button" onClick={onBack}>{label}</button><span>/</span><strong>{openFolderName}</strong></nav>}
-        <DocumentTable
+        <DocumentTable onLanguageChange={onLanguageChange}
           folderEntries={folders.filter((folder) => (folder.location ?? locationRoot) === `${locationRoot}${openFolderName ? '/' + openFolderName : ''}`).map((folder) => ({
             key: `folder:${mode}:${folder.id}`,
             item: { id: -folder.id, title: folder.name, location: folder.location ?? locationRoot, owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? folder.updatedAt, updatedAt: folderUpdatedAt(folder, documents.filter((item) => item.location === `${folder.location ?? locationRoot}/${folder.name}`)), visitedAt: '', size: aggregateSize(documents.filter((item) => item.location.startsWith(`${folder.location ?? locationRoot}/${folder.name}/`) || item.location === `${folder.location ?? locationRoot}/${folder.name}`)), kind: '在线文档', favorite: false, owned: true, shared: false },

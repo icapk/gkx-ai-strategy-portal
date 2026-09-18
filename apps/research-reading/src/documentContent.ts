@@ -152,6 +152,8 @@ const sanitizeDocument = (value: unknown): ResearchDocument | null => {
     favoritedAt: cleanString(item.favoritedAt, 40) || undefined,
     recentHiddenAt: cleanString(item.recentHiddenAt, 40) || undefined,
     deletedAt: cleanString(item.deletedAt, 40) || undefined,
+    retentionPolicy: item.retentionPolicy === '30-days-v1' ? item.retentionPolicy : undefined,
+    language: item.language === 'zh' || item.language === 'en' ? item.language : undefined,
     originalFileName: cleanString(item.originalFileName, 255) || undefined,
     size: cleanString(item.size, 30) || '0 KB',
     kind: item.kind as ResearchDocument['kind'],

@@ -1,3 +1,4 @@
+import { DocumentLanguageSelect, translationDirection } from './DocumentLanguage'
 import {
   useCallback,
   useEffect,
@@ -46,6 +47,10 @@ interface PasswordPrompt {
 }
 
 export interface PdfArchiveReaderProps {
+  onLanguageChange?: (language:'zh'|'en')=>void
+
+  storage?: { loadFile: typeof loadPdfArchiveFile; loadAnnotations: typeof loadPdfAnnotations; loadImage: typeof loadPdfAnnotationImage }
+
   document: ResearchDocument
   initialAnnotationId?: string
   initialPageNumber?: number
@@ -211,6 +216,8 @@ const screenshotDataUrl = async (
 }
 
 export function PdfArchiveReader({
+  onLanguageChange,
+  storage,
   document: documentItem,
   initialAnnotationId,
   initialPageNumber,
@@ -220,6 +227,7 @@ export function PdfArchiveReader({
   onDownload,
   onExport,
 }: PdfArchiveReaderProps) {
+  const [translationOpen,setTranslationOpen]=useState(false)
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null)
   const [annotations, setAnnotations] = useState<PdfArchiveAnnotation[]>([])
   const [page, setPage] = useState(1)
@@ -396,8 +404,8 @@ export function PdfArchiveReader({
 
     const load = async () => {
       const [fileResult, annotationResult] = await Promise.all([
-        loadPdfArchiveFile(documentItem.id),
-        loadPdfAnnotations(documentItem.id),
+        (storage?.loadFile ?? loadPdfArchiveFile)(documentItem.id),
+        (storage?.loadAnnotations ?? loadPdfAnnotations)(documentItem.id),
       ])
       if (cancelled) return
 
@@ -900,7 +908,7 @@ export function PdfArchiveReader({
     }
     setLoadingImageIds((current) => ({ ...current, [annotation.id]: true }))
     try {
-      const result = await loadPdfAnnotationImage(documentItem.id, annotation.imageAssetKey)
+      const result = await (storage?.loadImage ?? loadPdfAnnotationImage)(documentItem.id, annotation.imageAssetKey)
       if (!result.ok) {
         showToast(result.error)
         return null
@@ -1143,7 +1151,7 @@ export function PdfArchiveReader({
               <div><span className={`is-${draft.kind}`}>{draft.kind === 'highlight' ? '划词' : '截图'}</span><strong>{draftBaseline ? '编辑笔记' : '新建笔记'}</strong></div>
               <small>原文第 {draft.pageNumber} 页</small>
             </header>
-            {draft.kind === 'highlight' && <a href={`https://translate.google.com/?sl=auto&tl=zh-CN&text=${encodeURIComponent(draft.quote)}&op=translate`} target="_blank" rel="noopener noreferrer" title="将在 Google 翻译中打开所选文字">翻译所选文字 ↗</a>}
+            {draft.kind==='highlight'&&<><button type="button" onClick={()=>setTranslationOpen(open=>!open)}>翻译所选文字</button>{translationOpen&&<section aria-label="选区翻译"><DocumentLanguageSelect value={documentItem.language} disabled={!onLanguageChange} onChange={language=>onLanguageChange?.(language)}/>{!documentItem.language?<p role="alert">首次翻译前请选择文档语言，不会自动识别。</p>:<><strong>{translationDirection(documentItem.language)} · 模拟状态</strong><p>{documentItem.language==='zh'?'Translation preview (demo).':'译文预览（模拟）。'}</p><p>原文：{draft.quote}</p><small>未接入真实翻译与术语服务，此处展示交互，不作为原文译文。扫描 PDF 不做 OCR。</small></>}</section>}</>}
             {draft.kind === 'highlight' ? <blockquote>{draft.quote}</blockquote> : draft.imageDataUrl ? <img className="pdf-archive-reader__editor-image" src={draft.imageDataUrl} alt={`第 ${draft.pageNumber} 页截图`} /> : null}
             <label htmlFor="pdf-archive-note-draft">笔记内容</label>
             <textarea

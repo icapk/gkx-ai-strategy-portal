@@ -1,3 +1,4 @@
+import { applyConfirmedAreas } from '../reviewDecisions.ts'
 import type { PrdArea, PrdFeature } from '../researchReview/prd'
 export const readingOverview={
  positioning:'智能阅读是面向科研文献的原文阅读与证据整理工作台，把文献、摘录、思考和相关知识组织在同一条阅读路径中。',
@@ -68,3 +69,5 @@ export const readingAreas:PrdArea[]=[
  ['REV-04','共享保存与人工框选','P0','READ-review-share','','阅读PRD正文、版本、合规关联和人工区域保存到独立阅读服务；审核和文献数据保留原存储。','人工框选支持拖画、增加、重画、删除、保存、恢复系统建议；坐标相对目标元素。|写入检查共享修订号，冲突不覆盖他人，编辑草稿保留；损坏记录不以种子覆盖。']
  ])
 ]
+
+readingAreas.splice(0,readingAreas.length,...applyConfirmedAreas(readingAreas))

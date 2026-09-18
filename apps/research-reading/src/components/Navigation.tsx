@@ -22,9 +22,7 @@ export function TopNavigation({
           <button className="product-tab product-tab--active" type="button" role="tab" aria-selected="true">
             智能科研
           </button>
-          <button className="product-tab" type="button" role="tab" aria-selected="false" onClick={onReadingSelect}>
-            智能阅读
-          </button>
+          <span className="prototype-notice">演示模式 · 机构与协作权限为本地模拟</span>
         </div>
         <div className="top-utilities">
           <button
