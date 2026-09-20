@@ -1,0 +1,32 @@
+const {chromium}=require('C:/Users/Lenovo/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright')
+const assert=require('node:assert/strict')
+;(async()=>{
+ const browser=await chromium.launch({channel:'msedge',headless:true})
+ try{
+  const context=await browser.newContext({viewport:{width:1600,height:1000}}),page=await context.newPage()
+  await page.goto('http://127.0.0.1:5174/?view=research')
+  const locate=async id=>{await page.getByLabel('搜索功能编号或标题').fill(id);await page.locator('.research-review .review-point-open').click();await page.waitForFunction(()=>['focused','context','failed'].includes(document.querySelector('.prototype-focus-layer')?.dataset.phase));assert.notEqual(await page.locator('.prototype-focus-layer').getAttribute('data-phase'),'failed',await page.locator('.prototype-focus-feedback').innerText())}
+  await locate('R8.1')
+  await page.locator('.pdf-import-dropzone input[type=file]').setInputFiles('public/antenna/paper.pdf')
+  await page.getByRole('button',{name:/开始导入/}).click()
+  await page.getByRole('button',{name:'完成',exact:true}).waitFor({timeout:45000})
+  await page.getByRole('button',{name:'完成',exact:true}).click()
+  for(const id of ['R8.3','R8.4','R8.5','R8.7','R8.8']){await locate(id);console.log(id,await page.locator('.prototype-focus-layer').getAttribute('data-phase'))}
+  await page.locator('.pdf-archive-reader canvas').waitFor()
+  await page.waitForFunction(()=>{const c=document.querySelector('.pdf-archive-reader canvas');return c&&c.width>100})
+  await locate('R8.5')
+  await page.getByRole('button',{name:'放大',exact:true}).click()
+  await page.waitForFunction(()=>document.querySelector('.pdf-archive-reader__zoom').textContent.includes('110%'))
+  await page.setViewportSize({width:1400,height:900})
+  await page.waitForFunction(()=>{const target=document.querySelector('[data-focus-id="research-pdf-screenshot"]').getBoundingClientRect(),frame=document.querySelector('.prototype-focus-frame')?.getBoundingClientRect();return frame&&Math.abs(frame.left-target.left)<2&&Math.abs(frame.top-target.top)<2})
+  await page.screenshot({path:'.local/focus-pdf.png'})
+  const pixelCount=await page.locator('.pdf-archive-reader canvas').evaluate(c=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let count=0;for(let i=0;i<d.length;i+=40)if(d[i]<180)count++;return count});assert.ok(pixelCount>100)
+  await page.getByRole('button',{name:'返回存档列表',exact:true}).click()
+  await page.getByLabel('搜索功能编号或标题').fill('R2.3');await page.locator('.review-point-open').click()
+  await page.waitForFunction(()=>document.querySelectorAll('.prototype-focus-frame').length===2)
+  await page.locator('.document-table tbody tr:first-child').evaluate(el=>el.remove())
+  await page.waitForFunction(()=>document.querySelector('.prototype-focus-layer').dataset.phase==='failed')
+  assert.equal(await page.locator('.prototype-focus-frame').count(),0)
+  console.log('PASS: isolated real PDF import, five reader targets, zoom/resize tracking, rendered pixels, disappeared-target cleanup')
+ }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exitCode=1})

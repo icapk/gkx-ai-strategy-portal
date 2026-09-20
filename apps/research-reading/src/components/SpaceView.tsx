@@ -1,3 +1,5 @@
+import {QuickFolderActions} from './QuickFolderActions'
+import {CreateActions} from './CreateActions'
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { downloadPdfArchive } from '../pdfArchive'
@@ -5,6 +7,9 @@ import type { FolderItem, ResearchDocument } from '../types'
 import { DocumentTable } from './DocumentTable'
 
 interface SpaceViewProps {
+  onSearchOpen:()=>void
+  onShareFolder:(folder:FolderItem)=>void
+  onDownloadFolder:(folder:FolderItem)=>void
   onLanguageChange?: (id:number,language:'zh'|'en')=>void
   onManageSpace?: () => void
   quickAccess: string[]
@@ -40,23 +45,6 @@ const downloadArchivedPdf = (documentItem: ResearchDocument) => {
   }).catch(() => window.alert('PDF 下载失败，请稍后重试。'))
 }
 
-const sizeInBytes = (value: string) => {
-  const match = value.trim().match(/^([\d.]+)\s*(B|KB|MB|GB)$/i)
-  if (!match) return 0
-  const amount = Number(match[1])
-  const unit = match[2].toUpperCase()
-  const multiplier = unit === 'GB' ? 1024 ** 3 : unit === 'MB' ? 1024 ** 2 : unit === 'KB' ? 1024 : 1
-  return Number.isFinite(amount) ? amount * multiplier : 0
-}
-
-const aggregateSize = (documents: ResearchDocument[]) => {
-  const bytes = documents.reduce((total, documentItem) => total + sizeInBytes(documentItem.size), 0)
-  if (bytes < 1024) return `${Math.round(bytes)} B`
-  if (bytes < 1024 ** 2) return `${Math.max(1, Math.round(bytes / 1024))} KB`
-  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`
-  return `${(bytes / 1024 ** 3).toFixed(1)} GB`
-}
-
 const folderUpdatedAt = (folder: FolderItem, documents: ResearchDocument[]) => documents.reduce(
   (latest, documentItem) => {
     const candidate = documentItem.updatedAt ?? documentItem.createdAt
@@ -66,7 +54,7 @@ const folderUpdatedAt = (folder: FolderItem, documents: ResearchDocument[]) => d
 )
 
 export function SpaceView({
-  onLanguageChange,
+  onSearchOpen,onShareFolder,onDownloadFolder,onLanguageChange,
   quickAccess, onToggleQuickAccess, onManageSpace,
   mode,
   teamName,
@@ -213,14 +201,10 @@ export function SpaceView({
     <section data-compliance-target={`research-${mode}`} className={`view view--space${mode === 'team' ? ' view--team' : ''}${emptyTeam ? ' view--empty-team' : ''}`}>
       <header className="view-header view-header--actions space-toolbar">
         <div className="header-actions">
-          <details className="create-dropdown"><summary className="button button--primary">新建 ▾</summary><div className="create-dropdown-menu">
-            <button type="button" onClick={(event) => { event.currentTarget.closest('details')?.removeAttribute('open'); onNewFolder() }}>新建在线文件夹</button>
-            <button type="button" onClick={(event) => { event.currentTarget.closest('details')?.removeAttribute('open'); onNewDocument() }}>新建在线文档</button>
-            <button type="button" onClick={(event) => { event.currentTarget.closest('details')?.removeAttribute('open'); onNewTable() }}>新建在线表格</button>
-          </div></details>
-          <button className="button button--secondary" type="button" onClick={onImportDocument}>上传</button>
+          <CreateActions onNewFolder={onNewFolder} onNewDocument={onNewDocument} onNewTable={onNewTable} onUpload={onImportDocument}/>
           {mode === 'team' && onManageSpace && <button className="button button--secondary" type="button" onClick={onManageSpace}>空间管理 <span className="space-admin-info" title="此功能仅对管理员开放，其他成员不可见。" aria-label="此功能仅对管理员开放，其他成员不可见。">ⓘ</span></button>}
         </div>
+        <button className="global-search-trigger" type="button" aria-label="全文搜索笔记和文档" onClick={onSearchOpen}><img src="/assets/reading/search.svg" alt=""/><span>搜索笔记、文档</span><kbd>⌘ K</kbd></button>
         {mode === 'personal' && <div className="space-inline-note" role="note">🔒 个人空间仅你可见；除非主动分享，文件与文件夹不会进入团队空间。</div>}
       </header>
       <div className={`view-body space-body${openFolderName ? ' space-body--folder' : ''}${emptyTeam ? ' space-body--empty' : ''}`}>
@@ -228,10 +212,10 @@ export function SpaceView({
         <DocumentTable onLanguageChange={onLanguageChange}
           folderEntries={folders.filter((folder) => (folder.location ?? locationRoot) === `${locationRoot}${openFolderName ? '/' + openFolderName : ''}`).map((folder) => ({
             key: `folder:${mode}:${folder.id}`,
-            item: { id: -folder.id, title: folder.name, location: folder.location ?? locationRoot, owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? folder.updatedAt, updatedAt: folderUpdatedAt(folder, documents.filter((item) => item.location === `${folder.location ?? locationRoot}/${folder.name}`)), visitedAt: '', size: aggregateSize(documents.filter((item) => item.location.startsWith(`${folder.location ?? locationRoot}/${folder.name}/`) || item.location === `${folder.location ?? locationRoot}/${folder.name}`)), kind: '在线文档', favorite: false, owned: true, shared: false },
+            item: { id: -folder.id, title: folder.name, location: folder.location ?? locationRoot, owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? folder.updatedAt, updatedAt: folderUpdatedAt(folder, documents.filter((item) => item.location === `${folder.location ?? locationRoot}/${folder.name}`)), visitedAt: '', size: '-', kind: '在线文档', favorite: false, owned: true, shared: false },
             onOpen: () => onOpenFolder(folder),
             title: renamingFolderId === folder.id ? <form className="document-rename-form" onSubmit={(event) => { event.preventDefault(); finishRename(folder) }}><input ref={renameInputRef} autoFocus aria-label="文件夹新名称" value={renameValue} onChange={(event) => setRenameValue(event.target.value)} /><button type="submit">保存</button><button type="button" onClick={() => cancelRename(folder.id)}>取消</button>{renameError && <span role="alert">{renameError}</span>}</form> : undefined,
-            actions: <><button data-focus-id="research-folder-pin" type="button" onClick={() => onToggleQuickAccess(`folder:${mode}:${folder.id}`)}>{quickAccess.includes(`folder:${mode}:${folder.id}`) ? '从快速访问中移除' : '加入快速访问'}</button><button type="button" onClick={() => onToggleQuickAccess(`favorite-folder:${mode}:${folder.id}`)}>{quickAccess.includes(`favorite-folder:${mode}:${folder.id}`) ? '取消收藏' : '收藏'}</button><button type="button" className="more-button" ref={(node) => { if (node) menuTriggerRefs.current.set(folder.id, node); else menuTriggerRefs.current.delete(folder.id) }} aria-label={`${folder.name}更多操作`} aria-haspopup="menu" aria-expanded={menuFolderId === folder.id} onClick={(event) => toggleFolderMenu(folder.id, event.currentTarget)}><span className="more-dots" aria-hidden="true"><i /><i /><i /></span></button></>,
+            actions: <QuickFolderActions name={folder.name} isFavoriteTab={false} onOpen={()=>onOpenFolder(folder)} pinned={quickAccess.includes(`folder:${mode}:${folder.id}`)} favorite={quickAccess.includes(`favorite-folder:${mode}:${folder.id}`)} onUnpin={()=>onToggleQuickAccess(`folder:${mode}:${folder.id}`)} onFavorite={()=>onToggleQuickAccess(`favorite-folder:${mode}:${folder.id}`)} onShare={()=>onShareFolder(folder)} onDownload={()=>onDownloadFolder(folder)} onDelete={()=>onDeleteFolder(folder.id)}/>,
           }))}
           quickAccess={quickAccess} onToggleQuickAccess={onToggleQuickAccess}
           documents={visibleDocuments} mode="space" page={page} onPageChange={onPageChange}

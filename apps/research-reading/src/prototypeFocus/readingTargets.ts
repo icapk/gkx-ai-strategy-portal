@@ -1,6 +1,8 @@
 import type { PrototypeTarget, PrototypeFocusLocation } from './types'
 
 export const readingTargets: Record<string, PrototypeTarget> = {
+  'annotation-review':{product:'reading',reviewMode:'annotations'},
+  'annotation-prd':{product:'reading',reviewMode:'prd'},
   'reading-review':{product:'reading'},
   'reading-library':{product:'reading',readingView:'library'},
   'reading-upload':{product:'reading',readingView:'upload'},
@@ -23,6 +25,14 @@ const target = (navigationTarget: string, selectors: string[], description: stri
 const focus = (id: string) => `[data-focus-id="${id}"]`
 const tool = (label: string) => `.antenna-toolbar [aria-label="${label}"]`
 export const readingLocations: Record<string, PrototypeFocusLocation> = {
+  'READ-annotation-list':{navigationTarget:'annotation-review',selectors:['[data-focus-id="annotation-list"]'],description:'注释列表与筛选',preserveSurface:true},
+  'READ-annotation-create':{navigationTarget:'annotation-review',selectors:['[data-focus-id="annotation-create"]'],description:'新增注释入口',preserveSurface:true},
+  'READ-annotation-relations':{navigationTarget:'annotation-review',selectors:['[data-focus-id="annotation-detail"], [data-focus-id="annotation-list"]'],description:'选择注释后查看并编辑关联',preserveSurface:true,contextOnly:true,prerequisite:'请在注释模式选择已有注释查看详情；空列表不生成测试记录。'},
+  'READ-annotation-location':{navigationTarget:'annotation-review',selectors:['[data-focus-id="annotation-list"]'],description:'选择注释后定位红点与范围',preserveSurface:true,contextOnly:true,prerequisite:'请在注释模式选择已有注释查看详情；空列表不生成测试记录。'},
+  'READ-annotation-workflow':{navigationTarget:'annotation-review',selectors:['[data-focus-id="annotation-detail"], [data-focus-id="annotation-list"]'],description:'选择注释后更新处理状态',preserveSurface:true,contextOnly:true,prerequisite:'请在注释模式选择已有注释查看详情；空列表不生成测试记录。'},
+  'READ-annotation-history':{navigationTarget:'annotation-review',selectors:['[data-focus-id="annotation-list"]'],description:'从关联链接返回功能详情查看修订记录',preserveSurface:true,contextOnly:true,prerequisite:'请在注释模式选择已有注释查看详情；空列表不生成测试记录。'},
+  'READ-annotation-exchange':{navigationTarget:'annotation-review',selectors:['[data-focus-id="annotation-transfer"]'],description:'注释导入导出',preserveSurface:true},
+  'READ-annotation-progress':{navigationTarget:'annotation-prd',selectors:['[data-focus-id="prd-design-progress"]'],description:'当前展开功能的设计进度与着重讲解',preserveSurface:true},
   'READ-library':target('reading-library',['.reading-files-table-scroll'],'文献列表'),
   'READ-library-search':target('reading-library',['.reading-files-search'],'文献搜索'),
   'READ-library-nav':target('reading-library',['.reading-files-nav'],'文献分组'),
@@ -83,3 +93,4 @@ export const readingLocations: Record<string, PrototypeFocusLocation> = {
   'F20.3': target('reading-metadata', ['.antenna-metadata'], '论文详情信息'),
   'F20.4': target('reading-graph', ['.knowledge-tabs', '.knowledge-panel > .knowledge-scope'], '技术、学术理论、学者分类与归纳数量'),
 }
+

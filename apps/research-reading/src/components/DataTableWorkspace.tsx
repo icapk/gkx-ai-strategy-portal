@@ -1,6 +1,7 @@
+import {displayMinute} from '../displayFormat'
 import { SpreadsheetGrid } from './SpreadsheetGrid'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import { exportResearchDataTableCsv, parseDelimitedData } from '../dataTableContent'
+
 import { usePrototypeFocus } from '../prototypeFocus/FocusContext'
 import type {
   DataTableColumn,
@@ -10,7 +11,7 @@ import type {
   ResearchDataTable,
   ResearchDocument,
 } from '../types'
-import { displayResearchLocation } from '../workbenchDocuments'
+
 import { Modal } from './Modal'
 
 type ViewMode = 'table' | 'form'
@@ -30,18 +31,6 @@ interface DataTableWorkspaceProps {
   onSave: (value: { title: string; table: ResearchDataTable }) => string | null
   onToast: (message: string) => void
   onNavigationGuardChange: (guard: (() => boolean) | null) => void
-}
-
-interface ImportDraft {
-  id: string
-  name: string
-  size: number
-  mimeType: string
-  status: 'reading' | 'ready' | 'error'
-  headers: string[]
-  rows: string[][]
-  previewText: string
-  error?: string
 }
 
 interface FieldDraft {
@@ -130,7 +119,7 @@ export function DataTableWorkspace({
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [saveState, setSaveState] = useState<SaveState>('saved')
   const [saveError, setSaveError] = useState('')
-  const [lastSavedAt, setLastSavedAt] = useState(initialTable.updatedAt.slice(-5))
+  const [lastSavedAt, setLastSavedAt] = useState(displayMinute(initialTable.updatedAt).slice(-5))
   const [query, setQuery] = useState(initialSearchQuery)
   const [statusFilter, setStatusFilter] = useState('全部状态')
   const [sort, setSort] = useState<{ columnId: string; direction: SortDirection } | null>(null)
@@ -146,10 +135,6 @@ export function DataTableWorkspace({
   const [formDirty, setFormDirty] = useState(false)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [undo, setUndo] = useState<UndoState | null>(null)
-  const [importOpen, setImportOpen] = useState(initialAction === 'import')
-  const [importDrafts, setImportDrafts] = useState<ImportDraft[]>([])
-  const [importMode, setImportMode] = useState<'append' | 'replace'>('append')
-  const [importError, setImportError] = useState('')
   const [shareOpen, setShareOpen] = useState(initialAction === 'share')
   const [shareAccess, setShareAccess] = useState<DataTableShareAccess>(initialTable.share.access)
   const [shareCollaborators, setShareCollaborators] = useState<string[]>(initialTable.share.collaborators)
@@ -187,7 +172,7 @@ export function DataTableWorkspace({
   const previewAttachment = previewAttachmentId
     ? table.attachments.find((attachment) => attachment.id === previewAttachmentId)
     : undefined
-  const nestedModalOpen = recordEditorOpen || importOpen || shareOpen || Boolean(fieldDraft) || filesOpen || Boolean(previewAttachment)
+  const nestedModalOpen = recordEditorOpen || shareOpen || Boolean(fieldDraft) || filesOpen || Boolean(previewAttachment)
   const {request: focusRequest, ready: focusReady, reject: focusReject} = usePrototypeFocus()
   useEffect(() => {
     if (focusRequest?.module !== 'research' || focusRequest.target?.surface !== 'table') return
@@ -599,141 +584,6 @@ export function DataTableWorkspace({
     onToast('字段已删除，可撤销')
   }
 
-  const readImportFiles = async (files: FileList | File[]) => {
-    const allFiles = Array.from(files)
-    const selected = allFiles.slice(0, 10)
-    setImportError('')
-    if (allFiles.length > 10) setImportError('一次最多选择 10 个文件，已保留前 10 个。')
-    const pending: ImportDraft[] = selected.map((file) => ({
-      id: createId('import'), name: file.name, size: file.size, mimeType: file.type || 'text/plain', status: 'reading', headers: [], rows: [], previewText: '',
-    }))
-    setImportDrafts((current) => [...current, ...pending])
-    await Promise.all(selected.map(async (file, index) => {
-      const base = pending[index]
-      let result: ImportDraft
-      if (!/\.(csv|tsv)$/i.test(file.name)) {
-        result = { ...base, status: 'error', error: '仅支持 CSV、TSV 文件。' }
-      } else if (file.size > 2 * 1024 * 1024) {
-        result = { ...base, status: 'error', error: '文件超过 2 MiB 限制。' }
-      } else {
-        try {
-          const text = await file.text()
-          const parsed = parseDelimitedData(text, /\.tsv$/i.test(file.name) ? '\t' : undefined)
-          result = parsed.ok
-            ? { ...base, status: 'ready', headers: parsed.headers, rows: parsed.rows, previewText: text.slice(0, 6000) }
-            : { ...base, status: 'error', error: parsed.error }
-        } catch {
-          result = { ...base, status: 'error', error: '文件读取失败，请重新选择。' }
-        }
-      }
-      setImportDrafts((current) => current.map((item) => item.id === base.id ? result : item))
-    }))
-  }
-
-  const handleImportInput = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files?.length) void readImportFiles(event.target.files)
-    event.target.value = ''
-  }
-
-  const handleImportDrop = (event: DragEvent<HTMLLabelElement>) => {
-    event.preventDefault()
-    if (event.dataTransfer.files.length) void readImportFiles(event.dataTransfer.files)
-  }
-
-  const submitImportData = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const ready = importDrafts.filter((item) => item.status === 'ready')
-    if (!ready.length) {
-      setImportError('请先选择并成功解析至少一个文件。')
-      return
-    }
-    if (importDrafts.some((item) => item.status === 'reading')) {
-      setImportError('文件仍在解析，请稍候。')
-      return
-    }
-    if (importMode === 'replace' && table.rows.length && !window.confirm('替换会移除当前全部记录，是否继续？')) return
-    if (table.attachments.length + ready.length > 30) {
-      setImportError('单个表格最多保留 30 条文件记录，请先移除部分导入记录。')
-      return
-    }
-    const nextColumns = [...table.columns]
-    const columnByName = new Map(nextColumns.map((column) => [normalizedValue(column.name), column]))
-    for (const file of ready) {
-      for (const header of file.headers) {
-        const key = normalizedValue(header)
-        if (!columnByName.has(key)) {
-          if (nextColumns.length >= 30) {
-            setImportError('合并后的字段超过 30 个，请精简文件表头后重试。')
-            return
-          }
-          const column: DataTableColumn = { id: createId('column'), name: header, type: 'text', required: false }
-          nextColumns.push(column)
-          columnByName.set(key, column)
-        }
-      }
-    }
-    const timestamp = formatTimestamp()
-    const importedRows = ready.flatMap((file) => file.rows.map((values) => {
-      const rowValues = blankValues(nextColumns)
-      file.headers.forEach((header, index) => {
-        const column = columnByName.get(normalizedValue(header))
-        if (column) rowValues[column.id] = values[index] ?? ''
-      })
-      return { id: createId('row'), values: rowValues, updatedAt: timestamp, updatedBy: currentUser }
-    }))
-    if (importedRows.length + (importMode === 'append' ? table.rows.length : 0) > 500) {
-      setImportError('导入后记录将超过 500 条，请拆分数据后重试。')
-      return
-    }
-    const nextRows = importMode === 'replace' ? importedRows : [...table.rows, ...importedRows]
-    const validationError = validateTable({ ...table, columns: nextColumns, rows: nextRows })
-    if (validationError) {
-      setImportError(`导入数据未通过字段校验：${validationError} 请修正源文件后重试。`)
-      return
-    }
-    const attachments = ready.map((file) => ({
-      id: createId('attachment'),
-      name: file.name,
-      size: file.size,
-      mimeType: file.mimeType,
-      uploadedAt: timestamp,
-      uploadedBy: currentUser,
-      rowCount: file.rows.length,
-      source: 'import' as const,
-      previewText: file.previewText,
-    }))
-    setUndo({ table, message: importMode === 'replace' ? '已替换全部记录' : '已追加导入记录' })
-    markChanged((current) => ({
-      ...current,
-      columns: nextColumns,
-      rows: nextRows,
-      attachments: [...current.attachments, ...attachments],
-    }))
-    setImportOpen(false)
-    setImportDrafts([])
-    setImportError('')
-    setPage(1)
-    if (importMode === 'replace') {
-      const firstRow = importedRows[0]
-      setActiveRowId(firstRow?.id ?? null)
-      setFormValues(firstRow?.values ?? blankValues(nextColumns))
-      setFormIsNew(!firstRow)
-      updateFormDirty(false)
-      setFormErrors({})
-    }
-    onToast(`已从 ${ready.length} 个文件导入 ${importedRows.length} 条记录`)
-  }
-
-  const openImportDialog = () => {
-    if (formDirty) {
-      onToast('请先保存当前表单记录，再导入数据')
-      return
-    }
-    setImportDrafts([])
-    setImportError('')
-    setImportOpen(true)
-  }
-
   const openShareDialog = () => {
     if (formDirty) {
       onToast('请先保存当前表单记录，再设置分享权限')
@@ -744,10 +594,6 @@ export function DataTableWorkspace({
     setShareOpen(true)
   }
 
-  const exportCsv = () => {
-    downloadText(exportResearchDataTableCsv(table), `${title.replace(/[\\/:*?"<>|]/g, '-') || '在线表格格'}.csv`)
-    onToast('CSV 已导出，可用于分享或备份')
-  }
 
   const submitShare = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -815,8 +661,6 @@ export function DataTableWorkspace({
       <header className="data-sheet-header" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
         <button ref={backButtonRef} className="data-sheet-back" type="button" onClick={handleClose}><span aria-hidden="true" />返回</button>
         <div className="data-sheet-title-area">
-          <div className="data-sheet-breadcrumb"><span>基础服务</span><i>/</i><span>智能科研</span><i>/</i><span>{displayResearchLocation(documentItem.location)}</span><i>/</i><strong>数据表格</strong></div>
-          <p className="mobile-capability-context" aria-label="功能路径：基础服务，智能科研，数据表格"><span>基础服务</span><i>/</i><span>智能科研</span><i>/</i><strong>数据表格</strong></p>
           <input aria-label="数据表格名称" maxLength={50} value={title} onChange={(event) => { setTitle(event.target.value); updateSaveState('dirty'); setSaveError('') }} />
         </div>
         <div className="data-sheet-save-area">
@@ -833,20 +677,17 @@ export function DataTableWorkspace({
           <button id="data-sheet-tab-table" type="button" role="tab" aria-controls="data-sheet-panel-table" aria-selected={viewMode === 'table'} tabIndex={viewMode === 'table' ? 0 : -1} className={viewMode === 'table' ? 'is-active' : ''} onKeyDown={(event) => { if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); setViewMode('form'); event.currentTarget.nextElementSibling instanceof HTMLElement && event.currentTarget.nextElementSibling.focus() } }} onClick={() => setViewMode('table')}><img className="data-sheet-tab-icon" src="/assets/iconpark/grid-nine.svg" alt="" />表格视图</button>
           <button id="data-sheet-tab-form" type="button" role="tab" aria-controls="data-sheet-panel-form" aria-selected={viewMode === 'form'} tabIndex={viewMode === 'form' ? 0 : -1} className={viewMode === 'form' ? 'is-active' : ''} onKeyDown={(event) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); setViewMode('table'); event.currentTarget.previousElementSibling instanceof HTMLElement && event.currentTarget.previousElementSibling.focus() } }} onClick={() => setViewMode('form')}><img className="data-sheet-tab-icon" src="/assets/iconpark/form-one.svg" alt="" />表单视图</button>
         </div>
-        <div className="data-sheet-toolbar-actions">
-          <button data-focus-id="research-table-import" className="button button--secondary" type="button" onClick={openImportDialog}><img className="iconpark-control-icon" src="/assets/iconpark/upload-logs.svg" alt="" />导入数据</button>
-          <button className="button button--secondary" type="button" onClick={exportCsv}><img className="iconpark-control-icon" src="/assets/iconpark/download.svg" alt="" />导出 CSV</button>
-        </div>
+        
       </div>
 
       {saveError && (
         <div className="data-sheet-error" role="alert" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
           <strong>表格保存失败</strong><span>{saveError}</span>
-          <div><button type="button" onClick={() => saveNow()}>重试保存</button><button type="button" onClick={exportCsv}>导出备份</button></div>
+          <div><button type="button" onClick={() => saveNow()}>重试保存</button><button type="button" onClick={()=>downloadText(JSON.stringify(table,null,2),title+'.json','application/json')}>备份未保存内容</button></div>
         </div>
       )}
 
-      <div className="data-sheet-body" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
+      <div data-focus-id="research-table-records" className="data-sheet-body" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
         {viewMode === 'table' ? (
           <section id="data-sheet-panel-table" className="data-sheet-panel" role="tabpanel" aria-labelledby="data-sheet-tab-table">
             <SpreadsheetGrid table={table} onChange={next => markChanged(() => next)} />
@@ -855,8 +696,8 @@ export function DataTableWorkspace({
           <section id="data-sheet-panel-form" className="data-sheet-form-view" role="tabpanel" aria-labelledby="data-sheet-tab-form">
             {table.rows.length === 0 ? (
               <div className="data-sheet-empty data-sheet-form-empty">
-                <img src="/assets/document-sheet.svg" alt="" /><strong>暂无记录</strong><p>新增或导入记录后，可在表单视图中逐条查看全部字段。</p>
-                <div><button className="button button--primary" type="button" onClick={openNewRecord}>新增记录</button><button className="button button--secondary" type="button" onClick={openImportDialog}>导入数据</button></div>
+                <img src="/assets/document-sheet.svg" alt="" /><strong>暂无记录</strong><p>新增记录后，可在表单视图中逐条查看全部字段。</p>
+                <div><button className="button button--primary" type="button" onClick={openNewRecord}>新增记录</button></div>
               </div>
             ) : <>
               <aside aria-label="表单视图记录导航">
@@ -895,7 +736,7 @@ export function DataTableWorkspace({
                       }}
                     >
                       <i>{String(index + 1).padStart(2, '0')}</i>
-                      <span><strong>{row.values[primaryColumn?.id] || '未命名记录'}</strong><small>{owner || row.updatedBy} · {row.updatedAt}</small></span>
+                      <span><strong>{row.values[primaryColumn?.id] || '未命名记录'}</strong><small>{owner || row.updatedBy} · {displayMinute(row.updatedAt)}</small></span>
                       <b aria-hidden="true">›</b>
                     </button>
                   })}
@@ -906,7 +747,7 @@ export function DataTableWorkspace({
                 <article id="data-sheet-active-record" className="data-sheet-record-form" aria-label={`${activeRow.values[primaryColumn?.id] || '未命名记录'}详情`}>
                   <header>
                     <div><span>第 {activeRowIndex + 1} / {filteredRows.length} 条 · 记录详情</span><h2>{activeRow.values[primaryColumn?.id] || '未命名记录'}</h2></div>
-                    <span>{activeRow.updatedBy} 更新于 {activeRow.updatedAt}</span>
+                    <span>{activeRow.updatedBy} 更新于 {displayMinute(activeRow.updatedAt)}</span>
                   </header>
                   <dl className="data-sheet-record-details">
                     {table.columns.map((column) => {
@@ -953,19 +794,6 @@ export function DataTableWorkspace({
         </Modal>
       )}
 
-      {importOpen && (
-        <Modal title="导入数据文件" onClose={() => setImportOpen(false)} onSubmit={submitImportData} confirmText="确认导入" confirmDisabled={!importDrafts.some((item) => item.status === 'ready')} extraWide tall bodyClassName="data-sheet-import-modal">
-          <div className="data-sheet-modal-intro"><strong>本地批量导入 CSV / TSV</strong><span>支持一次选择多个文件；每个文件不超过 2 MiB，最多 500 行、30 个字段。</span></div>
-          <p className="data-sheet-import-hint">必填表头：{table.columns.filter((column) => column.required).map((column) => column.name).join('、')}。其他表头会自动添加为文本字段。</p>
-          <label className="data-sheet-drop-zone" onDragOver={(event) => event.preventDefault()} onDrop={handleImportDrop}>
-            <span className="data-sheet-drop-icon" aria-hidden="true" /><strong>点击或拖拽数据文件到这里</strong><small>本地解析，不上传服务器；原文件仅保留导入记录与文本预览</small><input type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values" multiple onChange={handleImportInput} />
-          </label>
-          {importDrafts.length > 0 && <div className="data-sheet-import-list">{importDrafts.map((file) => <article key={file.id} className={`is-${file.status}`}><img src="/assets/document-sheet.svg" alt="" /><div><strong>{file.name}</strong><span>{formatFileSize(file.size)}{file.status === 'ready' ? ` · ${file.rows.length} 条 · ${file.headers.length} 个字段` : file.status === 'reading' ? ' · 正在解析' : ''}</span>{file.error && <b>{file.error}</b>}</div><button type="button" aria-label={`移除${file.name}`} onClick={() => setImportDrafts((current) => current.filter((item) => item.id !== file.id))}>×</button></article>)}</div>}
-          {importDrafts.find((item) => item.status === 'ready') && <div className="data-sheet-import-preview"><header><strong>数据预览</strong><span>前 5 行</span></header><div><table><thead><tr>{importDrafts.find((item) => item.status === 'ready')?.headers.map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{importDrafts.find((item) => item.status === 'ready')?.rows.slice(0, 5).map((row, rowIndex) => <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}</tr>)}</tbody></table></div></div>}
-          <fieldset className="data-sheet-import-mode"><legend>写入方式</legend><label><input type="radio" name="import-mode" checked={importMode === 'append'} onChange={() => setImportMode('append')} /><span><strong>追加到现有表格</strong><small>保留当前记录，在末尾添加导入数据</small></span></label><label><input type="radio" name="import-mode" checked={importMode === 'replace'} onChange={() => setImportMode('replace')} /><span><strong>替换全部记录</strong><small>保留字段设置，清空当前记录后写入</small></span></label></fieldset>
-          {importError && <p className="data-sheet-modal-error" role="alert">{importError}</p>}
-        </Modal>
-      )}
 
       {shareOpen && <Modal title="分享文件" onClose={()=>setShareOpen(false)} onSubmit={e=>{e.preventDefault();if(formDirty){onToast('请先保存表单记录');return}if(!saveNow())return;setShareOpen(false);onShareMove?.()}} confirmText="选择目标位置"><p>分享将移动此表格。访问权限跟随目标空间，原位置不保留，不按文件单独指定成员。</p></Modal>}
 
@@ -982,8 +810,8 @@ export function DataTableWorkspace({
 
       {filesOpen && (
         <Modal title="数据文件与导入记录" onClose={() => setFilesOpen(false)} hideFooter wide>
-          <div className="data-sheet-file-history">{table.attachments.length === 0 ? <div className="data-sheet-file-empty"><img src="/assets/document-sheet.svg" alt="" /><strong>暂无导入文件</strong><span>通过“导入数据”可批量解析 CSV / TSV 文件。</span></div> : table.attachments.map((file) => <article key={file.id}><img src="/assets/document-sheet.svg" alt="" /><div><strong>{file.name}</strong><span>{formatFileSize(file.size)} · {file.rowCount} 条 · {file.uploadedBy} 于 {file.uploadedAt} 导入</span></div><div>{file.previewText && <button type="button" onClick={() => { setFilesOpen(false); setPreviewAttachmentId(file.id) }}>查看预览</button>}<button type="button" className="is-danger" onClick={() => { if (!window.confirm(`移除“${file.name}”的导入记录？已导入的表格行不会删除。`)) return; markChanged((current) => ({ ...current, attachments: current.attachments.filter((item) => item.id !== file.id) })); onToast('导入记录已移除') }}>移除记录</button></div></article>)}</div>
-          <div className="data-sheet-file-actions"><button className="button button--secondary" type="button" onClick={() => { setFilesOpen(false); window.setTimeout(openImportDialog, 0) }}>继续导入</button><button className="button button--primary" type="button" onClick={() => setFilesOpen(false)}>完成</button></div>
+          <div className="data-sheet-file-history">{table.attachments.length === 0 ? <div className="data-sheet-file-empty"><img src="/assets/document-sheet.svg" alt="" /><strong>暂无导入文件</strong><span>暂无历史数据文件。</span></div> : table.attachments.map((file) => <article key={file.id}><img src="/assets/document-sheet.svg" alt="" /><div><strong>{file.name}</strong><span>{formatFileSize(file.size)} · {file.rowCount} 条 · {file.uploadedBy} 于 {displayMinute(file.uploadedAt)} 导入</span></div><div>{file.previewText && <button type="button" onClick={() => { setFilesOpen(false); setPreviewAttachmentId(file.id) }}>查看预览</button>}<button type="button" className="is-danger" onClick={() => { if (!window.confirm(`移除“${file.name}”的导入记录？已导入的表格行不会删除。`)) return; markChanged((current) => ({ ...current, attachments: current.attachments.filter((item) => item.id !== file.id) })); onToast('导入记录已移除') }}>移除记录</button></div></article>)}</div>
+          <div className="data-sheet-file-actions"><button className="button button--primary" type="button" onClick={() => setFilesOpen(false)}>完成</button></div>
         </Modal>
       )}
 

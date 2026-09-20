@@ -101,7 +101,7 @@ export function Sidebar({
                       type="button"
                       key={team}
                       tabIndex={teamTreeExpanded ? undefined : -1}
-                      className={`sidebar-item sidebar-item--child${activeTeam === team ? ' is-active' : ''}`}
+                      className={`sidebar-item sidebar-item--child${activeSection === 'team' && activeTeam === team ? ' is-active' : ''}`}
                       onClick={() => onTeamSelect(team)}
                     >
                       {team}

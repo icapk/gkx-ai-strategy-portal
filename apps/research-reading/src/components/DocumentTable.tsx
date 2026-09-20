@@ -1,12 +1,13 @@
+import {displayMinute,documentSizeLabel} from '../displayFormat'
 import DOMPurify from 'dompurify'
 import { loadResearchDataTables, exportResearchDataTableCsv } from '../dataTableContent'
 import { useEffect, useRef, useState, type ReactNode, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { retentionLabel } from '../researchPolicy'
-import { DocumentLanguageSelect } from './DocumentLanguage'
 import type { ResearchDocument, WorkbenchTab } from '../types'
 import { displayResearchLocation, favoriteTimeLabel } from '../workbenchDocuments'
 import { compareResearchDocuments, minute } from '../researchSort'
+import { recentDocumentWindow, recentDocumentLimitForIndex, RECENT_DOCUMENT_BATCH, usesWorkbenchLoadMore } from '../recentDocuments'
 
 export type FolderTableEntry = { item: ResearchDocument; key: string; onOpen: () => void; actions: ReactNode; title?: ReactNode }
 interface DocumentTableProps {
@@ -29,15 +30,11 @@ interface DocumentTableProps {
   onOpenDocument?: (documentItem: ResearchDocument) => void
   onDownloadDocument?: (documentItem: ResearchDocument) => void
   highlightedDocumentId?: number | null
+  recentResetKey?: string | number
 }
 
 function sizeInMegabytes(item: ResearchDocument) {
-  if (item.pdfArchive) return `${(item.pdfArchive.byteSize / 1024 ** 2).toFixed(2)} M`
-  const match = item.size.trim().match(/^([\d.]+)\s*(B|K|KB|M|MB|G|GB)$/i)
-  if (!match) return '—'
-  const unit = match[2].toUpperCase()
-  const value = Number(match[1]) * (unit.startsWith('G') ? 1024 : unit.startsWith('M') ? 1 : unit.startsWith('K') ? 1 / 1024 : 1 / 1024 ** 2)
-  return `${value > 0 && value < 0.01 ? '<0.01' : value.toFixed(2)} M`
+  return documentSizeLabel(item, item.kind==='数据表格'?loadResearchDataTables().find(t=>t.documentId===item.id):undefined)
 }
 
 function FileIcon({ kind }: { kind: ResearchDocument['kind'] }) {
@@ -207,6 +204,7 @@ export function DocumentTable({
   onOpenDocument,
   onDownloadDocument,
   highlightedDocumentId = null,
+  recentResetKey = '',
 }: DocumentTableProps) {
   const [spaceMenuId, setSpaceMenuId] = useState<number | null>(null)
   const [pageSize, setPageSize] = useState<10 | 20 | 50>(20)
@@ -224,6 +222,7 @@ export function DocumentTable({
   const tableRegionRef = useRef<HTMLDivElement>(null)
   const isWorkbench = mode === 'workbench'
   const isRecent = isWorkbench && workbenchTab === 'recent'
+  const usesLoadMore = usesWorkbenchLoadMore(mode,workbenchTab)
   const isFavorites = isWorkbench && workbenchTab === 'favorites'
   const isRecycle = mode === 'recycle'
   const tableProfile = isRecent
@@ -235,14 +234,25 @@ export function DocumentTable({
         : isRecycle
           ? 'recycle'
           : 'workbench'
-  const columnCount = isRecent ? 8 : isFavorites ? 5 : mode === 'space' ? 8 : isRecycle ? 6 : 8
+  const columnCount = isRecent ? 8 : isFavorites ? 6 : mode === 'space' ? 8 : isRecycle ? 6 : 8
   const totalPages = Math.max(1, Math.ceil(allItems.length / pageSize))
-  const visibleDocuments = sortedDocuments.slice((page - 1) * pageSize, page * pageSize)
+  const recentKey=JSON.stringify([mode,workbenchTab,sort.key,sort.direction,recentResetKey])
+  const [recentState,setRecentState]=useState({key:recentKey,limit:RECENT_DOCUMENT_BATCH})
+  const recentLimit=recentState.key===recentKey?recentState.limit:RECENT_DOCUMENT_BATCH
+  const recentWindow=recentDocumentWindow(sortedDocuments,recentLimit)
+  const visibleDocuments = usesLoadMore?recentWindow.items:sortedDocuments.slice((page - 1) * pageSize, page * pageSize)
   const emptyState = emptyCopy(mode, workbenchTab)
 
+  useEffect(()=>{setRecentState({key:recentKey,limit:RECENT_DOCUMENT_BATCH})},[recentKey])
+  useEffect(()=>{
+    if(!usesLoadMore||highlightedDocumentId==null)return
+    const index=sortedDocuments.findIndex(item=>item.id===highlightedDocumentId)
+    if(index>=0)setRecentState(state=>({key:recentKey,limit:Math.max(state.key===recentKey?state.limit:RECENT_DOCUMENT_BATCH,recentDocumentLimitForIndex(index))}))
+  },[highlightedDocumentId,usesLoadMore])
+
   useEffect(() => {
-    if (page > totalPages) onPageChange(totalPages)
-  }, [isRecent, onPageChange, page, totalPages])
+    if (!usesLoadMore && page > totalPages) onPageChange(totalPages)
+  }, [usesLoadMore, onPageChange, page, totalPages])
 
 
   useEffect(() => {
@@ -283,7 +293,7 @@ export function DocumentTable({
         ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
     })
     return () => window.cancelAnimationFrame(frame)
-  }, [highlightedDocumentId])
+  }, [highlightedDocumentId,visibleDocuments.length])
 
   const openSpaceMenu = (event: ReactMouseEvent<HTMLButtonElement>, documentId: number) => {
     event.stopPropagation()
@@ -292,9 +302,8 @@ export function DocumentTable({
       return
     }
     const rect = event.currentTarget.getBoundingClientRect()
-    const menuWidth = 160
-    const menuDocument = documents.find((item) => item.id === documentId)
-    const menuHeight = menuDocument && onOpenDocument ? 310 : 268
+    const menuWidth = 170
+    const menuHeight = (isRecent ? 4 : 3) * 46 + 18
     const viewportGap = 8
     const left = Math.min(window.innerWidth - menuWidth - viewportGap, Math.max(viewportGap, rect.right - menuWidth))
     const belowTop = rect.bottom + 2
@@ -433,7 +442,7 @@ export function DocumentTable({
     }
     return (
       <>
-        {isRecent && onRemoveRecent ? <button type="button" onClick={() => onRemoveRecent(documentItem.id)}>移除</button> : isWorkbench && workbenchTab === 'quick' ? <button type="button" onClick={() => onToggleQuickAccess?.(`document:${documentItem.id}`)}>取消快速访问</button> : isFavorites ? <button data-focus-id="research-favorite" type="button" onClick={() => onToggleFavorite(documentItem.id)}>取消收藏</button> : <button type="button" onClick={() => onShare(documentItem.id)}>分享</button>}
+        <button type="button" onClick={() => onShare(documentItem.id)}>分享</button><button data-focus-id="research-download" type="button" onClick={()=>{if((documentItem.pdfArchive||documentItem.originalFileName)&&onDownloadDocument)onDownloadDocument(documentItem);else downloadFallback(documentItem)}}>下载</button>
         <span className="document-space-menu-wrap">
           <button data-focus-reveal="research-document-menu" className="more-button" type="button" ref={(node) => { if (node) spaceMenuTriggerRefs.current.set(documentItem.id, node); else spaceMenuTriggerRefs.current.delete(documentItem.id) }} aria-label={`${documentItem.title}更多操作`} aria-haspopup="menu" aria-expanded={spaceMenuId === documentItem.id} onClick={(event) => openSpaceMenu(event, documentItem.id)}><span className="more-dots" aria-hidden="true"><i /><i /><i /></span></button>
         </span>
@@ -446,17 +455,17 @@ export function DocumentTable({
     if (folder) {
       const title = <td className="title-cell">{folder.title ?? <button type="button" className="document-title-link" onClick={folder.onOpen}>📁 {documentItem.title}</button>}</td>
       const actions = <td><span className="row-actions">{folder.actions}</span></td>
-      if(isRecycle)return <>{title}<td>{documentItem.owner}</td><td>{documentItem.deletedAt}<small className="retention-label">{retentionLabel(documentItem)}</small></td><td>文件夹</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actions}</>
-      if (isFavorites) return <>{title}<td>{documentItem.owner}</td><td>—</td><td>文件夹</td><td>{sizeInMegabytes(documentItem)}</td>{actions}</>
-      if (mode === 'space') return <>{title}<td>文件夹</td><td>{sizeInMegabytes(documentItem)}</td><td>{documentItem.updatedAt}</td><td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{minute(documentItem.createdAt)||'—'}</td>{actions}</>
-      return <>{title}<td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{sizeInMegabytes(documentItem)}</td><td>{minute(documentItem.createdAt)||'—'}</td><td>—</td><td>文件夹</td>{actions}</>
+      if(isRecycle)return <>{title}<td>{documentItem.owner}</td><td>{displayMinute(documentItem.deletedAt)}<small className="retention-label">{retentionLabel(documentItem)}</small></td><td>文件夹</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actions}</>
+      if (isFavorites) return <>{title}<td>{documentItem.owner}</td><td>—</td><td>文件夹</td><td>-</td>{actions}</>
+      if (mode === 'space') return <>{title}<td>文件夹</td><td>-</td><td>{displayMinute(documentItem.updatedAt)}</td><td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{minute(documentItem.createdAt)||'—'}</td>{actions}</>
+      return <>{title}<td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>-</td><td>{minute(documentItem.createdAt)||'—'}</td><td>—</td><td>文件夹</td>{actions}</>
     }
     const titleCell = <td className="title-cell">{renderTitle(documentItem)}</td>
     const actionCell = <td><span className="row-actions">{renderActions(documentItem)}</span></td>
 
     if (isFavorites) return <>{titleCell}<td>{documentItem.owner}</td><td>{favoriteTimeLabel(documentItem)}</td><td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td>{actionCell}</>
-    if (mode === 'space') return <>{titleCell}<td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td><td>{documentItem.updatedAt ?? documentItem.createdAt}</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{minute(documentItem.createdAt)||'—'}</td>{actionCell}</>
-    if (isRecycle) return <>{titleCell}<td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.deletedAt ?? '时间未记录'}<small className="retention-label">{retentionLabel(documentItem)}</small></td><td><KindTag kind={documentItem.kind} /></td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actionCell}</>
+    if (mode === 'space') return <>{titleCell}<td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td><td>{displayMinute(documentItem.updatedAt ?? documentItem.createdAt)}</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{minute(documentItem.createdAt)||'—'}</td>{actionCell}</>
+    if (isRecycle) return <>{titleCell}<td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.deletedAt ? displayMinute(documentItem.deletedAt) : '时间未记录'}<small className="retention-label">{retentionLabel(documentItem)}</small></td><td><KindTag kind={documentItem.kind} /></td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actionCell}</>
     return <>{titleCell}<td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{sizeInMegabytes(documentItem)}</td><td>{minute(documentItem.createdAt)||'—'}</td><td>{minute(documentItem.visitedAt)||'—'}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
   }
 
@@ -464,11 +473,11 @@ export function DocumentTable({
     <div className={`table-region table-region--${tableProfile}`} ref={tableRegionRef}>
       <div className="table-scroll">
         <table className={`document-table document-table--${tableProfile}`} aria-label={isRecent ? '最近浏览文档' : isFavorites ? '收藏文档' : mode === 'space' ? '空间文档' : isRecycle ? '回收站内容' : '工作台文档'}>
-          <thead><tr>{renderHeader()}<th>语言</th></tr></thead>
+          <thead><tr>{renderHeader()}</tr></thead>
           <tbody>
             {allItems.length === 0 ? (
               <tr>
-                <td className="empty-cell" colSpan={columnCount+1+(isFavorites?1:0)}>
+                <td className="empty-cell" colSpan={columnCount}>
                   <span className="empty-mark" aria-hidden="true">⌁</span>
                   <strong>{emptyState.title}</strong>
                   <span>{emptyState.detail}</span>
@@ -481,13 +490,13 @@ export function DocumentTable({
                 data-document-kind={folderEntries.some(entry => entry.item.id === documentItem.id) ? "文件夹" : documentItem.kind}
                 className={highlightedDocumentId === documentItem.id ? 'is-search-target' : undefined}
               >
-                {renderRow(documentItem)}<td>{documentItem.kind==='PDF文档'&&!folderEntries.some(f=>f.item.id===documentItem.id)?<DocumentLanguageSelect label={documentItem.title+'语言'} value={documentItem.language} disabled={!onLanguageChange||isRecycle} onChange={language=>onLanguageChange?.(documentItem.id,language)}/>: '—'}</td>
+                {renderRow(documentItem)}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {allItems.length > 0 ? (
+      {usesLoadMore ? (recentWindow.hasMore ? <div className="pagination" aria-label={`${workbenchTab==='quick'?'快速访问':workbenchTab==='favorites'?'我的收藏':'最近浏览'}加载更多`}><button type="button" data-focus-id={`research-${workbenchTab}-load-more`} onClick={()=>setRecentState({key:recentKey,limit:recentWindow.nextLimit})}>加载更多</button><span aria-live="polite">已显示 {visibleDocuments.length} / {allItems.length} 条</span></div> : null) : allItems.length > 0 ? (
         <Pagination
           page={page}
           pageSize={pageSize}
@@ -509,17 +518,9 @@ export function DocumentTable({
             onClick={(event) => event.stopPropagation()}
             onKeyDown={navigateMenu}
           >
-            {onOpenDocument && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onOpenDocument(documentItem))}>{documentItem.pdfArchive ? '阅读与笔记' : isNativeDocument(documentItem) ? (documentItem.kind === '数据表格' ? '打开表格' : '编辑文档') : '预览文档'}</button>}
-            {onCreateNote && documentItem.pdfArchive && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onCreateNote(documentItem))}>笔记</button>}
-            {onToggleQuickAccess && (workbenchTab === 'quick' || !quickAccess.includes(`document:${documentItem.id}`)) && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleQuickAccess(`document:${documentItem.id}`))}>{quickAccess.includes(`document:${documentItem.id}`) ? '取消快速访问' : '加入快速访问'}</button>}
-            {!isFavorites && <button data-focus-id="research-favorite" type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleFavorite(documentItem.id))}>{documentItem.favorite ? '取消收藏' : '收藏'}</button>}
-            {isWorkbench && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onShare(documentItem.id))}>分享</button>}
-            <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => {
-              if ((documentItem.pdfArchive || documentItem.originalFileName) && onDownloadDocument) onDownloadDocument(documentItem)
-              else downloadFallback(documentItem)
-            })}>{documentItem.pdfArchive ? '下载 PDF' : '下载'}</button>
-            {onRename && <button type="button" role="menuitem" onClick={() => beginRename(documentItem)}>重命名</button>}
-            <button type="button" role="menuitem" className="danger-link" onClick={() => runSpaceMenuAction(documentItem.id, () => onDelete(documentItem.id))}>删除</button>
+            {onToggleQuickAccess && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleQuickAccess(`document:${documentItem.id}`))}>{quickAccess.includes(`document:${documentItem.id}`) ? '取消快速访问' : '加入快速访问'}</button>}
+            {<button data-focus-id="research-favorite" type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleFavorite(documentItem.id))}>{documentItem.favorite ? '取消收藏' : '收藏'}</button>}
+            {isRecent&&onRemoveRecent&&<button type="button" role="menuitem" onClick={()=>runSpaceMenuAction(documentItem.id,()=>onRemoveRecent(documentItem.id))}>移除</button>}<button type="button" role="menuitem" className="danger-link" onClick={() => runSpaceMenuAction(documentItem.id, () => onDelete(documentItem.id))}>删除</button>
           </div>
         )
       })(), document.body)}

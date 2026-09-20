@@ -117,7 +117,7 @@ export function makeResearchSearchSnippet(text: string, terms: string[], maximum
 function documentFields(document: ResearchDocument): SearchField[] {
  return [
   {label:'标题',value:document.title,weight:360},
-  {label:'正文',value:[document.content,document.pdfTextContent,document.blocks?.map(blockSearchText).join(' ')].filter(Boolean).join(' '),weight:220},
+  ...(document.kind==='在线文档'&&!document.originalFileName?[{label:'正文',value:document.content ?? document.blocks?.map(blockSearchText).join(' ') ?? '',weight:220}]:[]),
  ]
 }
 function noteFields(note:ResearchNote, _documentTitle:string):SearchField[] {
@@ -205,7 +205,7 @@ export function searchResearchContent(
     const match = evaluateFields(documentFields(document), query)
     if (!match) return []
     const snippetSource = documentFields(document).find(f=>f.label==='正文')?.value || match.snippet
-    const target = documentSearchTarget(document, terms)
+    const target = document.kind==='在线文档'&&!document.originalFileName?documentSearchTarget(document, terms):{}
     return [{
       id: `document:${document.id}`,
       type: 'document',

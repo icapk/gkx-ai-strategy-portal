@@ -463,20 +463,20 @@ export function ResearchDocumentEditor({
     showNotice(`“${documentItem.title}”已解析、存档并关联到报告`)
   }
 
-  const importPdfAndInsertReference: PdfImportDialogProps['onImportFile'] = async (file, onProgress, language): Promise<PdfImportResult> => {
+  const importPdfAndInsertReference: PdfImportDialogProps['onImportFile'] = async (file, onProgress): Promise<PdfImportResult> => {
     const alreadyLinked = blocksRef.current.some((block) => {
       const reference = getPdfReferenceMetadata(block)
       const archivedDocument = reference
         ? archivedPdfDocuments.find((item) => item.id === reference.documentId)
         : undefined
       return archivedDocument?.pdfArchive?.originalName === file.name
-        && archivedDocument.pdfArchive.byteSize === file.size
+        && archivedDocument?.pdfArchive?.byteSize === file.size
     })
     if (!alreadyLinked && blocksRef.current.length >= MAX_DOCUMENT_BLOCKS) {
       return { ok: false, error: `当前报告已达到 ${MAX_DOCUMENT_BLOCKS} 个内容元素，无法建立 PDF 来源关联。` }
     }
 
-    const result = await onImportPdfFile(file, onProgress, language)
+    const result = await onImportPdfFile(file, onProgress)
     if (!result.ok) return result
     insertPdfReference(result.documentItem)
     return result

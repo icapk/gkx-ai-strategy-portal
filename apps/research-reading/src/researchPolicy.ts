@@ -6,6 +6,7 @@ export function moveResearchDocument(item:ResearchDocument,location:string,docum
 export function recycleExpired(deletedAt?:string,now=new Date()){if(!deletedAt)return false;const time=Date.parse(deletedAt.replace(' ','T'));return Number.isFinite(time)&&now.getTime()-time>=30*86400000}
 
 export type RetainedItem={deletedAt?:string;retentionPolicy?:'30-days-v1'}
-export function automaticRecycleDue(item:RetainedItem,now=new Date()){return item.retentionPolicy==='30-days-v1'&&recycleExpired(item.deletedAt,now)}
-export function historicalRecycleDue(item:RetainedItem,now=new Date()){return item.retentionPolicy!=='30-days-v1'&&recycleExpired(item.deletedAt,now)}
-export function retentionLabel(item:RetainedItem,now=new Date()){if(!item.deletedAt)return '删除时间未记录';if(historicalRecycleDue(item,now))return '已过期 · 历史资料，备份后手动清理';if(item.retentionPolicy!=='30-days-v1')return '历史资料 · 不自动清理';if(automaticRecycleDue(item,now))return '已到期 · 等待有权限时清理';const time=Date.parse(item.deletedAt.replace(' ','T'));return Number.isFinite(time)?'距自动清理 '+Math.max(0,Math.ceil((time+30*86400000-now.getTime())/86400000))+' 天':'删除时间异常 · 不自动清理'}
+export function automaticRecycleDue(item:RetainedItem,now=new Date()){return recycleExpired(item.deletedAt,now)}
+export function historicalRecycleDue(_item:RetainedItem,_now=new Date()){return false // All dated items now share the same retention period.
+}
+export function retentionLabel(item:RetainedItem,now=new Date()){if(!item.deletedAt)return '删除时间未记录';if(automaticRecycleDue(item,now))return '已到期 · 等待有权限时清理';const time=Date.parse(item.deletedAt.replace(' ','T'));return Number.isFinite(time)?'距自动清理 '+Math.max(0,Math.ceil((time+30*86400000-now.getTime())/86400000))+' 天':'删除时间异常 · 不自动清理'}

@@ -1,3 +1,4 @@
+import {displayMinute} from '../displayFormat'
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { getResearchDataTableSearchText } from '../dataTableContent'
 import type { ResearchDataTable, ResearchDocument } from '../types'
@@ -56,7 +57,7 @@ const accessLabels: Record<ResearchDataTable['share']['access'], string> = {
 }
 
 const normalizedValue = (value: string) => value.normalize('NFC').trim().toLocaleLowerCase('zh-CN')
-const shortDateTime = (value: string) => value.length >= 16 ? value.slice(0, 16) : value
+const shortDateTime = displayMinute
 const isCompletedStatus = (value: string) => /完成|已归档|结项/.test(value)
 const isRiskStatus = (value: string) => /风险|阻塞|延期|失败/.test(value)
 const isNotStartedStatus = (value: string) => /未开始|待开始|待处理/.test(value)

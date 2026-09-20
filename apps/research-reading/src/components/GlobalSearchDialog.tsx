@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import type { ResearchDocument, ResearchNote } from '../types'
+import type { FolderItem, ResearchDocument, ResearchNote } from '../types'
 import {
   countResearchSearchResults,
   filterResearchSearchResults,
@@ -15,6 +15,8 @@ import { minute } from '../researchSort'
 import { Modal } from './Modal'
 
 interface GlobalSearchDialogProps {
+  folders: (FolderItem & {scope:"personal"|"team"})[]
+  onOpenFolder:(folder:FolderItem & {scope:"personal"|"team"})=>void
   documents: ResearchDocument[]
   notes: ResearchNote[]
   onClose: () => void
@@ -23,8 +25,6 @@ interface GlobalSearchDialogProps {
   onOpenNote: (note: ResearchNote) => void
 }
 
-const recentSearchesStorageKey = 'intelligent-research-portal:recent-searches:v1'
-const maximumRecentSearches = 6
 const searchResultsPageSize = 10
 
 const documentResultIcons: Record<ResearchDocument['kind'], string> = {
@@ -41,26 +41,6 @@ const scopeOptions: Array<{ value: ResearchSearchScope; label: string }> = [
   { value: 'documents', label: '文档' },
   { value: 'notes', label: '笔记' },
 ]
-
-function loadRecentSearches() {
-  try {
-    const stored = window.localStorage.getItem(recentSearchesStorageKey)
-    if (!stored) return []
-    const parsed: unknown = JSON.parse(stored)
-    if (!Array.isArray(parsed)) return []
-    return Array.from(new Set(parsed.filter((item): item is string => typeof item === 'string').map((item) => item.trim()).filter(Boolean))).slice(0, maximumRecentSearches)
-  } catch {
-    return []
-  }
-}
-
-function saveRecentSearches(searches: string[]) {
-  try {
-    window.localStorage.setItem(recentSearchesStorageKey, JSON.stringify(searches))
-  } catch {
-    // Search remains usable when storage is unavailable or full.
-  }
-}
 
 function HighlightedText({ text, terms }: { text: string; terms: string[] }) {
   if (!text || terms.length === 0) return <>{text}</>
@@ -108,8 +88,8 @@ function ResultMetadata({ result, terms }: { result: ResearchSearchResult; terms
 
   return (
     <div className="global-search-result-metadata" aria-label="笔记信息">
-      <span><b>创建时间：</b>{minute(result.note.createdAt)||"—"}</span>
       <span><b>所属文档：</b><HighlightedText text={result.documentTitle} terms={terms} /></span>
+      <span><b>创建时间：</b>{minute(result.note.createdAt)||"—"}</span>
       <span><b>更新时间：</b><HighlightedText text={minute(result.note.updatedAt)||"—"} terms={terms} /></span>
     </div>
   )
@@ -128,6 +108,7 @@ function ResultIcon({ result }: { result: ResearchSearchResult }) {
 
 function resultActionLabel(result: ResearchSearchResult) {
   if (result.type === 'note') return '查看笔记'
+  if(result.document.id<0)return '打开文件夹'
   if (result.document.kind === '数据表格') return '打开表格'
   if (result.document.pdfArchive) return result.targetPageNumber ? '打开并定位' : '打开阅读'
   if (result.document.kind !== '在线文档') return '定位文档'
@@ -136,6 +117,7 @@ function resultActionLabel(result: ResearchSearchResult) {
 
 export function GlobalSearchDialog({
   documents,
+  folders, onOpenFolder,
   notes,
   onClose,
   onOpenDocument,
@@ -146,16 +128,16 @@ export function GlobalSearchDialog({
   const [submittedQuery, setSubmittedQuery] = useState('')
   const [scope, setScope] = useState<ResearchSearchScope>('all')
   const [resultPage, setResultPage] = useState(1)
-  const [recentSearches, setRecentSearches] = useState(loadRecentSearches)
   const inputRef = useRef<HTMLInputElement>(null)
   const resultListRef = useRef<HTMLDivElement>(null)
 
+  const searchDocuments=useMemo(()=>[...documents,...folders.map((folder,index):ResearchDocument=>({id:-index-1,title:folder.name,location:folder.location??'我的空间',owner:folder.owner??'',kind:'附件',size:'-',createdAt:folder.createdAt??folder.updatedAt,visitedAt:'',favorite:false,owned:folder.scope==='personal',shared:folder.scope==='team'}))],[documents,folders])
   const hasSubmittedQuery = Boolean(submittedQuery)
   const allResults = useMemo(() => (
     hasSubmittedQuery
-      ? searchResearchContent(documents, notes, submittedQuery)
-      : listResearchContent(documents, notes)
-  ), [documents, hasSubmittedQuery, notes, submittedQuery])
+      ? searchResearchContent(searchDocuments, notes, submittedQuery)
+      : listResearchContent(searchDocuments, notes)
+  ), [searchDocuments, hasSubmittedQuery, notes, submittedQuery])
   const counts = useMemo(() => countResearchSearchResults(allResults), [allResults])
   const visibleResults = useMemo(() => filterResearchSearchResults(allResults, scope), [allResults, scope])
   const terms = useMemo(() => getResearchSearchTerms(submittedQuery), [submittedQuery])
@@ -178,19 +160,12 @@ export function GlobalSearchDialog({
     if (resultPage > totalResultPages) setResultPage(totalResultPages)
   }, [resultPage, totalResultPages])
 
-  const rememberSearch = (query: string) => {
-    const next = [query, ...recentSearches.filter((item) => item.toLocaleLowerCase('zh-CN') !== query.toLocaleLowerCase('zh-CN'))].slice(0, maximumRecentSearches)
-    setRecentSearches(next)
-    saveRecentSearches(next)
-  }
-
   const runSearch = (query: string) => {
     const value = query.trim()
     if (!value) {setSubmittedQuery('');setResultPage(1);return}
     setDraftQuery(value)
     setSubmittedQuery(value)
     setResultPage(1)
-    rememberSearch(value)
   }
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -206,16 +181,8 @@ export function GlobalSearchDialog({
     window.requestAnimationFrame(() => inputRef.current?.focus())
   }
 
-  const clearRecentSearches = () => {
-    setRecentSearches([])
-    try {
-      window.localStorage.removeItem(recentSearchesStorageKey)
-    } catch {
-      // Ignore storage failures; the in-memory list is already cleared.
-    }
-  }
-
   const openResult = (result: ResearchSearchResult) => {
+    if(result.type==='document'&&result.document.id<0){const folder=folders[-result.document.id-1];if(folder)onOpenFolder(folder);onClose();return}
     if (result.type === 'document') {
       if (result.document.kind === '在线文档' || result.document.kind === '数据表格' || result.document.pdfArchive) {
         onOpenDocument(result.document, {
@@ -276,7 +243,7 @@ export function GlobalSearchDialog({
           ))}
         </div>
 
-        <p className="search-boundary">检索可读取的正文与 PDF 笔记。Word / Excel 检索已提取正文（Excel 每表前501行，正文最多12万字符）；旧文件或提取失败时仅支持标题搜索；扫描 PDF 不做 OCR。解析失败不会生成虚构正文。</p>
+        <p className="search-boundary">搜索范围包括在线文档的名称和内容、在线文件夹名称、上传文件夹/文档名称、PDF的笔记标题和内容，不支持搜索上传文档的正文内容。</p>
         {visibleResults.length === 0 ? (
           <section className="global-search-empty" role="status">
             <h3>{hasSubmittedQuery ? '未找到匹配内容' : '暂无可浏览内容'}</h3>
@@ -284,15 +251,7 @@ export function GlobalSearchDialog({
           </section>
         ) : (
           <section className="global-search-results" aria-label={hasSubmittedQuery ? '搜索结果' : '科研内容列表'}>
-            {!hasSubmittedQuery && recentSearches.length > 0 && (
-              <div className="global-search-recent-inline" aria-label="最近搜索">
-                <span>最近搜索</span>
-                <div>
-                  {recentSearches.slice(0, 3).map((query) => <button type="button" onClick={() => runSearch(query)} key={query}>{query}</button>)}
-                </div>
-                <button className="global-search-recent-clear" type="button" onClick={clearRecentSearches}>清除</button>
-              </div>
-            )}
+
             <div className="global-search-result-list" ref={resultListRef}>
               {paginatedResults.map((result) => {
                 const title = result.type === 'document' ? result.document.title : result.note.title

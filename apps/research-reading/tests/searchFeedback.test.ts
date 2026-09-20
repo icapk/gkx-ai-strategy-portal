@@ -14,10 +14,10 @@ test('位置展示补全根类型且不改变存储路径',()=>{
 test('笔记用自身更新时间参与混排，创建时间与文档直接比较',()=>{
  const doc={...pdf,id:401,title:'needle 文档',visitedAt:'2026-09-02 10:00',createdAt:'2026-09-01 10:00'}
  assert.deepEqual(listResearchContent([pdf,doc],[note]).map(r=>r.id),['document:401','note:1','document:400'])
- assert.deepEqual(searchResearchContent([pdf,doc],[note],'needle').map(r=>r.id),['document:401','note:1','document:400'])
+ assert.deepEqual(searchResearchContent([pdf,doc],[note],'needle').map(r=>r.id),['document:401','note:1'])
 })
 test('标题优先不受正文命中文档的较新时间影响，全部关键词必须命中',()=>{
- const doc={...pdf,visitedAt:'2026-09-03 10:00'}
+ const doc={...pdf,kind:'在线文档' as const,visitedAt:'2026-09-03 10:00'}
  assert.deepEqual(searchResearchContent([doc],[note],'needle').map(r=>r.id),['note:1','document:400'])
  assert.equal(searchResearchContent([doc],[note],'needle missing').length,0)
 })

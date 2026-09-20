@@ -1,4 +1,4 @@
-import { useEffect, useRef, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useId, useState, type FormEvent, type ReactNode } from 'react'
 
 interface ModalProps {
   title: string
@@ -33,6 +33,21 @@ export function Modal({
   bodyClassName = '',
   auditTarget,
 }: ModalProps) {
+  const [reviewEdge, setReviewEdge] = useState(0)
+  const [reviewTop, setReviewTop] = useState(0)
+  useEffect(() => {
+    const update = () => {
+      const sidebar = document.querySelector<HTMLElement>('.reading-review:has(.annotation-workspace)')
+      const rect = sidebar?.getClientRects().length ? sidebar.getBoundingClientRect() : null
+      setReviewEdge(rect && window.innerWidth > 760 ? rect.right : 0)
+      setReviewTop(rect && window.innerWidth <= 760 ? rect.bottom : 0)
+    }
+    const observer = new MutationObserver(update)
+    observer.observe(document.body, { childList: true, subtree: true })
+    window.addEventListener('resize', update); update()
+    return () => { observer.disconnect(); window.removeEventListener('resize', update) }
+  }, [])
+  const titleId=useId()
   const dialogRef = useRef<HTMLFormElement | null>(null)
   const onCloseRef = useRef(onClose)
 
@@ -53,12 +68,13 @@ export function Modal({
     })
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return
+      if (document.querySelector('.annotation-draw-layer,.annotation-dialog-backdrop,.annotation-session-toolbar')) return
       if (event.key === 'Escape') {
         event.preventDefault()
         onCloseRef.current()
         return
       }
-      if (event.key !== 'Tab') return
+      if (event.key !== 'Tab' || document.querySelector('.annotation-workspace')) return
       const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
         'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
       ) ?? []).filter((element) => element.offsetParent !== null)
@@ -82,20 +98,20 @@ export function Modal({
   }, [title])
 
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
+    <div className="modal-backdrop" style={reviewTop ? { paddingTop: reviewTop + 8 } : reviewEdge ? { paddingLeft: reviewEdge + 20 } : undefined} role="presentation" onMouseDown={() => { if (!document.querySelector('.annotation-draw-layer,.annotation-dialog-backdrop')) onClose() }}>
       <form
         ref={dialogRef}
         data-compliance-target={auditTarget}
         className={`modal-card${wide ? ' modal-card--wide' : ''}${extraWide ? ' modal-card--extra-wide' : ''}${tall ? ' modal-card--tall' : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="modal-title"
+        aria-labelledby={titleId}
         tabIndex={-1}
         onMouseDown={(event) => event.stopPropagation()}
         onSubmit={onSubmit}
       >
         <header className="modal-header">
-          <h2 id="modal-title">{title}</h2>
+          <h2 id={titleId}>{title}</h2>
           <button className="icon-button modal-close" type="button" aria-label="关闭" onClick={onClose}>
             <img src="/assets/figma/modal-close.svg" alt="" />
           </button>

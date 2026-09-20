@@ -1,3 +1,4 @@
+import {displayMinute} from '../displayFormat'
 import { useReadingLanguage } from './ReadingLanguageContext'
 import { translationDirection } from './DocumentLanguage'
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
@@ -2050,8 +2051,9 @@ export function ReadingReader({
     }
   }, [auditRequest])
 
+  useEffect(()=>{const restore=(event:Event)=>{const state=(event as CustomEvent).detail;const panels:Record<string,InsightPanel>={figures:'charts',references:'references',metadata:'metadata',graph:'graph'};setLeftPanel(state.right==='notes'?'notes':'outline');if(panels[state.right])setRightPanel(panels[state.right])};window.addEventListener('annotation-restore-reading-panels',restore);return()=>window.removeEventListener('annotation-restore-reading-panels',restore)},[])
   return (
-    <section data-compliance-target="reading-reader" ref={readingFrameRef} className={`reading-frame${maximized ? ' reading-frame--maximized' : ''}${editingNoteId != null && leftPanel === 'notes' && noteEditorExpanded ? ' reading-frame--notes-expanded' : ''}${activeTool === 'screenshot' ? ' reading-frame--screenshot-armed' : ''}`} aria-label="PDF增强阅读">
+    <section data-annotation-reader-left={leftPanel==='outline'?'outline':undefined} data-annotation-reader-right={leftPanel==='notes'?'notes':({charts:'figures',references:'references',metadata:'metadata',graph:'graph'} as Record<string,string>)[rightPanel]} data-compliance-target="reading-reader" ref={readingFrameRef} className={`reading-frame${maximized ? ' reading-frame--maximized' : ''}${editingNoteId != null && leftPanel === 'notes' && noteEditorExpanded ? ' reading-frame--notes-expanded' : ''}${activeTool === 'screenshot' ? ' reading-frame--screenshot-armed' : ''}`} aria-label="PDF增强阅读">
       <h2 className="sr-only">PDF增强阅读</h2>
       <header data-compliance-target="reading-header" className="reading-document-header">
         <div className="reading-document-picker">
@@ -2385,7 +2387,7 @@ export function ReadingReader({
             {noteAnchor(detailedNote.excerpt) && <div><dt>来源</dt><dd>第{noteAnchor(detailedNote.excerpt)?.page}页 · {noteAnchor(detailedNote.excerpt)?.sectionTitle}</dd><button type="button" onClick={() => { const anchor = noteAnchor(detailedNote.excerpt); if (anchor) { setNoteDetailId(null); goToPage(anchor.page, { sectionTitle: anchor.sectionTitle, label: '笔记详情定位前' }) } }}>定位</button></div>}
             <div><dt>笔记</dt><dd className="reading-note-detail-copy">{detailedNote.excerpt}</dd><button type="button" onClick={() => void copyText(detailedNote.excerpt, '笔记已复制')}>复制</button></div>
             {detailedNote.imageDataUrls && detailedNote.imageDataUrls.length > 0 && <div><dt>附图</dt><dd className="reading-note-detail-images">{detailedNote.imageDataUrls.map((src, index) => <img src={src} alt={`笔记附图 ${index + 1}`} key={`${detailedNote.id}-${index}`} />)}</dd><span /></div>}
-            <div><dt>保存时间</dt><dd>{detailedNote.createdAt || '历史笔记 · 时间未记录'}</dd><span /></div>
+            <div><dt>保存时间</dt><dd>{detailedNote.createdAt ? displayMinute(detailedNote.createdAt) : '历史笔记 · 时间未记录'}</dd><span /></div>
           </dl>
           <footer><button type="button" onClick={() => { setNoteDetailId(null); startEditingNote(detailedNote) }}>编辑</button><button type="button" className="is-danger" onClick={() => setPendingDeleteNoteId(detailedNote.id)}>删除</button></footer>
         </section>

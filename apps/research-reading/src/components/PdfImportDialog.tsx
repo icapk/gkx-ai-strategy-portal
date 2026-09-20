@@ -10,7 +10,7 @@ import {
 import type { ResearchDocument } from '../types'
 import { Modal } from './Modal'
 import './PdfImportDialog.css'
-import { DocumentLanguageSelect, type DocumentLanguage } from './DocumentLanguage'
+
 
 const MAX_BATCH_FILES = 10
 const MAX_FILE_BYTES = 50 * 1024 * 1024
@@ -28,7 +28,7 @@ export interface ExistingPdfFile {
 export interface PdfImportDialogProps {
   open: boolean
   onClose: () => void
-  onImportFile: (file: File, onProgress: (progress: number) => void, language: DocumentLanguage) => Promise<PdfImportResult>
+  onImportFile: (file: File, onProgress: (progress: number) => void) => Promise<PdfImportResult>
   onOpenDocument: (documentId: number) => void
   existingFiles: ExistingPdfFile[]
 }
@@ -97,7 +97,7 @@ export function PdfImportDialog({
   onOpenDocument,
   existingFiles,
 }: PdfImportDialogProps) {
-  const [language,setLanguage]=useState<DocumentLanguage>()
+
   const [items, setItems] = useState<ImportQueueItem[]>([])
   const [selectionIssues, setSelectionIssues] = useState<SelectionIssue[]>([])
   const [isDragging, setIsDragging] = useState(false)
@@ -253,12 +253,12 @@ export function PdfImportDialog({
         patchItem(itemId, (item) => ({ ...item, status: 'processing', progress: 1, error: undefined }))
 
         try {
-          if(!language)throw Error('请选择文档语言')
+
           const result = await onImportFile(sourceItem.file, (progress) => {
             patchItem(itemId, (item) => item.status === 'processing'
               ? { ...item, progress: Math.max(item.progress, clampProgress(progress)) }
               : item)
-          },language)
+          })
 
           if ('error' in result) {
             patchItem(itemId, (item) => ({ ...item, status: 'failed', error: readableImportError(result.error) }))
@@ -336,7 +336,7 @@ export function PdfImportDialog({
       onClose={requestClose}
       onSubmit={submitDialog}
       confirmText={confirmText}
-      confirmDisabled={isProcessing || items.length === 0 || !language}
+      confirmDisabled={isProcessing || items.length === 0}
       cancelText={isProcessing ? '处理中' : '取消'}
       bodyClassName="pdf-import-modal-body"
       wide
@@ -394,7 +394,7 @@ export function PdfImportDialog({
                   <span className="pdf-import-order" aria-label={`队列第 ${index + 1} 项`}>{index + 1}</span>
                   <img className="pdf-import-file-icon" src="/assets/reading/pdf.svg" alt="" />
                   <div className="pdf-import-file-copy">
-                    <DocumentLanguageSelect value={language} disabled={isProcessing} onChange={setLanguage} label="本批 PDF 语言"/><strong title={item.file.name}>{item.file.name}</strong>
+                    <strong title={item.file.name}>{item.file.name}</strong>
                     <small>{formatFileSize(item.file.size)}{item.status === 'queued' && item.knownArchive ? ' · 已有同名存档，将核对原件并直接关联' : ''}{item.status === 'processing' ? ` · ${processingStage(item.progress)}` : ''}{item.error ? ` · ${item.error}` : ''}</small>
                     {item.status === 'processing' && (
                       <span

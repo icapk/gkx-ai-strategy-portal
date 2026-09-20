@@ -6,11 +6,11 @@ test('分享双向移动保留编号和内容且拒绝重名与无权限',()=>{c
 test('回收站三十天边界及异常旧时间',()=>{assert.equal(recycleExpired('2026-08-19 10:00',new Date(2026,8,18,10)),true);assert.equal(recycleExpired('2026-08-19 10:01',new Date(2026,8,18,10)),false);assert.equal(recycleExpired('unknown'),false)})
 
 import { automaticRecycleDue, historicalRecycleDue, retentionLabel } from '../src/researchPolicy.ts'
-test('历史回收站不追溯清理，新删除才启用30天规则',()=>{
+test('新旧回收站统一30天规则，异常日期不误删',()=>{
   const now=new Date('2026-09-19T10:00:00Z'),old={deletedAt:'2026-08-01T10:00:00Z'}
-  assert.equal(automaticRecycleDue(old,now),false)
-  assert.equal(historicalRecycleDue(old,now),true)
-  assert.ok(retentionLabel(old,now).includes('历史资料'))
+  assert.equal(automaticRecycleDue(old,now),true)
+  assert.equal(historicalRecycleDue(old,now),false)
+  assert.ok(retentionLabel(old,now).includes('已到期'))
   assert.equal(automaticRecycleDue({...old,retentionPolicy:'30-days-v1'},now),true)
   assert.equal(automaticRecycleDue({deletedAt:'未知',retentionPolicy:'30-days-v1'},now),false)
   assert.equal(automaticRecycleDue({deletedAt:'2026-08-20T10:00:01Z',retentionPolicy:'30-days-v1'},now),false)

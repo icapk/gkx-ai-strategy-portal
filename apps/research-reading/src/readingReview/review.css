@@ -19,3 +19,33 @@
 .review-priority-filter>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}
 .reading-review .review-point-detail { margin-left:auto; padding:2px 4px; color:#52647a; font-size:11px; background:transparent; border:0; }
 .reading-review .review-point-detail:hover { color:#1d4ed8; text-decoration:underline; }
+
+/* Unified review controls, round 1 */
+.reading-review:not(.is-collapsed){width:420px;min-width:420px}.review-feature-title{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}.review-feature-title h2,.review-feature-title .review-point-open{flex:1;min-width:140px;margin:0;text-align:left}.review-feature-actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}.review-feature-actions button{border:1px solid #d4dee7;border-radius:4px;background:#f5f8fc;color:#24628b;font:inherit;font-size:12px;padding:4px 7px;cursor:pointer}.review-status-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.review-point-meta{display:flex;align-items:center;gap:10px;margin-top:10px}.review-point-detail{margin-left:auto}.prd-heading-actions{padding:4px 12px 10px}.review-detail .review-feature-title{margin:10px 0 16px}@media(max-width:600px){.reading-review:not(.is-collapsed){width:min(420px,100vw);min-width:0}}
+
+/* Compact hierarchy and status filters shared by both products. */
+.reading-review .review-hierarchy{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.reading-review .review-hierarchy label{grid-template-columns:minmax(0,1fr);gap:5px;min-width:0}
+.reading-review .review-status-inline{display:flex;align-items:center;gap:8px;min-width:0}
+.reading-review .review-status-inline legend{margin-bottom:5px}
+.reading-review .review-status-inline>label{border-right:1px solid #cdd6e1;padding-right:9px;flex:none}
+.reading-review .review-status-inline>div{margin:0;flex-wrap:nowrap;gap:8px}
+.reading-review .review-status-inline label{white-space:nowrap;font-size:12px;gap:3px}
+
+.reading-review .review-status-inline{margin-top:10px;gap:7px}
+.reading-review .review-status-inline>strong{font-size:12px;white-space:nowrap;flex:none}
+.reading-review .review-status-inline>div{display:flex;gap:6px}
+.reading-review .review-status-inline>label{padding-right:7px}
+.reading-review .review-priority-filter .review-priority-options{display:flex;flex-wrap:nowrap;align-items:center;gap:8px}
+.reading-review .review-priority-options>label{border-right:1px solid #cdd6e1;padding-right:9px;flex:none}
+.reading-review .review-priority-options>div{display:flex;align-items:center;gap:8px}
+.reading-review .review-priority-options label{font-size:12px;white-space:nowrap;gap:3px}
+
+.reading-review .review-status-inline>strong{width:48px;font-size:12px;line-height:20px}
+.reading-review .review-status-inline label{font-size:12px;line-height:20px}
+.reading-review .review-status-inline input[type=checkbox]{width:13px;height:13px;flex:none;margin:0 3px 0 0}
+.reading-review header .review-product-switch{display:flex;gap:6px}.reading-review header .review-product-switch button{font-size:13px;padding:6px 10px;border:1px solid #d6dfeb;border-radius:6px;color:#53647d}.reading-review header .review-product-switch button[aria-pressed=true]{color:#245cc5;background:#eaf1ff;border-color:#b9cef8;font-weight:700}
+.reading-review [data-status="已合规"]{color:#147350}.reading-review [data-status="待定"]{color:#96711a}.reading-review [data-status="不合规"]{color:#b7373d}
+.reading-review select.review-quick-status[data-status="已合规"],.reading-review select option[data-status="已合规"]{color:#147350}.reading-review select.review-quick-status[data-status="待定"],.reading-review select option[data-status="待定"]{color:#96711a}.reading-review select.review-quick-status[data-status="不合规"],.reading-review select option[data-status="不合规"]{color:#b7373d}
+.compliance-detail-heading{display:flex;align-items:center;gap:8px;background:#f3f6fa;padding:10px;margin:-12px -12px 12px;font-size:12px}.compliance-detail-heading small{flex:1;min-width:0;color:#72819a}.reading-review .compliance-detail-heading .review-back{margin:0 0 0 auto;white-space:nowrap;color:#245cc5}.reading-review .compliance-body{border:1px solid #cedcf0;background:#f5f8fc;padding:12px;border-radius:7px;margin:12px 0}.compliance-body p{white-space:pre-wrap;line-height:1.7}.reading-review .compliance-related{padding:8px 0;border:0}.reading-review .compliance-related .prd-related{margin:3px 0;padding:3px 0}.compliance-editor form{display:grid;gap:12px}.compliance-editor form>label{display:grid;gap:5px;font-weight:600}.compliance-editor textarea,.compliance-editor input{font:inherit}.compliance-editor fieldset{max-height:220px;overflow:auto;border:1px solid #d6dfeb;border-radius:6px}.compliance-editor .compliance-relation-option{display:flex;align-items:flex-start;gap:6px;margin:6px 0;font-size:12px}.compliance-editor .compliance-relation-option input{width:auto;flex:none}
+.reading-review header .review-product-switch{flex:1;min-width:0}.reading-review header .review-product-switch button{width:auto;height:auto;min-width:76px;white-space:nowrap;flex:none;line-height:1.4}.reading-review .review-detail .review-feature-title>button{border:1px solid #d6dfeb;border-radius:6px;padding:6px 9px;color:#346486;background:#f5f8fc}.reading-review .review-detail>section.compliance-related,.reading-review .review-detail>section.feature-annotations{margin:8px 0;padding:8px 0}.reading-review .review-detail .compliance-related h3{margin:0 0 6px}.reading-review .review-detail .feature-annotations h3{margin:0}

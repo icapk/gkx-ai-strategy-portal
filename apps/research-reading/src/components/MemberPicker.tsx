@@ -118,7 +118,7 @@ export function MemberPicker({
           aria-label="搜索成员"
           autoFocus
         />
-        <h3>全部成员·80人</h3>
+        <h3>可添加成员 · {candidates.length} 人</h3>
         <div className="candidate-list" role="list">
           {filteredCandidates.map((candidate) => {
             const selected = selectedIds.includes(candidate.id)

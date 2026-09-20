@@ -1,7 +1,11 @@
 export interface TargetFrame { left: number; top: number; width: number; height: number }
 
 export function sidebarEdge() {
-  return Math.max(0, ...Array.from(document.querySelectorAll<HTMLElement>('.reading-review')).filter(el => el.getClientRects().length).map(el => el.getBoundingClientRect().right))
+  return Math.max(0, ...Array.from(document.querySelectorAll<HTMLElement>('.reading-review')).filter(el => el.getClientRects().length).map(el => { const rect = el.getBoundingClientRect(); return rect.width >= window.innerWidth - 40 && rect.height < window.innerHeight * .55 ? 0 : rect.right }))
+}
+
+export function sidebarBottom() {
+  return Math.max(0, ...Array.from(document.querySelectorAll<HTMLElement>('.reading-review')).filter(el => el.getClientRects().length).map(el => { const rect = el.getBoundingClientRect(); return rect.width >= window.innerWidth - 40 && rect.height < window.innerHeight * .55 ? rect.bottom : 0 }))
 }
 
 export function clippedTargetFrame(element: HTMLElement, minimumLeft = sidebarEdge()): TargetFrame | null {
@@ -9,7 +13,7 @@ export function clippedTargetFrame(element: HTMLElement, minimumLeft = sidebarEd
   const bounds = element.getBoundingClientRect()
   const ownStyle = getComputedStyle(element)
   if (ownStyle.visibility === 'hidden' || ownStyle.display === 'none' || ownStyle.opacity === '0') return null
-  let left = Math.max(minimumLeft, bounds.left), top = Math.max(0, bounds.top)
+  let left = Math.max(minimumLeft, bounds.left), top = Math.max(sidebarBottom(), bounds.top)
   let right = Math.min(window.innerWidth, bounds.right), bottom = Math.min(window.innerHeight, bounds.bottom)
   let fixed = ownStyle.position === 'fixed'
   for (let parent = element.parentElement; parent && parent !== document.body; parent = parent.parentElement) {

@@ -216,6 +216,7 @@ export interface CommentItem {
 }
 
 export interface MemberItem {
+  email?:string
   id: number
   name: string
   role: string

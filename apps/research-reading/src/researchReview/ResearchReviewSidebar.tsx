@@ -1,26 +1,36 @@
+import {ComplianceEditor} from '../ComplianceEditor'
+import {DemoDataControls} from '../components/DemoDataControls'
+import {useProductAnnotations} from '../annotations/useProductAnnotations'
+import {AnnotationWorkspace} from '../annotations/AnnotationWorkspace'
+import {FeatureAnnotationSection} from '../annotations/FeatureAnnotationSection'
+import {ReviewActions,useReviewCatalog} from '../reviewControls'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { groups, stories, storyDescriptions, points, statuses, priorities, initialFilters, matches, loadReview, parseReview, STORAGE_KEY, type ReviewFile, type Status, type Priority } from './model'
+import { groups, points as catalogPoints, statuses, priorities, initialFilters, matches, loadReview, parseReview, STORAGE_KEY, type ReviewFile, type Status, type Priority } from './model'
 import '../readingReview/review.css'
 import './review.css'
-import { storySteps } from './storySteps'
 import { usePrototypeFocus } from '../prototypeFocus/FocusContext'
 import { PrdWorkspace } from './PrdWorkspace'
 import { useSharedPrd } from './useSharedPrd'
-import { exportPrd } from './prd'
 
 export function ResearchReviewSidebar() {
-  const { requestFocus, cancelFocus } = usePrototypeFocus()
+  const {points:basePoints,numbering,parentNumber}=useReviewCatalog('research',catalogPoints)
+  const { requestFocus, cancelFocus, request:reviewFocusRequest } = usePrototypeFocus()
   const [loaded] = useState(loadReview)
   const [data,setData]=useState(loaded.data)
-  const [filters,setFilters]=useState<ReturnType<typeof initialFilters>>(()=>({...initialFilters(),mode:new URLSearchParams(window.location.search).get('review')==='prd'?'prd':'design'}))
+  const points=basePoints.map(p=>({...p,title:data.records[p.id]?.title??p.title,requirement:data.records[p.id]?.requirement??p.requirement,acceptance:data.records[p.id]?.acceptance??p.acceptance}))
+  const [editing,setEditing]=useState<string|null>(null)
+  const editGuard=useRef<null|((action:()=>void)=>void)>(null)
+  const [filters,setFilters]=useState<ReturnType<typeof initialFilters>>(()=>({...initialFilters(),mode:new URLSearchParams(window.location.search).get('review')==='annotations'?'annotations':new URLSearchParams(window.location.search).get('review')==='prd'?'prd':'design'}))
   const [prdQuery,setPrdQuery]=useState('')
   const [prdView,setPrdView]=useState({chapter:'overview',opened:[] as string[]})
   const {book:prdBook,save:savePrdBook,status:prdStatus,notice:prdNotice}=useSharedPrd()
-  const [collapsed,setCollapsed]=useState(()=>window.innerWidth<1280)
+  const annotations=useProductAnnotations('research',prdBook,points)
+  const [collapsed,setCollapsed]=useState(()=>new URLSearchParams(location.search).get('reviewOpen')!=='1'&&window.innerWidth<1280)
   const [selected,setSelected]=useState<string|null>(null)
   const [lastViewed,setLastViewed]=useState<string|null>(null)
   const [reviewQuery,setReviewQuery]=useState('')
+  const [annotationQuery,setAnnotationQuery]=useState('')
   const [status,setStatus]=useState<Status>('待定')
   const [priority,setPriority]=useState<Priority>('P0')
   const [note,setNote]=useState('')
@@ -45,7 +55,13 @@ export function ResearchReviewSidebar() {
   const point=points.find(p=>p.id===selected)
   const current=selected?data.records[selected]:null
   const dirty=!!current && (status!==current.status || priority!==current.priority || !!note.trim())
-  const protect=(action:()=>void)=>dirty?setGuard(()=>action):action()
+  const protect=(action:()=>void)=>{if(editGuard.current){editGuard.current(action);return}const proceed=()=>{dirty?setGuard(()=>action):action()};if(annotations.leaveGuard.current)annotations.leaveGuard.current(proceed);else proceed()}
+  const modeUrl=(mode:string)=>{const url=new URL(location.href);url.searchParams.set('review',mode);history.replaceState(null,'',url)}
+  useEffect(()=>{const mode=reviewFocusRequest?.target?.reviewMode;if(mode&&reviewFocusRequest?.module==='research')protect(()=>{setCollapsed(false);setFilters(f=>({...f,mode}));modeUrl(mode)})},[reviewFocusRequest?.sequence])
+  const openAnnotation=(id:string)=>protect(()=>{setSelected(null);setNote('');annotations.setOpenId(id);setFilters(f=>({...f,mode:'annotations'}));modeUrl('annotations')})
+  const createAnnotation=(kind:'compliance'|'prd',id:string)=>protect(()=>{setSelected(null);setNote('');annotations.setCreateRequest({key:Date.now(),kind,id});setFilters(f=>({...f,mode:'annotations'}));modeUrl('annotations')})
+  const openAnnotationFeature=(kind:'compliance'|'prd',id:string)=>protect(()=>{if(kind==='compliance'){if(!data.records[id]){setMessage('该功能点已不存在');return}setReviewQuery('');setFilters({...initialFilters(),mode:'design'});modeUrl('design');select(id)}else{const area=prdBook.revisions.find(v=>v.id===prdBook.current)?.areas.find(a=>a.features.some(f=>f.id===id));if(!area){setMessage('该功能点已不存在');return}setSelected(null);setNote('');setPrdQuery('');setPrdView({chapter:area.id,opened:[id]});setFilters(f=>({...f,mode:'prd'}));modeUrl('prd')}})
+  useEffect(()=>{const restore=()=>{const mode=new URLSearchParams(location.search).get('review');protect(()=>setFilters(f=>({...f,mode:mode==='prd'?'prd':mode==='annotations'?'annotations':'design'})))};window.addEventListener('popstate',restore);return()=>window.removeEventListener('popstate',restore)})
   useEffect(()=>{
     if(!dirty)return
     const unload=(e:BeforeUnloadEvent)=>{e.preventDefault();e.returnValue=''}
@@ -58,13 +74,13 @@ export function ResearchReviewSidebar() {
     return()=>{window.removeEventListener('beforeunload',unload);document.removeEventListener('click',click,true)}
   },[dirty])
   const persist=(next:ReviewFile)=>{
-    try {localStorage.setItem(STORAGE_KEY,JSON.stringify(next));setData(next);return true}
+    try {next={...next,records:Object.fromEntries(Object.entries(next.records).map(([id,r])=>[id,{...r,history:[]}]))};localStorage.setItem(STORAGE_KEY,JSON.stringify(next));setData(next);return true}
     catch{setMessage('保存失败：本地存储不可用或空间不足，编辑内容仍保留。');return false}
   }
   const save=()=>{
     if(!selected||!current)return true
     if(!dirty)return true
-    const next={version:1 as const,records:{...data.records,[selected]:{status,priority,history:[...current.history,{at:new Date().toISOString(),from:current.status,to:status,fromPriority:current.priority,toPriority:priority,note:note.trim()}]}}}
+    const next={version:1 as const,records:{...data.records,[selected]:{status,priority,history:[]}}}
     if(!persist(next))return false
     setNote('');setMessage('审核记录已保存。')
     if(point&&!matches(point,next,filters)){setSelected(null);setMessage('已保存，该功能已移出当前筛选结果。')}
@@ -76,7 +92,7 @@ export function ResearchReviewSidebar() {
   const quickStatus=(id:string,nextStatus:Status)=>{
     const previous=data.records[id]
     if(previous.status===nextStatus)return
-    const next:ReviewFile={version:1,records:{...data.records,[id]:{...previous,status:nextStatus,history:[...previous.history,{at:new Date().toISOString(),from:previous.status,to:nextStatus,fromPriority:previous.priority,toPriority:previous.priority,note:''}]}}}
+    const next:ReviewFile={version:1,records:{...data.records,[id]:{...previous,status:nextStatus,history:[]}}}
     if(persist(next))setMessage(`${id} 已改为${nextStatus}${matches(points.find(p=>p.id===id)!,next,filters)?'':'，已移出当前筛选结果'}。`)
   }
   const exportFile=()=>{
@@ -89,10 +105,10 @@ export function ResearchReviewSidebar() {
   }
   const visible=points.filter(p=>matches(p,data,filters))
   const normalizedReviewQuery=reviewQuery.trim().toLowerCase()
-  const reviewMatch=(p:typeof points[number])=>!normalizedReviewQuery || `${p.id} ${p.title} ${p.parentTitle}`.toLowerCase().includes(normalizedReviewQuery)
+  const reviewMatch=(p:typeof points[number])=>!normalizedReviewQuery || `${numbering(p)} ${p.title} ${p.parentTitle}`.toLowerCase().includes(normalizedReviewQuery)
   const visibleResults=visible.filter(reviewMatch)
-  const count=(ignore:Parameters<typeof matches>[3],condition:(p:typeof points[number])=>boolean)=>points.filter(p=>matches(p,data,filters,ignore)&&condition(p)).length
-  const hierarchyCount=(group:string,parent='',child='')=>count('hierarchy',p=>(!group||p.group===Number(group))&&(!parent||p.parent===parent)&&(!child||p.id===child))
+  const count=(ignore:Parameters<typeof matches>[3],condition:(p:typeof points[number])=>boolean)=>points.filter(p=>matches(p,data,filters,ignore)&&reviewMatch(p)&&condition(p)).length
+  const hierarchyCount=(group:string,parent=filters.parent,child=filters.child)=>count('hierarchy',p=>(!group||p.group===Number(group))&&(!parent||p.parent===parent)&&(!child||p.id===child))
   const parents=points.filter(p=>String(p.group)===filters.group).filter((p,i,a)=>a.findIndex(x=>x.parent===p.parent)===i)
   const children=points.filter(p=>p.parent===filters.parent&&p.id.includes('.'))
   const toggle=<T,>(list:T[],item:T)=>list.includes(item)?list.filter(x=>x!==item):[...list,item]
@@ -105,43 +121,40 @@ export function ResearchReviewSidebar() {
   }
   const changed=incoming?Object.keys(incoming.records).filter(id=>JSON.stringify(incoming.records[id])!==JSON.stringify(data.records[id])):[]
   return <>
-    <aside className={`reading-review research-review ${filters.mode==='prd'?'is-prd':''} ${collapsed?'is-collapsed':''}`} aria-label="智能科研合规评审">
-      {collapsed?<button className="review-expand" title="展开合规评审" aria-label="展开合规评审" onClick={()=>setCollapsed(false)}><img src="/assets/reading/outline.svg" alt=""/><span>合规评审</span></button>:<>
-        <header><strong>智能科研 · 合规评审</strong><button title="收起侧栏" aria-label="收起评审侧栏" onClick={()=>protect(()=>setCollapsed(true))}>‹</button></header>
+    <aside className={`reading-review research-review ${filters.mode==='prd'||filters.mode==='annotations'?'is-prd':''} ${collapsed?'is-collapsed':''}`} aria-label="智能科研评审">
+      {collapsed?<button className="review-expand" title="展开评审" aria-label="展开评审" onClick={()=>setCollapsed(false)}><img src="/assets/reading/outline.svg" alt=""/><span>评审</span></button>:<>
+        <header><nav className="review-product-switch" aria-label="切换产品"><button aria-pressed={true} onClick={()=>protect(()=>{const url=new URL(location.href);url.searchParams.set("view","research");url.searchParams.set("reviewOpen","1");location.assign(url.href)})}>智能科研</button><button aria-pressed={false} onClick={()=>protect(()=>{const url=new URL(location.href);url.searchParams.set("view","reading");url.searchParams.set("reviewOpen","1");location.assign(url.href)})}>智能阅读</button></nav><button title="收起侧栏" aria-label="收起评审侧栏" onClick={()=>protect(()=>setCollapsed(true))}>‹</button></header>
         <div className="review-top-tools">
-          <label className="review-mode-select"><select aria-label="评审模式" value={filters.mode} onChange={e=>{const mode=e.target.value as typeof filters.mode;protect(()=>{cancelFocus();setSelected(null);setNote('');setFilters(f=>({...f,mode}))})}}><option value="design">功能设计模式</option><option value="story">故事线模式</option><option value="prd">PRD模式</option></select></label>
-          <label className="review-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg><input aria-label={filters.mode==='prd'?'搜索PRD需求内容':'搜索功能编号或标题'} value={filters.mode==='prd'?prdQuery:reviewQuery} onChange={e=>filters.mode==='prd'?setPrdQuery(e.target.value):setReviewQuery(e.target.value)} placeholder={filters.mode==='prd'?'搜索需求、规则或状态':'搜索编号或标题'}/></label>
+          <label className="review-mode-select"><select aria-label="评审模式" value={filters.mode} onChange={e=>{const mode=e.target.value as typeof filters.mode;protect(()=>{cancelFocus();setSelected(null);setNote('');setFilters(f=>({...f,mode}));const url=new URL(location.href);url.searchParams.set('review',mode);history.replaceState(null,'',url)})}}><option value="design">合规审查模式</option><option value="prd">PRD模式</option><option value="annotations">注释模式</option></select></label>
+          <label className="review-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg><input aria-label={filters.mode==='annotations'?'搜索注释':filters.mode==='prd'?'搜索PRD全文':'搜索功能编号或标题'} value={filters.mode==='annotations'?annotationQuery:filters.mode==='prd'?prdQuery:reviewQuery} onChange={e=>filters.mode==='annotations'?setAnnotationQuery(e.target.value):filters.mode==='prd'?setPrdQuery(e.target.value):setReviewQuery(e.target.value)} placeholder={filters.mode==='annotations'?'搜索编号、标题或正文':filters.mode==='prd'?'搜索需求、规则或状态':'搜索编号或标题'}/></label>
         </div>
-        {filters.mode==='prd'?<PrdWorkspace book={prdBook} onBookChange={savePrdBook} query={prdQuery} view={prdView} onViewChange={setPrdView} onClearQuery={()=>setPrdQuery('')} onCompliance={id=>{if(!data.records[id]){setMessage('该合规项已不存在，请修改关联。');return}setFilters({...initialFilters(),mode:'design'});select(id)}} onLocate={(id,label)=>protect(()=>{if(window.innerWidth<1280)setCollapsed(true);requestFocus(id,label,'research')})}/>:point&&current?<div className="review-detail">
-          <button className="review-back" onClick={()=>protect(()=>{setSelected(null);setNote('')})}>‹ 返回功能列表</button>
-          <small>{groups[point.group]} / {point.parentTitle}</small><h2><button type="button" title="定位并框选原型" onClick={()=>locate(point.id)}>{point.id} {point.title}</button></h2>
-          <section><h3>需规摘录</h3><p>{point.requirement}</p><small>来源：智能科研_合规简略版0910.md</small><h3>验收要点</h3><p>{point.acceptance}</p><h3>故事线 · {stories[point.story]}</h3><p>{storyDescriptions[point.story]}</p></section>
-          <section><h3>关联PRD功能点</h3>{prdBook.revisions.find(v=>v.id===prdBook.current)!.areas.flatMap(area=>area.features.filter(f=>f.compliance?.includes(point.id)).map(f=><button className="prd-related" key={f.id} onClick={()=>protect(()=>{setSelected(null);setNote('');setPrdQuery('');setPrdView({chapter:area.id,opened:[f.id]});setFilters(s=>({...s,mode:'prd'}))})}>{f.id} {f.title} →</button>))}{!prdBook.revisions.find(v=>v.id===prdBook.current)!.areas.some(a=>a.features.some(f=>f.compliance?.includes(point.id)))&&<p>当前版本未关联 · 待核对</p>}</section>
-          <section><h3>AI初审 · {point.baseline.status}</h3><p>{point.baseline.reason}</p><small>{point.baseline.evidence}</small></section>
-          <section className="review-edit"><h3>人工复核</h3><label>合规状态<select value={status} onChange={e=>setStatus(e.target.value as Status)}>{statuses.map(s=><option key={s}>{s}</option>)}</select></label><label>优先级<select value={priority} onChange={e=>setPriority(e.target.value as Priority)}>{priorities.map(s=><option key={s}>{s}</option>)}</select></label><label>追加备注<textarea maxLength={10000} rows={4} value={note} onChange={e=>setNote(e.target.value)} placeholder="记录修改意见或复核依据"/></label><button className="review-primary" disabled={!dirty} onClick={save}>保存审核</button></section>
-          <section><h3>修改记录 · {current.history.length}</h3>{current.history.length===0?<p>暂无人工修改</p>:[...current.history].reverse().map((h,i)=><article className="review-history" key={`${h.at}-${i}`}><small>{new Date(h.at).toLocaleString('zh-CN')}</small><p>{h.from} → {h.to} · {h.fromPriority} → {h.toPriority}</p>{h.note&&<p>{h.note}</p>}</article>)}</section>
+        {editing&&points.find(p=>p.id===editing)?<ComplianceEditor onGuard={guard=>{editGuard.current=guard}} key={editing} point={points.find(p=>p.id===editing)!} record={data.records[editing]} product="research" features={prdBook?.revisions.find(v=>v.id===prdBook?.current)?.areas.flatMap(a=>a.features)||[]} linked={data.records[editing].relationIds??(prdBook?.revisions.find(v=>v.id===prdBook?.current)?.areas.flatMap(a=>a.features).filter(f=>f.compliance?.includes(editing)).map(f=>f.id)||[])} onCancel={()=>{editGuard.current=null;setEditing(null)}} onSave={patch=>{if(!persist({version:1,records:{...data.records,[editing]:{...data.records[editing],...patch,history:[]}}}))return false;setSelected(editing);setStatus((patch.status??data.records[editing].status));setPriority(patch.priority??data.records[editing].priority);editGuard.current=null;setEditing(null);return true}}/>:filters.mode==='annotations'?<AnnotationWorkspace query={annotationQuery} product="research" version={annotations.version} features={annotations.catalog} store={annotations.store} openId={annotations.openId} onOpened={()=>annotations.setOpenId(null)} createRequest={annotations.createRequest} onCreateHandled={()=>annotations.setCreateRequest(null)} onOpenFeature={openAnnotationFeature} onGuardChange={guard=>{annotations.leaveGuard.current=guard}}/>:filters.mode==='prd'?<PrdWorkspace annotationTools={f=><FeatureAnnotationSection kind="prd" id={f.id} items={annotations.store.items} onOpen={openAnnotation} onCreate={()=>createAnnotation('prd',f.id)}/>} book={prdBook} onBookChange={savePrdBook} query={prdQuery} view={prdView} onViewChange={setPrdView} onClearQuery={()=>setPrdQuery('')} onCompliance={id=>{if(!data.records[id]){setMessage('该合规项已不存在，请修改关联。');return}setFilters({...initialFilters(),mode:'design'});modeUrl('design');select(id)}} onLocate={(id,label)=>protect(()=>{if(window.innerWidth<1280)setCollapsed(true);requestFocus(id,label,'research')})}/>:point&&current?<div className="review-detail">
+          <div className="compliance-detail-heading"><strong>合规详情</strong><small>{groups[point.group]} / {point.parentTitle}</small><button className="review-back" onClick={()=>protect(()=>{setSelected(null);setNote('')})}>‹ 返回功能列表</button></div>
+          <div className="review-feature-title"><h2>{numbering(point)} {point.title}</h2><button onClick={()=>setEditing(point.id)}>编辑</button></div>
+          <div className="annotation-badges"><span data-status={current.status}>{current.status}</span><span>{current.priority}</span></div><section className="compliance-body"><h3>需规摘录</h3><p>{point.requirement}</p></section>
+          <section className="compliance-related"><h3>关联功能点</h3>{prdBook.revisions.find(v=>v.id===prdBook.current)!.areas.flatMap(area=>area.features.filter(f=>(current.relationIds?current.relationIds.includes(f.id):f.compliance?.includes(point.id))).map(f=><button className="prd-related" key={f.id} onClick={()=>protect(()=>{setSelected(null);setNote('');setPrdQuery('');setPrdView({chapter:area.id,opened:[f.id]});setFilters(s=>({...s,mode:'prd'}));modeUrl('prd')})}>{f.id} {f.title} →</button>))}{!prdBook.revisions.find(v=>v.id===prdBook.current)!.areas.some(a=>a.features.some(f=>(current.relationIds?current.relationIds.includes(f.id):f.compliance?.includes(point.id))))&&<p>当前版本未关联 · 待核对</p>}</section>
+          <FeatureAnnotationSection kind="compliance" id={point.id} items={annotations.store.items} onOpen={openAnnotation} onCreate={()=>createAnnotation('compliance',point.id)}/>
+          
         </div>:<>
           <div className="review-filters">
-            {filters.mode==='design'?<div className="review-hierarchy">
-              <label>一级功能<select aria-label="一级功能" value={filters.group} onChange={e=>updates({group:e.target.value,parent:'',child:''})}><option value="">全部 {hierarchyCount('')}</option>{groups.map((g,i)=><option value={String(i)} key={g}>{g} {hierarchyCount(String(i))}</option>)}</select></label>
-              <label>二级功能<select aria-label="二级功能" disabled={!filters.group} value={filters.parent} onChange={e=>updates({parent:e.target.value,child:''})}><option value="">全部 {hierarchyCount(filters.group)}</option>{parents.map(p=><option key={p.parent} value={p.parent}>{p.parent} {p.parentTitle} {hierarchyCount(filters.group,p.parent)}</option>)}</select></label>
-              <label>三级功能<select aria-label="三级功能" disabled={!filters.parent||!children.length} value={filters.child} onChange={e=>updates({child:e.target.value})}><option value="">{filters.parent&&!children.length?'无三级功能':'全部'} {hierarchyCount(filters.group,filters.parent)}</option>{children.map(p=><option key={p.id} value={p.id}>{p.id} {p.title} {hierarchyCount(filters.group,filters.parent,p.id)}</option>)}</select></label>
-            </div>:<details className="review-story-select"><summary>故事线 · 已选 {filters.stories.length}/5</summary><label><input type="checkbox" checked={filters.stories.length===5} onChange={e=>updates({stories:e.target.checked?[0,1,2,3,4]:[]})}/>全选 {count('story',()=>true)}</label>{stories.map((s,i)=><label key={s}><input type="checkbox" checked={filters.stories.includes(i)} onChange={()=>updates({stories:toggle(filters.stories,i)})}/>{i+1} {s} {count('story',p=>p.story===i)}</label>)}</details>}
-            <fieldset><legend>合规状态</legend><label><input type="checkbox" checked={filters.statuses.length===3} onChange={e=>updates({statuses:e.target.checked?[...statuses]:[]})}/>全选 {count('status',()=>true)}</label><div>{statuses.map(s=><label key={s}><input type="checkbox" checked={filters.statuses.includes(s)} onChange={()=>updates({statuses:toggle(filters.statuses,s)})}/>{s} {count('status',p=>data.records[p.id].status===s)}</label>)}</div></fieldset>
-            <details className="review-priority-filter"><summary>优先级 · 已选 {filters.priorities.length}/3</summary><label><input type="checkbox" checked={filters.priorities.length===3} onChange={e=>updates({priorities:e.target.checked?[...priorities]:[]})}/>全选 {count('priority',()=>true)}</label><div>{priorities.map(s=><label key={s}><input type="checkbox" checked={filters.priorities.includes(s)} onChange={()=>updates({priorities:toggle(filters.priorities,s)})}/>{s} {count('priority',p=>data.records[p.id].priority===s)}</label>)}</div></details>
+            <div className="review-hierarchy">
+              <label>一级功能<select aria-label="一级功能" value={filters.group} onChange={e=>updates({group:e.target.value,parent:'',child:''})}><option value="">全部 {hierarchyCount('')}</option>{groups.map((g,i)=><option value={String(i)} key={g}>{i+1}. {g} {hierarchyCount(String(i))}</option>)}</select></label>
+              <label>二级功能<select aria-label="二级功能" disabled={!filters.group} value={filters.parent} onChange={e=>updates({parent:e.target.value,child:''})}><option value="">全部 {hierarchyCount(filters.group,'')}</option>{parents.map(p=><option key={p.parent} value={p.parent}>{parentNumber(p)} {p.parentTitle} {hierarchyCount(filters.group,p.parent)}</option>)}</select></label>
+              <label>三级功能<select aria-label="三级功能" disabled={!filters.parent||!children.length} value={filters.child} onChange={e=>updates({child:e.target.value})}><option value="">{filters.parent&&!children.length?'无三级功能':'全部'} {hierarchyCount(filters.group,filters.parent,'')}</option>{children.map(p=><option key={p.id} value={p.id}>{numbering(p)} {p.title} {hierarchyCount(filters.group,filters.parent,p.id)}</option>)}</select></label>
+            </div>
+            <div className="review-status-inline" role="group" aria-label="合规状态"><strong>合规状态</strong><label><input type="checkbox" checked={filters.statuses.length===3} onChange={e=>updates({statuses:e.target.checked?[...statuses]:[]})}/>全选 {count('status',()=>true)}</label><div>{statuses.map(s=><label key={s}><input type="checkbox" checked={filters.statuses.includes(s)} onChange={()=>updates({statuses:toggle(filters.statuses,s)})}/>{s} {count('status',p=>data.records[p.id].status===s)}</label>)}</div></div>
+            <div className="review-status-inline review-priority-inline" role="group" aria-label="优先级"><strong>优先级</strong><label><input type="checkbox" checked={filters.priorities.length===3} onChange={e=>updates({priorities:e.target.checked?[...priorities]:[]})}/>全选 {count('priority',()=>true)}</label><div>{priorities.map(s=><label key={s}><input type="checkbox" checked={filters.priorities.includes(s)} onChange={()=>updates({priorities:toggle(filters.priorities,s)})}/>{s} {count('priority',p=>data.records[p.id].priority===s)}</label>)}</div></div>
           </div>
-          <div className="review-result-count"><span>{visibleResults.length} / {points.length} 个功能点</span><button onClick={()=>{setReviewQuery('');updates({...initialFilters(),mode:filters.mode})}}>重置筛选</button></div>
-          <div className="review-results" ref={resultsRef}>{(filters.mode==='story'?stories:groups).map((name,i)=>{
-            const list=visibleResults.filter(p=>(filters.mode==='story'?p.story:p.group)===i)
-            return list.length?<section key={name}><h3>{name} <small>{list.length}</small></h3>
-              {filters.mode==='story'&&!normalizedReviewQuery&&<><p className="review-story-copy">{storyDescriptions[i]}</p><ol className="review-story-steps">{storySteps[i].map((step,j)=><li key={j}>{step.map((part,k)=>typeof part==='string'?part:<button key={k} className="review-story-feature" data-status={data.records[part.id].status} title={`${data.records[part.id].status} · 定位原型`} onClick={()=>locate(part.id)}>{part.id} {part.label??points.find(p=>p.id===part.id)!.title}</button>)}</li>)}</ol></>}
-              {list.map(p=><article className={`review-point ${lastViewed===p.id?'is-last-viewed':''}`} key={p.id}><button className="review-point-open" title="定位并框选原型" onClick={()=>locate(p.id)}><b>{markMatch(p.id)}</b> {markMatch(p.title)}</button><div className="review-point-meta"><select className="review-quick-status" aria-label={`${p.id} 合规状态`} data-status={data.records[p.id].status} value={data.records[p.id].status} onChange={e=>quickStatus(p.id,e.target.value as Status)}>{statuses.map(s=><option key={s}>{s}</option>)}</select><span>{data.records[p.id].priority}</span><small>备注 {data.records[p.id].history.filter(h=>h.note).length}</small><button type="button" className="review-point-details" aria-label={`${p.id} 审核详情`} title="查看审核详情" onClick={()=>{cancelFocus();select(p.id)}}><img src="/assets/reading/outline.svg" alt=""/>详情</button></div></article>)}
+          <div className="review-results" ref={resultsRef}>{groups.map((name,i)=>{
+            const list=visibleResults.filter(p=>p.group===i)
+            return list.length?<section key={name}><h3>{i+1}. {name} <small>{list.length}</small></h3>
+              {list.map(p=><article className={`review-point ${lastViewed===p.id?'is-last-viewed':''}`} key={p.id}><div className="review-feature-title"><button className="review-point-open" onClick={()=>select(p.id)}><b>{markMatch(numbering(p))}</b> {markMatch(p.title)}</button><ReviewActions point={p} product="research" onLocate={()=>locate(p.id)} onRename={()=>protect(()=>setEditing(p.id))}/></div><div className="review-point-meta"><select className="review-quick-status" aria-label={numbering(p)+' 合规状态'} data-status={data.records[p.id].status} value={data.records[p.id].status} onChange={e=>quickStatus(p.id,e.target.value as Status)}>{statuses.map(s=><option data-status={s} key={s}>{s}</option>)}</select><span>{data.records[p.id].priority}</span><button className="review-point-detail" aria-label={numbering(p)+' 审核详情'} onClick={()=>select(p.id)}>详情</button></div></article>)}
             </section>:null
           })}{!visibleResults.length&&<p className="review-empty">没有符合筛选条件的功能点。</p>}</div>
         </>}
         {prdNotice&&filters.mode==='prd'&&<div className="review-message" role="status">{prdNotice}</div>}
         {message&&<div className="review-message" role="status">{message}<button aria-label="关闭提示" onClick={()=>setMessage('')}>×</button></div>}
-        {filters.mode==='prd'?<footer><button onClick={()=>exportPrd(prdBook.revisions.find(v=>v.id===prdBook.current)!.areas,prdBook.revisions.find(v=>v.id===prdBook.current)!.name)}><img src="/assets/reading/download.svg" alt=""/>导出 PRD</button><small title={prdStatus}>{prdStatus}</small></footer>:<footer><button onClick={()=>protect(exportFile)}><img src="/assets/reading/download.svg" alt=""/>导出</button><button onClick={()=>protect(()=>fileRef.current?.click())}><img src="/assets/reading/upload.svg" alt=""/>导入</button><small>本机保存 · 原型审核</small></footer>}
+        <div className="review-bottom-tools"><div id="research-review-version"/><div className="review-bottom-action-row">{filters.mode==='design'&&<><button onClick={()=>protect(exportFile)}>导出合规审查结果</button><button onClick={()=>protect(()=>fileRef.current?.click())}>导入合规审查结果</button></>}<div id="research-review-tools"/><DemoDataControls product="research"/></div></div>
         <input ref={fileRef} hidden type="file" accept=".json,application/json" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void importFile(file)}}/>
       </>}
     </aside>
@@ -149,10 +162,11 @@ export function ResearchReviewSidebar() {
     {incoming&&createPortal(<div className="review-modal-backdrop"><div className="review-modal" role="dialog" aria-modal="true" aria-label="导入审核记录">
       <h2>导入审核记录</h2><p>包含 {Object.keys(incoming.records).length} 项，其中 {changed.length} 项与本机不同。匹配项将被覆盖，其他项保留。</p>
       <div className="review-import-diff">{changed.map(id=><article key={id}>
-        <p><b>{id}</b> {data.records[id].status} / {data.records[id].priority} → {incoming.records[id].status} / {incoming.records[id].priority}<br/>历史 {data.records[id].history.length} → {incoming.records[id].history.length} 条</p>
-        <details><summary>查看历史与备注差异</summary>{(['本机记录','导入记录'] as const).map((name,i)=><section key={name}><h4>{name}</h4>{(i?incoming:data).records[id].history.length===0?<p>暂无修改记录</p>:(i?incoming:data).records[id].history.map((h,j)=><p key={j}>{new Date(h.at).toLocaleString('zh-CN')}<br/>{h.from} → {h.to} · {h.fromPriority} → {h.toPriority}<br/>{h.note||'无备注'}</p>)}</section>)}</details>
+        <p><b>{id}</b> {data.records[id].status} / {data.records[id].priority} → {incoming.records[id].status} / {incoming.records[id].priority}</p>
+        
       </article>)}</div>
       <button onClick={exportFile}>导出当前备份</button><div><button autoFocus onClick={()=>setIncoming(null)}>取消</button><button className="review-primary" onClick={()=>{if(persist({version:1,records:{...data.records,...incoming.records}})){setIncoming(null);setSelected(null);setMessage('审核记录已导入。')}}}>确认导入</button></div>
     </div></div>,document.body)}
   </>
 }
+

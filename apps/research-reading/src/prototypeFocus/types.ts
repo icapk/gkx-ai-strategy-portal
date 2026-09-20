@@ -3,6 +3,7 @@ import type { Section, WorkbenchTab, TeamPanelTab, ModalKind } from '../types'
 export type PrototypeModule = 'research' | 'reading'
 export interface PrototypeTarget {
   product: PrototypeModule
+  reviewMode?: 'design' | 'prd' | 'annotations'
   section?: Section
   tab?: WorkbenchTab
   teamTab?: TeamPanelTab

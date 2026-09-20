@@ -1,3 +1,4 @@
+import {displayMinute} from '../displayFormat'
 import { useMemo, useRef, useState, type FormEvent } from 'react'
 import type { ResearchDocument, ResearchNote } from '../types'
 import { displayResearchLocation } from '../workbenchDocuments'
@@ -26,7 +27,7 @@ export function NoteDetailDialog({ note, documentItem, onClose, onEdit, onOpenDo
         <div className="research-note-heading">
           <span className="research-note-type">笔记</span>
           <h3>{note.title}</h3>
-          <p>更新于 {note.updatedAt}</p>
+          <p>更新于 {displayMinute(note.updatedAt)}</p>
         </div>
         <button className="research-note-source" type="button" onClick={onOpenDocument}>
           <span>来源文档</span>

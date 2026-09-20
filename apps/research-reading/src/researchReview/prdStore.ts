@@ -19,14 +19,7 @@ export function loadPrdBook():{book:PrdBook;error:string} {
   return {book,error:''}
  }catch{return {book:initialPrdBook(),error:'PRD本地记录无法读取，已展示内置基线；未覆盖原记录。'}}
 }
-export function reviseFeature(book:PrdBook,area:string,before:PrdFeature|undefined,after:PrdFeature|undefined,reason:string):PrdBook {
- const next=structuredClone(book), revision=next.revisions.find(v=>v.id===next.current)!
- const target=revision.areas.find(a=>a.id===area)!
- if(before)target.features=target.features.filter(f=>f.id!==before.id)
- if(after){const index=before?book.revisions.find(v=>v.id===book.current)!.areas.find(a=>a.id===area)!.features.findIndex(f=>f.id===before.id):target.features.length;target.features.splice(index,0,after)}
- revision.changes.push({id:crypto.randomUUID(),at:new Date().toISOString(),reason,area,before,after})
- return next
-}
+export {reviseFeature} from './prdMutation'
 export function comparePrd(before:PrdArea[],after:PrdArea[]) {
  const left=new Map(before.flatMap(a=>a.features).map(f=>[f.id,f])),right=new Map(after.flatMap(a=>a.features).map(f=>[f.id,f]))
  return [...new Set([...left.keys(),...right.keys()])].flatMap(id=>JSON.stringify(left.get(id))===JSON.stringify(right.get(id))?[]:[{id,before:left.get(id),after:right.get(id)}])

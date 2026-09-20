@@ -7,10 +7,15 @@ import { prepareFocus } from './prepare'
 import type { PrototypeFocusRequest, PrototypeModule } from './types'
 import './focus.css'
 import { readManual, readReadingManual } from './manual'
+import type { ManualMapping } from './manual'
+import { currentAnnotationContext, savedRangeMatchesContext } from '../annotations/location'
+import { restoreAnnotationState } from '../annotations/restoration'
+import type { AnnotationRange } from '../annotations/uiTypes'
 
 interface FocusApi {
   request: PrototypeFocusRequest | null
-  requestFocus: (id: string, label: string, module: PrototypeModule) => void
+  requestFocus: (id: string, label: string, module: PrototypeModule, initial?:boolean) => void
+  requestSnapshotFocus: (id: string, label: string, snapshot: ManualMapping) => void
   ready: (sequence: number) => void
   reject: (sequence: number, message: string) => void
   cancelFocus: () => void
@@ -30,16 +35,35 @@ export function PrototypeFocusProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState('idle')
   const sequence = useRef(0)
   const active = useRef<PrototypeFocusRequest | null>(null)
-  const requestFocus = useCallback((id: string, label: string, module: PrototypeModule) => {
+  const cancelFocus = useCallback(() => { sequence.current++; active.current = null; setRequest(null); setPrepared(0); setFrames([]); setFeedback(''); setPhase('idle') }, [])
+  const requestSnapshotFocus = useCallback(async (id: string, label: string, snapshot: AnnotationRange) => {
+    const manual = structuredClone(snapshot)
+    const restoreSequence = ++sequence.current
+    active.current = null; setRequest(null); setFrames([]); setPrepared(0)
+    if (manual.restore) {
+      setPhase('preparing'); setFeedback(`${label}：正在恢复保存的页面与浮层`)
+      try {
+        const error = await restoreAnnotationState(manual.restore)
+        if (sequence.current !== restoreSequence) return
+        if (error) { setPhase('failed'); setFeedback(error); return }
+      } catch (error) { if (sequence.current === restoreSequence) { setPhase('failed'); setFeedback(error instanceof Error ? error.message : '页面恢复失败，原内容未提交。') }; return }
+    } else if (!savedRangeMatchesContext(snapshot, currentAnnotationContext(manual.target.product))) {
+      active.current = null; setRequest(null); setFrames([]); setPrepared(0); setPhase('failed'); setFeedback('注释保存于其他页面或文档，请先打开原页面及对应文档，再定位保存的范围。'); return
+    }
+    const next: PrototypeFocusRequest = { id, label, module: manual.target.product, target: manual.target, manual, location: { navigationTarget: 'annotation-snapshot', selectors: manual.regions.map(r => r.selector), description: '注释创建时的范围', preserveSurface: true, prepare: manual.prepare, timeoutMs: 6000 }, sequence: ++sequence.current }
+    active.current = next
+    setPrepared(0); setFrames([]); setPhase('preparing'); setFeedback(`${label}：正在定位保存的注释范围`); setRequest(next)
+  }, [])
+  const requestFocus = useCallback((id: string, label: string, module: PrototypeModule, initial=false) => {
     const [featureId,baseId]=id.split('::')
-    const manual=module==='research'?readManual(featureId):readReadingManual(featureId)
+    const manual=initial?undefined:module==='research'?readManual(featureId):readReadingManual(featureId)
+    if ((manual as AnnotationRange | undefined)?.restore) { void requestSnapshotFocus(id,label,manual!); return }
     const location = manual?{navigationTarget:'manual',selectors:manual.regions.map(r=>r.selector),description:'人工校正区域',timeoutMs:6000,prepare:manual.prepare}:(module === 'research' ? researchLocations : readingLocations)[baseId??id]
     const target = manual?.target??(location ? (module === 'research' ? researchTargets : readingTargets)[location.navigationTarget] : undefined)
     const next = {id, label, module, location, target, manual, sequence: ++sequence.current}
     active.current = next
     setPrepared(0); setFrames([]); setPhase('preparing'); setFeedback(`${id} ${label}：正在准备对应视图`); setRequest(next)
-  }, [])
-  const cancelFocus = useCallback(() => { active.current = null; setRequest(null); setPrepared(0); setFrames([]); setFeedback(''); setPhase('idle') }, [])
+  }, [requestSnapshotFocus])
   const reject = useCallback((seq: number, message: string) => {
     if (active.current?.sequence !== seq) return
     active.current = null; setPrepared(0); setFrames([]); setPhase('failed'); setFeedback(message)
@@ -75,8 +99,9 @@ export function PrototypeFocusProvider({ children }: { children: ReactNode }) {
       if (foundAt && [...observed].some(element => !element.isConnected)) { finish(`${request.id}：原定位目标已离开当前视图，请重新定位`); return }
       if (new URLSearchParams(locationSearch()).get('view') !== request.module) { cancelFocus(); return }
       try {
-        const isPrepared = prepareFocus(location.prepare)
-        const groups = location.selectors.map(selector => Array.from(document.querySelectorAll<HTMLElement>(selector)).filter(el => !el.closest(request.module==='reading'&&location.navigationTarget==='reading-review'?'.prototype-focus-layer':'.reading-review,.prototype-focus-layer') && el.getClientRects().length && !el.closest('[inert],[aria-hidden="true"]')))
+        const contextReady = location.navigationTarget !== 'annotation-snapshot' || savedRangeMatchesContext(request.manual, currentAnnotationContext(request.module))
+        const isPrepared = contextReady && prepareFocus(location.prepare)
+        const groups = location.selectors.map(selector => Array.from(document.querySelectorAll<HTMLElement>(selector)).filter(el => !el.closest((['annotation-review','annotation-prd'].includes(location.navigationTarget)||request.module==='reading'&&location.navigationTarget==='reading-review')?'.prototype-focus-layer':'.reading-review,.prototype-focus-layer') && el.getClientRects().length && !el.closest('[inert],[aria-hidden="true"]')))
         const missing = groups.map((items, index) => items.length ? null : index + 1).filter(Boolean)
         if (isPrepared && !missing.length) {
           const elements = Array.from(new Set(groups.flat()))
@@ -90,12 +115,12 @@ export function PrototypeFocusProvider({ children }: { children: ReactNode }) {
           const boxes = manual?manual.regions.map(region=>{
             const el=document.querySelector<HTMLElement>(region.selector)
             if(!el)return null
-            const bounds=el.getBoundingClientRect(),clip=clippedTargetFrame(el)
+            const bounds=el.getBoundingClientRect(),clip=clippedTargetFrame(el,el.closest('.modal-backdrop')?0:undefined)
             if(!clip)return null
             const left=Math.max(clip.left,bounds.left+bounds.width*region.x),top=Math.max(clip.top,bounds.top+bounds.height*region.y)
             const right=Math.min(clip.left+clip.width,bounds.left+bounds.width*(region.x+region.width)),bottom=Math.min(clip.top+clip.height,bounds.top+bounds.height*(region.y+region.height))
             return right>left&&bottom>top?{left,top,width:right-left,height:bottom-top}:null
-          }):elements.map(el => clippedTargetFrame(el,request.module==='reading'&&location.navigationTarget==='reading-review'?0:undefined))
+          }):elements.map(el => clippedTargetFrame(el,(['annotation-review','annotation-prd'].includes(location.navigationTarget)||request.module==='reading'&&location.navigationTarget==='reading-review')?0:undefined))
           if (boxes.every((box): box is TargetFrame => box !== null)) {
             if (!foundAt) { foundAt = now; setPhase(location.contextOnly ? 'context' : 'focused'); setFeedback(`${request.id} ${request.label}：${location.contextOnly ? '相关位置 · ' : ''}${location.description}${location.prerequisite ? '；' + location.prerequisite : ''}`) }
             for (const el of elements) if (!observed.has(el)) { observer.observe(el); observed.add(el) }
@@ -119,10 +144,13 @@ export function PrototypeFocusProvider({ children }: { children: ReactNode }) {
     window.addEventListener('keydown', escape)
     return () => window.removeEventListener('keydown', escape)
   }, [cancelFocus])
-  return <FocusContext.Provider value={{request, requestFocus, ready, reject, cancelFocus}}>{children}{createPortal(
-    <div className="prototype-focus-layer" data-phase={phase} data-sequence={request?.sequence}>
+  return <FocusContext.Provider value={{request, requestFocus, requestSnapshotFocus, ready, reject, cancelFocus}}>{children}{createPortal(
+    <div className="prototype-focus-layer" data-phase={phase} data-sequence={request?.sequence} data-annotation={request?.location?.navigationTarget === 'annotation-snapshot' || undefined}>
       {frames.map((frame,index) => <div key={index} className="prototype-focus-frame" style={frame} data-context={request?.location?.contextOnly || undefined} />)}
       {feedback && <div className="prototype-focus-feedback" role="status"><span>{feedback}</span><button type="button" aria-label="取消功能定位" onClick={cancelFocus}>×</button></div>}
     </div>, document.body)}</FocusContext.Provider>
 }
 function locationSearch() { return window.location.search }
+
+
+

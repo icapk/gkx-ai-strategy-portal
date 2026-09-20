@@ -9812,3 +9812,14 @@ td.data-sheet-row-actions button.is-danger:hover {
 .modal-backdrop:has(.demo-data-body){position:fixed;inset:0;z-index:12000;padding:16px;display:flex;align-items:center;justify-content:center}.modal-backdrop:has(.demo-data-body) .modal{max-height:calc(100dvh - 32px);overflow:auto}.demo-data-body label{display:block;margin-top:16px}.reading-files-table-scroll .document-language-label{display:none}.reading-files-table-scroll select{max-width:130px}
 
 .retention-label{display:block;max-width:210px;white-space:normal;font-size:11px;color:#6b7280;margin-top:4px}
+
+/* Shared file/folder menu: use the available width instead of wrapping long action labels. */
+.document-space-menu { width:170px; max-width:calc(100vw - 16px); box-sizing:border-box; height:auto; }
+.document-space-menu button { width:100%; flex-shrink:0; white-space:nowrap; text-align:left; padding-left:10px; padding-right:10px; box-sizing:border-box; }
+@media(max-width:680px){ .document-table--space th:first-child,.document-table--space td:first-child { position:static; } }
+
+/* Research annotation feedback: aligned workspace actions and upload choices. */
+.workbench-create,.space-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;width:100%}.workbench-create>.global-search-trigger,.space-toolbar>.global-search-trigger{margin-left:auto;width:250px;flex-shrink:0}.space-toolbar>.space-inline-note{flex-basis:100%;order:3}.upload-pickers>.button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 14px;font:inherit;line-height:20px;border:1px solid var(--border,#dce2ea);border-radius:4px;background:#fff;color:var(--text-1,#28364b);cursor:pointer}.upload-pickers>.button:hover{background:#f1f5fa}.upload-pickers>.button:disabled,.upload-pickers>.button:has(input:disabled){opacity:.5;cursor:not-allowed}.text-field:read-only{background:#f4f6f8;color:var(--text-1,#28364b)}
+@media(max-width:700px){.workbench-create>.global-search-trigger,.space-toolbar>.global-search-trigger{width:min(250px,100%);min-height:36px}.workbench-create>.global-search-trigger span,.space-toolbar>.global-search-trigger span{display:block}.workbench-create>span{flex-basis:100%;order:3}}
+
+.member-email{display:block;min-height:16px;color:var(--text-3);font-size:12px}

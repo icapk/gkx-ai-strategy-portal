@@ -1022,7 +1022,7 @@ export function PdfArchiveReader({
   } satisfies CSSProperties : undefined
 
   return (
-    <section ref={readerRef} className="pdf-archive-reader" role="dialog" aria-modal="true" aria-label={`${documentItem.title} PDF 在线阅读器`}>
+    <section data-business-dirty={draftDirty||isSaving} ref={readerRef} className="pdf-archive-reader" role="dialog" aria-modal="true" aria-label={`${documentItem.title} PDF 在线阅读器`}>
       <header className="pdf-archive-reader__header">
         <button ref={backButtonRef} className="pdf-archive-reader__back" type="button" aria-label="返回存档列表" disabled={isSaving} onClick={() => runAfterDraftExit(onClose)}>
           <img src="/assets/reading/back.svg" alt="" />
@@ -1151,7 +1151,7 @@ export function PdfArchiveReader({
               <div><span className={`is-${draft.kind}`}>{draft.kind === 'highlight' ? '划词' : '截图'}</span><strong>{draftBaseline ? '编辑笔记' : '新建笔记'}</strong></div>
               <small>原文第 {draft.pageNumber} 页</small>
             </header>
-            {draft.kind==='highlight'&&<><button type="button" onClick={()=>setTranslationOpen(open=>!open)}>翻译所选文字</button>{translationOpen&&<section aria-label="选区翻译"><DocumentLanguageSelect value={documentItem.language} disabled={!onLanguageChange} onChange={language=>onLanguageChange?.(language)}/>{!documentItem.language?<p role="alert">首次翻译前请选择文档语言，不会自动识别。</p>:<><strong>{translationDirection(documentItem.language)} · 模拟状态</strong><p>{documentItem.language==='zh'?'Translation preview (demo).':'译文预览（模拟）。'}</p><p>原文：{draft.quote}</p><small>未接入真实翻译与术语服务，此处展示交互，不作为原文译文。扫描 PDF 不做 OCR。</small></>}</section>}</>}
+            {draft.kind==='highlight'&&onLanguageChange&&<><button type="button" onClick={()=>setTranslationOpen(open=>!open)}>翻译所选文字</button>{translationOpen&&<section aria-label="选区翻译"><DocumentLanguageSelect value={documentItem.language} disabled={!onLanguageChange} onChange={language=>onLanguageChange?.(language)}/>{!documentItem.language?<p role="alert">首次翻译前请选择文档语言，不会自动识别。</p>:<><strong>{translationDirection(documentItem.language)} · 模拟状态</strong><p>{documentItem.language==='zh'?'Translation preview (demo).':'译文预览（模拟）。'}</p><p>原文：{draft.quote}</p><small>未接入真实翻译与术语服务，此处展示交互，不作为原文译文。扫描 PDF 不做 OCR。</small></>}</section>}</>}
             {draft.kind === 'highlight' ? <blockquote>{draft.quote}</blockquote> : draft.imageDataUrl ? <img className="pdf-archive-reader__editor-image" src={draft.imageDataUrl} alt={`第 ${draft.pageNumber} 页截图`} /> : null}
             <label htmlFor="pdf-archive-note-draft">笔记内容</label>
             <textarea

@@ -3,6 +3,7 @@ import type { UserProfile } from '../profile'
 import { Modal } from './Modal'
 
 interface ProfileSettingsModalProps {
+  identityReadOnly?:boolean
   profile: UserProfile
   onClose: () => void
   onSave: (profile: UserProfile) => string | null
@@ -159,7 +160,7 @@ const prepareAvatar = async (file: File): Promise<string> => {
   return result
 }
 
-export function ProfileSettingsModal({ profile, onClose, onSave }: ProfileSettingsModalProps) {
+export function ProfileSettingsModal({ identityReadOnly=false, profile, onClose, onSave }: ProfileSettingsModalProps) {
   const [draft, setDraft] = useState<UserProfile>(() => ({ ...profile }))
   const [errors, setErrors] = useState<ProfileErrors>({})
   const [avatarError, setAvatarError] = useState('')
@@ -362,6 +363,7 @@ export function ProfileSettingsModal({ profile, onClose, onSave }: ProfileSettin
         ref={(element) => { fieldRefs.current.name = element ?? undefined }}
         className="text-field"
         id="profile-name"
+        readOnly={identityReadOnly} aria-required="true"
         value={draft.name}
         maxLength={30}
         autoComplete="name"
@@ -407,11 +409,12 @@ export function ProfileSettingsModal({ profile, onClose, onSave }: ProfileSettin
       />
       {errors.phone && <p id="profile-phone-error" role="alert" style={errorStyle}>{errors.phone}</p>}
 
-      <label className="field-label" htmlFor="profile-organization">所属机构：</label>
+      <label className="field-label" htmlFor="profile-organization">{identityReadOnly&&<span className="required-mark">*</span>}所属机构：</label>
       <input
         ref={(element) => { fieldRefs.current.organization = element ?? undefined }}
         className="text-field"
         id="profile-organization"
+        readOnly={identityReadOnly} aria-required={identityReadOnly}
         value={draft.organization}
         maxLength={60}
         autoComplete="organization"

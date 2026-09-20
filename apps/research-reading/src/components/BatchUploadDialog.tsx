@@ -1,28 +1,11 @@
-import { useRef, useState } from 'react'
-import { DocumentLanguageSelect, type DocumentLanguage } from './DocumentLanguage'
-import { Modal } from './Modal'
-type Entry = { file: File; status: string; done: boolean; language?: DocumentLanguage }
-export function BatchUploadDialog({ onClose, onUpload }: { onClose: () => void; onUpload: (file: File, language?: DocumentLanguage) => Promise<void> }) {
-  const [entries, setEntries] = useState<Entry[]>([])
-  const [busy, setBusy] = useState(false)
-  const folderInput = useRef<HTMLInputElement>(null)
-  const addFiles = (files: FileList | null) => {
-    if (!files) return
-    setEntries((current) => [...current, ...Array.from(files).filter((file) => !current.some((item) => (item.file.webkitRelativePath || item.file.name) === (file.webkitRelativePath || file.name) && item.file.size === file.size)).map((file) => ({ file, status: '待上传', done: false }))])
-  }
-  const submit = async () => {
-    if (busy) return
-    setBusy(true)
-    try { for (let index = 0; index < entries.length; index++) {
-      const entry = entries[index]; if (entry.done) continue
-      setEntries((items) => items.map((item, i) => i === index ? { ...item, status: '正在上传…' } : item))
-      try { await onUpload(entry.file, entry.language); setEntries((items) => items.map((item, i) => i === index ? { ...item, status: '上传成功', done: true } : item)) }
-      catch (error) { setEntries((items) => items.map((item, i) => i === index ? { ...item, status: `失败：${error instanceof Error ? error.message : '保存失败，请重试'}` } : item)) }
-    } } finally { setBusy(false) }
-  }
-  return <Modal title="上传文件或文件夹" auditTarget="research-import" onClose={() => { if (!busy) onClose() }} onSubmit={(event) => { event.preventDefault(); void submit() }} confirmText={busy ? '正在上传…' : '上传 / 重试失败项'} confirmDisabled={busy || entries.length === 0 || entries.every((entry) => entry.done) || entries.some(entry=>/\.pdf$/i.test(entry.file.name)&&!entry.language)} cancelText="关闭">
-    <p>支持批量选择本地文档，或选择文件夹导入其中全部文件并保留目录层级。可多次选择文件夹；浏览器不提供空文件夹。单文件最大 50 MB，原文件保存在当前浏览器本地。</p>
-    <div className="upload-pickers"><label className="button button--secondary">选择文件<input type="file" multiple disabled={busy} onChange={(event) => { addFiles(event.target.files); event.target.value = '' }} /></label><button type="button" className="button button--secondary" disabled={busy} onClick={() => folderInput.current?.click()}>选择文件夹</button><input hidden type="file" multiple ref={(input) => { folderInput.current = input; input?.setAttribute('webkitdirectory', '') }} disabled={busy} onChange={(event) => { addFiles(event.target.files); event.target.value = '' }} /></div>
-    <div className="batch-upload-list" aria-live="polite">{entries.map((entry, index) => <div key={`${entry.file.webkitRelativePath || entry.file.name}:${index}`}><span>{entry.file.webkitRelativePath || entry.file.name}</span>{/\.pdf$/i.test(entry.file.name)&&<DocumentLanguageSelect value={entry.language} disabled={busy||entry.done} label={entry.file.name+'语言'} onChange={language=>setEntries(items=>items.map((item,i)=>i===index?{...item,language}:item))}/>}<span>{entry.status}</span></div>)}</div>
-  </Modal>
+import {useRef,useState} from 'react'
+import {Modal} from './Modal'
+import {validateUploadBatch} from '../uploadPolicy'
+import {captureProduct} from '../demoBackup'
+type Entry={file:File;status:string;done:boolean}
+export function BatchUploadDialog({onClose,onUpload,findConflicts,destination}:{onClose:()=>void;onUpload:(file:File,overwrite?:boolean)=>Promise<void>;findConflicts:(files:File[])=>string[];destination:string}){
+ const [entries,setEntries]=useState<Entry[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(''),[conflicts,setConflicts]=useState<string[]|null>(null);const folderInput=useRef<HTMLInputElement>(null)
+ const addFiles=(files:FileList|null)=>{if(!files)return;const all=[...entries,...Array.from(files).map(file=>({file,status:'待上传',done:false}))];try{validateUploadBatch(all.map(e=>e.file));setEntries(all);setError('')}catch(e){setError(String(e))}}
+ const run=async(overwrite=false)=>{if(busy)return;setBusy(true);setError('');try{const files=entries.filter(e=>!e.done).map(e=>e.file);validateUploadBatch(files);const names=findConflicts(files);if(names.length&&!overwrite){setConflicts(names);return}if(names.length){const backup=await captureProduct('research');const url=URL.createObjectURL(new Blob([JSON.stringify(backup)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='智能科研-覆盖前完整备份-'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}setConflicts(null);for(let i=0;i<entries.length;i++){if(entries[i].done)continue;setEntries(v=>v.map((e,j)=>j===i?{...e,status:'正在上传…'}:e));try{await onUpload(entries[i].file,overwrite);setEntries(v=>v.map((e,j)=>j===i?{...e,status:'上传成功',done:true}:e))}catch(err){setEntries(v=>v.map((e,j)=>j===i?{...e,status:'失败：'+String(err)}:e));setError('上传停止；此前成功项保留，失败项和未处理项可重试。');break}}}catch(e){setError(String(e))}finally{setBusy(false)}}
+ return <Modal title="批量上传文件" auditTarget="research-import" onClose={()=>{if(!busy)onClose()}} onSubmit={e=>{e.preventDefault();void run()}} confirmText={busy?'正在上传…':'上传 / 重试失败项'} confirmDisabled={busy||!!conflicts||!entries.length||entries.every(e=>e.done)} cancelText="关闭"><p>支持 Word（.doc、.docx）、Excel（.xls、.xlsx）、PDF；可批量选择文件或文件夹并保留目录层级。每批最多 20 个文件，单文件最大 50 MB，无额外批次总大小限制；实际保存受浏览器可用空间限制。</p><p>保存位置：{destination}。同名检查以目标文件夹为范围。</p><div className="upload-pickers"><label className="button button--secondary">选择文件<input type="file" multiple accept=".doc,.docx,.xls,.xlsx,.pdf" disabled={busy||!!conflicts} onChange={e=>{addFiles(e.target.files);e.target.value=''}}/></label><button className="button button--secondary" type="button" disabled={busy||!!conflicts} onClick={()=>folderInput.current?.click()}>选择文件夹</button><input hidden type="file" multiple ref={el=>{folderInput.current=el;el?.setAttribute('webkitdirectory','')}} onChange={e=>{addFiles(e.target.files);e.target.value=''}}/></div>{error&&<p role="alert">{error}</p>}<div className="batch-upload-list">{entries.map((e,i)=><div key={i}><span>{e.file.webkitRelativePath||e.file.name}</span><span>{e.status}</span>{!e.done&&<button type="button" disabled={busy||!!conflicts} onClick={()=>setEntries(v=>v.filter((_,j)=>j!==i))}>移除</button>}</div>)}</div>{conflicts&&<section role="alertdialog" aria-label="同名文件覆盖确认" className="upload-conflict"><h3>以下文件已有同名文档，是否覆盖？</h3><ul>{conflicts.map(n=><li key={n}>{n}</li>)}</ul><p>覆盖前自动下载完整资料备份；保留文件编号和已有笔记。PDF 原文变化后，请核对旧标注位置。取消将不上传本次批次。</p><button type="button" disabled={busy} onClick={()=>void run(true)}>覆盖并上传</button><button type="button" disabled={busy} onClick={()=>{setConflicts(null);setError('已取消本次上传，原资料未改动。')}}>取消本次操作</button></section>}</Modal>
 }

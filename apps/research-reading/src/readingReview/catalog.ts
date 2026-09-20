@@ -1,11 +1,15 @@
-import { applyConfirmedAreas } from '../reviewDecisions.ts'
+import {applySidebarCorrectionAreas} from '../reviewSidebarCorrection.ts'
+import {applyAdjustmentsOneAreas} from '../reviewAdjustmentsOne.ts'
+import {applyBrowser16Areas} from '../reviewBrowser16.ts'
+import { applyConfirmedAreas, applyRoundOneAreas } from '../reviewDecisions.ts'
+import { applyCollaborationAreas } from '../reviewCollaboration.ts'
 import type { PrdArea, PrdFeature } from '../researchReview/prd'
 export const readingOverview={
  positioning:'智能阅读是面向科研文献的原文阅读与证据整理工作台，把文献、摘录、思考和相关知识组织在同一条阅读路径中。',
  users:'服务需要精读论文、对照图表和准备研究材料的研究人员、研究生与科研助理；产品、设计和研发通过独立PRD模式评审功能规则，不影响阅读者的文献与笔记。',
  scenario:'研究者导入论文并在文献库找回材料；阅读时从目录进入目标章节，选择真实原文或截图，记录自己的理解；再从图表、引用和知识实体追溯证据，汇总技术、理论与署名作者。',
  value:'减少原文、截图、术语解释和个人笔记分散导致的反复查找，使每一条摘录和知识关联都能说明来源。',
- scope:'覆盖文献库与导入、PDF阅读、摘录与笔记、论文结构化信息、四页签知识整理及设计评审。阅读业务资料仍使用现有浏览器存储；PRD正文、版本与人工框选使用本机共享服务。不包含通用大模型生成、跨论文学者消歧或生产级账号权限。',
+ scope:'覆盖文献库与导入、PDF阅读、摘录与笔记、论文结构化信息、四页签知识整理及设计评审。阅读业务资料仍使用现有浏览器存储；评审内容在本地部署中由本机服务保存，线上演示中由当前浏览器保存。不包含通用大模型生成、跨论文学者消歧或生产级账号权限。',
  delivery:'',sourceTitle:'',sourceUrl:''
 }
 type Seed=[string,string,'P0'|'P1'|'P2',string,string,string,string]
@@ -62,12 +66,12 @@ export const readingAreas:PrdArea[]=[
  ['KG-05','实体检索与分类切换','P1','READ-kg-search','F20.2 F20.4','匹配名称、别名与原文证据；归一化英文大小写和连字符，不调用远程模型。','筛选结果限当前页签；无命中不保留上次实体详情，清空恢复列表。|规则检索不是完整自然语言语义搜索，PRD关联不自动将F20.2判为合规。'],
  ['KG-06','证据定位与抽取边界','P0','READ-kg-evidence','F20.1 F20.4','证据包含原句、页码及相对位置；正文解析排除页眉、署名和文末引用区域，作者单独核对。','点击证据返回对应原文区域；同一输入得到相同结果。|空文档不补示例；换领域需补词表与版面解析，不能宣称当前天线词表通用于所有论文。']
  ]),
- area('review','设计评审与共享PRD','独立评审需求，不改变文献业务数据。','左侧评审栏包含功能设计、故事线、PRD三种模式；PRD内按概述、区域和功能叶子组织。',[
- ['REV-01','三模式与评审检索','P1','READ-review','','模式下拉展示完整名称；功能设计与故事线保留原有审核，PRD支持全文和优先级筛选。','URL review=prd可恢复PRD模式；搜索编号、标题和规则，结果只展示命中功能。|切换不覆盖合规状态、备注和历史。'],
+ area('review','设计评审与共享PRD','独立评审需求，不改变文献业务数据。','左侧评审栏包含合规审查、PRD两种模式；PRD内按概述、区域和功能叶子组织。',[
+ ['REV-01','评审模式与功能检索','P1','READ-review','','模式下拉展示完整名称；合规审查保留原有审核，PRD支持全文和优先级筛选。','URL review=prd可恢复PRD模式；搜索编号、标题和规则，结果只展示命中功能。|切换不覆盖合规状态、备注和历史。'],
  ['REV-02','需求编辑与双向合规关联','P0','READ-review-edit','','每个叶子有稳定ID、名称、P0/P1/P2、计划版本、规则组及零到多条合规关联。','编辑需说明原因；保存记录前后值；新增和删除同样进入历史。|PRD与合规可双向打开准确叶子，未关联时明示；关联不意味着已合规。'],
  ['REV-03','大版本、历史与导出','P0','READ-review-version','','大版本手动命名并填写规划；以选中版本复制为当前版本，原版保持不变。','小修改保留原因、时间及前后内容；历史版本只读；导出使用选中版本已保存数据而非源码种子。'],
  ['REV-04','共享保存与人工框选','P0','READ-review-share','','阅读PRD正文、版本、合规关联和人工区域保存到独立阅读服务；审核和文献数据保留原存储。','人工框选支持拖画、增加、重画、删除、保存、恢复系统建议；坐标相对目标元素。|写入检查共享修订号，冲突不覆盖他人，编辑草稿保留；损坏记录不以种子覆盖。']
  ])
 ]
 
-readingAreas.splice(0,readingAreas.length,...applyConfirmedAreas(readingAreas))
+readingAreas.splice(0,readingAreas.length,...applySidebarCorrectionAreas(applyBrowser16Areas(applyAdjustmentsOneAreas(applyCollaborationAreas(applyRoundOneAreas(applyConfirmedAreas(readingAreas)),'reading'),'reading'),'reading')))

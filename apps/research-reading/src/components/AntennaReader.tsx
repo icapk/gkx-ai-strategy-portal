@@ -291,7 +291,8 @@ export function AntennaReader({onBack,notes,onNotesChange,onEditingNoteChange}:P
   const selectedReference=antennaReferenceDetails.find(r=>r.number===reference)
   const selectedFigure=antennaFigures.find(f=>f.number===figure)
   const selectedGraphNode=antennaGraph.nodes.find(n=>n.id===graphNode)??antennaGraph.nodes[0]
-  return <div className="antenna-reader" ref={root}>
+  useEffect(()=>{const restore=(event:Event)=>{const state=(event as CustomEvent).detail; const panels:Record<string,string>={notes:'笔记',figures:'图表',references:'引用',metadata:'元数据',graph:'图谱'};setLeft(state.left==='outline');setRight(!!state.right);if(panels[state.right])setPanel(panels[state.right])};window.addEventListener('annotation-restore-reading-panels',restore);return()=>window.removeEventListener('annotation-restore-reading-panels',restore)},[])
+  return <div data-annotation-reader-left={left?'outline':undefined} data-annotation-reader-right={right?({'笔记':'notes','图表':'figures','引用':'references','元数据':'metadata','图谱':'graph'} as Record<string,string>)[panel]:undefined} className="antenna-reader" ref={root}>
     <header className="antenna-header"><Tool icon="back" label="返回文件列表" onClick={onBack}/><img src="/assets/reading/pdf.svg" alt="PDF"/><div><strong title={antennaDocument.title}>{antennaDocument.title}</strong><small>原始论文 · 3页 · 8幅图 · 9条引用</small></div><a className="antenna-tool" title="下载原始PDF" aria-label="下载原始PDF" href="/antenna/paper.pdf" download="文件1-论文PDF.pdf"><img src="/assets/reading/download.svg" alt=""/></a></header>
     <div className={`antenna-body ${left?'has-left':''} ${right?'has-right':''}`}>
       <div className="antenna-left-rail"><button className="antenna-rail-button" type="button" title={left?'收起目录':'展开目录'} aria-label={left?'收起目录':'展开目录'} aria-pressed={left} onClick={()=>setLeft(v=>!v)}><RailIcon name="目录"/></button></div>

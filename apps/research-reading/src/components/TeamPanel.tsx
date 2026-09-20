@@ -1,3 +1,4 @@
+import {displayMinute} from '../displayFormat'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CommentItem, MemberItem, TeamPanelTab, TodoItem } from '../types'
 
@@ -196,7 +197,7 @@ export function TeamPanel({
                   <div className="comment-avatar">{item.author.slice(0, 1)}</div>
                   <div className="comment-identity">
                     <div className="comment-author">{item.author}</div>
-                    <time>{item.time}</time>
+                    <time>{displayMinute(item.time)}</time>
                   </div>
                   <button type="button" className="comment-reply-trigger" onClick={() => { setReplyToId(item.id); setReplyText('') }}>
                     <img src="/assets/figma/comment-reply.svg" alt="" />回复

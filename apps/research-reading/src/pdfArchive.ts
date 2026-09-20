@@ -121,11 +121,12 @@ const sanitizeAnnotation = (value: unknown, documentId: number): PdfArchiveAnnot
 
 export const pdfArchiveStorageKey = (documentId: number) => `pdf-${documentId}`
 
-export async function savePdfArchiveFile(documentId: number, file: File, data: ArrayBuffer): Promise<ArchiveResult> {
+export async function savePdfArchiveFile(documentId: number, file: File, data: ArrayBuffer, replaceExisting=false): Promise<ArchiveResult> {
   try {
     const database = await openDatabase()
     const transaction = database.transaction(FILE_STORE, 'readwrite')
-    const request = transaction.objectStore(FILE_STORE).add({
+    const store=transaction.objectStore(FILE_STORE)
+    const request = store[replaceExisting?'put':'add']({
       documentId,
       name: file.name.slice(0, 200),
       type: 'application/pdf',

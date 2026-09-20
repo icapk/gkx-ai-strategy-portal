@@ -1,13 +1,17 @@
+import {registerAnnotationRestorer,type AnnotationRestoreState} from './annotations/restoration'
+import {ShareTargetSelect} from './annotations/ShareTargetSelect'
+import {downloadZip} from './downloadZip'
+import {captureProduct} from './demoBackup'
+import {uploadTitle,uploadPath} from './uploadPolicy'
 import { extractUploadText } from './uploadText'
 import { HistoricalRecycleCleanup } from './components/HistoricalRecycleCleanup'
 import { automaticRecycleDue, historicalRecycleDue, canChange, sameName, moveResearchDocument } from './researchPolicy'
-import { DemoDataControls } from './components/DemoDataControls'
 import { PdfDownloadOptions } from './components/PdfDownloadOptions'
 import { LocalFilePreview } from './components/LocalFilePreview'
 import { TeamSpaceDialog } from './components/TeamSpaceDialog'
 import { teamSpacesKey, normalizeRole, validateTeamSpace, type TeamSpace } from './teamSpaces'
 import { BatchUploadDialog } from './components/BatchUploadDialog'
-import { saveOriginalFile, deleteOriginalFile, downloadOriginalFile } from './localFiles'
+import { saveOriginalFile, loadOriginalFile, deleteOriginalFile, downloadOriginalFile } from './localFiles'
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { initialComments, initialDocuments, initialFolders, initialMembers, initialResearchNotes, initialTodos, teamNames as defaultTeamNames } from './data'
 import { DocumentTable } from './components/DocumentTable'
@@ -55,6 +59,7 @@ import {
   downloadPdfArchive,
   exportPdfNotes,
   hasPdfArchiveFile,
+  loadPdfArchiveFile,
   loadPdfAnnotations,
   pdfArchiveStorageKey,
   reconcilePdfArchiveStorage,
@@ -99,6 +104,7 @@ const pdfAnnotationToResearchNote = (
   tags: ['PDF笔记', annotation.kind === 'highlight' ? '划词标注' : '截图标注'],
 })
 
+import { DocumentEditorBoundary } from './components/DocumentEditorBoundary'
 const ResearchDocumentEditor = lazy(() => import('./components/ContinuousDocumentEditor').then((module) => ({ default: module.ContinuousDocumentEditor })))
 const DataTableWorkspace = lazy(() => import('./components/DataTableWorkspace').then((module) => ({ default: module.DataTableWorkspace })))
 const PdfArchiveReader = lazy(() => import('./components/PdfArchiveReader').then((module) => ({ default: module.PdfArchiveReader })))
@@ -134,17 +140,17 @@ type PendingDeletion =
   | { type: 'folder'; id: number; scope: FolderScope }
 
 
-const memberCandidates: MemberCandidate[] = [
-  { id: 'member-zhang-1', name: '张三', email: 'zhangsan@example.com', date: '2025-12-05', color: '#3e84f5' },
-  { id: 'member-li-1', name: '李四', email: 'lisi@example.com', date: '2025-12-05', color: '#17b981' },
-  { id: 'member-wang-1', name: '王五', email: 'wangwu@example.com', date: '2025-12-02', color: '#8b5ef5' },
-  { id: 'member-zhao-1', name: '赵六', email: 'zhaoliu@example.com', date: '2025-12-02', color: '#f49e14' },
-  { id: 'member-sun-1', name: '孙七', email: 'sunqi@example.com', date: '2025-12-01', color: '#ee4546' },
-  { id: 'member-zhang-2', name: '张三', email: 'zhangsan@example.com', date: '2025-11-28', color: '#3e84f5' },
-  { id: 'member-li-2', name: '李四', email: 'lisi@example.com', date: '2025-11-26', color: '#17b981' },
-  { id: 'member-wang-2', name: '王五', email: 'wangwu@example.com', date: '2025-12-01', color: '#8b5ef5' },
-  { id: 'member-zhao-2', name: '赵六', email: 'zhaoliu@example.com', date: '2025-11-22', color: '#f49e14' },
-  { id: 'member-sun-2', name: '孙七', email: 'sunqi@example.com', date: '2025-11-20', color: '#ee4546' },
+const memberCandidateSeeds: MemberCandidate[] = [
+  { id: 'member-zhang-1', name: '张三', email: '', date: '2025-12-05', color: '#3e84f5' },
+  { id: 'member-li-1', name: '李四', email: '', date: '2025-12-05', color: '#17b981' },
+  { id: 'member-wang-1', name: '王五', email: '', date: '2025-12-02', color: '#8b5ef5' },
+  { id: 'member-zhao-1', name: '赵六', email: '', date: '2025-12-02', color: '#f49e14' },
+  { id: 'member-sun-1', name: '孙七', email: '', date: '2025-12-01', color: '#ee4546' },
+  { id: 'member-zhang-2', name: '张三', email: '', date: '2025-11-28', color: '#3e84f5' },
+  { id: 'member-li-2', name: '李四', email: '', date: '2025-11-26', color: '#17b981' },
+  { id: 'member-wang-2', name: '王五', email: '', date: '2025-12-01', color: '#8b5ef5' },
+  { id: 'member-zhao-2', name: '赵六', email: '', date: '2025-11-22', color: '#f49e14' },
+  { id: 'member-sun-2', name: '孙七', email: '', date: '2025-11-20', color: '#ee4546' },
 ]
 
 const defaultInviteSelection = ['member-zhang-1', 'member-li-1', 'member-zhao-1', 'member-sun-1', 'member-wang-2']
@@ -225,6 +231,7 @@ export default function App() {
   const maintenanceAttempts=useRef(new Map<string,number>())
   const [sharingId, setSharingId] = useState<number|null>(null)
   const [shareTarget, setShareTarget] = useState('我的空间')
+  const [shareTargetExpanded,setShareTargetExpanded]=useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [highlightedDocumentId, setHighlightedDocumentId] = useState<number | null>(null)
   const [activeNoteId, setActiveNoteId] = useState<number | null>(null)
@@ -237,6 +244,7 @@ export default function App() {
   const [activePdfSearchTarget, setActivePdfSearchTarget] = useState<(DocumentSearchTarget & { documentId: number }) | null>(null)
   const [pdfArchiveImportOpen, setPdfArchiveImportOpen] = useState(false)
   const [profile, setProfile] = useState<UserProfile>(() => loadUserProfile())
+  const memberCandidates = memberCandidateSeeds.map(candidate=>({...candidate,email:candidate.name===profile.name?profile.email:(teamSpaces.flatMap(t=>t.members).find(m=>m.name===candidate.name)?.email??'')}))
   const [page, setPage] = useState(1)
   const [toast, setToast] = useState<ToastState | null>(null)
   const [pendingDeletion, setPendingDeletion] = useState<PendingDeletion | null>(null)
@@ -296,6 +304,7 @@ export default function App() {
     if (activeProduct !== 'research' || !focusRequest || focusRequest.module !== 'research' || !focusRequest.target) return
     const {sequence, target, location} = focusRequest
     const stop = (message: string) => focusReject(sequence, `${focusRequest.id}：${message}`)
+    if (target.reviewMode || location?.preserveSurface) { focusReady(sequence); return }
 
     const editing = documents.find(item => item.id === activeDocumentId)
     const sameSurface = (target.surface === 'editor' && editing?.kind === '在线文档') || (target.surface === 'table' && editing?.kind === '数据表格') || (target.surface === 'pdf' && activePdfDocumentId !== null)
@@ -732,6 +741,7 @@ export default function App() {
   }
 
   const saveProfile = (nextProfile: UserProfile) => {
+    if(activeProduct==='research') nextProfile={...nextProfile,name:profile.name,organization:profile.organization||'演示机构'}
     const result = saveUserProfile(nextProfile)
     if (!result.ok) return result.error
     setProfile(nextProfile)
@@ -981,6 +991,10 @@ export default function App() {
   const shareDocument = (id:number) => {const item=documents.find(d=>d.id===id);if(!item)return;if(!canChange(item.location,teamSpaces)){showError('当前角色无权分享此文件');return}setShareTarget(isPersonalDocument(item)?teamSpaces.find(t=>canChange(t.name,teamSpaces))?.name??'我的空间':'我的空间');setSharingId(id)}
   const confirmShare = () => {const item=documents.find(d=>d.id===sharingId);if(!item)return;try{const allowed=['我的空间',...folders.map(f=>(f.location??'我的空间')+'/'+f.name),...teamSpaces.map(t=>t.name),...teamFolders.map(f=>(f.location??activeTeam)+'/'+f.name)];if(!allowed.includes(shareTarget))throw Error('目标目录已不存在');const moved=moveResearchDocument(item,shareTarget,documents,teamSpaces,formatLocalDateTime());const result=persistResearchDocument(moved);if(!result.ok)throw Error(result.error);setDocuments(current=>{const next=current.map(d=>d.id===item.id?moved:d);documentsRef.current=next;return next});setSharingId(null);showToast('分享完成，文件已移动至 '+shareTarget.replace(/^我的空间/,'个人空间'))}catch(e){showError(e instanceof Error?e.message:String(e))}}
 
+  const [sharingFolder,setSharingFolder]=useState<{folder:FolderItem;scope:FolderScope}|null>(null)
+  const shareFolder=(folder:FolderItem,scope:FolderScope)=>{setShareTarget('我的空间');setSharingFolder({folder,scope})}
+  const downloadFolder=async(folder:FolderItem)=>{try{const path=(folder.location??'我的空间')+'/'+folder.name;const items=documents.filter(d=>d.location===path||d.location.startsWith(path+'/'));const entries:{name:string;data:Blob|string}[]=[];for(const item of items){const prefix=folder.name+item.location.slice(path.length)+'/';if(item.pdfArchive){const file=await loadPdfArchiveFile(item.id);if(!file.ok)throw Error(file.error);entries.push({name:prefix+file.value.name,data:new Blob([file.value.data],{type:file.value.type})});const notes=await loadPdfAnnotations(item.id);if(notes.ok&&notes.value.length)entries.push({name:prefix+item.title+'-笔记.json',data:JSON.stringify(notes.value,null,2)})}else if(item.originalFileName)entries.push({name:prefix+item.originalFileName,data:await loadOriginalFile(item.id)});else entries.push({name:prefix+item.title+'.json',data:JSON.stringify({document:item,table:researchDataTables.find(t=>t.documentId===item.id)},null,2)})}if(!entries.length)entries.push({name:folder.name+'/文件夹说明.txt',data:'此文件夹暂无文件。'});await downloadZip(folder.name,entries)}catch(e){showError('文件夹下载失败：'+String(e))}}
+  const confirmFolderShare=()=>{if(!sharingFolder)return;const {folder,scope}=sharingFolder,source=folder.location??'我的空间',path=source+'/'+folder.name,target=shareTarget+'/'+folder.name,targetScope:FolderScope=shareTarget==='我的空间'||shareTarget.startsWith('我的空间/')?'personal':'team';if(!canChange(source,teamSpaces)||!canChange(shareTarget,teamSpaces)){showError('当前角色无权移动该文件夹');return}if(shareTarget===source||shareTarget===path||shareTarget.startsWith(path+'/')){showError('请选择不同位置，不能移动到自身内部');return}const from=scope==='team'?teamFolders:folders,to=targetScope==='team'?teamFolders:folders;if(to.some(f=>(f.location??'我的空间')===shareTarget&&sameName(f.name,folder.name))){showError('目标目录已有同名文件夹');return}const tree=from.filter(f=>f.id===folder.id||f.location===path||f.location?.startsWith(path+'/')),ids=new Map<number,number>();let nextIdValue=Math.max(0,...to.map(f=>f.id))+1;const moved=tree.map(f=>{const id=scope===targetScope?f.id:nextIdValue++;ids.set(f.id,id);return {...f,id,location:f.id===folder.id?shareTarget:target+(f.location??'').slice(path.length)}});let personal=folders,team=teamFolders;if(scope==='personal')personal=personal.filter(f=>!tree.some(t=>t.id===f.id));else team=team.filter(f=>!tree.some(t=>t.id===f.id));if(targetScope==='personal')personal=[...personal,...moved];else team=[...team,...moved];const updated=documents.map(d=>d.location===path||d.location.startsWith(path+'/')?{...d,location:target+d.location.slice(path.length),spaceScope:targetScope,shared:targetScope==='team',owned:targetScope==='personal'}:d);const error=folderTransaction(()=>{const a=persistFolders('personal',personal),b=persistFolders('team',team),c=persistResearchDocumentsBatch(updated);if(!a.ok)throw Error(a.error);if(!b.ok)throw Error(b.error);if(!c.ok)throw Error(c.error)});if(error){showError(error);return}setFolders(personal);foldersRef.current=personal;setTeamFolders(team);teamFoldersRef.current=team;setDocuments(updated);documentsRef.current=updated;if(scope!==targetScope)setQuickAccess(q=>q.map(key=>{for(const [old,id]of ids)for(const prefix of ['folder','favorite-folder'])if(key===prefix+':'+scope+':'+old)return prefix+':'+targetScope+':'+id;return key}));setCreatedTeams(items=>items.filter(name=>name!==shareTarget.split('/')[0]));setSharingFolder(null);setOpenFolderName(null);showToast('文件夹和内容已移动，文件编号及笔记保留')}
   const changeLanguage = (id:number,language:'zh'|'en') => {const item=documents.find(d=>d.id===id);if(!item)return;if(!canChange(item.location,teamSpaces)){showError('当前角色仅可查看');return}const next={...item,language};const result=persistResearchDocument(next);if(!result.ok){showError(result.error);return}setDocuments(items=>items.map(d=>d.id===id?next:d))}
   const renameDocument = (id: number, title: string) => {
     const target = documents.find((doc) => doc.id === id)
@@ -1083,7 +1097,7 @@ export default function App() {
     showToast(`文件夹“${name}”创建成功`)
   }
 
-  const submitNewDocument = (event?: FormEvent<HTMLFormElement>, directType?: 'document' | 'sheet') => {
+  const submitNewDocument = async (event?: FormEvent<HTMLFormElement>, directType?: 'document' | 'sheet') => {
     event?.preventDefault()
     const effectiveType = directType ?? documentType
     setNewDocumentStorageError('')
@@ -1094,7 +1108,7 @@ export default function App() {
       return
     }
     const timestamp = formatLocalDateTime()
-    const documentId = documentIdCounterRef.current
+    let documentId = documentIdCounterRef.current
     documentIdCounterRef.current += 1
     const createdDocument: ResearchDocument = {
       id: documentId,
@@ -1120,7 +1134,9 @@ export default function App() {
       blocks: effectiveType === 'document' ? [createDocumentBlock('text')] : undefined,
     }
     if(!canChange(createdDocument.location,teamSpaces)){showError('当前角色仅可查看');return}
-    if(documents.some(d=>d.location===createdDocument.location&&d.kind===createdDocument.kind&&sameName(d.title,createdDocument.title))){if(directType){let n=2;while(documents.some(d=>d.location===createdDocument.location&&d.kind===createdDocument.kind&&sameName(d.title,title+' '+n)))n++;createdDocument.title=title+' '+n}else{setNewDocumentError('同目录已存在同类型同名文件');return}}
+    const previous=documents.find(d=>d.location===createdDocument.location&&sameName(d.title,createdDocument.title))
+    if(previous){if(previous.kind!==createdDocument.kind){setNewDocumentError('同目录已有不同类型的同名文件，请更换名称');return}if(!window.confirm('“'+title+'”已有同名文档，是否覆盖？覆盖前将下载完整备份；取消则不创建。'))return;try{const backup=await captureProduct('research'),url=URL.createObjectURL(new Blob([JSON.stringify(backup)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='智能科研-新建覆盖前备份-'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch{setNewDocumentError('备份失败，未覆盖原文件');return}documentId=previous.id;Object.assign(createdDocument,{id:previous.id,createdAt:previous.createdAt,owner:previous.owner,favorite:previous.favorite,favoritedAt:previous.favoritedAt})}
+
     const documentResult = persistResearchDocument(createdDocument)
     if (!documentResult.ok) {
       setNewDocumentStorageError(documentResult.error)
@@ -1144,15 +1160,15 @@ export default function App() {
       }
       const tableResult = persistResearchDataTable(createdDataTable)
       if (!tableResult.ok) {
-        const rollbackResult = removePersistedResearchDocument(documentId)
+        const rollbackResult = previous?persistResearchDocument(previous):removePersistedResearchDocument(documentId)
         setNewDocumentStorageError(rollbackResult.ok
           ? tableResult.error
           : `${tableResult.error} 新建文档索引清理失败，请返回列表刷新后重试。`)
         return
       }
-      setResearchDataTables((current) => [createdDataTable!, ...current])
+      setResearchDataTables((current) => [createdDataTable!, ...current.filter(t=>t.documentId!==documentId)])
     }
-    setDocuments((current) => [createdDocument, ...current])
+    setDocuments((current) => {const next=[createdDocument, ...current.filter(d=>d.id!==documentId)];documentsRef.current=next;return next})
     if (activeSection === 'team') setCreatedTeams((current) => current.filter((team) => team !== activeTeam))
     setModal(null)
     setNewDocumentTitle('')
@@ -1174,11 +1190,9 @@ export default function App() {
     onProgress: (progress: number) => void,
     targetLocation = '我的空间/文献存档',
     targetScope: 'personal' | 'team' = 'personal',
-    language?: 'zh' | 'en',
+    overwrite = false,
   ) => {
-    if (!language) return {ok:false as const,error:'请选择中文文档或英文文档'}
     if (!canChange(targetLocation,teamSpaces))return {ok:false as const,error:'当前角色仅可查看'}
-    if (documentsRef.current.some(d=>d.location===targetLocation&&d.kind==='PDF文档'&&sameName(d.title,file.name.replace(/\.pdf$/i,'').normalize('NFC').trim().slice(0,50))))return {ok:false as const,error:'同目录已存在同名 PDF'}
     if (!/\.pdf$/i.test(file.name.trim())) return { ok: false as const, error: '仅支持导入 PDF 文件。' }
     if (file.size <= 0) return { ok: false as const, error: '文件为空，无法导入。' }
     if (file.size > 50 * 1024 * 1024) return { ok: false as const, error: '单个 PDF 不能超过 50 MB。' }
@@ -1189,10 +1203,12 @@ export default function App() {
     )
     const recycledDuplicate = recycledDocuments.find(matchesFile)
     if (recycledDuplicate) return { ok: false as const, error: '同名且大小相同的 PDF 已在回收站，请先恢复或彻底删除后再导入。' }
-    const activeDuplicate = documentsRef.current.find(matchesFile)
+    const activeDuplicate = documentsRef.current.find(d=>d.location===targetLocation&&sameName(d.title,uploadTitle(file.name)))
+    if(activeDuplicate&&!overwrite)return {ok:false as const,error:'同目录已有同名文件，请从上传入口确认覆盖'}
+    if(activeDuplicate&&activeDuplicate.kind!=='PDF文档')return {ok:false as const,error:'同名文件类型不同，不能覆盖'}
     if (activeDuplicate) {
       onProgress(4)
-      if (await hasPdfArchiveFile(activeDuplicate.id)) {
+      if (!overwrite && await hasPdfArchiveFile(activeDuplicate.id)) {
         onProgress(100)
         return { ok: true as const, documentItem: activeDuplicate }
       }
@@ -1222,7 +1238,7 @@ export default function App() {
         }),
         id,
         updatedAt: timestamp,
-        language,
+
         size: formatFileSize(file.size),
         kind: 'PDF文档',
         description: `已在线解析并存档的 PDF 文献，共 ${parsed.pageCount} 页；可打开原文进行划词、截图和笔记整理。`,
@@ -1239,14 +1255,15 @@ export default function App() {
         },
       }
       onProgress(97)
-      const archiveResult = await savePdfArchiveFile(id, file, data)
+      const priorFile=activeDuplicate?await loadPdfArchiveFile(id):null
+      const archiveResult = await savePdfArchiveFile(id, file, data, !!activeDuplicate&&overwrite)
       if (!archiveResult.ok) return { ok: false as const, error: readablePdfImportError(archiveResult.error) }
       onProgress(99)
       const documentResult = persistResearchDocument(archivedDocument)
       if (!documentResult.ok) {
         if (activeDuplicate) {
-          onProgress(100)
-          return { ok: true as const, documentItem: activeDuplicate }
+          if(priorFile?.ok){const old=priorFile.value;await savePdfArchiveFile(id,new File([old.data],old.name,{type:old.type}),old.data,true)}
+          return {ok:false as const,error:documentResult.error}
         }
         const rollback = await deletePdfArchive(id)
         return {
@@ -1268,14 +1285,14 @@ export default function App() {
     }
   }
 
-  const uploadLocalFile = async (file: File, language?: 'zh' | 'en') => {
+  const uploadLocalFile = async (file: File, overwrite=false) => {
     if (!/\.(docx?|xlsx?|pdf)$/i.test(file.name)) throw new Error('仅支持 Word、Excel 和 PDF，暂不支持 PPT 及其他格式')
     if (!file.size) throw new Error('文件为空，无法上传')
     if (file.size > 50 * 1024 * 1024) throw new Error('单文件不能超过 50 MB')
     const scope: FolderScope = activeSection === 'team' ? 'team' : 'personal'
     const root = scope === 'team' ? activeTeam : '我的空间'
     if(!canChange(root,teamSpaces))throw Error('当前角色仅可查看')
-    const base = `${root}${openFolderName ? '/' + openFolderName : ''}`
+    const base = `${root}${activeSection!=='workbench'&&openFolderName ? '/' + openFolderName : ''}`
     const parts = (file.webkitRelativePath || file.name).split('/').filter(Boolean)
     if (parts.some((part) => part === '.' || part === '..')) throw new Error('文件路径无效')
     const timestamp = formatLocalDateTime()
@@ -1292,20 +1309,27 @@ export default function App() {
       if (scope === 'team') { teamFoldersRef.current = nextFolders; setTeamFolders(nextFolders) } else { foldersRef.current = nextFolders; setFolders(nextFolders) }
     }
     if (/\.pdf$/i.test(file.name)) {
-      const result = await importPdfFile(file, () => undefined, location, scope, language)
+      const result = await importPdfFile(file, () => undefined, location, scope, overwrite)
       if (!result.ok) throw new Error(result.error)
     } else {
-      if(documentsRef.current.some(d=>d.location===location&&sameName(d.title,file.name.slice(0,50))))throw Error('同目录已存在同名文件')
-      const id = documentIdCounterRef.current++
+      const previous=documentsRef.current.find(d=>d.location===location&&sameName(d.title,uploadTitle(file.name)))
+      if(previous&&!overwrite)throw Error('同目录已存在同名文件，请确认覆盖')
+      const kind=/\.docx?$/i.test(file.name)?'Word文档':'Excel文档'
+      if(previous&&previous.kind!==kind)throw Error('同名文件类型不同，不能覆盖')
+      const id = previous?.id??documentIdCounterRef.current++
       const item: ResearchDocument = { id, title: file.name.slice(0, 50), originalFileName: file.name, location, owner: profile.name, createdAt: timestamp, updatedAt: timestamp, visitedAt: '', size: formatFileSize(file.size), kind: /\.docx?$/i.test(file.name) ? 'Word文档' : /\.(xlsx?|csv)$/i.test(file.name) ? 'Excel文档' : '附件', favorite: false, owned: true, shared: scope === 'team', spaceScope: scope, content: /\.(txt|md|csv)$/i.test(file.name) ? (await file.text()).slice(0, 120000) : '' }
+      if(previous)Object.assign(item,{createdAt:previous.createdAt,visitedAt:previous.visitedAt,favorite:previous.favorite,favoritedAt:previous.favoritedAt,owner:previous.owner})
       Object.assign(item,await extractUploadText(file))
+      const priorFile=previous?await loadOriginalFile(id).catch(()=>null):null
       await saveOriginalFile(id, file)
       const result = persistResearchDocument(item)
-      if (!result.ok) { await deleteOriginalFile(id); throw new Error(result.error) }
-      setDocuments((current) => { const next = [item, ...current]; documentsRef.current = next; return next })
+      if (!result.ok) { if(priorFile)await saveOriginalFile(id,new File([priorFile],previous!.originalFileName||file.name,{type:priorFile.type}));else if(!previous)await deleteOriginalFile(id); throw new Error(result.error) }
+      setDocuments((current) => { const next = [item, ...current.filter(d=>d.id!==id)]; documentsRef.current = next; return next })
     }
     if (scope === 'team') setCreatedTeams((teams) => teams.filter((name) => name !== activeTeam))
   }
+  const uploadDestination=(file?:File)=>{const root=activeSection==='team'?activeTeam:'我的空间';return root+(activeSection!=='workbench'&&openFolderName?'/'+openFolderName:'')+(file&&uploadPath(file).length>1?'/'+uploadPath(file).slice(0,-1).join('/'):'')}
+  const findUploadConflicts=(files:File[])=>files.flatMap(file=>{const location=uploadDestination(file),old=documentsRef.current.find(d=>d.location===location&&sameName(d.title,uploadTitle(file.name)));return old?[location.replace(/^我的空间/,'个人空间')+'/'+file.name]:[]})
   const openImportDialog = () => setModal('import-document')
 
   const persistTeamSpaces = (next: TeamSpace[]) => {
@@ -1343,7 +1367,7 @@ export default function App() {
       teamNameInputRef.current?.focus()
       return
     }
-    const selectedMembers = memberCandidates.filter((candidate,index,all)=>all.findIndex(c=>c.email===candidate.email)===index)
+    const selectedMembers = memberCandidates.filter((candidate,index,all)=>all.findIndex(c=>c.name===candidate.name)===index)
     const newSpace: TeamSpace = { name, description: teamDescription.trim(), members: [{ id: 1, name: profile.name, role: '管理员', initials: profile.name[0], color: '#5b8ff9', status: '在线', joinedAt: new Date().toISOString().slice(0, 10) }, ...selectedMembers.filter((candidate) => candidate.name !== profile.name).map((candidate, index) => ({ id: index + 2, name: candidate.name, role: '可查看', initials: candidate.name[0], color: candidate.color, status: '在线' as const, joinedAt: candidate.date }))] }
     const saveError = validateTeamSpace(newSpace, teamSpaces) || persistTeamSpaces([...teamSpaces, newSpace])
     if (saveError) { showError(saveError); return }
@@ -1515,7 +1539,7 @@ export default function App() {
     const work=[...foldersDue.filter(f=>attempt('folder:'+f.id)).map(f=>()=>purgeFolder(f,true)),...docsDue.filter(d=>attempt('document:'+d.id)).map(d=>()=>permanentlyDeleteDocument(d.id,true))]
     if(!work.length)return;maintenanceBusy.current=true
     void(async()=>{try{for(const run of work)await run()}catch(e){showError('到期清理未完成，可在回收站重试：'+String(e))}finally{maintenanceBusy.current=false}})()
-  },[recycledDocuments,recycledFolders,teamSpaces,activeProduct,maintenanceTick,historicalCleanup])
+  },[recycledDocuments,recycledFolders,teamSpaces,activeProduct,activeSection,maintenanceTick,historicalCleanup])
 
   const activeResearchNote = activeNoteId == null
     ? undefined
@@ -1610,9 +1634,45 @@ export default function App() {
     return { ok: true as const, annotations: annotationResult.value }
   }
 
+
+  const captureResearchAnnotation = ():Extract<AnnotationRestoreState,{product:'research'}> => ({schema:1,product:'research',section:activeSection,tab:workbenchTab,teamTab:teamPanelTab,team:activeSection==='team'?activeTeam:null,folder:openFolderName,documentId:activePdfDocumentId??activeDocumentId??previewDocumentId,surface:activePdfDocumentId!==null?'pdf':activeDocumentId!==null?(activeEditingDocument?.kind==='数据表格'?'table':'editor'):previewDocumentId!==null?'preview':dataTableHubOpen?'table-hub':'workspace',modal:modal??(searchOpen?'search':pdfArchiveImportOpen?'pdf-import':spaceManagementOpen?'members':null),share:sharingId!==null?{kind:'file',id:sharingId,targetPath:shareTarget,expanded:shareTargetExpanded}:sharingFolder?{kind:'folder',id:sharingFolder.folder.id,scope:sharingFolder.scope,targetPath:shareTarget,expanded:shareTargetExpanded}:undefined})
+  useEffect(()=>registerAnnotationRestorer('research',{
+    capture:()=>activeProduct==='research'?captureResearchAnnotation():undefined,
+    restore:state=>{
+      if(state.product!=='research'||activeProduct!=='research')return '请先切换到智能科研。'
+      const sameSurface=state.documentId===(activePdfDocumentId??activeDocumentId??previewDocumentId)&&state.surface===captureResearchAnnotation().surface
+      if(!sameSurface&&(document.querySelector('[data-business-dirty="true"]')))return '请先保存并关闭当前文档或表格，再恢复注释页面。'
+      if(pendingDeletion||pdfDownloadItem||historicalCleanup)return '请先处理当前业务确认窗口。'
+      if((modal&&modal!==state.modal)||searchOpen&&state.modal!=='search'||pdfArchiveImportOpen&&state.modal!=='pdf-import'||spaceManagementOpen&&state.modal!=='members')return '请先完成或关闭当前业务窗口，避免丢失输入。'
+      if((sharingId!==null&&(state.share?.kind!=='file'||state.share.id!==sharingId))||(sharingFolder&&(state.share?.kind!=='folder'||state.share.id!==sharingFolder.folder.id)))return '请先关闭当前分享窗口，再定位其他注释。'
+      if((sharingId!==null||sharingFolder)&&state.share?.targetPath!==shareTarget)return '当前分享目标与注释快照不同，请先完成或取消当前选择，再恢复定位。'
+      const team=state.section==='team'?teamSpaces.find(t=>t.name===state.team):undefined
+      if(state.section==='team'&&(!team||!team.members.some(m=>m.id===1)))return '原团队空间不存在或当前没有访问权限。'
+      if(state.folder){const root=state.section==='team'?state.team:'我的空间';const wanted=root+'/'+state.folder;const options=state.section==='team'?teamFolders:folders;if(!options.some(f=>(f.location??root)+'/'+f.name===wanted))return '原文件夹不存在，无法恢复。'}
+      const doc=state.documentId!=null?documents.find(d=>d.id===state.documentId):undefined
+      if(state.documentId!=null&&(!doc||!canReadDocument(doc)))return '原文档不存在或已无访问权限。'
+      if(state.surface==='pdf'&&!doc?.pdfArchive||state.surface==='table'&&doc?.kind!=='数据表格'||state.surface==='editor'&&doc?.kind!=='在线文档')return '原文档类型已变化，无法按原界面恢复。'
+      let folder:FolderItem|undefined
+      if(state.share){
+        const targets=Array.from(new Set(['我的空间',...folders.map(f=>(f.location??'我的空间')+'/'+f.name),...teamSpaces.map(t=>t.name),...teamFolders.map(f=>(f.location??activeTeam)+'/'+f.name)])).filter(path=>canChange(path,teamSpaces))
+        if(!targets.includes(state.share.targetPath))return '原分享目标不存在或无操作权限。'
+        if(state.share.kind==='file'){const item=documents.find(d=>d.id===state.share!.id);if(!item||!canReadDocument(item)||!canChange(item.location,teamSpaces))return '原分享文件不存在或无操作权限。'}
+        else {folder=(state.share.scope==='team'?teamFolders:folders).find(f=>f.id===state.share!.id);if(!folder||!canChange(folder.location??'我的空间',teamSpaces))return '原分享文件夹不存在或无操作权限。'}
+      }
+      if(state.modal==='members'&&!(team??currentSpace)?.members.some(m=>m.id===1&&m.role==='管理员'))return '当前角色不能恢复成员管理窗口。'
+      if(state.modal&& !['search','pdf-import','members','new-folder','new-document','import-document','new-team','invite-member','add-todo','profile-settings'].includes(state.modal))return '此窗口需要原业务对象，请先手动打开再定位。'
+      if(newDocumentTitle&&modal!==state.modal)return '请先保存或取消未完成的新建内容。'
+      if(!sameSurface&&dataTableNavigationGuardRef.current&&!dataTableNavigationGuardRef.current())return '请先保存当前表格修改。'
+      setActiveSection(state.section);setWorkbenchTab(state.tab);setTeamPanelTab(state.teamTab??'todo');if(state.team)setActiveTeam(state.team);setOpenFolderName(state.folder??null);setPage(1)
+      setActiveDocumentId(state.surface==='editor'||state.surface==='table'?state.documentId??null:null);setActivePdfDocumentId(state.surface==='pdf'?state.documentId??null:null);setPreviewDocumentId(state.surface==='preview'?state.documentId??null:null);setDataTableHubOpen(state.surface==='table-hub')
+      setSearchOpen(state.modal==='search');setPdfArchiveImportOpen(state.modal==='pdf-import');setSpaceManagementOpen(state.modal==='members');setModal(state.modal&& !['search','pdf-import','members'].includes(state.modal)?state.modal as ModalKind:null)
+      if(state.share){setShareTarget(state.share.targetPath);setShareTargetExpanded(state.share.expanded);setSharingId(state.share.kind==='file'?state.share.id:null);setSharingFolder(state.share.kind==='folder'&&folder?{folder,scope:state.share.scope??'personal'}:null)}else{setSharingId(null);setSharingFolder(null);setShareTargetExpanded(false)}
+      return undefined
+    }
+  }))
   return (
-    <main className={`app-stage${activeProduct === 'reading' ? ' app-stage--reading' : ' app-stage--research-review'}`}>
-      <DemoDataControls product={activeProduct} />
+    <main data-annotation-product={activeProduct} data-annotation-context={JSON.stringify({product:activeProduct,section:activeSection,tab:workbenchTab,teamTab:activeSection==='team'?teamPanelTab:null,team:activeSection==='team'?activeTeam:null,folder:openFolderName,documentId:activePdfDocumentId??activeDocumentId??previewDocumentId,surface:activePdfDocumentId!==null?'pdf':activeDocumentId!==null?(activeEditingDocument?.kind==='数据表格'?'table':'editor'):previewDocumentId!==null?'preview':dataTableHubOpen?'table-hub':'workspace',modal:modal??(searchOpen?'search':pdfArchiveImportOpen?'pdf-import':spaceManagementOpen?'members':null),share:sharingId!==null?{kind:'file',id:sharingId,expanded:shareTargetExpanded}:sharingFolder?{kind:'folder',id:sharingFolder.folder.id,scope:sharingFolder.scope,expanded:shareTargetExpanded}:null})} className={`app-stage${activeProduct === 'reading' ? ' app-stage--reading' : ' app-stage--research-review'}`}>
+
       {activeProduct === 'reading' && <ReadingReviewSidebar />}
       {activeProduct === 'research' && <ResearchReviewSidebar />}
       <div className="ambient ambient--left" aria-hidden="true" />
@@ -1642,7 +1702,7 @@ export default function App() {
             teamTreeExpanded={teamTreeExpanded}
             onSectionSelect={selectSection}
             onTeamTreeToggle={toggleTeamTree}
-            onTeamSelect={(team) => { setActiveTeam(team); setTeamTreeExpanded(true); setOpenFolderName(null) }}
+            onTeamSelect={(team) => { selectSection('team'); setPage(1); setActiveTeam(team); setTeamTreeExpanded(true); setOpenFolderName(null) }}
             onNewTeam={() => {
               setTeamName('')
               setTeamInviteSelection([])
@@ -1653,7 +1713,7 @@ export default function App() {
           />
           <div className="main-pane">
             {activeSection === 'workbench' && (
-              <WorkspaceView onLanguageChange={changeLanguage} onNew={openNewDocumentDialog} onNewTable={openNewDataTableDialog} onUpload={() => { setOpenFolderName(null); openImportDialog() }} onSearchOpen={openGlobalSearch} onDownloadDocument={item => { void downloadArchivedPdf(item) }}
+              <WorkspaceView onShareFolder={f=>shareFolder(f,f.scope)} onDownloadFolder={f=>void downloadFolder(f)} onDeleteFolder={f=>setPendingDeletion({type:'folder',id:f.id,scope:f.scope})} onNewFolder={()=>{setOpenFolderName(null);setModal('new-folder')}} onLanguageChange={changeLanguage} onNew={openNewDocumentDialog} onNewTable={openNewDataTableDialog} onUpload={() => { setOpenFolderName(null); openImportDialog() }} onSearchOpen={openGlobalSearch} onDownloadDocument={item => { void downloadArchivedPdf(item) }}
                 documents={visibleDocuments}
                 quickFolders={[...folders.map((folder) => ({ ...folder, scope: 'personal' as const })), ...teamFolders.map((folder) => ({ ...folder, scope: 'team' as const }))].filter((folder) => quickAccess.includes(`${workbenchTab === 'favorites' ? 'favorite-folder' : 'folder'}:${folder.scope}:${folder.id}`))}
                 onOpenQuickFolder={(folder) => { setActiveSection(folder.scope); if (folder.scope === 'team') { setActiveTeam(folder.location ?? activeTeam); setTeamTreeExpanded(true) }; setOpenFolderName(`${folder.location ?? (folder.scope === 'team' ? activeTeam : '我的空间')}/${folder.name}`.split('/').slice(1).join('/')); setPage(1) }}
@@ -1672,7 +1732,7 @@ export default function App() {
               />
             )}
             {activeSection === 'personal' && (
-              <SpaceView onLanguageChange={changeLanguage}
+              <SpaceView onSearchOpen={openGlobalSearch} onShareFolder={f=>shareFolder(f,'personal')} onDownloadFolder={f=>void downloadFolder(f)} onLanguageChange={changeLanguage}
                 mode="personal"
                 folders={folders}
                 documents={personalDocuments}
@@ -1699,7 +1759,7 @@ export default function App() {
               />
             )}
             {activeSection === 'team' && (
-              <SpaceView onLanguageChange={changeLanguage}
+              <SpaceView onSearchOpen={openGlobalSearch} onShareFolder={f=>shareFolder(f,activeSection==='team'?'team':'personal')} onDownloadFolder={f=>void downloadFolder(f)} onLanguageChange={changeLanguage}
                 mode="team"
                 onManageSpace={isTeamAdmin ? () => setSpaceManagementOpen(true) : undefined}
                 teamName={activeTeam}
@@ -1730,7 +1790,7 @@ export default function App() {
             )}
             {activeSection === 'recycle' && (
               <section data-compliance-target="research-recycle" className="view view--space view--recycle">
-                <div className="view-body workbench-body"><div className="recycle-note">新删除资料保留30天；仅在页面打开或运行且具备清理权限时自动清理。历史资料不自动删除，过期后需先备份再确认清理。</div>
+                <div className="view-body workbench-body"><div className="recycle-note">已删除资料仅保留30天，超过30天将自动清理过期文件。</div>
                   <DocumentTable documents={recycledDocuments.filter(d=>canReadDocument(d)&&!recycledFolders.some(f=>f.documentIds.includes(d.id)))} folderEntries={recycledFolders.filter(bundle=>bundle.scope==='personal'||teamSpaces.some(t=>t.name===bundle.root.location?.split('/')[0]&&t.members.some(m=>m.id===1))).map(bundle=>({key:String(bundle.id),item:{id:-bundle.id,title:bundle.root.name,location:bundle.root.location!,owner:bundle.root.owner??'当前用户',createdAt:bundle.root.createdAt??'',visitedAt:'',deletedAt:bundle.deletedAt,retentionPolicy:bundle.retentionPolicy,size:bundle.root.size??'0 B',kind:'附件',favorite:false,owned:true,shared:false},title:<span>{bundle.root.name}</span>,onOpen:()=>undefined,actions:<><button onClick={()=>restoreFolder(bundle)}>恢复</button><button className="danger-link" onClick={()=>void purgeFolder(bundle)}>彻底删除</button></>}))} mode="recycle" page={page} onPageChange={setPage} onToggleFavorite={() => undefined} onDelete={(id) => { void permanentlyDeleteDocument(id) }} onShare={() => undefined} onRestore={restoreDocument} />
                 </div>
               </section>
@@ -1743,6 +1803,7 @@ export default function App() {
 
       {activeEditingDocument?.kind === '在线文档' && (
         <div className="document-editor-host" aria-hidden={activePdfDocument ? true : undefined} inert={activePdfDocument ? true : undefined}>
+          <DocumentEditorBoundary key={activeEditingDocument.id} onClose={closeActiveDocument}>
           <Suspense fallback={<div className="document-editor-loading" role="status"><span /><strong>正在打开文档编辑器…</strong></div>}>
             <ResearchDocumentEditor
               documentItem={activeEditingDocument}
@@ -1754,12 +1815,13 @@ export default function App() {
               onOpenPdfDocument={openPdfDocumentById}
             />
           </Suspense>
+          </DocumentEditorBoundary>
         </div>
       )}
 
       {activePdfDocument && (
         <Suspense fallback={<div className="document-editor-loading" role="status"><span /><strong>正在打开 PDF 文献…</strong></div>}>
-          <PdfArchiveReader onLanguageChange={language=>{if(activePdfDocument)changeLanguage(activePdfDocument.id,language)}}
+          <PdfArchiveReader 
             key={`pdf-archive-reader-${activePdfDocument.id}`}
             document={activePdfDocument}
             initialAnnotationId={activePdfSearchTarget?.documentId === activePdfDocument.id ? activePdfSearchTarget.annotationId : undefined}
@@ -1798,6 +1860,8 @@ export default function App() {
 
       {searchOpen && (
         <GlobalSearchDialog
+          folders={[...folders.map(f=>({...f,scope:'personal' as const})),...teamFolders.filter(f=>teamSpaces.some(t=>t.name===f.location?.split('/')[0]&&t.members.some(m=>m.id===1))).map(f=>({...f,scope:'team' as const}))]}
+          onOpenFolder={folder=>{setActiveSection(folder.scope);if(folder.scope==='team'){setActiveTeam(folder.location!.split('/')[0]);setTeamTreeExpanded(true)}setOpenFolderName(((folder.location??'我的空间')+'/'+folder.name).split('/').slice(1).join('/'));setPage(1)}}
           documents={accessibleDocuments}
           notes={researchNotes}
           onClose={() => setSearchOpen(false)}
@@ -1813,7 +1877,7 @@ export default function App() {
             open
             existingFiles={existingPdfFiles}
             onClose={() => setPdfArchiveImportOpen(false)}
-            onImportFile={(file, onProgress, language) => importPdfFile(file, onProgress, '我的空间/文献存档', 'personal', language)}
+            onImportFile={(file, onProgress) => importPdfFile(file, onProgress, '我的空间/文献存档', 'personal')}
             onOpenDocument={(documentId) => {
               setPdfArchiveImportOpen(false)
               openPdfDocumentById(documentId)
@@ -1852,7 +1916,8 @@ export default function App() {
 
       {modal === 'profile-settings' && (
         <ProfileSettingsModal
-          profile={profile}
+          profile={activeProduct==='research'?{...profile,organization:profile.organization||'演示机构'}:profile}
+          identityReadOnly={activeProduct==='research'}
           onClose={() => setModal(null)}
           onSave={saveProfile}
         />
@@ -1921,7 +1986,7 @@ export default function App() {
         </Modal>
       )}
 
-      {activeProduct === 'research' && modal === 'import-document' && <BatchUploadDialog onClose={() => setModal(null)} onUpload={uploadLocalFile} />}
+      {activeProduct === 'research' && modal === 'import-document' && <BatchUploadDialog destination={uploadDestination().replace(/^我的空间/,'个人空间')} findConflicts={findUploadConflicts} onClose={() => setModal(null)} onUpload={uploadLocalFile} />}
 
       {activeProduct === 'research' && modal === 'add-todo' && (
         <Modal auditTarget="research-todo" title="添加待办" onClose={() => setModal(null)} onSubmit={submitTodo} confirmText="确定">
@@ -1939,7 +2004,8 @@ export default function App() {
       )}
 
       {historicalCleanup&&<HistoricalRecycleCleanup name={historicalCleanup.name} onClose={()=>setHistoricalCleanup(null)} onConfirm={async()=>{if(historicalCleanup.kind==='document')return Boolean(await permanentlyDeleteDocument(historicalCleanup.id,true));const folder=recycledFolders.find(f=>f.id===historicalCleanup.id);return folder?purgeFolder(folder,true):false}}/>}
-      {sharingId!==null&&<Modal title="分享文件" confirmText="确认移动" onClose={()=>setSharingId(null)} onSubmit={e=>{e.preventDefault();confirmShare()}}><p>分享将移动原文件，完成后原位置不保留。文件编号、笔记和表格内容保持不变。</p><label>目标空间 / 文件夹<select className="text-field" value={shareTarget} onChange={e=>setShareTarget(e.target.value)}>{Array.from(new Set(['我的空间',...folders.map(f=>(f.location??'我的空间')+'/'+f.name),...teamSpaces.map(t=>t.name),...teamFolders.map(f=>(f.location??activeTeam)+'/'+f.name)])).filter(path=>canChange(path,teamSpaces)).map(path=><option key={path} value={path}>{path.replace(/^我的空间/,'个人空间')}</option>)}</select></label></Modal>}
+      {sharingFolder&&<Modal title="分享文件夹" confirmText="确认移动" onClose={()=>setSharingFolder(null)} onSubmit={e=>{e.preventDefault();confirmFolderShare()}}><p>将文件夹及全部子内容移动到目标目录，原位置不保留；文件编号和笔记不变。</p><ShareTargetSelect value={shareTarget} onChange={setShareTarget} expanded={shareTargetExpanded} onExpandedChange={setShareTargetExpanded} options={Array.from(new Set(['我的空间',...folders.map(f=>(f.location??'我的空间')+'/'+f.name),...teamSpaces.map(t=>t.name),...teamFolders.map(f=>(f.location??activeTeam)+'/'+f.name)])).filter(path=>canChange(path,teamSpaces)).map(path=>({value:path,label:path.replace(/^我的空间/,'个人空间')}))}/></Modal>}
+      {sharingId!==null&&<Modal title="分享文件" confirmText="确认移动" onClose={()=>setSharingId(null)} onSubmit={e=>{e.preventDefault();confirmShare()}}><p>分享将移动原文件，完成后原位置不保留。文件编号、笔记和表格内容保持不变。</p><ShareTargetSelect value={shareTarget} onChange={setShareTarget} expanded={shareTargetExpanded} onExpandedChange={setShareTargetExpanded} options={Array.from(new Set(['我的空间',...folders.map(f=>(f.location??'我的空间')+'/'+f.name),...teamSpaces.map(t=>t.name),...teamFolders.map(f=>(f.location??activeTeam)+'/'+f.name)])).filter(path=>canChange(path,teamSpaces)).map(path=>({value:path,label:path.replace(/^我的空间/,'个人空间')}))}/></Modal>}
       {spaceManagementOpen && isTeamAdmin && currentSpace && <TeamSpaceDialog space={currentSpace} candidates={memberCandidates} onSave={saveManagedSpace} onClose={() => setSpaceManagementOpen(false)} />}
       {activeProduct === 'research' && modal === 'new-team' && !teamMemberPickerOpen && (
         <Modal
@@ -1962,7 +2028,7 @@ export default function App() {
           />
           <label className="field-label" htmlFor="team-description">空间简介：</label>
           <textarea id="team-description" className="text-field" rows={3} maxLength={500} value={teamDescription} placeholder="请输入空间简介" onChange={(event) => setTeamDescription(event.target.value)} />
-          <p>默认加入当前机构全员（演示机构，共 {new Set(memberCandidates.filter(m=>m.name!==profile.name).map(m=>m.email)).size+1} 人）。创建者为管理员，其他成员默认可查看；管理员可在空间管理中移除成员或调整角色。</p>
+          <p>默认加入当前机构全员，可手动移除和本空间无关的机构人员。创建者为管理员，其他成员默认可查看；管理员可在空间管理中移除成员或调整角色。</p>
         </Modal>
       )}
 
@@ -2032,3 +2098,7 @@ export default function App() {
     </main>
   )
 }
+
+import './reviewUnified.css'
+
+

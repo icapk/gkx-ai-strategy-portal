@@ -1,7 +1,15 @@
-import { applyConfirmedAreas } from '../reviewDecisions'
+import {applyBatchAnnotationAreas} from '../batchAnnotationRules'
+import {applyAnnotationFixAreas} from '../annotationFixRules'
+import {applySidebarCorrectionAreas} from '../reviewSidebarCorrection.ts'
+import {applyAdjustmentsOneAreas} from '../reviewAdjustmentsOne.ts'
+import {applyBrowser16Areas} from '../reviewBrowser16.ts'
+import { applyConfirmedAreas, applyRoundOneAreas } from '../reviewDecisions'
+import { applyCollaborationAreas } from '../reviewCollaboration'
 import { expandPrd } from './prdDetails'
 import { featureRules, type PrdRule } from './prdRules'
 export interface PrdFeature {
+  emphasis?: boolean
+  designProgress?: '待讨论'|'待完善'|'已完成'
   manual?: import('../prototypeFocus/manual').ManualMapping
   rules?: PrdRule[]
   priority?: 'P0'|'P1'|'P2'
@@ -71,10 +79,10 @@ export const legacyPrdAreas: PrdArea[] = [
   ]},
 ]
 
-export const prdAreas = applyConfirmedAreas(expandPrd(legacyPrdAreas))
+export const prdAreas = applyBatchAnnotationAreas(applyAnnotationFixAreas(applySidebarCorrectionAreas(applyBrowser16Areas(applyAdjustmentsOneAreas(applyCollaborationAreas(applyRoundOneAreas(applyConfirmedAreas(expandPrd(legacyPrdAreas))),'research'),'research'),'research'))))
 export function prdMarkdown(areas = prdAreas, version = 'v2.0 细化评审稿') {
   const overview = prdOverview
-  return ['# 智能科研 PRD',version,'## 需求概述',overview.positioning,overview.users,overview.scenario,overview.value,'### 产品范围',overview.scope,`参照：[${overview.sourceTitle}](${overview.sourceUrl})`,...areas.flatMap(area=>['## '+area.title,area.purpose,'### 页面布局',area.layout,...area.features.flatMap(feature=>['### '+feature.id+' '+feature.title,'优先级：'+(feature.priority??'未分级')+' · 计划版本：'+(feature.release??'历史原稿'),'合规关联：'+(feature.compliance?.join('、')||'待关联'),...featureRules(feature).flatMap(group=>['#### '+group.title,group.items.map((text,i)=>`${i+1}. ${text}`).join('\n')]),'原型关联：'+feature.links.map(link=>link.id+' '+link.label).join('；')])])].join('\n\n')+'\n'
+  return ['# 智能科研 PRD',version,'## 需求概述',overview.positioning,overview.users,overview.scenario,overview.value,'### 产品范围',overview.scope,`参照：[${overview.sourceTitle}](${overview.sourceUrl})`,...areas.flatMap(area=>['## '+area.title,area.purpose,'### 页面布局',area.layout,...area.features.flatMap(feature=>['### '+feature.id+' '+feature.title,'优先级：'+(feature.priority??'未分级')+' · 计划版本：'+(feature.release??'历史原稿'),'着重讲解：'+(feature.emphasis?'是':'否')+' · 设计进度：'+(feature.designProgress??'待讨论'),'合规关联：'+(feature.compliance?.join('、')||'待关联'),...featureRules(feature).flatMap(group=>['#### '+group.title,group.items.map((text,i)=>`${i+1}. ${text}`).join('\n')]),'原型关联：'+feature.links.map(link=>link.id+' '+link.label).join('；')])])].join('\n\n')+'\n'
 }
 export function exportPrd(areas = prdAreas, version = 'v2.0 细化评审稿') {
   const url=URL.createObjectURL(new Blob([prdMarkdown(areas,version)],{type:'text/markdown;charset=utf-8'}))

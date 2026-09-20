@@ -11,7 +11,7 @@ import { compareResearchDocuments } from '../src/researchSort.ts'
 import type { ResearchDocument, ResearchNote } from '../src/types.ts'
 
 test('搜索标题命中优先，组内按访问和创建时间而非匹配分数排序',()=>{
- const base=initialDocuments[0]
+ const base={...initialDocuments[0],kind:'在线文档' as const,originalFileName:undefined}
  const docs:ResearchDocument[]=[{...base,id:100,title:'needle',content:'',visitedAt:'2026-09-01 10:00',createdAt:'2026-09-01 09:00'},
  { ...base,id:101,title:'prefix needle suffix',content:'',visitedAt:'2026-09-02 10:00',createdAt:'2026-09-01 09:00'},
  { ...base,id:102,title:'仅正文',content:'needle',visitedAt:'2026-09-03 10:00',createdAt:'2026-09-03 09:00'}]
@@ -91,7 +91,7 @@ test('搜索函数仍保持空查询无命中的清晰语义', () => {
   assert.deepEqual(searchResearchContent(initialDocuments, initialResearchNotes, '   '), [])
 })
 
-test('在线解析后的 PDF 全文可被科研搜索命中', () => {
+test('上传PDF正文不纳入搜索，标题仍可搜索', () => {
   const document: ResearchDocument = {
     id: 79,
     title: '已存档文献',
@@ -116,8 +116,6 @@ test('在线解析后的 PDF 全文可被科研搜索命中', () => {
   }
 
   const [result] = searchResearchContent([document], [], '知识蒸馏')
-  assert.equal(result?.id, 'document:79')
-  assert.deepEqual(result?.matchedFields, ['正文'])
-  assert.match(result?.snippet ?? '', /知识蒸馏/)
-  assert.equal(result?.targetPageNumber, 2)
+  assert.equal(result,undefined)
+  assert.equal(searchResearchContent([document],[],'已存档文献')[0]?.id,'document:79')
 })

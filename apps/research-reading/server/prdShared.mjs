@@ -15,6 +15,7 @@ function validBook(value) {
   for(const a of v.areas){
    if(!a||typeof a.id!=='string'||!Array.isArray(a.features))return false
    for(const f of a.features){
+    if(f?.emphasis!==undefined&&typeof f.emphasis!=='boolean'||f?.designProgress!==undefined&&!['待讨论','待完善','已完成'].includes(f.designProgress))return false
     if(!f||typeof f.id!=='string'||features.has(f.id)||typeof f.title!=='string'||!Array.isArray(f.links)||!Array.isArray(f.acceptance))return false
     if(f.rules!==undefined&&(!Array.isArray(f.rules)||f.rules.some((r)=>!r||typeof r.title!=='string'||!Array.isArray(r.items)||r.items.some((i)=>typeof i!=='string'))))return false
     features.add(f.id)

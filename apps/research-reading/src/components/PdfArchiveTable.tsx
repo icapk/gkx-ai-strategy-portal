@@ -1,3 +1,4 @@
+import {displayMinute} from '../displayFormat'
 import { useEffect, useMemo, useState } from 'react'
 import type { ResearchDocument } from '../types'
 import './PdfArchiveTable.css'
@@ -73,7 +74,7 @@ export function PdfArchiveTable({
                   <td data-label="页数">{archive.pageCount} 页</td>
                   <td data-label="原文件大小">{documentItem.size}</td>
                   <td data-label="笔记">{archive.annotationCount} 条</td>
-                  <td data-label="存档时间">{documentItem.updatedAt || documentItem.createdAt}</td>
+                  <td data-label="存档时间">{displayMinute(documentItem.updatedAt || documentItem.createdAt)}</td>
                   <td data-label="操作">
                     <span className="pdf-archive-actions">
                       <button type="button" onClick={() => onOpen(documentItem)}>阅读与笔记</button>

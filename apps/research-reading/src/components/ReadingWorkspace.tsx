@@ -1,3 +1,4 @@
+import {registerAnnotationRestorer,type AnnotationRestoreState} from '../annotations/restoration'
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { initialReadingNotes, readingDocuments, type ReadingDocument, type ReadingNote } from '../readingData'
 import {
@@ -91,6 +92,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
   const workspaceRef = useRef(workspace)
   const libraryViewRef = useRef<LibraryViewState>({section:'all',search:'',page:1,pageSize:10})
   const [view, setView] = useState<'reader' | 'library' | 'upload'>('library')
+  const [annotationRestoreKey,setAnnotationRestoreKey]=useState(0)
   const [activeDocumentId, setActiveDocumentId] = useState(ANTENNA_ID)
   const [librarySelectedDocumentId, setLibrarySelectedDocumentId] = useState<number | null>(initialLoad.state.documents[0]?.id ?? null)
   const [readerEditingNote, setReaderEditingNote] = useState(false)
@@ -122,11 +124,27 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
   const activeNotes = activeDocument
     ? workspace.notes.filter((note) => note.documentId === activeDocument.id)
     : []
+  useEffect(()=>registerAnnotationRestorer('reading',{
+    capture:()=>({schema:1,product:'reading',view,documentId:view==='reader'?activeDocumentId:null,library:{...libraryViewRef.current},folder:uploadFolder,uploadFolderOpen,left:document.querySelector('[data-annotation-reader-left="outline"]')?'outline':undefined,right:document.querySelector<HTMLElement>('[data-annotation-reader-right]')?.dataset.annotationReaderRight as Extract<AnnotationRestoreState,{product:'reading'}>['right']}),
+    restore:async state=>{
+      if(state.product!=='reading')return '注释产品不匹配。'
+      if(document.querySelector('[data-business-dirty="true"]')||readerEditingNote||readerExitGuardOpen||uploadFile||uploadState.phase==='uploading'||uploadState.phase==='parsing'||uploadNewFolderOpen)return '请先保存或取消当前笔记、上传或新建内容，再恢复注释页面。'
+      if(state.view==='reader'&&(state.documentId==null||!workspaceRef.current.documents.some(d=>d.id===state.documentId)))return '原阅读文档不存在，无法恢复。'
+      if(state.folder&&!workspaceRef.current.folders.includes(state.folder))return '原文件夹不存在，无法恢复。'
+      if(state.library){libraryViewRef.current={...state.library};setAnnotationRestoreKey(k=>k+1)}
+      if(state.documentId!=null)setActiveDocumentId(state.documentId)
+      if(state.folder)setUploadFolder(state.folder)
+      setUploadFolderOpen(state.view==='upload'&&!!state.uploadFolderOpen);setView(state.view)
+      await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())))
+      window.dispatchEvent(new CustomEvent('annotation-restore-reading-panels',{detail:{left:state.left,right:state.right}}))
+      return undefined
+    }
+  }))
   useEffect(() => {
     if (!focusRequest || focusRequest.module !== 'reading' || preparedFocusSequence.current === focusRequest.sequence) return
     const sequence = focusRequest.sequence
     preparedFocusSequence.current = sequence
-    if(focusRequest.location?.navigationTarget==='reading-review'){readyFocus(sequence);return}
+    if(focusRequest.target?.reviewMode||focusRequest.location?.preserveSurface||focusRequest.location?.navigationTarget==='reading-review'){readyFocus(sequence);return}
     if(focusRequest.target?.readingView==='library'||focusRequest.target?.readingView==='upload'){
       if(readerEditingNote||(view==='upload'&&(uploadFile||uploadState.phase!=='idle'))){rejectFocus(sequence,'请先保存或取消当前笔记、上传，再定位。');return}
       setView(focusRequest.target.readingView)
@@ -242,9 +260,9 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
   useEffect(() => {
     if (!uploadFolderOpen) return
     const closeFromOutside = (event: PointerEvent) => {
-      if (!uploadFolderControlRef.current?.contains(event.target as Node)) closeUploadFolderMenu()
+      if (document.querySelector('.annotation-session-toolbar,.annotation-draw-layer,.annotation-composer')) return; if (!uploadFolderControlRef.current?.contains(event.target as Node)) closeUploadFolderMenu()
     }
-    const closeFromViewportChange = () => closeUploadFolderMenu()
+    const closeFromViewportChange = () => { if (!document.querySelector('.annotation-session-toolbar,.annotation-draw-layer,.annotation-composer')) closeUploadFolderMenu() }
     document.addEventListener('pointerdown', closeFromOutside, true)
     window.addEventListener('resize', closeFromViewportChange)
     window.addEventListener('scroll', closeFromViewportChange, true)
@@ -523,7 +541,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
         </div>
       </div>
 
-      <div id="reading-product-panel" className="reading-product-panel" role="tabpanel" aria-labelledby="reading-product-tab-reading">
+      <div data-annotation-context={JSON.stringify({product:'reading',view,documentId:view==='reader'?activeDocumentId:null,uploadFolder:view==='upload'?uploadFolder:null,uploadFolderOpen:view==='upload'?uploadFolderOpen:false})} id="reading-product-panel" className="reading-product-panel" role="tabpanel" aria-labelledby="reading-product-tab-reading">
       {view === 'reader' && activeDocument ? (
         <ReadingLanguageScope language={activeDocument.language} onChange={language=>commitWorkspace({...workspaceRef.current,documents:workspaceRef.current.documents.map(d=>d.id===activeDocument.id?{...d,language}:d)})}>{activeDocument.originalFile ? <ReadingUploadedPdf onLanguageChange={language=>commitWorkspace({...workspaceRef.current,documents:workspaceRef.current.documents.map(d=>d.id===activeDocument.id?{...d,language}:d)})} document={activeDocument} notes={activeNotes} onNotesChange={updateActiveNotes} onBack={leaveUploadForLibrary}/> : activeDocument.id === ANTENNA_ID ? <AntennaReader onBack={leaveUploadForLibrary} notes={activeNotes} onNotesChange={updateActiveNotes} onEditingNoteChange={handleReaderEditingNoteChange} /> : <ReadingReader
           key={activeDocument.id}
@@ -539,7 +557,7 @@ export function ReadingWorkspace({ onSwitchToResearch, onProfileOpen, profileNam
           onToast={handleChildToast}
         />}</ReadingLanguageScope>
       ) : view === 'library' ? (
-        <ReadingLibrary
+        <ReadingLibrary key={annotationRestoreKey}
           initialViewState={libraryViewRef.current}
           onViewStateChange={state => { libraryViewRef.current = state }}
           documents={documents}
