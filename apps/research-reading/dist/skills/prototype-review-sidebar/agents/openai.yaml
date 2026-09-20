@@ -1,0 +1,4 @@
+interface:
+  display_name: "可复制评审侧边栏"
+  short_description: "直接复用三模式评审侧栏，附运行模板、定位接入说明、保存规则与踩坑经验"
+  default_prompt: "使用 $prototype-review-sidebar 把可运行的三模式评审侧边栏接入我的原型，并验证定位、保存和数据隔离。"

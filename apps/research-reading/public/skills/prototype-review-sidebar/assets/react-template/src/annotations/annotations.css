@@ -1,0 +1,137 @@
+.annotation-workspace,.feature-annotations{font-size:13px;line-height:1.65;--annotation-body-color:#28364b;color:var(--annotation-body-color);min-width:0}.annotation-workspace h2{font-size:17px;margin:0}.annotation-workspace h3{font-size:16px;overflow-wrap:anywhere}.annotation-workspace button,.feature-annotations button,.annotation-composer button,.annotation-draw-help button{border:1px solid #d8e0eb;border-radius:7px;background:#fff;color:#34445c;padding:6px 10px;cursor:pointer;font:inherit}.annotation-workspace button:hover,.feature-annotations button:hover,.annotation-composer button:hover{background:#eef4ff;border-color:#9ebae7}.annotation-workspace button:disabled{opacity:.45;cursor:not-allowed}.annotation-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}.annotation-tools h2,.annotation-tools h3{margin:0;flex:1}.annotation-hint{font-size:12px;color:#718096}.annotation-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.annotation-filters label:last-child{grid-column:1/-1}.annotation-filters label,.annotation-composer>label{display:flex;flex-direction:column;gap:5px}.annotation-filters select,.annotation-composer input:not([type=checkbox]),.annotation-composer textarea,.annotation-composer select{width:100%;min-width:0;box-sizing:border-box;border:1px solid #d6deeb;border-radius:6px;padding:8px;background:#fff;color:#26384e;font:inherit}.annotation-list{display:grid;gap:8px}.annotation-list .annotation-list-row{text-align:left;display:flex;flex-direction:column;gap:4px;width:100%;padding:12px;overflow-wrap:anywhere}.annotation-list-row small{color:#788598}.annotation-badges{display:flex;gap:6px;flex-wrap:wrap}.annotation-badges span{border-radius:5px;padding:2px 7px;background:#edf2f9;font-size:12px}.annotation-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}.annotation-detail dl{font-size:12px;background:#f5f7fa;padding:10px;border-radius:8px}.annotation-detail dt{color:#738096}.annotation-detail dd{margin:0 0 8px;overflow-wrap:anywhere}.annotation-id{user-select:all;font-family:monospace}.annotation-related{display:flex;flex-direction:column;gap:6px;margin:12px 0}.annotation-related button{text-align:left}.annotation-notice{padding:10px;border-radius:7px;background:#fff5de;color:#78560c;overflow-wrap:anywhere}.annotation-linked-row{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;margin:6px 0}.annotation-revisions{border-top:1px solid #e1e7ee;padding-top:10px}.annotation-revisions details{margin:8px 0}.annotation-revisions summary{cursor:pointer}.annotation-revisions summary button{margin:0 6px}.annotation-revisions time{font-size:11px;color:#758198}.annotation-overlay{position:fixed;inset:0;z-index:1150;pointer-events:none}.annotation-pin{position:fixed;width:25px;height:25px;border:2px solid #fff;background:#df3947;color:white;border-radius:50%;box-shadow:0 2px 7px #63192444;pointer-events:auto;cursor:pointer;font-weight:700}.annotation-pin.is-selected{outline:3px solid #f6abb1}.annotation-range{position:fixed;box-sizing:border-box;border:2px solid #e54250;background:#ed465018;pointer-events:none}.annotation-dialog-backdrop{position:fixed;inset:0;background:#15243e66;z-index:10020;display:grid;place-items:center;padding:20px}.annotation-composer{box-sizing:border-box;width:min(640px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:white;border-radius:12px;padding:22px;box-shadow:0 15px 65px #17294755;display:flex;flex-direction:column;gap:12px;font-size:14px;color:#26384e}.annotation-composer header,.annotation-composer footer{display:flex;gap:10px;align-items:center;justify-content:space-between}.annotation-composer h2{font-size:18px;margin:0}.annotation-composer h3{font-size:14px}.annotation-composer footer{justify-content:flex-end}.annotation-composer footer button:last-child{background:#315dc8;color:white}.annotation-binding-options{max-height:180px;overflow:auto;margin-top:8px}.annotation-binding-options label{display:flex;gap:8px;align-items:flex-start;padding:5px 0}.annotation-binding-options input{margin-top:5px}.annotation-candidates{display:flex;gap:6px;flex-wrap:wrap}.annotation-candidates button[aria-pressed=true]{background:#e4edff;border-color:#668bdf}.annotation-draw-layer{position:fixed;inset:0;z-index:10030;cursor:crosshair;touch-action:none;background:#345d8810;outline:none}.annotation-draw-help{position:absolute;top:15px;left:50%;transform:translateX(-50%);background:#fff;padding:10px 15px;border:1px solid #c8d5e8;border-radius:8px;box-shadow:0 4px 20px #0002;cursor:default;max-width:calc(100% - 30px)}.annotation-draw-help p{color:#ad2335}.annotation-draw-help button{margin-left:10px}@media(max-width:600px){.annotation-dialog-backdrop{padding:8px}.annotation-composer{padding:15px;max-height:calc(100dvh - 16px)}.annotation-draw-help{left:10px;transform:none;font-size:12px}}
+.annotation-confirm-backdrop{position:fixed;inset:0;background:#15243e77;display:grid;place-items:center;z-index:1;padding:20px}.annotation-confirm{width:min(380px,100%);box-sizing:border-box;background:#fff;border-radius:12px;padding:22px;box-shadow:0 12px 48px #0004}.annotation-confirm .annotation-tools{justify-content:flex-end}
+
+/* Adjustment 1: shared cards, persistent annotation session, green focus. */
+.annotation-workspace{padding:12px;box-sizing:border-box}.annotation-workspace>.annotation-tools:first-child{margin-top:0}.annotation-list{gap:10px}.annotation-list .annotation-list-row{display:block;text-align:left;box-sizing:border-box;min-width:0}.annotation-card-title{display:block;text-align:left;width:100%;border:0!important;padding:0!important;background:transparent!important;font-size:14px!important}.annotation-list-row .review-card-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.annotation-list-row label{display:flex;flex-direction:column;gap:4px}.annotation-list-row select{width:100%;border:1px solid #d6deeb;background:white;border-radius:5px;padding:5px;color:inherit;font:inherit}.annotation-list-row time{display:block;font-size:11px;color:#748193;margin-top:8px}.annotation-list-row .review-card-actions{flex-wrap:wrap}.annotation-pin{background:#17976b;box-shadow:0 2px 7px #07583c44}.annotation-pin.is-selected{outline-color:#a4e8c8}.annotation-range{border-color:#17976b;background:#17a6731c}.annotation-overlay{z-index:10010}.prototype-focus-layer[data-annotation=true] .prototype-focus-frame{border-color:#17976b!important;background:#17a6731c!important;box-shadow:0 0 0 3px #17976b22!important}.annotation-session-toolbar{position:fixed;z-index:10040;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#f6fffa;color:#154e39;border:1px solid #9dd8bc;padding:9px 12px;border-radius:10px;box-shadow:0 5px 22px #143d2b33;max-width:calc(100vw - 28px)}.annotation-session-toolbar button{border:1px solid #a7cfbc;background:white;color:#225943;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}.annotation-session-toolbar button[aria-pressed=true]{background:#187b56;color:white}.annotation-session-toolbar small{flex-basis:100%;font-size:11px}.annotation-binding-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}.annotation-binding-toggle{width:100%;text-align:left}.annotation-binding-options{max-height:240px;background:#f8fafc;border:1px solid #dfe5ec;border-radius:6px;padding:7px}.annotation-selected-relations{display:flex;flex-direction:column;gap:5px;margin-top:7px}.annotation-selected-relations>span{display:block;position:relative;padding:5px 26px 5px 8px;background:#eef7f2;border-radius:5px;overflow-wrap:anywhere;font-size:12px}.annotation-selected-relations small{display:block;color:#648473;font-size:10px}.annotation-selected-relations button{position:absolute;right:3px;top:4px;padding:0 5px!important}.annotation-share-select{position:relative;width:100%;font:inherit}.annotation-share-select>button{display:flex;justify-content:space-between;width:100%;border:1px solid #cdd6e1;padding:10px;background:white;border-radius:6px;text-align:left;font:inherit;color:inherit}.annotation-share-options{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:20;max-height:240px;overflow:auto;border:1px solid #c9d7e4;background:#fff;box-shadow:0 7px 20px #14273d22;border-radius:6px;padding:5px}.annotation-share-options button{display:block;width:100%;text-align:left;padding:8px 10px;font:inherit;color:inherit;background:#fff;border:0;border-radius:4px}.annotation-share-options button[aria-selected=true]{background:#eaf4ff;color:#245ab0}.annotation-share-options button:hover{background:#f1f5fa}.annotation-draw-help{top:auto;bottom:18px}.annotation-composer .annotation-binding-options input{flex:none}
+@media(max-width:600px){.annotation-binding-columns{grid-template-columns:1fr}.annotation-session-toolbar{left:10px;right:10px;max-width:none;transform:none;padding:8px;gap:5px}.annotation-session-toolbar strong{font-size:12px}.annotation-session-toolbar button{font-size:12px;padding:6px}.annotation-workspace{padding:10px}}
+.annotation-modal-entry{position:fixed;right:24px;bottom:24px;z-index:10015;background:#187b56;color:white;border:1px solid #b3e3cd;border-radius:8px;padding:10px 15px;box-shadow:0 4px 16px #143d2b44;cursor:pointer;font:inherit}
+.annotation-share-options{position:relative;top:auto;left:auto;right:auto;margin-top:4px;max-height:min(240px,30vh)}
+.modal-backdrop:has(.annotation-share-select){z-index:10000}
+.modal-header:has(.annotation-modal-entry){gap:8px}.modal-header:has(.annotation-modal-entry) h2{flex:1}.modal-header:has(.annotation-modal-entry) .modal-close{order:2}.modal-header .annotation-modal-entry{position:static;inset:auto;padding:5px 8px;font-size:12px;box-shadow:none;white-space:nowrap}
+
+/* Browser review adjustments: controls stay inside the sidebar. */
+.reading-review:has(.annotation-workspace){z-index:10035}
+.annotation-workspace .annotation-session-toolbar{position:static;transform:none;max-width:none;box-shadow:none;margin:8px 0;padding:8px;gap:5px}
+.annotation-workspace .annotation-session-toolbar strong{font-size:12px}
+.annotation-workspace .annotation-session-toolbar button{font-size:12px;padding:5px 7px}
+.annotation-workspace .annotation-filters label:last-child{grid-column:auto}
+.annotation-card-heading{display:flex;align-items:flex-start;gap:8px}
+.annotation-card-heading .annotation-card-title{flex:1;min-width:0;line-height:1.5}
+.annotation-list-row .annotation-card-heading time{flex:none;margin:2px 0 0;font-size:10px;white-space:nowrap}
+.annotation-list-row .review-card-meta{margin:7px 0;gap:6px}
+.annotation-list-row .review-card-actions{display:flex;align-items:center;gap:6px}
+.annotation-relation-state{font-size:11px;color:#748193;margin-right:auto}
+.annotation-state-help{font-size:10px}
+.annotation-state-help:empty{display:none}
+.annotation-dialog-backdrop{z-index:10050}
+.manual-focus-editor>header{cursor:grab;touch-action:none;user-select:none}
+.manual-focus-editor>header:active{cursor:grabbing}
+.manual-focus-editor{max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);box-sizing:border-box}
+
+.annotation-overlay{z-index:10032}
+
+@media(max-width:760px){
+ body:has(.modal-backdrop,.annotation-session-toolbar,.annotation-draw-layer) .reading-review:has(.annotation-workspace){position:fixed;inset:8px 8px auto;width:calc(100vw - 16px);height:180px;max-height:180px;overflow:auto}
+ body:has(.modal-backdrop,.annotation-session-toolbar,.annotation-draw-layer) .reading-review:has(.annotation-workspace)>:not(header):not(.annotation-workspace){display:none!important}
+ body:has(.modal-backdrop,.annotation-session-toolbar,.annotation-draw-layer) .reading-review:has(.annotation-workspace)>header{min-height:30px;height:30px;padding:4px 10px}
+ body:has(.modal-backdrop,.annotation-session-toolbar,.annotation-draw-layer) .annotation-workspace{padding:6px 10px;overflow:visible}
+ body:has(.modal-backdrop,.annotation-session-toolbar,.annotation-draw-layer) .annotation-workspace>:not(.annotation-tools):not(.annotation-session-toolbar){display:none!important}
+ body:has(.annotation-workspace) .modal-card{max-height:calc(100dvh - 220px);overflow:auto;padding:16px 16px 0}
+ body:has(.annotation-workspace) .annotation-share-options{max-height:22vh}
+}
+@media(max-width:760px){body:has(.modal-backdrop,.annotation-session-toolbar,.annotation-draw-layer) .annotation-workspace>.annotation-detail{display:block!important}}
+
+.annotation-list .annotation-list-row{padding:10px 12px}
+.annotation-card-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto;gap:6px;align-items:center;margin-top:8px}
+.annotation-list-row .annotation-card-controls .review-card-meta,.annotation-list-row .annotation-card-controls .review-card-actions{display:contents}
+.annotation-card-controls .review-card-meta label{display:contents;font-size:0}
+.annotation-card-controls .review-card-meta select{font-size:12px;min-width:0;width:100%;padding:4px;height:29px}
+.annotation-card-controls .review-card-actions button{font-size:12px;padding:4px 7px;height:29px}
+.annotation-card-footnote{display:flex;justify-content:space-between;gap:8px;color:#748193;font-size:10px;line-height:1.4;margin-top:6px}
+
+.annotation-card-controls .annotation-control-label{display:none}
+
+/* Separate the result cards from the filtering controls. */
+.annotation-results-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:2px solid #dce4ee;margin:16px -12px 0;padding:13px 12px 9px;background:#f3f6fa;color:#344054;font-size:12px}
+.annotation-results-heading span{color:#788599;font-size:11px}
+.annotation-workspace .annotation-list{margin:0 -12px;padding:0 12px 14px;background:#f3f6fa;min-height:90px}
+.annotation-workspace .annotation-list .annotation-list-row{background:#fff}
+.annotation-workspace .annotation-session-toolbar .annotation-marker-toggle{display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:5px;margin-left:auto}
+.annotation-marker-toggle:focus-visible{outline:2px solid #14846a;outline-offset:2px}
+.annotation-detail-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:14px}
+.annotation-detail-heading h3{margin:0;min-width:0;overflow-wrap:anywhere}
+.annotation-detail-heading button{flex:none}
+.annotation-detail>dl{margin-top:24px;border-top:1px solid #e1e6ef;padding-top:14px}
+.annotation-card-footnote .annotation-remove{margin-left:auto;padding:0 3px;font-size:11px;border:0;background:transparent;color:#956060;line-height:1.5}
+.annotation-composer footer .annotation-remove{margin-right:auto;color:#a13c3c}
+
+.annotation-workspace .annotation-session-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:6px;margin:0}
+.annotation-session-row>button{white-space:nowrap;font-size:12px;padding:5px 7px}
+.annotation-workspace .annotation-session-row .annotation-session-toolbar{margin:0;padding:0;border:0;background:transparent;flex-wrap:nowrap;gap:5px}
+.annotation-workspace .annotation-session-row .annotation-session-toolbar .annotation-marker-toggle{margin:0}
+.annotation-detail>.annotation-body{border:1px solid #cbd9e9;border-radius:7px;background:#f5f8fc;padding:12px;margin:12px 0;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.annotation-detail>h4{margin:12px 0 5px;font-size:12px}
+.annotation-detail .annotation-related{display:grid;grid-template-columns:40px minmax(0,1fr);gap:4px 8px;margin:6px 0;align-items:start}
+.annotation-detail .annotation-related>strong{grid-column:1;grid-row:1;font-size:12px}
+.annotation-detail .annotation-related>button,.annotation-detail .annotation-related>p{grid-column:2;margin:0;text-align:left;font-size:12px}
+.annotation-detail>dl{margin-top:14px}
+.annotation-sort{display:flex;gap:4px;margin-left:auto}
+.annotation-workspace .annotation-sort button{padding:3px 5px;font-size:11px;white-space:nowrap}
+.annotation-sort button[aria-pressed=true]{background:#e8effb;color:#2458a4;border-color:#b9cdec}
+.annotation-results-heading>span{white-space:nowrap}
+
+.annotation-workspace .annotation-results-heading .annotation-back{margin:0 0 0 auto;padding:0;border:0;border-radius:0;background:transparent;color:#2157ba;font-size:12px;white-space:nowrap}
+.annotation-record-info{margin-top:14px;border:1px solid #e1e6ef;border-radius:7px;background:#f5f7fa;padding:8px 10px;font-size:12px}
+.annotation-record-info>summary{cursor:pointer;color:#62718a;font-weight:600}
+.annotation-record-info>dl{margin:8px 0 0;padding:0;background:transparent}
+
+/* Annotation cards follow the compliance card hierarchy. */
+.annotation-workspace .annotation-list{padding-left:0;padding-right:0;background:#fff}
+.annotation-workspace .annotation-aligned-card{padding:10px 12px;border:1px solid #dfe5ed;border-radius:6px;gap:5px}
+.annotation-aligned-card .annotation-card-heading{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px}
+.annotation-aligned-card .annotation-card-title{font-size:13px!important;font-weight:400;flex:1;min-width:100px;line-height:1.6}
+.annotation-aligned-card .annotation-card-title b{font-weight:600;color:#5a6573}
+.annotation-aligned-card .review-card-actions{display:flex;gap:5px;align-items:center}
+.annotation-aligned-card .review-card-actions button{border:1px solid #d4dee7;border-radius:4px;background:#f5f8fc;color:#24628b;font-size:12px;padding:4px 7px}
+.annotation-aligned-card .annotation-card-heading time{font-size:10px;margin:2px 0 0;white-space:nowrap}
+.annotation-aligned-card .annotation-card-controls{display:flex;gap:10px;margin-top:10px}
+.annotation-aligned-card .annotation-card-controls .review-card-meta{display:flex;margin:0;gap:10px}
+.annotation-aligned-card .annotation-card-controls .review-card-meta label{display:block}
+.annotation-aligned-card .annotation-card-controls select{width:86px;height:auto;padding:2px 3px;border:1px solid transparent;background:transparent;font-size:11px;cursor:pointer}
+.annotation-aligned-card .annotation-card-controls select:hover,.annotation-aligned-card .annotation-card-controls select:focus{border-color:#c9d2dc;background:white}
+.annotation-aligned-card select[data-status="AI 待做"]{color:#96711a}
+.annotation-aligned-card select[data-status="待审核"]{color:#24628b}
+.annotation-aligned-card select[data-status="已完结"]{color:#147350}
+.annotation-aligned-card:hover{background:#f1f6ff!important}
+
+.annotation-aligned-card .annotation-card-controls .review-card-meta{width:100%;align-items:center}.annotation-aligned-card .review-card-meta time{margin:0 0 0 auto;font-size:10px;white-space:nowrap}
+.annotation-aligned-card .annotation-card-heading .review-card-actions{margin:0}
+
+/* Compact annotation hints and ordered card metadata. */
+.annotation-workspace .annotation-filters{font-size:12px}
+.annotation-workspace .annotation-filters label,.annotation-workspace .annotation-filters select{font-size:12px}
+.annotation-workspace .annotation-filters strong{font-weight:600}
+.annotation-aligned-card .annotation-card-heading{flex-wrap:nowrap;gap:6px}
+.annotation-aligned-card .annotation-card-title{min-width:0;overflow-wrap:anywhere}
+.annotation-heading-meta{display:flex;flex-direction:column;align-items:flex-end;flex:none;font-size:10px;line-height:1.5;color:#748193}
+.annotation-aligned-card .annotation-heading-meta time{margin:0;font-size:10px}
+.annotation-aligned-card .review-card-actions{flex:none;flex-wrap:nowrap}
+.annotation-aligned-card .annotation-card-controls .review-card-meta{gap:7px;flex-wrap:wrap}
+.annotation-aligned-card .review-card-meta .annotation-remove{padding:0 3px;border:0;background:transparent;color:#956060;font-size:11px;line-height:1.5}
+.annotation-aligned-card .review-card-meta>span{color:#748193;font-size:10px;min-width:0}
+
+.annotation-heading-meta{flex-direction:row;align-items:center;gap:5px;white-space:nowrap}
+.annotation-aligned-card select[data-status="AI 待做"],.annotation-aligned-card option[data-status="AI 待做"]{color:#b7373d}
+.annotation-aligned-card select[data-status="待审核"],.annotation-aligned-card option[data-status="待审核"]{color:#96711a}
+.annotation-aligned-card select[data-status="已完结"],.annotation-aligned-card option[data-status="已完结"]{color:#147350}
+
+.annotation-share-options .share-space-heading { display:block; padding:9px 10px; background:#f0f4f8; color:#38485f; font-size:12px; }
+.annotation-share-options [role=group]+[role=group] { border-top:1px solid #dbe3eb; margin-top:6px; }
+.annotation-share-options details { margin:4px 0; }
+.annotation-share-options summary { cursor:pointer; padding:7px 10px; font-size:13px; overflow-wrap:anywhere; }
+.annotation-share-options details>[role=group] { margin-left:14px; border-left:1px solid #dbe3eb; }
+.annotation-share-options button { overflow-wrap:anywhere; }
+.annotation-share-options .share-empty { color:#788598; padding:6px 10px; font-size:12px; }
+.annotation-share-options { max-height:min(360px,45vh); }
+
+.annotation-workspace [data-status="暂缓处理"],.feature-annotations [data-status="暂缓处理"]{color:var(--annotation-body-color)}

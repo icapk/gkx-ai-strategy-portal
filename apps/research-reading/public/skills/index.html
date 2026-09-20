@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>侧边栏复用资源 · 智能科研与智能阅读</title><style>
+*{box-sizing:border-box}body{margin:0;padding:24px;font:15px/1.8 system-ui,sans-serif;color:#28364b;background:#fff;max-width:1000px;margin-inline:auto}h1{font-size:24px}h2{font-size:20px;margin-top:30px}h3{font-size:17px}a{color:#245cb7}nav{display:flex;gap:10px;flex-wrap:wrap;border-bottom:1px solid #dae1e9;padding:12px 0}nav a{padding:5px 12px;border-radius:6px;background:#edf3fc;text-decoration:none}nav a[aria-current=page]{background:#245cb7;color:#fff}.download{display:inline-block;background:#245cb7;color:white;padding:10px 18px;border-radius:7px;text-decoration:none}pre{overflow:auto;padding:16px;background:#f3f6fa;border-radius:8px}code{overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{border:1px solid #dae1e9;padding:10px;text-align:left;vertical-align:top}.hint{color:#5c697a}article{overflow-wrap:anywhere}button{font:inherit} @media(max-width:500px){body{padding:12px}th,td{padding:6px;font-size:13px}}
+</style></head><body>
+<h1>侧边栏复用资源</h1><p>来自智能科研与智能阅读的实际评审侧边栏，包含合规审查、PRD、注释、定位和框选校正，可复制到自己的 React 原型。</p>
+<a class="download" href="prototype-review-sidebar-v0.1.zip" download>下载完整 skill 包 v0.1</a>
+<p class="hint">包含源码、样式、示例、测试、复制脚本和说明；不含真实文献及用户注释。需要 Node.js 24 或更新版本，首次安装依赖需要联网。</p>
+<p><a href="https://github.com/icapk/gkx-ai-strategy-portal/tree/main/apps/research-reading/public/skills/prototype-review-sidebar" target="_blank" rel="noopener">浏览全部源码</a> · <a href="prototype-review-sidebar/SKILL.md" download>下载 SKILL.md</a></p>
+<nav aria-label="资源说明"><a href="#usage">使用说明</a><a href="#design">设计约定</a><a href="#pitfalls">踩坑经验</a><a href="#integration">接入契约</a><a href="#verification">验收清单</a><a href="#provenance">来源说明</a></nav>
+<article id="content" aria-live="polite">正在加载说明…</article>
+<script src="marked-18.0.12.min.js"></script><script src="purify-3.4.15.min.js"></script><script>
+const names=['usage','design','pitfalls','integration','verification','provenance'];let sequence=0;
+async function show(){const id=names.includes(location.hash.slice(1))?location.hash.slice(1):'usage',token=++sequence,article=document.getElementById('content');document.querySelectorAll('nav a').forEach(a=>a.setAttribute('aria-current',a.hash==='#'+id?'page':'false'));article.textContent='正在加载说明…';try{const url=new URL('prototype-review-sidebar/references/'+id+'.md',location.href),r=await fetch(url);if(!r.ok)throw Error('读取失败');const md=await r.text();if(token!==sequence)return;article.innerHTML=DOMPurify.sanitize(marked.parse(md));article.querySelectorAll('a[href]').forEach(a=>{const href=a.getAttribute('href');if(!href.startsWith('#'))a.href=new URL(href,url).href})}catch(e){if(token===sequence)article.textContent='说明加载失败，请刷新重试，或下载完整 skill 包离线阅读。'}}
+addEventListener('hashchange',show);show();
+</script></body></html>
