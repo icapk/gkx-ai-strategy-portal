@@ -65,5 +65,5 @@ export function useSharedPrd() {
   catch(error){setStatus(error instanceof Error?error.message:'保存失败，输入已保留');return false}
   finally{busy.current=false}
  }
- return {book,save,status:import.meta.env.PROD?status.replaceAll("共享","本浏览器").replaceAll("服务","存储"):status,notice}
+ return {book,save,status,notice}
 }

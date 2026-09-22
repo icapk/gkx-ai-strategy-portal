@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 
-export type CandidateRole = '可查看' | '可编辑' | '管理员'
+export type CandidateRole = '查看' | '编辑' | '管理'
 
 export interface MemberCandidate {
+  accountId?:number
   id: string
   name: string
   email: string
@@ -21,7 +22,7 @@ interface MemberPickerProps {
   onRoleChange: (id: string, role: CandidateRole) => void
 }
 
-const roleOptions: CandidateRole[] = ['管理员', '可编辑', '可查看']
+const roleOptions: CandidateRole[] = ['管理', '编辑', '查看']
 const roleMenuHeight = 104
 
 export function MemberPicker({
@@ -60,7 +61,7 @@ export function MemberPicker({
 
   useEffect(() => {
     if (openRoleId == null) return
-    const currentRole = roles[openRoleId] ?? '可查看'
+    const currentRole = roles[openRoleId] ?? '查看'
     const currentOption = roleMenuRef.current?.querySelector<HTMLButtonElement>(`button[data-role="${currentRole}"]`)
     currentOption?.focus()
   }, [openRoleId, roles])
@@ -145,7 +146,7 @@ export function MemberPicker({
         <h3>已选：<b>{selectedCandidates.length}</b> 人</h3>
         <div className="selected-member-list" role="list">
           {selectedCandidates.map((candidate) => {
-            const role = roles[candidate.id] ?? '可查看'
+            const role = roles[candidate.id] ?? '查看'
             return (
               <article key={candidate.id} role="listitem">
                 <span className="member-avatar" style={{ background: candidate.color }}>{candidate.name[0]}</span>
@@ -158,7 +159,7 @@ export function MemberPicker({
                     <button
                       className="selected-member-role"
                       type="button"
-                      aria-label={`${candidate.name}管理员角色配置，当前${role}`}
+                      aria-label={`${candidate.name}管理操作权限配置，当前${role}`}
                       aria-expanded={openRoleId === candidate.id}
                       aria-haspopup="menu"
                       aria-controls={`member-role-menu-${candidate.id}`}
@@ -194,7 +195,7 @@ export function MemberPicker({
                         id={`member-role-menu-${candidate.id}`}
                         ref={roleMenuRef}
                         role="menu"
-                        aria-label={`管理员角色配置：${candidate.name}`}
+                        aria-label={`管理操作权限配置：${candidate.name}`}
                         onClick={(event) => event.stopPropagation()}
                         onKeyDown={handleRoleMenuKeyDown}
                       >

@@ -158,6 +158,8 @@ export interface ResearchDocument {
   updatedAt?: string
   favoritedAt?: string
   recentHiddenAt?: string
+  originalLocation?:string
+  deletedBy?: string
   deletedAt?: string
   retentionPolicy?: '30-days-v1'
   size: string
@@ -187,6 +189,10 @@ export interface ResearchNote {
 }
 
 export interface FolderItem {
+  visitedAt?: string
+  favoritedAt?: string
+  openedBy?: Record<string,string>
+  favoritedBy?: Record<string,string>
   id: number
   name: string
   count: number
@@ -216,6 +222,7 @@ export interface CommentItem {
 }
 
 export interface MemberItem {
+  portalRole?:'管理员'|'普通成员'
   email?:string
   id: number
   name: string

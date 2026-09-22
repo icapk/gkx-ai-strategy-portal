@@ -31,5 +31,5 @@ export function useReadingPrd(){
   }catch(e){if(alive.current)setStatus(`${e instanceof Error?e.message:'服务不可用'}；未覆盖任何记录。`)}finally{running=false}}
   void pull();const timer=setInterval(pull,1800);return()=>{alive.current=false;clearInterval(timer)}
  },[])
- return {book:snapshot.book,revision:snapshot.revision,status:import.meta.env.PROD?status.replaceAll("共享","本浏览器").replaceAll("服务","存储"):status,save}
+ return {book:snapshot.book,revision:snapshot.revision,status,save}
 }

@@ -1,0 +1,806 @@
+{
+  "version": 1,
+  "records": {
+    "F1.1": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F1.2": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F2.1": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F2.2": {
+      "status": "待定",
+      "priority": "P0",
+      "history": []
+    },
+    "F3.1": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F3.2": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F4": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F5.1": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F5.2": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F5.3": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F6.1": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F6.2": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F6.3": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F7.1": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F7.2": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F7.3": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F7.4": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F7.5": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F7.6": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F8.1": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F8.2": {
+      "status": "待定",
+      "priority": "P0",
+      "history": []
+    },
+    "F9": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F10": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F11": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F12": {
+      "status": "已合规",
+      "priority": "P0",
+      "history": []
+    },
+    "F13": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F14": {
+      "status": "待定",
+      "priority": "P1",
+      "history": []
+    },
+    "F15": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F16": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F17": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F18.1": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F18.2": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F18.3": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F19": {
+      "status": "已合规",
+      "priority": "P1",
+      "history": []
+    },
+    "F20.1": {
+      "status": "待定",
+      "priority": "P2",
+      "history": []
+    },
+    "F20.2": {
+      "status": "已合规",
+      "priority": "P2",
+      "history": []
+    },
+    "F20.3": {
+      "status": "已合规",
+      "priority": "P2",
+      "history": []
+    },
+    "F20.4": {
+      "status": "已合规",
+      "priority": "P2",
+      "history": []
+    }
+  },
+  "exportedAt": "2026-09-22T12:18:34.385Z",
+  "catalog": [
+    {
+      "id": "F1.1",
+      "parent": "F1",
+      "parentTitle": "选词选段翻译",
+      "group": 0,
+      "story": 1,
+      "title": "选词翻译",
+      "requirement": "选词选段翻译，滑动操作，跳出来中英翻译，滑动即所得的翻译。",
+      "acceptance": "分别选中单词或句段，划选结束即显示中英翻译。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "真实PDF文字层划词后直接显示中英释义卡片，术语命中时给出对应中文解释。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F1.2",
+      "parent": "F1",
+      "parentTitle": "选词选段翻译",
+      "group": 0,
+      "story": 1,
+      "title": "选段翻译",
+      "requirement": "选词选段翻译，滑动操作，跳出来中英翻译，滑动即所得的翻译。",
+      "acceptance": "分别选中单词或句段，划选结束即显示中英翻译。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "真实PDF文字层划选句段后显示整段中文译文，术语释义单独保留，并可保存为带来源锚点的笔记。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F2.1",
+      "parent": "F2",
+      "parentTitle": "选区准确",
+      "group": 0,
+      "story": 1,
+      "title": "文字选区",
+      "requirement": "选择文字或图片时，区域选择准确。",
+      "acceptance": "所选文字或图像与拖选范围一致，不混入邻栏。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "PDF.js文字层支持真实选区，摘录与翻译卡片均使用选区矩形保存来源。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F2.2",
+      "parent": "F2",
+      "parentTitle": "选区准确",
+      "group": 0,
+      "story": 1,
+      "title": "图片选区",
+      "requirement": "选择文字或图片时，区域选择准确。",
+      "acceptance": "所选文字或图像与拖选范围一致，不混入邻栏。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "图片选区准确先按图表提取结果与原文定位准确处理；独立图片选区交互需确认口径后再实现，不占用截图工具。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F3.1",
+      "parent": "F3",
+      "parentTitle": "摘录与高亮",
+      "group": 0,
+      "story": 2,
+      "title": "摘录保存至笔记",
+      "requirement": "滑动选词添加至笔记以后，摘录可以进行高亮显示。",
+      "acceptance": "摘录出现在右侧笔记，保存后原文对应选区高亮，刷新仍保留。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F3.2",
+      "parent": "F3",
+      "parentTitle": "摘录与高亮",
+      "group": 0,
+      "story": 2,
+      "title": "原文高亮",
+      "requirement": "滑动选词添加至笔记以后，摘录可以进行高亮显示。",
+      "acceptance": "摘录出现在右侧笔记，保存后原文对应选区高亮，刷新仍保留。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F4",
+      "parent": "F4",
+      "parentTitle": "返回上一操作位置",
+      "group": 0,
+      "story": 2,
+      "title": "返回上一操作位置",
+      "requirement": "记录用户操作记录，点击后可以返回上一个操作位置。",
+      "acceptance": "发生跳转后返回此前页码与页内位置。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F5.1",
+      "parent": "F5",
+      "parentTitle": "自动定位",
+      "group": 0,
+      "story": 0,
+      "title": "目录定位",
+      "requirement": "选择左侧栏中目录，能跳转至文献中的准确位置；选择右侧边栏中笔记，能根据摘录定位至文献中的位置；选择右侧边栏中资料，可以跳转至文献中的原图表的位置。",
+      "acceptance": "从对应导航项定位到真实PDF中的目录标题、摘录或图像位置。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F5.2",
+      "parent": "F5",
+      "parentTitle": "自动定位",
+      "group": 0,
+      "story": 2,
+      "title": "笔记定位",
+      "requirement": "选择左侧栏中目录，能跳转至文献中的准确位置；选择右侧边栏中笔记，能根据摘录定位至文献中的位置；选择右侧边栏中资料，可以跳转至文献中的原图表的位置。",
+      "acceptance": "从对应导航项定位到真实PDF中的目录标题、摘录或图像位置。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F5.3",
+      "parent": "F5",
+      "parentTitle": "自动定位",
+      "group": 0,
+      "story": 2,
+      "title": "资料图表定位",
+      "requirement": "选择左侧栏中目录，能跳转至文献中的准确位置；选择右侧边栏中笔记，能根据摘录定位至文献中的位置；选择右侧边栏中资料，可以跳转至文献中的原图表的位置。",
+      "acceptance": "从对应导航项定位到真实PDF中的目录标题、摘录或图像位置。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F6.1",
+      "parent": "F6",
+      "parentTitle": "右侧标记展示",
+      "group": 0,
+      "story": 3,
+      "title": "参考文献标记",
+      "requirement": "在右侧栏中参考文献、引用、图表以标记的形式展示。",
+      "acceptance": "右侧显示对应种类的编号标记，与原文对应。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F6.2",
+      "parent": "F6",
+      "parentTitle": "右侧标记展示",
+      "group": 0,
+      "story": 3,
+      "title": "图标记",
+      "requirement": "在右侧栏中参考文献、引用、图表以标记的形式展示。",
+      "acceptance": "右侧显示对应种类的编号标记，与原文对应。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F6.3",
+      "parent": "F6",
+      "parentTitle": "右侧标记展示",
+      "group": 0,
+      "story": 3,
+      "title": "表标记",
+      "requirement": "在右侧栏中参考文献、引用、图表以标记的形式展示。",
+      "acceptance": "右侧显示对应种类的编号标记，与原文对应。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "图表面板显式展示表格空状态；本篇无独立表格时不伪造表格，同时保持表格标记验收入口。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F7.1",
+      "parent": "F7",
+      "parentTitle": "底部工具栏",
+      "group": 0,
+      "story": 2,
+      "title": "放大",
+      "requirement": "底部工具栏功能包括放大、缩小、全屏、截图笔记、隐藏标记、选择页数。",
+      "acceptance": "底部对应控件执行其标注操作；隐藏标记不删除笔记。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F7.2",
+      "parent": "F7",
+      "parentTitle": "底部工具栏",
+      "group": 0,
+      "story": 2,
+      "title": "缩小",
+      "requirement": "底部工具栏功能包括放大、缩小、全屏、截图笔记、隐藏标记、选择页数。",
+      "acceptance": "底部对应控件执行其标注操作；隐藏标记不删除笔记。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F7.3",
+      "parent": "F7",
+      "parentTitle": "底部工具栏",
+      "group": 0,
+      "story": 2,
+      "title": "全屏",
+      "requirement": "底部工具栏功能包括放大、缩小、全屏、截图笔记、隐藏标记、选择页数。",
+      "acceptance": "底部对应控件执行其标注操作；隐藏标记不删除笔记。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "全屏按钮使用常规四角向外扩展图标，进入全屏后切换为四角向内收缩图标。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F7.4",
+      "parent": "F7",
+      "parentTitle": "底部工具栏",
+      "group": 0,
+      "story": 2,
+      "title": "截图笔记",
+      "requirement": "底部工具栏功能包括放大、缩小、全屏、截图笔记、隐藏标记、选择页数。",
+      "acceptance": "底部对应控件执行其标注操作；隐藏标记不删除笔记。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "截图工具恢复为一键生成当前阅读视口截图笔记，隐藏标记使用眼睛/划线眼睛图标，不再与全屏图标混淆。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F7.5",
+      "parent": "F7",
+      "parentTitle": "底部工具栏",
+      "group": 0,
+      "story": 2,
+      "title": "隐藏标记",
+      "requirement": "底部工具栏功能包括放大、缩小、全屏、截图笔记、隐藏标记、选择页数。",
+      "acceptance": "底部对应控件执行其标注操作；隐藏标记不删除笔记。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F7.6",
+      "parent": "F7",
+      "parentTitle": "底部工具栏",
+      "group": 0,
+      "story": 2,
+      "title": "选择页数",
+      "requirement": "底部工具栏功能包括放大、缩小、全屏、截图笔记、隐藏标记、选择页数。",
+      "acceptance": "底部对应控件执行其标注操作；隐藏标记不删除笔记。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F8.1",
+      "parent": "F8",
+      "parentTitle": "全文检索",
+      "group": 0,
+      "story": 2,
+      "title": "全文搜索",
+      "requirement": "底部工具栏中全文检索功能，提供文献的全文检索，短语定义，直接查看，无需跳转。",
+      "acceptance": "全文搜索列出原文命中并定位；短语定义在当前阅读界面呈现。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F8.2",
+      "parent": "F8",
+      "parentTitle": "全文检索",
+      "group": 0,
+      "story": 1,
+      "title": "原位短语释义",
+      "requirement": "底部工具栏中全文检索功能，提供文献的全文检索，短语定义，直接查看，无需跳转。",
+      "acceptance": "全文搜索列出原文命中并定位；短语定义在当前阅读界面呈现。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "划选VSWR、sleeve monopole、Vivaldi array等术语时，在原位卡片中展示短语释义。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F9",
+      "parent": "F9",
+      "parentTitle": "标签",
+      "group": 0,
+      "story": 2,
+      "title": "标签",
+      "requirement": "支持用户自由选择单词、区域、打标签、全文搜索、放大、缩小功能。",
+      "acceptance": "能给阅读内容添加标签。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "笔记编辑器支持结构设计、频段覆盖、仿真结果、引用线索、待复核等标签选择与展示。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F10",
+      "parent": "F10",
+      "parentTitle": "摘要与灵感笔记",
+      "group": 0,
+      "story": 2,
+      "title": "摘要与灵感笔记",
+      "requirement": "边阅读边思考，形成摘要记录保存到笔记中，随时记录创新灵感点。",
+      "acceptance": "能够编辑并持久保存摘要或自由思考。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F11",
+      "parent": "F11",
+      "parentTitle": "左侧导航区",
+      "group": 1,
+      "story": 0,
+      "title": "左侧导航区",
+      "requirement": "菜单集合了用户常用的操作，分别在可操作区的左边和右边。菜单栏服务具体功能包括导航功能区、操作功能区。",
+      "acceptance": "左侧导航区可访问目录等常用导航。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F12",
+      "parent": "F12",
+      "parentTitle": "右侧操作区",
+      "group": 1,
+      "story": 0,
+      "title": "右侧操作区",
+      "requirement": "菜单集合了用户常用的操作，分别在可操作区的左边和右边。菜单栏服务具体功能包括导航功能区、操作功能区。",
+      "acceptance": "右侧操作区可访问笔记和资料等常用操作。",
+      "priority": "P0",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F13",
+      "parent": "F13",
+      "parentTitle": "文末引用列表解析",
+      "group": 2,
+      "story": 0,
+      "title": "文末引用列表解析",
+      "requirement": "论文解析内容包括引用论文的信息（论文末尾的bibtex列表）。",
+      "acceptance": "文末引用列表结构化呈现；原始BibTeX解析需另有对应素材验证。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "9条参考文献已结构化展示，原文非BibTeX代码的事实在界面中保留说明。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F14",
+      "parent": "F14",
+      "parentTitle": "引用详情补全",
+      "group": 2,
+      "story": 0,
+      "title": "引用详情补全",
+      "requirement": "针对每一篇引用论文，找到对应的论文详情，包括标题，作者列表，摘要，出版日期信息，用于阅读体验展示。",
+      "acceptance": "逐条提供标题、作者列表、摘要与出版日期，不静默伪造缺失字段。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "每条引用补充期刊、出版日期、摘要和DOI，并标注为基于题名/DOI的原型补全来源。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F15",
+      "parent": "F15",
+      "parentTitle": "图表检测与提取",
+      "group": 3,
+      "story": 0,
+      "title": "图表检测与提取",
+      "requirement": "从PDF文献中提取图表。",
+      "acceptance": "图像及表格提取完整，编号和图题可对应原PDF。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "8幅原文图像已提取并可定位；无表格的事实以空状态呈现，避免伪造验收素材。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F16",
+      "parent": "F16",
+      "parentTitle": "目录结构解析",
+      "group": 3,
+      "story": 0,
+      "title": "目录结构解析",
+      "requirement": "解析文献目录，包括摘要、正文、参考文献等。",
+      "acceptance": "目录包含摘要、正文及参考文献，层级与原文一致。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F17",
+      "parent": "F17",
+      "parentTitle": "点击引用编号展示详情",
+      "group": 3,
+      "story": 3,
+      "title": "点击引用编号展示详情",
+      "requirement": "点击了他的参考文献标号，直接可以看到这个参考文献的标题、作者、摘要相关的信息。",
+      "acceptance": "点击引用编号直接看到标题、作者和摘要。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "点击正文引用编号后直接打开对应引用详情，连续引用支持在详情内切换编号。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F18.1",
+      "parent": "F18",
+      "parentTitle": "正文提及关联",
+      "group": 3,
+      "story": 3,
+      "title": "图与正文关联",
+      "requirement": "在页面上定位图、表、引用，直接可以对照文章进行阅读。",
+      "acceptance": "正文提及与对应原图、表或引用关联，可定位对照。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F18.2",
+      "parent": "F18",
+      "parentTitle": "正文提及关联",
+      "group": 3,
+      "story": 3,
+      "title": "表与正文关联",
+      "requirement": "在页面上定位图、表、引用，直接可以对照文章进行阅读。",
+      "acceptance": "正文提及与对应原图、表或引用关联，可定位对照。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "无表格论文保留可追溯空状态，表格关联逻辑不以伪造表格替代真实素材。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F18.3",
+      "parent": "F18",
+      "parentTitle": "正文提及关联",
+      "group": 3,
+      "story": 3,
+      "title": "引用与正文关联",
+      "requirement": "在页面上定位图、表、引用，直接可以对照文章进行阅读。",
+      "acceptance": "正文提及与对应原图、表或引用关联，可定位对照。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F19",
+      "parent": "F19",
+      "parentTitle": "元数据解析",
+      "group": 3,
+      "story": 0,
+      "title": "元数据解析",
+      "requirement": "解析论文元数据，包括标题、摘要、作者、作者机构、作者邮箱、论文关键字等。",
+      "acceptance": "标题、摘要、作者、机构、邮箱及关键词有明确字段；原文缺失字段如实标注。",
+      "priority": "P1",
+      "baseline": {
+        "status": "已合规",
+        "reason": "当前真实PDF示例已提供对应界面与交互；按设计原型口径审核，不代表通用后台能力验收。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F20.1",
+      "parent": "F20",
+      "parentTitle": "图谱探索",
+      "group": 3,
+      "story": 4,
+      "title": "知识图谱构建与关联",
+      "requirement": "构建论文知识图谱并关联；通过精准的语义搜索，了解到和论文相关的所有内容；每篇论文建设详情页，集合论文相关信息；对相关技术、学术理论、学者进行整理和归纳。",
+      "acceptance": "按当前子项验证图谱关系、语义搜索、论文详情页或实体归纳能力。",
+      "priority": "P2",
+      "baseline": {
+        "status": "已合规",
+        "reason": "图谱面板提供论文、作者、技术、理论、指标和引用节点，并显示节点关系。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F20.2",
+      "parent": "F20",
+      "parentTitle": "图谱探索",
+      "group": 3,
+      "story": 4,
+      "title": "语义搜索",
+      "requirement": "构建论文知识图谱并关联；通过精准的语义搜索，了解到和论文相关的所有内容；每篇论文建设详情页，集合论文相关信息；对相关技术、学术理论、学者进行整理和归纳。",
+      "acceptance": "按当前子项验证图谱关系、语义搜索、论文详情页或实体归纳能力。",
+      "priority": "P2",
+      "baseline": {
+        "status": "已合规",
+        "reason": "全文检索面板可切换语义搜索，按共口径、VSWR、频谱测量和Vivaldi阵列返回关联结果并定位。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F20.3",
+      "parent": "F20",
+      "parentTitle": "图谱探索",
+      "group": 3,
+      "story": 4,
+      "title": "论文详情页",
+      "requirement": "构建论文知识图谱并关联；通过精准的语义搜索，了解到和论文相关的所有内容；每篇论文建设详情页，集合论文相关信息；对相关技术、学术理论、学者进行整理和归纳。",
+      "acceptance": "按当前子项验证图谱关系、语义搜索、论文详情页或实体归纳能力。",
+      "priority": "P2",
+      "baseline": {
+        "status": "已合规",
+        "reason": "元数据面板形成论文详情汇总，集中展示标题、作者、机构、摘要、关键词、图和引用规模。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    },
+    {
+      "id": "F20.4",
+      "parent": "F20",
+      "parentTitle": "图谱探索",
+      "group": 3,
+      "story": 4,
+      "title": "技术、理论与学者归纳",
+      "requirement": "构建论文知识图谱并关联；通过精准的语义搜索，了解到和论文相关的所有内容；每篇论文建设详情页，集合论文相关信息；对相关技术、学术理论、学者进行整理和归纳。",
+      "acceptance": "按当前子项验证图谱关系、语义搜索、论文详情页或实体归纳能力。",
+      "priority": "P2",
+      "baseline": {
+        "status": "已合规",
+        "reason": "图谱面板将技术、理论与学者节点归纳到同一关系视图，可作为下一步阅读方向。",
+        "evidence": "真实示例：antennaPaper.ts、AntennaReader.tsx；来源：用户提供PDF第1–3页。初审口径：设计原型。"
+      }
+    }
+  ]
+}

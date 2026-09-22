@@ -151,6 +151,8 @@ const sanitizeDocument = (value: unknown): ResearchDocument | null => {
     updatedAt: cleanString(item.updatedAt, 40) || cleanString(item.createdAt, 40),
     favoritedAt: cleanString(item.favoritedAt, 40) || undefined,
     recentHiddenAt: cleanString(item.recentHiddenAt, 40) || undefined,
+    originalLocation: cleanString(item.originalLocation, 500) || undefined,
+    deletedBy: cleanString(item.deletedBy, 100) || undefined,
     deletedAt: cleanString(item.deletedAt, 40) || undefined,
     retentionPolicy: item.retentionPolicy === '30-days-v1' ? item.retentionPolicy : undefined,
     language: item.language === 'zh' || item.language === 'en' ? item.language : undefined,

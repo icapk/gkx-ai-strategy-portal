@@ -410,7 +410,7 @@ export function PdfImportDialog({
                   <div className="pdf-import-item-actions">
                     <span className={`pdf-import-status is-${item.status}`}>{item.status === 'processing' ? processingStage(item.progress) : statusLabel[item.status]}{item.status === 'processing' ? ` ${item.progress}%` : ''}</span>
                     {item.status === 'success' && item.documentId != null && <button type="button" disabled={isProcessing} onClick={() => openImportedDocument(item.documentId!)}>打开原文</button>}
-                    {item.status === 'failed' && <button type="button" disabled={isProcessing} onClick={() => retryItem(item.id)}>重试</button>}
+                    
                     {(item.status === 'queued' || item.status === 'failed') && <button type="button" className="is-remove" disabled={isProcessing} onClick={() => removeItem(item.id)}>移除</button>}
                   </div>
                 </article>
@@ -426,7 +426,7 @@ export function PdfImportDialog({
             <span className="pdf-import-result-icon" aria-hidden="true" />
             <div>
               <strong>{counts.failed > 0 ? '本批次已完成，部分文件需处理' : '本批次已全部在线解析并存档'}</strong>
-              <p>已存档 {counts.success} 个{counts.failed > 0 ? `，失败 ${counts.failed} 个，可在上方单独重试。` : '，可直接打开原文并阅读。'}</p>
+              <p>已存档 {counts.success} 个{counts.failed > 0 ? `，失败 ${counts.failed} 个，未完成文件请重新选择上传。` : '，可直接打开原文并阅读。'}</p>
             </div>
           </div>
         )}

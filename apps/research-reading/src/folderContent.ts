@@ -35,6 +35,8 @@ const sanitizeFolders = (value: unknown): FolderItem[] => {
     names.add(nameKey)
     return [{
       id: Number(item.id),
+      ...(item.openedBy && typeof item.openedBy === 'object' ? {openedBy:Object.fromEntries(Object.entries(item.openedBy).filter(([,v])=>typeof v==='string'))}:{}),
+      ...(item.favoritedBy && typeof item.favoritedBy === 'object' ? {favoritedBy:Object.fromEntries(Object.entries(item.favoritedBy).filter(([,v])=>typeof v==='string'))}:{}),
       name,
       count: Number.isFinite(item.count) ? Math.max(0, Math.floor(Number(item.count))) : 0,
       updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt.slice(0, 40) : '',

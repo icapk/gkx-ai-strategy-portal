@@ -57,7 +57,7 @@ const primaryItems: Array<{ section: Section; label: string }> = [
   { section: 'workbench', label: '工作台' },
   { section: 'personal', label: '个人空间' },
   { section: 'team', label: '团队空间' },
-  { section: 'recycle', label: '回收站' },
+
 ]
 
 export function Sidebar({

@@ -1438,10 +1438,7 @@ label:focus-within {
   padding-top: 16px;
 }
 
-.view--empty-team .header-actions {
-  pointer-events: none;
-  opacity: 0;
-}
+
 
 .recycle-note {
   margin-bottom: 12px;
@@ -9823,3 +9820,37 @@ td.data-sheet-row-actions button.is-danger:hover {
 @media(max-width:700px){.workbench-create>.global-search-trigger,.space-toolbar>.global-search-trigger{width:min(250px,100%);min-height:36px}.workbench-create>.global-search-trigger span,.space-toolbar>.global-search-trigger span{display:block}.workbench-create>span{flex-basis:100%;order:3}}
 
 .member-email{display:block;min-height:16px;color:var(--text-3);font-size:12px}
+
+/* Keep rename controls visible inside the name column. */
+.document-table .document-title-rename-form,
+.document-table .document-rename-form { display:flex; align-items:center; gap:4px; width:100%; min-width:0; position:relative; }
+.document-table .document-title-rename-form input,
+.document-table .document-rename-form input { flex:1 1 0; width:0; min-width:0; max-width:none; }
+.document-table .document-title-rename-form button,
+.document-table .document-rename-form button { flex:0 0 24px; width:24px; min-width:24px; padding:0; height:28px; font-size:16px; }
+.document-table .document-rename-form [role="alert"] { position:absolute; top:100%; left:0; white-space:normal; }
+/* Recycle columns have a stable width even with the review sidebar open. */
+.view--recycle .document-table--recycle { table-layout:fixed; width:1100px; min-width:1100px; }
+.view--recycle .document-table--recycle[data-deleted-by="true"] { width:1250px; min-width:1250px; }
+.view--recycle .document-table--recycle th:nth-child(1) { width:260px!important; }
+.view--recycle .document-table--recycle th:nth-child(2) { width:110px!important; }
+.view--recycle .document-table--recycle th:nth-child(3) { width:240px!important; }
+.view--recycle .document-table--recycle th:nth-child(4) { width:110px!important; }
+.view--recycle .document-table--recycle th:nth-child(5) { width:180px!important; }
+.view--recycle .document-table--recycle[data-deleted-by="true"] th:nth-child(6) { width:150px!important; }
+.view--recycle .document-table--recycle th:last-child,
+.view--recycle .document-table--recycle td:last-child:not(.empty-cell) { width:200px!important; min-width:200px; }
+.data-sheet-actions {display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto}
+.data-sheet-actions>button {border:1px solid #d9e1ed;background:#fff;border-radius:5px;padding:6px 12px;color:#25364d;white-space:nowrap}
+.data-sheet-actions>button:disabled {opacity:.45;cursor:not-allowed}
+.spreadsheet th>button {width:100%;padding:4px;cursor:pointer;color:inherit}
+.spreadsheet th>button:hover {background:#e8f0ff}
+.spreadsheet-tools {align-items:center}
+.spreadsheet-tools>button {height:32px;align-self:center}
+.spreadsheet-tools>details {position:relative;align-self:center}
+.spreadsheet-tools>details>summary {cursor:pointer;list-style:none;padding:6px 10px}
+.spreadsheet-tools>details[open] {z-index:4}
+.spreadsheet-tools>details[open]>button {display:block;position:absolute;left:0;width:150px;background:#fff;box-shadow:0 4px 12px #0002;height:34px;white-space:nowrap}
+.spreadsheet-tools>details[open]>button:first-of-type {top:32px}
+.spreadsheet-tools>details[open]>button:last-of-type {top:66px}
+.spreadsheet th>button {background:transparent;border:0;border-radius:0;min-height:0}

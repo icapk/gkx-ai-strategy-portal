@@ -1,10 +1,7 @@
-import { compareResearchDocuments } from './researchSort.ts'
+import { minute, compareResearchDocuments } from './researchSort.ts'
 import type { ResearchDocument } from './types'
 
-const isTimestamp = (value?: string) => {
-  if (!value || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?$/.test(value)) return false
-  return !Number.isNaN(Date.parse(value.replace(' ', 'T')))
-}
+const isTimestamp = (value?: string) => Boolean(minute(value))
 
 export const parentFolderLabel = (location: string) => {
   const parts = location.split('/').map((part) => part.trim()).filter(Boolean)
@@ -30,9 +27,9 @@ export const isTeamDocument = (documentItem: ResearchDocument, teamName: string)
 )
 
 export const recentDocuments = (documents: ResearchDocument[], now = new Date()) => {
- const cutoff = new Date(now);const day=cutoff.getDate();cutoff.setDate(1);cutoff.setMonth(cutoff.getMonth()-1);cutoff.setDate(Math.min(day,new Date(cutoff.getFullYear(),cutoff.getMonth()+1,0).getDate()))
+ const wallNow=new Date(minute(now.toISOString()).replace(' ','T')+'Z');const cutoff = new Date(wallNow);const day=cutoff.getUTCDate();cutoff.setUTCDate(1);cutoff.setUTCMonth(cutoff.getUTCMonth()-1);cutoff.setUTCDate(Math.min(day,new Date(Date.UTC(cutoff.getUTCFullYear(),cutoff.getUTCMonth()+1,0)).getUTCDate()))
  const latest = new Map<number,ResearchDocument>()
- for(const item of documents){const visited=Date.parse(item.visitedAt.replace(' ','T'));if(!isTimestamp(item.visitedAt)||visited<cutoff.getTime()||visited>now.getTime()||(item.recentHiddenAt&&item.visitedAt<=item.recentHiddenAt))continue;const prior=latest.get(item.id);if(!prior||item.visitedAt>prior.visitedAt)latest.set(item.id,item)}
+ for(const item of documents){const visited=Date.parse(minute(item.visitedAt).replace(' ','T')+'Z');if(!isTimestamp(item.visitedAt)||visited<cutoff.getTime()||visited>wallNow.getTime()||(item.recentHiddenAt&&item.visitedAt<=item.recentHiddenAt))continue;const prior=latest.get(item.id);if(!prior||item.visitedAt>prior.visitedAt)latest.set(item.id,item)}
  return [...latest.values()].sort((a,b)=>compareResearchDocuments(a,b))
 }
 
@@ -45,5 +42,5 @@ export const favoriteDocuments = (documents: ResearchDocument[]) => documents
   ))
 
 export const favoriteTimeLabel = (documentItem: ResearchDocument) => (
-  isTimestamp(documentItem.favoritedAt) ? documentItem.favoritedAt! : '历史收藏 · 时间未记录'
+  minute(documentItem.favoritedAt) || '—'
 )

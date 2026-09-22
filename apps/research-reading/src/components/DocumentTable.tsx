@@ -1,9 +1,10 @@
+import {exportOnlineFile,downloadBlob} from '../researchExport'
 import {displayMinute,documentSizeLabel} from '../displayFormat'
 import DOMPurify from 'dompurify'
 import { loadResearchDataTables, exportResearchDataTableCsv } from '../dataTableContent'
 import { useEffect, useRef, useState, type ReactNode, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { retentionLabel } from '../researchPolicy'
+
 import type { ResearchDocument, WorkbenchTab } from '../types'
 import { displayResearchLocation, favoriteTimeLabel } from '../workbenchDocuments'
 import { compareResearchDocuments, minute } from '../researchSort'
@@ -11,6 +12,8 @@ import { recentDocumentWindow, recentDocumentLimitForIndex, RECENT_DOCUMENT_BATC
 
 export type FolderTableEntry = { item: ResearchDocument; key: string; onOpen: () => void; actions: ReactNode; title?: ReactNode }
 interface DocumentTableProps {
+  canEdit?:(item:ResearchDocument)=>boolean
+  showDeletedBy?:boolean
   onLanguageChange?: (id:number, language:'zh'|'en')=>void
   folderEntries?: FolderTableEntry[]
   quickAccess?: string[]
@@ -186,6 +189,7 @@ const openActionLabel = (documentItem: ResearchDocument) => {
 }
 
 export function DocumentTable({
+  canEdit=()=>true, showDeletedBy=false,
   onLanguageChange,
   folderEntries = [],
   quickAccess = [], onToggleQuickAccess,
@@ -197,7 +201,7 @@ export function DocumentTable({
   onToggleFavorite,
   onDelete,
   onShare,
-  onRemoveRecent,
+
   onRestore,
   onRename,
   onCreateNote,
@@ -208,7 +212,7 @@ export function DocumentTable({
 }: DocumentTableProps) {
   const [spaceMenuId, setSpaceMenuId] = useState<number | null>(null)
   const [pageSize, setPageSize] = useState<10 | 20 | 50>(20)
-  const [sort, setSort] = useState<{ key: 'createdAt' | 'visitedAt'; direction: 'asc' | 'desc' }>({ key: 'visitedAt', direction: 'desc' })
+  const [sort, setSort] = useState<{ key: 'createdAt' | 'visitedAt'; direction: 'asc' | 'desc' }>({ key: mode==='space'?'createdAt':'visitedAt', direction: 'desc' })
   const allItems = [...folderEntries.map((entry) => entry.item), ...documents]
   const sortedDocuments = [...allItems].sort((a, b) => compareResearchDocuments(a, b, mode === 'recycle' ? 'deletedAt' : workbenchTab === 'favorites' && mode === 'workbench' ? 'favoritedAt' : sort.key, mode === 'recycle' || workbenchTab === 'favorites' ? 'desc' : sort.direction))
   const sortHeader = (key: 'createdAt' | 'visitedAt', label: string) => <th aria-sort={sort.key === key ? (sort.direction === 'desc' ? 'descending' : 'ascending') : 'none'}><button type="button" className="document-sort" onClick={() => { setSort({ key, direction: sort.key === key && sort.direction === 'desc' ? 'asc' : 'desc' }); onPageChange(1) }}>{label} {sort.key === key ? (sort.direction === 'desc' ? '↓' : '↑') : '↕'}</button></th>
@@ -234,7 +238,7 @@ export function DocumentTable({
         : isRecycle
           ? 'recycle'
           : 'workbench'
-  const columnCount = isRecent ? 8 : isFavorites ? 6 : mode === 'space' ? 8 : isRecycle ? 6 : 8
+  const columnCount = isRecycle?(showDeletedBy?7:6):isRecent||isFavorites?7:8
   const totalPages = Math.max(1, Math.ceil(allItems.length / pageSize))
   const recentKey=JSON.stringify([mode,workbenchTab,sort.key,sort.direction,recentResetKey])
   const [recentState,setRecentState]=useState({key:recentKey,limit:RECENT_DOCUMENT_BATCH})
@@ -270,7 +274,11 @@ export function DocumentTable({
         window.requestAnimationFrame(() => trigger?.focus())
       }
     }
-    const closeFromViewportChange = () => setSpaceMenuId(null)
+    const closeFromViewportChange = () => {
+      const rect=trigger?.getBoundingClientRect()
+      if(!rect||rect.bottom<0||rect.top>window.innerHeight){setSpaceMenuId(null);return}
+      setSpaceMenuPosition({left:Math.max(8,Math.min(rect.right-180,window.innerWidth-188)),top:Math.max(8,Math.min(rect.bottom+4,window.innerHeight-240))})
+    }
     const focusTimer = window.setTimeout(() => spaceMenuRef.current?.querySelector<HTMLButtonElement>('button')?.focus({preventScroll:true}), 0)
     document.addEventListener('pointerdown', closeFromOutside, true)
     document.addEventListener('keydown', closeOnEscape)
@@ -303,7 +311,7 @@ export function DocumentTable({
     }
     const rect = event.currentTarget.getBoundingClientRect()
     const menuWidth = 170
-    const menuHeight = (isRecent ? 4 : 3) * 46 + 18
+    const menuHeight = (2 + (onRename ? 1 : 0) + (onToggleQuickAccess ? 1 : 0)) * 46 + 18
     const viewportGap = 8
     const left = Math.min(window.innerWidth - menuWidth - viewportGap, Math.max(viewportGap, rect.right - menuWidth))
     const belowTop = rect.bottom + 2
@@ -375,16 +383,7 @@ export function DocumentTable({
     }
   }
 
-  const downloadFallback = (documentItem: ResearchDocument) => {
-    if (!isNativeDocument(documentItem)) { window.alert('没有可下载的原始文件，请重新上传。'); return }
-    const table = documentItem.kind === '数据表格' ? loadResearchDataTables().find(item => item.documentId === documentItem.id) : undefined
-    const textNode = document.createElement('p'); textNode.textContent = documentItem.content ?? ''
-    const body = table ? exportResearchDataTableCsv(table) : `<!doctype html><meta charset="utf-8"><article>${DOMPurify.sanitize(documentItem.richHtml || textNode.outerHTML)}</article>`
-    const url = URL.createObjectURL(new Blob([body], { type: table ? 'text/csv;charset=utf-8' : 'text/html;charset=utf-8' }))
-    const anchor = document.createElement('a'); anchor.href = url; anchor.download = `${documentItem.title}.${table ? 'csv' : 'html'}`
-    anchor.click()
-    window.setTimeout(() => URL.revokeObjectURL(url), 0)
-  }
+  const downloadFallback=async(item:ResearchDocument)=>{try{const file=await exportOnlineFile(item,loadResearchDataTables().find(t=>t.documentId===item.id));downloadBlob(file.name,file.data)}catch(error){window.alert('导出失败：'+String(error))}}
 
   const renderTitle = (documentItem: ResearchDocument) => {
     if (renamingDocumentId === documentItem.id) {
@@ -406,8 +405,8 @@ export function DocumentTable({
             }
           }}
         />
-        <button type="submit">保存</button>
-        <button type="button" onClick={() => cancelRename(documentItem.id)}>取消</button>
+        <button type="submit" aria-label="保存" title="保存">✓</button>
+        <button type="button" aria-label="取消" title="取消" onClick={() => cancelRename(documentItem.id)}>×</button>
         {renameError && <span className="sr-only" id={`document-rename-error-${documentItem.id}`} role="alert">{renameError}</span>}
       </form>
     }
@@ -428,21 +427,15 @@ export function DocumentTable({
     return <><FileIcon kind={documentItem.kind} />{documentItem.title}</>
   }
 
-  const renderHeader = () => {
-
-    if (isFavorites) return <><th>标题</th><th>所有者</th><th>收藏时间</th><th>类型</th><th>文档大小</th><th>操作</th></>
-    if (mode === 'space') return <><th>名称</th><th>类型</th><th>文档大小</th><th>最后修改</th><th>位置 <span className="location-header-info" tabIndex={0} aria-label="可查看所属父文件夹">i<span className="location-header-tooltip" role="tooltip">可查看所属父文件夹</span></span></th><th>创建者</th>{sortHeader('createdAt', '创建时间')}<th>操作</th></>
-    if (isRecycle) return <><th>标题</th><th>所有者</th><th>删除时间</th><th>类型</th><th>原位置</th><th>操作</th></>
-    return <><th>标题</th><th>位置 <span className="location-header-info" tabIndex={0} aria-label="可查看所属父文件夹">i<span className="location-header-tooltip" role="tooltip">可查看所属父文件夹</span></span></th><th>所有者</th><th>文档大小</th>{sortHeader('createdAt', '创建时间')}{sortHeader('visitedAt', '最近浏览')}<th>类型</th><th>操作</th></>
-  }
+  const renderHeader=()=> <><th>文档名称</th><th>文档类型</th><th>{isRecycle?'原位置':'位置'}</th>{!isRecycle&&<th>创建者</th>}<th>文档大小</th>{isRecycle?<><th>删除时间</th>{showDeletedBy&&<th>删除者</th>}</>:isFavorites?<th>收藏时间</th>:isRecent?sortHeader('visitedAt','最后打开时间'):<>{sortHeader('createdAt','创建时间')}<th>最后修改时间</th></>}<th>操作</th></>
 
   const renderActions = (documentItem: ResearchDocument) => {
     if (isRecycle) {
-      return <><button type="button" onClick={() => onRestore?.(documentItem.id)}>恢复</button><button className="danger-link" type="button" onClick={() => onDelete(documentItem.id)}>彻底删除</button></>
+      return <><button type="button" onClick={() => onRestore?.(documentItem.id)}>恢复</button><button disabled={!canEdit(documentItem)} className="danger-link" type="button" onClick={() => onDelete(documentItem.id)}>彻底删除</button></>
     }
     return (
       <>
-        <button type="button" onClick={() => onShare(documentItem.id)}>分享</button><button data-focus-id="research-download" type="button" onClick={()=>{if((documentItem.pdfArchive||documentItem.originalFileName)&&onDownloadDocument)onDownloadDocument(documentItem);else downloadFallback(documentItem)}}>下载</button>
+        <button disabled={!canEdit(documentItem)} type="button" onClick={() => onShare(documentItem.id)}>分享</button><button data-focus-id="research-download" type="button" onClick={()=>{if(onDownloadDocument)onDownloadDocument(documentItem);else downloadFallback(documentItem)}}>下载</button>
         <span className="document-space-menu-wrap">
           <button data-focus-reveal="research-document-menu" className="more-button" type="button" ref={(node) => { if (node) spaceMenuTriggerRefs.current.set(documentItem.id, node); else spaceMenuTriggerRefs.current.delete(documentItem.id) }} aria-label={`${documentItem.title}更多操作`} aria-haspopup="menu" aria-expanded={spaceMenuId === documentItem.id} onClick={(event) => openSpaceMenu(event, documentItem.id)}><span className="more-dots" aria-hidden="true"><i /><i /><i /></span></button>
         </span>
@@ -450,29 +443,16 @@ export function DocumentTable({
     )
   }
 
-  const renderRow = (documentItem: ResearchDocument) => {
-    const folder = folderEntries.find((entry) => entry.item.id === documentItem.id)
-    if (folder) {
-      const title = <td className="title-cell">{folder.title ?? <button type="button" className="document-title-link" onClick={folder.onOpen}>📁 {documentItem.title}</button>}</td>
-      const actions = <td><span className="row-actions">{folder.actions}</span></td>
-      if(isRecycle)return <>{title}<td>{documentItem.owner}</td><td>{displayMinute(documentItem.deletedAt)}<small className="retention-label">{retentionLabel(documentItem)}</small></td><td>文件夹</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actions}</>
-      if (isFavorites) return <>{title}<td>{documentItem.owner}</td><td>—</td><td>文件夹</td><td>-</td>{actions}</>
-      if (mode === 'space') return <>{title}<td>文件夹</td><td>-</td><td>{displayMinute(documentItem.updatedAt)}</td><td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{minute(documentItem.createdAt)||'—'}</td>{actions}</>
-      return <>{title}<td>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>-</td><td>{minute(documentItem.createdAt)||'—'}</td><td>—</td><td>文件夹</td>{actions}</>
-    }
-    const titleCell = <td className="title-cell">{renderTitle(documentItem)}</td>
-    const actionCell = <td><span className="row-actions">{renderActions(documentItem)}</span></td>
-
-    if (isFavorites) return <>{titleCell}<td>{documentItem.owner}</td><td>{favoriteTimeLabel(documentItem)}</td><td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td>{actionCell}</>
-    if (mode === 'space') return <>{titleCell}<td><KindTag kind={documentItem.kind} /></td><td>{sizeInMegabytes(documentItem)}</td><td>{displayMinute(documentItem.updatedAt ?? documentItem.createdAt)}</td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{minute(documentItem.createdAt)||'—'}</td>{actionCell}</>
-    if (isRecycle) return <>{titleCell}<td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{documentItem.deletedAt ? displayMinute(documentItem.deletedAt) : '时间未记录'}<small className="retention-label">{retentionLabel(documentItem)}</small></td><td><KindTag kind={documentItem.kind} /></td><td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td>{actionCell}</>
-    return <>{titleCell}<td title={displayResearchLocation(documentItem.location)}>{displayResearchLocation(documentItem.location)}</td><td><span className="owner-cell"><img src="/assets/avatar-owner.svg" alt="" />{documentItem.owner}</span></td><td>{sizeInMegabytes(documentItem)}</td><td>{minute(documentItem.createdAt)||'—'}</td><td>{minute(documentItem.visitedAt)||'—'}</td><td><KindTag kind={documentItem.kind} /></td>{actionCell}</>
+  const renderRow=(item:ResearchDocument)=>{
+    const folder=folderEntries.find(entry=>entry.item.id===item.id)
+    const person=(name?:string)=>name?<span className="owner-cell"><img src="/assets/avatar-owner.svg" alt=""/>{name}</span>:'-'
+    return <><td className="title-cell">{folder?(folder.title??<button type="button" className="document-title-link" onClick={folder.onOpen}>📁 {item.title}</button>):renderTitle(item)}</td><td>{folder?'文件夹':<KindTag kind={item.kind}/>}</td><td title={displayResearchLocation(isRecycle?item.originalLocation??item.location:item.location)}>{displayResearchLocation(isRecycle?item.originalLocation??item.location:item.location)}</td>{!isRecycle&&<td>{person(item.owner)}</td>}<td>{folder?'-':sizeInMegabytes(item)}</td>{isRecycle?<><td>{displayMinute(item.deletedAt)}</td>{showDeletedBy&&<td>{person(item.deletedBy)}</td>}</>:isFavorites?<td>{favoriteTimeLabel(item)}</td>:isRecent?<td>{displayMinute(item.visitedAt)}</td>:<><td>{displayMinute(item.createdAt)}</td><td>{displayMinute(item.updatedAt)}</td></>}<td><span className="row-actions">{folder?folder.actions:renderActions(item)}</span></td></>
   }
 
   return (
     <div className={`table-region table-region--${tableProfile}`} ref={tableRegionRef}>
       <div className="table-scroll">
-        <table className={`document-table document-table--${tableProfile}`} aria-label={isRecent ? '最近浏览文档' : isFavorites ? '收藏文档' : mode === 'space' ? '空间文档' : isRecycle ? '回收站内容' : '工作台文档'}>
+        <table data-deleted-by={isRecycle && showDeletedBy ? "true" : undefined} className={`document-table document-table--${tableProfile}`} aria-label={isRecent ? '最近浏览文档' : isFavorites ? '收藏文档' : mode === 'space' ? '空间文档' : isRecycle ? '回收站内容' : '工作台文档'}>
           <thead><tr>{renderHeader()}</tr></thead>
           <tbody>
             {allItems.length === 0 ? (
@@ -520,7 +500,7 @@ export function DocumentTable({
           >
             {onToggleQuickAccess && <button type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleQuickAccess(`document:${documentItem.id}`))}>{quickAccess.includes(`document:${documentItem.id}`) ? '取消快速访问' : '加入快速访问'}</button>}
             {<button data-focus-id="research-favorite" type="button" role="menuitem" onClick={() => runSpaceMenuAction(documentItem.id, () => onToggleFavorite(documentItem.id))}>{documentItem.favorite ? '取消收藏' : '收藏'}</button>}
-            {isRecent&&onRemoveRecent&&<button type="button" role="menuitem" onClick={()=>runSpaceMenuAction(documentItem.id,()=>onRemoveRecent(documentItem.id))}>移除</button>}<button type="button" role="menuitem" className="danger-link" onClick={() => runSpaceMenuAction(documentItem.id, () => onDelete(documentItem.id))}>删除</button>
+            {onRename&&<button disabled={!canEdit(documentItem)} type="button" role="menuitem" onClick={()=>runSpaceMenuAction(documentItem.id,()=>{setRenamingDocumentId(documentItem.id);setRenameValue(documentItem.title);setRenameError('')})}>重命名</button>}<button disabled={!canEdit(documentItem)} type="button" role="menuitem" className="danger-link" onClick={() => runSpaceMenuAction(documentItem.id, () => onDelete(documentItem.id))}>删除</button>
           </div>
         )
       })(), document.body)}

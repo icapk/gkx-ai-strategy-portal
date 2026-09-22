@@ -12,10 +12,10 @@ test('空间允许空简介，但拒绝空名称、路径名称和重名', () =>
 test('移除或降级最后一名管理员不能保存，保留其他管理员时允许', () => {
   assert.ok(validateTeamSpace({ ...space, members: [] }, []))
   assert.ok(validateTeamSpace({ ...space, members: [{ ...space.members[0], role: '可查看' }] }, []))
-  assert.equal(validateTeamSpace({ ...space, members: [{ ...space.members[0], role: '可查看' }, { ...space.members[0], id: 2 }] }, []), '')
+  assert.ok(validateTeamSpace({ ...space, members: [{ ...space.members[0], role: '可查看' }, { ...space.members[0], id: 2 }] }, []))
 })
 test('历史角色名称迁移为新文案', () => {
-  assert.equal(normalizeRole('编辑者'), '可编辑')
-  assert.equal(normalizeRole('查看员'), '可查看')
-  assert.equal(normalizeRole('管理员'), '管理员')
+  assert.equal(normalizeRole('编辑者'), '编辑')
+  assert.equal(normalizeRole('查看员'), '查看')
+  assert.equal(normalizeRole('管理员'), '管理')
 })

@@ -78,10 +78,9 @@ function ResultMetadata({ result, terms }: { result: ResearchSearchResult; terms
   if (result.type === 'document') {
     return (
       <div className="global-search-result-metadata" aria-label="文档信息">
-        <span><b>最近访问：</b>{minute(result.document.visitedAt)||"—"}</span>
-        <span><b>所有者：</b><HighlightedText text={result.document.owner} terms={terms} /></span>
+        <span><b>最后打开时间：</b>{minute(result.document.visitedAt)||"—"}</span>
+        <span><b>创建者：</b><HighlightedText text={result.document.owner} terms={terms} /></span>
         <span><b>创建时间：</b><HighlightedText text={minute(result.document.createdAt)||'—'} terms={terms} /></span>
-        <span><b>文件大小：</b><HighlightedText text={result.document.size} terms={terms} /></span>
       </div>
     )
   }
@@ -96,6 +95,7 @@ function ResultMetadata({ result, terms }: { result: ResearchSearchResult; terms
 }
 
 function ResultIcon({ result }: { result: ResearchSearchResult }) {
+  if(result.type==='document'&&result.document.id<0)return <span className="global-search-result-icon" aria-label="文件夹">📁</span>
   if (result.type === 'note') {
     return <span className="global-search-result-icon global-search-result-icon--note" aria-hidden="true"><i /></span>
   }
@@ -131,7 +131,7 @@ export function GlobalSearchDialog({
   const inputRef = useRef<HTMLInputElement>(null)
   const resultListRef = useRef<HTMLDivElement>(null)
 
-  const searchDocuments=useMemo(()=>[...documents,...folders.map((folder,index):ResearchDocument=>({id:-index-1,title:folder.name,location:folder.location??'我的空间',owner:folder.owner??'',kind:'附件',size:'-',createdAt:folder.createdAt??folder.updatedAt,visitedAt:'',favorite:false,owned:folder.scope==='personal',shared:folder.scope==='team'}))],[documents,folders])
+  const searchDocuments=useMemo(()=>[...documents,...folders.map((folder,index):ResearchDocument=>({id:-index-1,title:folder.name,location:folder.location??'我的空间',owner:folder.owner??'',kind:'附件',size:'-',createdAt:folder.createdAt??'',visitedAt:folder.visitedAt??'',favorite:false,owned:folder.scope==='personal',shared:folder.scope==='team'}))],[documents,folders])
   const hasSubmittedQuery = Boolean(submittedQuery)
   const allResults = useMemo(() => (
     hasSubmittedQuery

@@ -22,20 +22,23 @@ export function legacyDocumentHtml(item: ResearchDocument) {
   }).join('') || '<p></p>'
 }
 interface Props {
+  readOnly?:boolean
   documentItem: ResearchDocument
   onClose: () => void
   onSave: (value: { title: string; blocks: DocumentBlock[]; content: string; size: string; richHtml?: string }) => string | null
   [key: string]: unknown
 }
-export function ContinuousDocumentEditor({ documentItem, onClose, onSave }: Props) {
+export function ContinuousDocumentEditor({ documentItem, onClose, onSave, readOnly=false }: Props) {
   const [title, setTitle] = useState(documentItem.title)
   const [dirty, setDirty] = useState(false)
   const [message, setMessage] = useState('')
   const [linkDraft,setLinkDraft]=useState<{from:number;to:number;label:string;url:string}|null>(null)
   const [linkError,setLinkError]=useState('')
   const uploadRef = useRef<HTMLInputElement>(null)
-  const editor = useEditor({ shouldRerenderOnTransaction: true, extensions: [StarterKit.configure({link:{openOnClick:false,autolink:false,HTMLAttributes:{target:"_blank",rel:"noopener noreferrer"}}}), Image.configure({ allowBase64: true }), TableKit.configure({ table: { resizable: true } }), Mathematics], content: legacyDocumentHtml(documentItem), onUpdate: () => setDirty(true), editorProps: { attributes: { 'aria-label': '文档正文', role: 'textbox', 'aria-multiline': 'true' } } }, [documentItem.id])
+  const editor = useEditor({ editable:!readOnly, shouldRerenderOnTransaction: true, extensions: [StarterKit.configure({link:{openOnClick:false,autolink:false,HTMLAttributes:{target:"_blank",rel:"noopener noreferrer"}}}), Image.configure({ allowBase64: true }), TableKit.configure({ table: { resizable: true } }), Mathematics], content: legacyDocumentHtml(documentItem), onUpdate: () => setDirty(true), editorProps: { attributes: { 'aria-label': '文档正文', role: 'textbox', 'aria-multiline': 'true' } } }, [documentItem.id])
+  useEffect(()=>{editor?.setEditable(!readOnly,false);if(readOnly)setDirty(false)},[editor,readOnly])
   const save = () => {
+    if(readOnly)return
     if (!editor) return
     if (!title.trim()) { setMessage('请输入文档标题'); return }
     const richHtml = DOMPurify.sanitize(editor.getHTML(), { ADD_ATTR: ['data-type', 'data-latex'] })
@@ -55,13 +58,13 @@ export function ContinuousDocumentEditor({ documentItem, onClose, onSave }: Prop
   if (!editor) return <div role="status">正在打开文档…</div>
   const editLink=()=>{if(editor.isActive('link'))editor.chain().focus().extendMarkRange('link').run();const {from,to}=editor.state.selection;setLinkError('');setLinkDraft({from,to,label:editor.state.doc.textBetween(from,to),url:editor.getAttributes('link').href??''})}
   const saveLink=()=>{if(!linkDraft)return;let href;try{const url=new URL(linkDraft.url.trim());if(!['http:','https:'].includes(url.protocol))throw Error();href=url.href}catch{setLinkError('请输入有效的 http 或 https 网页地址');return}const label=linkDraft.label.trim()||href;const previous=editor.state.doc.textBetween(linkDraft.from,linkDraft.to);const chain=editor.chain().focus().setTextSelection({from:linkDraft.from,to:linkDraft.to});if(previous===label&&linkDraft.from!==linkDraft.to)chain.setLink({href,target:'_blank',rel:'noopener noreferrer'}).run();else chain.insertContent({type:'text',text:label,marks:[{type:'link',attrs:{href,target:'_blank',rel:'noopener noreferrer'}}]}).run();setLinkDraft(null)}
-  const control = (label: string, run: () => void, active = false, disabled = false) => <button type="button" data-focus-id={`editor-${label}`} disabled={disabled} aria-pressed={active} onMouseDown={(event) => event.preventDefault()} onClick={run}>{label}</button>
+  const control = (label: string, run: () => void, active = false, disabled = false) => <button type="button" data-focus-id={`editor-${label}`} disabled={readOnly||disabled} aria-pressed={active} onMouseDown={(event) => event.preventDefault()} onClick={run}>{label}</button>
   return <section className="continuous-editor" aria-label={`文档编辑：${title}`}>
-    <header data-business-dirty={dirty}><button type="button" onClick={() => { if (!dirty || window.confirm('有未保存修改，确定离开？')) onClose() }}>返回</button><input aria-label="文档标题" value={title} maxLength={50} onChange={(event) => { setTitle(event.target.value); setDirty(true) }} /><span role="status">{dirty ? '未保存' : '已保存'}</span><button type="button" onClick={save}>保存</button></header>
+    <header data-business-dirty={dirty}><button type="button" onClick={() => { if (!dirty || window.confirm('有未保存修改，确定离开？')) onClose() }}>返回</button><input readOnly={readOnly} aria-label="文档标题" value={title} maxLength={50} onChange={(event) => { setTitle(event.target.value); setDirty(true) }} /><span role="status">{dirty ? '未保存' : '已保存'}</span><button disabled={readOnly} type="button" onClick={save}>保存</button></header>
     <div className="continuous-toolbar" role="toolbar" aria-label="文档编辑工具">
       <div className="editor-tool-group" role="group" aria-label="撤销与重做"><div>{control('撤销', () => editor.chain().focus().undo().run(),false,!editor.can().undo())}{control('重做', () => editor.chain().focus().redo().run(),false,!editor.can().redo())}</div><small>编辑</small></div>
       <div className="editor-tool-group" role="group" aria-label="文字格式"><div>
-      <select aria-label="文本样式" onChange={(event) => { const value = Number(event.target.value); if (value) editor.chain().focus().toggleHeading({ level: value as 1 | 2 | 3 }).run(); else editor.chain().focus().setParagraph().run() }}><option value="0">正文</option><option value="1">标题 1</option><option value="2">标题 2</option><option value="3">标题 3</option></select>
+      <select disabled={readOnly} aria-label="文本样式" onChange={(event) => { const value = Number(event.target.value); if (value) editor.chain().focus().toggleHeading({ level: value as 1 | 2 | 3 }).run(); else editor.chain().focus().setParagraph().run() }}><option value="0">正文</option><option value="1">标题 1</option><option value="2">标题 2</option><option value="3">标题 3</option></select>
       {control('粗体', () => editor.chain().focus().toggleBold().run(), editor.isActive('bold'))}{control('斜体', () => editor.chain().focus().toggleItalic().run(), editor.isActive('italic'))}{control('下划线', () => editor.chain().focus().toggleUnderline().run(), editor.isActive('underline'))}{control('删除线', () => editor.chain().focus().toggleStrike().run())}
       </div><small>文字格式</small></div><div className="editor-tool-group" role="group" aria-label="段落与列表"><div>{control('无序列表', () => editor.chain().focus().toggleBulletList().run())}{control('有序列表', () => editor.chain().focus().toggleOrderedList().run())}{control('引用', () => editor.chain().focus().toggleBlockquote().run())}
       </div><small>段落</small></div><div className="editor-tool-group" role="group" aria-label="插入内容"><div>{control('表格', () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run())}

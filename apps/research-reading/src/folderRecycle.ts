@@ -1,12 +1,12 @@
 import type { FolderItem } from './types'
-export interface RecycledFolder {id:number;scope:'personal'|'team';root:FolderItem;folders:FolderItem[];documentIds:number[];deletedAt:string;retentionPolicy?:'30-days-v1'}
+export interface RecycledFolder {id:number;scope:'personal'|'team';root:FolderItem;folders:FolderItem[];documentIds:number[];deletedAt:string;originalLocation?:string;deletedBy?:string;retentionPolicy?:'30-days-v1'}
 export const folderRecycleKey='research-folder-recycle-v1'
 export function loadRecycledFolders():RecycledFolder[] {
  try {const value=JSON.parse(localStorage.getItem(folderRecycleKey)||'[]');return Array.isArray(value)?value.filter(v=>v.root&&Array.isArray(v.folders)&&Array.isArray(v.documentIds)):[]}catch{return []}
 }
 // A synchronous local transaction rolls metadata back before React publishes changes.
 export function folderTransaction(action:()=>void):string {
- const keys=[folderRecycleKey,'intelligent-research-portal:documents:v1','intelligent-research-portal:folders:v1:personal','intelligent-research-portal:folders:v1:team']
+ const keys=['research:team-spaces:v1','research:quick-access:v1',folderRecycleKey,'intelligent-research-portal:documents:v1','intelligent-research-portal:folders:v1:personal','intelligent-research-portal:folders:v1:team']
  let snapshots:[string,string|null][]=[]
  try{snapshots=keys.map(k=>[k,localStorage.getItem(k)]);action();return ''}catch(e){
   let failed=false

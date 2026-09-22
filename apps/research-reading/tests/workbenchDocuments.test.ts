@@ -43,7 +43,7 @@ test('收藏按真实收藏时间排序并明确标记历史数据', () => {
     documentItem(3, { favorite: true, favoritedAt: '2026-08-26 10:00' }),
   ]
   assert.deepEqual(favoriteDocuments(documents).map(({ id }) => id), [3, 2, 1])
-  assert.equal(favoriteTimeLabel(documents[0]), '历史收藏 · 时间未记录')
+  assert.equal(favoriteTimeLabel(documents[0]), '—')
 })
 
 test('个人空间只接收个人范围文档并正确显示父文件夹', () => {

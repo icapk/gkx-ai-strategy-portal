@@ -1,15 +1,10 @@
+import {displayMinute} from './displayFormat.ts'
 import type { ResearchDocument } from './types'
 
 export type ResearchSortKey = 'visitedAt' | 'createdAt' | 'favoritedAt' | 'deletedAt'
 const collator = new Intl.Collator('zh-Hans-CN-u-co-pinyin', { numeric: true, sensitivity: 'base' })
 export function minute(value?: string) {
-  if(value&&/^\d{4}-\d{2}-\d{2}T/.test(value)){
-    const date=new Date(value)
-    if(Number.isNaN(date.getTime()))return ''
-    const pad=(n:number)=>String(n).padStart(2,'0')
-    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-  }
-  return value && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(value) ? value.slice(0, 16) : ''
+ if(!value)return '';const text=displayMinute(value);return /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(text)?text:''
 }
 export function compareResearchDocuments(a: ResearchDocument, b: ResearchDocument, key: ResearchSortKey = 'visitedAt', direction: 'asc' | 'desc' = 'desc') {
   const av = minute(a[key]), bv = minute(b[key])

@@ -1,3 +1,6 @@
+import {TableImportDialog} from './TableImportDialog'
+import {fieldValueError} from '../tableImport'
+import {downloadBlob,exportTableXlsx} from '../researchExport'
 import {displayMinute} from '../displayFormat'
 import { SpreadsheetGrid } from './SpreadsheetGrid'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
@@ -19,6 +22,7 @@ type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
 type SortDirection = 'asc' | 'desc'
 
 interface DataTableWorkspaceProps {
+  readOnly?:boolean
   documentItem: ResearchDocument
   table: ResearchDataTable
   currentUser: string
@@ -57,11 +61,7 @@ const columnTypeLabels: Record<DataTableColumnType, string> = {
   file: '文件名',
 }
 
-const formatTimestamp = () => {
-  const now = new Date()
-  const pad = (value: number) => String(value).padStart(2, '0')
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
-}
+const formatTimestamp = () => displayMinute(new Date().toISOString())
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`
@@ -101,6 +101,7 @@ const statusClass = (value: string) => {
 }
 
 export function DataTableWorkspace({
+  readOnly=false,
   documentItem,
   table: initialTable,
   currentUser,
@@ -119,7 +120,7 @@ export function DataTableWorkspace({
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [saveState, setSaveState] = useState<SaveState>('saved')
   const [saveError, setSaveError] = useState('')
-  const [lastSavedAt, setLastSavedAt] = useState(displayMinute(initialTable.updatedAt).slice(-5))
+  const [lastSavedAt, setLastSavedAt] = useState(displayMinute(initialTable.updatedAt))
   const [query, setQuery] = useState(initialSearchQuery)
   const [statusFilter, setStatusFilter] = useState('全部状态')
   const [sort, setSort] = useState<{ columnId: string; direction: SortDirection } | null>(null)
@@ -139,6 +140,7 @@ export function DataTableWorkspace({
   const [shareAccess, setShareAccess] = useState<DataTableShareAccess>(initialTable.share.access)
   const [shareCollaborators, setShareCollaborators] = useState<string[]>(initialTable.share.collaborators)
   const [fieldDraft, setFieldDraft] = useState<FieldDraft | null>(null)
+  const [importOpen,setImportOpen]=useState(initialAction==='import')
   const [filesOpen, setFilesOpen] = useState(initialAction === 'files')
   const [previewAttachmentId, setPreviewAttachmentId] = useState<string | null>(null)
   const tableRef = useRef(table)
@@ -172,7 +174,7 @@ export function DataTableWorkspace({
   const previewAttachment = previewAttachmentId
     ? table.attachments.find((attachment) => attachment.id === previewAttachmentId)
     : undefined
-  const nestedModalOpen = recordEditorOpen || shareOpen || Boolean(fieldDraft) || filesOpen || Boolean(previewAttachment)
+  const nestedModalOpen = importOpen || recordEditorOpen || shareOpen || Boolean(fieldDraft) || filesOpen || Boolean(previewAttachment)
   const {request: focusRequest, ready: focusReady, reject: focusReject} = usePrototypeFocus()
   useEffect(() => {
     if (focusRequest?.module !== 'research' || focusRequest.target?.surface !== 'table') return
@@ -191,6 +193,7 @@ export function DataTableWorkspace({
   }, [])
 
   const markChanged = (updater: (current: ResearchDataTable) => ResearchDataTable) => {
+    if(readOnly)return
     const timestamp = formatTimestamp()
     setTable((current) => {
       const next = updater(current)
@@ -217,6 +220,7 @@ export function DataTableWorkspace({
   }
 
   const saveNow = (candidate = tableRef.current, candidateTitle = titleRef.current) => {
+    if(readOnly)return false
     if (!candidateTitle.normalize('NFC').trim()) {
       updateSaveState('error')
       setSaveError('表格名称不能为空。')
@@ -237,7 +241,7 @@ export function DataTableWorkspace({
     }
     updateSaveState('saved')
     setSaveError('')
-    setLastSavedAt(formatTimestamp().slice(-5))
+    setLastSavedAt(formatTimestamp())
     return true
   }
 
@@ -543,9 +547,7 @@ export function DataTableWorkspace({
       return
     }
     const previous = fieldDraft.columnId ? table.columns.find((column) => column.id === fieldDraft.columnId) : undefined
-    if (previous && previous.type !== fieldDraft.type && table.rows.some((row) => row.values[previous.id]?.trim())) {
-      if (!window.confirm('修改字段类型可能使现有值不符合格式，仍要继续吗？')) return
-    }
+    if(previous){const candidate={...previous,name,type:fieldDraft.type,required:fieldDraft.required,options};for(let i=0;i<table.rows.length;i++){const error=fieldValueError(candidate,table.rows[i].values[previous.id]??'');if(error){setFieldDraft({...fieldDraft,error:'第 '+(i+1)+' 行：'+error+'。请先修改现有数据。'});return}}}
     setUndo({ table, message: previous ? '已修改字段' : '已添加字段' })
     const columnId = fieldDraft.columnId ?? createId('column')
     const nextColumn: DataTableColumn = { id: columnId, name, type: fieldDraft.type, required: fieldDraft.required, options }
@@ -661,14 +663,11 @@ export function DataTableWorkspace({
       <header className="data-sheet-header" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
         <button ref={backButtonRef} className="data-sheet-back" type="button" onClick={handleClose}><span aria-hidden="true" />返回</button>
         <div className="data-sheet-title-area">
-          <input aria-label="数据表格名称" maxLength={50} value={title} onChange={(event) => { setTitle(event.target.value); updateSaveState('dirty'); setSaveError('') }} />
+          <input readOnly={readOnly} aria-label="数据表格名称" maxLength={50} value={title} onChange={(event) => { setTitle(event.target.value); updateSaveState('dirty'); setSaveError('') }} />
         </div>
-        <div className="data-sheet-save-area">
+        <div className="data-sheet-save-area"><button type="button" onClick={()=>{try{downloadBlob(documentItem.title+'.xlsx',exportTableXlsx(initialTable))}catch(error){onToast('导出失败：'+String(error))}}}>导出 XLSX</button>
           <span className={`data-sheet-save-state is-${formDirty ? 'dirty' : saveState}`} role="status"><i />{saveStateLabel}</span>
-          <button className="button button--secondary data-sheet-share-button" type="button" onClick={openShareDialog}>
-            <img className="iconpark-control-icon" src="/assets/iconpark/share.svg" alt="" />分享
-          </button>
-          <button className="button button--primary" type="button" disabled={saveState === 'saving'} onClick={() => saveNow()}>保存</button>
+          <button className="button button--primary" type="button" disabled={readOnly||saveState === 'saving'} onClick={() => saveNow()}>保存</button>
         </div>
       </header>
 
@@ -678,26 +677,27 @@ export function DataTableWorkspace({
           <button id="data-sheet-tab-form" type="button" role="tab" aria-controls="data-sheet-panel-form" aria-selected={viewMode === 'form'} tabIndex={viewMode === 'form' ? 0 : -1} className={viewMode === 'form' ? 'is-active' : ''} onKeyDown={(event) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); setViewMode('table'); event.currentTarget.previousElementSibling instanceof HTMLElement && event.currentTarget.previousElementSibling.focus() } }} onClick={() => setViewMode('form')}><img className="data-sheet-tab-icon" src="/assets/iconpark/form-one.svg" alt="" />表单视图</button>
         </div>
         
+        <div className="data-sheet-actions"><button type="button" disabled={readOnly} onClick={openNewRecord}>新增记录</button><button type="button" disabled={readOnly} onClick={openAddField}>添加字段</button><button type="button" disabled={readOnly} onClick={()=>setImportOpen(true)}>导入数据</button><button type="button" onClick={()=>setFilesOpen(true)}>导入记录</button></div>
       </div>
 
       {saveError && (
         <div className="data-sheet-error" role="alert" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
           <strong>表格保存失败</strong><span>{saveError}</span>
-          <div><button type="button" onClick={() => saveNow()}>重试保存</button><button type="button" onClick={()=>downloadText(JSON.stringify(table,null,2),title+'.json','application/json')}>备份未保存内容</button></div>
+          <div><button type="button" onClick={() => saveNow()}>重试保存</button><button type="button" onClick={()=>downloadText(JSON.stringify({table,title,recordDraft:formDirty?{isNew:formIsNew,rowId:activeRowId,values:formValues}:null},null,2),title+'-未保存草稿.json','application/json')}>备份未保存内容</button></div>
         </div>
       )}
 
       <div data-focus-id="research-table-records" className="data-sheet-body" aria-hidden={nestedModalOpen ? true : undefined} inert={nestedModalOpen ? true : undefined}>
         {viewMode === 'table' ? (
           <section id="data-sheet-panel-table" className="data-sheet-panel" role="tabpanel" aria-labelledby="data-sheet-tab-table">
-            <SpreadsheetGrid table={table} onChange={next => markChanged(() => next)} />
+            <SpreadsheetGrid readOnly={readOnly} table={table} onAddField={openAddField} onEditField={openEditField} onDeleteRows={deleteRows} onChange={next => markChanged(() => next)} />
           </section>
         ) : (
           <section id="data-sheet-panel-form" className="data-sheet-form-view" role="tabpanel" aria-labelledby="data-sheet-tab-form">
             {table.rows.length === 0 ? (
               <div className="data-sheet-empty data-sheet-form-empty">
                 <img src="/assets/document-sheet.svg" alt="" /><strong>暂无记录</strong><p>新增记录后，可在表单视图中逐条查看全部字段。</p>
-                <div><button className="button button--primary" type="button" onClick={openNewRecord}>新增记录</button></div>
+                <div><button className="button button--primary" type="button" disabled={readOnly} onClick={openNewRecord}>新增记录</button></div>
               </div>
             ) : <>
               <aside aria-label="表单视图记录导航">
@@ -760,8 +760,8 @@ export function DataTableWorkspace({
                     })}
                   </dl>
                   <footer>
-                    <button className="button button--danger" type="button" onClick={() => deleteRows([activeRow.id])}>删除记录</button>
-                    <button className="button button--primary" type="button" onClick={() => openRecord(activeRow)}>编辑记录</button>
+                    <button className="button button--danger" type="button" disabled={readOnly} onClick={() => deleteRows([activeRow.id])}>删除记录</button>
+                    <button className="button button--primary" type="button" disabled={readOnly} onClick={() => openRecord(activeRow)}>编辑记录</button>
                   </footer>
                 </article>
               ) : (
@@ -808,9 +808,10 @@ export function DataTableWorkspace({
         </Modal>
       )}
 
+      {importOpen&&<TableImportDialog table={table} user={currentUser} onClose={()=>setImportOpen(false)} onImport={next=>{if(readOnly)return;markChanged(()=>next);onToast('数据已导入')}}/>}
       {filesOpen && (
         <Modal title="数据文件与导入记录" onClose={() => setFilesOpen(false)} hideFooter wide>
-          <div className="data-sheet-file-history">{table.attachments.length === 0 ? <div className="data-sheet-file-empty"><img src="/assets/document-sheet.svg" alt="" /><strong>暂无导入文件</strong><span>暂无历史数据文件。</span></div> : table.attachments.map((file) => <article key={file.id}><img src="/assets/document-sheet.svg" alt="" /><div><strong>{file.name}</strong><span>{formatFileSize(file.size)} · {file.rowCount} 条 · {file.uploadedBy} 于 {displayMinute(file.uploadedAt)} 导入</span></div><div>{file.previewText && <button type="button" onClick={() => { setFilesOpen(false); setPreviewAttachmentId(file.id) }}>查看预览</button>}<button type="button" className="is-danger" onClick={() => { if (!window.confirm(`移除“${file.name}”的导入记录？已导入的表格行不会删除。`)) return; markChanged((current) => ({ ...current, attachments: current.attachments.filter((item) => item.id !== file.id) })); onToast('导入记录已移除') }}>移除记录</button></div></article>)}</div>
+          <div className="data-sheet-file-history">{table.attachments.length === 0 ? <div className="data-sheet-file-empty"><img src="/assets/document-sheet.svg" alt="" /><strong>暂无导入文件</strong><span>暂无历史数据文件。</span></div> : table.attachments.map((file) => <article key={file.id}><img src="/assets/document-sheet.svg" alt="" /><div><strong>{file.name}</strong><span>{formatFileSize(file.size)} · {file.rowCount} 条 · {file.uploadedBy} 于 {displayMinute(file.uploadedAt)} 导入</span></div><div>{file.previewText && <button type="button" onClick={() => { setFilesOpen(false); setPreviewAttachmentId(file.id) }}>查看预览</button>}<button type="button" disabled={readOnly} className="is-danger" onClick={() => { if (!window.confirm(`移除“${file.name}”的导入记录？已导入的表格行不会删除。`)) return; markChanged((current) => ({ ...current, attachments: current.attachments.filter((item) => item.id !== file.id) })); onToast('导入记录已移除') }}>移除记录</button></div></article>)}</div>
           <div className="data-sheet-file-actions"><button className="button button--primary" type="button" onClick={() => setFilesOpen(false)}>完成</button></div>
         </Modal>
       )}

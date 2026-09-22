@@ -7,6 +7,8 @@ import type { FolderItem, ResearchDocument } from '../types'
 import { DocumentTable } from './DocumentTable'
 
 interface SpaceViewProps {
+  onRecycle:()=>void
+  canEdit:(location:string)=>boolean
   onSearchOpen:()=>void
   onShareFolder:(folder:FolderItem)=>void
   onDownloadFolder:(folder:FolderItem)=>void
@@ -24,7 +26,7 @@ interface SpaceViewProps {
   onOpenFolder: (folder: FolderItem) => void
   onRenameFolder: (id: number, name: string) => boolean
   onDeleteFolder: (id: number) => void
-  onBack: () => void
+  onBack: (path?:string|null) => void
   onNewFolder: () => void
   onNewDocument: () => void
   onNewTable: () => void
@@ -54,6 +56,7 @@ const folderUpdatedAt = (folder: FolderItem, documents: ResearchDocument[]) => d
 )
 
 export function SpaceView({
+  onRecycle,canEdit,
   onSearchOpen,onShareFolder,onDownloadFolder,onLanguageChange,
   quickAccess, onToggleQuickAccess, onManageSpace,
   mode,
@@ -77,7 +80,7 @@ export function SpaceView({
   onCreateNote,
   onOpenDocument,
   onDownloadDocument = downloadArchivedPdf,
-  emptyTeam = false,
+
 }: SpaceViewProps) {
   const locationRoot = mode === 'personal' ? '我的空间' : teamName ?? 'AI研究团队'
   const label = mode === 'personal' ? '个人空间' : locationRoot
@@ -91,7 +94,7 @@ export function SpaceView({
   const renameInputRef = useRef<HTMLInputElement>(null)
   const visibleDocuments = openFolderName
     ? documents.filter((documentItem) => documentItem.location === `${locationRoot}/${openFolderName}`)
-    : documents
+    : documents.filter(item=>item.location===locationRoot)
 
   const closeFolderMenu = (restoreFocus = false) => {
     const trigger = menuFolderId == null ? null : menuTriggerRefs.current.get(menuFolderId)
@@ -197,25 +200,26 @@ export function SpaceView({
     window.requestAnimationFrame(() => menuTriggerRefs.current.get(folderId)?.focus())
   }
 
+  const emptyTeam = mode === 'team' && folders.length === 0 && documents.length === 0
   return (
     <section data-compliance-target={`research-${mode}`} className={`view view--space${mode === 'team' ? ' view--team' : ''}${emptyTeam ? ' view--empty-team' : ''}`}>
       <header className="view-header view-header--actions space-toolbar">
         <div className="header-actions">
-          <CreateActions onNewFolder={onNewFolder} onNewDocument={onNewDocument} onNewTable={onNewTable} onUpload={onImportDocument}/>
-          {mode === 'team' && onManageSpace && <button className="button button--secondary" type="button" onClick={onManageSpace}>空间管理 <span className="space-admin-info" title="此功能仅对管理员开放，其他成员不可见。" aria-label="此功能仅对管理员开放，其他成员不可见。">ⓘ</span></button>}
+          <CreateActions disabled={!canEdit(locationRoot)} onNewFolder={onNewFolder} onNewDocument={onNewDocument} onNewTable={onNewTable} onUpload={onImportDocument}/><button className="button button--secondary" type="button" onClick={onRecycle}>回收站</button>
+          {mode === 'team' && onManageSpace && <button className="button button--secondary" type="button" onClick={onManageSpace}>空间管理 <span className="space-admin-info" title="此功能仅对管理权限成员开放。" aria-label="此功能仅对管理权限成员开放。">ⓘ</span></button>}
         </div>
         <button className="global-search-trigger" type="button" aria-label="全文搜索笔记和文档" onClick={onSearchOpen}><img src="/assets/reading/search.svg" alt=""/><span>搜索笔记、文档</span><kbd>⌘ K</kbd></button>
         {mode === 'personal' && <div className="space-inline-note" role="note">🔒 个人空间仅你可见；除非主动分享，文件与文件夹不会进入团队空间。</div>}
       </header>
       <div className={`view-body space-body${openFolderName ? ' space-body--folder' : ''}${emptyTeam ? ' space-body--empty' : ''}`}>
-        {openFolderName && <nav className="folder-breadcrumb" aria-label="文件夹路径"><button type="button" onClick={onBack}>{label}</button><span>/</span><strong>{openFolderName}</strong></nav>}
-        <DocumentTable onLanguageChange={onLanguageChange}
+        {openFolderName && <nav className="folder-breadcrumb" aria-label="文件夹路径"><button type="button" onClick={()=>onBack(null)}>{label}</button>{openFolderName.split('/').map((part,index,parts)=><span key={index}> / {index===parts.length-1?<strong>{part}</strong>:<button type="button" onClick={()=>onBack(parts.slice(0,index+1).join('/'))}>{part}</button>}</span>)}<button type="button" onClick={()=>onBack(openFolderName.split('/').slice(0,-1).join('/')||null)}>返回上级</button></nav>}
+        <DocumentTable canEdit={d=>canEdit(d.location)} onLanguageChange={onLanguageChange}
           folderEntries={folders.filter((folder) => (folder.location ?? locationRoot) === `${locationRoot}${openFolderName ? '/' + openFolderName : ''}`).map((folder) => ({
             key: `folder:${mode}:${folder.id}`,
             item: { id: -folder.id, title: folder.name, location: folder.location ?? locationRoot, owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? folder.updatedAt, updatedAt: folderUpdatedAt(folder, documents.filter((item) => item.location === `${folder.location ?? locationRoot}/${folder.name}`)), visitedAt: '', size: '-', kind: '在线文档', favorite: false, owned: true, shared: false },
             onOpen: () => onOpenFolder(folder),
-            title: renamingFolderId === folder.id ? <form className="document-rename-form" onSubmit={(event) => { event.preventDefault(); finishRename(folder) }}><input ref={renameInputRef} autoFocus aria-label="文件夹新名称" value={renameValue} onChange={(event) => setRenameValue(event.target.value)} /><button type="submit">保存</button><button type="button" onClick={() => cancelRename(folder.id)}>取消</button>{renameError && <span role="alert">{renameError}</span>}</form> : undefined,
-            actions: <QuickFolderActions name={folder.name} isFavoriteTab={false} onOpen={()=>onOpenFolder(folder)} pinned={quickAccess.includes(`folder:${mode}:${folder.id}`)} favorite={quickAccess.includes(`favorite-folder:${mode}:${folder.id}`)} onUnpin={()=>onToggleQuickAccess(`folder:${mode}:${folder.id}`)} onFavorite={()=>onToggleQuickAccess(`favorite-folder:${mode}:${folder.id}`)} onShare={()=>onShareFolder(folder)} onDownload={()=>onDownloadFolder(folder)} onDelete={()=>onDeleteFolder(folder.id)}/>,
+            title: renamingFolderId === folder.id ? <form className="document-rename-form" onSubmit={(event) => { event.preventDefault(); finishRename(folder) }}><input ref={renameInputRef} autoFocus aria-label="文件夹新名称" onKeyDown={event => { if(event.key === 'Escape') { event.preventDefault(); cancelRename(folder.id) } }} value={renameValue} onChange={(event) => setRenameValue(event.target.value)} /><button type="submit" aria-label="保存" title="保存">✓</button><button type="button" aria-label="取消" title="取消" onClick={() => cancelRename(folder.id)}>×</button>{renameError && <span role="alert">{renameError}</span>}</form> : undefined,
+            actions: <QuickFolderActions canEdit={canEdit(folder.location??locationRoot)} onRename={()=>{setRenamingFolderId(folder.id);setRenameValue(folder.name);setRenameError('')}} name={folder.name} isFavoriteTab={false} onOpen={()=>onOpenFolder(folder)} pinned={quickAccess.includes(`folder:${mode}:${folder.id}`)} favorite={quickAccess.includes(`favorite-folder:${mode}:${folder.id}`)} onUnpin={()=>onToggleQuickAccess(`folder:${mode}:${folder.id}`)} onFavorite={()=>onToggleQuickAccess(`favorite-folder:${mode}:${folder.id}`)} onShare={()=>onShareFolder(folder)} onDownload={()=>onDownloadFolder(folder)} onDelete={()=>onDeleteFolder(folder.id)}/>,
           }))}
           quickAccess={quickAccess} onToggleQuickAccess={onToggleQuickAccess}
           documents={visibleDocuments} mode="space" page={page} onPageChange={onPageChange}

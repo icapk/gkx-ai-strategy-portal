@@ -1,3 +1,4 @@
+import {displayMinute} from './displayFormat.ts'
 import type {
   DataTableAttachment,
   DataTableColumn,
@@ -57,10 +58,7 @@ const cleanTimestamp = (value: unknown, fallback: string) => {
   return candidate || fallback
 }
 
-const formatTimestamp = (date = new Date()) => {
-  const pad = (value: number) => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-}
+const formatTimestamp = (date = new Date()) => displayMinute(date.toISOString())
 
 const createId = (prefix: string) => {
   generatedIdCounter += 1

@@ -1,3 +1,4 @@
+import {displayMinute} from '../displayFormat'
 import { DocumentLanguageSelect, translationDirection } from './DocumentLanguage'
 import {
   useCallback,
@@ -47,6 +48,7 @@ interface PasswordPrompt {
 }
 
 export interface PdfArchiveReaderProps {
+  readOnly?:boolean
   onLanguageChange?: (language:'zh'|'en')=>void
 
   storage?: { loadFile: typeof loadPdfArchiveFile; loadAnnotations: typeof loadPdfAnnotations; loadImage: typeof loadPdfAnnotationImage }
@@ -82,16 +84,7 @@ const createAnnotationId = () => {
   return `pdf-note-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 }
 
-const formatTime = (value: string) => {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '刚刚'
-  return date.toLocaleString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+const formatTime = (value: string) => displayMinute(value)
 
 const canvasToBlob = (canvas: HTMLCanvasElement, quality: number) => new Promise<Blob>((resolve, reject) => {
   canvas.toBlob((blob) => {
@@ -216,6 +209,7 @@ const screenshotDataUrl = async (
 }
 
 export function PdfArchiveReader({
+  readOnly=false,
   onLanguageChange,
   storage,
   document: documentItem,
@@ -693,6 +687,7 @@ export function PdfArchiveReader({
   }
 
   const createHighlightDraft = (quote: string, rects: PdfAnnotationRect[], wasTruncated = false) => {
+    if(readOnly)return
     runAfterDraftExit(() => {
       const timestamp = new Date().toISOString()
       setDraft({
@@ -789,12 +784,13 @@ export function PdfArchiveReader({
   }
 
   const beginPageInteraction = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if(readOnly)return
     if (isSaving) return
     if (tool === 'screenshot') {
       beginCrop(event)
       return
     }
-    if (tool === 'highlight' && !isRendering && event.button === 0 && event.isPrimary) {
+    if (!readOnly && tool === 'highlight' && !isRendering && event.button === 0 && event.isPrimary) {
       highlightStartRef.current = { x: event.clientX, y: event.clientY }
     }
   }
@@ -1197,8 +1193,8 @@ export function PdfArchiveReader({
                   >{loadingImageIds[annotation.id] ? '正在加载截图…' : '点击预览截图'}</button>)}
               <p className={annotation.note ? '' : 'is-empty'}>{annotation.note || '尚未填写补充说明'}</p>
               <footer>
-                <button type="button" disabled={isSaving} onClick={() => editAnnotation(annotation)}>编辑</button>
-                <button type="button" disabled={isSaving} onClick={() => setDeleteTarget(annotation)}>删除</button>
+                <button type="button" disabled={readOnly||isSaving} onClick={() => editAnnotation(annotation)}>编辑</button>
+                <button type="button" disabled={readOnly||isSaving} onClick={() => setDeleteTarget(annotation)}>删除</button>
               </footer>
             </article>
           ))}

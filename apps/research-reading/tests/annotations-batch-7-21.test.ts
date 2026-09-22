@@ -14,14 +14,14 @@ test('搜索仅在线文档检索正文；上传Word/Excel/PDF只按名称，PDF
  assert.equal(searchResearchContent(docs,notes,'标题').filter(r=>r.type==='document').length,5)
  assert.equal(searchResearchContent(docs,notes,'笔记唯一词')[0].type,'note')
 })
-test('回收站新旧资料均按30天判定；未来、无效和缺失日期不清理',()=>{
+test('回收站仅带策略的新资料按30天判定；历史、未来、无效和缺失日期不清理',()=>{
  const now=new Date('2026-09-20T00:00:00Z')
  for(const retentionPolicy of [undefined,'30-days-v1'] as const){
- assert.equal(automaticRecycleDue({deletedAt:'2026-08-21T00:00:00Z',retentionPolicy},now),true)
+ assert.equal(automaticRecycleDue({deletedAt:'2026-08-21T00:00:00Z',retentionPolicy},now),retentionPolicy==='30-days-v1')
  assert.equal(automaticRecycleDue({deletedAt:'2026-08-21T00:00:01Z',retentionPolicy},now),false)
  for(const deletedAt of [undefined,'bad','2027-01-01T00:00:00Z'])assert.equal(automaticRecycleDue({deletedAt,retentionPolicy},now),false)
  }
- assert.match(retentionLabel({deletedAt:'2026-08-01T00:00:00Z'},now),/已到期/)
+ assert.match(retentionLabel({deletedAt:'2026-08-01T00:00:00Z'},now),/历史资料/)
 })
 test('PRD仅修改当前版本的相关功能，保留旧版本、其他功能和历史，重复同步幂等',()=>{
  const features=[{id:'REQ-P4-05',title:'网页书签',rules:[{title:'旧规则',items:['旧内容']}]},{id:'untouched',title:'独立功能',rules:[]}]

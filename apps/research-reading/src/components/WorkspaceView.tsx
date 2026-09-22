@@ -1,5 +1,6 @@
+import {InlineRename} from './InlineRename'
 import {CreateActions} from './CreateActions'
-import { useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useState, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { FolderItem, ResearchDocument, WorkbenchTab } from '../types'
 import { DocumentTable } from './DocumentTable'
 import { QuickFolderActions } from './QuickFolderActions'
@@ -11,6 +12,9 @@ const tabs: Array<{ id: WorkbenchTab; label: string }> = [
 ]
 
 interface WorkspaceViewProps {
+  canEdit:(location:string)=>boolean
+  onRenameDocument:(id:number,title:string)=>boolean
+  onRenameFolder:(folder:FolderItem&{scope:"personal"|"team"},name:string)=>boolean
   onShareFolder:(folder:FolderItem&{scope:'personal'|'team'})=>void
   onDownloadFolder:(folder:FolderItem&{scope:'personal'|'team'})=>void
   onDeleteFolder:(folder:FolderItem&{scope:'personal'|'team'})=>void
@@ -39,6 +43,7 @@ interface WorkspaceViewProps {
 }
 
 export function WorkspaceView({
+  canEdit,onRenameDocument,onRenameFolder,
   onShareFolder,onDownloadFolder,onDeleteFolder,onLanguageChange,
   onNewFolder, onNew, onNewTable, onUpload,
   onSearchOpen,
@@ -56,6 +61,7 @@ export function WorkspaceView({
   onOpenDocument,
   highlightedDocumentId,
 }: WorkspaceViewProps) {
+  const [renamingFolder,setRenamingFolder]=useState<string|null>(null)
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const activeTabIndex = tabs.findIndex((item) => item.id === tab)
 
@@ -112,8 +118,8 @@ export function WorkspaceView({
           role="tabpanel"
           aria-labelledby={`workbench-tab-${tabs[activeTabIndex]?.id ?? tab}`}
         >
-          <DocumentTable onLanguageChange={onLanguageChange} onDownloadDocument={onDownloadDocument}
-            folderEntries={tab === 'quick' || tab === 'favorites' ? quickFolders.map((folder) => ({ key: `folder:${folder.scope}:${folder.id}`, item: { id: -(folder.id * 2 + (folder.scope === 'team' ? 1 : 0)), title: folder.name, location: folder.location ?? '我的空间', owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? folder.updatedAt, updatedAt: folder.updatedAt, visitedAt: '', size: '-', kind: '在线文档', favorite: false, owned: true, shared: false }, onOpen: () => onOpenQuickFolder(folder), actions: <QuickFolderActions pinned={quickAccess.includes(`folder:${folder.scope}:${folder.id}`)} onShare={()=>onShareFolder(folder)} onDownload={()=>onDownloadFolder(folder)} onDelete={()=>onDeleteFolder(folder)} name={folder.name} isFavoriteTab={tab==='favorites'} favorite={quickAccess.includes(`favorite-folder:${folder.scope}:${folder.id}`)} onOpen={()=>onOpenQuickFolder(folder)} onUnpin={()=>onToggleQuickAccess(`folder:${folder.scope}:${folder.id}`)} onFavorite={()=>onToggleQuickAccess(`favorite-folder:${folder.scope}:${folder.id}`)}/> })) : []}
+          <DocumentTable canEdit={d=>canEdit(d.location)} onRename={onRenameDocument} onLanguageChange={onLanguageChange} onDownloadDocument={onDownloadDocument}
+            folderEntries={['quick','favorites','recent'].includes(tab) ? quickFolders.map((folder) => ({ key: `folder:${folder.scope}:${folder.id}`, item: { id: -(folder.id * 2 + (folder.scope === 'team' ? 1 : 0)), title: folder.name, location: folder.location ?? '我的空间', owner: folder.owner ?? '当前用户', createdAt: folder.createdAt ?? '', updatedAt: folder.updatedAt, visitedAt: folder.visitedAt??'', favoritedAt:folder.favoritedAt, size: '-', kind: '在线文档', favorite: false, owned: true, shared: false }, onOpen: () => onOpenQuickFolder(folder), title:renamingFolder===folder.scope+':'+folder.id?<InlineRename name={folder.name} onSave={name=>onRenameFolder(folder,name)} onCancel={()=>setRenamingFolder(null)}/>:undefined, actions: <QuickFolderActions canEdit={canEdit(folder.location??"我的空间")} onRename={()=>setRenamingFolder(folder.scope+':'+folder.id)} pinned={quickAccess.includes(`folder:${folder.scope}:${folder.id}`)} onShare={()=>onShareFolder(folder)} onDownload={()=>onDownloadFolder(folder)} onDelete={()=>onDeleteFolder(folder)} name={folder.name} isFavoriteTab={tab==='favorites'} favorite={quickAccess.includes(`favorite-folder:${folder.scope}:${folder.id}`)} onOpen={()=>onOpenQuickFolder(folder)} onUnpin={()=>onToggleQuickAccess(`folder:${folder.scope}:${folder.id}`)} onFavorite={()=>onToggleQuickAccess(`favorite-folder:${folder.scope}:${folder.id}`)}/> })) : []}
             quickAccess={quickAccess}
             onToggleQuickAccess={onToggleQuickAccess}
             documents={documents}
