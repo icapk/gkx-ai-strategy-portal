@@ -313,12 +313,11 @@ export default function InformationExchangePage() {
     <main className="ie-page">
       <PortalHeader currentPage="information-exchange" />
       <section id="ie-top" className="ie-hero-stage">
-        <img className="ie-hero-art" src={`${assetRoot}/hero-background.png`} alt="" />
-        <div className="ie-hero-copy">
-          <h1>科技信息交流</h1>
-          <p>汇聚科技赛事、专家思辨与热门交流活动<br />打造开放共享的科技交流平台。</p>
-          <button className="ie-topic-cta" type="button" onClick={() => document.getElementById("ie-hot")?.scrollIntoView({ behavior: "smooth" })}>参与热门话题</button>
-        </div>
+        <img
+          className="ie-hero-art"
+          src={`${assetRoot}/hero-background.png`}
+          alt="科技信息交流：汇聚科技赛事、专家思辨与热门交流活动，打造开放共享的科技交流平台。"
+        />
         <div className="ie-metrics">
           <MetricItem icon="calendar" label="累计活动数量" value="3,462" />
           <MetricItem icon="expert" label="参与专家数量" value="2,000,000" />
