@@ -116,7 +116,7 @@ button {
   top: 0;
   height: var(--header-height);
   border-bottom: 0;
-  background: #d8e7fc;
+  background: rgba(216, 231, 252, .72);
   -webkit-backdrop-filter: blur(18px) saturate(135%);
   backdrop-filter: blur(18px) saturate(135%);
 }

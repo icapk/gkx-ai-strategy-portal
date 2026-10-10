@@ -3020,6 +3020,7 @@
   <link rel="stylesheet" href="portal-extras.css?v=20261010-card-interactions-2">
   <link rel="stylesheet" href="mastergo-v2.css">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261010-glass-tabs-1">
+  <link rel="stylesheet" href="apps/cluster-service/dist/assets/glass-tabs.css?v=20261010-glass-tabs-6">
   <style>
     .search-service-path {
       display: flex;
@@ -3753,7 +3754,7 @@
       </div>
 
       <nav class="desktop-nav" id="desktopNav" aria-label="主导航">
-        <button class="nav-trigger home-nav-trigger is-active" id="homeNavTab" type="button" aria-current="page">首页</button>
+        <button class="nav-trigger portal-glass-tab home-nav-trigger is-active" id="homeNavTab" type="button" aria-current="page">首页</button>
       </nav>
 
       <div class="header-actions">
@@ -9458,7 +9459,7 @@
       function createDesktopDirectEntry(group) {
         const isEmbedded = group.action === "embed";
         const entry = document.createElement(isEmbedded ? "button" : "a");
-        entry.className = "nav-trigger nav-direct-entry";
+        entry.className = "nav-trigger portal-glass-tab nav-direct-entry";
         entry.dataset.navLabel = group.label;
         entry.textContent = group.label;
 
@@ -9549,7 +9550,7 @@
 
         const trigger = document.createElement("button");
         trigger.type = "button";
-        trigger.className = "nav-trigger";
+        trigger.className = "nav-trigger portal-glass-tab";
         trigger.dataset.navLabel = group.label;
         trigger.textContent = group.label;
         trigger.setAttribute("aria-haspopup", "true");

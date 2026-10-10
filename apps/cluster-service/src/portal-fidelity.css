@@ -54,11 +54,12 @@ html.is-portal-embed .fp-back-to-portal:focus-visible {
 }
 
 .fp-site-header {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 60;
   width: 100%;
   height: 56px;
-  background: #d8e7fc;
+  background: rgba(216, 231, 252, .72);
   -webkit-backdrop-filter: blur(18px) saturate(135%);
   backdrop-filter: blur(18px) saturate(135%);
 }
