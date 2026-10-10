@@ -59,6 +59,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import PageSectionLocator from "./PageSectionLocator";
 import PortalHeader from "./PortalHeader";
 import { OneMapModule } from "./topic-modules/OneMapModule";
 import { PolicyModule } from "./topic-modules/PolicyModule";
@@ -3146,10 +3147,14 @@ export default function TechnologyTopicServicePage() {
         </div>
       </section>
 
-      {activeDefinition.subs.length > 1 && <nav className="tp-subsection-locator" aria-label={`${activeDefinition.label}内容定位`}>
-        <strong>内容定位</strong>
-        {activeDefinition.subs.map((sub) => <button className={activeLocator === sub.id ? "active" : ""} type="button" aria-current={activeLocator === sub.id ? "location" : undefined} onClick={() => locateSubsection(sub.id)} key={sub.id}><span>{sub.label}</span></button>)}
-      </nav>}
+      <PageSectionLocator
+        items={activeDefinition.subs.map((sub) => ({ id: `tp-subsection-${sub.id}`, label: sub.label }))}
+        topId="tp-top"
+        anchorId="tp-workspace"
+        label={`${activeDefinition.label}内容定位`}
+        activeId={`tp-subsection-${activeLocator}`}
+        onLocate={(sectionId) => locateSubsection(sectionId.replace("tp-subsection-", ""))}
+      />
 
       <footer className="tp-footer"><div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科技专题服务</strong><small>深圳国际科技信息中心</small></span></div><p>当前页面仅用于功能与交互演示，所有数据、排序、对象与结论均不代表真实情况。</p></footer>
     </div>

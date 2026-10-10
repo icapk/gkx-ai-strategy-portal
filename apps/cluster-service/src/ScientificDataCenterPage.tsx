@@ -27,6 +27,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import PageSectionLocator from "./PageSectionLocator";
 import PortalHeader from "./PortalHeader";
 import "./scientific-data-center.css";
 
@@ -900,11 +901,7 @@ export default function ScientificDataCenterPage() {
           <div className="sdc-content-flow" key={activeTopic}><TopicContent topicId={activeTopic} onOpen={openTopic} /></div>
         </section>
 
-        <nav className="sdc-section-locator" aria-label={`${activeDefinition.label}内容定位`}>
-          <strong>内容定位</strong>
-          {activeDefinition.sections.map((section) => <button type="button" className={activeAnchor === section.id ? "is-active" : ""} aria-current={activeAnchor === section.id ? "location" : undefined} onClick={() => locateSection(section.id)} key={section.id}>{section.label}</button>)}
-          <button type="button" className="sdc-back-top" onClick={() => document.getElementById("sdc-top")?.scrollIntoView({ behavior: preferredScrollBehavior() })}>返回顶部</button>
-        </nav>
+        <PageSectionLocator items={activeDefinition.sections} topId="sdc-top" anchorId="sdc-workspace" label={`${activeDefinition.label}内容定位`} activeId={activeAnchor} onLocate={locateSection} />
 
         {activeTopic === "brain-atlas" ? null : <footer className="sdc-footer"><div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科学数据中心</strong><small>深圳国际科技信息中心</small></span></div><p>当前页面仅用于标书功能与交互演示；所有数据、对象、图谱关系和统计结果均不代表真实结论。</p></footer>}
       </div>

@@ -775,7 +775,7 @@ export default function TechnologyDecisionSupportPage() {
         <section className="tds-main-column" aria-labelledby="tds-module-title"><header className="tds-module-heading"><span><ActiveIcon size={23} /></span><div><h2 id="tds-module-title">{activeDefinition.label}</h2><p>{activeDefinition.description}</p></div>{activeModule === "forecast" ? <DemoBadge>综合预测报告</DemoBadge> : <DemoBadge />}</header><div className="tds-content-flow" key={activeModule}><ModuleContent moduleId={activeModule} /></div></section>
       </div>
     </main>
-    <PageSectionLocator items={activeDefinition.sections} topId="tds-top" label="内容定位" />
+    <PageSectionLocator items={activeDefinition.sections} topId="tds-top" anchorId="tds-workspace" label="内容定位" />
     <footer className="tds-footer"><div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科技决策支持</strong><small>深圳国际科技信息中心</small></span></div><p>预测结果需结合数据权限、业务规则与专业研判用于辅助决策。</p></footer>
   </div>;
 }

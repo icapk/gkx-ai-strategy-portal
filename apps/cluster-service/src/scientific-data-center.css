@@ -82,14 +82,13 @@
   width: 1200px;
   margin: 24px auto 0;
   display: grid;
-  grid-template-columns: 208px minmax(0, 1fr) 124px;
+  grid-template-columns: 208px minmax(0, 1fr);
   column-gap: 24px;
   align-items: start;
   scroll-margin-top: 24px;
 }
 
-.sdc-topic-nav,
-.sdc-section-locator {
+.sdc-topic-nav {
   position: sticky;
   top: 24px;
   align-self: start;
@@ -194,29 +193,6 @@
 }
 .sdc-content-section-header h3 { margin: 0; color: #20344e; font-size: 17px; line-height: 25px; }
 .sdc-content-section-header p { max-width: 72ch; margin: 4px 0 0; color: #687991; font-size: 11px; line-height: 18px; }
-
-.sdc-section-locator {
-  padding-left: 12px;
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid #dfe7f1;
-}
-.sdc-section-locator > strong { min-height: 30px; padding: 0 4px; display: flex; align-items: center; color: #74849a; font-size: 11px; font-weight: 600; }
-.sdc-section-locator > button {
-  width: 100%;
-  min-height: 34px;
-  padding: 7px 4px;
-  color: #697a91;
-  background: transparent;
-  border: 0;
-  font-size: 11px;
-  line-height: 17px;
-  text-align: left;
-}
-.sdc-section-locator > button:hover { color: var(--sdc-blue); }
-.sdc-section-locator > button.is-active { color: var(--sdc-blue); font-weight: 650; }
-.sdc-section-locator > button.is-active::before { display: inline-block; width: 6px; height: 6px; margin-right: 7px; content: ""; background: var(--sdc-blue); border-radius: 50%; vertical-align: 1px; }
-.sdc-section-locator > .sdc-back-top { margin-top: 12px; padding-top: 10px; color: #8593a6; border-top: 1px solid #e7edf4; }
 
 .sdc-index-list { border-top: 1px solid #e5ebf2; }
 .sdc-index-row {
@@ -735,52 +711,11 @@
   .sdc-brain-system-grid article:focus-within { transform: none; }
 }
 
-.sdc-page.is-brain-atlas .sdc-section-locator {
-  position: sticky;
-  z-index: 35;
-  top: 96px;
-  grid-column: 2;
-  grid-row: 1;
-  align-self: start;
-  justify-self: end;
-  width: 156px;
-  margin-top: 120px;
-  padding: 0;
-  gap: 4px;
-  transform: translateX(calc(100% + 24px));
-  border-left: 0;
-}
-.sdc-page.is-brain-atlas .sdc-section-locator > strong { display: none; }
-.sdc-page.is-brain-atlas .sdc-section-locator > button {
-  position: relative;
-  min-height: 38px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  color: #59697f;
-  font-size: 14px;
-  line-height: 22px;
-  text-align: left;
-  white-space: nowrap;
-  cursor: pointer;
-  pointer-events: auto;
-  touch-action: manipulation;
-}
-.sdc-page.is-brain-atlas .sdc-section-locator > button:hover { color: #1769ff; background: rgba(255, 255, 255, .56); border-radius: 4px; }
-.sdc-page.is-brain-atlas .sdc-section-locator > button.is-active { color: #1769ff; background: #fff; border-radius: 4px; box-shadow: none; font-weight: 600; }
-.sdc-page.is-brain-atlas .sdc-section-locator > button::before { display: none; }
-.sdc-page.is-brain-atlas .sdc-section-locator .sdc-back-top { margin-top: 8px; padding-top: 0; color: #59697f; border-top: 0; }
-
 @media (min-width: 1432px) and (max-width: 1600px) {
   .sdc-page.is-brain-atlas .sdc-shell,
   .sdc-page.is-brain-atlas .sdc-hero-inner {
     margin-right: auto;
     margin-left: max(28px, calc((100vw - 176px - 1200px) / 2));
-  }
-  .sdc-page.is-brain-atlas .sdc-section-locator {
-    width: 156px;
-    transform: translateX(calc(100% + 20px));
   }
 }
 
@@ -792,6 +727,5 @@
     margin-left: auto;
   }
   .sdc-page.is-brain-atlas .sdc-shell { grid-template-columns: 160px minmax(0, 1fr); gap: 18px; }
-  .sdc-page.is-brain-atlas .sdc-section-locator { display: none; }
   .sdc-brain-feature { grid-template-columns: 46% 54%; }
 }

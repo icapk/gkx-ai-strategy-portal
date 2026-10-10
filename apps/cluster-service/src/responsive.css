@@ -240,8 +240,6 @@ html.is-portal-embed .fp-site-header { display: none; }
   .trs-module-nav > button,
   .tds-module-nav > button,
   .sdc-topic-nav > button { min-height: 54px; }
-  .trs-section-locator,
-  .sdc-section-locator { display: none; }
   .trs-content-section,
   .tds-content-section,
   .sdc-content-section { padding: 18px 16px; }
@@ -355,7 +353,6 @@ html.is-portal-embed .fp-site-header { display: none; }
     grid-row: 2;
     width: 100%;
   }
-  .tp-subsection-locator { display: none; }
   .tp-section-header,
   .tp-flat-subsection-header,
   .tp-panel-header { align-items: flex-start; flex-direction: column; }

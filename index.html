@@ -9678,11 +9678,7 @@
       const mobileTicketButton = document.createElement("button");
       mobileTicketButton.type = "button";
       mobileTicketButton.className = "mobile-primary mobile-primary--link";
-      mobileTicketButton.innerHTML = `
-        <span>待办中心</span>
-        <svg class="mobile-direct-icon" viewBox="0 0 20 20" aria-hidden="true">
-          <path d="M4.5 5.5h11v9h-11zM7 8h6M7 11h4"></path>
-        </svg>`;
+      mobileTicketButton.innerHTML = `<span>待办中心</span>`;
       mobileTicketButton.addEventListener("click", () => openTicketService(mobileMenuButton));
       mobileTicketSection.appendChild(mobileTicketButton);
       mobileNav.appendChild(mobileTicketSection);

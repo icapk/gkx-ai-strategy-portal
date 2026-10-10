@@ -1,5 +1,5 @@
 :root {
-  --header-height: 64px;
+  --header-height: 56px;
   --theme: #0877e8;
   --theme-strong: #005bc4;
   --theme-soft: #edf6ff;
@@ -115,44 +115,43 @@ button {
   z-index: 100;
   top: 0;
   height: var(--header-height);
-  border-bottom: 1px solid rgba(216, 226, 238, 0.9);
-  background: rgba(250, 252, 255, 0.95);
-  backdrop-filter: blur(14px);
+  border-bottom: 0;
+  background: #d8e7fc;
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
 }
 
 .lp-header-inner {
   display: flex;
-  width: min(calc(100% - 40px), 1480px);
+  width: 100%;
   height: 100%;
   align-items: center;
-  gap: 26px;
-  margin: 0 auto;
+  gap: 0;
+  padding: 0 16px;
 }
 
 .lp-brand {
   display: flex;
-  min-width: 266px;
+  min-width: 230px;
   align-items: center;
   gap: 10px;
   color: #263449;
-  font-size: 17px;
-  font-weight: 650;
+  font-size: 16px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .lp-brand-mark {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   place-items: center;
-  border: 2px solid #18539a;
-  border-radius: 50%;
-  color: #18539a;
-  background: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  box-shadow: inset 0 0 0 3px #e9f2fb;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
+.lp-brand-mark img { width: 28px; height: 28px; display: block; object-fit: contain; }
 
 .lp-nav {
   display: flex;
@@ -166,37 +165,43 @@ button {
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0 16px;
-  color: #465469;
+  min-width: 88px;
+  padding: 9px 8px;
+  color: #1d2129;
   font-size: 14px;
   white-space: nowrap;
 }
 
 .lp-nav a::after {
   position: absolute;
-  right: 16px;
-  bottom: -1px;
-  left: 16px;
-  height: 3px;
-  border-radius: 3px 3px 0 0;
-  background: var(--theme);
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  height: 4px;
+  background: #fff;
   content: "";
   opacity: 0;
-  transform: scaleX(0.45);
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition: opacity 150ms ease;
 }
 
 .lp-nav a:hover,
 .lp-nav a:focus-visible,
 .lp-nav a[aria-current="page"] {
-  color: var(--theme-strong);
-  background: color-mix(in srgb, var(--theme) 4%, transparent);
+  color: #165dff;
+  background: rgba(255, 255, 255, .16);
   outline: none;
 }
 
 .lp-nav a[aria-current="page"]::after {
   opacity: 1;
-  transform: scaleX(1);
+}
+.lp-nav a[aria-current="page"] {
+  color: #165dff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .24) 0%, rgba(255, 255, 255, .48) 100%);
+  -webkit-backdrop-filter: blur(12px) saturate(135%);
+  backdrop-filter: blur(12px) saturate(135%);
+  font-weight: 500;
 }
 
 .lp-home-link,
@@ -752,7 +757,9 @@ button.lp-system-entry {
   }
 
   .lp-nav a {
-    padding: 0 10px;
+    min-width: 72px;
+    padding: 0 7px;
+    font-size: 13px;
   }
 
   .lp-hero-grid {
