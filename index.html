@@ -3020,7 +3020,7 @@
   <link rel="stylesheet" href="portal-extras.css?v=20261010-card-interactions-2">
   <link rel="stylesheet" href="mastergo-v2.css">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261010-glass-tabs-1">
-  <link rel="stylesheet" href="assets/glass-tabs.css?v=20261010-new-shell-glass-1">
+  <link rel="stylesheet" href="assets/glass-tabs.css?v=20261010-unified-glass-1">
   <style>
     .search-service-path {
       display: flex;
@@ -6312,6 +6312,10 @@
         let state = null;
         try { state = JSON.parse(sessionStorage.getItem(PORTAL_VIEW_STATE_KEY) || "null"); } catch (error) { /* ignore invalid state */ }
         if (!state || state.surface !== "iframe" || typeof state.iframeUrl !== "string" || !state.iframeUrl) return false;
+        if (state.iframeUrl.includes("apps/cluster-service/")) {
+          clearPortalViewState();
+          return false;
+        }
         activePortalViewState = state;
         showSurface("iframe", { ...state, skipViewStatePersistence: true });
         return true;
@@ -9257,6 +9261,13 @@
       }
 
       function activateEmbeddedSystem(item, activeNavLabel = item.label) {
+        const clusterPage = activeNavLabel === "集群服务"
+          ? new URL(item.url, window.location.href).searchParams.get("page")
+          : null;
+        const portalUrl = new URL(window.location.href);
+        if (clusterPage) portalUrl.searchParams.set("cluster", clusterPage);
+        else portalUrl.searchParams.delete("cluster");
+        window.history.replaceState(null, "", portalUrl);
         showSurface("iframe", {
           iframeUrl: item.url,
           hideEmbeddedHeader: item.hideEmbeddedHeader,
@@ -9268,7 +9279,23 @@
       }
 
       function showHome() {
+        const portalUrl = new URL(window.location.href);
+        portalUrl.searchParams.delete("cluster");
+        window.history.replaceState(null, "", portalUrl);
         showSurface("home");
+      }
+
+      function openClusterServiceRoute() {
+        const clusterPage = new URL(window.location.href).searchParams.get("cluster");
+        if (!clusterPage) return false;
+        const clusterGroup = NAVIGATION.find((group) => group.label === "集群服务");
+        const clusterItem = clusterGroup?.items.find((item) => {
+          if (!item.url) return false;
+          return new URL(item.url, window.location.href).searchParams.get("page") === clusterPage;
+        });
+        if (!clusterGroup || !clusterItem) return false;
+        activateEmbeddedSystem(clusterItem, clusterGroup.label);
+        return true;
       }
 
       brandHome.addEventListener("click", showHome);
@@ -9774,7 +9801,7 @@
       embeddedSystem.addEventListener("load", persistPortalViewState);
       window.addEventListener("pagehide", persistPortalViewState);
       window.addEventListener("beforeunload", persistPortalViewState);
-      restorePortalViewState();
+      if (!openClusterServiceRoute()) restorePortalViewState();
     })();
   </script>
 </body>

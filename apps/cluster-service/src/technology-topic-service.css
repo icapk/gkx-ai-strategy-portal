@@ -2051,8 +2051,11 @@
   position: sticky;
   z-index: 80;
   top: 0;
-  border-bottom: 1px solid #e6edf6;
-  box-shadow: 0 5px 18px rgba(44, 70, 105, .04);
+  border-bottom: 0;
+  background: var(--portal-tab-bar-background, rgba(216, 231, 252, .78));
+  -webkit-backdrop-filter: var(--portal-tab-bar-backdrop, blur(18px) saturate(135%));
+  backdrop-filter: var(--portal-tab-bar-backdrop, blur(18px) saturate(135%));
+  box-shadow: none;
 }
 
 .tp-chain-panel .tp-panel-header h3,

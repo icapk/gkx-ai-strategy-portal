@@ -117,7 +117,13 @@ html.is-portal-embed .fp-back-to-portal:focus-visible {
 }
 .fp-main-nav > a { min-width: 80px; }
 .fp-header-menu { position: relative; height: 64px; }
-.fp-header-menu.is-active > button { color: #165dff; font-weight: 600; }
+.fp-header-menu.is-active > button {
+  color: #165dff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .24) 0%, rgba(255, 255, 255, .48) 100%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  font-weight: 500;
+}
 .fp-header-menu > button { cursor: pointer; }
 .fp-header-popover {
   position: absolute;

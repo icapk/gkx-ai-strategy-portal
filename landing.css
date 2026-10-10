@@ -154,6 +154,13 @@ button {
   box-shadow: inset 0 0 0 3px #e9f2fb;
 }
 
+.lp-brand-mark img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
 .lp-nav {
   display: flex;
   height: 100%;

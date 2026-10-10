@@ -21,7 +21,7 @@ body{background:var(--header-band)}
 .nav-trigger{width:clamp(78px,calc((100vw - 731px)/7),88px);min-width:clamp(78px,calc((100vw - 731px)/7),88px);flex:0 0 clamp(78px,calc((100vw - 731px)/7),88px);height:56px;padding:9px 8px;border-radius:2px;color:#1d2129;background:transparent;font-size:14px;font-weight:400;line-height:22px;cursor:pointer;transition:color 150ms ease,background 150ms ease}
 .nav-trigger::after{display:block;top:0;right:0;bottom:auto;left:0;height:4px;border-radius:0;background:#fff;opacity:0;transform:none}
 .nav-trigger:hover{color:#165dff;background:rgba(255,255,255,.16)}
-.nav-trigger.is-open,.nav-trigger.is-active,.nav-trigger.is-current,.nav-trigger[aria-expanded=true]{color:#165dff;background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.48));-webkit-backdrop-filter:blur(12px) saturate(135%);backdrop-filter:blur(12px) saturate(135%);font-weight:500}
+.nav-trigger.is-open,.nav-trigger.is-active,.nav-trigger.is-current,.nav-trigger[aria-expanded=true]{color:#165dff;background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.48));-webkit-backdrop-filter:none;backdrop-filter:none;font-weight:500}
 .nav-trigger.is-open::after,.nav-trigger.is-active::after,.nav-trigger.is-current::after,.nav-trigger[aria-expanded=true]::after{opacity:1}
 .nav-trigger:focus-visible{color:#165dff;outline:2px solid rgba(22,93,255,.32);outline-offset:-2px}
 .nav-trigger:focus-visible::after{opacity:1}
