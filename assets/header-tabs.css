@@ -1,0 +1,95 @@
+:root{--header-band:#d8e7fc;--header-surface:transparent}
+body{background:var(--header-band)}
+.site-header{border-bottom:0;background:var(--header-surface);-webkit-backdrop-filter:blur(18px) saturate(135%);backdrop-filter:blur(18px) saturate(135%)}
+.brand-lockup img{display:none}
+.brand-home{display:inline-flex;width:100%;height:100%;align-items:center;gap:8px;padding:6px 2px;color:#1d2129;font-size:16px;font-weight:500;line-height:24px;white-space:nowrap}
+.brand-home::before{width:28px;height:28px;flex:0 0 28px;background:url("../apps/cluster-service/dist/assets/gkx-logo.png") center/contain no-repeat;content:""}
+.brand-home::after{content:"深圳国际科技信息中心"}
+.announcement-bar{background:var(--header-band)}
+.profile-menu.utility-menu{top:calc(100% + 4px);right:0;width:160px;padding:4px;border:1px solid #e5e6eb;border-radius:4px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.1)}
+.utility-menu .profile-menu-item{width:100%;min-height:40px;gap:8px;border-radius:2px;padding:0 12px;color:#1d2129;background:transparent;font-size:14px;font-weight:400;line-height:22px;text-decoration:none;transition:color 120ms ease,background-color 120ms ease}
+.utility-menu .profile-menu-item:hover,.utility-menu .profile-menu-item:focus,.utility-menu .profile-menu-item:focus-visible{color:#1d2129;background:#f2f3f5;outline:none}
+.utility-menu .profile-menu-item:active{background:#e5e6eb}
+.utility-menu .profile-menu-item.is-disabled{color:#c9cdd4;background:transparent}
+.utility-menu .profile-menu-item+.profile-menu-item{border-top:0}
+@media (min-width:1280px){
+:root{--header-height:56px}
+.site-header{height:var(--header-height);box-shadow:none;isolation:isolate}
+.header-inner{height:56px;padding:0 16px}
+.brand-lockup{width:230px;min-width:230px}
+.desktop-nav{flex:0 1 auto;gap:0}
+.nav-trigger{width:clamp(78px,calc((100vw - 731px)/7),88px);min-width:clamp(78px,calc((100vw - 731px)/7),88px);flex:0 0 clamp(78px,calc((100vw - 731px)/7),88px);height:56px;padding:9px 8px;border-radius:2px;color:#1d2129;background:transparent;font-size:14px;font-weight:400;line-height:22px;cursor:pointer;transition:color 150ms ease,background 150ms ease}
+.nav-trigger::after{display:block;top:0;right:0;bottom:auto;left:0;height:4px;border-radius:0;background:#fff;opacity:0;transform:none}
+.nav-trigger:hover{color:#165dff;background:rgba(255,255,255,.16)}
+.nav-trigger.is-open,.nav-trigger.is-active,.nav-trigger.is-current,.nav-trigger[aria-expanded=true]{color:#165dff;background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.48));-webkit-backdrop-filter:blur(12px) saturate(135%);backdrop-filter:blur(12px) saturate(135%);font-weight:500}
+.nav-trigger.is-open::after,.nav-trigger.is-active::after,.nav-trigger.is-current::after,.nav-trigger[aria-expanded=true]::after{opacity:1}
+.nav-trigger:focus-visible{color:#165dff;outline:2px solid rgba(22,93,255,.32);outline-offset:-2px}
+.nav-trigger:focus-visible::after{opacity:1}
+.header-actions{height:56px;gap:4px;margin-left:auto}
+.utility-nav{height:56px;gap:0}
+.utility-trigger{height:32px;gap:4px;padding:0 8px;border-radius:4px;color:#4e5969;font-size:14px;line-height:20px}
+.utility-nav .utility-trigger::before,.ticket-service-button::before,.message-center-button::before{width:20px;height:20px;flex:0 0 20px;background:currentColor;content:""}
+.utility-nav .utility-trigger::before{-webkit-mask:url("header-workbench.svg") center/20px 20px no-repeat;mask:url("header-workbench.svg") center/20px 20px no-repeat}
+.ticket-service-button svg{display:none}
+.ticket-service-button::before{-webkit-mask:url("header-todo.svg") center/20px 20px no-repeat;mask:url("header-todo.svg") center/20px 20px no-repeat}
+.message-center-button{display:inline-flex;width:102px;min-width:102px;height:32px;align-items:center;justify-content:center;gap:4px;border-radius:4px;padding:0 8px;color:#4e5969;font-size:14px;line-height:20px}
+.message-center-button::after{content:"消息中心";white-space:nowrap}
+.message-center-button::before{-webkit-mask:url("header-message.svg") center/20px 20px no-repeat;mask:url("header-message.svg") center/20px 20px no-repeat}
+.utility-trigger:hover,.utility-trigger:focus-visible,.utility-trigger[aria-expanded=true],.message-center-button:hover,.message-center-button:focus-visible,.message-center-button[aria-expanded=true]{color:#165dff;background:rgba(11,94,184,.08);border-radius:4px}
+.message-center-button svg{display:none}
+.message-center-badge{top:-4px;right:auto;left:88px;min-width:18px;height:18px;border-width:0;padding:0 4px;font-size:10px;line-height:18px}
+.profile-wrap{height:56px;margin-left:20px}
+.profile-button{display:flex;width:112px;min-width:112px;height:40px;align-items:center;justify-content:flex-start;gap:6px;border-radius:30px;padding:4px 8px 4px 4px;color:#1d2129;background:rgba(255,255,255,.48)}
+.profile-avatar{display:flex;width:32px;height:32px;flex:0 0 32px;align-items:center;justify-content:center;border:0;color:#fff;background:url("profile-avatar-fill.svg") center/32px no-repeat,url("profile-avatar-bg.svg") center/32px no-repeat;box-shadow:none;font-size:14px;font-weight:500;line-height:1;text-align:center}
+.profile-avatar::before{content:none}
+.profile-button::before{order:2;content:"李科信";font-size:14px;font-weight:400;line-height:22px;white-space:nowrap}
+.profile-button::after{width:12px;height:12px;flex:0 0 12px;order:3;margin-left:2px;background:url("profile-caret-down.svg") center/12px no-repeat;content:""}
+.profile-button:hover,.profile-button:focus-visible,.profile-button[aria-expanded=true]{color:#1769ff;background:rgba(255,255,255,.86)}
+.mega-menu{top:100%;border-bottom:1px solid rgba(255,255,255,.9);background:linear-gradient(110deg,rgba(248,251,255,.99),rgba(234,243,255,.99));box-shadow:0 12px 28px rgba(52,84,127,.08)}
+.mega-menu::before{display:none}
+.mega-inner{width:min(100%,1440px);padding:24px 32px 28px 256px}
+.mega-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 40px}
+.menu-entry{min-height:44px;border-radius:4px;padding:0 16px;color:#273446;font-size:14px;line-height:20px}
+.menu-entry:hover,.menu-entry:focus-visible{color:#1769ff;background:#e8f3ff}
+.mega-menu .entry-icon{display:none}
+}
+@media (max-width:1279px){
+.site-header,.header-inner{height:64px}
+.header-inner{align-items:center;padding:12px 16px}
+.brand-lockup{width:180px;min-width:180px;height:40px}
+.brand-home{height:40px;gap:8px;padding:6px 2px;font-size:14px;font-weight:500;line-height:24px}
+.brand-home::before{width:28px;height:28px;flex-basis:28px}
+.header-actions{height:40px;gap:0;margin-left:auto}
+.utility-nav,.ticket-service-button{display:none!important}
+.mobile-menu-button{display:inline-flex!important;order:1;width:20px;min-width:20px;height:20px;align-items:center;justify-content:center;border-radius:4px;padding:0;color:#4e5969;background:transparent}
+.mobile-menu-button svg{display:block;width:20px;height:20px;fill:currentColor;stroke:none}
+.message-center-button{display:block;order:2;width:20px;min-width:20px;height:20px;margin-left:12px;border-radius:4px;padding:0;background:transparent}
+.message-center-button::before{display:block;width:20px;height:20px;background:url("header-message.svg") center/20px no-repeat;content:""}
+.message-center-button svg{display:none}
+.message-center-badge{top:-2px;right:auto;left:14px;width:8px;min-width:8px;height:8px;overflow:hidden;border:0;border-radius:50%;padding:0;color:transparent;background:#f53f3f;font-size:0;line-height:0}
+.profile-wrap{order:3;height:40px;margin-left:16px}
+.profile-button{display:flex;width:32px;min-width:32px;height:32px;align-items:center;justify-content:center;border-radius:24px;padding:3.2px;background:rgba(255,255,255,.48)}
+.profile-avatar{width:25.6px;height:25.6px;border:0;background:url("profile-avatar-fill.svg") center/25.6px no-repeat,url("profile-avatar-bg.svg") center/25.6px no-repeat;box-shadow:none;font-size:12px;font-weight:500;line-height:20px}
+.mobile-backdrop{top:0;background:rgba(29,33,41,.5);-webkit-backdrop-filter:none;backdrop-filter:none}
+.mobile-drawer{top:0;left:0;width:100vw;max-width:none;overflow-x:hidden;border:0;background:#fff;box-shadow:none}
+.mobile-nav{width:100vw;padding:107px 16px 34px}
+.mobile-group{border-bottom-color:#e5e6eb;padding-bottom:8px}
+.mobile-group+.mobile-group{padding-top:8px}
+.mobile-primary{min-height:32px;gap:12px;padding:4px 0 4px 8px;color:#1d2129;background:transparent;font-size:16px;font-weight:500;line-height:24px}
+.mobile-primary:hover,.mobile-primary:focus-visible,.mobile-primary[aria-expanded=true]{color:#1d2129;background:transparent}
+.mobile-primary.is-current,.mobile-primary[aria-current=page]{border-radius:0;padding:4px 0 4px 8px;color:#1d2129;background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;font-weight:500}
+.mobile-chevron,.mobile-direct-icon{width:16px;min-width:16px;height:16px;color:#86909c;stroke:currentColor;stroke-width:1.5}
+.mobile-chevron{transform:rotate(-90deg)}
+.mobile-primary[aria-expanded=true] .mobile-chevron{transform:rotate(0)}
+.mobile-submenu{gap:12px;margin-top:8px;border-radius:4px;padding:12px 8px;background:#f2f3f5}
+.mobile-submenu .menu-entry{min-height:30px;border-radius:0;padding:4px 8px;color:#4e5969;background:transparent;font-size:14px;font-weight:400;line-height:22px}
+.mobile-submenu .menu-entry:hover,.mobile-submenu .menu-entry:focus-visible{color:#1d2129;background:#e5e6eb}
+.mobile-submenu .entry-icon{display:none}
+.site-header:has(#mobileMenuButton[aria-expanded=true]){z-index:1300;background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;pointer-events:none}
+.site-header:has(#mobileMenuButton[aria-expanded=true]) .brand-lockup,.site-header:has(#mobileMenuButton[aria-expanded=true]) .message-center-button,.site-header:has(#mobileMenuButton[aria-expanded=true]) .profile-wrap{visibility:hidden}
+.mobile-menu-button[aria-expanded=true]{position:fixed;z-index:1301;top:68px;right:16px;color:#165dff;pointer-events:auto}
+.mobile-menu-button[aria-expanded=true] svg{opacity:0}
+.mobile-menu-button[aria-expanded=true]::before,.mobile-menu-button[aria-expanded=true]::after{position:absolute;width:14px;height:1.5px;border-radius:1px;background:currentColor;content:""}
+.mobile-menu-button[aria-expanded=true]::before{transform:rotate(45deg)}
+.mobile-menu-button[aria-expanded=true]::after{transform:rotate(-45deg)}
+}

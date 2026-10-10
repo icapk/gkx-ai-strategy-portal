@@ -2945,6 +2945,7 @@
   <link rel="stylesheet" href="home-additions.css">
   <link rel="stylesheet" href="portal-extras.css?v=20260909-center-lists">
   <link rel="stylesheet" href="mastergo-v2.css">
+  <link rel="stylesheet" href="assets/header-tabs.css?v=20261010">
   <style>
     .search-service-path {
       display: flex;
@@ -3084,7 +3085,7 @@
 
         <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mobileDrawer">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16"></path>
+            <path d="M18 18v2H6v-2zm3-7v2H3v-2zm-3-7v2H6V4z"></path>
           </svg>
         </button>
 
@@ -3098,7 +3099,7 @@
             aria-expanded="false"
             aria-haspopup="menu"
           >
-            <span class="profile-avatar" aria-hidden="true">科</span>
+            <span class="profile-avatar" aria-hidden="true">李</span>
           </button>
           <div class="profile-menu profile-account-menu" id="profileMenu" role="menu" aria-label="个人中心" hidden>
             <button class="profile-menu-item" id="profileCenterOne" type="button" role="menuitem">
@@ -7292,10 +7293,18 @@
         homeNavTab.classList.toggle("is-active", isHome);
         if (isHome) homeNavTab.setAttribute("aria-current", "page");
         else homeNavTab.removeAttribute("aria-current");
-        desktopNav.querySelectorAll(".nav-direct-entry").forEach((entry) => {
+        desktopNav.querySelectorAll(".nav-trigger[data-nav-label]").forEach((entry) => {
           const isActive = options.activeNavLabel === entry.dataset.navLabel;
           entry.classList.toggle("is-active", isActive);
           if (isActive) entry.setAttribute("aria-current", "page");
+          else entry.removeAttribute("aria-current");
+        });
+        mobileNav.querySelectorAll(".mobile-primary").forEach((entry) => {
+          const isMobileHome = entry.classList.contains("mobile-home-link") && isHome;
+          const isMobileSection = Boolean(entry.dataset.navLabel && options.activeNavLabel === entry.dataset.navLabel);
+          const isCurrent = isMobileHome || isMobileSection;
+          entry.classList.toggle("is-current", isCurrent);
+          if (isCurrent) entry.setAttribute("aria-current", "page");
           else entry.removeAttribute("aria-current");
         });
         announcementBar.hidden = !isHome || !activeAnnouncement || announcementDismissed;
@@ -8561,14 +8570,14 @@
         return icon;
       }
 
-      function activateEmbeddedSystem(item) {
+      function activateEmbeddedSystem(item, activeNavLabel = item.label) {
         showSurface("iframe", {
           iframeUrl: item.url,
           hideEmbeddedHeader: item.hideEmbeddedHeader,
           headerCropPx: item.headerCropPx,
           hideEmbeddedToolbar: item.hideEmbeddedToolbar,
           embedTitle: item.embedTitle || item.label,
-          activeNavLabel: item.label
+          activeNavLabel
         });
       }
 
@@ -8617,7 +8626,7 @@
         return name;
       }
 
-      function createMenuEntry(item) {
+      function createMenuEntry(item, activeNavLabel = item.label) {
         let entry;
 
         if (!item.url) {
@@ -8628,7 +8637,7 @@
           entry = document.createElement("button");
           entry.type = "button";
           entry.className = "menu-entry";
-          entry.addEventListener("click", () => activateEmbeddedSystem(item));
+          entry.addEventListener("click", () => activateEmbeddedSystem(item, activeNavLabel));
         } else {
           entry = document.createElement("a");
           entry.className = "menu-entry";
@@ -8673,6 +8682,7 @@
         }
 
         entry.classList.add("profile-menu-item");
+        entry.setAttribute("role", "menuitem");
         entry.appendChild(createEntryName(item));
         return entry;
       }
@@ -8732,6 +8742,7 @@
 
         const menu = document.createElement("div");
         menu.className = "profile-menu utility-menu";
+        menu.setAttribute("role", "menu");
         menu.setAttribute("aria-label", `${group.label}菜单`);
         menu.hidden = true;
         menu.replaceChildren(...group.items.map(createUtilityMenuEntry));
@@ -8787,7 +8798,7 @@
       function setDesktopTriggerState(activeIndex) {
         desktopTriggers.forEach((trigger, index) => {
           const isActive = index === activeIndex;
-          trigger.classList.toggle("is-active", isActive);
+          trigger.classList.toggle("is-open", isActive);
           trigger.setAttribute("aria-expanded", String(isActive));
         });
       }
@@ -8802,7 +8813,7 @@
         window.clearTimeout(closeTimer);
         activeDesktopIndex = index;
         const group = NAVIGATION[index];
-        megaGrid.replaceChildren(...group.items.map(createMenuEntry));
+        megaGrid.replaceChildren(...group.items.map((item) => createMenuEntry(item, group.label)));
         megaMenu.hidden = false;
         setDesktopTriggerState(index);
 
@@ -8828,8 +8839,9 @@
       const mobileHomeSection = document.createElement("section");
       mobileHomeSection.className = "mobile-group";
       const mobileHomeLink = document.createElement("a");
-      mobileHomeLink.className = "mobile-primary mobile-primary--link";
+      mobileHomeLink.className = "mobile-primary mobile-primary--link mobile-home-link is-current";
       mobileHomeLink.href = "#";
+      mobileHomeLink.setAttribute("aria-current", "page");
       mobileHomeLink.textContent = "首页";
       mobileHomeLink.addEventListener("click", (event) => {
         event.preventDefault();
@@ -8852,6 +8864,7 @@
         const trigger = document.createElement("button");
         trigger.type = "button";
         trigger.className = "nav-trigger";
+        trigger.dataset.navLabel = group.label;
         trigger.textContent = group.label;
         trigger.setAttribute("aria-haspopup", "true");
         trigger.setAttribute("aria-expanded", "false");
@@ -8956,6 +8969,7 @@
         const primary = document.createElement("button");
         primary.type = "button";
         primary.className = "mobile-primary";
+        primary.dataset.navLabel = group.label;
         primary.setAttribute("aria-expanded", "false");
         primary.innerHTML = `
           <span>${group.label}</span>
@@ -8966,7 +8980,7 @@
         const submenu = document.createElement("div");
         submenu.className = "mobile-submenu";
         submenu.hidden = true;
-        submenu.replaceChildren(...group.items.map(createMenuEntry));
+        submenu.replaceChildren(...group.items.map((item) => createMenuEntry(item, group.label)));
 
         primary.addEventListener("click", () => toggleMobileGroup(mobileToggleIndex));
         section.append(primary, submenu);
