@@ -630,6 +630,501 @@
   .portal-qa-send { right: 10px; bottom: 10px; width: 44px; height: 44px; }
 }
 
+/* Figma 758:91 — message center fidelity and responsive behavior. */
+#portalMessageCenter .portal-message-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#portalTicketService .portal-message-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#portalTicketService .portal-message-drawer.portal-ticket-drawer {
+  width: min(576px, 100vw);
+  border-left: 1px solid #fff;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#portalMessageCenter .portal-message-drawer {
+  width: min(566px, 100vw);
+  border-left: 1px solid #fff;
+  padding: 16px 20px;
+  background: #fff;
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+  grid-template-rows: 24px auto minmax(0, 1fr) 32px;
+  gap: 16px;
+}
+
+#portalMessageCenter .portal-message-head {
+  min-height: 24px;
+  border: 0;
+  padding: 0;
+  color: #000;
+  background: #fff;
+}
+
+#portalMessageCenter .portal-message-head-row {
+  height: 24px;
+  align-items: center;
+}
+
+#portalMessageCenter .portal-message-title-wrap {
+  align-items: center;
+  gap: 0;
+}
+
+#portalMessageCenter .portal-message-title {
+  margin: 0;
+  color: #000;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+#portalMessageCenter .portal-message-close {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: url("assets/message-close.svg") center / 16px 16px no-repeat;
+}
+
+#portalMessageCenter .portal-message-close svg {
+  display: none;
+}
+
+#portalMessageCenter .portal-message-close:hover,
+#portalMessageCenter .portal-message-close:focus-visible {
+  background-color: transparent;
+  outline: 2px solid rgba(22, 93, 255, 0.25);
+  outline-offset: 2px;
+}
+
+#portalMessageCenter .portal-message-toolbar {
+  display: grid;
+  gap: 16px;
+  border: 0;
+  padding: 0;
+  background: #fff;
+}
+
+#portalMessageCenter .portal-list-search {
+  gap: 16px;
+}
+
+#portalMessageCenter .portal-list-search-field {
+  height: 32px;
+  border-color: #e5e6eb;
+  border-radius: 4px;
+}
+
+#portalMessageCenter .portal-list-search-field input {
+  padding: 0 12px;
+  color: #1d2129;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+#portalMessageCenter .portal-list-search-field input::placeholder {
+  color: #86909c;
+}
+
+#portalMessageCenter .portal-list-search-submit,
+#portalMessageCenter .portal-list-search-reset {
+  height: 32px;
+  border-color: #e5e6eb;
+  border-radius: 4px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+#portalMessageCenter .portal-list-search-submit {
+  border-color: #165dff;
+  background: #165dff;
+}
+
+#portalMessageCenter .portal-message-tabs {
+  display: flex;
+  width: fit-content;
+  height: 32px;
+  gap: 0;
+  border: 0;
+  border-radius: 2px;
+  padding: 3px;
+  background: #f2f3f5;
+}
+
+#portalMessageCenter .portal-message-tab {
+  min-height: 26px;
+  gap: 4px;
+  border-radius: 2px;
+  padding: 0 12px;
+  color: #4e5969;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+#portalMessageCenter .portal-message-tab.is-active,
+#portalMessageCenter .portal-message-tab[aria-selected="true"] {
+  color: #165dff;
+  background: #fff;
+  box-shadow: none;
+  font-weight: 500;
+}
+
+#portalMessageCenter .portal-message-tab-count,
+#portalMessageCenter .portal-message-tab.is-active .portal-message-tab-count,
+#portalMessageCenter .portal-message-tab[aria-selected="true"] .portal-message-tab-count {
+  display: inline;
+  min-width: 0;
+  height: auto;
+  border-radius: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+#portalMessageCenter .portal-message-tab-count::before { content: "("; }
+#portalMessageCenter .portal-message-tab-count::after { content: ")"; }
+
+#portalMessageCenter .portal-message-list-wrap {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 8px 0 0;
+  background: #fff;
+  scrollbar-color: #e5e6eb transparent;
+  scrollbar-width: thin;
+}
+
+#portalMessageCenter .portal-message-list-wrap::-webkit-scrollbar { width: 6px; }
+#portalMessageCenter .portal-message-list-wrap::-webkit-scrollbar-track { background: transparent; }
+#portalMessageCenter .portal-message-list-wrap::-webkit-scrollbar-thumb { border-radius: 4px; background: #e5e6eb; }
+
+#portalMessageCenter .portal-message-list {
+  gap: 12px;
+}
+
+#portalMessageCenter .portal-message-card,
+#portalMessageCenter .portal-message-card.is-unread {
+  border: 1px solid #e5e6eb;
+  border-radius: 2px;
+  padding: 16px;
+  background: linear-gradient(97.7deg, #fff 12.454%, #f8f8f8 104.29%);
+  box-shadow: none;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+#portalMessageCenter .portal-message-card:hover,
+#portalMessageCenter .portal-message-card:focus-within,
+#portalMessageCenter .portal-message-card.is-unread:hover,
+#portalMessageCenter .portal-message-card.is-unread:focus-within {
+  border-color: #94bfff;
+  background: linear-gradient(97.7deg, #fff 12.454%, #f2f7ff 104.29%);
+  box-shadow: 0 4px 12px rgba(22, 93, 255, 0.08);
+}
+
+#portalMessageCenter .portal-message-card:has(.portal-message-link:active) {
+  border-color: #165dff;
+  box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
+}
+
+#portalMessageCenter .portal-message-card-head {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#portalMessageCenter .portal-message-card-title-wrap {
+  align-items: flex-start;
+  gap: 4px;
+}
+
+#portalMessageCenter .portal-message-card-title {
+  color: #1d2129;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+#portalMessageCenter .portal-message-status-dot,
+#portalMessageCenter .portal-message-card.is-unread .portal-message-status-dot {
+  width: 6px;
+  min-width: 6px;
+  height: 6px;
+  margin-top: 0;
+  border-radius: 50%;
+  background: #f53f3f;
+  box-shadow: none;
+}
+
+#portalMessageCenter .portal-message-time {
+  padding-top: 1px;
+  color: #86909c;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+#portalMessageCenter .portal-message-detail {
+  margin-top: 8px;
+}
+
+#portalMessageCenter .portal-message-detail p {
+  color: #4e5969;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+#portalMessageCenter .portal-message-meta {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+#portalMessageCenter .portal-message-tag,
+#portalMessageCenter .portal-message-tag.is-due {
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: #1d2129;
+  background: #f2f3f5;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+#portalMessageCenter .portal-message-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  border-top: 1px solid #e5e6eb;
+  padding-top: 12px;
+}
+
+#portalMessageCenter .portal-message-source {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  color: #1d2129;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+#portalMessageCenter .portal-message-source > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#portalMessageCenter .portal-message-source-icon {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  background: url("assets/message-source.svg") center / 20px 20px no-repeat;
+}
+
+#portalMessageCenter .portal-message-link {
+  min-height: 22px;
+  flex: none;
+  gap: 4px;
+  border-radius: 4px;
+  padding: 0;
+  color: #165dff;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  transition: color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+}
+
+#portalMessageCenter .portal-message-link:hover {
+  color: #165dff;
+  background: rgba(22, 93, 255, 0.08);
+}
+
+#portalMessageCenter .portal-message-link:active {
+  color: #0e42d2;
+  background: rgba(22, 93, 255, 0.16);
+}
+
+#portalMessageCenter .portal-message-link:focus,
+#portalMessageCenter .portal-message-link:focus-visible {
+  color: #165dff;
+  background: rgba(22, 93, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.22);
+  outline: none;
+}
+
+#portalMessageCenter .portal-message-link-arrow {
+  width: 16px;
+  height: 16px;
+  background: url("assets/message-right.svg") center / 16px 16px no-repeat;
+}
+
+#portalMessageCenter .portal-list-pagination {
+  min-height: 32px;
+  justify-content: flex-end;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  color: #1d2129;
+  background: #fff;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+#portalMessageCenter .portal-list-pagination-controls {
+  gap: 8px;
+}
+
+#portalMessageCenter .portal-list-pagination button {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 2px;
+  padding: 0;
+  background-color: transparent;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 12px 12px;
+  font-size: 0;
+}
+
+#portalMessageCenter #portalMessagePreviousPage { background-image: url("assets/pagination-prev.svg"); }
+#portalMessageCenter #portalMessageNextPage { background-image: url("assets/pagination-next.svg"); }
+#portalMessageCenter #ticketPreviousPage { background-image: url("assets/pagination-prev.svg"); }
+#portalMessageCenter #ticketNextPage { background-image: url("assets/pagination-next.svg"); }
+
+#portalMessageCenter .portal-list-pagination-page {
+  display: grid;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 2px;
+  color: #165dff;
+  background: #e8f3ff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+#portalMessageCenter .portal-list-pagination-size {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e5e6eb;
+  border-radius: 2px;
+  padding: 0 30px 0 12px;
+  color: #1d2129;
+  background: #fff url("assets/pagination-down.svg") right 12px center / 12px 12px no-repeat;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+#portalMessageCenter .portal-message-empty {
+  min-height: 180px;
+  border-color: #e5e6eb;
+  border-radius: 2px;
+  color: #86909c;
+}
+
+@media (max-width: 720px) {
+  #portalTicketService .portal-message-drawer.portal-ticket-drawer {
+    width: 100vw;
+  }
+
+  #portalMessageCenter .portal-message-drawer {
+    width: 100vw;
+    padding: 14px 12px;
+    grid-template-rows: 24px auto minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+
+  #portalMessageCenter .portal-message-toolbar {
+    gap: 12px;
+    padding: 0;
+  }
+
+  #portalMessageCenter .portal-list-search {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  #portalMessageCenter .portal-message-tabs {
+    width: 100%;
+  }
+
+  #portalMessageCenter .portal-message-tab {
+    flex: 1;
+  }
+
+  #portalMessageCenter .portal-message-list-wrap {
+    padding-right: 4px;
+  }
+
+  #portalMessageCenter .portal-message-card,
+  #portalMessageCenter .portal-message-card.is-unread {
+    padding: 14px 12px;
+  }
+
+  #portalMessageCenter .portal-message-card-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  #portalMessageCenter .portal-message-time {
+    order: -1;
+  }
+
+  #portalMessageCenter .portal-message-card-footer {
+    align-items: stretch;
+  }
+
+  #portalMessageCenter .portal-message-source {
+    flex: 1;
+  }
+
+  #portalMessageCenter .portal-list-pagination {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  #portalMessageCenter .portal-list-search {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #portalMessageCenter .portal-list-search-field {
+    grid-column: 1 / -1;
+  }
+
+  #portalMessageCenter .portal-list-search-submit,
+  #portalMessageCenter .portal-list-search-reset {
+    width: 100%;
+  }
+
+  #portalMessageCenter .portal-list-pagination {
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  #portalMessageCenter .portal-list-pagination-summary {
+    width: 100%;
+  }
+}
+
 /* Portal paper comments: inline review workspace inside 搜论文 results. */
 .portal-paper-comment-toggle {
   border-color: #b7ded5;

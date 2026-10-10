@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>门户待办中心原型</title>
-  <link rel="stylesheet" href="portal-extras.css?v=20260909-center-lists">
+  <link rel="stylesheet" href="portal-extras.css?v=20261010-card-interactions-2">
   <style>
     :root {
       font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
@@ -27,16 +27,18 @@
       height: 100%;
       min-height: 0;
       display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      grid-template-rows: 24px auto minmax(0, 1fr) 32px;
+      gap: 16px;
+      padding: 16px 20px;
       overflow: hidden;
       background: #fff;
     }
 
     .ticket-content {
-      margin: 10px 0 0;
-      color: #5d687a;
-      font-size: 13px;
-      line-height: 1.6;
+      margin: 8px 0 0;
+      color: #4e5969;
+      font-size: 12px;
+      line-height: 20px;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
@@ -45,30 +47,100 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
       margin-top: 12px;
+      border-top: 1px solid #e5e6eb;
+      padding-top: 12px;
     }
 
     .ticket-footer .portal-message-meta { margin-top: 0; }
-    .ticket-number { color: #8791a1; font-size: 12px; }
+    .ticket-number-label,
+    .ticket-number {
+      color: #4e5969;
+      font-size: 14px;
+      line-height: 22px;
+    }
     .ticket-status.done { color: #52806d; background: #edf6f1; }
-    .ticket-process { flex-shrink: 0; }
+    .ticket-process {
+      min-height: 22px;
+      flex-shrink: 0;
+      padding: 0;
+    }
+
+    /* The iframe is 576px wide on desktop. Keep the Figma desktop layout here;
+       otherwise the shared <=720px message-center rules incorrectly switch it
+       to a mobile card layout inside the desktop drawer. */
+    #portalMessageCenter.portal-ticket-content .portal-list-search {
+      display: flex;
+      gap: 16px;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-message-toolbar {
+      gap: 16px;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-message-tabs {
+      width: fit-content;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-message-tab {
+      flex: 0 0 auto;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-message-list-wrap {
+      padding-right: 8px;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-message-card,
+    #portalMessageCenter.portal-ticket-content .portal-message-card.is-unread {
+      padding: 16px;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-message-card-head {
+      align-items: flex-start;
+      flex-direction: row;
+      gap: 12px;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-message-time {
+      order: 0;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-message-link.ticket-process {
+      min-height: 22px;
+      padding: 0;
+      line-height: 22px;
+    }
+
+    #portalMessageCenter.portal-ticket-content .ticket-footer .portal-message-meta {
+      margin-top: 0;
+    }
+
+    #portalMessageCenter.portal-ticket-content .portal-list-pagination {
+      flex-wrap: nowrap;
+    }
+
+    @media (max-width: 480px) {
+      .ticket-popup {
+        grid-template-rows: 24px auto minmax(0, 1fr) auto;
+        gap: 12px;
+        padding: 14px 12px;
+      }
+
+      .ticket-footer {
+        align-items: flex-start;
+      }
+    }
 
   </style>
 </head>
-<body class="portal-ticket-content">
+<body id="portalMessageCenter" class="portal-ticket-content">
   <main class="overlay" id="ticketOverlay">
     <section class="ticket-popup" role="dialog" aria-labelledby="ticketServiceTitle">
       <header class="portal-message-head">
         <div class="portal-message-head-row">
           <div class="portal-message-title-wrap">
-            <span class="portal-message-bell" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="m8 8 1 1 2-2M13 8h3M8 13h8M8 17h8"></path></svg>
-            </span>
-            <div>
-              <h1 class="portal-message-title" id="ticketServiceTitle">待办中心</h1>
-              <p class="portal-message-subtitle">按待处理和已处理状态集中查看待办事项</p>
-            </div>
+            <h1 class="portal-message-title" id="ticketServiceTitle">待办中心</h1>
           </div>
           <button class="portal-message-close close" type="button" title="关闭" aria-label="关闭待办中心">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
@@ -79,7 +151,7 @@
       <div class="portal-message-toolbar">
         <form class="portal-list-search" id="ticketSearchForm" role="search">
           <label class="portal-list-search-field">
-            <input id="ticketTitleInput" type="search" aria-label="待办标题" placeholder="输入标题关键词" autocomplete="off">
+            <input id="ticketTitleInput" type="search" aria-label="待办标题" placeholder="请输入标题关键词" autocomplete="off">
           </label>
           <button class="portal-list-search-submit" type="submit">查询</button>
           <button class="portal-list-search-reset" id="ticketSearchReset" type="button">重置</button>
@@ -94,11 +166,12 @@
         <div class="portal-message-list" id="ticketList" aria-live="polite"></div>
       </div>
       <footer class="portal-list-pagination" aria-label="待办列表分页">
-        <span class="portal-list-pagination-summary" id="ticketPaginationSummary">共 0 条 / 每页 10 条</span>
+        <span class="portal-list-pagination-summary" id="ticketPaginationSummary">共计 0 条</span>
         <div class="portal-list-pagination-controls">
-          <button id="ticketPreviousPage" type="button" disabled>上一页</button>
-          <span class="portal-list-pagination-page" id="ticketPaginationPage" aria-live="polite">0 / 0</span>
-          <button id="ticketNextPage" type="button" disabled>下一页</button>
+          <button id="ticketPreviousPage" type="button" aria-label="上一页" disabled></button>
+          <span class="portal-list-pagination-page" id="ticketPaginationPage" aria-live="polite">0</span>
+          <button id="ticketNextPage" type="button" aria-label="下一页" disabled></button>
+          <span class="portal-list-pagination-size">10条/页</span>
         </div>
       </footer>
     </section>
@@ -165,23 +238,23 @@
           <p class="ticket-content">${escapeHtml(ticket.desc)}</p>
           <div class="ticket-footer">
             <div class="portal-message-meta">
-              <span class="portal-message-tag ticket-status ${escapeHtml(ticket.status)}">${escapeHtml(statusMap[ticket.status])}</span>
+              <span class="ticket-number-label">工单编号</span>
               <span class="ticket-number">${escapeHtml(ticket.id)}</span>
             </div>
             ${ticket.status === "pending" ? `
               <button class="portal-message-link ticket-process" type="button" data-process-id="${escapeHtml(ticket.id)}">
-                去处理 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"></path></svg>
+                去处理 <span class="portal-message-link-arrow" aria-hidden="true"></span>
               </button>
             ` : `
               <button class="portal-message-link ticket-process" type="button" data-view-id="${escapeHtml(ticket.id)}">
-                去查看 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"></path></svg>
+                去查看 <span class="portal-message-link-arrow" aria-hidden="true"></span>
               </button>
             `}
           </div>
         </article>
       `).join("") : `<div class="portal-message-empty">${titleQuery ? `暂无匹配标题的${escapeHtml(statusMap[currentStatus])}事项` : `暂无${escapeHtml(statusMap[currentStatus])}事项`}</div>`;
-      document.getElementById("ticketPaginationSummary").textContent = `共 ${list.length} 条 / 每页 ${pageSize} 条`;
-      document.getElementById("ticketPaginationPage").textContent = `${pageCount ? currentPage : 0} / ${pageCount}`;
+      document.getElementById("ticketPaginationSummary").textContent = `共计 ${list.length} 条`;
+      document.getElementById("ticketPaginationPage").textContent = `${pageCount ? currentPage : 0}`;
       document.getElementById("ticketPreviousPage").disabled = pageCount === 0 || currentPage <= 1;
       document.getElementById("ticketNextPage").disabled = pageCount === 0 || currentPage >= pageCount;
     }

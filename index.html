@@ -18,7 +18,8 @@
       --ink-muted: #8a96a8;
       --line: #e5eaf1;
       --surface: #ffffff;
-      --header-surface: #f8faff;
+      --header-band: #d8e7fc;
+      --header-surface: transparent;
       --shadow: 0 18px 42px rgba(26, 43, 72, 0.12);
       --content-width: 1440px;
     }
@@ -41,7 +42,7 @@
       margin: 0;
       overflow-x: hidden;
       color: var(--ink);
-      background: var(--surface);
+      background: var(--header-band);
       font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
@@ -65,8 +66,10 @@
       z-index: 1000;
       top: 0;
       height: var(--header-height);
-      border-bottom: 1px solid var(--line);
+      border-bottom: 0;
       background: var(--header-surface);
+      -webkit-backdrop-filter: blur(18px) saturate(135%);
+      backdrop-filter: blur(18px) saturate(135%);
     }
 
     .header-inner {
@@ -87,21 +90,37 @@
     }
 
     .brand-lockup img {
-      display: block;
-      width: 252px;
-      height: auto;
-      transform: translateY(-2px);
-      user-select: none;
+      display: none;
     }
 
     .brand-home {
-      display: block;
+      display: inline-flex;
       width: 100%;
-      padding: 0;
+      height: 100%;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 2px;
       border-radius: 6px;
+      color: #1d2129;
       background: transparent;
       cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
       text-align: left;
+      white-space: nowrap;
+    }
+
+    .brand-home::before {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      background: url("apps/cluster-service/dist/assets/gkx-logo.png") center / contain no-repeat;
+      content: "";
+    }
+
+    .brand-home::after {
+      content: "深圳国际科技信息中心";
     }
 
     .brand-home:focus-visible {
@@ -167,8 +186,51 @@
       cursor: pointer;
     }
 
-    .utility-menu {
-      width: 204px;
+    .profile-menu.utility-menu {
+      top: calc(100% + 4px);
+      right: 0;
+      width: 160px;
+      padding: 4px;
+      border: 1px solid #e5e6eb;
+      border-radius: 4px;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+    }
+
+    .utility-menu .profile-menu-item {
+      width: 100%;
+      min-height: 40px;
+      gap: 8px;
+      border-radius: 2px;
+      padding: 0 12px;
+      color: #1d2129;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 22px;
+      text-decoration: none;
+      transition: color 120ms ease, background-color 120ms ease;
+    }
+
+    .utility-menu .profile-menu-item:hover,
+    .utility-menu .profile-menu-item:focus,
+    .utility-menu .profile-menu-item:focus-visible {
+      color: #1d2129;
+      background: #f2f3f5;
+      outline: none;
+    }
+
+    .utility-menu .profile-menu-item:active {
+      background: #e5e6eb;
+    }
+
+    .utility-menu .profile-menu-item.is-disabled {
+      color: #c9cdd4;
+      background: transparent;
+    }
+
+    .utility-menu .profile-menu-item + .profile-menu-item {
+      border-top: 0;
     }
 
     a.profile-menu-item,
@@ -781,7 +843,7 @@
       position: relative;
       z-index: 900;
       border-bottom: 1px solid #d9e8fb;
-      background: linear-gradient(90deg, #f2f7ff 0%, #eef7ff 52%, #f5f9ff 100%);
+      background: var(--header-band);
     }
 
     .announcement-inner {
@@ -883,6 +945,18 @@
     .mobile-primary[aria-expanded="true"] {
       color: var(--blue-strong);
       outline: none;
+    }
+
+    .mobile-primary.is-current,
+    .mobile-primary[aria-current="page"] {
+      border-radius: 6px;
+      padding-right: 12px;
+      padding-left: 12px;
+      color: #165dff;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .24) 0%, rgba(255, 255, 255, .48) 100%);
+      -webkit-backdrop-filter: blur(12px) saturate(135%);
+      backdrop-filter: blur(12px) saturate(135%);
+      font-weight: 500;
     }
 
     .mobile-chevron {
@@ -2943,7 +3017,7 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css?v=20260909-center-lists">
+  <link rel="stylesheet" href="portal-extras.css?v=20261010-card-interactions-2">
   <link rel="stylesheet" href="mastergo-v2.css">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261010">
   <style>
@@ -3056,6 +3130,618 @@
       }
     }
   </style>
+  <style>
+    /* Portal header visual fidelity pass. Styles only: DOM, copy and behavior remain unchanged. */
+    @media (min-width: 1280px) {
+      :root {
+        --header-height: 56px;
+        --header-surface: transparent;
+      }
+
+      .site-header {
+        height: var(--header-height);
+        border-bottom: 0;
+        background: var(--header-surface);
+        -webkit-backdrop-filter: blur(18px) saturate(135%);
+        backdrop-filter: blur(18px) saturate(135%);
+        box-shadow: none;
+        isolation: isolate;
+      }
+
+      .header-inner {
+        height: 56px;
+        padding: 0 16px;
+      }
+
+      .brand-lockup {
+        width: 230px;
+        min-width: 230px;
+      }
+
+      .desktop-nav {
+        flex: 0 1 auto;
+        gap: 0;
+      }
+
+      .nav-trigger {
+        width: clamp(78px, calc((100vw - 731px) / 7), 88px);
+        min-width: clamp(78px, calc((100vw - 731px) / 7), 88px);
+        flex: 0 0 clamp(78px, calc((100vw - 731px) / 7), 88px);
+        height: 56px;
+        padding: 9px 8px;
+        border-radius: 2px;
+        color: #1d2129;
+        background: transparent;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 22px;
+        cursor: pointer;
+        transition: color 150ms ease, background 150ms ease;
+      }
+
+      .nav-trigger::after {
+        display: block;
+        top: 0;
+        right: 0;
+        bottom: auto;
+        left: 0;
+        height: 4px;
+        border-radius: 0;
+        background: #fff;
+        opacity: 0;
+        transform: none;
+      }
+
+      .nav-trigger:hover {
+        color: #165dff;
+        background: rgba(255, 255, 255, .16);
+      }
+
+      .nav-trigger.is-open,
+      .nav-trigger.is-active,
+      .nav-trigger.is-current,
+      .nav-trigger[aria-expanded="true"] {
+        color: #165dff;
+        background: linear-gradient(180deg, rgba(255, 255, 255, .24) 0%, rgba(255, 255, 255, .48) 100%);
+        -webkit-backdrop-filter: blur(12px) saturate(135%);
+        backdrop-filter: blur(12px) saturate(135%);
+        font-weight: 500;
+      }
+
+      .nav-trigger.is-open::after,
+      .nav-trigger.is-active::after,
+      .nav-trigger.is-current::after,
+      .nav-trigger[aria-expanded="true"]::after {
+        opacity: 1;
+      }
+
+      .nav-trigger:focus-visible {
+        color: #165dff;
+        outline: 2px solid rgba(22, 93, 255, .32);
+        outline-offset: -2px;
+      }
+
+      .nav-trigger:focus-visible::after {
+        opacity: 1;
+      }
+
+      .header-actions {
+        height: 56px;
+        gap: 4px;
+        margin-left: auto;
+      }
+
+      .utility-nav {
+        height: 56px;
+        gap: 0;
+      }
+
+      .utility-trigger {
+        height: 32px;
+        gap: 4px;
+        padding: 0 8px;
+        border-radius: 4px;
+        color: #4e5969;
+        font-size: 14px;
+        line-height: 20px;
+      }
+
+      .utility-nav .utility-trigger::before {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+        content: "";
+        background: currentColor;
+        -webkit-mask: url("assets/header-workbench.svg") center / 20px 20px no-repeat;
+        mask: url("assets/header-workbench.svg") center / 20px 20px no-repeat;
+      }
+
+      .ticket-service-button svg { display: none; }
+
+      .ticket-service-button::before {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+        content: "";
+        background: currentColor;
+        -webkit-mask: url("assets/header-todo.svg") center / 20px 20px no-repeat;
+        mask: url("assets/header-todo.svg") center / 20px 20px no-repeat;
+      }
+
+      .message-center-button {
+        width: 102px;
+        min-width: 102px;
+        height: 32px;
+        padding: 0 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        border-radius: 4px;
+        color: #4e5969;
+        font-size: 14px;
+        line-height: 20px;
+      }
+
+      .message-center-button::after {
+        content: "消息中心";
+        white-space: nowrap;
+      }
+
+      .message-center-button::before {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+        background: currentColor;
+        -webkit-mask: url("assets/header-message.svg") center / 20px 20px no-repeat;
+        mask: url("assets/header-message.svg") center / 20px 20px no-repeat;
+        content: "";
+      }
+
+      .utility-trigger:hover,
+      .utility-trigger:focus-visible,
+      .utility-trigger[aria-expanded="true"],
+      .message-center-button:hover,
+      .message-center-button:focus-visible,
+      .message-center-button[aria-expanded="true"] {
+        color: #165dff;
+        background: rgba(11, 94, 184, .08);
+        border-radius: 4px;
+      }
+
+      .message-center-button svg {
+        display: none;
+      }
+
+      .message-center-badge {
+        top: -4px;
+        right: auto;
+        left: 88px;
+        min-width: 18px;
+        height: 18px;
+        border-width: 0;
+        padding: 0 4px;
+        font-size: 10px;
+        line-height: 18px;
+      }
+
+      .profile-wrap {
+        height: 56px;
+        margin-left: 20px;
+      }
+
+      .profile-button {
+        width: 112px;
+        min-width: 112px;
+        height: 40px;
+        padding: 4px 8px 4px 4px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+        border-radius: 30px;
+        color: #1d2129;
+        background: rgba(255, 255, 255, .48);
+      }
+
+      .profile-avatar {
+        display: flex;
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        color: #fff;
+        background:
+          url("assets/profile-avatar-fill.svg") center / 32px 32px no-repeat,
+          url("assets/profile-avatar-bg.svg") center / 32px 32px no-repeat;
+        box-shadow: none;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1;
+        text-align: center;
+      }
+
+      .profile-avatar::before {
+        content: none;
+      }
+
+      .profile-button::before {
+        order: 2;
+        content: "李科信";
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 22px;
+        white-space: nowrap;
+      }
+
+      .profile-button::after {
+        width: 12px;
+        height: 12px;
+        flex: 0 0 12px;
+        order: 3;
+        margin-left: 2px;
+        content: "";
+        background: url("assets/profile-caret-down.svg") center / 12px 12px no-repeat;
+      }
+
+      .profile-button:hover,
+      .profile-button:focus-visible,
+      .profile-button[aria-expanded="true"] {
+        color: #1769ff;
+        background: rgba(255, 255, 255, .86);
+      }
+
+      .mega-menu {
+        top: 100%;
+        border-bottom: 1px solid rgba(255, 255, 255, .9);
+        background: linear-gradient(110deg, rgba(248, 251, 255, .99) 0%, rgba(234, 243, 255, .99) 100%);
+        box-shadow: 0 12px 28px rgba(52, 84, 127, .08);
+      }
+
+      .mega-menu::before { display: none; }
+
+      .mega-inner {
+        position: relative;
+        width: min(100%, 1440px);
+        padding: 24px 32px 28px 256px;
+      }
+
+      .mega-menu-title {
+        position: absolute;
+        top: 24px;
+        left: 48px;
+        width: 80px;
+        height: 44px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        color: #1d2129;
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 28px;
+        text-align: left;
+      }
+
+      .mega-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px 40px;
+      }
+
+      .menu-entry {
+        min-height: 44px;
+        padding: 0 12px;
+        border-radius: 4px;
+        color: #273446;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .menu-entry:hover,
+      .menu-entry:focus-visible {
+        color: #1769ff;
+        background: #e8f3ff;
+      }
+
+      .mega-menu .entry-icon { display: none; }
+    }
+
+    /* Figma 536:6858 — compact mobile header. */
+    @media (max-width: 1279px) {
+      .site-header,
+      .header-inner {
+        height: 64px;
+      }
+
+      .header-inner {
+        align-items: center;
+        padding: 12px 16px;
+      }
+
+      .brand-lockup {
+        width: 180px;
+        min-width: 180px;
+        height: 40px;
+      }
+
+      .brand-home {
+        height: 40px;
+        gap: 8px;
+        padding: 6px 2px;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 24px;
+      }
+
+      .brand-home::before {
+        width: 28px;
+        height: 28px;
+        flex-basis: 28px;
+      }
+
+      .header-actions {
+        height: 40px;
+        gap: 0;
+        margin-left: auto;
+      }
+
+      .utility-nav {
+        display: none !important;
+      }
+
+      .ticket-service-button {
+        display: none !important;
+      }
+
+      .mobile-menu-button {
+        display: inline-flex !important;
+        order: 1;
+        width: 20px;
+        min-width: 20px;
+        height: 20px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        padding: 0;
+        color: #4e5969;
+        background: transparent;
+      }
+
+      .mobile-menu-button svg {
+        display: block;
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+        stroke: none;
+      }
+
+      .message-center-button {
+        display: block;
+        order: 2;
+        width: 20px;
+        min-width: 20px;
+        height: 20px;
+        margin-left: 12px;
+        border-radius: 4px;
+        padding: 0;
+        background: transparent;
+      }
+
+      .message-center-button::before {
+        display: block;
+        width: 20px;
+        height: 20px;
+        content: "";
+        background: url("assets/header-message.svg") center / 20px 20px no-repeat;
+      }
+
+      .message-center-button svg {
+        display: none;
+      }
+
+      .message-center-badge {
+        top: -2px;
+        right: auto;
+        left: 14px;
+        width: 8px;
+        min-width: 8px;
+        height: 8px;
+        border: 0;
+        border-radius: 50%;
+        padding: 0;
+        overflow: hidden;
+        color: transparent;
+        background: #f53f3f;
+        font-size: 0;
+        line-height: 0;
+      }
+
+      .profile-wrap {
+        order: 3;
+        height: 40px;
+        margin-left: 16px;
+      }
+
+      .profile-button {
+        display: flex;
+        width: 32px;
+        min-width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 24px;
+        padding: 3.2px;
+        background: rgba(255, 255, 255, .48);
+      }
+
+      .profile-avatar {
+        width: 25.6px;
+        height: 25.6px;
+        border: 0;
+        background:
+          url("assets/profile-avatar-fill.svg") center / 25.6px 25.6px no-repeat,
+          url("assets/profile-avatar-bg.svg") center / 25.6px 25.6px no-repeat;
+        box-shadow: none;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 20px;
+      }
+
+      .mobile-backdrop {
+        top: 0;
+        background: rgba(29, 33, 41, .5);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+
+      .mobile-drawer {
+        top: 0;
+        left: 0;
+        width: 100vw;
+        max-width: none;
+        overflow-x: hidden;
+        border: 0;
+        background: #fff;
+        box-shadow: none;
+      }
+
+      .mobile-nav {
+        width: 100vw;
+        padding: 107px 16px 34px;
+      }
+
+      .mobile-group {
+        border-bottom-color: #e5e6eb;
+        padding-bottom: 8px;
+      }
+
+      .mobile-group + .mobile-group {
+        padding-top: 8px;
+      }
+
+      .mobile-primary {
+        min-height: 32px;
+        gap: 12px;
+        padding: 4px 0 4px 8px;
+        color: #1d2129;
+        background: transparent;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px;
+      }
+
+      .mobile-primary:hover,
+      .mobile-primary:focus-visible,
+      .mobile-primary[aria-expanded="true"] {
+        color: #1d2129;
+        background: transparent;
+      }
+
+      .mobile-primary.is-current,
+      .mobile-primary[aria-current="page"] {
+        border-radius: 0;
+        padding: 4px 0 4px 8px;
+        color: #1d2129;
+        background: transparent;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        font-weight: 500;
+      }
+
+      .mobile-chevron,
+      .mobile-direct-icon {
+        width: 16px;
+        min-width: 16px;
+        height: 16px;
+        color: #86909c;
+        stroke: currentColor;
+        stroke-width: 1.5;
+      }
+
+      .mobile-chevron {
+        transform: rotate(-90deg);
+      }
+
+      .mobile-primary[aria-expanded="true"] .mobile-chevron {
+        transform: rotate(0deg);
+      }
+
+      .mobile-submenu {
+        gap: 12px;
+        margin-top: 8px;
+        border-radius: 4px;
+        padding: 12px 8px;
+        background: #f2f3f5;
+      }
+
+      .mobile-submenu .menu-entry {
+        min-height: 30px;
+        border-radius: 0;
+        padding: 4px 8px;
+        color: #4e5969;
+        background: transparent;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 22px;
+      }
+
+      .mobile-submenu .menu-entry:hover,
+      .mobile-submenu .menu-entry:focus-visible {
+        color: #1d2129;
+        background: #e5e6eb;
+      }
+
+      .mobile-submenu .entry-icon {
+        display: none;
+      }
+
+      .site-header:has(#mobileMenuButton[aria-expanded="true"]) {
+        z-index: 1300;
+        background: transparent;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        pointer-events: none;
+      }
+
+      .site-header:has(#mobileMenuButton[aria-expanded="true"]) .brand-lockup,
+      .site-header:has(#mobileMenuButton[aria-expanded="true"]) .message-center-button,
+      .site-header:has(#mobileMenuButton[aria-expanded="true"]) .profile-wrap {
+        visibility: hidden;
+      }
+
+      .mobile-menu-button[aria-expanded="true"] {
+        position: fixed;
+        z-index: 1301;
+        top: 68px;
+        right: 16px;
+        color: #165dff;
+        pointer-events: auto;
+      }
+
+      .mobile-menu-button[aria-expanded="true"] svg {
+        opacity: 0;
+      }
+
+      .mobile-menu-button[aria-expanded="true"]::before,
+      .mobile-menu-button[aria-expanded="true"]::after {
+        position: absolute;
+        width: 14px;
+        height: 1.5px;
+        border-radius: 1px;
+        background: currentColor;
+        content: "";
+      }
+
+      .mobile-menu-button[aria-expanded="true"]::before {
+        transform: rotate(45deg);
+      }
+
+      .mobile-menu-button[aria-expanded="true"]::after {
+        transform: rotate(-45deg);
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="site-header" id="siteHeader">
@@ -3121,8 +3807,9 @@
       </div>
     </div>
 
-    <section class="mega-menu" id="megaMenu" aria-label="二级导航" hidden>
+    <section class="mega-menu" id="megaMenu" aria-labelledby="megaMenuTitle" hidden>
       <div class="mega-inner">
+        <h2 class="mega-menu-title" id="megaMenuTitle"></h2>
         <div class="mega-grid" id="megaGrid"></div>
       </div>
     </section>
@@ -3146,7 +3833,7 @@
   <section class="portal-ticket-service portal-message-center" id="portalTicketService" aria-hidden="true" hidden>
     <button class="portal-message-overlay" id="portalTicketServiceOverlay" type="button" aria-label="关闭待办中心"></button>
     <aside class="portal-message-drawer portal-ticket-drawer" aria-label="待办中心">
-      <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20260909-center-lists" title="待办中心"></iframe>
+      <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20261010-ticket-message-parity" title="待办中心"></iframe>
     </aside>
   </section>
 
@@ -3156,11 +3843,7 @@
       <header class="portal-message-head">
         <div class="portal-message-head-row">
           <div class="portal-message-title-wrap">
-            <span class="portal-message-bell" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></span>
-            <div>
-              <h2 class="portal-message-title" id="portalMessageTitle">消息中心</h2>
-              <p class="portal-message-subtitle">按未读和已读状态集中查看门户消息</p>
-            </div>
+            <h2 class="portal-message-title" id="portalMessageTitle">消息中心</h2>
           </div>
           <button class="portal-message-close" id="portalMessageClose" type="button" aria-label="关闭消息中心"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
         </div>
@@ -3182,11 +3865,12 @@
         <div class="portal-message-empty" id="portalMessageEmpty" hidden>当前没有符合条件的消息</div>
       </div>
       <footer class="portal-list-pagination" aria-label="消息列表分页">
-        <span class="portal-list-pagination-summary" id="portalMessagePaginationSummary">共 0 条 / 每页 10 条</span>
+        <span class="portal-list-pagination-summary" id="portalMessagePaginationSummary">共计 0 条</span>
         <div class="portal-list-pagination-controls">
-          <button id="portalMessagePreviousPage" type="button" disabled>上一页</button>
-          <span class="portal-list-pagination-page" id="portalMessagePaginationPage" aria-live="polite">0 / 0</span>
-          <button id="portalMessageNextPage" type="button" disabled>下一页</button>
+          <button id="portalMessagePreviousPage" type="button" aria-label="上一页" disabled></button>
+          <span class="portal-list-pagination-page" id="portalMessagePaginationPage" aria-live="polite">0</span>
+          <button id="portalMessageNextPage" type="button" aria-label="下一页" disabled></button>
+          <span class="portal-list-pagination-size">10条/页</span>
         </div>
       </footer>
       <div class="portal-message-toast" id="portalMessageToast" role="status" aria-live="polite"></div>
@@ -4641,6 +5325,7 @@
       const homeNavTab = document.getElementById("homeNavTab");
       const utilityNav = document.getElementById("utilityNav");
       const megaMenu = document.getElementById("megaMenu");
+      const megaMenuTitle = document.getElementById("megaMenuTitle");
       const megaGrid = document.getElementById("megaGrid");
       const iframeShell = document.getElementById("iframeShell");
       const embeddedSystem = document.getElementById("embeddedSystem");
@@ -5495,8 +6180,7 @@
           id: "m001b", category: "TODO", iconText: "待", iconClass: "is-todo",
           title: "低空经济专项申报材料待补充",
           summary: "你提交的申报材料缺少企业研发费用说明，请在 8 月 20 日前补充后重新提交。",
-          source: "科技专题", time: "今天 10:30", unread: true, badges: ["待办"], tags: ["政策申报", "材料补充", "待处理"],
-          due: "截止 2026-08-20 18:00",
+          source: "科技专题", time: "今天 10:30", unread: true, badges: [], tags: ["政策申报", "材料补充"],
           actions: [
             { name: "去处理", targetSystem: "科技专题服务系统", targetPage: "申报材料补充", url: "/topic/policy-declare/apply_20260803_001/materials" },
             { name: "查看要求", targetSystem: "科技专题服务系统", targetPage: "申报要求", url: "/topic/policy-declare/apply_20260803_001/requirements" }
@@ -5506,7 +6190,7 @@
           id: "m002", category: "TASK", iconText: "任", iconClass: "is-report",
           title: "《低空经济产业趋势分析报告》已生成",
           summary: "你手动创建的报告生成任务已完成，可在线预览或下载 Word/PDF 文件。",
-          source: "新型高端智库", time: "今天 11:20", unread: true, badges: ["NEW"], tags: ["低空经济", "报告生成", "任务完成"],
+          source: "新型高端智库", time: "今天 11:20", unread: true, badges: ["NEW"], tags: ["低空经济", "报告生成"],
           actions: [
             { name: "在线预览", targetSystem: "新型高端智库", targetPage: "报告预览", url: "/thinktank/report/report_20260803_001" },
             { name: "下载报告", targetSystem: "新型高端智库", targetPage: "报告下载", url: "/api/thinktank/report/report_20260803_001/download" }
@@ -5526,7 +6210,7 @@
           id: "m003b", category: "TASK", iconText: "比", iconClass: "is-report",
           title: "“深圳人工智能政策对比”任务已完成",
           summary: "你发起的政策比对任务已生成结果，包含差异摘要、适用主体和申报建议。",
-          source: "科技专题", time: "今天 09:05", unread: true, badges: ["NEW"], tags: ["政策比对", "任务完成", "人工智能"],
+          source: "科技专题", time: "今天 09:05", unread: true, badges: ["NEW"], tags: ["政策比对", "人工智能"],
           actions: [
             { name: "查看结果", targetSystem: "科技专题服务系统", targetPage: "政策比对结果", url: "/topic/policy-compare/task_policy_compare_20260803_001" },
             { name: "继续分析", targetSystem: "科技专题服务系统", targetPage: "政策比对分析", url: "/topic/policy-compare/task_policy_compare_20260803_001/analysis" }
@@ -5647,6 +6331,12 @@
         return message.title.toLocaleLowerCase().includes(messageTitleQuery.toLocaleLowerCase());
       }
 
+      const PORTAL_MESSAGE_TASK_TAG_PATTERN = /^(?:待办|待处理|处理中|已处理|任务完成|已完成|待审核|已审核|已取消|即将到期|已逾期|逾期|截止(?:时间)?)/;
+
+      function getPortalMessageTopicTags(message) {
+        return message.tags.filter((tag) => !PORTAL_MESSAGE_TASK_TAG_PATTERN.test(tag));
+      }
+
       function getFilteredPortalMessages() {
         return PORTAL_MESSAGES.filter((message) => matchesPortalMessageTitle(message) &&
           (activeMessageStatus === "UNREAD" ? message.unread : !message.unread));
@@ -5677,29 +6367,24 @@
         const visibleMessages = messages.slice((messageCurrentPage - 1) * MESSAGE_PAGE_SIZE, messageCurrentPage * MESSAGE_PAGE_SIZE);
         portalMessageList.innerHTML = visibleMessages.map((message) => {
           const primaryAction = message.actions[0];
+          const topicTags = getPortalMessageTopicTags(message);
           return `
           <article class="portal-message-card ${message.unread ? "is-unread" : "is-read"}" data-message-id="${escapeHtml(message.id)}">
             <header class="portal-message-card-head">
               <div class="portal-message-card-title-wrap">
-                <span class="portal-message-status-dot" aria-hidden="true"></span>
                 <h3 class="portal-message-card-title">${escapeHtml(message.title)}</h3>
+                ${message.unread ? `<span class="portal-message-status-dot" aria-hidden="true"></span>` : ""}
               </div>
               <time class="portal-message-time">${escapeHtml(message.time)}</time>
             </header>
             <div class="portal-message-detail">
               <p>${escapeHtml(message.summary)}</p>
             </div>
-            <div class="portal-message-fields">
-              <div class="portal-message-field">
-                <span class="portal-message-field-label">跳转链接</span>
-                ${primaryAction ? `<button class="portal-message-link" type="button" data-message-action="0" title="${escapeHtml(primaryAction.url)}"><span>${escapeHtml(primaryAction.name)}</span><span class="portal-message-link-page">${escapeHtml(primaryAction.targetPage)}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 13 13 7M8 7h5v5"></path></svg></button>` : `<span class="portal-message-field-value">暂无跳转链接</span>`}
-              </div>
-              <div class="portal-message-field">
-                <span class="portal-message-field-label">子系统名称</span>
-                <span class="portal-message-field-value">${escapeHtml(primaryAction?.targetSystem || message.source)}</span>
-              </div>
+            ${topicTags.length ? `<div class="portal-message-meta">${topicTags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+            <div class="portal-message-card-footer">
+              <div class="portal-message-source"><span class="portal-message-source-icon" aria-hidden="true"></span><span>${escapeHtml(primaryAction?.targetSystem || message.source)}</span></div>
+              ${primaryAction ? `<button class="portal-message-link" type="button" data-message-action="0" title="${escapeHtml(primaryAction.url)}"><span>${message.unread ? "去处理" : "去查看"}</span><span class="portal-message-link-arrow" aria-hidden="true"></span></button>` : `<span class="portal-message-field-value">暂无跳转链接</span>`}
             </div>
-            <div class="portal-message-meta"><span class="portal-message-field-label">标签</span>${message.tags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}${message.due ? `<span class="portal-message-tag is-due">${escapeHtml(message.due)}</span>` : ""}</div>
           </article>
         `;
         }).join("");
@@ -5707,8 +6392,8 @@
         portalMessageEmpty.textContent = messageTitleQuery
           ? (activeMessageStatus === "UNREAD" ? "暂无匹配标题的未读消息" : "暂无匹配标题的已读消息")
           : (activeMessageStatus === "UNREAD" ? "暂无未读消息" : "暂无已读消息");
-        portalMessagePaginationSummary.textContent = `共 ${messages.length} 条 / 每页 ${MESSAGE_PAGE_SIZE} 条`;
-        portalMessagePaginationPage.textContent = `${pageCount ? messageCurrentPage : 0} / ${pageCount}`;
+        portalMessagePaginationSummary.textContent = `共计 ${messages.length} 条`;
+        portalMessagePaginationPage.textContent = `${pageCount ? messageCurrentPage : 0}`;
         portalMessagePreviousPage.disabled = pageCount === 0 || messageCurrentPage <= 1;
         portalMessageNextPage.disabled = pageCount === 0 || messageCurrentPage >= pageCount;
       }
@@ -8813,6 +9498,7 @@
         window.clearTimeout(closeTimer);
         activeDesktopIndex = index;
         const group = NAVIGATION[index];
+        megaMenuTitle.textContent = group.label;
         megaGrid.replaceChildren(...group.items.map((item) => createMenuEntry(item, group.label)));
         megaMenu.hidden = false;
         setDesktopTriggerState(index);
