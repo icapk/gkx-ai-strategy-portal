@@ -75,13 +75,14 @@ const topicDefinitions: TopicDefinition[] = [
   {
     id: "brain-atlas",
     label: "脑图谱专题",
-    description: "分层呈现脑图谱点、线、面、体及典型数据案例。",
+    description: "从细胞构筑到突触分子架构，汇聚多物种脑图谱数据资源",
     icon: Brain,
     sections: [
-      { id: "brain-visual", label: "点线面体图谱" },
-      { id: "brain-cases", label: "图谱数据案例" },
+      { id: "brain-intro", label: "多种脑图谱及其应用" },
+      { id: "brain-libraries", label: "核心图谱库" },
+      { id: "brain-systems", label: "关联系统入口" },
     ],
-    contentTypes: ["四态图谱", "多物种案例"],
+    contentTypes: ["多物种图谱", "数据共享"],
   },
   {
     id: "engineered-cell",
@@ -329,78 +330,89 @@ function OphthalmologyContent() {
   );
 }
 
-type BrainStageId = "point" | "line" | "surface" | "volume";
-const brainStages: { id: BrainStageId; label: string; definition: string; focus: string }[] = [
-  { id: "point", label: "点", definition: "点代表神经元，是脑图谱中的最小数据单位。", focus: "观察神经元位置、密度与类型标记" },
-  { id: "line", label: "线", definition: "线由神经元的树突与轴突连续表达。", focus: "理解单细胞形态与投射路径" },
-  { id: "surface", label: "面", definition: "面代表经过分割与重建的脑区表面。", focus: "查看脑区边界、层级与空间邻接" },
-  { id: "volume", label: "体", definition: "多个点、线、面组合形成三维立体图谱。", focus: "在统一空间坐标中综合查看脑结构" },
-];
-
-function BrainDiagram({ stage }: { stage: BrainStageId }) {
-  const stageDefinition = brainStages.find((item) => item.id === stage) ?? brainStages[0];
-  return (
-    <svg className={`sdc-brain-diagram is-${stage}`} viewBox="0 0 580 310" role="img" aria-label={`${stageDefinition.label}态脑图谱结构示意：${stageDefinition.definition} 观察重点：${stageDefinition.focus}。`}>
-      <path className="sdc-brain-outline" d="M144 230C80 188 91 97 153 73c27-50 116-58 158-20 58-25 132 10 139 69 60 26 60 107-1 130-58 23-116 18-163 28-57 13-103-13-142-50Z" />
-      {(stage === "surface" || stage === "volume") && <>
-        <path className="sdc-brain-surface surface-one" d="M158 118c42-39 110-43 148-5 33-27 95-10 105 35-43 4-70 17-96 53-38-23-91-31-157-8-22-24-19-51 0-75Z" />
-        <path className="sdc-brain-surface surface-two" d="M173 206c48-23 98-14 143 11 26-33 61-48 99-51-5 52-54 76-101 79-47 4-95 17-141-39Z" />
-      </>}
-      {(stage === "line" || stage === "volume") && <>
-        <path className="sdc-neuron-line" d="M145 178C205 139 234 92 282 85s77 58 126 68" />
-        <path className="sdc-neuron-line" d="M171 215c58-27 101-23 143-1 39 20 63 8 103-20" />
-        <path className="sdc-neuron-line" d="M224 82c12 49 4 85 41 112 32 24 76 34 91 58" />
-      </>}
-      {(stage === "point" || stage === "volume") && [
-        [151, 174], [183, 127], [225, 93], [265, 142], [303, 87], [343, 128], [395, 151], [179, 214], [232, 226], [290, 211], [356, 224], [413, 193],
-      ].map(([cx, cy], index) => <circle className="sdc-neuron-point" cx={cx} cy={cy} r={index % 3 === 0 ? 7 : 5} key={`${cx}-${cy}`} />)}
-      {stage === "volume" && <>
-        <path className="sdc-volume-contour" d="M133 220C91 157 117 97 174 72c58-27 150-31 217 14 67 46 70 126 7 164" />
-        <ellipse className="sdc-volume-ring" cx="293" cy="174" rx="165" ry="74" />
-      </>}
-    </svg>
-  );
-}
-
 function BrainAtlasContent() {
-  const [stage, setStage] = useState<BrainStageId>("point");
-  const activeStage = brainStages.find((item) => item.id === stage) ?? brainStages[0];
-  const cases = [
-    { title: "多物种细胞构筑图谱", species: "小鼠、猕猴、人脑样本", content: "细胞类型、层级结构与脑区对应关系" },
-    { title: "脑区立体定位图谱", species: "多物种标准空间", content: "脑区坐标、边界轮廓与空间定位" },
-    { title: "脑区联接图谱", species: "神经环路数据", content: "脑区连接方向、强度与投射路径" },
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [selectedLibrary, setSelectedLibrary] = useState<string | null>(null);
+  const slides = [
+    {
+      title: "脑图谱：把大脑变成可计算的地图",
+      description: "聚焦灵长类脑图谱标准化、高质量、可追溯的数据体系建设，构建集科研支撑、产业转化、教学科普于一体的脑科学知识图谱平台，面向高校、科研院所与企业提供开放、共享、智能的数据服务。",
+      tags: ["6 PB 自采原始数据", "30+ 猴脑三维图像", "1,000+ 完整形态神经元"],
+    },
+    {
+      title: "细胞构筑图谱：看清大脑由什么构成",
+      description: "以 DAPI 与荧光尼氏染料标记的猴脑微米分辨率三维图像为基础，重建脑区与核团边界，形成统一立体定位坐标下的细胞构筑图谱，支持冠状、水平、矢状三切面浏览，可服务于脑区定位、切片配准与跨样本比较。",
+      tags: ["30+ 猴脑样本", "4,000+ 三切面切片", "微米级分辨率"],
+    },
+    {
+      title: "脑区联接图谱：看清脑区之间怎么连接",
+      description: "基于神经环路示踪（病毒载体与荧光染料）追踪神经元轴突与树突的投射路径，刻画脑区之间的连接方向、强度与投射路径，形成脑区联接图谱，并提供跨物种比较与重要脑区联接图谱共享。",
+      tags: ["20+ 示踪猴脑", "10+ 涉及脑区", "单轴突分辨率"],
+    },
+    {
+      title: "神经突触分子架构图谱：看清连接处的分子结构",
+      description: "率先建设国际首个神经突触分子架构图谱，涵盖大小鼠、猴等模式动物，包含关键突触蛋白的原位三维结构、组织分布信息与突触形态特征，为突触层面的机制研究提供分子级参照。",
+      tags: ["12 类关键突触蛋白", "3,200+ 原位结构条目", "冷冻电镜 + 超分辨光学"],
+    },
+  ];
+  const activeSlide = slides[slideIndex];
+  const libraries = [
+    { title: "猕猴全脑细胞构筑图谱", description: "DAPI 与荧光尼氏染料标记的猕猴微米分辨率三维图像，重建脑区与核团边界，支持三切面浏览与原始数据下载" },
+    { title: "脑区联接图谱", description: "以神经环路示踪追踪神经元轴突与树突的投射路径，呈现脑区之间的连接方向、强度与投射路径" },
+    { title: "神经突触分子架构图谱", description: "国际首个神经突触分子架构图谱，涵盖大小鼠、猴等模式动物，收录突触蛋白的原位三维结构与组织分布" },
   ];
   return (
     <>
       <ContentSection
-        id="brain-visual"
-        title="点、线、面、体图谱"
-        description="按四种数据表达层级查看脑图谱构成，当前图形为结构演示。"
+        id="brain-intro"
+        title="多种脑图谱及其应用"
+        description="以可视化图文方式展示脑图谱的点（神经元）、线（轴突、树突）、面（分割脑区）、体（点线面形成的立体图谱），为科研、产业、教育等领域的应用提供服务"
       >
-        <div className="sdc-segmented" role="group" aria-label="脑图谱表达层级">
-          {brainStages.map((item) => <button type="button" aria-pressed={stage === item.id} className={stage === item.id ? "is-active" : ""} onClick={() => setStage(item.id)} key={item.id}><strong>{item.label}</strong><span>{item.id === "point" ? "神经元" : item.id === "line" ? "树突与轴突" : item.id === "surface" ? "脑区表面" : "3D立体图谱"}</span></button>)}
-        </div>
-        <div className="sdc-brain-view">
-          <div className="sdc-brain-canvas"><BrainDiagram stage={stage} /><DemoBadge>结构演示</DemoBadge></div>
-          <aside>
-            <span>当前层级 · {activeStage.label}</span>
-            <h4>{activeStage.definition}</h4>
-            <p>{activeStage.focus}</p>
-            <dl><dt>数据状态</dt><dd>结构演示</dd><dt>交互状态</dt><dd>四态切换可用</dd></dl>
-          </aside>
+        <div className="sdc-brain-feature" aria-live="polite">
+          <article>
+            <h4>{activeSlide.title}</h4>
+            <p>{activeSlide.description}</p>
+            <div className="sdc-brain-stat-tags">{activeSlide.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+          </article>
+          <div className="sdc-brain-preview" role="img" aria-label={`${activeSlide.title}的图谱预览区`}>
+            <svg viewBox="0 0 560 330" aria-hidden="true">
+              <path d="M152 236C89 196 90 110 151 78c27-49 112-58 158-22 58-23 127 14 134 72 55 27 53 101-4 124-59 24-117 14-163 29-53 17-90-10-124-45Z" />
+              <g>{[[168,168],[205,116],[250,190],[292,102],[334,159],[386,126],[404,215],[315,238],[228,250],[174,218]].map(([cx,cy]) => <circle cx={cx} cy={cy} r="6" key={`${cx}-${cy}`} />)}</g>
+              <g>{[[168,168,205,116],[205,116,292,102],[205,116,250,190],[250,190,334,159],[292,102,334,159],[334,159,386,126],[334,159,404,215],[250,190,315,238],[315,238,404,215],[228,250,315,238],[174,218,228,250],[168,168,174,218]].map(([x1,y1,x2,y2]) => <line x1={x1} y1={y1} x2={x2} y2={y2} key={`${x1}-${y1}-${x2}-${y2}`} />)}</g>
+            </svg>
+          </div>
+          <div className="sdc-brain-carousel-controls">
+            <button type="button" aria-label="上一张脑图谱介绍" onClick={() => setSlideIndex((value) => (value - 1 + slides.length) % slides.length)}><ChevronLeft size={18} /></button>
+            <button type="button" aria-label="下一张脑图谱介绍" onClick={() => setSlideIndex((value) => (value + 1) % slides.length)}><ChevronRight size={18} /></button>
+          </div>
+          <div className="sdc-brain-carousel-dots" role="tablist" aria-label="脑图谱介绍切换">
+            {slides.map((slide, index) => <button type="button" role="tab" aria-selected={slideIndex === index} aria-label={`查看${slide.title}`} className={slideIndex === index ? "is-active" : ""} onClick={() => setSlideIndex(index)} key={slide.title} />)}
+          </div>
         </div>
       </ContentSection>
 
       <ContentSection
-        id="brain-cases"
-        title="图谱数据案例"
-        description="展示标书明确的多物种细胞构筑、脑区立体定位与脑区联接图谱。"
+        id="brain-libraries"
+        title="核心图谱库"
+        description="三个在库图谱，覆盖细胞构筑、脑区联接及突触分子架构"
       >
-        <div className="sdc-case-table">
-          <div className="sdc-case-head"><span>图谱案例</span><span>数据范围</span><span>主要内容</span><span>入口状态</span></div>
-          {cases.map((item) => <div className="sdc-case-row" key={item.title}><strong>{item.title}</strong><span>{item.species}</span><span>{item.content}</span><EmptyResource label="暂无地址" /></div>)}
+        <div className="sdc-brain-library-list">
+          {libraries.map((item) => <article className={selectedLibrary === item.title ? "is-selected" : ""} key={item.title}>
+            <div><h4>{item.title}</h4><p>{item.description}</p></div>
+            <button type="button" aria-pressed={selectedLibrary === item.title} onClick={() => setSelectedLibrary(item.title)}>查看图谱</button>
+          </article>)}
         </div>
-        <div className="sdc-inline-status"><Database size={18} /><span>脑图谱可视化系统与脑图谱数据共享平台尚未提供正式地址，当前不开放跳转。</span></div>
+      </ContentSection>
+
+      <ContentSection
+        id="brain-systems"
+        title="关联系统入口"
+        description="两个关联系统，提供在线可视化探索与图谱数据共享服务"
+      >
+        <div className="sdc-brain-system-grid">
+          <article><h4>脑图谱可视化系统</h4><p>在线浏览细胞构筑、脑区联接与突触分子架构图谱，支持三维旋转、三切面联动与脑区定位。</p><a href="#brain-systems">进入系统</a></article>
+          <article><h4>脑图谱数据共享平台</h4><p>面向高校、科研院所与企业开放图谱数据与标准文档，支持按物种、模态检索与数据集下载。</p><a href="#brain-systems">进入系统</a></article>
+        </div>
       </ContentSection>
     </>
   );
@@ -822,7 +834,8 @@ export default function ScientificDataCenterPage() {
     if (!sections.length) return;
     let frame = 0;
     const updateAnchor = () => {
-      const current = sections.reduce((selected, section) => section.getBoundingClientRect().top <= 116 ? section : selected, sections[0]);
+      const activationLine = activeTopic === "brain-atlas" ? 180 : 116;
+      const current = sections.reduce((selected, section) => section.getBoundingClientRect().top <= activationLine ? section : selected, sections[0]);
       setActiveAnchor(current.id);
     };
     const schedule = () => { window.cancelAnimationFrame(frame); frame = window.requestAnimationFrame(updateAnchor); };
@@ -855,17 +868,17 @@ export default function ScientificDataCenterPage() {
   };
 
   return (
-    <main className="sdc-page">
+    <main className={`sdc-page${activeTopic === "brain-atlas" ? " is-brain-atlas" : ""}`}>
       <PortalHeader currentPage="scientific-data-center" />
 
       <section id="sdc-top" className="sdc-hero" aria-labelledby="sdc-title">
-        <img src="./assets/thinktank-hero-compact.png" alt="" />
+        <img src={activeTopic === "brain-atlas" ? "./assets/figma-scientific-data/scientific-data-hero-art.png" : "./assets/thinktank-hero-compact.png"} alt="" />
         <div className="sdc-hero-inner">
           <div>
             <h1 id="sdc-title">科学数据中心</h1>
             <p>汇集医学、脑图谱、工程细胞、材料与碳足迹专题数据，提供结构清晰的科学导航与可视化入口。</p>
           </div>
-          <div className="sdc-hero-index" aria-label="科学数据中心专题范围"><span>7 个专题入口</span><i /><span>图谱 · 数据表 · 空间指标</span></div>
+          {activeTopic === "brain-atlas" ? null : <div className="sdc-hero-index" aria-label="科学数据中心专题范围"><span>7 个专题入口</span><i /><span>图谱 · 数据表 · 空间指标</span></div>}
         </div>
       </section>
 
@@ -880,9 +893,9 @@ export default function ScientificDataCenterPage() {
 
         <section className="sdc-main-column" id={`sdc-module-${activeTopic}`} aria-labelledby="sdc-topic-title">
           <header className="sdc-topic-heading">
-            <span><ActiveIcon size={23} aria-hidden="true" /></span>
+            <span>{activeTopic === "brain-atlas" ? <img src="./assets/figma-scientific-data/brain-topic-icon.png" alt="" /> : <ActiveIcon size={23} aria-hidden="true" />}</span>
             <div><h2 id="sdc-topic-title">{activeDefinition.label}</h2><p>{activeDefinition.description}</p></div>
-            <DemoBadge>功能演示</DemoBadge>
+            {activeTopic === "brain-atlas" ? null : <DemoBadge>功能演示</DemoBadge>}
           </header>
           <div className="sdc-content-flow" key={activeTopic}><TopicContent topicId={activeTopic} onOpen={openTopic} /></div>
         </section>
@@ -893,7 +906,7 @@ export default function ScientificDataCenterPage() {
           <button type="button" className="sdc-back-top" onClick={() => document.getElementById("sdc-top")?.scrollIntoView({ behavior: preferredScrollBehavior() })}>返回顶部</button>
         </nav>
 
-        <footer className="sdc-footer"><div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科学数据中心</strong><small>深圳国际科技信息中心</small></span></div><p>当前页面仅用于标书功能与交互演示；所有数据、对象、图谱关系和统计结果均不代表真实结论。</p></footer>
+        {activeTopic === "brain-atlas" ? null : <footer className="sdc-footer"><div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科学数据中心</strong><small>深圳国际科技信息中心</small></span></div><p>当前页面仅用于标书功能与交互演示；所有数据、对象、图谱关系和统计结果均不代表真实结论。</p></footer>}
       </div>
     </main>
   );
