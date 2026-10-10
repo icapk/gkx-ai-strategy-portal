@@ -35,7 +35,6 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import PageSectionLocator from "./PageSectionLocator";
 import PortalHeader from "./PortalHeader";
 import "./technology-resource-service.css";
 
@@ -917,7 +916,11 @@ export default function TechnologyResourceServicePage() {
           <div className="trs-content-flow" key={activeModule}><ModuleContent moduleId={activeModule} /></div>
         </section>
 
-        <PageSectionLocator items={activeDefinition.sections} topId="trs-top" anchorId="trs-workspace" label={`${activeDefinition.label}内容定位`} activeId={activeAnchor} onLocate={locateSection} />
+        <nav className="trs-section-locator" aria-label={`${activeDefinition.label}内容定位`}>
+          <strong>内容定位</strong>
+          {activeDefinition.sections.map((section) => <button type="button" className={activeAnchor === section.id ? "is-active" : ""} aria-current={activeAnchor === section.id ? "location" : undefined} onClick={() => locateSection(section.id)} key={section.id}>{section.label}</button>)}
+          <button type="button" className="trs-back-top" onClick={() => document.getElementById("trs-top")?.scrollIntoView({ behavior: preferredScrollBehavior() })}>返回顶部</button>
+        </nav>
 
         <footer className="trs-footer">
           <div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科技资源服务</strong><small>深圳国际科技信息中心</small></span></div>

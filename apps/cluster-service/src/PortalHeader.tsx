@@ -51,9 +51,7 @@ function HeaderMenu({
     >
       <button
         ref={triggerRef}
-        className="portal-glass-tab"
         type="button"
-        aria-current={active ? "page" : undefined}
         aria-expanded={open}
         aria-controls={popoverId}
         onClick={() => setOpen(true)}
@@ -84,7 +82,7 @@ export default function PortalHeader({ currentPage }: PortalHeaderProps) {
           </a>
 
           <nav className="fp-main-nav" aria-label="主导航">
-            <a className="portal-glass-tab" href="../../../index.html" target="_top">首页</a>
+            <a href="../../../index.html" target="_top">首页</a>
             <HeaderMenu label="科学研究" active={active === "science"}>
               <a href={buildPortalPageHref("information-exchange")} aria-current={currentPage === "information-exchange" ? "page" : undefined}>科技信息交流</a>
               <a href={buildPortalPageHref("technology-resource-service")} aria-current={currentPage === "technology-resource-service" ? "page" : undefined}>科技资源服务</a>

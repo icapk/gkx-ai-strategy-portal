@@ -95,12 +95,13 @@
   width: 1200px;
   margin: 24px auto 0;
   display: grid;
-  grid-template-columns: 212px minmax(0, 1fr);
+  grid-template-columns: 212px minmax(0, 1fr) 126px;
   column-gap: 24px;
   align-items: start;
   scroll-margin-top: 24px;
 }
-.trs-module-nav {
+.trs-module-nav,
+.trs-section-locator {
   position: sticky;
   top: 24px;
   align-self: start;
@@ -207,6 +208,46 @@
 }
 .trs-content-section-header h3 { margin: 0; color: #20344e; font-size: 17px; line-height: 25px; }
 .trs-content-section-header p { max-width: 70ch; margin: 4px 0 0; color: #687991; font-size: 11px; line-height: 18px; }
+
+.trs-section-locator {
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #dfe7f1;
+}
+.trs-section-locator > strong {
+  min-height: 30px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  color: #74849a;
+  font-size: 11px;
+  font-weight: 600;
+}
+.trs-section-locator > button {
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 4px;
+  color: #697a91;
+  background: transparent;
+  border: 0;
+  font-size: 11px;
+  line-height: 17px;
+  text-align: left;
+}
+.trs-section-locator > button:hover { color: var(--trs-blue); }
+.trs-section-locator > button.is-active { color: var(--trs-blue); font-weight: 650; }
+.trs-section-locator > button.is-active::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  content: "";
+  background: var(--trs-blue);
+  border-radius: 50%;
+  vertical-align: 1px;
+}
+.trs-section-locator > .trs-back-top { margin-top: 12px; padding-top: 10px; color: #8593a6; border-top: 1px solid #e7edf4; }
 
 .trs-lifecycle {
   min-height: 82px;
@@ -806,6 +847,8 @@
 /* Keep operational copy legible at the fixed 1200px desktop canvas. */
 .trs-hero-flow span,
 .trs-demo-badge,
+.trs-section-locator > strong,
+.trs-section-locator > button,
 .trs-lifecycle > div > span,
 .trs-lifecycle strong,
 .trs-type-tabs button,
@@ -923,6 +966,7 @@
 }
 
 @media (max-width: 1450px) {
-  .trs-shell { grid-template-columns: 206px minmax(0, 1fr); column-gap: 22px; }
+  .trs-shell { grid-template-columns: 206px minmax(0, 1fr) 122px; column-gap: 22px; }
   .trs-module-nav > button { padding-inline: 11px; }
+  .trs-section-locator { padding-left: 9px; }
 }
