@@ -5586,6 +5586,50 @@
         profile: profilePage,
         iframe: iframeShell
       };
+      const PORTAL_VIEW_STATE_KEY = "gkx-portal-view-state-v1";
+      let activePortalViewState = null;
+
+      function toPortalRelativeUrl(url) {
+        const href = String(url || "");
+        if (!href) return "";
+        try {
+          const pageBase = new URL(".", window.location.href).href;
+          const resolved = new URL(href, pageBase).href;
+          return resolved.startsWith(pageBase) ? resolved.slice(pageBase.length) : resolved;
+        } catch (error) {
+          return href;
+        }
+      }
+
+      function getCurrentEmbeddedUrl() {
+        let iframeUrl = embeddedSystem.getAttribute("src") || activePortalViewState?.iframeUrl || "";
+        try {
+          const liveUrl = embeddedSystem.contentWindow?.location?.href;
+          if (liveUrl && liveUrl !== "about:blank") iframeUrl = toPortalRelativeUrl(liveUrl);
+        } catch (error) { /* cross-origin frames keep their configured URL */ }
+        return iframeUrl;
+      }
+
+      function persistPortalViewState() {
+        if (!activePortalViewState || iframeShell.hidden) return;
+        const nextState = { ...activePortalViewState, iframeUrl: getCurrentEmbeddedUrl() };
+        activePortalViewState = nextState;
+        try { sessionStorage.setItem(PORTAL_VIEW_STATE_KEY, JSON.stringify(nextState)); } catch (error) { /* storage may be unavailable */ }
+      }
+
+      function clearPortalViewState() {
+        activePortalViewState = null;
+        try { sessionStorage.removeItem(PORTAL_VIEW_STATE_KEY); } catch (error) { /* storage may be unavailable */ }
+      }
+
+      function restorePortalViewState() {
+        let state = null;
+        try { state = JSON.parse(sessionStorage.getItem(PORTAL_VIEW_STATE_KEY) || "null"); } catch (error) { /* ignore invalid state */ }
+        if (!state || state.surface !== "iframe" || typeof state.iframeUrl !== "string" || !state.iframeUrl) return false;
+        activePortalViewState = state;
+        showSurface("iframe", { ...state, skipViewStatePersistence: true });
+        return true;
+      }
 
       function formatDate(date) {
         const [year, month, day] = String(date).split("-");
@@ -7279,6 +7323,22 @@
         } else {
           iframeShell.classList.remove("is-header-cropped", "is-toolbar-hidden");
           iframeShell.style.removeProperty("--embedded-header-crop");
+        }
+        if (!options.skipViewStatePersistence) {
+          if (name === "iframe" && options.iframeUrl) {
+            activePortalViewState = {
+              surface: "iframe",
+              iframeUrl: options.iframeUrl,
+              embedTitle: options.embedTitle || "内嵌服务",
+              activeNavLabel: options.activeNavLabel || "",
+              hideEmbeddedHeader: Boolean(options.hideEmbeddedHeader),
+              hideEmbeddedToolbar: Boolean(options.hideEmbeddedToolbar),
+              headerCropPx: options.headerCropPx
+            };
+            try { sessionStorage.setItem(PORTAL_VIEW_STATE_KEY, JSON.stringify(activePortalViewState)); } catch (error) { /* storage may be unavailable */ }
+          } else {
+            clearPortalViewState();
+          }
         }
         closeMessageCenter();
         closeProfileMenu();
@@ -9006,6 +9066,18 @@
           closeDesktopMenu();
         }
       });
+
+      window.addEventListener("message", (event) => {
+        if (event.source !== embeddedSystem.contentWindow) return;
+        if (event.data?.type !== "gkx-embedded-route" || typeof event.data.href !== "string") return;
+        if (!activePortalViewState || iframeShell.hidden) return;
+        activePortalViewState = { ...activePortalViewState, iframeUrl: toPortalRelativeUrl(event.data.href) };
+        try { sessionStorage.setItem(PORTAL_VIEW_STATE_KEY, JSON.stringify(activePortalViewState)); } catch (error) { /* storage may be unavailable */ }
+      });
+      embeddedSystem.addEventListener("load", persistPortalViewState);
+      window.addEventListener("pagehide", persistPortalViewState);
+      window.addEventListener("beforeunload", persistPortalViewState);
+      restorePortalViewState();
     })();
   </script>
 </body>

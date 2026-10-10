@@ -11,6 +11,26 @@ import "./portal-fidelity.css";
 import "./technology-topic-service.css";
 import "./responsive.css";
 
+function notifyParentRoute() {
+  if (window.parent === window) return;
+  window.parent.postMessage({ type: "gkx-embedded-route", href: window.location.href }, "*");
+}
+
+const originalPushState = window.history.pushState.bind(window.history);
+window.history.pushState = (...args) => {
+  originalPushState(...args);
+  window.queueMicrotask(notifyParentRoute);
+};
+
+const originalReplaceState = window.history.replaceState.bind(window.history);
+window.history.replaceState = (...args) => {
+  originalReplaceState(...args);
+  window.queueMicrotask(notifyParentRoute);
+};
+
+window.addEventListener("hashchange", notifyParentRoute);
+window.addEventListener("popstate", notifyParentRoute);
+
 const searchParams = new URLSearchParams(window.location.search);
 const requestedPage = searchParams.get("page");
 document.documentElement.classList.toggle("is-portal-embed", searchParams.get("embed") === "portal");
@@ -38,3 +58,5 @@ createRoot(document.getElementById("root")!).render(
     <RootPage />
   </StrictMode>,
 );
+
+window.queueMicrotask(notifyParentRoute);
