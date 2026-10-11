@@ -872,13 +872,12 @@ export default function ScientificDataCenterPage() {
       <PortalHeader currentPage="scientific-data-center" />
 
       <section id="sdc-top" className="sdc-hero" aria-labelledby="sdc-title">
-        <img src={activeTopic === "brain-atlas" ? "./assets/figma-scientific-data/scientific-data-hero-art.png" : "./assets/thinktank-hero-compact.png"} alt="" />
+        <img src="./assets/figma-scientific-data/scientific-data-hero-art.png" alt="" />
         <div className="sdc-hero-inner">
           <div>
             <h1 id="sdc-title">科学数据中心</h1>
             <p>汇集医学、脑图谱、工程细胞、材料与碳足迹专题数据，提供结构清晰的科学导航与可视化入口。</p>
           </div>
-          {activeTopic === "brain-atlas" ? null : <div className="sdc-hero-index" aria-label="科学数据中心专题范围"><span>7 个专题入口</span><i /><span>图谱 · 数据表 · 空间指标</span></div>}
         </div>
       </section>
 

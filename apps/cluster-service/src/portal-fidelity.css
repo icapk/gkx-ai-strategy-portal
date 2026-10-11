@@ -19,7 +19,7 @@ html.is-portal-embed .fp-back-to-portal {
   z-index: 120;
   top: 16px;
   left: 20px;
-  display: inline-flex;
+  display: none;
   min-height: 36px;
   padding: 0 13px;
   align-items: center;

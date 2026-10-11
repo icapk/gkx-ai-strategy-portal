@@ -39,6 +39,8 @@
   pointer-events: none;
 }
 
+.site-header.site-header::after { display: none; }
+
 :is(.site-header.site-header.site-header, .lp-header.lp-header.lp-header, .rec-header.rec-header.rec-header, .fp-site-header.fp-site-header.fp-site-header) > * {
   position: relative;
   z-index: 1;
