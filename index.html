@@ -842,38 +842,43 @@
     .announcement-bar {
       position: relative;
       z-index: 900;
-      border-bottom: 1px solid #d9e8fb;
-      background: var(--header-band);
+      border: 0;
+      border-radius: 2px;
+      background: #e8f3ff;
     }
 
     .announcement-inner {
       display: flex;
-      width: min(calc(100% - 48px), var(--content-width));
-      min-height: 42px;
+      width: 100%;
+      min-height: 40px;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       margin: 0 auto;
-      padding: 8px 44px;
-      color: #43536a;
-      font-size: 13px;
-      line-height: 1.6;
+      padding: 9px 16px;
+      color: #1d2129;
+      font-size: 14px;
+      line-height: 22px;
       text-align: center;
     }
 
     .announcement-label {
       flex: none;
       border-radius: 4px;
-      padding: 1px 7px;
+      padding: 2px 8px;
       color: #ffffff;
-      background: var(--blue);
+      background: #165dff;
       font-size: 12px;
+      line-height: 20px;
     }
 
     .announcement-content {
+      min-width: 0;
+      overflow: hidden;
       color: inherit;
       text-decoration: none;
-      overflow-wrap: anywhere;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .announcement-content[href]:hover,
@@ -885,36 +890,25 @@
     }
 
     .announcement-close {
-      position: absolute;
-      top: 50%;
-      right: max(20px, calc((100% - var(--content-width)) / 2 + 20px));
       display: grid;
-      width: 30px;
-      height: 30px;
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      margin: -4px;
       padding: 0;
       place-items: center;
-      border-radius: 5px;
-      color: #6a7890;
+      border-radius: 4px;
       background: transparent;
       cursor: pointer;
-      transform: translateY(-50%);
     }
 
     .announcement-close:hover,
     .announcement-close:focus-visible {
-      color: var(--blue-strong);
-      background: rgba(0, 82, 217, 0.07);
+      background: rgba(22, 93, 255, 0.1);
       outline: none;
     }
 
-    .announcement-close svg {
-      width: 16px;
-      height: 16px;
-      fill: none;
-      stroke: currentColor;
-      stroke-linecap: round;
-      stroke-width: 1.8;
-    }
+    .announcement-close img { display: block; width: 12px; height: 12px; }
 
     .mobile-nav {
       padding: 12px 16px 24px;
@@ -2597,14 +2591,13 @@
       }
 
       .announcement-inner {
-        width: calc(100% - 32px);
-        padding-right: 36px;
-        padding-left: 8px;
-        text-align: left;
+        width: 100%;
+        padding: 9px 16px;
+        text-align: center;
       }
 
       .announcement-close {
-        right: 10px;
+        right: auto;
       }
 
       .search-results-page {
@@ -2730,10 +2723,10 @@
     @media (max-width: 720px) {
       .announcement-inner {
         width: 100%;
-        min-height: 46px;
+        min-height: 40px;
         gap: 8px;
-        padding: 7px 44px 7px 12px;
-        font-size: 12px;
+        padding: 9px 12px;
+        font-size: 13px;
       }
 
       .embedded-toolbar {
@@ -3019,7 +3012,7 @@
   <link rel="stylesheet" href="home-additions.css">
   <link rel="stylesheet" href="portal-extras.css?v=20261010-card-interactions-2">
   <link rel="stylesheet" href="mastergo-v2.css">
-  <link rel="stylesheet" href="assets/header-tabs.css?v=20261010-glass-tabs-1">
+  <link rel="stylesheet" href="assets/header-tabs.css?v=20261012-alert">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
   <style>
     .search-service-path {
@@ -3820,10 +3813,8 @@
     <div class="announcement-inner">
       <span class="announcement-label">公告</span>
       <a class="announcement-content" id="announcementContent" aria-disabled="true">门户服务持续优化中，欢迎体验智能科研、智能阅读与综合科技服务。</a>
+      <button class="announcement-close" id="announcementClose" type="button" aria-label="关闭公告"><img src="assets/announcement-close-figma.svg" alt="" /></button>
     </div>
-    <button class="announcement-close" id="announcementClose" type="button" aria-label="关闭公告">
-      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"></path></svg>
-    </button>
   </aside>
 
   <div class="mobile-backdrop" id="mobileBackdrop" hidden></div>
