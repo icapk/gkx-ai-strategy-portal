@@ -162,7 +162,6 @@ function EventsSection() {
               <img className="ie-event-thumb-image" src={`${assetRoot}/${event.image}`} alt={event.title} />
               <b>{eventState(event.status)}</b>
               {isVideo ? <button className="ie-event-video-trigger" type="button" aria-label={`打开${event.title}视频弹窗`} aria-haspopup="dialog" onClick={() => setVideoPreview(event)}>
-                <span className="ie-event-video-icon" aria-hidden="true"><img src={`${assetRoot}/event-play.svg`} alt="" /></span>
                 <span className="ie-event-video-hint">播放视频</span>
               </button> : null}
             </div>

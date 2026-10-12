@@ -158,14 +158,13 @@ const technologyBranches = [
   },
 ];
 
-type HotTechnology = { name: string; detail: string };
-const yearlyTechnologies: Array<{ year: string; items: HotTechnology[] }> = [
-  { year: "2025年", items: [{ name: "行业智能体协同", detail: "面向复杂任务编排、工具调用与多智能体协作的技术方向。" }] },
-  { year: "2024年", items: [{ name: "具身智能决策控制", detail: "围绕感知、规划、控制闭环与真实环境验证的技术方向。" }] },
-  { year: "2023年", items: [{ name: "检索增强生成", detail: "结合领域知识检索、证据引用与生成质量控制的技术方向。" }] },
-  { year: "2022年", items: [{ name: "多模态表征学习", detail: "融合文本、图像与结构化数据表征的技术方向。" }] },
-  { year: "2021年", items: [{ name: "大规模预训练模型", detail: "以通用语义建模和迁移能力为重点的技术方向。" }] },
-];
+const yearlyTechnologies = [
+  { year: "2025年", items: ["多模态融合生成", "具身智能决策", "知识图谱推理", "检索增强生成", "智能体协同规划", "大模型低比特量化", "长上下文信息建模", "端侧模型轻量部署"] },
+  { year: "2024年", items: ["具身感知建模", "视觉语言对齐", "行业知识增强", "复杂任务规划", "智能体工具调用", "推理加速", "模型安全评测", "多端协同部署"] },
+  { year: "2023年", items: ["检索增强生成", "知识密集任务", "多模态理解", "领域微调", "指令学习", "模型幻觉评测", "开源模型适配", "证据引用生成"] },
+  { year: "2022年", items: ["多模态表征学习", "对比学习", "图文跨模态检索", "预训练数据治理", "小样本迁移", "模型蒸馏", "分布式训练", "可解释性分析"] },
+  { year: "2021年", items: ["大规模预训练模型", "中文语义建模", "自监督学习", "知识图谱构建", "语言模型评测", "领域迁移学习", "深度学习平台", "算力调度系统"] },
+] as const;
 
 const technologyMilestones = [
   { id: "m-2021", year: "2021年", technology: "预训练模型工程平台上线", team: "基础模型研发团队", impact: "夯实中文语义建模、训练与评测基础。" },
@@ -246,30 +245,95 @@ function MetricStrip({ items }: { items: Array<{ label: string; value: string; t
 
 function LineChart() {
   return (
-    <svg className="ttf-line-chart" viewBox="0 0 820 220" role="img" aria-label="2021至2025年技术发展概览：技术总量约为40、45、70、100、110，突破性技术约为30、35、60、90、100。">
-      <defs>
-        <linearGradient id="ttf-blue-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#1877ff" stopOpacity=".18"/><stop offset="1" stopColor="#1877ff" stopOpacity="0"/></linearGradient>
-        <linearGradient id="ttf-green-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#00bc37" stopOpacity=".15"/><stop offset="1" stopColor="#00bc37" stopOpacity="0"/></linearGradient>
-      </defs>
-      {[28,68,108,148,188].map((y) => <line key={y} x1="52" y1={y} x2="796" y2={y} stroke="#e5e9ef" strokeDasharray="3 4" />)}
-      {[0,30,60,90,120].map((n,index)=><text key={n} x="40" y={192-index*40} textAnchor="end">{n}</text>)}
-      {["2021","2022","2023","2024","2025"].map((year,index)=><text key={year} x={70+index*178} y="214" textAnchor="middle">{year}</text>)}
-      <path d="M70 135 L248 128 L426 95 L604 55 L782 41 L782 188 L70 188Z" fill="url(#ttf-blue-fill)" />
-      <path d="M70 148 L248 141 L426 108 L604 68 L782 55 L782 188 L70 188Z" fill="url(#ttf-green-fill)" />
-      <polyline points="70,135 248,128 426,95 604,55 782,41" fill="none" stroke="#1877ff" strokeWidth="3" />
-      <polyline points="70,148 248,141 426,108 604,68 782,55" fill="none" stroke="#00bc37" strokeWidth="3" />
-      {["70,135","248,128","426,95","604,55","782,41"].map((p)=><circle key={p} cx={p.split(",")[0]} cy={p.split(",")[1]} r="5" fill="#1877ff" />)}
-      {["70,148","248,141","426,108","604,68","782,55"].map((p)=><circle key={p} cx={p.split(",")[0]} cy={p.split(",")[1]} r="5" fill="#00bc37" />)}
-    </svg>
+    <div className="ttf-route-chart" role="img" aria-label="2021至2025年技术发展概览，技术总量与突破性技术持续增长。">
+      <div className="ttf-route-chart-y">{[120, 90, 60, 30, 0].map((value) => <span key={value}>{value}</span>)}</div>
+      <div className="ttf-route-chart-grid">{Array.from({ length: 5 }, (_, index) => <i key={index} />)}</div>
+      <img className="is-blue" src={`${assetRoot}/technology-chart-blue.svg`} alt="" />
+      <img className="is-green" src={`${assetRoot}/technology-chart-green.svg`} alt="" />
+      <div className="ttf-route-chart-x">{["2021", "2022", "2023", "2024", "2025"].map((year) => <span key={year}>{year}</span>)}</div>
+    </div>
   );
 }
 
 function TechnologySection() {
+  const [domain, setDomain] = useState("人工智能领域");
+  const [query, setQuery] = useState("");
+  const [activeRoadmapLevel, setActiveRoadmapLevel] = useState<(typeof roadmapLevels)[number]["id"]>("goal");
+  const [activeYear, setActiveYear] = useState("2025年");
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState("m-2021");
+  const [treeScale, setTreeScale] = useState(.64);
+  const [branchesExpanded, setBranchesExpanded] = useState(true);
+  const [selectedNodeTitle, setSelectedNodeTitle] = useState("人工智能");
+  const normalizedQuery = query.trim();
+  const activeYearItems = yearlyTechnologies.find((item) => item.year === activeYear)?.items ?? yearlyTechnologies[0].items;
+  const filteredTechnologies = activeYearItems.filter((item) => !normalizedQuery || item.includes(normalizedQuery));
+  const visibleBranches = technologyBranches.filter((branch) => !normalizedQuery || `${branch.name}${branch.leaves.map((leaf) => leaf.name).join("")}`.includes(normalizedQuery));
+  const milestoneCards = [technologyMilestones[0], technologyMilestones[2], technologyMilestones[4]];
+
+  return (
+    <section id="technology" className="ttf-section ttf-tech ttf-route-section">
+      <header className="ttf-route-heading">
+        <div className="ttf-route-heading-copy"><img src={`${assetRoot}/technology-route-icon-figma.png`} alt="" /><div><h2>领域技术路线</h2><p>总体画像｜发展目标｜具体任务｜保障措施</p></div></div>
+        <div className="ttf-route-filters">
+          <label className="ttf-route-select"><select value={domain} onChange={(event) => setDomain(event.target.value)} aria-label="选择技术领域"><option>人工智能领域</option><option>生物医药领域</option><option>新能源领域</option></select><img src={`${assetRoot}/technology-select-arrow.svg`} alt="" /></label>
+          <label className="ttf-route-search"><img src={`${assetRoot}/technology-search.svg`} alt="" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索关键词" aria-label="搜索领域技术关键词" /></label>
+        </div>
+      </header>
+
+      <div className="ttf-route-content">
+        <article className="ttf-route-overview">
+          <div className="ttf-route-metrics">
+            {[{ label: "论文总数", value: "12,345" }, { label: "学者数量", value: "3,256" }, { label: "企业数量", value: "12,345" }, { label: "论文发表环比", value: "+ 6.2%", danger: true }].map((item) => <div key={item.label}><span>{item.label}</span><strong className={item.danger ? "is-danger" : ""}>{item.value}</strong></div>)}
+          </div>
+          <div className="ttf-route-trend">
+            <header>
+              <h3>近五年技术发展概览</h3>
+              <div className="ttf-route-legend"><span><img src={`${assetRoot}/technology-legend-blue.svg`} alt="" />技术总量</span><span><img src={`${assetRoot}/technology-legend-green.svg`} alt="" />突破性技术</span></div>
+              <div className="ttf-route-segments" role="tablist" aria-label="技术路线层级">{roadmapLevels.map((level) => <button type="button" role="tab" aria-selected={activeRoadmapLevel === level.id} className={activeRoadmapLevel === level.id ? "is-active" : ""} onClick={() => setActiveRoadmapLevel(level.id)} key={level.id}>{level.label}</button>)}</div>
+            </header>
+            <LineChart />
+          </div>
+        </article>
+
+        <article className="ttf-route-insights">
+          <section className="ttf-route-key-tech">
+            <h3>近五年关键技术</h3>
+            <div className="ttf-route-year-tabs" role="tablist" aria-label="关键技术年份">{yearlyTechnologies.map((item) => <button type="button" role="tab" aria-selected={activeYear === item.year} className={activeYear === item.year ? "is-active" : ""} onClick={() => setActiveYear(item.year)} key={item.year}>{item.year}</button>)}</div>
+            <div className="ttf-route-tech-grid" aria-live="polite">{filteredTechnologies.length ? filteredTechnologies.map((item) => <span key={item}>{item}</span>) : <p>未找到匹配的技术关键词</p>}</div>
+          </section>
+          <section className="ttf-route-milestones">
+            <header><h3>关键技术发展里程碑轨道</h3><span>2021年–2025年</span></header>
+            <div className="ttf-route-milestone-track">
+              {milestoneCards.map((item, index) => <button type="button" className={selectedMilestoneId === item.id ? "is-active" : ""} aria-pressed={selectedMilestoneId === item.id} onClick={() => setSelectedMilestoneId(item.id)} key={item.id}><strong>{item.technology}</strong>{index < 2 ? <em>高影响</em> : null}<small>{item.team}</small><i /><time>{item.year}</time></button>)}
+            </div>
+            <i className="ttf-route-scroll-indicator" aria-hidden="true" />
+          </section>
+        </article>
+
+        <article className="ttf-route-tree-panel">
+          <header><h3>关键技术分枝树</h3><span>内容为近五年数据</span></header>
+          <div className="ttf-route-tree-viewport">
+            <div className="ttf-route-tree-toolbar">
+              <button type="button" onClick={() => setTreeScale((value) => Math.max(.54, Number((value - .1).toFixed(2))))} disabled={treeScale <= .54} aria-label="缩小技术分枝树">−</button><span>{Math.round(treeScale * 100)}%</span><button type="button" onClick={() => setTreeScale((value) => Math.min(1.04, Number((value + .1).toFixed(2))))} disabled={treeScale >= 1.04} aria-label="放大技术分枝树">+</button><i />
+              <button type="button" className={branchesExpanded ? "is-active" : ""} onClick={() => setBranchesExpanded(true)} disabled={branchesExpanded}>全部展开</button><button type="button" onClick={() => setBranchesExpanded(false)} disabled={!branchesExpanded}>全部收起</button>
+            </div>
+            <div className="ttf-route-tree-stage" style={{ "--ttf-route-scale": treeScale, "--ttf-route-factor": treeScale / .64 } as CSSProperties}>
+              <button type="button" className={`ttf-route-root${selectedNodeTitle === "人工智能" ? " is-selected" : ""}`} onClick={() => setSelectedNodeTitle("人工智能")}><strong>人工智能</strong><span>334,287 篇论文</span><em>{technologyBranches.length}项</em><b aria-hidden="true">›</b></button>
+              {branchesExpanded ? <div className="ttf-route-branches">{visibleBranches.map((branch) => <button type="button" className={selectedNodeTitle === branch.name ? "is-selected" : ""} onClick={() => setSelectedNodeTitle(branch.name)} key={branch.name}><strong>{branch.name}</strong><span>{branch.papers.toLocaleString("zh-CN")} 篇论文</span><em>{branch.leaves.length}项</em><b aria-hidden="true">›</b></button>)}</div> : null}
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function LegacyTechnologySection() {
   const [expandedBranches, setExpandedBranches] = useState<Set<string>>(() => new Set(technologyBranches.map((item) => item.name)));
   const [treeScale, setTreeScale] = useState(1);
   const [treeQuery, setTreeQuery] = useState("");
   const [activeRoadmapLevel, setActiveRoadmapLevel] = useState<(typeof roadmapLevels)[number]["id"]>("goal");
-  const [selectedHotTechnology, setSelectedHotTechnology] = useState<HotTechnology>(yearlyTechnologies[0].items[0]);
+  const [selectedHotTechnology, setSelectedHotTechnology] = useState<string>(yearlyTechnologies[0].items[0]);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<(typeof technologyMilestones)[number]["id"]>(technologyMilestones[0].id);
   const [selectedNode, setSelectedNode] = useState({ title: "人工智能", detail: "12,345 篇论文 · 3 条关键技术路线 · 9 个细分技术节点" });
   const normalizedQuery = treeQuery.trim();
@@ -316,8 +380,8 @@ function TechnologySection() {
       <div className="ttf-tech-overview">
         <article className="fp-card ttf-key-tech">
           <PanelTitle title="近5年热门关键技术" />
-          {yearlyTechnologies.map(({ year, items }) => <div className="ttf-key-year" key={year}><b>{year}</b>{items.map((item) => <button type="button" aria-pressed={selectedHotTechnology.name === item.name} className={selectedHotTechnology.name === item.name ? "is-active" : ""} onClick={() => setSelectedHotTechnology(item)} key={item.name}>{item.name}</button>)}</div>)}
-          <div className="ttf-key-detail" aria-live="polite"><strong>{selectedHotTechnology.name}</strong><p>{selectedHotTechnology.detail}</p></div>
+          {yearlyTechnologies.map(({ year, items }) => <div className="ttf-key-year" key={year}><b>{year}</b>{items.map((item) => <button type="button" aria-pressed={selectedHotTechnology === item} className={selectedHotTechnology === item ? "is-active" : ""} onClick={() => setSelectedHotTechnology(item)} key={item}>{item}</button>)}</div>)}
+          <div className="ttf-key-detail" aria-live="polite"><strong>{selectedHotTechnology}</strong><p>根据当前年份与领域数据生成的技术路线摘要。</p></div>
         </article>
         <div className="ttf-tech-main">
           <article className="fp-card ttf-trend-panel">
