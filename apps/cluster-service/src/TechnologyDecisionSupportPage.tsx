@@ -773,9 +773,9 @@ export default function TechnologyDecisionSupportPage() {
       <div id="tds-workspace" className="tds-shell">
         <nav className="tds-module-nav" aria-label="科技决策支持功能目录"><header><strong>功能目录</strong><small>4 项决策支持能力</small></header>{moduleDefinitions.map((module) => { const Icon = module.icon; return <button type="button" className={activeModule === module.id ? "is-active" : ""} aria-current={activeModule === module.id ? "page" : undefined} onClick={() => openModule(module.id)} key={module.id}><Icon size={18} /><span><strong>{module.label}</strong><small>{module.sections.length} 个内容区块</small></span></button>; })}<div className="tds-nav-note"><Activity size={14} /><p>支持按对象、时间范围与预测类别查看分析结果。</p></div></nav>
         <section className="tds-main-column" aria-labelledby="tds-module-title"><header className="tds-module-heading"><span><ActiveIcon size={23} /></span><div><h2 id="tds-module-title">{activeDefinition.label}</h2><p>{activeDefinition.description}</p></div>{activeModule === "forecast" ? <DemoBadge>综合预测报告</DemoBadge> : <DemoBadge />}</header><div className="tds-content-flow" key={activeModule}><ModuleContent moduleId={activeModule} /></div></section>
+        <PageSectionLocator items={activeDefinition.sections} topId="tds-top" label="内容定位" />
       </div>
     </main>
-    <PageSectionLocator items={activeDefinition.sections} topId="tds-top" label="内容定位" />
     <footer className="tds-footer"><div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科技决策支持</strong><small>深圳国际科技信息中心</small></span></div><p>预测结果需结合数据权限、业务规则与专业研判用于辅助决策。</p></footer>
   </div>;
 }

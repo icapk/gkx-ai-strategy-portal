@@ -246,58 +246,91 @@ html.is-portal-embed .fp-back-to-portal:focus-visible {
 }
 .fp-tag.is-blue { color: #165dff; background: #e8f3ff; }
 
-.fp-section-locator {
-  position: fixed;
+.fp-section-locator.fp-section-locator {
+  position: sticky;
   z-index: 40;
-  top: 50%;
-  right: max(18px, calc((100vw - 1200px) / 2 - 158px));
-  width: 136px;
-  padding: 8px;
+  top: 96px;
+  right: auto;
+  align-self: start;
+  width: 156px;
+  padding: 0;
   display: grid;
-  gap: 3px;
-  color: #697789;
-  background: rgba(255, 255, 255, .96);
-  border: 1px solid #e1e7ef;
-  border-radius: 8px;
-  box-shadow: 0 12px 30px rgba(44, 75, 112, .1);
-  transform: translateY(-50%);
+  gap: 4px;
+  color: #59697f;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
-.fp-section-locator > header {
-  height: 34px;
-  padding: 0 8px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #334a66;
-  border-bottom: 1px solid #e8edf3;
-  font-size: 12px;
-  font-weight: 650;
-}
-.fp-section-locator > button {
+.fp-section-locator.fp-section-locator > button {
   position: relative;
   width: 100%;
-  min-height: 34px;
-  padding: 0 8px;
-  display: grid;
-  grid-template-columns: 21px minmax(0, 1fr);
+  min-height: 38px;
+  padding: 0 16px;
+  display: flex;
   align-items: center;
-  gap: 5px;
-  color: #68798d;
+  justify-content: flex-start;
+  color: #59697f;
   background: transparent;
   border: 0;
   border-radius: 4px;
+  font-size: 14px;
+  line-height: 22px;
   text-align: left;
+  white-space: nowrap;
   cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  transition: color 140ms ease, background-color 140ms ease;
 }
-.fp-section-locator > button b { color: #9aa7b6; font-size: 9px; font-weight: 650; font-variant-numeric: tabular-nums; }
-.fp-section-locator > button span { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-.fp-section-locator > button:hover { color: #165dff; background: #f3f7fd; }
-.fp-section-locator > button.is-active { color: #165dff; background: #edf4ff; font-weight: 650; }
-.fp-section-locator > button.is-active::before { position: absolute; top: 8px; bottom: 8px; left: -1px; width: 2px; content: ""; background: #165dff; border-radius: 2px; }
-.fp-section-locator > button.is-active b { color: #165dff; }
-.fp-section-locator > button:focus-visible { outline: 2px solid #165dff; outline-offset: 2px; }
-.fp-section-locator > .fp-locator-top { margin-top: 4px; padding-top: 2px; grid-template-columns: 21px minmax(0, 1fr); border-top: 1px solid #e8edf3; border-radius: 0 0 4px 4px; }
-.fp-section-locator > .fp-locator-top svg { justify-self: center; }
+.fp-section-locator.fp-section-locator > button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fp-section-locator.fp-section-locator > button:hover { color: #1769ff; background: rgba(255, 255, 255, .56); }
+.fp-section-locator.fp-section-locator > button.is-active { color: #1769ff; background: #fff; box-shadow: none; font-weight: 600; }
+.fp-section-locator.fp-section-locator > button:focus-visible { outline: 2px solid #165dff; outline-offset: 2px; }
+.fp-section-locator.fp-section-locator > .fp-locator-top { margin-top: 8px; padding-top: 0; color: #59697f; border-top: 0; }
+
+/* The brain-atlas locator is anchored to the content workspace, starts 120px
+   below that workspace, and only then becomes sticky. Standalone portal pages
+   use this stage so the locator never floats over their hero/banner. */
+.fp-locator-stage {
+  position: relative;
+  width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+.fp-locator-stage > :first-child,
+.fp-locator-stage > .fp-section-locator.fp-section-locator {
+  grid-column: 1;
+  grid-row: 1;
+}
+.fp-locator-stage > .fp-section-locator.fp-section-locator {
+  justify-self: end;
+  margin-top: 120px;
+  transform: translateX(calc(100% + 24px));
+}
+
+.sdc-shell > .fp-section-locator.fp-section-locator,
+.trs-shell > .fp-section-locator.fp-section-locator,
+.tds-shell > .fp-section-locator.fp-section-locator,
+.tp-service-shell > .fp-section-locator.fp-section-locator {
+  position: sticky;
+  z-index: 35;
+  top: 96px;
+  right: auto;
+  align-self: start;
+  justify-self: end;
+  width: 156px;
+  margin-top: 120px;
+  transform: translateX(calc(100% + 24px));
+}
+.sdc-shell > .fp-section-locator.fp-section-locator,
+.trs-shell > .fp-section-locator.fp-section-locator,
+.tds-shell > .fp-section-locator.fp-section-locator { grid-column: 2; grid-row: 1; }
+.tp-service-shell > .fp-section-locator.fp-section-locator { grid-column: 3; grid-row: 1; }
+.sdc-shell > .sdc-main-column,
+.trs-shell > .trs-main-column { grid-column: 2; grid-row: 1; }
 
 @media (max-width: 1500px) {
   .fp-brand { flex-basis: 218px; }
@@ -322,16 +355,4 @@ html.is-portal-embed .fp-back-to-portal:focus-visible {
   .fp-register { flex-basis: 74px; font-size: 11px; }
 }
 
-@media (max-width: 1499px) {
-  .fp-section-locator {
-    right: 4px;
-    width: 28px;
-    padding: 6px 2px;
-  }
-  .fp-section-locator > header { justify-content: center; padding: 0; }
-  .fp-section-locator > header span,
-  .fp-section-locator > button span { display: none; }
-  .fp-section-locator > button { min-height: 34px; padding: 0; grid-template-columns: 1fr; justify-items: center; text-align: center; }
-  .fp-section-locator > button.is-active::before { top: 8px; bottom: 8px; left: -3px; }
-  .fp-section-locator > .fp-locator-top { grid-template-columns: 1fr; }
-}
+@media (max-width: 1431px) { .fp-section-locator.fp-section-locator { display: none; } }

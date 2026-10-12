@@ -587,7 +587,9 @@ export default function FigmaThinkTankPage() {
       <img src="./assets/thinktank-hero-reference.png" alt="" />
       <div className="ttf-hero-copy"><h1>新型高端智库</h1><p>整合领域技术路线梳理、战略咨询报告、人才分布与流动分析，提供高价值的产业、人才、技术决策参考</p><span>发布话题</span></div>
     </section>
-    <div className="ttf-content"><TechnologySection/><ReportsSection/><TalentSection/><MobilitySection/><NewsSection/></div>
-    <PageSectionLocator items={thinkTankLocatorItems} topId="top" label="内容定位" />
+    <div className="fp-locator-stage">
+      <div className="ttf-content"><TechnologySection/><ReportsSection/><TalentSection/><MobilitySection/><NewsSection/></div>
+      <PageSectionLocator items={thinkTankLocatorItems} topId="top" label="内容定位" />
+    </div>
   </main>;
 }

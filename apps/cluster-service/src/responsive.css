@@ -178,12 +178,18 @@ html.is-portal-embed .fp-site-header { display: none; }
   .ie-metric-item { min-height: 92px; justify-content: flex-start; padding: 0 28px; }
   .ie-metric-item:nth-child(n) { transform: none; }
   .ie-page .fp-section-heading > img { display: none; }
-  .ie-events-grid { min-height: 0; grid-template-columns: 1fr; }
+  .ie-event-heading { width: 100%; height: auto; }
+  .ie-event-heading > div { width: auto; min-width: 0; }
+  .ie-event-heading > i { display: none; }
+  .ie-events-grid { height: auto; min-height: 0; grid-template-columns: 1fr; }
   .ie-feature-image,
   .ie-event-thumb { width: 100%; }
-  .ie-event-feature { padding-bottom: 68px; }
+  .ie-event-feature { width: 100%; height: auto; }
+  .ie-event-image-wrap,
+  .ie-event-feature-copy { width: 100%; }
   .ie-event-side-list { grid-template-rows: none; }
-  .ie-event-horizontal { grid-template-columns: 1fr; }
+  .ie-event-horizontal { height: auto; grid-template-columns: 1fr; }
+  .ie-event-horizontal-copy { width: 100%; height: auto; }
   .ie-event-horizontal .ie-event-action { position: static; margin-top: 12px; }
   .ie-event-detail,
   .ie-debate-card,

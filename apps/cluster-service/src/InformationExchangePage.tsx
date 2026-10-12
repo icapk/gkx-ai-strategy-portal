@@ -1,15 +1,5 @@
-import {
-  ArrowDownUp,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  MapPin,
-  MessageCircle,
-  Play,
-  ThumbsUp,
-  Users,
-} from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { ChevronLeft } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import PageSectionLocator from "./PageSectionLocator";
 import PortalHeader from "./PortalHeader";
 import "./information-exchange.css";
@@ -17,17 +7,20 @@ import "./information-exchange.css";
 const assetRoot = "./assets/figma-information-exchange";
 
 const eventRows = [
-  { id: "event-1", title: "2026深圳国际AI创新大赛", type: "赛事", field: "人工智能", summary: "面向全球征集人工智能创新应用项目，聚焦技术验证、产业场景与成果转化。", date: "2026-04-15 至 2026-06-30", location: "深圳市南山区科技园", image: "event-ai-competition.png", status: "报名进行中" },
-  { id: "event-2", title: "AI大模型技术与行业应用实践", type: "讲座", field: "人工智能", summary: "围绕模型工程、行业数据治理与智能体应用进行案例讲解和实践交流。", date: "2026-05-22", location: "深圳市福田区", image: "event-ai-practice.png", status: "开放预约" },
-  { id: "event-3", title: "数字化转型与企业创新发展沙龙", type: "沙龙", field: "数字化转型", summary: "邀请科研机构、企业与投资机构共同讨论数字化创新路径。", date: "2026-05-08", location: "上海市", image: "event-digital-salon.png", status: "活动结束" },
+  { id: "event-1", title: "2026深圳国际AI创新大赛", type: "赛事", field: "人工智能", summary: "面向全球征集人工智能创新应用项目，聚焦技术验证、产业场景与成果转化。", date: "2026-04-15 至 2026-06-30", location: "深圳市南山区科技园", image: "event-feature-figma.png", status: "报名进行中" },
+  { id: "event-2", title: "AI大模型技术与行业应用实践", type: "讲座", field: "人工智能", summary: "围绕模型工程、行业数据治理与智能体应用进行案例讲解和实践交流。", date: "2026-05-22", location: "深圳市福田区", image: "event-practice-figma.png", status: "开放预约" },
+  { id: "event-3", title: "数字化转型与企业创新发展沙龙", type: "沙龙", field: "数字化转型", summary: "邀请科研机构、企业与投资机构共同讨论数字化创新路径。", date: "2026-05-08", location: "上海市", image: "event-salon-figma.png", status: "活动结束" },
   { id: "event-4", title: "量子信息产业协同论坛", type: "会议", field: "量子信息", summary: "讨论量子计算、量子通信与测量技术的协同创新和应用机会。", date: "2026-06-18", location: "合肥市", image: "event-ai-competition.png", status: "开放预约" },
   { id: "event-5", title: "合成生物青年学者交流会", type: "沙龙", field: "合成生物", summary: "面向青年科研人员组织研究进展分享与跨机构合作交流。", date: "2026-07-03", location: "深圳市光明区", image: "event-ai-practice.png", status: "即将开放" },
 ];
 
 type DebateExpert = { name: string; title: string; institution: string };
-type DebateRow = { id: string; title: string; summary: string; focus: string; discipline: [string, string, string]; status: "进行中" | "即将开始" | "已结束"; date: string; votes: number; participants: number; experts: DebateExpert[] };
+type DebateRow = { id: string; title: string; summary: string; focus: string; discipline: [string, string, string]; status: "进行中" | "即将开始" | "已结束"; date: string; votes: number; participants: number; experts: DebateExpert[]; organizer?: string; priority?: number };
 
 const debateRows: DebateRow[] = [
+  { id: "debate-figma-planning", title: "AI 科研助手应在自动写作中承担多大责任？", summary: "聚焦 AI 科研助手在文献检索、知识组织与自动写作中的能力边界。", focus: "文献检索、证据组织、自动写作与科研诚信", discipline: ["工学类", "计算机科学与技术", "科学智能"], status: "进行中", date: "2026-04-08 ～2026-05-20", votes: 1824, participants: 1268, organizer: "科学智能联合实验室", priority: 1, experts: [{ name: "张伟", title: "教授", institution: "清华大学" }, { name: "林澈", title: "教授", institution: "北京大学" }, { name: "沈璟", title: "顾问", institution: "深圳大学" }] },
+  { id: "debate-figma-upcoming", title: "科研数据开放共享应如何划定授权边界？", summary: "讨论科研数据开放、个人信息保护、成果权益和跨机构共享的责任边界。", focus: "使用目的、授权期限、再分发条件与审计追溯", discipline: ["法学类", "法学", "数据权益与科技法"], status: "即将开始", date: "2026-05-10 ～2026-06-20", votes: 1368, participants: 896, organizer: "科技数据治理联合研究组", priority: 2, experts: [{ name: "顾宁", title: "教授", institution: "政法大学" }, { name: "许远", title: "研究", institution: "科技法治" }, { name: "苏维", title: "顾问", institution: "数字权益" }] },
+  { id: "debate-figma-ended", title: "大语言模型会重塑科研评价的证据标准吗？", summary: "从证据可追溯性、同行评议与模型辅助判断的角度讨论科研评价边界。", focus: "证据链、同行评议、模型透明度与责任归属", discipline: ["管理学类", "公共管理", "科技评价"], status: "已结束", date: "2026-01-12 ～2026-02-28", votes: 3026, participants: 2314, organizer: "科技治理与评价联合研究中心", priority: 3, experts: [{ name: "邵清", title: "研究", institution: "治理中心" }, { name: "王澄", title: "教授", institution: "浙江大学" }, { name: "林岚", title: "主任", institution: "评估中心" }] },
   { id: "debate-engineering-ai", title: "大语言模型是否会取代传统软件开发？", summary: "讨论大模型对需求分析、代码生成、测试交付和软件工程人才结构的长期影响。", focus: "技术替代边界、软件工程范式、人机协作与开发者能力转型", discipline: ["工学类", "计算机科学与技术", "软件工程"], status: "进行中", date: "2026-08-27", votes: 3286, participants: 2345, experts: [{ name: "张伟", title: "教授", institution: "清华大学" }, { name: "林澈", title: "研究员", institution: "先进计算中心" }, { name: "沈璟", title: "技术总监", institution: "智能软件研究院" }] },
   { id: "debate-education-talent", title: "未来产业人才培养更需要通才还是专才？", summary: "围绕交叉基础、专业深度、项目实践与产业协同讨论未来产业人才培养路径。", focus: "通识基础、专业能力、产教融合与人才评价", discipline: ["教育学类", "教育学", "高等教育学"], status: "即将开始", date: "2026-08-30", votes: 3018, participants: 1680, experts: [{ name: "周岚", title: "教授", institution: "北京大学" }, { name: "陈宇", title: "研究员", institution: "未来教育研究中心" }, { name: "罗予安", title: "产业导师", institution: "湾区科创学院" }] },
   { id: "debate-law-copyright", title: "生成式人工智能作品的著作权应如何界定？", summary: "讨论训练数据、提示设计、模型生成与人工编辑对作品权属和责任认定的影响。", focus: "训练数据授权、创作贡献、平台责任与权利救济", discipline: ["法学类", "法学", "知识产权法"], status: "即将开始", date: "2026-09-02", votes: 2864, participants: 1516, experts: [{ name: "顾宁", title: "教授", institution: "中国政法大学" }, { name: "许知远", title: "研究员", institution: "科技法治研究中心" }, { name: "苏维", title: "高级顾问", institution: "数字权益实验室" }] },
@@ -90,29 +83,6 @@ const informationLocatorItems = [
   { id: "ie-hot", label: "热门活动" },
 ];
 
-function SectionHeading({
-  icon,
-  title,
-  subtitle,
-  children,
-}: {
-  icon: string;
-  title: string;
-  subtitle: string;
-  children?: ReactNode;
-}) {
-  return (
-    <header className="fp-section-heading">
-      <img src={`${assetRoot}/${icon}`} alt="" />
-      <div className="fp-section-heading-copy">
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
-      </div>
-      {children ? <div className="fp-section-heading-actions">{children}</div> : null}
-    </header>
-  );
-}
-
 function MetricItem({ icon, label, value }: { icon: "calendar" | "expert" | "topic"; label: string; value: string }) {
   return (
     <div className="ie-metric-item">
@@ -125,8 +95,8 @@ function MetricItem({ icon, label, value }: { icon: "calendar" | "expert" | "top
 function MetaRow({ date, location }: { date: string; location: string }) {
   return (
     <div className="ie-meta-row">
-      <span><CalendarDays size={14} />{date}</span>
-      <span><MapPin size={14} />{location}</span>
+      <span><img src={`${assetRoot}/event-time.svg`} alt="" />{date}</span>
+      <span><img src={`${assetRoot}/event-location.svg`} alt="" />{location}</span>
     </div>
   );
 }
@@ -137,43 +107,36 @@ function EventTagRow({ first, second }: { first: string; second: string }) {
 
 function EventsSection() {
   const [offset, setOffset] = useState(0);
-  const [selectedEventId, setSelectedEventId] = useState(eventRows[0].id);
   const visibleEvents = Array.from({ length: 3 }, (_, index) => eventRows[(offset + index) % eventRows.length]);
-  const selectedEvent = eventRows.find((item) => item.id === selectedEventId) ?? visibleEvents[0];
   const feature = visibleEvents[0];
+  const eventState = (status: string) => status.includes("结束") ? "报名结束" : "报名中";
+  const actionLabel = (status: string) => status.includes("结束") ? "报名结束" : "立即报名";
   return (
     <section id="ie-events" className="ie-section ie-events">
-      <SectionHeading icon="section-events.png" title="赛事活动" subtitle="科技赛事｜学术讲座｜专业沙龙｜行业会议">
-        <button className="ie-circle-control" type="button" onClick={() => setOffset((value) => (value - 1 + eventRows.length) % eventRows.length)} aria-label="上一组赛事活动"><ChevronLeft size={20} /></button>
-        <button className="ie-circle-control" type="button" onClick={() => setOffset((value) => (value + 1) % eventRows.length)} aria-label="下一组赛事活动"><ChevronRight size={20} /></button>
-      </SectionHeading>
+      <header className="ie-event-heading"><div><img src={`${assetRoot}/event-section-icon-figma.png`} alt="" /><span><h2>赛事活动</h2><p>科技赛事｜学术讲座｜专业沙龙｜行业会议</p></span></div><i aria-hidden="true" /></header>
       <div className="ie-events-grid">
         <article className="fp-card ie-event-feature">
-          <img className="ie-feature-image" src={`${assetRoot}/${feature.image}`} alt={feature.title} />
-          <h3>{feature.title}</h3>
-          <EventTagRow first={feature.type} second={feature.field} />
-          <p>{feature.summary}</p>
-          <MetaRow date={feature.date} location={feature.location} />
-          <button className="ie-event-action" type="button" onClick={() => setSelectedEventId(feature.id)}>查看活动</button>
+          <div className="ie-event-image-wrap"><img className="ie-feature-image" src={`${assetRoot}/${feature.image}`} alt={feature.title} /><span className={feature.status.includes("结束") ? "is-ended" : ""}>{eventState(feature.status)}</span></div>
+          <div className="ie-event-feature-copy"><div><h3>{feature.title}</h3><EventTagRow first="活动类型" second={feature.field} /></div><div><p>{feature.summary}</p><MetaRow date={feature.date} location={feature.location} /></div></div>
+          <i className="ie-event-divider" />
+          <button className={`ie-event-action${feature.status.includes("结束") ? " is-disabled" : ""}`} type="button" disabled={feature.status.includes("结束")}>{actionLabel(feature.status)}</button>
         </article>
         <div className="ie-event-side-list">
           {visibleEvents.slice(1).map((event, index) => <article className="fp-card ie-event-horizontal" key={event.id}>
             <div className={`ie-event-thumb${index === 0 ? " is-video" : ""}`}>
               <img src={`${assetRoot}/${event.image}`} alt={event.title} />
-              {index === 0 ? <span aria-hidden="true"><Play size={24} fill="currentColor" /></span> : null}
+              <b>{eventState(event.status)}</b>
+              {index === 0 ? <span aria-hidden="true"><img src={`${assetRoot}/event-play.svg`} alt="" /></span> : null}
             </div>
             <div className="ie-event-horizontal-copy">
-              <h3>{event.title}</h3>
-              <EventTagRow first={event.type} second={event.field} />
-              <p>{event.summary}</p>
-              <MetaRow date={event.date} location={event.location} />
-              <button className="ie-event-action" type="button" onClick={() => setSelectedEventId(event.id)}>查看活动</button>
+              <div className="ie-event-title-block"><h3>{event.title}</h3><EventTagRow first="活动类型" second={event.field} /></div>
+              <div className="ie-event-detail-block"><p>{event.summary}</p><MetaRow date={event.date} location={event.location} /></div>
+              <button className={`ie-event-action${event.status.includes("结束") ? " is-disabled" : ""}`} type="button" disabled={event.status.includes("结束")}>{actionLabel(event.status)}</button>
             </div>
           </article>)}
         </div>
       </div>
-      <div className="ie-event-detail" aria-live="polite"><div><small>当前活动</small><strong>{selectedEvent.title}</strong><span>{selectedEvent.date} · {selectedEvent.location}</span></div><p>{selectedEvent.summary}</p><b>{selectedEvent.status}</b></div>
-      <button className="ie-more-link" type="button" onClick={() => setOffset((value) => (value + 3) % eventRows.length)}>换一组活动</button>
+      <button className="ie-more-link" type="button" onClick={() => setOffset((value) => (value + 3) % eventRows.length)}>查看更多</button>
     </section>
   );
 }
@@ -181,103 +144,202 @@ function EventsSection() {
 function ExpertStrip({ experts }: { experts: DebateExpert[] }) {
   return (
     <div className="ie-expert-strip">
-      <strong>参与专家</strong>
+      <strong>专家团</strong>
       <div className="ie-experts">
-        {experts.slice(0, 3).map((expert) => (
-          <span className="ie-expert" key={`${expert.name}-${expert.institution}`}>
-            <img src={`${assetRoot}/expert-avatar.png`} alt={`${expert.name}头像`} />
+        {experts.slice(0, 3).map((expert, index) => (
+          <span className="ie-expert" key={`${expert.name}-${expert.institution}-${index}`}>
+            <img src={`${assetRoot}/debate-expert-avatar.png`} alt={`${expert.name}头像`} />
             <span><b>{expert.name}</b><em>｜{expert.title}</em><small>{expert.institution}</small></span>
           </span>
         ))}
       </div>
-      <span className="ie-more-experts">展示 {Math.min(experts.length, 3)} 位领域专家</span>
+      <span className="ie-more-experts"><b>+4</b> 位专家</span>
+    </div>
+  );
+}
+
+function DebateSelect({
+  label,
+  value,
+  options,
+  onChange,
+  className = "",
+  chevron = "debate-chevron-down.svg",
+}: {
+  label: string;
+  value: string;
+  options: Array<{ value: string; label: string }>;
+  onChange: (value: string) => void;
+  className?: string;
+  chevron?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listboxId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, [open]);
+
+  const handleTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (["ArrowDown", "Enter", " "].includes(event.key)) {
+      event.preventDefault();
+      setOpen(true);
+    }
+    if (event.key === "Escape") setOpen(false);
+  };
+
+  return (
+    <div className={`ie-debate-select${className ? ` ${className}` : ""}${open ? " is-open" : ""}`} ref={rootRef}>
+      <button
+        ref={triggerRef}
+        className="ie-debate-select-trigger"
+        type="button"
+        aria-label={label}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listboxId}
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={handleTriggerKeyDown}
+      >
+        <span>{options.find((option) => option.value === value)?.label ?? value}</span>
+        <img src={`${assetRoot}/${chevron}`} alt="" />
+      </button>
+      {open ? <div className="ie-debate-select-menu" id={listboxId} role="listbox" aria-label={label}>
+        {options.map((option) => <button
+          className={option.value === value ? "is-selected" : ""}
+          type="button"
+          role="option"
+          aria-selected={option.value === value}
+          key={option.value}
+          onClick={() => {
+            onChange(option.value);
+            setOpen(false);
+            triggerRef.current?.focus();
+          }}
+        ><span>{option.label}</span><i aria-hidden="true">✓</i></button>)}
+      </div> : null}
     </div>
   );
 }
 
 function DebateSection() {
   const [statusFilter, setStatusFilter] = useState<"全部状态" | DebateRow["status"]>("全部状态");
-  const [fieldFilter, setFieldFilter] = useState("全部学科");
   const [expertFilter, setExpertFilter] = useState("全部专家");
-  const [expandedId, setExpandedId] = useState<string | null>(debateRows[0].id);
+  const [visibleCount, setVisibleCount] = useState(3);
   const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
   const expertNames = useMemo(() => Array.from(new Set(debateRows.flatMap((row) => row.experts.map((expert) => expert.name)))), []);
-  const visibleRows = useMemo(() => debateRows
+  const filteredRows = useMemo(() => debateRows
     .filter((row) => statusFilter === "全部状态" || row.status === statusFilter)
-    .filter((row) => fieldFilter === "全部学科" || row.discipline[0] === fieldFilter)
     .filter((row) => expertFilter === "全部专家" || row.experts.some((expert) => expert.name === expertFilter))
-    .sort((left, right) => right.date.localeCompare(left.date))
-    .slice(0, 5), [expertFilter, fieldFilter, statusFilter]);
+    .sort((left, right) => (left.priority ?? 99) - (right.priority ?? 99) || right.date.localeCompare(left.date)), [expertFilter, statusFilter]);
+  const visibleRows = filteredRows.slice(0, visibleCount);
   const toggleVote = (rowId: string) => setVotedIds((current) => { const next = new Set(current); if (next.has(rowId)) next.delete(rowId); else next.add(rowId); return next; });
+  const displayStatus = (status: DebateRow["status"]) => status === "进行中" ? "策划中" : status === "即将开始" ? "待启动" : "已结束";
+  const actionLabel = (row: DebateRow, voted: boolean) => row.status === "进行中" ? voted ? "已投票" : "话题投票" : row.status === "即将开始" ? "在线报名" : "专题讨论";
   return (
     <section id="ie-debates" className="ie-section ie-debates">
-      <SectionHeading icon="section-debate.png" title="思辨活动" subtitle="用户投票选题｜十一大学科分类｜领域专家观点">
-        <div className="ie-debate-filters"><label className="ie-select"><select value={fieldFilter} onChange={(event) => setFieldFilter(event.target.value)} aria-label="思辨活动学科主题"><option>全部学科</option>{Array.from(new Set(debateRows.map((row) => row.discipline[0]))).map((item) => <option key={item}>{item}</option>)}</select></label><label className="ie-select"><select value={expertFilter} onChange={(event) => setExpertFilter(event.target.value)} aria-label="思辨活动领域专家"><option>全部专家</option>{expertNames.map((item) => <option key={item}>{item}</option>)}</select></label><label className="ie-select"><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)} aria-label="思辨活动状态"><option>全部状态</option><option>进行中</option><option>即将开始</option><option>已结束</option></select></label></div>
-      </SectionHeading>
+      <header className="ie-debate-heading">
+        <div className="ie-debate-heading-copy">
+          <img src={`${assetRoot}/debate-section-icon.png`} alt="" />
+          <div><h2>思辨活动</h2><p>用户投票选题｜十一大学科分类｜领域专家观点</p></div>
+        </div>
+        <div className="ie-debate-filters">
+          <DebateSelect label="思辨活动领域专家" value={expertFilter} options={[{ value: "全部专家", label: "全部专家" }, ...expertNames.map((name) => ({ value: name, label: name }))]} onChange={(value) => { setExpertFilter(value); setVisibleCount(3); }} />
+          <DebateSelect label="思辨活动状态" value={statusFilter} options={[{ value: "全部状态", label: "全部状态" }, { value: "进行中", label: "策划中" }, { value: "即将开始", label: "待启动" }, { value: "已结束", label: "已结束" }]} onChange={(value) => { setStatusFilter(value as typeof statusFilter); setVisibleCount(3); }} />
+        </div>
+      </header>
       <div className="ie-debate-list">
         {visibleRows.length ? visibleRows.map((row) => { const voted = votedIds.has(row.id); return (
-          <article className={`fp-card ie-debate-card${expandedId === row.id ? " is-expanded" : ""}`} key={row.id}>
+          <article className="fp-card ie-debate-card" data-status={row.status} key={row.id}>
             <div className="ie-debate-copy">
-              <h3>{row.title}</h3>
-              <p>{row.summary}</p>
-              <div className="ie-tags"><span className="fp-tag is-blue">{row.discipline[0]}</span><span className="fp-tag">{row.discipline[1]}</span><span className="fp-tag">{row.discipline[2]}</span></div>
-              <div className="ie-debate-meta"><span><CalendarDays size={14} />{row.date}</span><i /><span><Users size={14} />{row.participants.toLocaleString("zh-CN")} 人参与</span><i /><span><ThumbsUp size={14} />{(row.votes + (voted ? 1 : 0)).toLocaleString("zh-CN")} 票选出</span></div>
+              <div className="ie-debate-title-row"><h3>{row.title}</h3><span className="ie-debate-status">{displayStatus(row.status)}</span></div>
+              <dl className="ie-debate-info">
+                <div><dt>主办单位</dt><dd>{row.organizer ?? "深圳国际科技信息中心"}</dd></div>
+                <div><dt>活动时间</dt><dd>{row.date}</dd></div>
+                <div><dt>参与人数</dt><dd>{row.participants.toLocaleString("zh-CN")}</dd></div>
+              </dl>
+              <button className={`ie-debate-action${voted ? " is-voted" : ""}`} type="button" aria-pressed={row.status === "进行中" ? voted : undefined} onClick={() => { if (row.status === "进行中") toggleVote(row.id); }}><span>{actionLabel(row, voted)}</span><img src={`${assetRoot}/debate-arrow-right.svg`} alt="" /></button>
             </div>
             <ExpertStrip experts={row.experts} />
-            <div className="ie-debate-state"><span className={row.status === "进行中" ? "is-live" : ""}>{row.status}</span><button className={voted ? "is-voted" : ""} type="button" aria-pressed={voted} disabled={row.status === "已结束"} onClick={() => toggleVote(row.id)}>{row.status === "已结束" ? "投票已结束" : voted ? "已投票" : "投票支持"}</button><button type="button" aria-expanded={expandedId === row.id} onClick={() => setExpandedId((current) => current === row.id ? null : row.id)}>{expandedId === row.id ? "收起详情" : "查看详情"}</button></div>
-            {expandedId === row.id ? <div className="ie-debate-detail"><strong>讨论焦点</strong><span>{row.focus}</span><p>该议题由社区用户投票选出，系统展示参与人数与最多三位领域专家信息，便于按学科主题持续跟踪近期思辨活动。</p></div> : null}
           </article>
-        ); }) : <div className="ie-debate-empty"><strong>没有匹配的近期思辨活动</strong><p>请调整学科、领域专家或活动状态。</p><button type="button" onClick={() => { setFieldFilter("全部学科"); setExpertFilter("全部专家"); setStatusFilter("全部状态"); }}>清除筛选</button></div>}
+        ); }) : <div className="ie-debate-empty"><strong>没有匹配的近期思辨活动</strong><p>请调整领域专家或活动状态。</p><button type="button" onClick={() => { setExpertFilter("全部专家"); setStatusFilter("全部状态"); setVisibleCount(3); }}>清除筛选</button></div>}
       </div>
-      <p className="ie-list-summary" role="status">当前显示最近 {visibleRows.length} 期思辨活动</p>
+      {visibleCount < filteredRows.length ? <button className="ie-debate-load-more" type="button" onClick={() => setVisibleCount((count) => count + 3)}>加载更多</button> : null}
     </section>
   );
 }
 
-function HotCard({ topic, rank }: { topic: HotTopic; rank: number }) {
+function topicViewCount(topic: HotTopic) {
+  return topic.participants * 3 + topic.commentCount * 4;
+}
+
+function HotCard({ topic }: { topic: HotTopic }) {
   const [likedCommentIds, setLikedCommentIds] = useState<Set<string>>(new Set());
-  const score = topicHeatScore(topic);
   const toggleCommentLike = (commentId: string) => setLikedCommentIds((current) => { const next = new Set(current); if (next.has(commentId)) next.delete(commentId); else next.add(commentId); return next; });
+  const featuredComments = [...topic.comments];
+  const fallbackComments = [
+    { author: "领域研究者", content: "建议同时呈现关键证据、适用边界和仍需验证的问题，便于社区形成更有效的讨论。", publishedAt: "1小时前" },
+    { author: "产业观察员", content: "除了关注技术能力，也需要持续评估真实场景中的稳定性、成本与协作方式。", publishedAt: "2小时前" },
+    { author: "社区用户", content: "期待后续补充更多实践案例和可复核的数据，让不同观点能够在同一证据基础上比较。", publishedAt: "3小时前" },
+  ];
+  while (featuredComments.length < 3) {
+    const fallback = fallbackComments[featuredComments.length] ?? fallbackComments[0];
+    featuredComments.push({ id: `${topic.id}-featured-${featuredComments.length}`, ...fallback });
+  }
   return (
     <article className="fp-card ie-hot-card">
-      <header>
-        <div className="ie-hot-copy">
-          <div className="ie-hot-rank"><b>TOP {rank}</b><span>综合热度 {score}</span></div>
+      <div className="ie-hot-overview">
+        <div className="ie-hot-title-block">
           <h3><a href={topicDetailHref(topic.id)}>{topic.title}</a></h3>
           <p>{topic.summary}</p>
-          <div className="ie-tags"><span className="fp-tag is-blue">{topic.discipline[0]}</span><span className="fp-tag">{topic.discipline[1]}</span><span className="fp-tag">{topic.discipline[2]}</span></div>
         </div>
-        <div className="ie-hot-meta"><span><Users size={14} />{topic.participants.toLocaleString("zh-CN")} 人参与</span><i /><span><MessageCircle size={14} />{topic.commentCount.toLocaleString("zh-CN")} 条评论</span><i /><span><CalendarDays size={14} />最新评论 <time dateTime={topic.latestCommentAt.replace(" ", "T")}>{topic.latestCommentAt}</time></span></div>
-      </header>
-      <div className="ie-comments-title">最新评论 <span>展示符合评论规范的 {topic.comments.length} 条内容</span></div>
-      <div className="ie-comment-list">
-        {topic.comments.map((comment) => { const liked = likedCommentIds.has(comment.id); return <div className="ie-comment" key={comment.id}>
-          <p>{comment.content}</p>
-          <span><img src={`${assetRoot}/expert-avatar.png`} alt="" /><b>{comment.author}</b><small>｜{comment.publishedAt}</small></span>
-          <button type="button" className={liked ? "is-liked" : ""} aria-pressed={liked} onClick={() => toggleCommentLike(comment.id)}><ThumbsUp size={13} />{liked ? "已点赞" : "点赞"}</button>
-        </div>; })}
+        <div className="ie-hot-facts">
+          <div className="ie-tags"><span className="fp-tag is-blue">{topic.discipline[0].replace(/类$/, "")}</span><span className="fp-tag">{topic.discipline[1]}</span><span className="fp-tag">{topic.discipline[2]}</span></div>
+          <div className="ie-hot-meta">
+            <span><img src={`${assetRoot}/hot-participants.svg`} alt="" />{topic.participants.toLocaleString("zh-CN")} 人参与</span><i>｜</i>
+            <span><img src={`${assetRoot}/hot-views.svg`} alt="" />{topicViewCount(topic).toLocaleString("zh-CN")} 浏览</span><i>｜</i>
+            <span><img src={`${assetRoot}/hot-comments.svg`} alt="" />{topic.commentCount.toLocaleString("zh-CN")} 评论</span>
+          </div>
+        </div>
       </div>
-      <a className="ie-topic-detail-link" href={topicDetailHref(topic.id)}>进入话题详情<ChevronRight size={15} aria-hidden="true" /></a>
+      <div className="ie-hot-discussion">
+        <i className="ie-hot-divider" />
+        <h4><i />精选评论</h4>
+        <div className="ie-hot-comment-list">
+          {featuredComments.slice(0, 3).map((comment, index) => { const liked = likedCommentIds.has(comment.id); const likeCount = Math.max(32, Math.round(topic.participants * (.14 - index * .025))) + (liked ? 1 : 0); return <div className="ie-hot-comment" key={comment.id}>
+            <p>{comment.content}</p>
+            <div className="ie-hot-comment-footer">
+              <span><img src={`${assetRoot}/hot-comment-avatar-figma.png`} alt="" /><b>{comment.author}</b><small>｜</small><small>{comment.publishedAt}</small></span>
+              <button type="button" className={liked ? "is-liked" : ""} aria-pressed={liked} onClick={() => toggleCommentLike(comment.id)}><img src={`${assetRoot}/hot-like.svg`} alt="" />{likeCount.toLocaleString("zh-CN")} 点赞</button>
+            </div>
+          </div>; })}
+        </div>
+      </div>
     </article>
   );
 }
 
 function HotSection() {
   const [field, setField] = useState("全部学科");
-  const [sort, setSort] = useState<"comprehensive" | "participants" | "comments" | "latest">("comprehensive");
-  const rows = useMemo(() => hotTopics
-    .filter((topic) => field === "全部学科" || topic.discipline[0] === field)
-    .sort((left, right) => sort === "participants" ? right.participants - left.participants : sort === "comments" ? right.commentCount - left.commentCount : sort === "latest" ? right.latestCommentAt.localeCompare(left.latestCommentAt) : topicHeatScore(right) - topicHeatScore(left))
-    .slice(0, 3), [field, sort]);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const filteredRows = useMemo(() => hotTopics.filter((topic) => field === "全部学科" || topic.discipline[0] === field), [field]);
+  const rows = filteredRows.slice(0, visibleCount);
+  const fieldOptions = [{ value: "全部学科", label: "全部学科领域" }, ...Array.from(new Set(hotTopics.map((topic) => topic.discipline[0]))).map((value) => ({ value, label: value }))];
   return (
     <section id="ie-hot" className="ie-section ie-hot">
-      <SectionHeading icon="section-hot.png" title="热门活动" subtitle="社区论坛综合热度 TOP 3｜学科分层｜最新评论">
-        <label className="ie-select"><select value={field} onChange={(event) => setField(event.target.value)} aria-label="热门话题所属学科"><option>全部学科</option>{Array.from(new Set(hotTopics.map((topic) => topic.discipline[0]))).map((value) => <option key={value}>{value}</option>)}</select></label>
-        <label className="ie-select ie-sort-select"><ArrowDownUp size={15} aria-hidden="true" /><select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} aria-label="热门话题排序"><option value="comprehensive">综合热度</option><option value="participants">参与人数</option><option value="comments">评论数量</option><option value="latest">最新评论</option></select></label>
-      </SectionHeading>
-      <div className="ie-ranking-note"><strong>综合排序依据</strong><span>参与人数 45%</span><span>评论数 35%</span><span>最新评论时间 20%</span></div>
-      <div className="ie-hot-list">{rows.map((topic, index) => <HotCard topic={topic} rank={index + 1} key={topic.id} />)}</div>
-      <p className="ie-list-summary" role="status">当前显示 {rows.length} 个热门话题{field === "全部学科" ? "，覆盖十一大学科领域" : `，所属领域：${field}`}</p>
+      <header className="ie-hot-heading">
+        <div className="ie-hot-heading-copy"><span className="ie-hot-heading-icon"><img src={`${assetRoot}/hot-section-icon-figma.png`} alt="" /></span><div><h2>热门活动</h2><p>社区热点话题｜用户讨论｜最新评论</p></div></div>
+        <DebateSelect className="ie-hot-field-select" chevron="hot-select-arrow.svg" label="热门话题所属学科" value={field} options={fieldOptions} onChange={(value) => { setField(value); setVisibleCount(3); }} />
+      </header>
+      <div className="ie-hot-list">{rows.map((topic) => <HotCard topic={topic} key={topic.id} />)}</div>
+      {visibleCount < filteredRows.length ? <button className="ie-hot-load-more" type="button" onClick={() => setVisibleCount((count) => count + 3)}>加载更多</button> : null}
     </section>
   );
 }
@@ -325,13 +387,14 @@ export default function InformationExchangePage() {
         </div>
       </section>
 
-      <div className="ie-content">
-        <EventsSection />
-        <DebateSection />
-        <HotSection />
+      <div className="fp-locator-stage">
+        <div className="ie-content">
+          <EventsSection />
+          <DebateSection />
+          <HotSection />
+        </div>
+        <PageSectionLocator items={informationLocatorItems} topId="ie-top" label="内容定位" />
       </div>
-
-      <PageSectionLocator items={informationLocatorItems} topId="ie-top" label="内容定位" />
     </main>
   );
 }
