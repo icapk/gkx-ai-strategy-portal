@@ -127,7 +127,7 @@
 .ie-debate-select-menu > button i { color: #165dff; font-size: 13px; font-style: normal; opacity: 0; }
 .ie-debate-select-menu > button.is-selected i { opacity: 1; }
 .ie-debate-list { display: grid; gap: 16px; margin-top: 24px; }
-.ie-debate-card { display: grid; grid-template-columns: 478px 492px; justify-content: space-between; min-height: 212px; padding: 24px 32px; border-radius: 8px; box-shadow: none; }
+.ie-debate-card { display: grid; grid-template-columns: 478px 560px; justify-content: space-between; min-height: 212px; padding: 24px 32px; border-radius: 8px; box-shadow: none; }
 .ie-debate-copy { width: 478px; min-height: 164px; display: flex; flex-direction: column; align-items: flex-start; }
 .ie-debate-title-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 28px; }
 .ie-debate-copy h3 { margin: 0; color: #1d2129; font-size: 16px; line-height: 24px; font-weight: 500; white-space: nowrap; }
@@ -145,16 +145,16 @@
 .ie-debate-action:hover { color: #0f53cf; }
 .ie-debate-action:focus-visible { outline: 2px solid #165dff; outline-offset: 3px; }
 .ie-debate-action.is-voted { color: #0f53cf; font-weight: 500; }
-.ie-expert-strip { position: relative; display: flex; width: 492px; height: 163px; flex-direction: column; min-width: 0; padding: 16px 19px 16px 33px; border-radius: 8px; background: linear-gradient(90deg,rgba(22,93,255,.08) 0%,rgba(22,93,255,0) 100%); }
+.ie-expert-strip { position: relative; display: flex; width: 560px; height: 163px; flex-direction: column; min-width: 0; padding: 16px 18px 16px 28px; border-radius: 8px; background: linear-gradient(90deg,rgba(22,93,255,.08) 0%,rgba(22,93,255,0) 100%); }
 .ie-expert-strip::before { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; content: ""; background: rgba(22,93,255,.08); }
 .ie-expert-strip > strong { color: #4e5969; font-size: 14px; line-height: 22px; font-weight: 500; }
-.ie-experts { display: flex; gap: 40px; margin-top: 16px; }
-.ie-expert { display: flex; width: 120px; flex: 0 0 120px; align-items: center; gap: 8px; }
+.ie-experts { display: flex; gap: 20px; margin-top: 16px; }
+.ie-expert { display: flex; width: 158px; flex: 0 0 158px; align-items: center; gap: 8px; }
 .ie-expert img { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; object-fit: cover; }
-.ie-expert > span { display: grid; grid-template-columns: auto auto; align-items: end; }
-.ie-expert b { font-size: 14px; font-weight: 500; }
-.ie-expert em { color: #86909c; font-size: 12px; font-style: normal; }
-.ie-expert small { grid-column: 1 / -1; margin-top: 8px; color: #86909c; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.ie-expert > span { width: 102px; min-width: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: end; }
+.ie-expert b { font-size: 14px; font-weight: 500; white-space: nowrap; }
+.ie-expert em { min-width: 0; overflow: hidden; color: #86909c; font-size: 12px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.ie-expert small { grid-column: 1 / -1; max-width: 102px; margin-top: 8px; overflow: hidden; color: #86909c; font-size: 12px; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
 .ie-more-experts { margin-top: 21px; color: #4e5969; font-size: 14px; line-height: 22px; }
 .ie-more-experts b { color: #165dff; font-weight: 500; }
 .ie-debate-load-more { display: flex; min-height: 36px; align-items: center; justify-content: center; margin: 24px auto 0; padding: 7px 16px; border: 0; color: #165dff; background: transparent; font-size: 14px; line-height: 22px; cursor: pointer; }
