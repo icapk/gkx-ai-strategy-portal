@@ -105,8 +105,43 @@ function EventTagRow({ first, second }: { first: string; second: string }) {
   return <div className="ie-tags"><span className="fp-tag is-blue">{first}</span><span className="fp-tag">{second}</span></div>;
 }
 
+function EventVideoDialog({ event, onClose }: { event: (typeof eventRows)[number]; onClose: () => void }) {
+  const [playing, setPlaying] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
+    const handleKeyDown = (keyboardEvent: globalThis.KeyboardEvent) => {
+      if (keyboardEvent.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="ie-video-dialog-backdrop" role="presentation" onMouseDown={(mouseEvent) => { if (mouseEvent.target === mouseEvent.currentTarget) onClose(); }}>
+      <section className="ie-video-dialog" role="dialog" aria-modal="true" aria-labelledby="ie-video-dialog-title">
+        <header><div><span>赛事视频</span><h3 id="ie-video-dialog-title">{event.title}</h3></div><button ref={closeRef} type="button" aria-label="关闭视频弹窗" onClick={onClose}>×</button></header>
+        <div className={`ie-video-player${playing ? " is-playing" : ""}`}>
+          <img src={`${assetRoot}/${event.image}`} alt={`${event.title}视频封面`} />
+          <span className="ie-video-player-badge">视频预览</span>
+          <button className="ie-video-player-toggle" type="button" aria-label={playing ? "暂停视频预览" : "播放视频预览"} aria-pressed={playing} onClick={() => setPlaying((current) => !current)}><span><img src={`${assetRoot}/event-play.svg`} alt="" /></span></button>
+          <div className="ie-video-player-controls" aria-hidden="true"><i><b /></i><span>{playing ? "00:24" : "00:00"} / 03:18</span><em>{playing ? "播放中" : "已暂停"}</em></div>
+        </div>
+        <footer><p>{event.summary}</p><button type="button" onClick={onClose}>关闭</button></footer>
+      </section>
+    </div>
+  );
+}
+
 function EventsSection() {
   const [offset, setOffset] = useState(0);
+  const [videoPreview, setVideoPreview] = useState<(typeof eventRows)[number] | null>(null);
   const visibleEvents = Array.from({ length: 3 }, (_, index) => eventRows[(offset + index) % eventRows.length]);
   const feature = visibleEvents[0];
   const eventState = (status: string) => status.includes("结束") ? "报名结束" : "报名中";
@@ -122,21 +157,25 @@ function EventsSection() {
           <button className={`ie-event-action${feature.status.includes("结束") ? " is-disabled" : ""}`} type="button" disabled={feature.status.includes("结束")}>{actionLabel(feature.status)}</button>
         </article>
         <div className="ie-event-side-list">
-          {visibleEvents.slice(1).map((event, index) => <article className="fp-card ie-event-horizontal" key={event.id}>
-            <div className={`ie-event-thumb${index === 0 ? " is-video" : ""}`}>
-              <img src={`${assetRoot}/${event.image}`} alt={event.title} />
+          {visibleEvents.slice(1).map((event, index) => { const isVideo = index === 0; return <article className={`fp-card ie-event-horizontal${isVideo ? " has-video" : ""}`} key={event.id}>
+            <div className={`ie-event-thumb${isVideo ? " is-video" : ""}`}>
+              <img className="ie-event-thumb-image" src={`${assetRoot}/${event.image}`} alt={event.title} />
               <b>{eventState(event.status)}</b>
-              {index === 0 ? <span aria-hidden="true"><img src={`${assetRoot}/event-play.svg`} alt="" /></span> : null}
+              {isVideo ? <button className="ie-event-video-trigger" type="button" aria-label={`打开${event.title}视频弹窗`} aria-haspopup="dialog" onClick={() => setVideoPreview(event)}>
+                <span className="ie-event-video-icon" aria-hidden="true"><img src={`${assetRoot}/event-play.svg`} alt="" /></span>
+                <span className="ie-event-video-hint">播放视频</span>
+              </button> : null}
             </div>
             <div className="ie-event-horizontal-copy">
               <div className="ie-event-title-block"><h3>{event.title}</h3><EventTagRow first="活动类型" second={event.field} /></div>
               <div className="ie-event-detail-block"><p>{event.summary}</p><MetaRow date={event.date} location={event.location} /></div>
               <button className={`ie-event-action${event.status.includes("结束") ? " is-disabled" : ""}`} type="button" disabled={event.status.includes("结束")}>{actionLabel(event.status)}</button>
             </div>
-          </article>)}
+          </article>; })}
         </div>
       </div>
-      <button className="ie-more-link" type="button" onClick={() => setOffset((value) => (value + 3) % eventRows.length)}>查看更多</button>
+      <button className="ie-more-link" type="button" onClick={() => { setVideoPreview(null); setOffset((value) => (value + 3) % eventRows.length); }}>查看更多</button>
+      {videoPreview ? <EventVideoDialog event={videoPreview} onClose={() => setVideoPreview(null)} /> : null}
     </section>
   );
 }
