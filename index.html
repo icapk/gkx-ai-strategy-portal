@@ -3010,7 +3010,7 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css?v=20261013-message-read-all-3">
+  <link rel="stylesheet" href="portal-extras.css?v=20261013-arco-buttons-1">
   <link rel="stylesheet" href="mastergo-v2.css">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261012-alert">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
@@ -3753,12 +3753,12 @@
       <div class="header-actions">
         <nav class="utility-nav" id="utilityNav" aria-label="快捷导航"></nav>
 
-        <button class="utility-trigger ticket-service-button" id="ticketServiceButton" type="button" aria-label="打开待办中心" aria-controls="portalTicketService" aria-expanded="false">
+        <button class="arco-btn arco-btn-text utility-trigger ticket-service-button" id="ticketServiceButton" type="button" aria-label="打开待办中心" aria-controls="portalTicketService" aria-expanded="false">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 5.5h11v9h-11z"></path><path d="M7 8h6M7 11h4"></path></svg>
           <span>待办中心</span>
         </button>
 
-        <button class="message-center-button" id="messageCenterButton" type="button" aria-label="消息中心，5 条未读消息" aria-controls="portalMessageCenter" aria-expanded="false">
+        <button class="arco-btn arco-btn-text message-center-button" id="messageCenterButton" type="button" aria-label="消息中心，5 条未读消息" aria-controls="portalMessageCenter" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
           <span class="message-center-badge" id="messageCenterBadge" aria-hidden="true">5</span>
         </button>
@@ -3825,7 +3825,7 @@
   <section class="portal-ticket-service portal-message-center" id="portalTicketService" aria-hidden="true" hidden>
     <button class="portal-message-overlay" id="portalTicketServiceOverlay" type="button" aria-label="关闭待办中心"></button>
     <aside class="portal-message-drawer portal-ticket-drawer" aria-label="待办中心">
-      <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20261010-ticket-message-parity" title="待办中心"></iframe>
+      <iframe id="portalTicketServiceFrame" src="portal-ticket-service.html?v=20261013-arco-buttons-1" title="待办中心"></iframe>
     </aside>
   </section>
 
@@ -3837,7 +3837,7 @@
           <div class="portal-message-title-wrap">
             <h2 class="portal-message-title" id="portalMessageTitle">消息中心</h2>
           </div>
-          <button class="portal-message-close" id="portalMessageClose" type="button" aria-label="关闭消息中心"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+          <button class="arco-btn arco-btn-text arco-btn-icon-only portal-message-close" id="portalMessageClose" type="button" aria-label="关闭消息中心"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
         </div>
       </header>
 
@@ -3846,12 +3846,12 @@
           <label class="portal-list-search-field">
             <input id="portalMessageTitleInput" type="search" aria-label="消息标题" placeholder="输入标题关键词" autocomplete="off">
           </label>
-          <button class="portal-list-search-submit" type="submit">查询</button>
-          <button class="portal-list-search-reset" id="portalMessageSearchReset" type="button">重置</button>
+          <button class="arco-btn arco-btn-primary portal-list-search-submit" type="submit">查询</button>
+          <button class="arco-btn arco-btn-secondary portal-list-search-reset" id="portalMessageSearchReset" type="button">重置</button>
         </form>
         <div class="portal-message-filter-row">
-          <div class="portal-message-tabs" id="portalMessageTabs" role="tablist" aria-label="消息状态"></div>
-          <button class="portal-message-mark-all-read" id="portalMessageMarkAllRead" type="button">一键已读</button>
+          <div class="portal-message-tabs arco-tabs arco-tabs-type-card" id="portalMessageTabs" role="tablist" aria-label="消息状态"></div>
+          <button class="arco-btn arco-btn-text portal-message-mark-all-read" id="portalMessageMarkAllRead" type="button">一键已读</button>
         </div>
       </div>
 
@@ -3861,10 +3861,10 @@
       </div>
       <footer class="portal-list-pagination" aria-label="消息列表分页">
         <span class="portal-list-pagination-summary" id="portalMessagePaginationSummary">共计 0 条</span>
-        <div class="portal-list-pagination-controls">
-          <button id="portalMessagePreviousPage" type="button" aria-label="上一页" disabled></button>
+        <div class="portal-list-pagination-controls arco-pagination">
+          <button class="arco-btn arco-btn-secondary arco-btn-icon-only arco-pagination-item" id="portalMessagePreviousPage" type="button" aria-label="上一页" disabled></button>
           <span class="portal-list-pagination-page" id="portalMessagePaginationPage" aria-live="polite">0</span>
-          <button id="portalMessageNextPage" type="button" aria-label="下一页" disabled></button>
+          <button class="arco-btn arco-btn-secondary arco-btn-icon-only arco-pagination-item" id="portalMessageNextPage" type="button" aria-label="下一页" disabled></button>
           <span class="portal-list-pagination-size">10条/页</span>
         </div>
       </footer>
@@ -6357,7 +6357,7 @@
           const unread = status.value === "UNREAD";
           const count = PORTAL_MESSAGES.filter((message) => matchesPortalMessageTitle(message) && message.unread === unread).length;
           const active = activeMessageStatus === status.value;
-          return `<button class="portal-message-tab ${active ? "is-active" : ""}" type="button" role="tab" aria-selected="${active}" data-message-status="${status.value}"><span>${status.label}</span><span class="portal-message-tab-count">${count}</span></button>`;
+          return `<button class="portal-message-tab arco-tabs-tab ${active ? "is-active" : ""}" type="button" role="tab" aria-selected="${active}" data-message-status="${status.value}"><span>${status.label}</span><span class="portal-message-tab-count">${count}</span></button>`;
         }).join("");
       }
 
@@ -6386,7 +6386,7 @@
             ${topicTags.length ? `<div class="portal-message-meta">${topicTags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
             <div class="portal-message-card-footer">
               <div class="portal-message-source"><span class="portal-message-source-icon" aria-hidden="true"></span><span>${escapeHtml(primaryAction?.targetSystem || message.source)}</span></div>
-              ${primaryAction ? `<button class="portal-message-link" type="button" data-message-action="0" title="${escapeHtml(primaryAction.url)}"><span>${message.unread ? "去处理" : "去查看"}</span><span class="portal-message-link-arrow" aria-hidden="true"></span></button>` : `<span class="portal-message-field-value">暂无跳转链接</span>`}
+              ${primaryAction ? `<button class="arco-btn arco-btn-text portal-message-link" type="button" data-message-action="0" title="${escapeHtml(primaryAction.url)}"><span>${message.unread ? "去处理" : "去查看"}</span><span class="portal-message-link-arrow" aria-hidden="true"></span></button>` : `<span class="portal-message-field-value">暂无跳转链接</span>`}
             </div>
           </article>
         `;

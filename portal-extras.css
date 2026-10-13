@@ -63,7 +63,7 @@
 .portal-qa-toolbar button:focus-visible {
   border-color: #d7deea;
   color: #4155c4;
-  background: #fff;
+  background-color: #fff;
   outline: none;
 }
 
@@ -5338,6 +5338,94 @@ body.has-message-center {
     grid-template-columns: 1fr;
   }
 
+}
+
+/* Shared Arco Button contract for the portal message and ticket centers. */
+#portalMessageCenter .arco-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 0 16px;
+  color: #4e5969;
+  background-color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  white-space: nowrap;
+  transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+}
+
+#portalMessageCenter .arco-btn-primary {
+  border-color: #165dff;
+  color: #fff;
+  background-color: #165dff;
+}
+
+#portalMessageCenter .arco-btn-primary:hover { border-color: #4080ff; background-color: #4080ff; }
+#portalMessageCenter .arco-btn-primary:active { border-color: #0e42d2; background-color: #0e42d2; }
+
+#portalMessageCenter .arco-btn-secondary {
+  border-color: #e5e6eb;
+  color: #4e5969;
+  background-color: #fff;
+}
+
+#portalMessageCenter .arco-btn-secondary:hover {
+  border-color: #c9cdd4;
+  color: #165dff;
+  background-color: #f7f8fa;
+}
+
+#portalMessageCenter .arco-btn-secondary:active { color: #0e42d2; background-color: #f2f3f5; }
+
+#portalMessageCenter .arco-btn-text {
+  height: 22px;
+  border: 0;
+  padding: 0;
+  color: #165dff;
+  background-color: transparent;
+}
+
+#portalMessageCenter .arco-btn-text:hover { color: #4080ff; background-color: transparent; }
+#portalMessageCenter .arco-btn-text:active { color: #0e42d2; background-color: transparent; }
+
+#portalMessageCenter .arco-btn-icon-only {
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+}
+
+#portalMessageCenter .arco-btn:focus-visible {
+  outline: 2px solid rgba(22, 93, 255, 0.25);
+  outline-offset: 2px;
+}
+
+#portalMessageCenter .arco-btn:disabled {
+  border-color: #e5e6eb;
+  color: #c9cdd4;
+  background-color: #f7f8fa;
+  cursor: not-allowed;
+}
+
+#portalMessageCenter .arco-btn.portal-message-close {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+}
+
+#portalMessageCenter .arco-btn.portal-message-mark-all-read,
+#portalMessageCenter .arco-btn.portal-message-link,
+#portalMessageCenter .arco-btn.ticket-process {
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
 }
 
 @media (max-width: 420px) {

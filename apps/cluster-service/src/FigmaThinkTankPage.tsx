@@ -934,7 +934,7 @@ function MobilitySection() {
     <SectionHeading title="人才流动趋势区" subtitle="学者迁徙图｜论文分布图｜学术生涯分布图"><div className="ttf-mobility-heading-controls"><ArcoFilterSelect label="研究领域" value="人工智能" options={["人工智能"]} onChange={()=>undefined}/><ArcoFilterSelect label="学者" value="张教授" options={["张教授"]} onChange={()=>undefined}/></div></SectionHeading>
     <article className="fp-card ttf-mobility-workbench">
       <PanelTitle title="学者迁徙图" aside="5 次迁徙｜6个驻点"/>
-      <div className="ttf-map">
+      <div className="ttf-map-scroll"><div className="ttf-map">
         <img className="ttf-map-background" src={`${mapAssetRoot}/world-map.svg`} alt="学者全球迁徙路线地图" />
         {migrationRoutes.map((route)=><img className="ttf-map-route" src={`${mapAssetRoot}/${route.src}`} alt="" style={{left:route.left,top:route.top,width:route.width,height:route.height}} key={route.src}/>)}
         {migrationStops.map((item,index)=><div className={`ttf-map-stop${index===activeStop?" is-active":""}${index===migrationStops.length-1?" is-current":""}`} style={{left:item.marker[0],top:item.marker[1]}} key={item.city}>
@@ -946,7 +946,7 @@ function MobilitySection() {
         </div>)}
         {migrationStops.map((item,index)=><button type="button" className={`ttf-map-label${index===activeStop?" is-active":""}${index===migrationStops.length-1?" is-current":""}`} style={{left:item.label[0],top:item.label[1]}} onClick={()=>setActiveStop(index)} key={`${item.city}-label`}>{item.city}</button>)}
         <div className="ttf-map-legend"><span><img src={`${mapAssetRoot}/legend-route.svg`} alt=""/>迁徙路线</span><span><i className="is-history"/>历史驻点</span><span><i className="is-current"/>当前驻点</span></div>
-      </div>
+      </div></div>
       <h4 className="ttf-migration-timeline-title">迁徙时间轴</h4>
       <div className="ttf-migration-timeline">{migrationStops.map((item,index)=><button className={activeStop===index?"active":""} type="button" onClick={()=>setActiveStop(index)} key={item.city}><i>{index+1}</i><b>{item.city}</b><small>{item.date}</small></button>)}</div>
       <div className="ttf-stop-detail"><header><strong>{stop.country}·{stop.city}</strong><em>{stop.institution}</em></header><div><span><small>所在地址</small>{stop.address}</span><span><small>迁入时间</small>{stop.enteredAt}</span><span><small>迁出时间</small>{stop.leftAt}</span><span><small>停留时长</small>{stop.duration}</span><span><small>地区发表论文数</small><b>{stop.papers}篇</b></span></div></div>

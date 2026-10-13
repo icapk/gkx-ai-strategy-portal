@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>门户待办中心原型</title>
-  <link rel="stylesheet" href="portal-extras.css?v=20261010-card-interactions-2">
+  <link rel="stylesheet" href="portal-extras.css?v=20261013-arco-buttons-1">
   <style>
     :root {
       font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
@@ -142,7 +142,7 @@
           <div class="portal-message-title-wrap">
             <h1 class="portal-message-title" id="ticketServiceTitle">待办中心</h1>
           </div>
-          <button class="portal-message-close close" type="button" title="关闭" aria-label="关闭待办中心">
+          <button class="arco-btn arco-btn-text arco-btn-icon-only portal-message-close close" type="button" title="关闭" aria-label="关闭待办中心">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
           </button>
         </div>
@@ -153,12 +153,12 @@
           <label class="portal-list-search-field">
             <input id="ticketTitleInput" type="search" aria-label="待办标题" placeholder="请输入标题关键词" autocomplete="off">
           </label>
-          <button class="portal-list-search-submit" type="submit">查询</button>
-          <button class="portal-list-search-reset" id="ticketSearchReset" type="button">重置</button>
+          <button class="arco-btn arco-btn-primary portal-list-search-submit" type="submit">查询</button>
+          <button class="arco-btn arco-btn-secondary portal-list-search-reset" id="ticketSearchReset" type="button">重置</button>
         </form>
-        <div class="portal-message-tabs" id="tabs" role="tablist" aria-label="工单状态筛选">
-          <button class="portal-message-tab" type="button" data-status="pending" role="tab" aria-selected="true">待处理 <span class="portal-message-tab-count" data-count="pending">0</span></button>
-          <button class="portal-message-tab" type="button" data-status="done" role="tab" aria-selected="false">已处理 <span class="portal-message-tab-count" data-count="done">0</span></button>
+        <div class="portal-message-tabs arco-tabs arco-tabs-type-card" id="tabs" role="tablist" aria-label="工单状态筛选">
+          <button class="portal-message-tab arco-tabs-tab" type="button" data-status="pending" role="tab" aria-selected="true">待处理 <span class="portal-message-tab-count" data-count="pending">0</span></button>
+          <button class="portal-message-tab arco-tabs-tab" type="button" data-status="done" role="tab" aria-selected="false">已处理 <span class="portal-message-tab-count" data-count="done">0</span></button>
         </div>
       </div>
 
@@ -167,10 +167,10 @@
       </div>
       <footer class="portal-list-pagination" aria-label="待办列表分页">
         <span class="portal-list-pagination-summary" id="ticketPaginationSummary">共计 0 条</span>
-        <div class="portal-list-pagination-controls">
-          <button id="ticketPreviousPage" type="button" aria-label="上一页" disabled></button>
+        <div class="portal-list-pagination-controls arco-pagination">
+          <button class="arco-btn arco-btn-secondary arco-btn-icon-only arco-pagination-item" id="ticketPreviousPage" type="button" aria-label="上一页" disabled></button>
           <span class="portal-list-pagination-page" id="ticketPaginationPage" aria-live="polite">0</span>
-          <button id="ticketNextPage" type="button" aria-label="下一页" disabled></button>
+          <button class="arco-btn arco-btn-secondary arco-btn-icon-only arco-pagination-item" id="ticketNextPage" type="button" aria-label="下一页" disabled></button>
           <span class="portal-list-pagination-size">10条/页</span>
         </div>
       </footer>
@@ -242,11 +242,11 @@
               <span class="ticket-number">${escapeHtml(ticket.id)}</span>
             </div>
             ${ticket.status === "pending" ? `
-              <button class="portal-message-link ticket-process" type="button" data-process-id="${escapeHtml(ticket.id)}">
+              <button class="arco-btn arco-btn-text portal-message-link ticket-process" type="button" data-process-id="${escapeHtml(ticket.id)}">
                 去处理 <span class="portal-message-link-arrow" aria-hidden="true"></span>
               </button>
             ` : `
-              <button class="portal-message-link ticket-process" type="button" data-view-id="${escapeHtml(ticket.id)}">
+              <button class="arco-btn arco-btn-text portal-message-link ticket-process" type="button" data-view-id="${escapeHtml(ticket.id)}">
                 去查看 <span class="portal-message-link-arrow" aria-hidden="true"></span>
               </button>
             `}

@@ -616,6 +616,7 @@
 .ttf-mobility-heading-controls > .ttf-arco-field:first-child { width: 180px; }
 .ttf-mobility-heading-controls > .ttf-arco-field:last-child { width: 160px; }
 .ttf-mobility-workbench { margin-top: 15px; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: rgba(255,255,255,.8); }
+.ttf-map-scroll { width: 100%; min-width: 0; overflow: hidden; }
 .ttf-map { position: relative; width: 1152px; height: 438px; overflow: hidden; border: 1px solid #e5e6eb; background: #f1f7fc; }
 .ttf-map-background { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
 .ttf-map-route { position: absolute; z-index: 2; display: block; max-width: none; pointer-events: none; }

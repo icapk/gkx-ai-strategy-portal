@@ -23,6 +23,7 @@ import {
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
@@ -138,7 +139,6 @@ function parseTopicFromUrl(): TopicId {
   const value = new URL(window.location.href).searchParams.get("module") as TopicId | null;
   return value && topicById.has(value) ? value : "navigation";
 }
-
 function preferredScrollBehavior(): ScrollBehavior {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 }
@@ -170,7 +170,6 @@ function ContentSection({
     </section>
   );
 }
-
 function EmptyResource({ label = "暂无链接" }: { label?: string }) {
   return <span className="sdc-resource-pending" aria-label={`${label}，当前不可访问`}>{label}</span>;
 }
@@ -805,6 +804,15 @@ export default function ScientificDataCenterPage() {
   const activeDefinition = topicById.get(activeTopic) ?? topicDefinitions[0];
   const [activeAnchor, setActiveAnchor] = useState(activeDefinition.sections[0].id);
   const ActiveIcon = activeDefinition.icon;
+  const topicNavRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 768px)").matches) return;
+    const frame = window.requestAnimationFrame(() => {
+      topicNavRef.current?.querySelector<HTMLElement>("[aria-current='page']")?.scrollIntoView({ block: "nearest", inline: "center" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeTopic]);
 
   useEffect(() => {
     const canonicalUrl = new URL(window.location.href);
@@ -883,7 +891,7 @@ export default function ScientificDataCenterPage() {
       </section>
 
       <div id="sdc-workspace" className="sdc-shell">
-        <nav className="sdc-topic-nav" aria-label="科学数据中心专题目录">
+        <nav className="sdc-topic-nav" ref={topicNavRef} aria-label="科学数据中心专题目录">
           <header><strong>专题目录</strong><small>7 项科学数据服务</small></header>
           {topicDefinitions.map((topic) => {
             const Icon = topic.icon;
