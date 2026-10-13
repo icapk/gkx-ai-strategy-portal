@@ -3010,7 +3010,7 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css?v=20261010-card-interactions-2">
+  <link rel="stylesheet" href="portal-extras.css?v=20261013-message-read-all-3">
   <link rel="stylesheet" href="mastergo-v2.css">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261012-alert">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
@@ -3849,7 +3849,10 @@
           <button class="portal-list-search-submit" type="submit">查询</button>
           <button class="portal-list-search-reset" id="portalMessageSearchReset" type="button">重置</button>
         </form>
-        <div class="portal-message-tabs" id="portalMessageTabs" role="tablist" aria-label="消息状态"></div>
+        <div class="portal-message-filter-row">
+          <div class="portal-message-tabs" id="portalMessageTabs" role="tablist" aria-label="消息状态"></div>
+          <button class="portal-message-mark-all-read" id="portalMessageMarkAllRead" type="button">一键已读</button>
+        </div>
       </div>
 
       <div class="portal-message-list-wrap">
@@ -5288,7 +5291,7 @@
             { label: "科技资源服务", url: "apps/cluster-service/dist/index.html?page=technology-resource-service&embed=portal&build=20261012-highend-route-3#trs-top", action: "embed", embedTitle: "科技资源服务", hideEmbeddedToolbar: true },
             { label: "科技决策支持", url: "apps/cluster-service/dist/index.html?page=technology-decision-support&embed=portal&build=20261012-highend-route-3#tds-top", action: "embed", embedTitle: "科技决策支持", hideEmbeddedToolbar: true },
             { label: "科学数据中心", url: "apps/cluster-service/dist/index.html?page=scientific-data-center&embed=portal&build=20261012-highend-route-3#sdc-top", action: "embed", embedTitle: "科学数据中心", hideEmbeddedToolbar: true },
-            { label: "新型高端智库", url: "apps/cluster-service/dist/index.html?page=think-tank&embed=portal&build=20261012-highend-route-3#top", action: "embed", embedTitle: "新型高端智库", hideEmbeddedToolbar: true },
+            { label: "新型高端智库", url: "apps/cluster-service/dist/index.html?page=think-tank&embed=portal&build=20261013-metric-style-24#top", action: "embed", embedTitle: "新型高端智库", hideEmbeddedToolbar: true },
             { label: "科技专题服务", url: "apps/cluster-service/dist/index.html?page=technology-topic-service&embed=portal&build=20261012-highend-route-3#tp-top", action: "embed", embedTitle: "科技专题服务", hideEmbeddedToolbar: true }
           ]
         },
@@ -5405,6 +5408,7 @@
       const portalMessageCenter = document.getElementById("portalMessageCenter");
       const portalMessageOverlay = document.getElementById("portalMessageOverlay");
       const portalMessageClose = document.getElementById("portalMessageClose");
+      const portalMessageMarkAllRead = document.getElementById("portalMessageMarkAllRead");
       const portalMessageTabs = document.getElementById("portalMessageTabs");
       const portalMessageList = document.getElementById("portalMessageList");
       const portalMessageEmpty = document.getElementById("portalMessageEmpty");
@@ -6343,9 +6347,12 @@
         messageCenterBadge.textContent = String(unread);
         messageCenterBadge.hidden = unread === 0;
         messageCenterButton.setAttribute("aria-label", unread ? `消息中心，${unread} 条未读消息` : "消息中心，没有未读消息");
+        portalMessageMarkAllRead.disabled = unread === 0;
+        portalMessageMarkAllRead.setAttribute("aria-label", unread ? `一键已读，当前 ${unread} 条未读消息` : "一键已读，当前没有未读消息");
       }
 
       function renderMessageTabs() {
+        portalMessageMarkAllRead.hidden = activeMessageStatus !== "UNREAD";
         portalMessageTabs.innerHTML = MESSAGE_STATUS_TABS.map((status) => {
           const unread = status.value === "UNREAD";
           const count = PORTAL_MESSAGES.filter((message) => matchesPortalMessageTitle(message) && message.unread === unread).length;
@@ -6407,6 +6414,18 @@
         updateMessageIndicators();
         renderMessageTabs();
         renderMessageList();
+      }
+
+      function markAllPortalMessagesRead() {
+        const unreadMessages = PORTAL_MESSAGES.filter((message) => message.unread);
+        if (!unreadMessages.length) return;
+        unreadMessages.forEach((message) => {
+          message.unread = false;
+        });
+        messageCurrentPage = 1;
+        renderMessageCenter();
+        portalMessageListWrap.scrollTop = 0;
+        showPortalMessageToast(`已将 ${unreadMessages.length} 条消息全部标为已读`);
       }
 
       function showPortalMessageToast(message) {
@@ -9182,6 +9201,7 @@
       });
       portalMessageOverlay.addEventListener("click", () => closeMessageCenter(true));
       portalMessageClose.addEventListener("click", () => closeMessageCenter(true));
+      portalMessageMarkAllRead.addEventListener("click", markAllPortalMessagesRead);
       portalMessageTabs.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-message-status]");
         if (!tab) return;

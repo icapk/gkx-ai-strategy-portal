@@ -105,7 +105,6 @@ html.is-portal-embed .fp-site-header { display: none; }
   .ttf-hero-copy { padding-top: 74px; }
   .ttf-hero-copy h1 { font-size: 32px; line-height: 42px; }
   .ttf-hero-copy p { width: 100%; font-size: 14px; line-height: 24px; }
-  .ttf-hero-copy > span { margin-top: 26px; }
   .ttf-page .ttf-heading > img { display: none; }
   .ttf-heading > .fp-section-heading-copy,
   .ttf-heading > .fp-section-heading-actions { transform: none; }
