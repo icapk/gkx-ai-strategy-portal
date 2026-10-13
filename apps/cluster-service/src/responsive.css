@@ -482,6 +482,8 @@ html.is-portal-embed .fp-site-header { display: none; }
     scroll-margin-top: 16px;
   }
 
+  .ttf-news { padding-bottom: 32px; }
+
   .ttf-heading {
     width: 100%;
     height: auto;
@@ -787,7 +789,10 @@ html.is-portal-embed .fp-site-header { display: none; }
   .ttf-strategy-push-card { min-height: 0; }
 
   .ttf-strategy-filter-panel {
-    padding: 12px;
+    padding: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    background: transparent;
   }
 
   .ttf-arco-select-trigger,
@@ -1047,7 +1052,19 @@ html.is-portal-embed .fp-site-header { display: none; }
     padding-block: 12px;
     align-items: flex-start;
     flex-direction: column;
-    gap: 4px;
+    gap: 12px;
+  }
+
+  .ttf-news-pagination {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .ttf-news-pagination .arco-pagination-item {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
   }
 
   .ttf-report-standalone-shell,

@@ -699,6 +699,18 @@ function ArcoFilterSelect({ label, value, options, onChange }: { label: string; 
   </div>;
 }
 
+function ArcoPagination({ label, current, total, pageSize, onChange }: { label: string; current: number; total: number; pageSize: number; onChange: (page: number) => void }) {
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  return <nav className="ttf-news-pagination arco-pagination" aria-label={label}>
+    <span className="arco-pagination-total-text">共 {total} 条</span>
+    <div className="arco-pagination-list">
+      <button className="arco-pagination-item arco-pagination-item-previous" type="button" aria-label="上一页" disabled={current <= 1} onClick={() => onChange(current - 1)}><ChevronLeft size={14} aria-hidden="true" /></button>
+      {Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => <button className={`arco-pagination-item${current === page ? " arco-pagination-item-active" : ""}`} type="button" aria-current={current === page ? "page" : undefined} onClick={() => onChange(page)} key={page}>{page}</button>)}
+      <button className="arco-pagination-item arco-pagination-item-next" type="button" aria-label="下一页" disabled={current >= pageCount} onClick={() => onChange(current + 1)}><ChevronRight size={14} aria-hidden="true" /></button>
+    </div>
+  </nav>;
+}
+
 function ReportsSection() {
   const [field, setField] = useState<(typeof reportFields)[number]>("全部领域");
   const [institution, setInstitution] = useState("全部机构");
@@ -968,12 +980,14 @@ function NewsDetailPage({ item }: { item: TalentNewsItem }) {
 }
 
 function NewsSection() {
+  const pageSize=10;
   const [tab,setTab]=useState<"all"|"followed">("all");
   const [query,setQuery]=useState("");
   const [field,setField]=useState("全部领域");
   const [sort,setSort]=useState<"最新发布"|"价值优先"|"关注度优先">("最新发布");
   const [followedIds,setFollowedIds]=useState<Set<string>>(new Set(["multimodal-medical"]));
   const [likedIds,setLikedIds]=useState<Set<string>>(new Set());
+  const [currentPage,setCurrentPage]=useState(1);
   const fields=useMemo(()=>["全部领域",...Array.from(new Set(talentNewsItems.map((item)=>item.field)))],[ ]);
   const visibleNews=useMemo(()=>{
     const keyword=query.trim().toLocaleLowerCase("zh-CN");
@@ -981,23 +995,27 @@ function NewsSection() {
       .filter((item)=>(tab==="all"||followedIds.has(item.id))&&(field==="全部领域"||item.field===field)&&(!keyword||`${item.title}${item.summary}${item.source}${item.scholars.join("")}`.toLocaleLowerCase("zh-CN").includes(keyword)))
       .sort((left,right)=>sort==="价值优先"?right.valueScore-left.valueScore:sort==="关注度优先"?(right.likes+(likedIds.has(right.id)?1:0))-(left.likes+(likedIds.has(left.id)?1:0)):Date.parse(right.publishedAt)-Date.parse(left.publishedAt));
   },[field,followedIds,likedIds,query,sort,tab]);
+  const pageCount=Math.max(1,Math.ceil(visibleNews.length/pageSize));
+  const effectivePage=Math.min(currentPage,pageCount);
+  const paginatedNews=useMemo(()=>visibleNews.slice((effectivePage-1)*pageSize,effectivePage*pageSize),[effectivePage,visibleNews]);
+  useEffect(()=>setCurrentPage((page)=>Math.min(page,pageCount)),[pageCount]);
   const toggleSet=(setter:typeof setFollowedIds,id:string)=>setter((current)=>{const next=new Set(current);if(next.has(id))next.delete(id);else next.add(id);return next;});
-  const clearFilters=()=>{setQuery("");setField("全部领域");setSort("最新发布");setTab("all");};
+  const clearFilters=()=>{setQuery("");setField("全部领域");setSort("最新发布");setTab("all");setCurrentPage(1);};
   const openNews=(item:TalentNewsItem)=>{const url=new URL(window.location.href);url.searchParams.set("page","think-tank");url.searchParams.set("news",item.id);url.hash="news";window.location.assign(`${url.pathname}${url.search}${url.hash}`);};
   return <section id="news" className="ttf-section ttf-news">
     <SectionHeading title="人才动态资讯区" subtitle="最新资讯｜定向查询｜关注追踪｜价值与热度排序"/>
     <article className="ttf-news-card">
-      <div className="ttf-news-tabs"><div role="tablist" aria-label="人才动态资讯范围"><button className={tab==="all"?"active":""} type="button" role="tab" aria-selected={tab==="all"} onClick={()=>setTab("all")}>全部资讯</button><button className={tab==="followed"?"active":""} type="button" role="tab" aria-selected={tab==="followed"} onClick={()=>setTab("followed")}>我的关注 <small>{followedIds.size}</small></button></div><span>当前显示 {visibleNews.length} 条</span></div>
+      <div className="ttf-news-tabs"><div role="tablist" aria-label="人才动态资讯范围"><button className={tab==="all"?"active":""} type="button" role="tab" aria-selected={tab==="all"} onClick={()=>{setTab("all");setCurrentPage(1);}}>全部资讯</button><button className={tab==="followed"?"active":""} type="button" role="tab" aria-selected={tab==="followed"} onClick={()=>{setTab("followed");setCurrentPage(1);}}>我的关注 <small>{followedIds.size}</small></button></div><span>当前显示 {visibleNews.length} 条</span></div>
       <div className="ttf-news-toolbar">
-        <label className="ttf-news-search"><Search size={16}/><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="搜索资讯标题、来源或相关学者" aria-label="定向查询人才动态资讯"/></label>
-        <ArcoFilterSelect label="领域" value={field} options={fields} onChange={setField}/>
-        <ArcoFilterSelect label="排序" value={sort} options={["最新发布","价值优先","关注度优先"]} onChange={(value)=>setSort(value as typeof sort)}/>
+        <label className="ttf-news-search"><Search size={16}/><input value={query} onChange={(event)=>{setQuery(event.target.value);setCurrentPage(1);}} placeholder="搜索资讯标题、来源或相关学者" aria-label="定向查询人才动态资讯"/></label>
+        <ArcoFilterSelect label="领域" value={field} options={fields} onChange={(value)=>{setField(value);setCurrentPage(1);}}/>
+        <ArcoFilterSelect label="排序" value={sort} options={["最新发布","价值优先","关注度优先"]} onChange={(value)=>{setSort(value as typeof sort);setCurrentPage(1);}}/>
       </div>
-      <div className="ttf-news-list">{visibleNews.length?visibleNews.map((item)=>{const liked=likedIds.has(item.id);const followed=followedIds.has(item.id);return <article key={item.id}>
-        <div className="ttf-news-main"><header><span>{item.field}</span><h3>{item.title}</h3></header><p title={item.summary}>{item.summary}</p><div className="ttf-news-meta"><span><Building2 size={14}/>{item.source}</span><span><CalendarDays size={14}/><time dateTime={item.publishedAt}>{item.publishedAt}</time></span></div><div className="ttf-news-scholars"><UserRound size={14}/><span>相关学者</span>{item.scholars.map((scholar)=><button type="button" onClick={()=>{setQuery(scholar);setTab("all");}} key={scholar}>{scholar}</button>)}</div></div>
+      <div className="ttf-news-list">{visibleNews.length?paginatedNews.map((item)=>{const liked=likedIds.has(item.id);const followed=followedIds.has(item.id);return <article key={item.id}>
+        <div className="ttf-news-main"><header><span>{item.field}</span><h3>{item.title}</h3></header><p title={item.summary}>{item.summary}</p><div className="ttf-news-meta"><span><Building2 size={14}/>{item.source}</span><span><CalendarDays size={14}/><time dateTime={item.publishedAt}>{item.publishedAt}</time></span></div><div className="ttf-news-scholars"><UserRound size={14}/><span>相关学者</span>{item.scholars.map((scholar)=><button type="button" onClick={()=>{setQuery(scholar);setTab("all");setCurrentPage(1);}} key={scholar}>{scholar}</button>)}</div></div>
         <div className="ttf-news-actions"><button className={liked?"is-active":""} type="button" aria-pressed={liked} onClick={()=>toggleSet(setLikedIds,item.id)}><Heart size={15} fill={liked?"currentColor":"none"}/>{new Intl.NumberFormat("zh-CN").format(item.likes+(liked?1:0))}</button><button className={followed?"is-active":""} type="button" aria-pressed={followed} onClick={()=>toggleSet(setFollowedIds,item.id)}><Star size={15} fill={followed?"currentColor":"none"}/>{followed?"已关注":"关注"}</button><button className="is-detail" type="button" onClick={()=>openNews(item)}>查看详情<ChevronRight size={14}/></button></div>
       </article>}):<div className="ttf-news-empty"><strong>{tab==="followed"?"暂未找到关注资讯":"未找到符合条件的资讯"}</strong><p>{tab==="followed"?"关注人才动态后，可在这里集中查看。":"请调整搜索词、领域或排序条件。"}</p><button type="button" onClick={clearFilters}>查看全部资讯</button></div>}</div>
-      <footer className="ttf-news-summary"><span>共 {talentNewsItems.length} 条人才动态资讯</span><span>支持按发布时间、信息价值与关注度排序</span></footer>
+      <footer className="ttf-news-summary"><span>支持按发布时间、信息价值与关注度排序</span><ArcoPagination label={`${tab==="all"?"全部资讯":"我的关注"}分页`} current={effectivePage} total={visibleNews.length} pageSize={pageSize} onChange={setCurrentPage}/></footer>
     </article>
   </section>;
 }
