@@ -6164,6 +6164,7 @@
       const PORTAL_MESSAGES = [
         {
           id: "m001", category: "FOLLOW", iconText: "关", iconClass: "is-update",
+          primaryActionType: "VIEW",
           title: "你关注的“AI 材料设计”有 3 篇新论文",
           summary: "系统根据你的关键词订阅，匹配到 3 篇高相关论文，已合并为一条更新提醒。",
           source: "科技情报", time: "2小时前", unread: true, badges: ["NEW"], tags: ["AI材料设计", "论文", "订阅更新"],
@@ -6174,6 +6175,7 @@
         },
         {
           id: "m001b", category: "TODO", iconText: "待", iconClass: "is-todo",
+          primaryActionType: "PROCESS",
           title: "低空经济专项申报材料待补充",
           summary: "你提交的申报材料缺少企业研发费用说明，请在 8 月 20 日前补充后重新提交。",
           source: "科技专题", time: "今天 10:30", unread: true, badges: [], tags: ["政策申报", "材料补充"],
@@ -6184,6 +6186,7 @@
         },
         {
           id: "m002", category: "TASK", iconText: "任", iconClass: "is-report",
+          primaryActionType: "VIEW",
           title: "《低空经济产业趋势分析报告》已生成",
           summary: "你手动创建的报告生成任务已完成，可在线预览或下载 Word/PDF 文件。",
           source: "新型高端智库", time: "今天 11:20", unread: true, badges: ["NEW"], tags: ["低空经济", "报告生成"],
@@ -6194,6 +6197,7 @@
         },
         {
           id: "m003", category: "NOTICE", iconText: "提", iconClass: "is-policy",
+          primaryActionType: "VIEW",
           title: "国家重点研发计划申报通知更新",
           summary: "2026 年度人工智能与先进制造专项启动申报，系统已为你匹配相关政策服务。",
           source: "科技专题", time: "今天 09:40", unread: true, badges: ["服务提醒"], tags: ["科技政策", "项目申报", "人工智能"],
@@ -6204,6 +6208,7 @@
         },
         {
           id: "m003b", category: "TASK", iconText: "比", iconClass: "is-report",
+          primaryActionType: "VIEW",
           title: "“深圳人工智能政策对比”任务已完成",
           summary: "你发起的政策比对任务已生成结果，包含差异摘要、适用主体和申报建议。",
           source: "科技专题", time: "今天 09:05", unread: true, badges: ["NEW"], tags: ["政策比对", "人工智能"],
@@ -6214,6 +6219,7 @@
         },
         {
           id: "m004", category: "FOLLOW", iconText: "技", iconClass: "is-update",
+          primaryActionType: "VIEW",
           title: "半导体产业链出现新的技术动态",
           summary: "国内 7nm 芯片制程技术取得重要突破，与你关注的产业链专题相关。",
           source: "科技信息", time: "5小时前", unread: false, badges: [], tags: ["半导体", "芯片制造", "产业链"],
@@ -6223,6 +6229,7 @@
         },
         {
           id: "m005", category: "NOTICE", iconText: "提", iconClass: "is-event",
+          primaryActionType: "VIEW",
           title: "深圳人工智能产业对接会开放报名",
           summary: "活动面向科研院所、科技企业和投资机构开放报名，与你关注的人工智能领域相关。",
           source: "科技信息", time: "昨天", unread: false, badges: [], tags: ["人工智能", "产业活动", "深圳"],
@@ -6233,6 +6240,7 @@
         },
         {
           id: "m006", category: "NOTICE", iconText: "信", iconClass: "is-interaction",
+          primaryActionType: "VIEW",
           title: "你的咨询反馈已有回复",
           summary: "关于“政策适用范围”的咨询已收到回复，可进入反馈记录查看详情。",
           source: "门户服务", time: "昨天", unread: false, badges: [], tags: ["咨询反馈", "政策服务"],
@@ -6242,6 +6250,7 @@
         },
         {
           id: "m007", category: "FOLLOW", iconText: "关", iconClass: "is-update",
+          primaryActionType: "VIEW",
           title: "你订阅的“量子计算”专题洞察月报已发布",
           summary: "你关注的量子计算专题有新的洞察月报，本期覆盖量子纠错、云平台和产业化进展。",
           source: "新型高端智库", time: "2天前", unread: false, badges: [], tags: ["量子计算", "洞察月报", "技术突破"],
@@ -6251,6 +6260,7 @@
         },
         {
           id: "m008", category: "NOTICE", iconText: "提", iconClass: "is-service",
+          primaryActionType: "VIEW",
           title: "有 2 条政策可能适合你的企业",
           summary: "根据企业画像和关注领域，系统匹配到研发补贴、成果转化相关政策。",
           source: "科技专题", time: "3天前", unread: false, badges: [], tags: ["科技企业", "政策匹配", "成果转化"],
@@ -6337,6 +6347,10 @@
         return message.tags.filter((tag) => !PORTAL_MESSAGE_TASK_TAG_PATTERN.test(tag));
       }
 
+      function getPortalMessagePrimaryActionLabel(message) {
+        return message.primaryActionType === "PROCESS" ? "去处理" : "去查看";
+      }
+
       function getFilteredPortalMessages() {
         return PORTAL_MESSAGES.filter((message) => matchesPortalMessageTitle(message) &&
           (activeMessageStatus === "UNREAD" ? message.unread : !message.unread));
@@ -6386,7 +6400,7 @@
             ${topicTags.length ? `<div class="portal-message-meta">${topicTags.map((tag) => `<span class="portal-message-tag">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
             <div class="portal-message-card-footer">
               <div class="portal-message-source"><span class="portal-message-source-icon" aria-hidden="true"></span><span>${escapeHtml(primaryAction?.targetSystem || message.source)}</span></div>
-              ${primaryAction ? `<button class="arco-btn arco-btn-text portal-message-link" type="button" data-message-action="0" title="${escapeHtml(primaryAction.url)}"><span>${message.unread ? "去处理" : "去查看"}</span><span class="portal-message-link-arrow" aria-hidden="true"></span></button>` : `<span class="portal-message-field-value">暂无跳转链接</span>`}
+              ${primaryAction ? `<button class="arco-btn arco-btn-text portal-message-link" type="button" data-message-action="0" title="${escapeHtml(primaryAction.url)}"><span>${getPortalMessagePrimaryActionLabel(message)}</span><span class="portal-message-link-arrow" aria-hidden="true"></span></button>` : `<span class="portal-message-field-value">暂无跳转链接</span>`}
             </div>
           </article>
         `;
