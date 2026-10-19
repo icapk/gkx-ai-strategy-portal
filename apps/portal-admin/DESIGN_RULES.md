@@ -103,16 +103,26 @@
 ### 当前筛选区规则
 
 - 筛选区只呈现 PRD 或已确认页面中存在的字段，不自动加入“查询”“重置”按钮。
-- 简单筛选采用即时生效：搜索型输入支持模糊搜索，并可与同一区域的简单筛选条件聚合过滤；下拉框在选项确认后立即触发筛选。
-- 只有条件数量较多、存在跨字段复杂组合、需要先完成一组条件配置后统一提交的复杂筛选场景，才显示“查询”“重置”按钮。不得仅因页面存在输入框或下拉框就添加这两个按钮。
-- 简单筛选的清空通过输入框清除按钮、下拉框“全部”选项或逐项恢复默认值完成，不额外占用工具栏空间。
+- 所有筛选/搜索组合末尾都必须显示“查询”和“重置”按钮，不再区分即时筛选与复杂筛选。查询统一提交当前全部条件；重置同时清空待选值与已应用条件，并恢复列表默认结果。
+- 查询使用主按钮，重置使用全局标准次按钮；两个按钮与筛选控件保持同一行、32px 高和 16px 间距，不得脱离当前筛选组。
 - 搜索和普通输入可根据页面语义保留外部 label；筛选下拉不在框外重复展示字段名，字段名作为下拉框内的默认文案。选择具体值后显示该值；恢复“全部”时重新显示字段名，但下拉选项中仍保留“全部”。
 - 输入框、选择器、日期控件统一为 32px 高。
-- 搜索型输入框的搜索或清除图标放在控件右侧，与下拉箭头位置一致；可清除搜索在有值时使用清除按钮。
+- 搜索型输入框内部不显示放大镜、清除或其他 icon，文字左右内边距统一为 12px，不得保留历史 icon 的 34px / 36px 右侧预留。
+- 同一筛选组同时存在下拉和搜索时，所有下拉条件在前，搜索条件在后；查询、重置继续位于筛选组末尾。
 - 下拉筛选需要“全部”时，将“全部”作为第一项和默认值。
 - 输入搜索 placeholder 统一使用“请输入”，选择器使用“请选择”或当前默认项。
 - 报告管理当前仅保留报告标题搜索，不显示报告类型、所属领域或报告来源筛选。
 - 报告管理仅允许按上传时间排序，不使用额外的排序下拉框。上传时间右侧始终显示纵向叠放的向上和向下箭头；点击向上箭头执行升序，点击向下箭头执行降序，当前生效箭头使用品牌蓝高亮。报告来源、报告类型、行业分类不显示排序入口。
+
+### 当前列表工具栏与按钮图标规则
+
+- 列表页主操作始终位于工具栏左侧，筛选、查询和重置组成同一个筛选组；查询、重置属于筛选组操作，但不计入筛选条件数量。
+- 当筛选条件不超过 2 个时，主操作靠左、筛选组靠右，同一行展示；当筛选条件超过 2 个时，完整筛选组独占上方一行，主操作在下一行靠左并紧邻表格，不拆散筛选条件与查询、重置按钮。
+- 标准桌面工具栏使用 16px 行列间距；筛选行、主操作行与表格之间均保持 16px，禁止 margin 与父级 gap 叠加成 32px。空间不足时允许整组换到下一行；不得压缩控件到不可读宽度，也不得产生页面级横向滚动。
+- 普通文字按钮统一只显示按钮文字，不添加上传、新增、保存、预览、打印、网络等装饰性前置图标。关闭、展开/收起、翻页和表头排序等独立功能控件可以保留图标，并必须提供准确的无障碍名称；搜索输入内部不得保留搜索或清除 icon。
+- 全局次按钮统一使用白底线性样式：高度 32px、左右 padding 16px、圆角 4px，默认文字 `#1D2129`、边框 `#E5E6EB`；hover 使用品牌蓝文字与 `#4080FF` 边框，active 使用 `#0E42D2`，focus-visible 增加品牌蓝轮廓，disabled 使用 `#F7F8FA` 背景、`#C9CDD4` 文字和 `#E5E6EB` 边框。
+- `default` 是新页面的标准次按钮入口；历史 `outline`、`linear` 仅作为兼容名称并必须渲染成完全相同的次按钮。工具栏、筛选区、弹窗 Footer 中的取消/关闭/重置等次按钮不得使用另一套浅灰填充或局部覆盖。
+- 该规则通过共享 `Button` 与 `.list-toolbar` 实现，新页面不得用页面级覆盖重新加入文字按钮图标或反转操作区、筛选区的顺序。
 
 ### 当前 Tab 规则
 
@@ -142,12 +152,12 @@
 ### 当前弹窗、提示与状态反馈
 
 - 标准弹窗分为 560 / 640 / 960 / 1280px：危险操作短确认 560px；普通新增、生成、编辑 640px；复杂配置和穿梭框 960px；表格或多列权限内容 1280px。
-- 弹窗使用固定 Header、可滚动 Body、固定 Footer。Header 常规高 56px、左右 24px；Body 四周 24px；Footer 高 64px、左右 24px、按钮右对齐且间距 12px。
+- 弹窗使用固定 Header、可滚动 Body、固定 Footer。Header 固定高 56px、左右 24px，只显示主标题和关闭按钮，不显示副标题，Header 与 Body 之间不显示分隔线；Body 顶部 padding 为 8px、左右和底部为 24px，使“标题文字底部 → Body 首项顶部”的实际距离为 24px；Footer 高 64px、左右 24px、按钮右对齐且间距 12px。
 - 新增、生成、编辑弹窗必须在实现前逐字段判断必填性：名称/标题、唯一标识、文件或路径、业务类型、状态、所属关系等缺失后会导致对象无法识别、无法保存或后续流程无法执行的字段为必填；描述、摘要、补充说明以及创建人、关联时间等系统自动生成字段默认可选。
 - 必填字段在字段标签最前显示红色 `*`，星号与字段名间距 3px；只读详情弹窗不显示必填星号。禁止所有字段一律标必填，也禁止只显示星号却仍允许保存空值。
 - 必填标识必须与校验联动：字段未完成时禁用主要提交按钮，或在提交后于对应控件下方显示明确错误文案；手机号、邮箱、URL、文件格式等还需继续执行格式校验。禁用的主要按钮统一使用 `#F7F8FA` 背景、`#C9CDD4` 文字、`#E5E6EB` 边框和 `not-allowed` 光标，不得继续呈现为可点击的品牌蓝。
 - 条件必填按当前操作判断：新建报告时 PDF 文件必填，编辑报告时已有文件可不重新上传；新建页面的子级页面父页面必填，一级页面父页面可空；启用属性、状态等有默认值的字段仍属于必填业务字段并显示 `*`。
-- 提示性副文案若只是上下文说明，放在弹窗标题下方；表单或业务过程中的风险、警告、成功、错误信息在 Body 顶部使用 Alert。危险操作二次确认弹窗是例外，使用独立的纯文字确认结构。
+- 弹窗不使用标题副文案；必要的普通上下文说明放在 Body 顶部使用正文辅助文字，表单或业务过程中的风险、警告、成功、错误信息在 Body 顶部使用 Alert。危险操作二次确认弹窗使用独立的纯文字确认结构。
 - Token 生成提示“Token 生成后仅在当前操作中完整复制，请妥善保存。”使用警告 Alert，不作为普通标题副文案。
 - 删除、注销、撤销等不可逆操作必须二次确认。确认弹窗不使用 Alert 色块，采用固定三段式：Header 标题为“确认删除 / 确认注销”等明确动作；Body 第一行为 16px 主确认文案，第二行为 14px `#86909C` 不可撤销说明；Footer 右侧依次为灰底取消按钮和危险色确认按钮。
 - 全局轻提示使用页面顶部居中的白底消息条，左侧为语义色实心圆形图标，右侧可关闭。信息/成功 3 秒自动关闭，警告/错误 4.5 秒自动关闭，最多同时 3 条。
@@ -164,24 +174,32 @@
 ### 报告管理
 
 - 面包屑：仅“报告管理”。
-- 工具栏：报告上传、查看操作记录位于左侧；搜索报告标题、查询、重置位于右侧，五项保持同一行。搜索框为 280×32px，仅在输入值非空时显示右侧 16px 清除按钮；查询与重置按钮高 32px，搜索组三个控件间距 16px。该页面不额外加入报告类型、所属领域或报告来源筛选。
+- 工具栏：报告上传、查看操作记录位于左侧；搜索报告标题、查询、重置位于右侧，五项保持同一行。搜索框为 280×32px，内部不显示 icon，左右 padding 均为 12px；查询与重置按钮高 32px，搜索组三个控件间距 16px。该页面不额外加入报告类型、所属领域或报告来源筛选。
 - 报告管理工具栏直接使用白色工作面板已有的 16px 顶部内边距，不额外叠加顶部 margin；工具栏至表格保持 16px。
 - 排序：仅上传时间表头右侧显示纵向叠放的向上和向下箭头；点击对应箭头直接按上传时间升序或降序排列，当前方向以品牌蓝高亮。置顶报告始终优先显示，同一置顶状态内再执行所选排序。
 - 主操作：报告上传。
-- 次操作：“查看操作记录”和“重置”共用 Arco `linear` 线性按钮变体：默认白底中性描边，hover 保持白底并将文字和描边改为品牌蓝，active 使用深蓝。
+- 次操作：“查看操作记录”和“重置”共用全局标准次按钮：默认白底中性描边，hover 保持白底并将文字和描边改为品牌蓝，active 使用深蓝。
 - 表格列：报告标题、报告来源、报告类型、所属栏目、署名信息、行业分类、状态、版本、上传时间。状态与版本分列展示，内容统一使用 14px 字号；状态列最小 104px，必须完整展示状态圆点与“发布失败”等四字状态，不得出现省略号。
 - 表格下方不展示排序规则或上下架规则说明文字，只保留分页工具栏。
-- 行内操作：上架/下架、编辑、删除、置顶/取消置顶。
-- 任何状态下只要存在删除操作，删除必须排在该行全部操作的最后，并保持危险红色。
-- 置顶后数据立即移至列表顶部，并显示置顶状态与成功提示。
-- 已置顶报告的删除按钮保持展示但不可点击，Tooltip 提示“已置顶的报告不能删除，请先取消置顶”。
+- 行内操作由状态与报告来源共同决定，并保持业务顺序：查看始终在前，删除始终在最后且使用危险红色。平台创作与外部研报可在草稿、已驳回、已下架状态编辑；用户创作不提供管理端编辑。
+- 查看打开 960px 只读详情弹窗，展示当前处理版本的成稿、申请信息、版本与状态。编辑打开 640px 报告表单并带入已有信息，Footer 为取消、保存草稿、提交审核；保存草稿不进入审核，提交审核进入待审核并生成审核待办。
+- 草稿、已驳回和已下架可提交审核；已驳回报告必须先编辑申请信息或重新上传成稿，未修改时“提交审核”保持禁用并解释原因。待审核只显示查看与撤回；撤回使用确认弹窗，成功后回到草稿并保留撤回记录，状态已变化时提示最新结果。
+- 已驳回额外显示“查看原因”，打开只读弹窗展示被驳回版本、驳回原因、审核人和审核时间。待上架显示查看与上架；上架后报告在案例广场对应栏目展示。
+- 已上架显示查看、置顶/取消置顶和下架。置顶直接更新推荐与列表排序并切换反向操作；下架打开 560px 弹窗，下架原因为必填，确认后进入已下架、停止公开访问并保留内容和历史记录。
+- 删除仅用于草稿或已下架报告，复用危险操作二次确认；删除管理记录但保留审核及操作记录。待上架不支持删除。规则中不提供“提交修订版”和“重试上架”。
 - 报告上传/信息修改弹窗字段：PDF格式文件、报告标题、报告类型、报告来源、所属领域、上传时间、内容摘要。
+- “查看操作记录”进入独立子页面；页头左侧使用灰色“返回”按钮，与“报告管理 / 操作记录”面包屑保持同一行和 16px 间距。返回按钮 hover/focus-visible 变为品牌蓝且背景保持透明；报告管理和返回按钮均可返回，刷新后保持在该子页面。
+- 操作记录页内容区不显示页面标题、副标题或说明文字。
+- 操作记录页筛选顺序固定为：操作类型、操作时间、搜索报告标题、查询、重置。搜索框位于最后两个按钮之前；查询统一提交三项条件，重置同时清空待选值与已应用条件。筛选组左对齐，宽度为 249.33px / 249.33px / 280px / 查询 / 重置，间距 16px，并使用当前 32px Arco 线性输入与 Trigger + Listbox。
+- 操作记录表格列：报告标题、操作类型、版本、操作人、操作时间、结果、原因／说明；不显示“操作前”“操作后”和“操作”列，也不提供行内查看入口。默认按操作时间倒序。
+- 版本字段统一使用 `V主版本.次版本 YYYY-MM-DD HH:mm`，大写 `V`，版本号与时间之间一个空格，例如 `V1.0 2025-10-13 12:00`；表格和详情弹窗保持一致。
+- 操作记录页使用全局标准分页器，底部显示总数、上一页/下一页、页码和每页条数；不再显示“默认按操作时间倒序排列”的说明文字。
 
 ### 公告管理
 
 - 面包屑：系统管理 / 公告管理。“系统管理”不可点击。
 - 页面顶部展示“当前首页公告”，复用门户首页导航下方公告栏的视觉样式，直接呈现当前已发布内容、发布时间与计划下线时间；同一时刻只展示一条已发布公告。
-- 简单筛选：公告内容模糊搜索、发布状态下拉（全部/草稿/待发布/已发布/已下线），均即时生效，不显示“查询”“重置”按钮。
+- 筛选：发布状态下拉（全部/草稿/待发布/已发布/已下线）在前，公告内容模糊搜索在后，末尾固定跟随查询和重置。搜索框不显示外置标签，placeholder 为“搜索公告内容”，内部不显示 icon，左右 padding 均为 12px；查询统一提交两项条件，重置同时恢复“全部”和空搜索。
 - 主操作：新建公告。
 - 表格列：公告内容、跳转方式、发布时间、下线时间、状态。
 - 行内操作：预览、编辑，以及按状态显示发布/下线/取消定时；草稿和已下线公告可以删除，已发布和待发布公告不可直接删除。
@@ -190,6 +208,7 @@
 - 发布方式支持立即发布和定时发布。立即发布新公告时，当前已发布公告自动转为已下线并保留历史记录；定时发布在到达设定时间前不影响当前公告。
 - 编辑已发布公告后使用“保存并更新”，内容立即同步首页；已发布公告的发布方式固定为立即发布。
 - 新建和非发布态编辑支持“保存草稿”。发布、定时、更新、取消定时、下线、删除均提供全局轻提示，删除使用危险操作二次确认弹窗。
+- 新建/编辑弹窗的“取消”“保存草稿”和预览弹窗的“关闭”统一使用全局标准次按钮；发布、定时发布和保存更新继续使用主按钮。
 - 预览弹窗模拟门户导航及公告条，并展示位置、状态、跳转、发布和下线元数据。
 
 ### 审核流程管理 / 流程中心
@@ -230,18 +249,18 @@
 - 一级内容 Tab：评论审核、认证学者审核、报告审核。
 - 评论审核列：评论内容、渠道、状态；操作：通过、取消展示。
 - 认证学者审核列：学者姓名、机构、职称、手机号；操作：通过、驳回。
-- 报告审核筛选：入库方式、提交时间、搜索报告标题；统一使用查询和重置。筛选区固定使用 249.33px / 249.33px / 280px / 查询 / 重置的网格，控件及按钮均为 32px 高，条件间距 16px。下拉框使用 Arco 风格 Trigger + Listbox，不使用浏览器原生 `<select>`；触发器左右内边距 12px，箭头 16px，选项高 36px。标题搜索框左右内边距分别为 12px 和 36px。
-- 报告审核主操作：查看审核记录。
+- 报告审核筛选：入库方式、提交时间、搜索报告标题；统一使用查询和重置。因筛选条件为 3 个，筛选区独占上方一行，固定使用 249.33px / 249.33px / 280px / 查询 / 重置的网格；主操作“查看审核记录”在下一行靠左，与表格保持 16px。控件及按钮均为 32px 高，条件间距 16px。下拉框使用 Arco 风格 Trigger + Listbox，不使用浏览器原生 `<select>`；触发器左右内边距 12px，箭头 16px，选项高 36px。标题搜索框左右内边距分别为 12px 和 36px。
+- 报告审核主操作：查看审核记录，使用纯文字主按钮，不显示装饰性图标。
 - 报告审核列：报告标题、入库方式、展示栏目、提交版本、提交人、提交时间；操作依次为查看、通过、驳回，驳回使用危险红色。
 - 报告审核表头和数据行均为 40px，正文统一 14px；列表每页显示 9 条可见记录，分页区显示“共计 150 条”和“10条/页”。
-- 报告审核“驳回”打开 480×360px 的“驳回审核”弹窗：黑色 50% 遮罩、16px 标题、蓝色信息提示、必填的 126px 高驳回原因文本域，以及取消/保存操作。取消使用 Arco `linear` 线性按钮，保存使用品牌蓝主按钮；保存后记录审核人、时间、版本号和原因，并移除对应待审记录。
+- 报告审核“驳回”打开 480×360px 的“驳回审核”弹窗：黑色 50% 遮罩、16px 标题、蓝色信息提示、必填的 126px 高驳回原因文本域，以及取消/保存操作。取消使用全局标准次按钮，保存使用品牌蓝主按钮；保存后记录审核人、时间、版本号和原因，并移除对应待审记录。
 - 操作后立即更新或移除对应待审数据，保持当前 Tab。
 
 ### 埋点管理 / 埋点信息管理
 
 - 面包屑：系统管理 / 埋点管理 / 埋点信息管理。“系统管理”不可点击，“埋点管理”可返回埋点信息管理入口。
-- 筛选：模块下拉、事件ID输入；事件ID右侧提供“查询”按钮，点击或按回车后应用事件ID条件，模块选择仍即时生效。
-- 主次操作：新增埋点事件为主要按钮，批量上传为线框按钮。
+- 筛选：模块下拉在前、事件 ID 搜索框在后，末尾固定跟随查询和重置；模块名称内嵌在下拉框中，搜索框不显示外置标签，placeholder 为“搜索事件ID”，内部不显示 icon，左右 padding 均为 12px。查询按钮点击或按回车后统一应用两项条件，重置同时恢复“全部”和空搜索；控件高度、线性边框和 16px 间距与报告审核一致。
+- 主次操作：新增埋点事件为主要按钮，批量上传使用全局标准次按钮。
 - 表格列：事件ID、所属功能模块、埋点标签、埋点路径、触发机制、创建时间。
 - 行内操作：查看、编辑、删除。
 - 新增/修改/详情字段：事件ID、所属功能模块、埋点标签、埋点路径、触发机制。
@@ -264,7 +283,7 @@
 - 页面采用“左树右表”自适应布局，不再拆分“组织管理 / 用户管理”内容 Tab。
 - 左侧为组织管理树，支持无限层级展开/收起和组织检索；标题统一为“组织管理（组织列表查看）”，标题右侧不再重复堆放能力名称和组织数量。节点“...”菜单包含新增子组织、重命名、组织数据管理。
 - 选择组织节点后，右侧用户列表立即按该组织及其下级组织聚合过滤。
-- 右侧简单筛选为用户姓名模糊搜索、账号状态下拉（全部/启用/禁用），均即时生效，不显示“查询”“重置”按钮。
+- 右侧筛选为账号状态下拉（全部/启用/禁用）在前、用户姓名模糊搜索在后，末尾固定跟随查询和重置。搜索框不显示外置标签，placeholder 为“搜索用户姓名”，内部不显示 icon，左右 padding 均为 12px；因右侧工作区较窄，完整筛选组独占一行，主操作行紧邻表格。
 - 工具栏操作：用户注册（主要按钮）、用户数据对接（线框按钮）；用户列表显性标注用户列表展示。
 - 用户数据对接必须由管理员填写外部用户接口地址、请求方式、认证方式和认证凭证，并配置用户 ID、姓名、归属组织、手机号、邮箱、账号状态等返回字段映射；接口地址仅接受 `https://`。
 - 用户数据对接遵循“填写接口配置 → 连接测试 → 开始对接”的操作顺序，连接测试未通过时不能开始对接；对接完成后按外部用户 ID 新增或更新用户并刷新当前用户列表。
@@ -274,7 +293,7 @@
 
 ### 角色管理
 
-- 筛选：角色ID、角色名称、状态。
+- 筛选：状态下拉在前，角色ID、角色名称搜索框在后，末尾固定跟随查询和重置；两个搜索框均不显示外置标签，使用“搜索角色ID / 搜索角色名称”作为 placeholder，内部不显示 icon。
 - 主操作：创建。
 - 表格列：角色ID、角色名称、角色描述、状态、创建人、创建时间、最近修改人、最近修改时间。
 - 行内操作：编辑、删除、配置。删除只在状态为“废弃”时出现；配置进入权限配置页面。
@@ -311,7 +330,7 @@
 
 #### 接口调用日志
 
-- 筛选：时间范围（近1小时/近7天）、调用结果（全部/成功/失败）、接口名称。
+- 筛选：时间范围（近1小时/近7天）、调用结果（全部/成功/失败）两个下拉在前，接口名称搜索在后，末尾固定跟随查询和重置。接口名称搜索框不显示外置标签，placeholder 为“搜索接口名称”，内部不显示 icon，左右 padding 均为 12px；三项筛选使用 249.33px / 249.33px / 280px 与 16px 间距。
 - 表格列：调用时间、调用方IP、接口地址、响应结果、调用耗时。
 - 行内操作：查看。
 - 查看弹窗展示调用时间、调用方IP、接口地址、响应结果、调用耗时、错误信息和完整请求参数。
@@ -331,7 +350,7 @@
 ### 权限配置
 
 - 一级 Tab：用户、角色。
-- 用户包含用户检索和用户列表；表格列：用户ID、用户姓名、所属组织名称、手机号、当前角色；操作：分配角色。
+- 用户包含用户姓名搜索和用户列表；搜索框不显示外置标签，placeholder 为“搜索用户姓名”，内部不显示 icon，左右 padding 均为 12px，宽度 280px，末尾固定跟随查询和重置。表格列：用户ID、用户姓名、所属组织名称、手机号、当前角色；操作：分配角色。
 - 分配角色使用穿梭框弹窗，左侧“可选角色”、右侧“已选角色”，支持普通用户、机构用户、政府用户多选分配。
 - 角色使用左侧角色列表 + 右侧权限工作区。
 - 右侧二级 Tab：页面、资源。
@@ -395,7 +414,7 @@ Step 2 才能生成界面：只有当用户确认来源内容清单正确后，�
 
 | 页面类型 | 判定依据 | 生成骨架 |
 | --- | --- | --- |
-| 管理列表页 | 可见筛选区、可选的复杂筛选提交操作、操作按钮、表格/列表、分页或批量操作 | 单白色工作卡片内按 `筛选区 -> 操作区 -> 表格/列表 -> 分页` 排布；简单筛选即时生效 |
+| 管理列表页 | 可见筛选区、查询/重置、操作按钮、表格/列表、分页或批量操作 | 单白色工作卡片内先按工具栏规则排列主操作与筛选组，再进入 `表格/列表 -> 分页`；不超过 2 个条件同排，超过 2 个条件时筛选组另起一行；所有筛选统一由查询提交、重置恢复默认 |
 | 表单/编辑页 | 主要内容是输入框、选择器、上传、字段分组、保存/提交/取消按钮 | 单白色工作卡片或弹窗 Body 内按表单分组排布，字段顺序严格按原型 |
 | 详情/阅读页 | 主要内容是只读字段、标题、标签、长文本、分区标题、返回入口、关联信息 | 详情卡或详情分区，保留原型可见分区，不主动补摘要/附件/关联列表 |
 | 文章页 | 可见文章标题、作者/来源/时间、摘要、正文段落、小标题、目录、标签、引用、图片或附件 | 使用阅读型正文版式；严格保留原型可见文字，不自行撰写正文或扩写段落 |
@@ -741,7 +760,7 @@ Use these key size tokens in both prototypes and production pages. Do not duplic
 - `--modal-max-width`: all Modal instances must keep at least 24px viewport side margin.
 - `--modal-max-height`: all Modal instances must keep at least 24px viewport top/bottom margin.
 - `--modal-padding-x`: Modal safe padding. Header title, Body content, and Footer actions align to this 24px side distance from the panel edges; Body uses the same 24px value vertically.
-- `--modal-header-height`: standard one-line Modal Header height. A Header with a subtitle grows to at least 72px.
+- `--modal-header-height`: standard one-line Modal Header height，固定 56px；弹窗不使用 Header 副标题。
 - `--modal-footer-height`: fixed Modal footer height.
 - `--modal-button-gap`: gap between footer buttons.
 
@@ -920,7 +939,7 @@ The list page pattern is represented by `论文管理`.
 - Filter labels sit inline to the left of controls, not above inputs. Labels are right-aligned and content-adaptive; controls fill the rest of the condition column. The important result is that filter condition pairs in the same row are equal length while the filter area stretches with the container.
 - Filter/search inputs must visually match the form input spec: 32px high, 4px radius, white background, `#E5E6EB` border, 14px text, placeholder `#86909C`, brand-blue focus border/ring, and the same disabled/error treatment as forms. Arco implementation may use `Input` or `Input.Search`, but the visual result cannot look like a separate Arco search component.
 - When a filter dropdown means "all values", include `全部` as the first option and make it the default selected value. Do not add a separate sorting filter such as `排序规则` unless the source prototype explicitly shows it.
-- Search-type filter inputs use placeholder `请输入`. The search icon is a right-side suffix icon aligned to the same right inset as the Select arrow, not a left prefix icon.
+- Search-type filter inputs use a field-specific placeholder and do not display prefix, suffix, search, or clear icons; left and right padding are both 12px.
 - When a complex filter requires a `查询` action, render it as a blue primary text-only button rather than a gray weak/disabled button. Do not create this action for simple search or direct-select filters.
 - When a complex filter requires `查询` and `重置`, keep them as clear text buttons without icons; reserve icons for source-defined action buttons such as `新增` or `批量导入`.
 - Create/action row starts below filters around `y=181` on the left side: primary `新增` button first, then secondary/batch actions such as `批量导入`.
@@ -986,7 +1005,7 @@ The deletion examples use a focused confirmation dialog over a dimmed page. All 
 - Use it for irreversible short decisions: delete one, batch delete, cancel import, overwrite, revoke.
 - Keep the body copy concise and action-oriented: one primary confirmation sentence followed by one muted irreversible-effect sentence.
 - Header and Footer stay fixed; only Body may scroll. The Modal panel itself must use `overflow: hidden` and must not scroll as a whole.
-- Header title is left-aligned at 20px/28px, semibold. The destructive-confirm Header is 64px high with 32px horizontal padding and a 1px bottom border. Body uses 32px vertical and 40px horizontal padding; primary copy is 16px/24px and secondary copy is 14px/22px `#86909C` with a 12px gap. Footer is 72px high with 32px horizontal padding and a 1px top border.
+- 确认/删除/撤回弹窗与普通弹窗使用同一外壳：Header 56px、左右 24px、无副标题和底部分隔线；Body 顶部 8px、左右和底部 24px；Footer 64px、左右 24px。确认正文保持 16px/24px，辅助说明为 14px/22px `#86909C`，间距 12px。
 - Footer actions align right; cancel button is left of the confirm button; button gap is 12px.
 - The underlying page remains visible but blocked by an overlay scrim.
 
@@ -999,8 +1018,8 @@ The detail modal style is confirmed from `情报管理系统` node `1998:23719` 
 - Reference position: `x=400, y=48` on the 1440px baseline.
 - Modal radius: 8px; background white; high-layer shadow around `0 2px 6px rgba(0,0,0,0.16)`.
 - Content width inside overlay: 592px, with 24px internal safe padding.
-- Header: fixed 56px height for a one-line title, `0 24px` padding, 1px bottom border `#E5E6EB`, 16px/24px medium title, and a 20px close icon inside a 32px target at the right. A title plus subtitle Header grows to at least 72px with 12px vertical padding.
-- Body starts below the fixed Header, uses 24px padding on every side and 16px internal field/module gaps, and is the only scrollable region.
+- Header: fixed 56px height, `0 24px` padding, no bottom border, 16px/24px medium title, and a 20px close icon inside a 32px target at the right. Header only shows the title and close action; no subtitle is allowed.
+- Body starts below the fixed Header, uses `8px 24px 24px` padding and 16px internal field/module gaps, and is the only scrollable region. The visual distance from the Header title text to the first Body item is 24px.
 - Detail section title: 14px medium text with a 3px by 14px brand-blue vertical bar and 8px gap.
 - Detail mode groups information into sectioned blocks. Repeated detail blocks use `#F7F8FA` background, 4px radius, and 12px padding.
 - Detail label/value rows use 14px text, 22px line-height, 8px gap; labels are `#4E5969`, right-aligned, 128px wide; values are `#1D2129`.
@@ -1038,8 +1057,8 @@ All Modal implementations must follow this structure:
 - `max-width`: `calc(100vw - 48px)`.
 - `max-height`: `calc(100vh - 48px)`.
 - Header title: left-aligned.
-- Header / Body / Footer horizontal padding: 24px. Body vertical padding is also 24px.
-- Header and Body are separated by a 1px line. The first Body content block starts 24px below the Body edge and has `margin-top: 0`.
+- Header / Body / Footer horizontal padding: 24px. Body top padding is 8px and bottom padding is 24px, producing a 24px visual title-to-content gap.
+- Header and Body have no separator line. The first Body content block starts 24px below the Body edge and has `margin-top: 0`.
 - The first direct content block inside Modal Body must have `margin-top: 0`; do not reuse page-level section wrappers that add extra top margin inside a Modal.
 - Modal form fields use vertical field groups, not left-right label/control rows. One group is `label above + control below`.
 - Field labels sit above the control, left-aligned. Controls fill the full width of their field group.
@@ -1805,16 +1824,16 @@ Use the Figma high-level shadow style (`阴影/高层阴影`) for dialogs, dropd
 - The message icon is a 24px solid semantic circle with a white glyph: info `#165DFF` with `i`, success `#00B42A` with a check, warning `#FF7D00` with `!`, and error `#F53F3F` with an `x`. Do not tint the whole message background blue, green, orange, or red.
 - Global messages are closeable and stack from the top with an 8px gap, showing no more than three at once. Info and success dismiss after 3 seconds; warning and error dismiss after 4.5 seconds. Long-running, batch, or multi-stage outcomes still require an inline or modal result state and must not be represented only by a transient message.
 - Alerts inside a Modal are a separate component from global transient messages. A Modal Alert fills the Body width, has a 40px minimum height, `padding: 9px 12px`, 12px content gap, 4px radius, and no border or shadow. Info, success, warning, and error use tinted backgrounds `#E8F3FF`, `#E8FFEA`, `#FFF7E8`, and `#FFECE8`; the left icon is a 20px solid semantic circle with a white glyph. Text is 14px/22px `#1D2129`.
-- Modal Alerts support a single-line body or a title plus description. Alert titles use 14px/22px at weight 600 with a 4px title-description gap. Use Alerts for semantic risk feedback inside forms or business flows, including a Token that can only be viewed or copied once. Destructive confirmation dialogs do not use an Alert; they use the dedicated primary-copy + muted irreversible-description structure. Keep a 16px gap between an Alert and the following form. Keep short neutral context tied to the dialog title as a Header subtitle. Never interchange Modal Alerts, destructive confirmation copy, Header subtitles, and top-centered global messages.
+- Modal Alerts support a single-line body or a title plus description. Alert titles use 14px/22px at weight 600 with a 4px title-description gap. Use Alerts for semantic risk feedback inside forms or business flows, including a Token that can only be viewed or copied once. Destructive confirmation dialogs do not use an Alert; they use the dedicated primary-copy + muted irreversible-description structure. Keep a 16px gap between an Alert and the following form. Header 不使用副标题；普通上下文说明放在 Body，且不得与 Alert、危险确认文案或顶部全局消息混用。
 
 - Confirmation modal: short irreversible decisions, 560px wide, with the dedicated three-part text structure.
-- Ordinary detail/edit/create modal: 640px wide, centered around the page, with a 56px fixed Header, 24px Body padding, 592px content sections, and a 64px fixed Footer.
+- Ordinary detail/edit/create modal: 640px wide, centered around the page, with a 56px fixed Header, `8px 24px 24px` Body padding, 592px content sections, and a 64px fixed Footer.
 - Complex config modal: 960px wide when the content is still modal-safe.
 - Table / permission / multi-column content modal: 1280px wide only when the content remains simple enough for a modal.
 - Drawer: detail preview, edit side panels, audit trails, or any scenario that exceeds normal Modal limits.
 - Popover/dropdown: selection, lightweight filters, overflow actions.
 - Keep overlay headers and footers fixed; only the Body may scroll.
-- When a modal needs a short neutral prompt or explanatory sentence, place it directly below the modal title in the fixed Header using 12px/20px tertiary text. Security warnings, one-time visibility notices, and other semantic risks are not neutral descriptions: present them as the Modal Alert specified above at the top of the Body. Do not insert tinted notices for non-semantic helper copy.
+- When a modal needs a short neutral prompt or explanatory sentence, place it at the top of the Body using ordinary helper text. Do not place any subtitle below the Header title. Security warnings, one-time visibility notices, and other semantic risks use the Modal Alert at the top of the Body.
 - Keep footer actions right-aligned with cancel on the left and confirm on the right.
 - Background page remains visible behind modal overlays but must be visually blocked by a scrim.
 
@@ -2022,7 +2041,7 @@ After generating a page in any AI / design / code tool, inspect these areas befo
 - Source field lock: confirm generated filters, form fields, table columns, rows, tabs, modules, and buttons have the same count, names, and order as the source prototype. Any extra generic admin field fails the output.
 - Work-card safe area: tabs, filters, actions, tables, forms, pagination, and state feedback all begin inside the white card's 16px padding. No first child may touch the white card edge.
 - Inputs: placeholder/text baseline, prefix/suffix/clear icons, Select arrows, and DatePicker icons must be vertically centered in the 32px control. A field with text that looks too high, too low, or icon-misaligned fails the spec.
-- Filter row: labels stay inline on the left of controls; controls use the form input visual. Search buttons do not add icons unless the source design shows them.
+- Filter row: dropdowns precede search inputs; controls use the form input visual. Search inputs and search buttons do not add icons.
 - Buttons: standard actions are 32px high; 28px is allowed only for compact table/tool internals.
 - Tabs: page tabs are underline tabs; category tabs are 30px compact tabs; sidebar tabs are 168px by 40px glass-highlight items. These three styles are never interchangeable and none of them may keep Arco default filled/pill/header styling.
 - Tables: one Arco table container, 40px rows, `#F7F8FA` header, `#4E5969` header text, single-line ellipsis, text-link operation column, and Arco-style pagination.

@@ -1346,6 +1346,39 @@ textarea:focus-visible {
   border: 0;
 }
 
+.page-heading.has-back-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.breadcrumb-back {
+  height: 20px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  color: var(--gkx-text-tertiary);
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.breadcrumb-back:hover,
+.breadcrumb-back:focus-visible {
+  color: var(--gkx-brand);
+  background: transparent;
+}
+
+.breadcrumb-back:focus-visible {
+  outline: 2px solid rgba(22,93,255,.18);
+  outline-offset: 1px;
+}
+
 .breadcrumb {
   min-height: 20px;
   margin: 0;
@@ -1502,14 +1535,6 @@ textarea:focus-visible {
   width: 100%;
 }
 
-.audit-report-filter-bar .filter-search-control > input.arco-input::placeholder {
-  color: var(--gkx-text-disabled);
-}
-
-.audit-report-filter-bar .filter-search-control > input.arco-input {
-  padding: 0 36px 0 12px;
-}
-
 .audit-report-filter-bar > .btn {
   width: auto;
 }
@@ -1518,6 +1543,10 @@ textarea:focus-visible {
   min-height: 32px;
   display: flex;
   align-items: center;
+}
+
+.audit-report-list-toolbar {
+  margin-bottom: 0;
 }
 
 .audit-report-list-page > .data-table-frame {
@@ -1637,7 +1666,6 @@ textarea:focus-visible {
   cursor: not-allowed;
 }
 
-.btn svg,
 .icon-btn svg {
   stroke-width: 1.2;
 }
@@ -1680,6 +1708,7 @@ textarea:focus-visible {
 }
 
 .report-management-toolbar > .report-search-group {
+  grid-column: auto;
   margin-left: auto;
   justify-content: flex-end;
   gap: 16px;
@@ -1688,6 +1717,38 @@ textarea:focus-visible {
 .report-management-page > .report-management-toolbar {
   margin-top: 0;
   margin-bottom: 16px;
+}
+
+.report-operation-page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-operation-filters {
+  display: grid;
+  grid-template-columns: 249.333px 249.333px 280px max-content max-content;
+  align-items: center;
+  justify-content: start;
+  gap: 16px;
+  flex: 0 0 auto;
+}
+
+.report-operation-filters > .filter-field {
+  width: 100%;
+}
+
+.report-operation-page > .data-table-frame {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.report-operation-page .table-wrap .arco-table-th,
+.report-operation-page .table-wrap .arco-table-td {
+  height: 40px;
+  font-size: 14px;
+  line-height: 22px;
 }
 
 .report-search-group .filter-field {
@@ -1708,14 +1769,6 @@ textarea:focus-visible {
   width: auto;
   padding: 0 16px;
   flex: 0 0 auto;
-}
-
-.report-search-group .filter-search-control > input.arco-input {
-  padding: 0 36px 0 12px;
-}
-
-.report-search-group .filter-search-control > input.arco-input::placeholder {
-  color: var(--gkx-text-disabled);
 }
 
 .filter-field {
@@ -1770,14 +1823,6 @@ textarea:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-small);
-}
-
-.filter-search-control svg {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
-  color: var(--gkx-text-tertiary);
-  stroke-width: 1.2;
 }
 
 .filter-search-control input {
@@ -1987,6 +2032,76 @@ textarea:focus-visible {
 
 .table-toolbar > div {
   gap: var(--space-small);
+}
+
+/* Shared list toolbar: actions lead; up to two filters stay on the same row. */
+.list-toolbar {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-height);
+  margin: 0 0 var(--space-medium);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-medium);
+}
+
+.list-toolbar-actions,
+.list-toolbar-filters:not(.filters):not(.audit-report-filter-bar) {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.list-toolbar-actions {
+  justify-self: start;
+  gap: var(--space-small);
+}
+
+.list-toolbar-filters {
+  justify-self: end;
+}
+
+.list-toolbar-filters.filters {
+  margin: 0;
+  padding: 0;
+  gap: var(--space-medium);
+}
+
+.list-toolbar.is-stacked {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.list-toolbar.is-stacked > .list-toolbar-actions,
+.list-toolbar.is-stacked > .list-toolbar-filters {
+  width: 100%;
+  justify-self: start;
+}
+
+.list-toolbar.is-stacked > .list-toolbar-actions {
+  grid-row: 2;
+}
+
+.list-toolbar.is-stacked > .list-toolbar-filters {
+  grid-row: 1;
+}
+
+.list-toolbar.audit-report-list-toolbar {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1180px) {
+  .list-toolbar:not(.is-stacked) {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .list-toolbar:not(.is-stacked) > .list-toolbar-actions,
+  .list-toolbar:not(.is-stacked) > .list-toolbar-filters {
+    width: 100%;
+    justify-self: start;
+  }
 }
 
 .table-wrap {
@@ -3416,13 +3531,7 @@ tbody tr:hover {
   justify-content: space-between;
   gap: 16px;
   flex: 0 0 auto;
-  border-bottom: 1px solid var(--gkx-border);
-}
-
-.modal-header:has(p) {
-  min-height: 72px;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  border-bottom: 0;
 }
 
 .modal-header > div {
@@ -3433,12 +3542,6 @@ tbody tr:hover {
   font-size: 16px;
   line-height: 24px;
   font-weight: 500;
-}
-
-.modal-header p {
-  color: var(--gkx-text-tertiary);
-  font-size: 12px;
-  line-height: 20px;
 }
 
 .modal-header > button {
@@ -3456,25 +3559,25 @@ tbody tr:hover {
   overflow: hidden;
 }
 
-.modal-form-body,
-.upload-body,
-.permission-confirm {
+.modal .modal-form-body,
+.modal .upload-body,
+.modal .permission-confirm {
   min-height: 0;
-  padding: 24px;
+  padding: 8px 24px 24px;
   flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.modal-form-body > :first-child,
-.upload-body > :first-child,
-.permission-confirm > :first-child {
+.modal .modal-form-body > :first-child,
+.modal .upload-body > :first-child,
+.modal .permission-confirm > :first-child {
   margin-top: 0;
 }
 
-.modal-form-body > :last-child,
-.upload-body > :last-child,
-.permission-confirm > :last-child {
+.modal .modal-form-body > :last-child,
+.modal .upload-body > :last-child,
+.modal .permission-confirm > :last-child {
   margin-bottom: 0;
 }
 
@@ -3932,18 +4035,6 @@ tbody tr:hover {
   gap: 12px;
   background: #fff;
   border-top: 1px solid var(--gkx-border);
-}
-
-.modal-footer .btn.default {
-  color: var(--gkx-text-secondary);
-  background: var(--gkx-bg-subtle);
-  border-color: var(--gkx-bg-subtle);
-}
-
-.modal-footer .btn.default:hover {
-  color: var(--gkx-text-primary);
-  background: var(--gkx-border);
-  border-color: var(--gkx-border);
 }
 
 .modal-footer.spread {
@@ -4898,7 +4989,7 @@ tbody tr:hover {
 
 .form-preview-modal-body {
   min-height: 200px;
-  padding: 24px;
+  padding: 8px 24px 24px;
   flex: 1 1 auto;
   overflow: auto;
 }
@@ -5346,7 +5437,7 @@ tbody tr:hover {
 
 /* Event tracking list and data dashboard. */
 .event-info-filters {
-  grid-template-columns: repeat(2, minmax(0, 384px)) max-content;
+  grid-template-columns: repeat(2, minmax(220px, 249.333px)) max-content max-content;
 }
 
 .event-info-filters > .btn {
@@ -5355,7 +5446,7 @@ tbody tr:hover {
 }
 
 .event-info-toolbar {
-  margin: var(--space-medium) 0;
+  margin: 0;
 }
 
 .event-dashboard-page {
@@ -6544,7 +6635,7 @@ tbody tr:hover {
 }
 
 .api-log-filters {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 249.333px 249.333px 280px max-content max-content;
   margin-bottom: 16px;
 }
 
@@ -6564,6 +6655,111 @@ tbody tr:hover {
 
 .audit-report-detail-modal {
   width: 960px;
+}
+
+.report-detail-modal {
+  width: 960px;
+}
+
+.report-action-form-modal,
+.report-readonly-modal {
+  width: 640px;
+}
+
+.report-down-modal {
+  width: 560px;
+}
+
+.report-withdraw-modal {
+  width: 560px;
+}
+
+.report-action-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.report-action-detail-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 32px;
+}
+
+.report-action-detail-grid > div {
+  min-width: 0;
+}
+
+.report-action-detail-grid dt {
+  margin: 0 0 6px;
+  color: var(--gkx-text-tertiary);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.report-action-detail-grid dd {
+  margin: 0;
+  color: var(--gkx-text-primary);
+  font-size: 14px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+}
+
+.report-action-detail-grid .report-action-summary {
+  grid-column: 1 / -1;
+}
+
+.report-manuscript-card {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--gkx-border);
+}
+
+.report-manuscript-card > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.report-manuscript-card span {
+  color: var(--gkx-text-tertiary);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.report-manuscript-card strong {
+  color: var(--gkx-brand);
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+}
+
+.report-manuscript-card p {
+  margin: 12px 0 0;
+  color: var(--gkx-text-secondary);
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.report-down-modal textarea {
+  min-height: 126px;
+}
+
+@media (max-width: 720px) {
+  .report-action-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-action-detail-grid .report-action-summary {
+    grid-column: auto;
+  }
+
+  .report-manuscript-card > div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
 }
 
 .scholar-material-modal {
@@ -7097,7 +7293,7 @@ tbody tr:hover {
 }
 
 .permission-user-filters {
-  grid-template-columns: minmax(0, 384px);
+  grid-template-columns: 280px max-content max-content;
   margin-bottom: 16px;
 }
 
@@ -7552,15 +7748,23 @@ tbody tr:hover {
 
 /* Keep page-scoped grid rules after the global filter breakpoints. */
 .user-management-filters {
-  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  grid-template-columns: repeat(2, minmax(220px, 249.333px)) max-content max-content;
+}
+
+.role-management-filters {
+  grid-template-columns: 249.333px 249.333px 280px max-content max-content;
 }
 
 @media (max-width: 1180px) {
-  .user-management-filters { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+  .user-management-filters { grid-template-columns: repeat(2, minmax(220px, 249.333px)) max-content max-content; }
 }
 
 @media (max-width: 820px) {
-  .user-management-filters { grid-template-columns: 1fr; }
+  .user-management-filters,
+  .role-management-filters,
+  .permission-user-filters { grid-template-columns: 1fr; }
+
+  .permission-user-filters { width: 100%; }
 }
 
 /* 用户管理页高度与标题行对齐修正。 */
@@ -7596,23 +7800,23 @@ tbody tr:hover {
 }
 
 .confirm-modal .modal-header {
-  min-height: 64px;
-  padding: 0 32px;
+  min-height: 56px;
+  padding: 0 24px;
 }
 
 .confirm-modal .modal-header h2 {
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
 }
 
 .confirm-modal-body {
-  min-height: 136px;
-  padding: 32px 40px;
+  min-height: 120px;
+  padding: 8px 24px 24px;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   overflow-y: auto;
 }
 
@@ -7632,20 +7836,20 @@ tbody tr:hover {
 }
 
 .confirm-modal .modal-footer {
-  min-height: 72px;
-  padding: 16px 32px;
-  flex: 0 0 72px;
+  min-height: 64px;
+  padding: 16px 24px;
+  flex: 0 0 64px;
 }
 
 .confirm-modal .modal-footer .btn {
-  min-width: 96px;
-  height: 40px;
+  min-width: 80px;
+  height: 32px;
 }
 
 @media (max-width: 620px) {
   .confirm-modal { width: calc(100vw - 32px); }
   .confirm-modal .modal-header { padding: 0 24px; }
-  .confirm-modal-body { padding: 24px; }
+  .confirm-modal-body { padding: 8px 24px 24px; }
   .confirm-modal .modal-footer { padding: 16px 24px; }
 }
 
@@ -8331,7 +8535,7 @@ tbody tr:hover {
 }
 
 .announcement-filters {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 249.333px 280px max-content max-content;
 }
 
 .announcement-editor-modal {
@@ -8521,13 +8725,13 @@ tbody tr:hover {
 }
 
 .report-reject-header {
-  min-height: 48px;
-  padding: 24px 24px 0;
+  min-height: 56px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  flex: 0 0 48px;
+  flex: 0 0 56px;
 }
 
 .report-reject-header h2 {
@@ -8539,8 +8743,8 @@ tbody tr:hover {
 }
 
 .report-reject-header button {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -8558,7 +8762,7 @@ tbody tr:hover {
 
 .report-reject-body {
   min-height: 0;
-  padding: 16px 24px 0;
+  padding: 8px 24px 24px;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -8693,6 +8897,23 @@ tbody tr:hover {
   }
 
   .announcement-home-preview-nav span {
+    display: none;
+  }
+}
+
+@media (max-width: 660px) {
+  .global-search {
+    width: 88px;
+    padding: 0 12px;
+    justify-content: flex-start;
+    border: 1px solid rgba(255,255,255,.9);
+  }
+
+  .global-search span {
+    display: inline;
+  }
+
+  .global-search kbd {
     display: none;
   }
 }

@@ -27,28 +27,42 @@ body {
   justify-content: center;
   gap: 0;
   min-height: 32px;
+  padding: 0 16px;
   font-weight: 400;
   box-shadow: none;
 }
 .btn.arco-btn > svg + span { margin-left: 8px; }
 .btn.arco-btn-text { min-height: 22px; height: 22px; padding: 0 4px; }
 .btn.arco-btn-disabled,
-.btn.arco-btn-disabled:hover { color: var(--color-text-4); background: var(--color-fill-2); border-color: transparent; }
+.btn.arco-btn-disabled:hover,
+.btn.arco-btn-disabled:active {
+  color: var(--color-text-4);
+  background: var(--color-fill-1);
+  border-color: var(--color-fill-3);
+}
+.btn.arco-btn.default:not(.arco-btn-disabled),
+.btn.arco-btn.outline:not(.arco-btn-disabled),
 .btn.arco-btn.linear:not(.arco-btn-disabled) {
   color: var(--color-text-1);
   background: #fff;
   border-color: var(--color-fill-3);
 }
+.btn.arco-btn.default:not(.arco-btn-disabled):hover,
+.btn.arco-btn.outline:not(.arco-btn-disabled):hover,
 .btn.arco-btn.linear:not(.arco-btn-disabled):hover {
   color: rgb(var(--primary-6));
   background: #fff;
   border-color: rgb(var(--primary-5));
 }
+.btn.arco-btn.default:not(.arco-btn-disabled):active,
+.btn.arco-btn.outline:not(.arco-btn-disabled):active,
 .btn.arco-btn.linear:not(.arco-btn-disabled):active {
   color: rgb(var(--primary-7));
   background: #fff;
   border-color: rgb(var(--primary-7));
 }
+.btn.arco-btn.default:not(.arco-btn-disabled):focus-visible,
+.btn.arco-btn.outline:not(.arco-btn-disabled):focus-visible,
 .btn.arco-btn.linear:not(.arco-btn-disabled):focus-visible {
   color: rgb(var(--primary-6));
   background: #fff;
@@ -63,26 +77,8 @@ body {
 .filter-field .arco-input:hover { background: #fff; border-color: var(--color-fill-4); }
 .filter-field .arco-input:focus { background: #fff; border-color: rgb(var(--primary-5)); box-shadow: none; }
 .filter-search-control { position: relative; display: block; height: 32px; padding: 0; border: 0; border-radius: var(--border-radius-small); background: transparent; box-shadow: none; }
-.filter-field .filter-search-control > input.arco-input { width: 100%; min-width: 0; padding-right: 34px; }
+.filter-field .filter-search-control > input.arco-input { width: 100%; min-width: 0; padding: 0 12px; }
 .filter-field:focus-within .filter-search-control { border: 0; box-shadow: none; }
-.filter-search-control > svg { position: absolute; top: 8px; right: 12px; color: var(--color-text-3); pointer-events: none; }
-.filter-search-control > .filter-clear-button {
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-3);
-  background: transparent;
-  border: 0;
-  border-radius: 2px;
-}
-.filter-search-control > .filter-clear-button:hover:not(:disabled) { color: rgb(var(--primary-6)); background: var(--color-fill-2); }
-.filter-search-control > .filter-clear-button:disabled { color: var(--color-text-4); cursor: default; }
 .filter-field .filter-select-control { border: 1px solid var(--color-fill-3); background: #fff; box-shadow: none; }
 .filter-field .filter-select-control:hover { border-color: var(--color-fill-4); background: #fff; }
 .filter-field .filter-select-control:focus-within { border-color: rgb(var(--primary-5)); background: #fff; box-shadow: none; }

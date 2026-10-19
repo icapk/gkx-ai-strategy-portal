@@ -14,7 +14,6 @@ import {
   ClipboardCheck,
   Copy,
   Database,
-  Eye,
   FileBarChart,
   FileText,
   FolderOpen,
@@ -26,15 +25,10 @@ import {
   MessageSquareMore,
   Minus,
   MoreHorizontal,
-  Network,
   Pin,
   Plus,
-  Printer,
-  Save,
-  Search,
   ShieldCheck,
   Trash2,
-  Upload,
   Users,
   X,
   XCircle,
@@ -159,6 +153,7 @@ const pageLabels: Record<PageKey, string> = {
 
 const ACTIVE_PAGE_STORAGE_KEY = "gkx-portal-admin:active-page:v1";
 const AUDIT_TAB_STORAGE_KEY = "gkx-portal-admin:audit-tab:v1";
+const REPORT_OPERATION_RECORDS_STORAGE_KEY = "gkx-portal-admin:operation-records-open:v1";
 
 function readStoredActivePage(): PageKey {
   if (typeof window === "undefined") return "report-management";
@@ -177,6 +172,15 @@ function readStoredAuditTab(): AuditContentTab {
     return stored === "comments" || stored === "scholars" || stored === "reports" ? stored : "comments";
   } catch {
     return "comments";
+  }
+}
+
+function readStoredReportOperationRecordsOpen() {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(REPORT_OPERATION_RECORDS_STORAGE_KEY) === "true";
+  } catch {
+    return false;
   }
 }
 
@@ -226,6 +230,11 @@ type ReportRow = {
   版本信息: string;
   上传时间: string;
   置顶: boolean;
+  内容摘要?: string;
+  驳回原因?: string;
+  审核人?: string;
+  审核时间?: string;
+  下架原因?: string;
 };
 const statusOptions = ["启用", "禁用"];
 const roleOptions = ["普通用户", "机构用户", "政府用户"];
@@ -241,15 +250,44 @@ const reportRows: ReportRow[] = [
   { 报告标题: "全球机器人市场报告", 报告来源: "外部研报", 报告类型: "洞察报告", 所属栏目: "研报库", 署名信息: "发布机构：IFR", 行业分类: "机器人", 状态: "发布失败", 版本信息: "V1.0 · 2026-09-16 09:50", 上传时间: "2026-09-16", 置顶: false },
 ];
 
-const reportActionsByStatus: Record<ReportStatus, string[]> = {
-  待上架: ["查看", "上架"],
-  草稿: ["查看", "编辑", "提交审核", "删除"],
-  待审核: ["查看", "撤回"],
-  已驳回: ["查看原因", "编辑", "提交审核"],
-  已上架: ["查看", "置顶", "提交修订版", "下架"],
-  已下架: ["查看", "提交审核", "删除"],
-  发布失败: ["查看", "重试上架"],
+function isAdminEditableReport(report: ReportRow) {
+  return report.报告来源 === "平台创作" || report.报告来源 === "外部研报";
+}
+
+function getReportActions(report: ReportRow) {
+  if (report.状态 === "待上架") return ["查看", "上架"];
+  if (report.状态 === "草稿") return ["查看", isAdminEditableReport(report) && "编辑", "提交审核", "删除"];
+  if (report.状态 === "待审核") return ["查看", "撤回"];
+  if (report.状态 === "已驳回") return ["查看", "查看原因", isAdminEditableReport(report) && "编辑", "提交审核"];
+  if (report.状态 === "已上架") return ["查看", report.置顶 ? "取消置顶" : "置顶", "下架"];
+  if (report.状态 === "已下架") return ["查看", isAdminEditableReport(report) && "编辑", "提交审核", "删除"];
+  return ["查看"];
+}
+
+type ReportOperationRecord = {
+  id: string;
+  报告标题: string;
+  操作类型: "上架" | "下架" | "替换版本";
+  版本: string;
+  操作人: string;
+  操作时间: string;
+  操作前: string;
+  操作后: string;
+  结果: "成功";
+  "原因／说明": string;
 };
+
+const reportOperationRows: ReportOperationRecord[] = [
+  { id: "record-1", 报告标题: "量子计算产业研究", 操作类型: "下架", 版本: "V1.0", 操作人: "管理员A", 操作时间: "2026-10-11 15:20", 操作前: "已上架", 操作后: "已下架", 结果: "成功", "原因／说明": "报告内容需要更新" },
+  { id: "record-2", 报告标题: "未来产业报告：智能制造", 操作类型: "替换版本", 版本: "V1.1", 操作人: "管理员A", 操作时间: "2026-10-10 14:06", 操作前: "已上架", 操作后: "已上架", 结果: "成功", "原因／说明": "使用已审核的修订版本" },
+  { id: "record-3", 报告标题: "新能源汽车消费趋势洞察", 操作类型: "上架", 版本: "V1.2", 操作人: "管理员B", 操作时间: "2026-10-09 17:35", 操作前: "待上架", 操作后: "已上架", 结果: "成功", "原因／说明": "审核通过后手动上架" },
+  { id: "record-4", 报告标题: "2026全球AI产业研报", 操作类型: "下架", 版本: "V1.1", 操作人: "管理员B", 操作时间: "2026-10-08 09:18", 操作前: "已上架", 操作后: "已下架", 结果: "成功", "原因／说明": "授权范围调整，暂停展示" },
+  { id: "record-5", 报告标题: "量子计算产业研究", 操作类型: "上架", 版本: "V1.0", 操作人: "管理员A", 操作时间: "2026-10-03 10:22", 操作前: "待上架", 操作后: "已上架", 结果: "成功", "原因／说明": "审核通过后手动上架" },
+];
+
+function formatReportOperationVersion(record: ReportOperationRecord) {
+  return `${record.版本.toUpperCase()} ${record.操作时间.slice(0, 16)}`;
+}
 
 type AnnouncementStatus = "草稿" | "待发布" | "已发布" | "已下线";
 type AnnouncementLinkType = "无跳转" | "站内链接" | "外部链接";
@@ -864,7 +902,7 @@ const reportResourceRows = [
 
 function StatusTag({ value, tone: toneOverride }: { value: string; tone?: "success" | "warning" | "danger" | "info" | "neutral" }) {
   const tone = toneOverride ?? (
-    ["未发布", "启用", "禁用", "下架", "废弃", "已注销"].includes(value)
+    ["未发布", "启用", "禁用", "下架", "已下架", "废弃", "已注销"].includes(value)
       ? "neutral"
       : value === "待审核"
         ? "info"
@@ -940,28 +978,23 @@ function ModalAlert({ tone = "info", title, children }: { tone?: FeedbackTone; t
 function Button({
   children,
   variant = "default",
-  icon: Icon,
   onClick,
   type = "button",
   disabled = false,
 }: {
   children: ReactNode;
   variant?: "primary" | "default" | "outline" | "linear" | "text" | "danger";
-  icon?: LucideIcon;
   onClick?: () => void;
   type?: "button" | "submit";
   disabled?: boolean;
 }) {
-  const arcoVariant = variant === "default"
-    ? "secondary"
+  const arcoVariant = variant === "default" || variant === "outline" || variant === "linear"
+    ? "outline"
     : variant === "danger"
       ? "primary arco-btn-status-danger"
-      : variant === "linear"
-        ? "outline"
-        : variant;
+      : variant;
   return (
     <button type={type} className={`btn ${variant} arco-btn arco-btn-size-default arco-btn-${arcoVariant}${disabled ? " arco-btn-disabled" : ""}`} disabled={disabled} onClick={onClick}>
-      {Icon && <Icon size={16} strokeWidth={1.9} />}
       <span>{children}</span>
     </button>
   );
@@ -1121,9 +1154,6 @@ function FilterInput({
       {searchable || clearable ? (
         <span className="filter-search-control">
           <input className="arco-input arco-input-size-default" aria-label={ariaLabel} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} onKeyDown={handleKeyDown} />
-          {clearable ? (
-            value ? <button type="button" className="filter-clear-button" aria-label={`清空${ariaLabel}`} onClick={() => onChange?.("")}><X aria-hidden="true" size={16} /></button> : null
-          ) : <Search aria-hidden="true" size={16} />}
         </span>
       ) : (
         <input className="filter-control arco-input arco-input-size-default" aria-label={ariaLabel} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} onKeyDown={handleKeyDown} />
@@ -1487,6 +1517,7 @@ function DataTable<T extends Record<string, ReactNode>>({
   compactPageSizeLabel = false,
   paginationPageCountOverride,
   resetScrollKey,
+  hidePagination = false,
   sortableColumns = [],
   sortedColumn,
 }: {
@@ -1508,6 +1539,7 @@ function DataTable<T extends Record<string, ReactNode>>({
   compactPageSizeLabel?: boolean;
   paginationPageCountOverride?: number;
   resetScrollKey?: string | number;
+  hidePagination?: boolean;
   sortableColumns?: string[];
   sortedColumn?: string;
 }) {
@@ -1688,7 +1720,7 @@ function DataTable<T extends Record<string, ReactNode>>({
         </table>
       </div>
       {footerNote && <div role="note">{footerNote}</div>}
-      <div className={`table-bottom-bar ${selectable && selectedRows.size > 0 ? "batch-selection-bar" : ""}`}>
+      {(!hidePagination || (selectable && selectedRows.size > 0)) && <div className={`table-bottom-bar ${selectable && selectedRows.size > 0 ? "batch-selection-bar" : ""}`}>
         {selectable && selectedRows.size > 0 && (
           <div className="batch-selection-actions">
             <span>已选 {selectedRows.size} 条</span>
@@ -1697,8 +1729,8 @@ function DataTable<T extends Record<string, ReactNode>>({
             <button type="button" onClick={() => setSelectedRows(new Set())}>取消选择</button>
           </div>
         )}
-        {pagination}
-      </div>
+        {!hidePagination && pagination}
+      </div>}
       {tooltip && createPortal(
         <div className="table-cell-tooltip" role="tooltip" style={{ left: tooltip.left, top: tooltip.top }}>{tooltip.content}</div>,
         document.body,
@@ -1707,12 +1739,159 @@ function DataTable<T extends Record<string, ReactNode>>({
   );
 }
 
-function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify: Notify }) {
+type ReportDialogType = "detail" | "edit" | "submit" | "withdraw" | "rejection" | "down";
+type ReportDialogState = { type: ReportDialogType; report: ReportRow };
+
+function ReportApplicationSummary({ report }: { report: ReportRow }) {
+  return (
+    <dl className="report-action-detail-grid">
+      <div><dt>报告标题</dt><dd>{report.报告标题}</dd></div>
+      <div><dt>当前状态</dt><dd><ReportStatusCell status={report.状态} /></dd></div>
+      <div><dt>报告来源</dt><dd>{report.报告来源}</dd></div>
+      <div><dt>报告类型</dt><dd>{report.报告类型}</dd></div>
+      <div><dt>所属栏目</dt><dd>{report.所属栏目}</dd></div>
+      <div><dt>行业分类</dt><dd>{report.行业分类}</dd></div>
+      <div><dt>署名信息</dt><dd>{report.署名信息}</dd></div>
+      <div><dt>版本信息</dt><dd>{report.版本信息}</dd></div>
+      <div><dt>上传时间</dt><dd>{report.上传时间}</dd></div>
+      <div className="report-action-summary"><dt>内容摘要</dt><dd>{report.内容摘要 || "暂无内容摘要"}</dd></div>
+    </dl>
+  );
+}
+
+function ReportActionDialog({
+  dialog,
+  close,
+  onSave,
+  onSubmit,
+  onWithdraw,
+  onDown,
+}: {
+  dialog: ReportDialogState;
+  close: () => void;
+  onSave: (values: ModalPayload, submit: boolean) => void;
+  onSubmit: () => void;
+  onWithdraw: () => void;
+  onDown: (reason: string) => void;
+}) {
+  const { type, report } = dialog;
+  const [values, setValues] = useState<ModalPayload>({
+    报告标题: report.报告标题,
+    报告类型: report.报告类型,
+    报告来源: report.报告来源,
+    所属领域: report.行业分类,
+    上传时间: report.上传时间,
+    内容摘要: report.内容摘要 || "",
+  });
+  const [fileName, setFileName] = useState("");
+  const [downReason, setDownReason] = useState("");
+  const setValue = (field: string, value: string) => setValues((current) => ({ ...current, [field]: value }));
+  const canSave = ["报告标题", "报告类型", "报告来源", "所属领域", "上传时间"].every((field) => values[field]?.trim());
+  const editableDomains = Array.from(new Set([report.行业分类, "人工智能", "智能制造", "新材料", "低空经济"]));
+
+  if (type === "withdraw") return createPortal(
+    <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <section className="modal confirm-modal report-withdraw-modal" role="dialog" aria-modal="true" aria-label="确认撤回审核">
+        <ModalHeader title="确认撤回审核" close={close} />
+        <div className="modal-form">
+          <div className="confirm-modal-body">
+            <p className="confirm-modal-message">确认撤回“{report.报告标题}”的本次审核申请吗？</p>
+            <p className="confirm-modal-description">撤回后将取消当前审核待办，报告回到可编辑的草稿状态，并保留撤回记录。</p>
+          </div>
+          <div className="modal-footer"><Button onClick={close}>取消</Button><Button variant="primary" onClick={onWithdraw}>确认撤回</Button></div>
+        </div>
+      </section>
+    </div>,
+    document.body,
+  );
+
+  if (type === "edit") return createPortal(
+    <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <section className="modal form-modal report-action-form-modal" role="dialog" aria-modal="true" aria-label="编辑报告">
+        <ModalHeader title="编辑报告" subtitle={`当前状态：${report.状态}`} close={close} />
+        <form className="modal-form" onSubmit={(event) => { event.preventDefault(); if (canSave) onSave(values, true); }}>
+          <div className="modal-form-body">
+            <FormField label="PDF格式文件"><FileUploadField onFileChange={setFileName} hint={fileName ? undefined : `当前成稿：${report.报告标题}.pdf，可不重新上传`} /></FormField>
+            <div className="form-row">
+              <FormField label="报告标题" required><input value={values.报告标题} onChange={(event) => setValue("报告标题", event.target.value)} /></FormField>
+              <FormField label="报告类型" required><FormSelect options={reportTypeOptions} value={values.报告类型} onChange={(value) => setValue("报告类型", value)} /></FormField>
+            </div>
+            <div className="form-row">
+              <FormField label="报告来源" required><input value={values.报告来源} onChange={(event) => setValue("报告来源", event.target.value)} /></FormField>
+              <FormField label="所属领域" required><FormSelect options={editableDomains} value={values.所属领域} onChange={(value) => setValue("所属领域", value)} /></FormField>
+            </div>
+            <FormField label="上传时间" required><DateField value={values.上传时间} onChange={(value) => setValue("上传时间", value)} /></FormField>
+            <FormField label="内容摘要"><textarea value={values.内容摘要} onChange={(event) => setValue("内容摘要", event.target.value)} /></FormField>
+          </div>
+          <div className="modal-footer">
+            <Button onClick={close}>取消</Button>
+            <Button disabled={!canSave} onClick={() => canSave && onSave(values, false)}>保存草稿</Button>
+            <Button type="submit" variant="primary" disabled={!canSave}>提交审核</Button>
+          </div>
+        </form>
+      </section>
+    </div>,
+    document.body,
+  );
+
+  if (type === "down") return createPortal(
+    <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <section className="modal form-modal report-down-modal" role="dialog" aria-modal="true" aria-label="下架报告">
+        <ModalHeader title="下架报告" subtitle={report.报告标题} close={close} />
+        <form className="modal-form" onSubmit={(event) => { event.preventDefault(); if (downReason.trim()) onDown(downReason.trim()); }}>
+          <div className="modal-form-body">
+            <ModalAlert tone="warning">下架后，报告将停止在案例广场及公开链接中的访问，内容与历史记录继续保留。</ModalAlert>
+            <FormField label="下架原因" required><textarea autoFocus value={downReason} onChange={(event) => setDownReason(event.target.value)} placeholder="请输入下架原因" /></FormField>
+          </div>
+          <div className="modal-footer"><Button onClick={close}>取消</Button><Button type="submit" variant="danger" disabled={!downReason.trim()}>确认下架</Button></div>
+        </form>
+      </section>
+    </div>,
+    document.body,
+  );
+
+  const isDetail = type === "detail";
+  const isSubmit = type === "submit";
+  const title = isDetail ? "报告详情" : isSubmit ? "提交审核" : "查看驳回原因";
+  const modalClass = isDetail ? "report-detail-modal" : "report-readonly-modal";
+  return createPortal(
+    <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <section className={`modal form-modal ${modalClass}`} role="dialog" aria-modal="true" aria-label={title}>
+        <ModalHeader title={title} subtitle={report.报告标题} close={close} />
+        <div className="modal-form">
+          <div className="modal-form-body report-action-body">
+            {isSubmit && <ModalAlert>提交后报告进入“待审核”，并生成新的审核待办。</ModalAlert>}
+            {type === "rejection" ? (
+              <dl className="report-action-detail-grid">
+                <div><dt>被驳回版本</dt><dd>{report.版本信息}</dd></div>
+                <div><dt>审核人</dt><dd>{report.审核人 || "审核管理员A"}</dd></div>
+                <div><dt>审核时间</dt><dd>{report.审核时间 || "2026-09-26 14:30"}</dd></div>
+                <div className="report-action-summary"><dt>驳回原因</dt><dd>{report.驳回原因 || "报告内容与申报信息存在不一致，请修改成稿或申请信息后重新提交审核。"}</dd></div>
+              </dl>
+            ) : <ReportApplicationSummary report={report} />}
+            {isDetail && (
+              <section className="report-manuscript-card">
+                <div><span>当前处理版本成稿</span><strong>{report.报告标题}.pdf</strong></div>
+                <p>{report.内容摘要 || "该版本成稿已完成归档，可在具备报告查看权限时查看完整内容。"}</p>
+              </section>
+            )}
+          </div>
+          <div className="modal-footer">{isSubmit ? <><Button onClick={close}>取消</Button><Button variant="primary" onClick={onSubmit}>提交审核</Button></> : <Button onClick={close}>关闭</Button>}</div>
+        </div>
+      </section>
+    </div>,
+    document.body,
+  );
+}
+
+function ReportManagement({ openModal, notify, onOpenOperationRecords }: { openModal: OpenModal; notify: Notify; onOpenOperationRecords: () => void }) {
   const [reports, setReports] = useState(reportRows);
   const [searchValue, setSearchValue] = useState("");
   const [query, setQuery] = useState("");
   const [sortField, setSortField] = useState<ReportSortField>("上传时间");
   const [sortDirection, setSortDirection] = useState<ReportSortDirection>("降序");
+  const [reportDialog, setReportDialog] = useState<ReportDialogState | null>(null);
+  const [modifiedReports, setModifiedReports] = useState<Set<string>>(() => new Set());
 
   const visibleReports = useMemo(() => reports
     .filter((report) => {
@@ -1737,11 +1916,10 @@ function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify:
 
   return (
     <section className="card page-card report-management-page">
-      <div className="table-toolbar report-management-toolbar">
-        <div>
+      <div className="list-toolbar report-management-toolbar">
+        <div className="list-toolbar-actions">
           <Button
             variant="primary"
-            icon={Upload}
             onClick={() => openModal("report", {
               mode: "create",
               onSave: (values) => setReports((list) => [
@@ -1757,16 +1935,17 @@ function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify:
                   版本信息: "尚未提交",
                   上传时间: values.上传时间,
                   置顶: false,
+                  内容摘要: values.内容摘要,
                 },
               ]),
             })}
           >报告上传</Button>
-          <Button variant="linear">查看操作记录</Button>
+          <Button variant="default" onClick={onOpenOperationRecords}>查看操作记录</Button>
         </div>
-        <div className="report-search-group">
+        <div className="list-toolbar-filters report-search-group">
           <FilterInput label="" ariaLabel="搜索报告标题" placeholder="搜索报告标题" clearable value={searchValue} onChange={setSearchValue} onEnter={() => setQuery(searchValue)} />
           <Button variant="primary" onClick={() => setQuery(searchValue)}>查询</Button>
-          <Button variant="linear" onClick={() => { setSearchValue(""); setQuery(""); }}>重置</Button>
+          <Button variant="default" onClick={() => { setSearchValue(""); setQuery(""); }}>重置</Button>
         </div>
       </div>
       <DataTable
@@ -1780,38 +1959,166 @@ function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify:
         sortedColumn={sortField}
         rowKey={(row) => String(row.报告标题)}
         actions={(row) => (
-          <ActionLinks
-            actions={reportActionsByStatus[row.原始状态 as ReportStatus]}
-            preserveOrder
-            onAction={(action) => {
-              const title = String(row.报告标题);
-              const report = reports.find((item) => item.报告标题 === title);
-              if (!report) return;
-              if (action === "上架") updateReport(title, { 状态: "已上架", 版本信息: report.版本信息.replace(/^V/, "线上 V") });
-              if (action === "下架") updateReport(title, { 状态: "已下架", 置顶: false });
-              if (action === "提交审核" || action === "提交修订版") updateReport(title, { 状态: "待审核" });
-              if (action === "撤回") updateReport(title, { 状态: "草稿", 版本信息: "尚未提交" });
-              if (action === "重试上架") updateReport(title, { 状态: "待上架" });
-              if (action === "置顶") {
-                setReports((list) => list.map((item) => ({ ...item, 置顶: item.报告标题 === title })));
-                notify("置顶成功，已移至列表顶部");
-              }
-              if (action === "编辑") {
-                openModal("report", {
-                  mode: "edit",
-                  payload: { 报告标题: report.报告标题, 报告类型: report.报告类型, 报告来源: report.报告来源, 所属领域: report.行业分类, 上传时间: report.上传时间, 内容摘要: "" },
-                  onSave: (values) => updateReport(title, { 报告标题: values.报告标题, 报告类型: values.报告类型, 报告来源: values.报告来源, 所属栏目: values.报告类型, 行业分类: values.所属领域, 上传时间: values.上传时间 }),
-                });
-              }
-              if (action === "删除") {
-                openModal("delete", {
-                  payload: { message: `确认删除${title}？` },
-                  onConfirm: () => setReports((list) => list.filter((item) => item.报告标题 !== title)),
-                });
-              }
-            }}
-          />
+          (() => {
+            const title = String(row.报告标题);
+            const report = reports.find((item) => item.报告标题 === title);
+            if (!report) return null;
+            const rejectedNeedsChange = report.状态 === "已驳回" && !modifiedReports.has(title);
+            return (
+              <ActionLinks
+                actions={getReportActions(report)}
+                disabledActions={rejectedNeedsChange ? ["提交审核"] : []}
+                actionTipOverrides={rejectedNeedsChange ? { 提交审核: "请先编辑申请信息或重新上传成稿，再提交审核" } : {}}
+                preserveOrder
+                onAction={(action) => {
+                  if (action === "查看") setReportDialog({ type: "detail", report });
+                  if (action === "编辑") setReportDialog({ type: "edit", report });
+                  if (action === "提交审核") setReportDialog({ type: "submit", report });
+                  if (action === "撤回") setReportDialog({ type: "withdraw", report });
+                  if (action === "查看原因") setReportDialog({ type: "rejection", report });
+                  if (action === "下架") setReportDialog({ type: "down", report });
+                  if (action === "上架") {
+                    const publishedVersion = report.版本信息.replace(/^线上\s+/, "").replace(/^V/, "线上 V");
+                    updateReport(title, { 状态: "已上架", 版本信息: publishedVersion });
+                    notify("上架成功，报告已在案例广场对应栏目展示");
+                  }
+                  if (action === "置顶") {
+                    setReports((list) => list.map((item) => ({ ...item, 置顶: item.报告标题 === title })));
+                    notify("置顶成功，已同步更新推荐和列表排序");
+                  }
+                  if (action === "取消置顶") {
+                    updateReport(title, { 置顶: false });
+                    notify("已取消置顶，报告恢复默认排序");
+                  }
+                  if (action === "删除") {
+                    openModal("delete", {
+                      payload: {
+                        message: `确认删除“${title}”吗？`,
+                        description: "删除后将移除草稿或报告管理记录，已有审核及操作记录继续保留。",
+                      },
+                      onConfirm: () => setReports((list) => list.filter((item) => item.报告标题 !== title)),
+                    });
+                  }
+                }}
+              />
+            );
+          })()
         )}
+      />
+      {reportDialog && (
+        <ReportActionDialog
+          key={`${reportDialog.type}-${reportDialog.report.报告标题}`}
+          dialog={reportDialog}
+          close={() => setReportDialog(null)}
+          onSave={(values, submit) => {
+            const originalTitle = reportDialog.report.报告标题;
+            const nextTitle = values.报告标题;
+            const versionTime = formatAnnouncementDate();
+            const nextVersion = reportDialog.report.版本信息 === "尚未提交"
+              ? `V1.0 · ${versionTime}`
+              : reportDialog.report.版本信息.replace(/^线上\s+/, "");
+            setReports((list) => list.map((item) => item.报告标题 === originalTitle ? {
+              ...item,
+              报告标题: nextTitle,
+              报告类型: values.报告类型,
+              报告来源: values.报告来源,
+              所属栏目: values.报告类型,
+              行业分类: values.所属领域,
+              上传时间: values.上传时间,
+              内容摘要: values.内容摘要,
+              状态: submit ? "待审核" : "草稿",
+              版本信息: submit ? nextVersion : item.版本信息,
+              置顶: false,
+            } : item));
+            setModifiedReports((current) => {
+              const next = new Set(current);
+              next.delete(originalTitle);
+              if (!submit) next.add(nextTitle);
+              return next;
+            });
+            notify(submit ? "已提交审核并生成审核待办" : "草稿保存成功，未进入审核");
+            setReportDialog(null);
+          }}
+          onSubmit={() => {
+            const title = reportDialog.report.报告标题;
+            const versionTime = formatAnnouncementDate();
+            updateReport(title, {
+              状态: "待审核",
+              版本信息: reportDialog.report.版本信息 === "尚未提交" ? `V1.0 · ${versionTime}` : reportDialog.report.版本信息.replace(/^线上\s+/, ""),
+              置顶: false,
+            });
+            setModifiedReports((current) => { const next = new Set(current); next.delete(title); return next; });
+            notify("已提交审核并生成审核待办");
+            setReportDialog(null);
+          }}
+          onWithdraw={() => {
+            const title = reportDialog.report.报告标题;
+            const latest = reports.find((item) => item.报告标题 === title);
+            if (!latest || latest.状态 !== "待审核") {
+              notify("审核状态已发生变化，已刷新为最新结果", "warning");
+            } else {
+              updateReport(title, { 状态: "草稿" });
+              notify("撤回成功，审核待办已取消并保留撤回记录");
+            }
+            setReportDialog(null);
+          }}
+          onDown={(reason) => {
+            updateReport(reportDialog.report.报告标题, { 状态: "已下架", 置顶: false, 下架原因: reason });
+            notify("下架成功，公开访问已停止并保留历史记录");
+            setReportDialog(null);
+          }}
+        />
+      )}
+    </section>
+  );
+}
+
+function ReportOperationRecords() {
+  const [searchValue, setSearchValue] = useState("");
+  const [operationType, setOperationType] = useState("全部");
+  const [operationTime, setOperationTime] = useState("全部");
+  const [filters, setFilters] = useState({ search: "", operationType: "全部", operationTime: "全部" });
+  const visibleRecords = useMemo(() => {
+    const normalizedSearch = filters.search.trim().toLocaleLowerCase("zh-CN");
+    return reportOperationRows
+      .filter((record) => !normalizedSearch || record.报告标题.toLocaleLowerCase("zh-CN").includes(normalizedSearch))
+      .filter((record) => filters.operationType === "全部" || record.操作类型 === filters.operationType)
+      .filter((record) => filters.operationTime === "全部" || record.操作时间.startsWith(filters.operationTime))
+      .sort((a, b) => b.操作时间.localeCompare(a.操作时间));
+  }, [filters]);
+
+  return (
+    <section className="card page-card report-operation-page">
+      <form className="report-operation-filters" onSubmit={(event) => {
+        event.preventDefault();
+        setFilters({ search: searchValue, operationType, operationTime });
+      }}>
+        <FilterSelect label="操作类型" options={["全部", "上架", "下架", "替换版本"]} value={operationType} onChange={setOperationType} />
+        <FilterSelect label="操作时间" options={["全部", "2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-03"]} value={operationTime} onChange={setOperationTime} />
+        <FilterInput label="" ariaLabel="搜索报告标题" placeholder="搜索报告标题" clearable value={searchValue} onChange={setSearchValue} onEnter={() => setFilters({ search: searchValue, operationType, operationTime })} />
+        <Button variant="primary" type="submit">查询</Button>
+        <Button variant="default" onClick={() => {
+          setSearchValue("");
+          setOperationType("全部");
+          setOperationTime("全部");
+          setFilters({ search: "", operationType: "全部", operationTime: "全部" });
+        }}>重置</Button>
+      </form>
+      <DataTable
+        columns={["报告标题", "操作类型", "版本", "操作人", "操作时间", "结果", "原因／说明"]}
+        columnWidthOverrides={{ 报告标题: 220, 操作类型: 96, 版本: 188, 操作人: 96, 操作时间: 164, 结果: 80, "原因／说明": 200 }}
+        fullTextColumns={["版本", "操作时间", "原因／说明"]}
+        rowKey={(row) => String(row.记录ID)}
+        rows={visibleRecords.map((record) => ({
+          记录ID: record.id,
+          报告标题: record.报告标题,
+          操作类型: record.操作类型,
+          版本: formatReportOperationVersion(record),
+          操作人: record.操作人,
+          操作时间: record.操作时间,
+          结果: <StatusTag value={record.结果} />,
+          "原因／说明": record["原因／说明"],
+        }))}
       />
     </section>
   );
@@ -1946,8 +2253,8 @@ function AnnouncementEditorModal({
             </div>
           </div>
           <div className="modal-footer">
-            <Button onClick={close}>取消</Button>
-            {!isPublished && <Button disabled={!canSave} onClick={() => canSave && onSave(previewValues, "草稿")}>保存草稿</Button>}
+            <Button variant="default" onClick={close}>取消</Button>
+            {!isPublished && <Button variant="default" disabled={!canSave} onClick={() => canSave && onSave(previewValues, "草稿")}>保存草稿</Button>}
             <Button type="submit" variant="primary" disabled={!canPublish}>{isPublished ? "保存并更新" : publishMode === "定时发布" ? (announcement?.status === "待发布" ? "保存定时" : "定时发布") : "立即发布"}</Button>
           </div>
         </form>
@@ -1976,7 +2283,7 @@ function AnnouncementPreviewModal({ announcement, close }: { announcement: Annou
               <div><dt>下线时间</dt><dd>{announcement.offlineAt || "不自动下线"}</dd></div>
             </dl>
           </div>
-          <div className="modal-footer"><Button variant="primary" onClick={close}>关闭</Button></div>
+          <div className="modal-footer"><Button variant="default" onClick={close}>关闭</Button></div>
         </div>
       </div>
     </div>,
@@ -1988,6 +2295,7 @@ function AnnouncementManagement({ openModal, notify }: { openModal: OpenModal; n
   const [announcements, setAnnouncements] = useState<Announcement[]>(readAnnouncementRows);
   const [contentQuery, setContentQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("全部");
+  const [announcementFilters, setAnnouncementFilters] = useState({ content: "", status: "全部" });
   const [editorAnnouncement, setEditorAnnouncement] = useState<Announcement | null | undefined>(undefined);
   const [previewAnnouncement, setPreviewAnnouncement] = useState<Announcement | null>(null);
   useEffect(() => {
@@ -2012,9 +2320,9 @@ function AnnouncementManagement({ openModal, notify }: { openModal: OpenModal; n
   const publishedAnnouncement = announcements.find((announcement) => announcement.status === "已发布");
   const statusOrder: Record<AnnouncementStatus, number> = { 已发布: 0, 待发布: 1, 草稿: 2, 已下线: 3 };
   const filteredAnnouncements = useMemo(() => announcements
-    .filter((announcement) => !contentQuery.trim() || announcement.content.includes(contentQuery.trim()))
-    .filter((announcement) => statusFilter === "全部" || announcement.status === statusFilter)
-    .sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || b.updatedAt.localeCompare(a.updatedAt)), [announcements, contentQuery, statusFilter]);
+    .filter((announcement) => !announcementFilters.content.trim() || announcement.content.includes(announcementFilters.content.trim()))
+    .filter((announcement) => announcementFilters.status === "全部" || announcement.status === announcementFilters.status)
+    .sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || b.updatedAt.localeCompare(a.updatedAt)), [announcements, announcementFilters]);
 
   const nextAnnouncementId = () => {
     const nextNumber = announcements.reduce((maximum, announcement) => {
@@ -2088,12 +2396,21 @@ function AnnouncementManagement({ openModal, notify }: { openModal: OpenModal; n
         <AnnouncementStrip announcement={publishedAnnouncement} />
         {publishedAnnouncement && <div className="announcement-live-meta"><span>发布时间 {publishedAnnouncement.publishAt}</span><span>{publishedAnnouncement.offlineAt ? `计划下线 ${publishedAnnouncement.offlineAt}` : "不自动下线"}</span></div>}
       </section>
-      <div className="filters announcement-filters">
-        <FilterInput label="公告内容" placeholder="请输入" searchable value={contentQuery} onChange={setContentQuery} />
-        <FilterSelect label="发布状态" options={["全部", "草稿", "待发布", "已发布", "已下线"]} value={statusFilter} onChange={setStatusFilter} />
-      </div>
-      <div className="table-toolbar">
-        <div><Button variant="primary" icon={Plus} onClick={() => setEditorAnnouncement(null)}>新建公告</Button></div>
+      <div className="list-toolbar announcement-list-toolbar">
+        <div className="list-toolbar-actions"><Button variant="primary" onClick={() => setEditorAnnouncement(null)}>新建公告</Button></div>
+        <form className="list-toolbar-filters filters announcement-filters" onSubmit={(event) => {
+          event.preventDefault();
+          setAnnouncementFilters({ content: contentQuery, status: statusFilter });
+        }}>
+          <FilterSelect label="发布状态" options={["全部", "草稿", "待发布", "已发布", "已下线"]} value={statusFilter} onChange={setStatusFilter} />
+          <FilterInput label="" ariaLabel="搜索公告内容" placeholder="搜索公告内容" searchable clearable value={contentQuery} onChange={setContentQuery} onEnter={() => setAnnouncementFilters({ content: contentQuery, status: statusFilter })} />
+          <Button variant="primary" type="submit">查询</Button>
+          <Button variant="default" onClick={() => {
+            setContentQuery("");
+            setStatusFilter("全部");
+            setAnnouncementFilters({ content: "", status: "全部" });
+          }}>重置</Button>
+        </form>
       </div>
       <DataTable
         columns={["公告内容", "跳转方式", "发布时间", "下线时间", "状态"]}
@@ -2344,7 +2661,7 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
     return (
       <section className="card page-card workflow-management">
         <div className="table-toolbar workflow-toolbar">
-          <div><Button variant="primary" icon={Plus} onClick={createWorkflowModel}>新建流程</Button></div>
+          <div><Button variant="primary" onClick={createWorkflowModel}>新建流程</Button></div>
         </div>
         <DataTable
           columns={["流程ID", "流程名称", "发布时间", "发布状态"]}
@@ -2385,7 +2702,7 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
     <section className={`process-designer workflow-designer ${propertyCollapsed ? "is-property-collapsed" : ""}`}>
       <header className="process-designer-header">
         <div className="workflow-designer-back">
-          <Button variant="text" icon={ChevronLeft} onClick={() => setView("management")}>返回</Button>
+          <Button variant="text" onClick={() => setView("management")}>返回</Button>
         </div>
         {selectedWorkflow && (
           <label className="workflow-name-field">
@@ -2494,7 +2811,7 @@ function WorkflowCenter({ openModal, notify }: { openModal: OpenModal; notify: N
                         <button type="button" className="delete-condition" onClick={() => removeCondition(condition.id)} aria-label="删除流转条件"><Trash2 size={16} /></button>
                       </div>
                     ))}
-                    <button type="button" className="add-condition" onClick={addCondition}><Plus size={14} />添加流转条件</button>
+                    <button type="button" className="add-condition" onClick={addCondition}>添加流转条件</button>
                   </div>
                 </>
               )}
@@ -2672,7 +2989,7 @@ function FormOptionEditor({ options, onChange }: { options: string[]; onChange: 
           <button type="button" aria-label={`删除选项 ${index + 1}`} disabled={options.length <= 1} onClick={() => onChange(options.filter((_, itemIndex) => itemIndex !== index))}><Trash2 size={15} /></button>
         </div>
       ))}
-      <button type="button" className="form-add-option" onClick={() => onChange([...options, `选项${options.length + 1}`])}><Plus size={14} />添加选项</button>
+      <button type="button" className="form-add-option" onClick={() => onChange([...options, `选项${options.length + 1}`])}>添加选项</button>
     </div>
   );
 }
@@ -2859,7 +3176,7 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
   if (view === "management") {
     return (
       <section className="card page-card form-management">
-        <div className="table-toolbar workflow-toolbar"><div><Button variant="primary" icon={Plus} onClick={createForm}>新建表单</Button></div></div>
+        <div className="table-toolbar workflow-toolbar"><div><Button variant="primary" onClick={createForm}>新建表单</Button></div></div>
         <DataTable
           columns={["表单ID", "表单名称", "组件数量", "最近修改时间"]}
           fullTextColumns={["表单ID"]}
@@ -2892,13 +3209,13 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
     <section className="form-workspace">
       <header className="form-workspace-header">
         <div className="form-workspace-identity">
-          <Button variant="text" icon={ChevronLeft} onClick={() => { setPreviewMode(null); setView("management"); }}>返回</Button>
+          <Button variant="text" onClick={() => { setPreviewMode(null); setView("management"); }}>返回</Button>
           <label><span>表单名称</span><input aria-label="表单名称" value={selectedForm.表单名称} onChange={(event) => updateSelectedForm((form) => ({ ...form, 表单名称: event.target.value }))} /></label>
         </div>
         <div className="form-workspace-actions">
-          <Button icon={Eye} onClick={() => openPreview("form")}>预览</Button>
-          <Button icon={Printer} onClick={() => openPreview("print")}>打印</Button>
-          <Button variant="primary" icon={Save} onClick={saveForm}>保存表单</Button>
+          <Button onClick={() => openPreview("form")}>预览</Button>
+          <Button onClick={() => openPreview("print")}>打印</Button>
+          <Button variant="primary" onClick={saveForm}>保存表单</Button>
         </div>
       </header>
 
@@ -2960,7 +3277,7 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
                 ? <div className="form-preview-sheet">{selectedForm.组件.map((component) => <FormComponentPreview key={component.id} component={component} interactive />)}</div>
                 : <FormPrintTable form={selectedForm} />}
             </div>
-            <footer className="modal-footer"><Button onClick={() => setPreviewMode(null)}>关闭</Button>{previewMode === "print" && <Button variant="primary" icon={Printer} onClick={printForm}>打印</Button>}</footer>
+            <footer className="modal-footer"><Button onClick={() => setPreviewMode(null)}>关闭</Button>{previewMode === "print" && <Button variant="primary" onClick={printForm}>打印</Button>}</footer>
           </section>
         </div>,
         document.body,
@@ -3105,8 +3422,10 @@ function AuditContent() {
       )}
       {tab === "reports" && (
         <div className="audit-report-list-page">
-          <form
-            className="audit-report-filter-bar"
+          <div className="list-toolbar is-stacked audit-report-list-toolbar">
+            <div className="list-toolbar-actions audit-report-toolbar"><Button variant="primary">查看审核记录</Button></div>
+            <form
+            className="list-toolbar-filters audit-report-filter-bar"
             onSubmit={(event) => {
               event.preventDefault();
               setReportFilters({ entryMethod: reportEntryMethod, submitTime: reportSubmitTime, search: reportSearchValue });
@@ -3116,14 +3435,14 @@ function AuditContent() {
             <FilterSelect label="提交时间" options={["全部", "2026-09-10"]} value={reportSubmitTime} onChange={setReportSubmitTime} />
             <FilterInput label="" ariaLabel="搜索报告标题" placeholder="搜索报告标题" clearable value={reportSearchValue} onChange={setReportSearchValue} onEnter={() => setReportFilters({ entryMethod: reportEntryMethod, submitTime: reportSubmitTime, search: reportSearchValue })} />
             <Button variant="primary" type="submit">查询</Button>
-            <Button variant="linear" onClick={() => {
+            <Button variant="default" onClick={() => {
               setReportEntryMethod("全部");
               setReportSubmitTime("全部");
               setReportSearchValue("");
               setReportFilters({ entryMethod: "全部", submitTime: "全部", search: "" });
             }}>重置</Button>
-          </form>
-          <div className="audit-report-toolbar"><Button variant="primary">查看审核记录</Button></div>
+            </form>
+          </div>
           <DataTable
             columns={["报告标题", "入库方式", "展示栏目", "提交版本", "提交人", "提交时间"]}
             columnWidthOverrides={{ 报告标题: 240, 入库方式: 140, 展示栏目: 140, 提交版本: 140, 提交人: 140, 提交时间: 216 }}
@@ -3192,7 +3511,7 @@ function AuditContent() {
               </label>
             </div>
             <footer className="report-reject-footer">
-              <Button variant="linear" onClick={closeReportReject}>取消</Button>
+              <Button variant="default" onClick={closeReportReject}>取消</Button>
               <Button variant="primary" onClick={saveReportReject}>保存</Button>
             </footer>
           </section>
@@ -3502,6 +3821,7 @@ function EventTracking({ openModal, initialTab }: { openModal: OpenModal; initia
   const [events, setEvents] = useState(trackingRows);
   const [moduleFilter, setModuleFilter] = useState("全部");
   const [eventIdFilter, setEventIdFilter] = useState("");
+  const [appliedModuleFilter, setAppliedModuleFilter] = useState("全部");
   const [appliedEventIdFilter, setAppliedEventIdFilter] = useState("");
 
   const updateEvent = (eventId: string, patch: Partial<(typeof trackingRows)[number]>) => {
@@ -3511,25 +3831,20 @@ function EventTracking({ openModal, initialTab }: { openModal: OpenModal; initia
   if (initialTab === "stats") return <section className="card page-card event-dashboard-page"><EventDashboard /></section>;
 
   const filteredEvents = events.filter((event) => (
-    (moduleFilter === "全部" || event.所属功能模块 === moduleFilter)
+    (appliedModuleFilter === "全部" || event.所属功能模块 === appliedModuleFilter)
     && event.事件ID.toLowerCase().includes(appliedEventIdFilter.trim().toLowerCase())
   ));
 
   return (
     <section className="card page-card">
-      <form className="filters event-info-filters" onSubmit={(event) => {
+      <form className="list-toolbar event-info-list-toolbar" onSubmit={(event) => {
         event.preventDefault();
+        setAppliedModuleFilter(moduleFilter);
         setAppliedEventIdFilter(eventIdFilter);
       }}>
-        <FilterSelect label="模块" options={["全部", "报告管理", "审核管理", "用户管理", "权限配置"]} value={moduleFilter} onChange={setModuleFilter} />
-        <FilterInput label="事件ID" placeholder="请输入" value={eventIdFilter} onChange={setEventIdFilter} onEnter={() => setAppliedEventIdFilter(eventIdFilter)} />
-        <Button variant="primary" type="submit">查询</Button>
-      </form>
-      <div className="table-toolbar event-info-toolbar">
-        <div>
+        <div className="list-toolbar-actions event-info-toolbar">
           <Button
             variant="primary"
-            icon={Plus}
             onClick={() => openModal("tracking", {
               mode: "create",
               onSave: (values) => setEvents((list) => [...list, {
@@ -3542,9 +3857,20 @@ function EventTracking({ openModal, initialTab }: { openModal: OpenModal; initia
               }]),
             })}
           >新增埋点事件</Button>
-          <Button icon={Upload} onClick={() => openModal("tracking", { mode: "batch" })}>批量上传</Button>
+          <Button onClick={() => openModal("tracking", { mode: "batch" })}>批量上传</Button>
         </div>
-      </div>
+        <div className="list-toolbar-filters filters event-info-filters">
+          <FilterSelect label="模块" options={["全部", "报告管理", "审核管理", "用户管理", "权限配置"]} value={moduleFilter} onChange={setModuleFilter} />
+          <FilterInput label="" ariaLabel="搜索事件ID" placeholder="搜索事件ID" searchable clearable value={eventIdFilter} onChange={setEventIdFilter} onEnter={() => { setAppliedModuleFilter(moduleFilter); setAppliedEventIdFilter(eventIdFilter); }} />
+          <Button variant="primary" type="submit">查询</Button>
+          <Button variant="default" onClick={() => {
+            setModuleFilter("全部");
+            setEventIdFilter("");
+            setAppliedModuleFilter("全部");
+            setAppliedEventIdFilter("");
+          }}>重置</Button>
+        </div>
+      </form>
       <DataTable
         columns={["事件ID", "所属功能模块", "埋点标签", "埋点路径", "触发机制", "创建时间"]}
         rows={filteredEvents}
@@ -3784,7 +4110,7 @@ function OrganizationSyncModal({ organizationName, close, notify }: { organizati
             </div>
             <p className="modal-helper-text">生产实现时，前端只提交接口配置到门户服务端，由服务端安全托管凭证、调用外部接口并创建可追踪的同步任务；当前原型用本地校验模拟连接测试结果。</p>
           </div>
-          <div className="modal-footer"><Button onClick={close}>取消</Button><Button disabled={syncing || connectionState === "测试中"} onClick={testConnection}>{connectionState === "测试中" ? "测试中" : "连接测试"}</Button><Button variant="primary" icon={Network} disabled={syncing || connectionState !== "已通过"} onClick={startSync}>{syncing ? "对接中" : "开始对接"}</Button></div>
+          <div className="modal-footer"><Button onClick={close}>取消</Button><Button disabled={syncing || connectionState === "测试中"} onClick={testConnection}>{connectionState === "测试中" ? "测试中" : "连接测试"}</Button><Button variant="primary" disabled={syncing || connectionState !== "已通过"} onClick={startSync}>{syncing ? "对接中" : "开始对接"}</Button></div>
         </div>
       </div>
     </div>,
@@ -3929,7 +4255,7 @@ function UserDataSyncModal({ organizationName, close, notify, onSync }: { organi
             </div>
             <p className="modal-helper-text">生产实现时由门户服务端安全保存认证凭证、请求外部接口并记录同步日志；当前原型通过本地校验模拟接口连接和数据写入。</p>
           </div>
-          <div className="modal-footer"><Button onClick={close}>取消</Button><Button disabled={syncing || connectionState === "测试中"} onClick={testConnection}>{connectionState === "测试中" ? "测试中" : "连接测试"}</Button><Button variant="primary" icon={Network} disabled={syncing || connectionState !== "已通过"} onClick={startSync}>{syncing ? "对接中" : "开始对接"}</Button></div>
+          <div className="modal-footer"><Button onClick={close}>取消</Button><Button disabled={syncing || connectionState === "测试中"} onClick={testConnection}>{connectionState === "测试中" ? "测试中" : "连接测试"}</Button><Button variant="primary" disabled={syncing || connectionState !== "已通过"} onClick={startSync}>{syncing ? "对接中" : "开始对接"}</Button></div>
         </div>
       </div>
     </div>,
@@ -3954,6 +4280,7 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   const [users, setUsers] = useState(userRows);
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("全部");
+  const [userFilters, setUserFilters] = useState({ name: "", status: "全部" });
   const [userRoleMap, setUserRoleMap] = useState<Record<string, string[]>>({ U20260001: ["普通用户"], U20260002: ["机构用户", "政府用户"] });
   const [transferUser, setTransferUser] = useState<(typeof userRows)[number] | null>(null);
 
@@ -3962,10 +4289,10 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   const selectedOrganizationLabels = useMemo(() => collectOrganizationLabels(selectedOrganization), [selectedOrganization]);
   const filteredUsers = useMemo(() => users.filter((user) => {
     const matchesOrganization = !selectedOrganizationLabels.length || selectedOrganizationLabels.includes(user.所属组织名称);
-    const matchesName = !nameFilter || user.用户姓名.includes(nameFilter.trim());
-    const matchesStatus = statusFilter === "全部" || user.账号状态 === statusFilter;
+    const matchesName = !userFilters.name || user.用户姓名.includes(userFilters.name.trim());
+    const matchesStatus = userFilters.status === "全部" || user.账号状态 === userFilters.status;
     return matchesOrganization && matchesName && matchesStatus;
-  }), [users, selectedOrganizationLabels, nameFilter, statusFilter]);
+  }), [users, selectedOrganizationLabels, userFilters]);
 
   const updateUser = (userId: string, patch: Partial<(typeof userRows)[number]>) => setUsers((list) => list.map((user) => user.用户ID === userId ? { ...user, ...patch } : user));
   const toggleOrganization = (nodeId: string) => setExpandedOrganizationIds((current) => {
@@ -4001,25 +4328,36 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
       <div className="user-organization-layout">
         <aside className="organization-tree-panel">
           <div className="organization-tree-heading"><div><h2>组织管理（组织列表查看）</h2></div></div>
-          <label className="filter-search-control organization-tree-search"><input aria-label="组织检索" placeholder="组织检索" value={organizationKeyword} onChange={(event) => setOrganizationKeyword(event.target.value)} />{organizationKeyword ? <button type="button" aria-label="清空组织检索" onClick={() => setOrganizationKeyword("")}><X size={14} /></button> : <Search size={16} aria-hidden="true" />}</label>
+          <label className="filter-search-control organization-tree-search"><input aria-label="组织检索" placeholder="组织检索" value={organizationKeyword} onChange={(event) => setOrganizationKeyword(event.target.value)} /></label>
           <div className="organization-tree-list" role="tree">
             {visibleOrganizations.length ? visibleOrganizations.map((node) => <OrganizationTreeNodeRow key={node.id} node={node} level={0} selectedId={selectedOrganizationId} expandedIds={expandedOrganizationIds} forceExpanded={Boolean(organizationKeyword.trim())} activeMenuId={activeOrganizationMenu} onSelect={(selectedNode) => { setSelectedOrganizationId(selectedNode.id); setActiveOrganizationMenu(null); }} onToggle={toggleOrganization} onOpenMenu={setActiveOrganizationMenu} onAction={handleOrganizationAction} />) : <div className="organization-tree-empty">未找到相关组织</div>}
           </div>
         </aside>
         <section className="user-list-panel">
-          <div className="organization-sync-toolbar"><Button icon={Network} onClick={() => { setOrganizationSyncTarget(selectedOrganization?.label); setOrganizationSyncOpen(true); }}>组织数据管理</Button></div>
+          <div className="organization-sync-toolbar"><Button onClick={() => { setOrganizationSyncTarget(selectedOrganization?.label); setOrganizationSyncOpen(true); }}>组织数据管理</Button></div>
           <div className="user-list-context"><h2>用户管理</h2><span>用户列表展示</span></div>
-          <div className="filters user-management-filters">
-            <FilterInput label="用户检索" placeholder="请输入用户姓名" searchable value={nameFilter} onChange={setNameFilter} />
-            <FilterSelect label="账号状态" options={["全部", "启用", "禁用"]} value={statusFilter} onChange={setStatusFilter} />
-          </div>
-          <div className="table-toolbar user-management-toolbar"><div>
-            <Button variant="primary" icon={Plus} onClick={() => openModal("user", { mode: "create", onSave: (values) => {
+          <form className="list-toolbar is-stacked user-management-toolbar" onSubmit={(event) => {
+            event.preventDefault();
+            setUserFilters({ name: nameFilter, status: statusFilter });
+          }}>
+            <div className="list-toolbar-actions">
+            <Button variant="primary" onClick={() => openModal("user", { mode: "create", onSave: (values) => {
               setUsers((list) => [...list, { 用户ID: `U2026${String(list.length + 1).padStart(4, "0")}`, 用户姓名: values.姓名, 所属组织名称: values.所属组织, 手机号: values.手机号, 邮箱: values.邮箱, 创建时间: "2026-07-14", 账号状态: "启用" }]);
               notify("用户注册成功");
             } })}>用户注册</Button>
-            <Button icon={Network} onClick={() => setUserSyncOpen(true)}>用户数据对接</Button>
-          </div></div>
+            <Button onClick={() => setUserSyncOpen(true)}>用户数据对接</Button>
+            </div>
+            <div className="list-toolbar-filters filters user-management-filters">
+              <FilterSelect label="账号状态" options={["全部", "启用", "禁用"]} value={statusFilter} onChange={setStatusFilter} />
+              <FilterInput label="" ariaLabel="搜索用户姓名" placeholder="搜索用户姓名" searchable clearable value={nameFilter} onChange={setNameFilter} onEnter={() => setUserFilters({ name: nameFilter, status: statusFilter })} />
+              <Button variant="primary" type="submit">查询</Button>
+              <Button variant="default" onClick={() => {
+                setNameFilter("");
+                setStatusFilter("全部");
+                setUserFilters({ name: "", status: "全部" });
+              }}>重置</Button>
+            </div>
+          </form>
           <DataTable
             columns={["用户ID", "姓名", "归属组织名称", "手机号", "邮箱", "创建时间", "账号状态"]}
             rows={filteredUsers.map((user) => ({ ...user, 姓名: user.用户姓名, 归属组织名称: user.所属组织名称, 原始账号状态: user.账号状态, 账号状态: <AccountStatusSwitch checked={user.账号状态 === "启用"} label={user.用户姓名} onChange={() => { updateUser(user.用户ID, { 账号状态: user.账号状态 === "启用" ? "禁用" : "启用" }); notify(`账号已${user.账号状态 === "启用" ? "禁用" : "启用"}`); }} /> }))}
@@ -4049,24 +4387,30 @@ function UserManagement({ openModal, notify }: { openModal: OpenModal; notify: N
 
 function RoleManagement({ openModal, onPermissionConfig }: { openModal: OpenModal; onPermissionConfig: () => void }) {
   const [roles, setRoles] = useState(roleRows);
+  const [roleIdFilter, setRoleIdFilter] = useState("");
+  const [roleNameFilter, setRoleNameFilter] = useState("");
+  const [roleStatusFilter, setRoleStatusFilter] = useState("全部");
+  const [roleFilters, setRoleFilters] = useState({ id: "", name: "", status: "全部" });
 
   const updateRole = (roleId: string, patch: Partial<(typeof roleRows)[number]>) => {
     setRoles((list) => list.map((role) => (role.角色ID === roleId ? { ...role, ...patch } : role)));
   };
+  const filteredRoles = roles.filter((role) => (
+    (!roleFilters.id.trim() || role.角色ID.toLowerCase().includes(roleFilters.id.trim().toLowerCase()))
+    && (!roleFilters.name.trim() || role.角色名称.includes(roleFilters.name.trim()))
+    && (roleFilters.status === "全部" || role.状态 === roleFilters.status)
+  ));
 
   return (
     <section className="card page-card">
       <div className="workflow-management-label">角色检索 · 角色列表展示</div>
-      <div className="filters">
-        <FilterInput label="角色ID" placeholder="角色ID" />
-        <FilterInput label="角色名称" placeholder="角色名称" />
-        <FilterSelect label="状态" options={["启用", "禁用", "废弃"]} />
-      </div>
-      <div className="table-toolbar">
-        <div>
+      <form className="list-toolbar is-stacked role-management-toolbar" onSubmit={(event) => {
+        event.preventDefault();
+        setRoleFilters({ id: roleIdFilter, name: roleNameFilter, status: roleStatusFilter });
+      }}>
+        <div className="list-toolbar-actions">
           <Button
             variant="primary"
-            icon={Plus}
             onClick={() => openModal("role", {
               mode: "create",
               onSave: (values) => setRoles((list) => [
@@ -4085,10 +4429,22 @@ function RoleManagement({ openModal, onPermissionConfig }: { openModal: OpenModa
             })}
           >创建</Button>
         </div>
-      </div>
+        <div className="list-toolbar-filters filters role-management-filters">
+          <FilterSelect label="状态" options={["全部", "启用", "禁用", "废弃"]} value={roleStatusFilter} onChange={setRoleStatusFilter} />
+          <FilterInput label="" ariaLabel="搜索角色ID" placeholder="搜索角色ID" searchable value={roleIdFilter} onChange={setRoleIdFilter} onEnter={() => setRoleFilters({ id: roleIdFilter, name: roleNameFilter, status: roleStatusFilter })} />
+          <FilterInput label="" ariaLabel="搜索角色名称" placeholder="搜索角色名称" searchable value={roleNameFilter} onChange={setRoleNameFilter} onEnter={() => setRoleFilters({ id: roleIdFilter, name: roleNameFilter, status: roleStatusFilter })} />
+          <Button variant="primary" type="submit">查询</Button>
+          <Button variant="default" onClick={() => {
+            setRoleIdFilter("");
+            setRoleNameFilter("");
+            setRoleStatusFilter("全部");
+            setRoleFilters({ id: "", name: "", status: "全部" });
+          }}>重置</Button>
+        </div>
+      </form>
       <DataTable
         columns={["角色ID", "角色名称", "角色描述", "状态", "创建人", "创建时间", "最近修改人", "最近修改时间"]}
-        rows={roles.map((row) => ({ ...row, 原始状态: row.状态, 状态: <StatusTag value={row.状态} /> }))}
+        rows={filteredRoles.map((row) => ({ ...row, 原始状态: row.状态, 状态: <StatusTag value={row.状态} /> }))}
         actions={(row) => (
           <ActionLinks
             actions={["编辑", row.原始状态 === "废弃" && "删除", "权限配置"]}
@@ -4291,7 +4647,7 @@ function PageManagement({ openModal, notify }: { openModal: OpenModal; notify: N
   return (
     <section className="card page-card page-menu-management-page">
       <div className="workflow-management-label">分级管理</div>
-      <div className="table-toolbar page-menu-toolbar"><div><Button variant="primary" icon={Plus} onClick={() => setEditor({ mode: "create-root", parentId: "" })}>新建页面</Button></div></div>
+      <div className="table-toolbar page-menu-toolbar"><div><Button variant="primary" onClick={() => setEditor({ mode: "create-root", parentId: "" })}>新建页面</Button></div></div>
       <div className={`table-wrap page-tree-grid-wrap ${scrollState.hasOverflow ? "is-scrollable" : ""} ${scrollState.showLeftShadow ? "has-left-shadow" : ""} ${scrollState.showRightShadow ? "has-right-shadow" : ""}`} ref={tableWrapRef} onScroll={updateScrollState}>
         <table className="page-tree-grid">
           <colgroup><col /><col /><col style={{ width: 160 }} /><col style={{ width: 112 }} /><col style={{ width: pageActionColumnWidth }} /></colgroup>
@@ -4384,7 +4740,7 @@ function ApiResources({ openModal, notify }: { openModal: OpenModal; notify: Not
       {tab === "tokens" && (
         <div className="resource-tab-content">
           <div className="table-toolbar">
-            <div><Button variant="primary" icon={Plus} onClick={() => setTokenEditor({ mode: "create" })}>创建令牌</Button></div>
+            <div><Button variant="primary" onClick={() => setTokenEditor({ mode: "create" })}>创建令牌</Button></div>
           </div>
           <DataTable
             columns={["应用名称", "Token字符串", "创建时间", "到期时间", "状态"]}
@@ -4479,19 +4835,30 @@ function ApiLogList() {
   const [timeRange, setTimeRange] = useState("近1小时");
   const [result, setResult] = useState("全部");
   const [apiName, setApiName] = useState("");
+  const [apiLogFilters, setApiLogFilters] = useState({ timeRange: "近1小时", result: "全部", apiName: "" });
   const [detail, setDetail] = useState<(typeof apiLogRows)[number] | null>(null);
   const rows = apiLogRows.filter((row) => (
-    (timeRange === "近7天" || row.时间范围 === "近1小时")
-    && (result === "全部" || row.响应结果 === result)
-    && row.接口名称.includes(apiName.trim())
+    (apiLogFilters.timeRange === "近7天" || row.时间范围 === "近1小时")
+    && (apiLogFilters.result === "全部" || row.响应结果 === apiLogFilters.result)
+    && row.接口名称.includes(apiLogFilters.apiName.trim())
   ));
   return (
     <div className="resource-tab-content api-log-list">
-      <div className="filters api-log-filters">
+      <form className="filters api-log-filters" onSubmit={(event) => {
+        event.preventDefault();
+        setApiLogFilters({ timeRange, result, apiName });
+      }}>
         <FilterSelect label="时间范围" options={["近1小时", "近7天"]} value={timeRange} onChange={setTimeRange} />
         <FilterSelect label="调用结果" options={["全部", "成功", "失败"]} value={result} onChange={setResult} />
-        <FilterInput label="接口名称" placeholder="请输入" searchable value={apiName} onChange={setApiName} />
-      </div>
+        <FilterInput label="" ariaLabel="搜索接口名称" placeholder="搜索接口名称" searchable clearable value={apiName} onChange={setApiName} onEnter={() => setApiLogFilters({ timeRange, result, apiName })} />
+        <Button variant="primary" type="submit">查询</Button>
+        <Button variant="default" onClick={() => {
+          setTimeRange("近1小时");
+          setResult("全部");
+          setApiName("");
+          setApiLogFilters({ timeRange: "近1小时", result: "全部", apiName: "" });
+        }}>重置</Button>
+      </form>
       <DataTable
         columns={["调用时间", "调用方IP", "接口地址", "响应结果", "调用耗时"]}
         rows={rows.map((row) => ({ ...row, 响应结果: <StatusTag value={row.响应结果} /> }))}
@@ -4760,7 +5127,7 @@ function BusinessResourceWorkspace({ type, openModal, notify }: { type: Business
           <div className="summary-count"><span>{config.info.总数标签}</span><strong>{selectedTotal}</strong></div>
           <div><span>创建人</span><strong>{config.info.创建人}</strong></div>
         </div>
-        <div className="table-toolbar"><div><Button variant="primary" icon={Plus} onClick={() => setItemEditor({ mode: "create", index: -1, values: emptyValues })}>新增</Button></div></div>
+        <div className="table-toolbar"><div><Button variant="primary" onClick={() => setItemEditor({ mode: "create", index: -1, values: emptyValues })}>新增</Button></div></div>
         <DataTable columns={config.columns} rows={resourceRows} actions={(row) => <ActionLinks actions={rowActions} onAction={(action) => {
           const rowIndex = resourceRows.findIndex((item) => item[primaryColumn] === String(row[primaryColumn]));
           const values = resourceRows[rowIndex] ?? emptyValues;
@@ -4839,6 +5206,7 @@ function ResourcePermissionTree({ selected, onChange }: { selected: string[]; on
 function PermissionConfig({ notify }: { notify: Notify }) {
   const [tab, setTab] = useState<"users" | "roles">("users");
   const [userKeyword, setUserKeyword] = useState("");
+  const [appliedUserKeyword, setAppliedUserKeyword] = useState("");
   const [userRoleMap, setUserRoleMap] = useState<Record<string, string[]>>({ U20260001: ["普通用户"], U20260002: ["机构用户", "政府用户"] });
   const [transferUser, setTransferUser] = useState<(typeof userRows)[number] | null>(null);
   const roles = ["系统管理员", ...roleOptions];
@@ -4846,20 +5214,24 @@ function PermissionConfig({ notify }: { notify: Notify }) {
   const [permissionTab, setPermissionTab] = useState<"pages" | "resources">("pages");
   const [pagePermissions, setPagePermissions] = useState<Record<string, string[]>>({ 系统管理员: pagePermissionGroups.flatMap((group) => group.items.map((item) => item.key)), 普通用户: ["report", "event-dashboard"], 机构用户: ["report", "workflow", "form", "event-info"], 政府用户: ["report", "event-dashboard"] });
   const [resourcePermissions, setResourcePermissions] = useState<Record<string, string[]>>({ 系统管理员: resourcePermissionGroups.flatMap((group) => group.items.flatMap((item) => [`${group.label}/${item}/view`, `${group.label}/${item}/edit`])), 普通用户: ["报告资源/TR报告/view"], 机构用户: ["人才库资源/人工智能人才库/view", "报告资源/TR报告/view"], 政府用户: ["智库资源/科技政策智库/view"] });
-  const filteredUsers = userRows.filter((user) => user.用户姓名.includes(userKeyword.trim()));
+  const filteredUsers = userRows.filter((user) => user.用户姓名.includes(appliedUserKeyword.trim()));
   return (
     <section className="card permission-page permission-config-page">
       <div className="resource-tabs permission-primary-tabs" aria-label="权限配置类型"><button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>用户</button><button className={tab === "roles" ? "active" : ""} onClick={() => setTab("roles")}>角色</button></div>
       {tab === "users" ? (
         <div className="permission-user-list">
-          <div className="filters permission-user-filters"><FilterInput label="用户检索" placeholder="请输入" searchable value={userKeyword} onChange={setUserKeyword} /></div>
+          <form className="filters permission-user-filters" onSubmit={(event) => { event.preventDefault(); setAppliedUserKeyword(userKeyword); }}>
+            <FilterInput label="" ariaLabel="搜索用户姓名" placeholder="搜索用户姓名" searchable clearable value={userKeyword} onChange={setUserKeyword} onEnter={() => setAppliedUserKeyword(userKeyword)} />
+            <Button variant="primary" type="submit">查询</Button>
+            <Button variant="default" onClick={() => { setUserKeyword(""); setAppliedUserKeyword(""); }}>重置</Button>
+          </form>
           <DataTable columns={["用户ID", "用户姓名", "所属组织名称", "手机号", "当前角色"]} rows={filteredUsers.map((user) => ({ ...user, 当前角色: (userRoleMap[user.用户ID] ?? []).join("、") || "未分配" }))} actions={(row) => <ActionLinks actions={["分配角色"]} onAction={() => setTransferUser(userRows.find((user) => user.用户ID === row.用户ID) ?? null)} />} />
         </div>
       ) : (
         <div className="role-permission-console">
           <aside className="role-selector"><h3>角色列表</h3>{roles.map((role) => <button type="button" className={activeRole === role ? "active" : ""} onClick={() => setActiveRole(role)} key={role}><ShieldCheck size={16} /><span><b>{role}</b><small>{role === "系统管理员" ? "全部系统权限" : "自定义权限"}</small></span><ChevronRight size={15} /></button>)}</aside>
           <section className="permission-workspace">
-            <div className="permission-workspace-header"><div><h3>{activeRole}</h3><p>配置该角色可访问的页面与业务资源范围</p></div><Button variant="primary" icon={Save} onClick={() => notify("权限配置保存成功")}>保存配置</Button></div>
+            <div className="permission-workspace-header"><div><h3>{activeRole}</h3><p>配置该角色可访问的页面与业务资源范围</p></div><Button variant="primary" onClick={() => notify("权限配置保存成功")}>保存配置</Button></div>
             <div className="resource-subtabs permission-workspace-tabs"><button className={permissionTab === "pages" ? "active" : ""} onClick={() => setPermissionTab("pages")}>页面</button><button className={permissionTab === "resources" ? "active" : ""} onClick={() => setPermissionTab("resources")}>资源</button></div>
             {permissionTab === "pages" ? <><div className="permission-note"><ShieldCheck size={16} /><span>若页面管理中页面已禁用，则优先覆盖此处配置。</span></div><PagePermissionTree selected={pagePermissions[activeRole] ?? []} onChange={(next) => setPagePermissions((current) => ({ ...current, [activeRole]: next }))} /></> : <ResourcePermissionTree selected={resourcePermissions[activeRole] ?? []} onChange={(next) => setResourcePermissions((current) => ({ ...current, [activeRole]: next }))} />}
           </section>
@@ -5137,7 +5509,7 @@ function FileUploadField({ id, accept = "application/pdf", hint = "仅支持 PDF
           onFileChange?.(nextFileName);
         }}
       />
-      <button className="upload-trigger" type="button" onClick={() => inputRef.current?.click()}><Upload size={14} />点击上传</button>
+      <button className="upload-trigger" type="button" onClick={() => inputRef.current?.click()}>点击上传</button>
       <small className="upload-hint">{hint}</small>
       {fileName && (
         <div className="upload-file-row">
@@ -5448,8 +5820,8 @@ function FormField({ label, required, children }: { label: string; required?: bo
   return <div className="form-field"><label className="form-field-label" htmlFor={fieldId}>{required && <em>*</em>}{label}</label>{control}</div>;
 }
 
-function ModalHeader({ title, subtitle, close }: { title: string; subtitle?: string; close: () => void }) {
-  return <header className="modal-header"><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div><button type="button" aria-label="关闭对话框" onClick={close}><X size={20} /></button></header>;
+function ModalHeader({ title, close }: { title: string; subtitle?: string; close: () => void }) {
+  return <header className="modal-header"><div><h2>{title}</h2></div><button type="button" aria-label="关闭对话框" onClick={close}><X size={20} /></button></header>;
 }
 
 function Sidebar({ active, setActive, collapsed, setCollapsed }: { active: PageKey; setActive: (p: PageKey) => void; collapsed: boolean; setCollapsed: (v: boolean) => void }) {
@@ -5499,7 +5871,7 @@ function TopBar({ collapsed, onMenu, onSearch }: { collapsed: boolean; onMenu: (
   return (
     <header className={`topbar ${collapsed ? "wide" : ""}`}>
       <button className="mobile-menu" onClick={onMenu}><Menu size={20} /></button>
-      <button className="global-search" onClick={onSearch}><Search size={17} /><span>搜索菜单</span><kbd>⌘ K</kbd></button>
+      <button className="global-search" onClick={onSearch}><span>搜索菜单</span><kbd>⌘ K</kbd></button>
       <div className="top-actions">
         <button className="top-link"><MessageSquareMore size={16} /><span>帮助</span></button>
         <button className="top-link"><LayoutGrid size={16} /><span>应用</span></button>
@@ -5518,6 +5890,7 @@ function TopBar({ collapsed, onMenu, onSearch }: { collapsed: boolean; onMenu: (
 
 export default function App() {
   const [active, setActive] = useState<PageKey>(readStoredActivePage);
+  const [reportOperationRecordsOpen, setReportOperationRecordsOpen] = useState(readStoredReportOperationRecordsOpen);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [formWorkspaceOpen, setFormWorkspaceOpen] = useState(false);
@@ -5534,6 +5907,7 @@ export default function App() {
   }, [dismissFeedback]);
   useEffect(() => {
     if (active !== "form-center") setFormWorkspaceOpen(false);
+    if (active !== "report-management") setReportOperationRecordsOpen(false);
   }, [active]);
   useEffect(() => {
     try {
@@ -5542,6 +5916,13 @@ export default function App() {
       // Keep navigation usable when browser storage is unavailable.
     }
   }, [active]);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(REPORT_OPERATION_RECORDS_STORAGE_KEY, String(reportOperationRecordsOpen));
+    } catch {
+      // Keep navigation usable when browser storage is unavailable.
+    }
+  }, [reportOperationRecordsOpen]);
   const currentTitle = pageLabels[active];
   const breadcrumbSection = breadcrumbSections[active];
   const breadcrumbParent = breadcrumbParents[active];
@@ -5553,14 +5934,21 @@ export default function App() {
     onConfirm: options.onConfirm,
     onSave: options.onSave,
   });
-  const go = (key: PageKey) => { setActive(key); setMobileOpen(false); };
+  const go = (key: PageKey) => {
+    if (key === "report-management") setReportOperationRecordsOpen(false);
+    setActive(key);
+    setMobileOpen(false);
+  };
+  const returnToReportManagement = () => setReportOperationRecordsOpen(false);
   const returnToFormCenter = () => {
     setFormWorkspaceOpen(false);
     setFormCenterVersion((version) => version + 1);
     go("form-center");
   };
   const page = useMemo(() => {
-    if (active === "report-management") return <ReportManagement openModal={openModal} notify={notify} />;
+    if (active === "report-management") return reportOperationRecordsOpen
+      ? <ReportOperationRecords />
+      : <ReportManagement openModal={openModal} notify={notify} onOpenOperationRecords={() => setReportOperationRecordsOpen(true)} />;
     if (active === "announcement-management") return <AnnouncementManagement openModal={openModal} notify={notify} />;
     if (active === "workflow-center") return <WorkflowCenter openModal={openModal} notify={notify} />;
     if (active === "form-center") return <FormCenter key={formCenterVersion} openModal={openModal} notify={notify} onWorkspaceChange={setFormWorkspaceOpen} />;
@@ -5572,30 +5960,43 @@ export default function App() {
     if (active === "page-management") return <PageManagement openModal={openModal} notify={notify} />;
     if (active === "resource-management") return <ResourceManagement openModal={openModal} notify={notify} />;
     return <PermissionConfig notify={notify} />;
-  }, [active, formCenterVersion]);
+  }, [active, formCenterVersion, reportOperationRecordsOpen]);
   return (
     <div className={`app-shell ${collapsed ? "is-sidebar-collapsed" : ""}`}>
       <div className={mobileOpen ? "mobile-sidebar open" : "mobile-sidebar"}><Sidebar active={active} setActive={go} collapsed={collapsed} setCollapsed={setCollapsed} /></div>
       {mobileOpen && <button className="mobile-overlay" onClick={() => setMobileOpen(false)} aria-label="关闭导航" />}
       <TopBar collapsed={collapsed} onMenu={() => setMobileOpen(!mobileOpen)} onSearch={() => setCommand(true)} />
       <main className={collapsed ? "main collapsed" : "main"}>
-        <div className="page-heading">
+        <div className={`page-heading ${active === "report-management" && reportOperationRecordsOpen ? "has-back-action" : ""}`}>
+          {active === "report-management" && reportOperationRecordsOpen && (
+            <button type="button" className="breadcrumb-back" onClick={returnToReportManagement}><ChevronLeft aria-hidden="true" size={16} />返回</button>
+          )}
           <nav className="breadcrumb" aria-label="面包屑">
-            {active !== "report-management" && <><span className="breadcrumb-section">{breadcrumbSection}</span><span className="breadcrumb-separator" aria-hidden="true">/</span></>}
-            {breadcrumbParent && breadcrumbParentTarget && (
+            {active === "report-management" && reportOperationRecordsOpen ? (
               <>
-                <button type="button" className="breadcrumb-link" onClick={() => go(breadcrumbParentTarget)}>{breadcrumbParent}</button>
+                <button type="button" className="breadcrumb-link" onClick={returnToReportManagement}>报告管理</button>
                 <span className="breadcrumb-separator" aria-hidden="true">/</span>
-              </>
-            )}
-            {active === "form-center" && formWorkspaceOpen ? (
-              <>
-                <button type="button" className="breadcrumb-link" onClick={returnToFormCenter}>{currentTitle}</button>
-                <span className="breadcrumb-separator" aria-hidden="true">/</span>
-                <span className="breadcrumb-current" aria-current="page">表单设计器</span>
+                <span className="breadcrumb-current" aria-current="page">操作记录</span>
               </>
             ) : (
-              <span className="breadcrumb-current" aria-current="page">{currentTitle}</span>
+              <>
+                {active !== "report-management" && <><span className="breadcrumb-section">{breadcrumbSection}</span><span className="breadcrumb-separator" aria-hidden="true">/</span></>}
+                {breadcrumbParent && breadcrumbParentTarget && (
+                  <>
+                    <button type="button" className="breadcrumb-link" onClick={() => go(breadcrumbParentTarget)}>{breadcrumbParent}</button>
+                    <span className="breadcrumb-separator" aria-hidden="true">/</span>
+                  </>
+                )}
+                {active === "form-center" && formWorkspaceOpen ? (
+                  <>
+                    <button type="button" className="breadcrumb-link" onClick={returnToFormCenter}>{currentTitle}</button>
+                    <span className="breadcrumb-separator" aria-hidden="true">/</span>
+                    <span className="breadcrumb-current" aria-current="page">表单设计器</span>
+                  </>
+                ) : (
+                  <span className="breadcrumb-current" aria-current="page">{currentTitle}</span>
+                )}
+              </>
             )}
           </nav>
         </div>
@@ -5605,7 +6006,7 @@ export default function App() {
       </main>
       <Modal type={modal.type} mode={modal.mode} payload={modal.payload} onConfirm={modal.onConfirm} onSave={modal.onSave} notify={notify} close={() => setModal({ type: null, mode: "create", payload: {} })} />
       <FeedbackToasts notices={feedbackNotices} onDismiss={dismissFeedback} />
-      {command && <div className="modal-backdrop command-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setCommand(false)}><div className="command-box"><label><Search size={20} /><input autoFocus placeholder="搜索菜单…" /><kbd>ESC</kbd></label><p>快速导航</p><div>{allMenuItems.map(item => <button key={item.key} onClick={() => { go(item.key); setCommand(false); }}><span><LayoutGrid size={16} />{item.label}</span><small>菜单 <ChevronRight size={14} /></small></button>)}</div></div></div>}
+      {command && <div className="modal-backdrop command-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setCommand(false)}><div className="command-box"><label><input autoFocus placeholder="搜索菜单…" /><kbd>ESC</kbd></label><p>快速导航</p><div>{allMenuItems.map(item => <button key={item.key} onClick={() => { go(item.key); setCommand(false); }}><span><LayoutGrid size={16} />{item.label}</span><small>菜单 <ChevronRight size={14} /></small></button>)}</div></div></div>}
     </div>
   );
 }
