@@ -1486,23 +1486,6 @@ textarea:focus-visible {
   padding-top: var(--space-medium);
 }
 
-.audit-content-page > .subtabs {
-  width: auto;
-  height: 29px;
-  min-height: 29px;
-  align-self: flex-start;
-  gap: 32px;
-}
-
-.audit-content-page > .subtabs button {
-  height: 29px;
-  padding: 0;
-}
-
-.audit-content-page > .subtabs button.active::after {
-  height: 3px;
-}
-
 .audit-content-page:has(> .audit-report-list-page) {
   min-height: 100%;
   display: flex;

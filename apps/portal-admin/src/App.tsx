@@ -3343,10 +3343,10 @@ function AuditContent() {
   };
   return (
     <section className="card page-card audit-content-page">
-      <div className="subtabs">
-        <button className={tab === "comments" ? "active" : ""} onClick={() => setTab("comments")}>评论审核</button>
-        <button className={tab === "scholars" ? "active" : ""} onClick={() => setTab("scholars")}>认证学者审核</button>
-        <button className={tab === "reports" ? "active" : ""} onClick={() => setTab("reports")}>报告审核</button>
+      <div className="subtabs gkx-tabs-primary arco-tabs-header arco-tabs-header-nav-line arco-tabs-header-nav-horizontal arco-tabs-header-size-small" role="tablist" aria-label="审核内容类型">
+        <button type="button" role="tab" aria-selected={tab === "comments"} className={`arco-tabs-header-title ${tab === "comments" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("comments")}><span className="arco-tabs-header-title-text">评论审核</span></button>
+        <button type="button" role="tab" aria-selected={tab === "scholars"} className={`arco-tabs-header-title ${tab === "scholars" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("scholars")}><span className="arco-tabs-header-title-text">认证学者审核</span></button>
+        <button type="button" role="tab" aria-selected={tab === "reports"} className={`arco-tabs-header-title ${tab === "reports" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("reports")}><span className="arco-tabs-header-title-text">报告审核</span></button>
       </div>
       {tab === "comments" && (
         <DataTable
@@ -4680,9 +4680,9 @@ function ResourceManagement({ openModal, notify }: { openModal: OpenModal; notif
   const [tab, setTab] = useState<"api" | BusinessResourceType>("api");
   return (
     <section className="card page-card resource-management-page">
-      <div className="resource-tabs resource-primary-tabs" aria-label="资源管理类型">
-        <button className={tab === "api" ? "active" : ""} onClick={() => setTab("api")}>接口资源管理</button>
-        {(Object.keys(businessResourceConfigs) as BusinessResourceType[]).map((type) => <button className={tab === type ? "active" : ""} onClick={() => setTab(type)} key={type}>{businessResourceConfigs[type].tab}</button>)}
+      <div className="resource-tabs resource-primary-tabs gkx-tabs-primary arco-tabs-header arco-tabs-header-nav-line arco-tabs-header-nav-horizontal arco-tabs-header-size-small" role="tablist" aria-label="资源管理类型">
+        <button type="button" role="tab" aria-selected={tab === "api"} className={`arco-tabs-header-title ${tab === "api" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("api")}><span className="arco-tabs-header-title-text">接口资源管理</span></button>
+        {(Object.keys(businessResourceConfigs) as BusinessResourceType[]).map((type) => <button type="button" role="tab" aria-selected={tab === type} className={`arco-tabs-header-title ${tab === type ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab(type)} key={type}><span className="arco-tabs-header-title-text">{businessResourceConfigs[type].tab}</span></button>)}
       </div>
       {tab === "api" ? <ApiResources openModal={openModal} notify={notify} /> : <BusinessResourceWorkspace type={tab} openModal={openModal} notify={notify} key={tab} />}
     </section>
@@ -4732,10 +4732,10 @@ function ApiResources({ openModal, notify }: { openModal: OpenModal; notify: Not
   };
   return (
     <div className="api-resource-workspace">
-      <div className="resource-subtabs" aria-label="接口资源管理功能">
-        <button className={tab === "tokens" ? "active" : ""} onClick={() => setTab("tokens")}>令牌管理</button>
-        <button className={tab === "docs" ? "active" : ""} onClick={() => setTab("docs")}>接口调用文档展示</button>
-        <button className={tab === "logs" ? "active" : ""} onClick={() => setTab("logs")}>接口调用日志</button>
+      <div className="resource-subtabs gkx-tabs-secondary arco-tabs-header arco-tabs-header-nav-capsule arco-tabs-header-nav-horizontal" role="tablist" aria-label="接口资源管理功能">
+        <button type="button" role="tab" aria-selected={tab === "tokens"} className={`arco-tabs-header-title ${tab === "tokens" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("tokens")}><span className="arco-tabs-header-title-text">令牌管理</span></button>
+        <button type="button" role="tab" aria-selected={tab === "docs"} className={`arco-tabs-header-title ${tab === "docs" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("docs")}><span className="arco-tabs-header-title-text">接口调用文档展示</span></button>
+        <button type="button" role="tab" aria-selected={tab === "logs"} className={`arco-tabs-header-title ${tab === "logs" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("logs")}><span className="arco-tabs-header-title-text">接口调用日志</span></button>
       </div>
       {tab === "tokens" && (
         <div className="resource-tab-content">
@@ -4887,8 +4887,8 @@ function BusinessResources({ openModal, notify }: { openModal: OpenModal; notify
   const [tab, setTab] = useState<BusinessResourceType>("talent");
   return (
     <div className="business-resource-workspace">
-      <div className="resource-subtabs" aria-label="业务资源类型">
-        {(Object.keys(businessResourceConfigs) as BusinessResourceType[]).map((type) => <button className={tab === type ? "active" : ""} onClick={() => setTab(type)} key={type}>{businessResourceConfigs[type].tab}</button>)}
+      <div className="resource-subtabs gkx-tabs-secondary arco-tabs-header arco-tabs-header-nav-capsule arco-tabs-header-nav-horizontal" role="tablist" aria-label="业务资源类型">
+        {(Object.keys(businessResourceConfigs) as BusinessResourceType[]).map((type) => <button type="button" role="tab" aria-selected={tab === type} className={`arco-tabs-header-title ${tab === type ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab(type)} key={type}><span className="arco-tabs-header-title-text">{businessResourceConfigs[type].tab}</span></button>)}
       </div>
       <BusinessResourceWorkspace type={tab} openModal={openModal} notify={notify} key={tab} />
     </div>
@@ -5217,7 +5217,7 @@ function PermissionConfig({ notify }: { notify: Notify }) {
   const filteredUsers = userRows.filter((user) => user.用户姓名.includes(appliedUserKeyword.trim()));
   return (
     <section className="card permission-page permission-config-page">
-      <div className="resource-tabs permission-primary-tabs" aria-label="权限配置类型"><button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>用户</button><button className={tab === "roles" ? "active" : ""} onClick={() => setTab("roles")}>角色</button></div>
+      <div className="resource-tabs permission-primary-tabs gkx-tabs-primary arco-tabs-header arco-tabs-header-nav-line arco-tabs-header-nav-horizontal arco-tabs-header-size-small" role="tablist" aria-label="权限配置类型"><button type="button" role="tab" aria-selected={tab === "users"} className={`arco-tabs-header-title ${tab === "users" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("users")}><span className="arco-tabs-header-title-text">用户</span></button><button type="button" role="tab" aria-selected={tab === "roles"} className={`arco-tabs-header-title ${tab === "roles" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setTab("roles")}><span className="arco-tabs-header-title-text">角色</span></button></div>
       {tab === "users" ? (
         <div className="permission-user-list">
           <form className="filters permission-user-filters" onSubmit={(event) => { event.preventDefault(); setAppliedUserKeyword(userKeyword); }}>
@@ -5232,7 +5232,7 @@ function PermissionConfig({ notify }: { notify: Notify }) {
           <aside className="role-selector"><h3>角色列表</h3>{roles.map((role) => <button type="button" className={activeRole === role ? "active" : ""} onClick={() => setActiveRole(role)} key={role}><ShieldCheck size={16} /><span><b>{role}</b><small>{role === "系统管理员" ? "全部系统权限" : "自定义权限"}</small></span><ChevronRight size={15} /></button>)}</aside>
           <section className="permission-workspace">
             <div className="permission-workspace-header"><div><h3>{activeRole}</h3><p>配置该角色可访问的页面与业务资源范围</p></div><Button variant="primary" onClick={() => notify("权限配置保存成功")}>保存配置</Button></div>
-            <div className="resource-subtabs permission-workspace-tabs"><button className={permissionTab === "pages" ? "active" : ""} onClick={() => setPermissionTab("pages")}>页面</button><button className={permissionTab === "resources" ? "active" : ""} onClick={() => setPermissionTab("resources")}>资源</button></div>
+            <div className="resource-subtabs permission-workspace-tabs gkx-tabs-secondary arco-tabs-header arco-tabs-header-nav-capsule arco-tabs-header-nav-horizontal" role="tablist" aria-label="权限范围类型"><button type="button" role="tab" aria-selected={permissionTab === "pages"} className={`arco-tabs-header-title ${permissionTab === "pages" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setPermissionTab("pages")}><span className="arco-tabs-header-title-text">页面</span></button><button type="button" role="tab" aria-selected={permissionTab === "resources"} className={`arco-tabs-header-title ${permissionTab === "resources" ? "active arco-tabs-header-title-active" : ""}`} onClick={() => setPermissionTab("resources")}><span className="arco-tabs-header-title-text">资源</span></button></div>
             {permissionTab === "pages" ? <><div className="permission-note"><ShieldCheck size={16} /><span>若页面管理中页面已禁用，则优先覆盖此处配置。</span></div><PagePermissionTree selected={pagePermissions[activeRole] ?? []} onChange={(next) => setPagePermissions((current) => ({ ...current, [activeRole]: next }))} /></> : <ResourcePermissionTree selected={resourcePermissions[activeRole] ?? []} onChange={(next) => setResourcePermissions((current) => ({ ...current, [activeRole]: next }))} />}
           </section>
         </div>

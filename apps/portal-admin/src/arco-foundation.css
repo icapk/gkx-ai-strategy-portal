@@ -73,6 +73,110 @@ body {
 .inline-actions .arco-btn.arco-btn-disabled,
 .inline-actions .arco-btn.arco-btn-disabled:hover { color: var(--color-text-4); background: transparent; }
 
+/* Arco line tabs for primary content navigation. */
+.gkx-tabs-primary {
+  position: relative;
+  width: 100%;
+  height: 36px;
+  min-height: 36px;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: transparent;
+  border: 0;
+  scrollbar-width: none;
+}
+.gkx-tabs-primary::before { display: none; }
+.gkx-tabs-primary::-webkit-scrollbar { display: none; }
+.gkx-tabs-primary > .arco-tabs-header-title {
+  position: relative;
+  min-width: 0;
+  height: 36px;
+  margin: 0;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  color: var(--color-text-2);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.gkx-tabs-primary > .arco-tabs-header-title:hover { color: var(--color-text-1); background: transparent; }
+.gkx-tabs-primary > .arco-tabs-header-title:focus-visible { outline: 2px solid rgba(22,93,255,.18); outline-offset: -2px; }
+.gkx-tabs-primary > .arco-tabs-header-title-active { color: rgb(var(--primary-6)); font-weight: 500; }
+.gkx-tabs-primary > .arco-tabs-header-title-active::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  content: "";
+  background: rgb(var(--primary-6));
+  border-radius: 2px 2px 0 0;
+}
+.gkx-tabs-primary .arco-tabs-header-title-text { padding: 0; background: transparent; }
+
+/* Arco capsule tabs for secondary content navigation. */
+.gkx-tabs-secondary {
+  width: max-content;
+  max-width: 100%;
+  height: 40px;
+  min-height: 40px;
+  margin: 0 0 16px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  background: var(--color-fill-2);
+  border: 0;
+  border-radius: var(--border-radius-small);
+  scrollbar-width: none;
+}
+.gkx-tabs-secondary::before { display: none; }
+.gkx-tabs-secondary::-webkit-scrollbar { display: none; }
+.gkx-tabs-secondary > .arco-tabs-header-title {
+  position: relative;
+  height: 32px;
+  margin: 0;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  color: var(--color-text-2);
+  background: transparent;
+  border: 0;
+  border-radius: var(--border-radius-small);
+  font-size: 14px;
+  line-height: 22px;
+  white-space: nowrap;
+}
+.gkx-tabs-secondary > .arco-tabs-header-title + .arco-tabs-header-title::before {
+  position: absolute;
+  top: 9px;
+  bottom: 9px;
+  left: 0;
+  width: 1px;
+  content: "";
+  background: var(--color-fill-3);
+}
+.gkx-tabs-secondary > .arco-tabs-header-title:hover { color: rgb(var(--primary-6)); background: rgba(255,255,255,.55); }
+.gkx-tabs-secondary > .arco-tabs-header-title:focus-visible { outline: 2px solid rgba(22,93,255,.18); outline-offset: -2px; }
+.gkx-tabs-secondary > .arco-tabs-header-title-active { color: rgb(var(--primary-6)); background: #fff; font-weight: 500; box-shadow: 0 1px 2px rgba(29,33,41,.08); }
+.gkx-tabs-secondary > .arco-tabs-header-title-active::after { display: none; }
+.gkx-tabs-secondary > .arco-tabs-header-title-active::before,
+.gkx-tabs-secondary > .arco-tabs-header-title-active + .arco-tabs-header-title::before { opacity: 0; }
+.gkx-tabs-secondary .arco-tabs-header-title-text { padding: 0; background: transparent; }
+
 .filter-field .arco-input { height: 32px; border: 1px solid var(--color-fill-3); background: #fff; font-size: 14px; line-height: 22px; }
 .filter-field .arco-input:hover { background: #fff; border-color: var(--color-fill-4); }
 .filter-field .arco-input:focus { background: #fff; border-color: rgb(var(--primary-5)); box-shadow: none; }
