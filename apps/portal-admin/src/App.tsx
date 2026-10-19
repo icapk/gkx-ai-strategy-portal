@@ -19,11 +19,9 @@ import {
   FileText,
   FolderOpen,
   GripVertical,
-  KeyRound,
   LayoutGrid,
   LockKeyhole,
   LogOut,
-  Megaphone,
   Menu,
   MessageSquareMore,
   Minus,
@@ -60,6 +58,8 @@ type PageKey =
   | "resource-management"
   | "permission-config";
 
+type AuditContentTab = "comments" | "scholars" | "reports";
+
 type ModalType =
   | "report"
   | "tracking"
@@ -93,7 +93,6 @@ type NavChild = { key: PageKey; label: string };
 
 type NavItem = {
   label: string;
-  icon: LucideIcon;
   key?: PageKey;
   children?: NavChild[];
 };
@@ -107,20 +106,18 @@ const navSections: NavSection[] = [
   {
     label: "系统管理",
     items: [
-      { key: "report-management", label: "报告管理", icon: FileText },
-      { key: "announcement-management", label: "公告管理", icon: Megaphone },
+      { key: "report-management", label: "报告管理" },
+      { key: "announcement-management", label: "公告管理" },
       {
         label: "审核管理",
-        icon: ShieldCheck,
         children: [
-          { key: "workflow-center", label: "审核流程管理 / 流程中心" },
-          { key: "form-center", label: "审核流程管理 / 表单中心" },
-          { key: "audit-content", label: "审核内容管理 / 评论审核" },
+          { key: "workflow-center", label: "流程中心" },
+          { key: "form-center", label: "表单中心" },
+          { key: "audit-content", label: "评论审核" },
         ],
       },
       {
         label: "埋点管理",
-        icon: Activity,
         children: [
           { key: "event-info", label: "埋点信息管理" },
           { key: "event-dashboard", label: "埋点数据统计" },
@@ -131,11 +128,11 @@ const navSections: NavSection[] = [
   {
     label: "权限管理",
     items: [
-      { key: "user-management", label: "用户管理", icon: Users },
-      { key: "role-management", label: "角色管理", icon: ShieldCheck },
-      { key: "page-management", label: "页面管理", icon: LayoutGrid },
-      { key: "resource-management", label: "资源管理", icon: Database },
-      { key: "permission-config", label: "权限配置", icon: KeyRound },
+      { key: "user-management", label: "用户管理" },
+      { key: "role-management", label: "角色管理" },
+      { key: "page-management", label: "页面管理" },
+      { key: "resource-management", label: "资源管理" },
+      { key: "permission-config", label: "权限配置" },
     ],
   },
 ];
@@ -160,10 +157,32 @@ const pageLabels: Record<PageKey, string> = {
   "permission-config": "权限配置",
 };
 
+const ACTIVE_PAGE_STORAGE_KEY = "gkx-portal-admin:active-page:v1";
+const AUDIT_TAB_STORAGE_KEY = "gkx-portal-admin:audit-tab:v1";
+
+function readStoredActivePage(): PageKey {
+  if (typeof window === "undefined") return "report-management";
+  try {
+    const stored = window.localStorage.getItem(ACTIVE_PAGE_STORAGE_KEY);
+    return stored && Object.prototype.hasOwnProperty.call(pageLabels, stored) ? stored as PageKey : "report-management";
+  } catch {
+    return "report-management";
+  }
+}
+
+function readStoredAuditTab(): AuditContentTab {
+  if (typeof window === "undefined") return "comments";
+  try {
+    const stored = window.localStorage.getItem(AUDIT_TAB_STORAGE_KEY);
+    return stored === "comments" || stored === "scholars" || stored === "reports" ? stored : "comments";
+  } catch {
+    return "comments";
+  }
+}
+
 const breadcrumbParents: Partial<Record<PageKey, string>> = {
   "workflow-center": "审核管理",
   "form-center": "审核管理",
-  "audit-content": "审核内容管理",
   "event-info": "埋点管理",
   "event-dashboard": "埋点管理",
 };
@@ -171,17 +190,16 @@ const breadcrumbParents: Partial<Record<PageKey, string>> = {
 const breadcrumbParentTargets: Partial<Record<PageKey, PageKey>> = {
   "workflow-center": "workflow-center",
   "form-center": "workflow-center",
-  "audit-content": "audit-content",
   "event-info": "event-info",
   "event-dashboard": "event-info",
 };
 
-const breadcrumbSections: Record<PageKey, "系统管理" | "权限管理"> = {
+const breadcrumbSections: Record<PageKey, "系统管理" | "权限管理" | "审核管理"> = {
   "report-management": "系统管理",
   "announcement-management": "系统管理",
   "workflow-center": "系统管理",
   "form-center": "系统管理",
-  "audit-content": "系统管理",
+  "audit-content": "审核管理",
   "event-info": "系统管理",
   "event-dashboard": "系统管理",
   "org-management": "权限管理",
@@ -192,21 +210,46 @@ const breadcrumbSections: Record<PageKey, "系统管理" | "权限管理"> = {
   "permission-config": "权限管理",
 };
 
-const reportTypeOptions = ["TR报告", "战略咨询报告", "洞察分析报告", "未来产业报告"];
-const reportSortFieldOptions = ["上传时间", "报告类型", "所属领域", "报告来源"] as const;
+const reportTypeOptions = ["研究报告", "洞察报告", "战略咨询报告"];
+const reportSortFieldOptions = ["上传时间"] as const;
 type ReportSortField = (typeof reportSortFieldOptions)[number];
-type ReportSortDirection = "正序" | "倒序";
-const reportSortCollator = new Intl.Collator("zh-CN", { numeric: true, sensitivity: "base" });
+type ReportSortDirection = "升序" | "降序";
+type ReportStatus = "待上架" | "草稿" | "待审核" | "已驳回" | "已上架" | "已下架" | "发布失败";
+type ReportRow = {
+  报告标题: string;
+  报告来源: string;
+  报告类型: string;
+  所属栏目: string;
+  署名信息: string;
+  行业分类: string;
+  状态: ReportStatus;
+  版本信息: string;
+  上传时间: string;
+  置顶: boolean;
+};
 const statusOptions = ["启用", "禁用"];
 const roleOptions = ["普通用户", "机构用户", "政府用户"];
 const resourcePermissionOptions = ["人才库资源", "报告资源", "智库资源"];
 
-const reportRows = [
-  { 报告标题: "未来产业报告：智能制造", 报告类型: "未来产业报告", 报告来源: "国科信", 所属领域: "智能制造", 上传时间: "2026-07-08", 内容摘要: "未来产业报告内容摘要", 状态: "上架", 是否置顶: "是" },
-  { 报告标题: "TR报告：人工智能", 报告类型: "TR报告", 报告来源: "研究中心", 所属领域: "人工智能", 上传时间: "2026-07-06", 内容摘要: "TR报告内容摘要", 状态: "下架", 是否置顶: "否" },
-  { 报告标题: "战略咨询报告：新材料", 报告类型: "战略咨询报告", 报告来源: "战略咨询组", 所属领域: "新材料", 上传时间: "2026-07-01", 内容摘要: "战略咨询报告内容摘要", 状态: "上架", 是否置顶: "否" },
-  { 报告标题: "洞察分析报告：低空经济", 报告类型: "洞察分析报告", 报告来源: "洞察分析组", 所属领域: "低空经济", 上传时间: "2026-06-28", 内容摘要: "洞察分析报告内容摘要", 状态: "下架", 是否置顶: "是" },
+const reportRows: ReportRow[] = [
+  { 报告标题: "先进储能技术发展研究", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "储能技术", 状态: "待上架", 版本信息: "V1.0 · 2026-09-30 09:50", 上传时间: "2026-09-30", 置顶: false },
+  { 报告标题: "未来产业报告：智能制造", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "智能制造", 状态: "草稿", 版本信息: "尚未提交", 上传时间: "2026-09-28", 置顶: false },
+  { 报告标题: "新能源汽车消费趋势洞察", 报告来源: "用户创作", 报告类型: "洞察报告", 所属栏目: "洞察报告", 署名信息: "作者：陈思敏", 行业分类: "新能源汽车", 状态: "待审核", 版本信息: "V1.2 · 2026-09-27 09:50", 上传时间: "2026-09-27", 置顶: false },
+  { 报告标题: "TR报告：人工智能", 报告来源: "平台创作", 报告类型: "战略咨询报告", 所属栏目: "战略咨询报告", 署名信息: "作者：平台创作", 行业分类: "人工智能", 状态: "已驳回", 版本信息: "V1.0 · 2026-09-25 09:50", 上传时间: "2026-09-25", 置顶: false },
+  { 报告标题: "量子计算产业研究", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "量子科技", 状态: "已上架", 版本信息: "线上 V1.1 · 2026-09-20 09:50", 上传时间: "2026-09-20", 置顶: false },
+  { 报告标题: "2026全球AI产业研报", 报告来源: "外部研报", 报告类型: "研究报告", 所属栏目: "研报库", 署名信息: "发布机构：IDC", 行业分类: "人工智能", 状态: "已下架", 版本信息: "V1.1 · 2026-09-18 09:50", 上传时间: "2026-09-18", 置顶: false },
+  { 报告标题: "全球机器人市场报告", 报告来源: "外部研报", 报告类型: "洞察报告", 所属栏目: "研报库", 署名信息: "发布机构：IFR", 行业分类: "机器人", 状态: "发布失败", 版本信息: "V1.0 · 2026-09-16 09:50", 上传时间: "2026-09-16", 置顶: false },
 ];
+
+const reportActionsByStatus: Record<ReportStatus, string[]> = {
+  待上架: ["查看", "上架"],
+  草稿: ["查看", "编辑", "提交审核", "删除"],
+  待审核: ["查看", "撤回"],
+  已驳回: ["查看原因", "编辑", "提交审核"],
+  已上架: ["查看", "置顶", "提交修订版", "下架"],
+  已下架: ["查看", "提交审核", "删除"],
+  发布失败: ["查看", "重试上架"],
+};
 
 type AnnouncementStatus = "草稿" | "待发布" | "已发布" | "已下线";
 type AnnouncementLinkType = "无跳转" | "站内链接" | "外部链接";
@@ -441,30 +484,33 @@ const scholarRows = [
   },
 ];
 
-const auditReportRows = [
-  {
-    报告名称: "TR报告：人工智能",
-    报告类型: "TR报告",
-    摘要预览: "围绕人工智能技术演进、应用进展与发展趋势开展系统分析。",
-    提交人: "张明远",
+const auditReportTemplates = [
+  { 报告名称: "低空经济政策环境研究", 入库方式: "外部调研", 展示栏目: "研报库" },
+  { 报告名称: "V2G产业政策建议报告", 入库方式: "外部调研", 展示栏目: "研报库" },
+  { 报告名称: "量子计算产业链研究", 入库方式: "平台创作", 展示栏目: "研报库" },
+  { 报告名称: "无人机物流商业化路径", 入库方式: "外部调研", 展示栏目: "研究报告" },
+  { 报告名称: "具身智能产业链研究", 入库方式: "平台创作", 展示栏目: "研报库" },
+  { 报告名称: "低空经济政策环境研究", 入库方式: "外部调研", 展示栏目: "研究报告" },
+  { 报告名称: "低空经济政策环境研究", 入库方式: "平台创作", 展示栏目: "研报库" },
+  { 报告名称: "低空经济政策环境研究", 入库方式: "外部调研", 展示栏目: "研报库" },
+  { 报告名称: "低空经济政策环境研究", 入库方式: "外部调研", 展示栏目: "洞察报告" },
+] as const;
+
+const auditReportRows = Array.from({ length: 150 }, (_, index) => {
+  const template = auditReportTemplates[index % auditReportTemplates.length];
+  return {
+    id: `audit-report-${index + 1}`,
+    ...template,
+    报告类型: template.展示栏目,
+    提交版本: "v1.1",
+    提交人: "李志辉",
+    提交时间: "2026-09-10 0:00:20",
+    摘要预览: `${template.报告名称}的本次提交版本摘要。`,
     报告稿: [
-      { 标题: "一、研究背景", 内容: "人工智能正在从单点算法能力向多模态理解、复杂推理与智能体协同方向演进。报告围绕技术体系、产业应用和治理需求，对当前发展阶段进行梳理。" },
-      { 标题: "二、技术与应用进展", 内容: "基础模型能力持续提升，数据、算力、模型和工程平台形成协同体系。人工智能已在科研辅助、工业质检、知识服务和公共服务等场景中形成可验证的应用路径。" },
-      { 标题: "三、趋势研判", 内容: "未来需要重点关注模型可靠性、专业数据供给、推理成本和安全治理。建议持续建设高质量领域数据集，完善评测机制，并推动技术能力与真实业务流程深度结合。" },
+      { 标题: "报告内容", 内容: `${template.报告名称}的本次提交版本内容。` },
     ],
-  },
-  {
-    报告名称: "未来产业报告：智能制造",
-    报告类型: "未来产业报告",
-    摘要预览: "分析智能制造关键技术、典型应用与产业发展路径。",
-    提交人: "陈思敏",
-    报告稿: [
-      { 标题: "一、产业背景", 内容: "制造业数字化转型正由设备联网向生产过程优化和全链路协同延伸。智能制造通过工业软件、智能装备和数据平台联动，提升生产系统的感知、分析与决策能力。" },
-      { 标题: "二、重点方向", 内容: "柔性生产、数字孪生、智能检测和预测性维护是当前重点应用方向。企业正在通过统一数据底座连接研发、生产、质量和供应链环节，形成可持续优化的生产闭环。" },
-      { 标题: "三、发展建议", 内容: "建议加强工业数据标准与接口体系建设，推动关键工业软件和核心装备协同创新，并以可量化的质量、效率和能耗指标评估智能化改造效果。" },
-    ],
-  },
-];
+  };
+});
 
 const trackingRows = [
   { 事件ID: "EVT_REPORT_VIEW", 所属功能模块: "报告管理", 埋点标签: "报告查看", 埋点路径: "/report/detail", 触发机制: "点击", 创建时间: "2026-07-08 10:20" },
@@ -833,6 +879,17 @@ function StatusTag({ value, tone: toneOverride }: { value: string; tone?: "succe
   return <span className={`status-tag ${tone}`}><i />{value}</span>;
 }
 
+function ReportStatusCell({ status }: { status: ReportStatus }) {
+  const tone = status === "已上架"
+    ? "success"
+    : status === "待上架" || status === "待审核"
+      ? "warning"
+      : status === "已驳回" || status === "发布失败"
+        ? "danger"
+        : "neutral";
+  return <StatusTag value={status} tone={tone} />;
+}
+
 function PinState({ pinned }: { pinned: boolean }) {
   return (
     <span className={`pin-state ${pinned ? "is-pinned" : ""}`}>
@@ -889,16 +946,23 @@ function Button({
   disabled = false,
 }: {
   children: ReactNode;
-  variant?: "primary" | "default" | "text" | "danger";
+  variant?: "primary" | "default" | "outline" | "linear" | "text" | "danger";
   icon?: LucideIcon;
   onClick?: () => void;
   type?: "button" | "submit";
   disabled?: boolean;
 }) {
+  const arcoVariant = variant === "default"
+    ? "secondary"
+    : variant === "danger"
+      ? "primary arco-btn-status-danger"
+      : variant === "linear"
+        ? "outline"
+        : variant;
   return (
-    <button type={type} className={`btn ${variant}`} disabled={disabled} onClick={onClick}>
+    <button type={type} className={`btn ${variant} arco-btn arco-btn-size-default arco-btn-${arcoVariant}${disabled ? " arco-btn-disabled" : ""}`} disabled={disabled} onClick={onClick}>
       {Icon && <Icon size={16} strokeWidth={1.9} />}
-      {children}
+      <span>{children}</span>
     </button>
   );
 }
@@ -955,20 +1019,20 @@ type TableAction = {
   isDisabled: boolean;
 };
 
-function getOrderedActions(actions: ActionSource, disabledActions: string[] = []): TableAction[] {
-  return actions
+function getOrderedActions(actions: ActionSource, disabledActions: string[] = [], preserveOrder = false): TableAction[] {
+  const items = actions
     .filter(Boolean)
     .map((action, index) => {
       const originalLabel = action as string;
       const label = compactActionLabels[originalLabel] ?? originalLabel;
       const isDanger = label.includes("删除") || label.includes("注销") || label.includes("驳回") || label.includes("失败") || label.includes("禁用") || label.includes("取消展示");
       return { originalLabel, label, index, priority: actionPriorities[label] ?? 50, isDanger, isDisabled: disabledActions.includes(originalLabel) };
-    })
-    .sort((a, b) => a.priority - b.priority || a.index - b.index);
+    });
+  return preserveOrder ? items : items.sort((a, b) => a.priority - b.priority || a.index - b.index);
 }
 
-function ActionLinks({ actions, disabledActions = [], actionTipOverrides = {}, onAction }: { actions: ActionSource; disabledActions?: string[]; actionTipOverrides?: Record<string, string>; onAction?: (action: string) => void }) {
-  const orderedActions = getOrderedActions(actions, disabledActions);
+function ActionLinks({ actions, disabledActions = [], actionTipOverrides = {}, preserveOrder = false, onAction }: { actions: ActionSource; disabledActions?: string[]; actionTipOverrides?: Record<string, string>; preserveOrder?: boolean; onAction?: (action: string) => void }) {
+  const orderedActions = getOrderedActions(actions, disabledActions, preserveOrder);
   const [actionTooltip, setActionTooltip] = useState<{ content: string; left: number; top: number } | null>(null);
   return (
     <>
@@ -979,7 +1043,7 @@ function ActionLinks({ actions, disabledActions = [], actionTipOverrides = {}, o
             <button
               aria-label={originalLabel}
               aria-disabled={isDisabled || undefined}
-              className={`${isDanger ? "danger-action" : ""} ${tip ? "has-action-tip" : ""} ${isDisabled ? "disabled-action" : ""}`.trim()}
+              className={`arco-btn arco-btn-text ${isDanger ? "danger-action arco-btn-status-danger" : ""} ${tip ? "has-action-tip" : ""} ${isDisabled ? "disabled-action arco-btn-disabled" : ""}`.trim()}
               key={originalLabel}
               title={tip}
               onMouseEnter={tip ? (event) => {
@@ -1013,8 +1077,8 @@ function ActionLinks({ actions, disabledActions = [], actionTipOverrides = {}, o
 }
 
 function getActionItems(actionNode: ReactNode): TableAction[] {
-  if (isValidElement<{ actions: ActionSource; disabledActions?: string[] }>(actionNode) && actionNode.type === ActionLinks) {
-    return getOrderedActions(actionNode.props.actions, actionNode.props.disabledActions);
+  if (isValidElement<{ actions: ActionSource; disabledActions?: string[]; preserveOrder?: boolean }>(actionNode) && actionNode.type === ActionLinks) {
+    return getOrderedActions(actionNode.props.actions, actionNode.props.disabledActions, actionNode.props.preserveOrder);
   }
   return [];
 }
@@ -1028,15 +1092,19 @@ function getActionColumnWidth(actionRows: TableAction[][]) {
 
 function FilterInput({
   label,
+  ariaLabel = label,
   placeholder = label,
   searchable = false,
+  clearable = false,
   value,
   onChange,
   onEnter,
 }: {
   label: string;
+  ariaLabel?: string;
   placeholder?: string;
   searchable?: boolean;
+  clearable?: boolean;
   value?: string;
   onChange?: (value: string) => void;
   onEnter?: () => void;
@@ -1048,15 +1116,17 @@ function FilterInput({
   };
 
   return (
-    <label className="filter-field">
-      <span className="filter-label">{label}</span>
-      {searchable ? (
+    <label className={`filter-field ${label ? "" : "filter-field-unlabeled"}`.trim()}>
+      {label && <span className="filter-label">{label}</span>}
+      {searchable || clearable ? (
         <span className="filter-search-control">
-          <input aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} onKeyDown={handleKeyDown} />
-          <Search aria-hidden="true" size={16} />
+          <input className="arco-input arco-input-size-default" aria-label={ariaLabel} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} onKeyDown={handleKeyDown} />
+          {clearable ? (
+            value ? <button type="button" className="filter-clear-button" aria-label={`清空${ariaLabel}`} onClick={() => onChange?.("")}><X aria-hidden="true" size={16} /></button> : null
+          ) : <Search aria-hidden="true" size={16} />}
         </span>
       ) : (
-        <input className="filter-control" aria-label={label} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} onKeyDown={handleKeyDown} />
+        <input className="filter-control arco-input arco-input-size-default" aria-label={ariaLabel} placeholder={placeholder} value={value} onChange={(event) => onChange?.(event.target.value)} onKeyDown={handleKeyDown} />
       )}
     </label>
   );
@@ -1073,34 +1143,47 @@ function FilterSelect({
   value?: string;
   onChange?: (value: string) => void;
 }) {
-  const [internalSelected, setInternalSelected] = useState(options[0]);
+  const [internalSelected, setInternalSelected] = useState<string | undefined>(undefined);
   const [open, setOpen] = useState(false);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
   const selected = value ?? internalSelected;
+  const defaultOption = options[0];
+  const showFieldName = selected === undefined || (defaultOption === "全部" && selected === defaultOption);
+  useEffect(() => {
+    if (!open) return undefined;
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!fieldRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePointer);
+  }, [open]);
+  const chooseOption = (nextValue: string) => {
+    if (value === undefined) setInternalSelected(nextValue);
+    onChange?.(nextValue);
+    setOpen(false);
+  };
   return (
-    <div className="filter-field">
+    <div className="filter-field filter-select-field" ref={fieldRef}>
       <span className="filter-label">{label}</span>
-      <div
-        className={`filter-select-control ${open ? "open" : ""}`}
-        onBlur={(event) => {
-          const nextTarget = event.relatedTarget;
-          if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
-            setOpen(false);
-          }
-        }}
-      >
+      <span className={`filter-select-control arco-select arco-select-size-default ${open ? "open" : ""}`}>
         <button
           type="button"
           className="filter-select-trigger"
           aria-label={label}
+          aria-controls={listboxId}
           aria-expanded={open}
           aria-haspopup="listbox"
-          onClick={() => setOpen((value) => !value)}
+          onClick={() => setOpen((current) => !current)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") setOpen(false);
+          }}
         >
-          <span>{selected}</span>
+          <span>{showFieldName ? label : selected}</span>
           <ChevronDown aria-hidden="true" size={16} />
         </button>
         {open && (
-          <div className="filter-select-menu" role="listbox" aria-label={label}>
+          <div className="filter-select-menu" id={listboxId} role="listbox" aria-label={`${label}选项`}>
             {options.map((option) => (
               <button
                 type="button"
@@ -1108,18 +1191,14 @@ function FilterSelect({
                 aria-selected={selected === option}
                 className={selected === option ? "active" : ""}
                 key={option}
-                onClick={() => {
-                  if (value === undefined) setInternalSelected(option);
-                  onChange?.(option);
-                  setOpen(false);
-                }}
+                onClick={() => chooseOption(option)}
               >
                 {option}
               </button>
             ))}
           </div>
         )}
-      </div>
+      </span>
     </div>
   );
 }
@@ -1135,6 +1214,8 @@ function SelectField({ label }: { label: string }) {
 
 function getPaginationItems(totalPages: number, currentPage: number) {
   if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  if (currentPage <= 3) return [1, 2, 3, 4, 5, "ellipsis", totalPages] as Array<number | "ellipsis">;
+  if (currentPage >= totalPages - 2) return [1, "ellipsis", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages] as Array<number | "ellipsis">;
   const items: Array<number | "ellipsis"> = [1];
   const start = Math.max(2, currentPage - 1);
   const end = Math.min(totalPages - 1, currentPage + 1);
@@ -1151,28 +1232,34 @@ function Pagination({
   pageSize,
   onPageChange,
   onPageSizeChange,
+  totalLabel,
+  compactPageSizeLabel = false,
+  pageCountOverride,
 }: {
   total: number;
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
+  totalLabel?: string;
+  compactPageSizeLabel?: boolean;
+  pageCountOverride?: number;
 }) {
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const totalPages = pageCountOverride ?? Math.max(1, Math.ceil(total / pageSize));
   const pageItems = getPaginationItems(totalPages, currentPage);
   return (
-    <nav className="pagination" aria-label="分页">
-      <span>共 {total} 条</span>
-      <button aria-label="上一页" disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)}><ChevronLeft size={16} /></button>
+    <nav className="pagination arco-pagination" aria-label="分页">
+      <span>{totalLabel ?? `共 ${total} 条`}</span>
+      <button className={`arco-pagination-item arco-pagination-item-size-default ${currentPage === 1 ? "arco-pagination-item-disabled" : ""}`} aria-label="上一页" disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)}><ChevronLeft size={16} /></button>
       {pageItems.map((item, index) => (
         item === "ellipsis"
           ? <span className="pagination-ellipsis" key={`ellipsis-${index}`}>…</span>
-          : <button className={item === currentPage ? "active" : ""} aria-current={item === currentPage ? "page" : undefined} key={item} onClick={() => onPageChange(item)}>{item}</button>
+          : <button className={`arco-pagination-item arco-pagination-item-size-default ${item === currentPage ? "active arco-pagination-item-active" : ""}`} aria-current={item === currentPage ? "page" : undefined} key={item} onClick={() => onPageChange(item)}>{item}</button>
       ))}
-      <button aria-label="下一页" disabled={currentPage === totalPages} onClick={() => onPageChange(currentPage + 1)}><ChevronRight size={16} /></button>
+      <button className={`arco-pagination-item arco-pagination-item-size-default ${currentPage === totalPages ? "arco-pagination-item-disabled" : ""}`} aria-label="下一页" disabled={currentPage === totalPages} onClick={() => onPageChange(currentPage + 1)}><ChevronRight size={16} /></button>
       <label className="pagination-size">
         <select aria-label="每页条数" value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}>
-          {[10, 20, 50].map((size) => <option key={size} value={size}>{size} 条/页</option>)}
+          {[10, 20, 50].map((size) => <option key={size} value={size}>{size}{compactPageSizeLabel ? "" : " "}条/页</option>)}
         </select>
         <ChevronDown aria-hidden="true" size={16} />
       </label>
@@ -1204,6 +1291,7 @@ const tableColumnMinimumWidths: Record<string, number> = {
   报告来源: 160,
   所属领域: 120,
   上传时间: 120,
+  版本: 220,
   内容摘要: 240,
   状态: 96,
   是否置顶: 96,
@@ -1352,28 +1440,28 @@ function SortableTableHeader({
 }) {
   const isActive = activeField === field;
   return (
-    <span className={`sortable-table-header ${isActive ? "is-active" : ""}`}>
+    <span className={`arco-table-cell-with-sorter sortable-table-header ${isActive ? "is-active" : ""}`}>
       <span>{field}</span>
-      <span className="table-sort-buttons" aria-label={`${field}排序`}>
+      <span className="arco-table-sorter table-sort-buttons" aria-label={`${field}排序`}>
         <button
           type="button"
-          className={`table-sort-button ${isActive && activeDirection === "正序" ? "is-active" : ""}`}
-          aria-label={`排序规则设置：${field}正序`}
-          aria-pressed={isActive && activeDirection === "正序"}
-          title={`排序规则设置：${field}正序`}
-          onClick={() => onSort(field, "正序")}
+          className={`arco-table-sorter-icon table-sort-button is-ascend ${isActive && activeDirection === "升序" ? "is-active arco-table-sorter-icon-active" : ""}`}
+          aria-label={`排序规则设置：${field}升序`}
+          aria-pressed={isActive && activeDirection === "升序"}
+          title={`排序规则设置：${field}升序`}
+          onClick={() => onSort(field, "升序")}
         >
-          <ArrowUp aria-hidden="true" size={12} />
+          <span className="table-sort-caret" aria-hidden="true" />
         </button>
         <button
           type="button"
-          className={`table-sort-button ${isActive && activeDirection === "倒序" ? "is-active" : ""}`}
-          aria-label={`排序规则设置：${field}倒序`}
-          aria-pressed={isActive && activeDirection === "倒序"}
-          title={`排序规则设置：${field}倒序`}
-          onClick={() => onSort(field, "倒序")}
+          className={`arco-table-sorter-icon table-sort-button is-descend ${isActive && activeDirection === "降序" ? "is-active arco-table-sorter-icon-active" : ""}`}
+          aria-label={`排序规则设置：${field}降序`}
+          aria-pressed={isActive && activeDirection === "降序"}
+          title={`排序规则设置：${field}降序`}
+          onClick={() => onSort(field, "降序")}
         >
-          <ArrowDown aria-hidden="true" size={12} />
+          <span className="table-sort-caret" aria-hidden="true" />
         </button>
       </span>
     </span>
@@ -1388,10 +1476,19 @@ function DataTable<T extends Record<string, ReactNode>>({
   onRowClick,
   activeRowKey,
   fullTextColumns = [],
+  columnWidthOverrides = {},
   selectable = false,
   batchActions,
   actionWidth,
   renderHeader,
+  footerNote,
+  pageRowCount,
+  paginationTotalLabel,
+  compactPageSizeLabel = false,
+  paginationPageCountOverride,
+  resetScrollKey,
+  sortableColumns = [],
+  sortedColumn,
 }: {
   columns: string[];
   rows: T[];
@@ -1400,10 +1497,19 @@ function DataTable<T extends Record<string, ReactNode>>({
   onRowClick?: (row: T, index: number) => void;
   activeRowKey?: string | number | null;
   fullTextColumns?: string[];
+  columnWidthOverrides?: Partial<Record<string, number>>;
   selectable?: boolean;
   batchActions?: (selectedRows: T[], clearSelection: () => void) => ReactNode;
   actionWidth?: number;
   renderHeader?: (column: string) => ReactNode;
+  footerNote?: ReactNode;
+  pageRowCount?: number;
+  paginationTotalLabel?: string;
+  compactPageSizeLabel?: boolean;
+  paginationPageCountOverride?: number;
+  resetScrollKey?: string | number;
+  sortableColumns?: string[];
+  sortedColumn?: string;
 }) {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -1415,12 +1521,13 @@ function DataTable<T extends Record<string, ReactNode>>({
   const selectAllRef = useRef<HTMLInputElement>(null);
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const activePage = Math.min(currentPage, totalPages);
-  const pageStart = (activePage - 1) * pageSize;
-  const pageRows = rows.slice(pageStart, pageStart + pageSize);
+  const visiblePageSize = pageRowCount ?? pageSize;
+  const pageStart = (activePage - 1) * visiblePageSize;
+  const pageRows = rows.slice(pageStart, pageStart + visiblePageSize);
   const visibleRowIndexes = pageRows.map((_, index) => pageStart + index);
   const allVisibleRowsSelected = visibleRowIndexes.length > 0 && visibleRowIndexes.every((index) => selectedRows.has(index));
   const someVisibleRowsSelected = visibleRowIndexes.some((index) => selectedRows.has(index));
-  const columnWidths = columns.map((column) => getColumnWidth(column, rows, fullTextColumns.includes(column)));
+  const columnWidths = columns.map((column) => columnWidthOverrides[column] ?? getColumnWidth(column, rows, fullTextColumns.includes(column)));
   const actionRows = actions ? rows.map((row) => getActionItems(actions(row))) : [];
   const actionColumnWidth = actions ? Math.max(actionWidth ?? 0, getActionColumnWidth(actionRows)) : 0;
   const selectedActionRows = Array.from(selectedRows, (rowIndex) => actionRows[rowIndex]).filter((actionItems): actionItems is TableAction[] => Boolean(actionItems));
@@ -1470,6 +1577,13 @@ function DataTable<T extends Record<string, ReactNode>>({
   }, [actions, columns.length, pageSize, rows.length, tableMinWidth]);
 
   useEffect(() => {
+    const tableWrap = tableWrapRef.current;
+    if (!tableWrap) return;
+    tableWrap.scrollLeft = 0;
+    updateScrollState();
+  }, [resetScrollKey]);
+
+  useEffect(() => {
     if (selectAllRef.current) {
       selectAllRef.current.indeterminate = someVisibleRowsSelected && !allVisibleRowsSelected;
     }
@@ -1505,6 +1619,9 @@ function DataTable<T extends Record<string, ReactNode>>({
       currentPage={activePage}
       pageSize={pageSize}
       onPageChange={setCurrentPage}
+      totalLabel={paginationTotalLabel}
+      compactPageSizeLabel={compactPageSizeLabel}
+      pageCountOverride={paginationPageCountOverride}
       onPageSizeChange={(nextPageSize) => {
         setPageSize(nextPageSize);
         setCurrentPage(1);
@@ -1513,13 +1630,13 @@ function DataTable<T extends Record<string, ReactNode>>({
   );
 
   return (
-    <>
+    <div className={`data-table-frame ${selectable ? "is-selectable" : ""}`}>
       <div
         className={`table-wrap ${actions ? "has-actions" : ""} ${scrollState.hasOverflow ? "is-scrollable" : ""} ${scrollState.showLeftShadow ? "has-left-shadow" : ""} ${scrollState.showRightShadow ? "has-right-shadow" : ""}`}
         ref={tableWrapRef}
         onScroll={updateScrollState}
       >
-        <table style={{ width: tableWidth, minWidth: `${tableMinWidth}px` }}>
+        <table className="arco-table" style={{ width: tableWidth, minWidth: `${tableMinWidth}px` }}>
           <colgroup>
             {selectable && <col className="table-select-column" style={{ width: 52 }} />}
             {renderedColumnWidths.map((width, index) => <col key={columns[index]} style={{ width }} />)}
@@ -1527,11 +1644,18 @@ function DataTable<T extends Record<string, ReactNode>>({
           </colgroup>
           <thead>
             <tr>
-              {selectable && <th className="table-select-cell table-sticky-left">
-                <input ref={selectAllRef} type="checkbox" aria-label="选择当前页全部数据" checked={allVisibleRowsSelected} onChange={toggleVisibleRows} />
+              {selectable && <th className="table-select-cell table-sticky-left arco-table-th">
+                <label className={`arco-checkbox ${allVisibleRowsSelected ? "arco-checkbox-checked" : someVisibleRowsSelected ? "arco-checkbox-indeterminate" : ""}`}>
+                  <input ref={selectAllRef} type="checkbox" aria-label="选择当前页全部数据" checked={allVisibleRowsSelected} onChange={toggleVisibleRows} />
+                  <span className="arco-checkbox-mask-wrapper"><span className="arco-checkbox-mask"><Check aria-hidden="true" className="arco-checkbox-mask-icon" size={10} strokeWidth={3} /></span></span>
+                </label>
               </th>}
-              {columns.map((column) => <th key={column}>{renderHeader?.(column) ?? column}</th>)}
-              {actions && <th className="table-action-cell table-sticky-right">操作</th>}
+              {columns.map((column) => {
+                const isSortable = sortableColumns.includes(column);
+                const isSorted = sortedColumn === column;
+                return <th className={`arco-table-th ${isSortable ? "arco-table-col-has-sorter" : ""} ${isSorted ? "arco-table-col-sorted" : ""}`.trim()} key={column}>{renderHeader?.(column) ?? column}</th>;
+              })}
+              {actions && <th className="table-action-cell table-sticky-right arco-table-th">操作</th>}
             </tr>
           </thead>
           <tbody>
@@ -1545,70 +1669,75 @@ function DataTable<T extends Record<string, ReactNode>>({
                   key={key}
                   onClick={onRowClick ? () => onRowClick(row, rowIndex) : undefined}
                 >
-                  {selectable && <td className="table-select-cell table-sticky-left">
-                    <input type="checkbox" aria-label={`选择第 ${rowIndex + 1} 条数据`} checked={selectedRows.has(rowIndex)} onClick={(event) => event.stopPropagation()} onChange={() => toggleRow(rowIndex)} />
+                  {selectable && <td className="table-select-cell table-sticky-left arco-table-td">
+                    <label className={`arco-checkbox ${selectedRows.has(rowIndex) ? "arco-checkbox-checked" : ""}`} onClick={(event) => event.stopPropagation()}>
+                      <input type="checkbox" aria-label={`选择第 ${rowIndex + 1} 条数据`} checked={selectedRows.has(rowIndex)} onChange={() => toggleRow(rowIndex)} />
+                      <span className="arco-checkbox-mask-wrapper"><span className="arco-checkbox-mask"><Check aria-hidden="true" className="arco-checkbox-mask-icon" size={10} strokeWidth={3} /></span></span>
+                    </label>
                   </td>}
                   {columns.map((column) => (
-                    <td key={column}>
+                    <td className="arco-table-td" key={column}>
                       <TableCellContent value={row[column]} showFullText={fullTextColumns.includes(column)} onShowTooltip={showTooltip} onHideTooltip={() => setTooltip(null)} />
                     </td>
                   ))}
-                  {actions && <td className="table-action-cell table-sticky-right">{actions(row)}</td>}
+                  {actions && <td className="table-action-cell table-sticky-right arco-table-td">{actions(row)}</td>}
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-      {selectable && selectedRows.size > 0 ? (
-        <div className="table-bottom-bar batch-selection-bar">
+      {footerNote && <div role="note">{footerNote}</div>}
+      <div className={`table-bottom-bar ${selectable && selectedRows.size > 0 ? "batch-selection-bar" : ""}`}>
+        {selectable && selectedRows.size > 0 && (
           <div className="batch-selection-actions">
             <span>已选 {selectedRows.size} 条</span>
             {batchActions?.(selectedDataRows, () => setSelectedRows(new Set()))}
             {canBatchDelete && <button type="button" className="danger-action">批量删除</button>}
             <button type="button" onClick={() => setSelectedRows(new Set())}>取消选择</button>
           </div>
-          {pagination}
-        </div>
-      ) : pagination}
+        )}
+        {pagination}
+      </div>
       {tooltip && createPortal(
         <div className="table-cell-tooltip" role="tooltip" style={{ left: tooltip.left, top: tooltip.top }}>{tooltip.content}</div>,
         document.body,
       )}
-    </>
+    </div>
   );
 }
 
 function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify: Notify }) {
   const [reports, setReports] = useState(reportRows);
+  const [searchValue, setSearchValue] = useState("");
+  const [query, setQuery] = useState("");
   const [sortField, setSortField] = useState<ReportSortField>("上传时间");
-  const [sortDirection, setSortDirection] = useState<ReportSortDirection>("倒序");
+  const [sortDirection, setSortDirection] = useState<ReportSortDirection>("降序");
 
-  const sortedReports = useMemo(() => reports
+  const visibleReports = useMemo(() => reports
+    .filter((report) => {
+      const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
+      if (!normalizedQuery) return true;
+      return [report.报告标题, report.报告来源, report.报告类型, report.所属栏目, report.署名信息, report.行业分类, report.状态]
+        .some((value) => value.toLocaleLowerCase("zh-CN").includes(normalizedQuery));
+    })
     .map((report, index) => ({ report, index }))
     .sort((a, b) => {
-      const pinnedOrder = Number(b.report.是否置顶 === "是") - Number(a.report.是否置顶 === "是");
+      const pinnedOrder = Number(b.report.置顶) - Number(a.report.置顶);
       if (pinnedOrder !== 0) return pinnedOrder;
 
-      const comparison = sortField === "上传时间"
-        ? a.report.上传时间.localeCompare(b.report.上传时间)
-        : reportSortCollator.compare(a.report[sortField], b.report[sortField]);
-      return (sortDirection === "正序" ? comparison : -comparison) || a.index - b.index;
+      const comparison = a.report.上传时间.localeCompare(b.report.上传时间);
+      return (sortDirection === "升序" ? comparison : -comparison) || a.index - b.index;
     })
-    .map(({ report }) => report), [reports, sortDirection, sortField]);
+    .map(({ report }) => report), [query, reports, sortDirection, sortField]);
 
-  const updateReport = (title: string, patch: Partial<(typeof reportRows)[number]>) => {
+  const updateReport = (title: string, patch: Partial<ReportRow>) => {
     setReports((list) => list.map((report) => (report.报告标题 === title ? { ...report, ...patch } : report)));
   };
 
   return (
-    <section className="card page-card">
-      <div className="filters">
-        <FilterSelect label="报告类型" options={["全部", ...reportTypeOptions]} />
-        <FilterSelect label="所属领域" options={["全部", "人工智能", "智能制造", "新材料", "低空经济"]} />
-        <FilterInput label="报告来源" placeholder="请输入" searchable />
-      </div>
-      <div className="table-toolbar">
+    <section className="card page-card report-management-page">
+      <div className="table-toolbar report-management-toolbar">
         <div>
           <Button
             variant="primary"
@@ -1619,74 +1748,62 @@ function ReportManagement({ openModal, notify }: { openModal: OpenModal; notify:
                 ...list,
                 {
                   报告标题: values.报告标题,
-                  报告类型: values.报告类型,
                   报告来源: values.报告来源,
-                  所属领域: values.所属领域,
+                  报告类型: values.报告类型,
+                  所属栏目: values.报告类型,
+                  署名信息: "作者：平台创作",
+                  行业分类: values.所属领域,
+                  状态: "草稿",
+                  版本信息: "尚未提交",
                   上传时间: values.上传时间,
-                  内容摘要: values.内容摘要,
-                  状态: "上架",
-                  是否置顶: "否",
+                  置顶: false,
                 },
               ]),
             })}
           >报告上传</Button>
+          <Button variant="linear">查看操作记录</Button>
+        </div>
+        <div className="report-search-group">
+          <FilterInput label="" ariaLabel="搜索报告标题" placeholder="搜索报告标题" clearable value={searchValue} onChange={setSearchValue} onEnter={() => setQuery(searchValue)} />
+          <Button variant="primary" onClick={() => setQuery(searchValue)}>查询</Button>
+          <Button variant="linear" onClick={() => { setSearchValue(""); setQuery(""); }}>重置</Button>
         </div>
       </div>
       <DataTable
-        key={`${sortField}-${sortDirection}`}
-        columns={["报告标题", "报告类型", "报告来源", "所属领域", "上传时间", "内容摘要", "状态", "是否置顶"]}
-        rows={sortedReports.map((row) => ({ ...row, 原始状态: row.状态, 状态: <StatusTag value={row.状态} />, 是否置顶: <PinState pinned={row.是否置顶 === "是"} />, 原始置顶状态: row.是否置顶 }))}
+        columns={["报告标题", "报告来源", "报告类型", "所属栏目", "署名信息", "行业分类", "状态", "版本", "上传时间"]}
+        columnWidthOverrides={{ 报告标题: 190, 报告来源: 112, 报告类型: 112, 所属栏目: 120, 署名信息: 180, 行业分类: 112, 状态: 104, 版本: 200, 上传时间: 120 }}
+        rows={visibleReports.map((row) => ({ ...row, 状态: <ReportStatusCell status={row.状态} />, 版本: <span className="report-version-cell" title={row.版本信息}>{row.版本信息}</span>, 原始状态: row.状态 }))}
         renderHeader={(column) => reportSortFieldOptions.includes(column as ReportSortField)
-          ? (
-            <SortableTableHeader
-              field={column as ReportSortField}
-              activeField={sortField}
-              activeDirection={sortDirection}
-              onSort={(field, direction) => {
-                setSortField(field);
-                setSortDirection(direction);
-              }}
-            />
-          )
+          ? <SortableTableHeader field={column as ReportSortField} activeField={sortField} activeDirection={sortDirection} onSort={(field, direction) => { setSortField(field); setSortDirection(direction); }} />
           : column}
-        selectable
+        sortableColumns={[...reportSortFieldOptions]}
+        sortedColumn={sortField}
         rowKey={(row) => String(row.报告标题)}
         actions={(row) => (
           <ActionLinks
-            actions={[
-              row.原始状态 === "下架" ? "报告上架" : "报告下架",
-              "信息修改",
-              (row.原始状态 === "下架" || row.原始置顶状态 === "是") && "报告删除",
-              row.原始置顶状态 === "是" ? "取消置顶" : "置顶",
-            ]}
-            disabledActions={row.原始置顶状态 === "是" ? ["报告删除"] : []}
+            actions={reportActionsByStatus[row.原始状态 as ReportStatus]}
+            preserveOrder
             onAction={(action) => {
               const title = String(row.报告标题);
               const report = reports.find((item) => item.报告标题 === title);
               if (!report) return;
-              if (action === "报告上架" || action === "报告下架") {
-                updateReport(title, { 状态: action === "报告上架" ? "上架" : "下架" });
-                notify(action === "报告上架" ? "上架成功" : "下架成功");
+              if (action === "上架") updateReport(title, { 状态: "已上架", 版本信息: report.版本信息.replace(/^V/, "线上 V") });
+              if (action === "下架") updateReport(title, { 状态: "已下架", 置顶: false });
+              if (action === "提交审核" || action === "提交修订版") updateReport(title, { 状态: "待审核" });
+              if (action === "撤回") updateReport(title, { 状态: "草稿", 版本信息: "尚未提交" });
+              if (action === "重试上架") updateReport(title, { 状态: "待上架" });
+              if (action === "置顶") {
+                setReports((list) => list.map((item) => ({ ...item, 置顶: item.报告标题 === title })));
+                notify("置顶成功，已移至列表顶部");
               }
-              if (action === "置顶" || action === "取消置顶") {
-                if (action === "置顶") {
-                  setReports((list) => {
-                    const target = list.find((item) => item.报告标题 === title);
-                    return target ? [{ ...target, 是否置顶: "是" }, ...list.filter((item) => item.报告标题 !== title)] : list;
-                  });
-                } else {
-                  updateReport(title, { 是否置顶: "否" });
-                }
-                notify(action === "置顶" ? "置顶成功，已移至列表顶部" : "取消置顶成功");
-              }
-              if (action === "信息修改") {
+              if (action === "编辑") {
                 openModal("report", {
                   mode: "edit",
-                  payload: report,
-                  onSave: (values) => updateReport(title, values),
+                  payload: { 报告标题: report.报告标题, 报告类型: report.报告类型, 报告来源: report.报告来源, 所属领域: report.行业分类, 上传时间: report.上传时间, 内容摘要: "" },
+                  onSave: (values) => updateReport(title, { 报告标题: values.报告标题, 报告类型: values.报告类型, 报告来源: values.报告来源, 所属栏目: values.报告类型, 行业分类: values.所属领域, 上传时间: values.上传时间 }),
                 });
               }
-              if (action === "报告删除") {
+              if (action === "删除") {
                 openModal("delete", {
                   payload: { message: `确认删除${title}？` },
                   onConfirm: () => setReports((list) => list.filter((item) => item.报告标题 !== title)),
@@ -2853,15 +2970,60 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
 }
 
 function AuditContent() {
-  const [tab, setTab] = useState<"comments" | "scholars" | "reports">("comments");
+  const [tab, setTab] = useState<AuditContentTab>(readStoredAuditTab);
   const [comments, setComments] = useState(commentRows);
   const [scholars, setScholars] = useState(scholarRows);
   const [reports, setReports] = useState(auditReportRows);
+  const [reportEntryMethod, setReportEntryMethod] = useState("全部");
+  const [reportSubmitTime, setReportSubmitTime] = useState("全部");
+  const [reportSearchValue, setReportSearchValue] = useState("");
+  const [reportFilters, setReportFilters] = useState({ entryMethod: "全部", submitTime: "全部", search: "" });
   const [selectedScholar, setSelectedScholar] = useState<(typeof scholarRows)[number] | null>(null);
   const [selectedScholarMaterial, setSelectedScholarMaterial] = useState<(typeof scholarRows)[number]["申请资料"][number] | null>(null);
   const [selectedReport, setSelectedReport] = useState<(typeof auditReportRows)[number] | null>(null);
+  const [rejectingReport, setRejectingReport] = useState<(typeof auditReportRows)[number] | null>(null);
+  const [reportRejectReason, setReportRejectReason] = useState("");
+  const [reportRejectSubmitted, setReportRejectSubmitted] = useState(false);
+  const [, setReportAuditRecords] = useState<Array<{ reportId: string; reportTitle: string; reviewer: string; auditedAt: string; version: string; reason: string }>>([]);
   const [rejectingComment, setRejectingComment] = useState<(typeof commentRows)[number] | null>(null);
   const [rejectOpinion, setRejectOpinion] = useState("");
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(AUDIT_TAB_STORAGE_KEY, tab);
+    } catch {
+      // Keep navigation usable when browser storage is unavailable.
+    }
+  }, [tab]);
+  const visibleAuditReports = reports.filter((report) => {
+    const normalizedSearch = reportFilters.search.trim().toLocaleLowerCase("zh-CN");
+    return (reportFilters.entryMethod === "全部" || report.入库方式 === reportFilters.entryMethod)
+      && (reportFilters.submitTime === "全部" || report.提交时间.startsWith(reportFilters.submitTime))
+      && (!normalizedSearch || report.报告名称.toLocaleLowerCase("zh-CN").includes(normalizedSearch));
+  });
+  const closeReportReject = () => {
+    setRejectingReport(null);
+    setReportRejectReason("");
+    setReportRejectSubmitted(false);
+  };
+  const saveReportReject = () => {
+    if (!rejectingReport) return;
+    const reason = reportRejectReason.trim();
+    setReportRejectSubmitted(true);
+    if (!reason) return;
+    setReportAuditRecords((records) => [
+      ...records,
+      {
+        reportId: rejectingReport.id,
+        reportTitle: rejectingReport.报告名称,
+        reviewer: "系统管理员",
+        auditedAt: new Date().toLocaleString("zh-CN", { hour12: false }),
+        version: rejectingReport.提交版本,
+        reason,
+      },
+    ]);
+    setReports((list) => list.filter((item) => item.id !== rejectingReport.id));
+    closeReportReject();
+  };
   return (
     <section className="card page-card audit-content-page">
       <div className="subtabs">
@@ -2942,24 +3104,100 @@ function AuditContent() {
         />
       )}
       {tab === "reports" && (
-        <DataTable
-          columns={["报告名称", "报告类型", "摘要预览", "提交人"]}
-          rows={reports.map(({ 报告名称, 报告类型, 摘要预览, 提交人 }) => ({ 报告名称, 报告类型, 摘要预览, 提交人 }))}
-          actions={(row) => (
-            <ActionLinks
-              actions={["查看详情", "审核通过", "审核驳回"]}
-              onAction={(action) => {
-                const report = reports.find((item) => item.报告名称 === String(row.报告名称));
-                if (!report) return;
-                if (action === "查看详情") {
-                  setSelectedReport(report);
-                  return;
-                }
-                setReports((list) => list.filter((item) => item.报告名称 !== report.报告名称));
-              }}
-            />
-          )}
-        />
+        <div className="audit-report-list-page">
+          <form
+            className="audit-report-filter-bar"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setReportFilters({ entryMethod: reportEntryMethod, submitTime: reportSubmitTime, search: reportSearchValue });
+            }}
+          >
+            <FilterSelect label="入库方式" options={["全部", "外部调研", "平台创作"]} value={reportEntryMethod} onChange={setReportEntryMethod} />
+            <FilterSelect label="提交时间" options={["全部", "2026-09-10"]} value={reportSubmitTime} onChange={setReportSubmitTime} />
+            <FilterInput label="" ariaLabel="搜索报告标题" placeholder="搜索报告标题" clearable value={reportSearchValue} onChange={setReportSearchValue} onEnter={() => setReportFilters({ entryMethod: reportEntryMethod, submitTime: reportSubmitTime, search: reportSearchValue })} />
+            <Button variant="primary" type="submit">查询</Button>
+            <Button variant="linear" onClick={() => {
+              setReportEntryMethod("全部");
+              setReportSubmitTime("全部");
+              setReportSearchValue("");
+              setReportFilters({ entryMethod: "全部", submitTime: "全部", search: "" });
+            }}>重置</Button>
+          </form>
+          <div className="audit-report-toolbar"><Button variant="primary">查看审核记录</Button></div>
+          <DataTable
+            columns={["报告标题", "入库方式", "展示栏目", "提交版本", "提交人", "提交时间"]}
+            columnWidthOverrides={{ 报告标题: 240, 入库方式: 140, 展示栏目: 140, 提交版本: 140, 提交人: 140, 提交时间: 216 }}
+            fullTextColumns={["提交时间"]}
+            pageRowCount={9}
+            paginationTotalLabel={`共计 ${visibleAuditReports.length} 条`}
+            paginationPageCountOverride={20}
+            compactPageSizeLabel
+            resetScrollKey={`${reportFilters.entryMethod}|${reportFilters.submitTime}|${reportFilters.search}|${visibleAuditReports.length}`}
+            rowKey={(row) => String(row.报告ID)}
+            rows={visibleAuditReports.map((report) => ({
+              报告ID: report.id,
+              报告标题: report.报告名称,
+              入库方式: report.入库方式,
+              展示栏目: report.展示栏目,
+              提交版本: report.提交版本,
+              提交人: report.提交人,
+              提交时间: report.提交时间,
+            }))}
+            actions={(row) => (
+              <ActionLinks
+                actions={["查看", "通过", "驳回"]}
+                preserveOrder
+                onAction={(action) => {
+                  const report = reports.find((item) => item.id === String(row.报告ID));
+                  if (!report) return;
+                  if (action === "查看") {
+                    setSelectedReport(report);
+                    return;
+                  }
+                  if (action === "驳回") {
+                    setRejectingReport(report);
+                    setReportRejectReason("2026年AI硬件产业链深度研究报告");
+                    setReportRejectSubmitted(false);
+                    return;
+                  }
+                  setReports((list) => list.filter((item) => item.id !== report.id));
+                }}
+              />
+            )}
+          />
+        </div>
+      )}
+      {rejectingReport && createPortal(
+        <div className="modal-backdrop report-reject-backdrop" onMouseDown={(event) => event.target === event.currentTarget && closeReportReject()}>
+          <section className="modal report-reject-modal" role="dialog" aria-modal="true" aria-labelledby="report-reject-title">
+            <header className="report-reject-header">
+              <h2 id="report-reject-title">驳回审核</h2>
+              <button type="button" aria-label="关闭驳回审核" onClick={closeReportReject}><X aria-hidden="true" size={16} /></button>
+            </header>
+            <div className="report-reject-body">
+              <div className="report-reject-alert" role="note">
+                <span className="report-reject-info-icon" aria-hidden="true" />
+                <span>提交后生成驳回记录，并保留审核人、时间、版本号和原因</span>
+              </div>
+              <label className="report-reject-field" htmlFor="report-reject-reason">
+                <span><i aria-hidden="true">*</i>驳回原因</span>
+                <textarea
+                  id="report-reject-reason"
+                  aria-invalid={reportRejectSubmitted && !reportRejectReason.trim() ? true : undefined}
+                  aria-describedby={reportRejectSubmitted && !reportRejectReason.trim() ? "report-reject-error" : undefined}
+                  value={reportRejectReason}
+                  onChange={(event) => setReportRejectReason(event.target.value)}
+                />
+                {reportRejectSubmitted && !reportRejectReason.trim() && <small id="report-reject-error" role="alert">请输入驳回原因</small>}
+              </label>
+            </div>
+            <footer className="report-reject-footer">
+              <Button variant="linear" onClick={closeReportReject}>取消</Button>
+              <Button variant="primary" onClick={saveReportReject}>保存</Button>
+            </footer>
+          </section>
+        </div>,
+        document.body,
       )}
       {selectedReport && createPortal(
         <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setSelectedReport(null)}>
@@ -5217,7 +5455,7 @@ function ModalHeader({ title, subtitle, close }: { title: string; subtitle?: str
 function Sidebar({ active, setActive, collapsed, setCollapsed }: { active: PageKey; setActive: (p: PageKey) => void; collapsed: boolean; setCollapsed: (v: boolean) => void }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ 审核管理: true, 埋点管理: true });
   return (
-    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+    <aside className={`sidebar sidebar-text-nav ${collapsed ? "collapsed" : ""}`}>
       <div className="brand">
         <img src="./assets/gkx-logo.png" alt="国科信" />
         {!collapsed && <strong>门户后台管理系统</strong>}
@@ -5225,31 +5463,26 @@ function Sidebar({ active, setActive, collapsed, setCollapsed }: { active: PageK
       <button className="sidebar-fold" onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "展开侧栏" : "收起侧栏"}>
         <img src={collapsed ? "./assets/sidebar-collapsed.svg" : "./assets/sidebar-expanded.svg"} alt="" />
       </button>
-      <nav>
+      <nav aria-label="后台管理导航">
         {navSections.map((section) => (
           <div className="nav-section-block" key={section.label}>
-            {!collapsed && <div className="nav-section-title">{section.label}</div>}
             {section.items.map((item) => {
-              const ItemIcon = item.icon;
               const isLeafActive = item.key === active;
               const hasActiveChild = item.children?.some((child) => child.key === active) ?? false;
               const isOpen = expanded[item.label] ?? hasActiveChild;
               if (item.key) {
                 return (
-                  <button className={`group-button nav-leaf ${isLeafActive ? "active" : ""}`} title={collapsed ? item.label : undefined} onClick={() => setActive(item.key!)} key={item.label}>
-                    <ItemIcon className="nav-item-icon" size={20} strokeWidth={1.2} />
-                    {!collapsed && <span>{item.label}</span>}
+                  <button className={`group-button nav-leaf ${isLeafActive ? "active" : ""}`} aria-current={isLeafActive ? "page" : undefined} onClick={() => setActive(item.key!)} key={item.label}>
+                    <span>{item.label}</span>
                   </button>
                 );
               }
               return (
                 <div className={`nav-group ${hasActiveChild ? "has-active" : ""}`} key={item.label}>
-                  <button className="group-button nav-parent" aria-haspopup={collapsed ? "menu" : undefined} onClick={() => !collapsed && setExpanded({ ...expanded, [item.label]: !isOpen })}>
-                    <ItemIcon className="nav-item-icon" size={20} strokeWidth={1.2} />
-                    {!collapsed && <><span>{item.label}</span><ChevronDown className={`nav-chevron ${isOpen ? "rotate" : ""}`} size={16} strokeWidth={1.2} /></>}
+                  <button className="group-button nav-parent" aria-expanded={isOpen} aria-controls={`sidebar-children-${item.label}`} onClick={() => setExpanded({ ...expanded, [item.label]: !isOpen })}>
+                    <span>{item.label}</span><ChevronDown aria-hidden="true" className={`nav-chevron ${isOpen ? "rotate" : ""}`} size={16} strokeWidth={1.2} />
                   </button>
-                  {!collapsed && isOpen && <div className="group-children">{item.children?.map((child) => <button className={`${active === child.key ? "active" : ""} ${child.label.length > 8 ? "is-long-label" : ""}`.trim()} onClick={() => setActive(child.key)} key={child.key}>{child.label}</button>)}</div>}
-                  {collapsed && <div className={`collapsed-submenu ${item.children?.some((child) => child.label.length > 8) ? "is-wide" : ""}`.trim()} role="menu" aria-label={`${item.label}二级菜单`}><strong>{item.label}</strong>{item.children?.map((child) => <button type="button" role="menuitem" className={`${active === child.key ? "active" : ""} ${child.label.length > 8 ? "is-long-label" : ""}`.trim()} onClick={() => setActive(child.key)} key={child.key}>{child.label}</button>)}</div>}
+                  {isOpen && <div className="group-children" id={`sidebar-children-${item.label}`}>{item.children?.map((child) => <button className={active === child.key ? "active" : ""} aria-current={active === child.key ? "page" : undefined} onClick={() => setActive(child.key)} key={child.key}>{child.label}</button>)}</div>}
                 </div>
               );
             })}
@@ -5284,7 +5517,7 @@ function TopBar({ collapsed, onMenu, onSearch }: { collapsed: boolean; onMenu: (
 }
 
 export default function App() {
-  const [active, setActive] = useState<PageKey>("report-management");
+  const [active, setActive] = useState<PageKey>(readStoredActivePage);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [formWorkspaceOpen, setFormWorkspaceOpen] = useState(false);
@@ -5301,6 +5534,13 @@ export default function App() {
   }, [dismissFeedback]);
   useEffect(() => {
     if (active !== "form-center") setFormWorkspaceOpen(false);
+  }, [active]);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(ACTIVE_PAGE_STORAGE_KEY, active);
+    } catch {
+      // Keep navigation usable when browser storage is unavailable.
+    }
   }, [active]);
   const currentTitle = pageLabels[active];
   const breadcrumbSection = breadcrumbSections[active];
@@ -5341,8 +5581,7 @@ export default function App() {
       <main className={collapsed ? "main collapsed" : "main"}>
         <div className="page-heading">
           <nav className="breadcrumb" aria-label="面包屑">
-            <span className="breadcrumb-section">{breadcrumbSection}</span>
-            <span className="breadcrumb-separator" aria-hidden="true">/</span>
+            {active !== "report-management" && <><span className="breadcrumb-section">{breadcrumbSection}</span><span className="breadcrumb-separator" aria-hidden="true">/</span></>}
             {breadcrumbParent && breadcrumbParentTarget && (
               <>
                 <button type="button" className="breadcrumb-link" onClick={() => go(breadcrumbParentTarget)}>{breadcrumbParent}</button>

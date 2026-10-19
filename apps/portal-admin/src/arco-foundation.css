@@ -1,0 +1,172 @@
+/* Arco 2.66.18 foundation, adapted to the existing portal shell and density. */
+body {
+  --border-radius-small: 4px;
+  --border-radius-medium: 4px;
+  --primary-6: 22, 93, 255;
+  --primary-5: 64, 128, 255;
+  --primary-7: 14, 66, 210;
+  --color-text-1: #1d2129;
+  --color-text-2: #4e5969;
+  --color-text-3: #86909c;
+  --color-text-4: #c9cdd4;
+  --color-fill-1: #f7f8fa;
+  --color-fill-2: #f2f3f5;
+  --color-fill-3: #e5e6eb;
+  --color-fill-4: #c9cdd4;
+  --color-bg-2: #fff;
+  --color-primary-light-1: #e8f3ff;
+  --gkx-brand: rgb(var(--primary-6));
+  --gkx-brand-hover: rgb(var(--primary-5));
+  --gkx-brand-active: rgb(var(--primary-7));
+  --gkx-brand-light: var(--color-primary-light-1);
+}
+
+.btn.arco-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-height: 32px;
+  font-weight: 400;
+  box-shadow: none;
+}
+.btn.arco-btn > svg + span { margin-left: 8px; }
+.btn.arco-btn-text { min-height: 22px; height: 22px; padding: 0 4px; }
+.btn.arco-btn-disabled,
+.btn.arco-btn-disabled:hover { color: var(--color-text-4); background: var(--color-fill-2); border-color: transparent; }
+.btn.arco-btn.linear:not(.arco-btn-disabled) {
+  color: var(--color-text-1);
+  background: #fff;
+  border-color: var(--color-fill-3);
+}
+.btn.arco-btn.linear:not(.arco-btn-disabled):hover {
+  color: rgb(var(--primary-6));
+  background: #fff;
+  border-color: rgb(var(--primary-5));
+}
+.btn.arco-btn.linear:not(.arco-btn-disabled):active {
+  color: rgb(var(--primary-7));
+  background: #fff;
+  border-color: rgb(var(--primary-7));
+}
+.btn.arco-btn.linear:not(.arco-btn-disabled):focus-visible {
+  color: rgb(var(--primary-6));
+  background: #fff;
+  border-color: rgb(var(--primary-5));
+  box-shadow: 0 0 0 2px rgba(22, 93, 255, .18);
+}
+.inline-actions .arco-btn { min-height: 22px; height: 22px; padding: 0; border: 0; font-size: 14px; line-height: 22px; }
+.inline-actions .arco-btn.arco-btn-disabled,
+.inline-actions .arco-btn.arco-btn-disabled:hover { color: var(--color-text-4); background: transparent; }
+
+.filter-field .arco-input { height: 32px; border: 1px solid var(--color-fill-3); background: #fff; font-size: 14px; line-height: 22px; }
+.filter-field .arco-input:hover { background: #fff; border-color: var(--color-fill-4); }
+.filter-field .arco-input:focus { background: #fff; border-color: rgb(var(--primary-5)); box-shadow: none; }
+.filter-search-control { position: relative; display: block; height: 32px; padding: 0; border: 0; border-radius: var(--border-radius-small); background: transparent; box-shadow: none; }
+.filter-field .filter-search-control > input.arco-input { width: 100%; min-width: 0; padding-right: 34px; }
+.filter-field:focus-within .filter-search-control { border: 0; box-shadow: none; }
+.filter-search-control > svg { position: absolute; top: 8px; right: 12px; color: var(--color-text-3); pointer-events: none; }
+.filter-search-control > .filter-clear-button {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-3);
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+}
+.filter-search-control > .filter-clear-button:hover:not(:disabled) { color: rgb(var(--primary-6)); background: var(--color-fill-2); }
+.filter-search-control > .filter-clear-button:disabled { color: var(--color-text-4); cursor: default; }
+.filter-field .filter-select-control { border: 1px solid var(--color-fill-3); background: #fff; box-shadow: none; }
+.filter-field .filter-select-control:hover { border-color: var(--color-fill-4); background: #fff; }
+.filter-field .filter-select-control:focus-within { border-color: rgb(var(--primary-5)); background: #fff; box-shadow: none; }
+.filter-field .filter-select-trigger { height: 32px; padding: 0 12px; border-radius: var(--border-radius-small); font-size: 14px; line-height: 30px; }
+.filter-field .filter-select-menu { top: calc(100% + 4px); padding: 4px 0; }
+.filter-field .filter-select-menu button { min-height: 36px; height: 36px; border: 0; border-radius: 0; font-weight: 400; }
+.filter-field .filter-select-menu button:hover { background: var(--color-fill-2); }
+.filter-field .filter-select-menu button.active { color: rgb(var(--primary-6)); background: var(--color-primary-light-1); font-weight: 500; }
+
+.table-wrap { border: 0; border-radius: var(--border-radius-medium); }
+.table-wrap > .arco-table { display: table; border: 0; color: var(--color-text-2); }
+.table-wrap .arco-table-th,
+.table-wrap .arco-table-td { height: 40px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--color-fill-3); font-size: 14px; line-height: 22px; }
+.table-wrap .arco-table-th { color: var(--color-text-2); background: var(--color-fill-2); font-weight: 500; }
+.table-wrap .arco-table-td { color: var(--color-text-2); background: #fff; }
+.table-wrap .arco-table-th.arco-table-col-has-sorter { padding: 0; }
+.table-wrap .arco-table-col-has-sorter .sortable-table-header.arco-table-cell-with-sorter {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: default;
+}
+.table-wrap .sortable-table-header .table-sort-buttons.arco-table-sorter {
+  width: 12px;
+  height: 16px;
+  margin-left: 8px;
+  display: inline-flex;
+  flex: 0 0 12px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  vertical-align: 0;
+}
+.table-wrap .sortable-table-header .table-sort-button.arco-table-sorter-icon {
+  width: 12px;
+  height: 8px;
+  min-height: 8px;
+  display: inline-flex;
+  flex: 0 0 8px;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+.table-wrap tbody tr:hover > .arco-table-td { background: var(--color-fill-1); }
+.table-wrap tbody tr.is-selected > .arco-table-td,
+.table-wrap tbody tr.is-selected:hover > .arco-table-td { background: var(--color-primary-light-1); }
+.table-wrap .arco-checkbox { padding-left: 0; line-height: 1; }
+.table-wrap .arco-checkbox > input[type=checkbox] { width: 14px; height: 14px; margin: 0; }
+.table-wrap .arco-checkbox-mask-wrapper { display: inline-block; top: 0; }
+.table-wrap .arco-checkbox-mask { display: block; border-radius: 2px; }
+.table-wrap .arco-checkbox-mask-icon { display: block; width: 10px; height: 10px; margin: 0; }
+
+.pagination.arco-pagination { justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.pagination.arco-pagination > .arco-pagination-item { margin-right: 0; padding: 0; min-width: 32px; height: 32px; line-height: 32px; }
+.pagination.arco-pagination > .arco-pagination-item-active { color: rgb(var(--primary-6)); background: var(--color-primary-light-1); }
+.pagination-size { border: 1px solid var(--color-fill-3); background: #fff; }
+.pagination-size:hover { background: #fff; border-color: var(--color-fill-4); }
+.pagination-size:focus-within { border-color: rgb(var(--primary-5)); background: #fff; box-shadow: none; }
+
+/* Existing native form fields use the same Arco token/state contract. */
+.form-field input:not([type=checkbox]):not([type=radio]):not([type=file]),
+.form-field select,
+.form-field textarea { color: var(--color-text-1); background: #fff; border-color: var(--color-fill-3); box-shadow: none; }
+.form-field input:not([type=checkbox]):not([type=radio]):not([type=file]):hover,
+.form-field select:hover,
+.form-field textarea:hover { background: #fff; border-color: var(--color-fill-4); }
+.form-field input:not([type=checkbox]):not([type=radio]):not([type=file]):focus,
+.form-field select:focus,
+.form-field textarea:focus { background: #fff; border-color: rgb(var(--primary-5)); box-shadow: none; }
+.form-field input:disabled,
+.form-field select:disabled,
+.form-field textarea:disabled { color: var(--color-text-4); background: #fff; border-color: var(--color-fill-3); }
+.form-field [aria-invalid=true] { border-color: rgb(var(--danger-6)); background: var(--color-danger-light-1); }
+.gkx-select .gkx-select-trigger { border-color: var(--color-fill-3); background: #fff; color: var(--color-text-1); }
+.gkx-select .gkx-select-trigger:hover { border-color: var(--color-fill-4); background: #fff; }
+.gkx-select .gkx-select-trigger[aria-expanded=true],
+.gkx-select .gkx-select-trigger:focus-visible { border-color: rgb(var(--primary-5)); background: #fff; box-shadow: none; }
+.gkx-select .gkx-select-trigger:disabled { color: var(--color-text-4); background: #fff; border-color: var(--color-fill-3); }
+.breadcrumb { color: var(--color-text-2); }
+.breadcrumb-current { color: var(--color-text-1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .arco-btn, .arco-input, .arco-select-view, .arco-pagination-item { transition: none; }
+}
