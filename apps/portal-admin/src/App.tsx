@@ -550,6 +550,27 @@ const auditReportRows = Array.from({ length: 150 }, (_, index) => {
   };
 });
 
+type AuditHistoryRecord = {
+  id: string;
+  报告标题: string;
+  入库方式: string;
+  展示栏目: string;
+  提交版本: string;
+  提交人: string;
+  提交时间: string;
+  处理结果: "已通过" | "已驳回" | "已撤回";
+  处理人: string;
+  处理时间: string;
+};
+
+const auditHistoryRows: AuditHistoryRecord[] = [
+  { id: "history-1", 报告标题: "未来产业报告：智能制造", 入库方式: "平台创作", 展示栏目: "研究报告", 提交版本: "V1.2 · 2026-10-09 14:20", 提交人: "张明远", 提交时间: "2026-10-09 14:20", 处理结果: "已驳回", 处理人: "审核员B", 处理时间: "2026-10-10 17:40" },
+  { id: "history-2", 报告标题: "2026全球AI产业研报", 入库方式: "外部研报", 展示栏目: "研报库", 提交版本: "V1.1 · 2026-10-09 08:40", 提交人: "管理员A", 提交时间: "2026-10-09 08:40", 处理结果: "已通过", 处理人: "审核员B", 处理时间: "2026-10-10 10:15" },
+  { id: "history-3", 报告标题: "新能源汽车消费趋势洞察", 入库方式: "用户创作", 展示栏目: "洞察报告", 提交版本: "V1.3 · 2026-10-07 18:35", 提交人: "陈思敏", 提交时间: "2026-10-07 18:35", 处理结果: "已撤回", 处理人: "陈思敏", 处理时间: "2026-10-08 09:12" },
+  { id: "history-4", 报告标题: "未来产业报告：智能制造", 入库方式: "平台创作", 展示栏目: "研究报告", 提交版本: "V1.1 · 2026-10-02 11:05", 提交人: "张明远", 提交时间: "2026-10-02 11:05", 处理结果: "已通过", 处理人: "审核员A", 处理时间: "2026-10-03 16:30" },
+  { id: "history-5", 报告标题: "2026全球AI产业研报", 入库方式: "外部研报", 展示栏目: "研报库", 提交版本: "V1.0 · 2026-09-30 09:20", 提交人: "管理员A", 提交时间: "2026-09-30 09:20", 处理结果: "已驳回", 处理人: "审核员C", 处理时间: "2026-10-01 10:06" },
+];
+
 const trackingRows = [
   { 事件ID: "EVT_REPORT_VIEW", 所属功能模块: "报告管理", 埋点标签: "报告查看", 埋点路径: "/report/detail", 触发机制: "点击", 创建时间: "2026-07-08 10:20" },
   { 事件ID: "EVT_USER_REGISTER", 所属功能模块: "用户管理", 埋点标签: "用户注册", 埋点路径: "/user/register", 触发机制: "提交", 创建时间: "2026-07-06 14:35" },
@@ -1279,7 +1300,7 @@ function Pagination({
   const pageItems = getPaginationItems(totalPages, currentPage);
   return (
     <nav className="pagination arco-pagination" aria-label="分页">
-      <span>{totalLabel ?? `共 ${total} 条`}</span>
+      {totalLabel !== "" && <span>{totalLabel ?? `共 ${total} 条`}</span>}
       <button className={`arco-pagination-item arco-pagination-item-size-default ${currentPage === 1 ? "arco-pagination-item-disabled" : ""}`} aria-label="上一页" disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)}><ChevronLeft size={16} /></button>
       {pageItems.map((item, index) => (
         item === "ellipsis"
@@ -1568,12 +1589,10 @@ function DataTable<T extends Record<string, ReactNode>>({
   const contentColumnsWidth = columnWidths.reduce((total, width) => total + width, 0);
   const fixedColumnsWidth = (selectable ? 52 : 0) + actionColumnWidth;
   const tableMinWidth = fixedColumnsWidth + contentColumnsWidth;
-  const renderedTableWidth = actions ? Math.max(tableMinWidth, tableViewportWidth) : tableMinWidth;
-  const contentFillWidth = actions ? Math.max(0, renderedTableWidth - tableMinWidth) : 0;
+  const renderedTableWidth = Math.max(tableMinWidth, tableViewportWidth);
+  const contentFillWidth = Math.max(0, renderedTableWidth - tableMinWidth);
   const tableWidth = `${renderedTableWidth}px`;
-  const renderedColumnWidths = actions
-    ? columnWidths.map((width) => width + contentFillWidth * (width / contentColumnsWidth))
-    : columnWidths;
+  const renderedColumnWidths = columnWidths.map((width) => width + contentFillWidth * (width / contentColumnsWidth));
 
   const updateScrollState = () => {
     const tableWrap = tableWrapRef.current;
@@ -3286,7 +3305,59 @@ function FormCenter({ openModal, notify, onWorkspaceChange }: { openModal: OpenM
   );
 }
 
-function AuditContent() {
+function ReportAuditHistoryPage() {
+  const [resultValue, setResultValue] = useState("全部");
+  const [timeValue, setTimeValue] = useState("全部时间");
+  const [searchValue, setSearchValue] = useState("");
+  const [filters, setFilters] = useState({ result: "全部", time: "全部时间", search: "" });
+  const visibleRows = useMemo(() => {
+    const normalizedSearch = filters.search.trim().toLocaleLowerCase("zh-CN");
+    return auditHistoryRows
+      .filter((record) => filters.result === "全部" || record.处理结果 === filters.result)
+      .filter((record) => filters.time === "全部时间" || record.处理时间.startsWith(filters.time))
+      .filter((record) => !normalizedSearch || record.报告标题.toLocaleLowerCase("zh-CN").includes(normalizedSearch))
+      .sort((a, b) => b.处理时间.localeCompare(a.处理时间));
+  }, [filters]);
+  const applyFilters = () => setFilters({ result: resultValue, time: timeValue, search: searchValue });
+  return (
+    <section className="card page-card audit-content-page audit-history-page">
+      <div className="audit-history-title-row"><h2>历史审核记录</h2><span>按处理时间倒序</span></div>
+      <form className="audit-history-filters" onSubmit={(event) => { event.preventDefault(); applyFilters(); }}>
+        <FilterSelect label="处理结果" options={["全部", "已通过", "已驳回", "已撤回"]} value={resultValue} onChange={setResultValue} />
+        <FilterSelect label="处理时间" options={["全部时间", "2026-10-10", "2026-10-08", "2026-10-03", "2026-10-01"]} value={timeValue} onChange={setTimeValue} />
+        <FilterInput label="" ariaLabel="搜索报告标题" placeholder="搜索报告标题" value={searchValue} onChange={setSearchValue} onEnter={applyFilters} />
+        <Button variant="primary" type="submit">查询</Button>
+        <Button variant="default" onClick={() => {
+          setResultValue("全部");
+          setTimeValue("全部时间");
+          setSearchValue("");
+          setFilters({ result: "全部", time: "全部时间", search: "" });
+        }}>重置</Button>
+      </form>
+      <DataTable
+        columns={["报告标题", "入库方式", "展示栏目", "提交版本", "提交人", "提交时间", "处理结果", "处理人", "处理时间"]}
+        columnWidthOverrides={{ 报告标题: 210, 入库方式: 110, 展示栏目: 110, 提交版本: 190, 提交人: 100, 提交时间: 160, 处理结果: 100, 处理人: 100, 处理时间: 160 }}
+        fullTextColumns={["提交版本", "提交时间", "处理时间"]}
+        paginationTotalLabel=""
+        rowKey={(row) => String(row.记录ID)}
+        rows={visibleRows.map((record) => ({
+          记录ID: record.id,
+          报告标题: record.报告标题,
+          入库方式: record.入库方式,
+          展示栏目: record.展示栏目,
+          提交版本: record.提交版本,
+          提交人: record.提交人,
+          提交时间: record.提交时间,
+          处理结果: <StatusTag value={record.处理结果} tone={record.处理结果 === "已通过" ? "success" : record.处理结果 === "已驳回" ? "danger" : "neutral"} />,
+          处理人: record.处理人,
+          处理时间: record.处理时间,
+        }))}
+      />
+    </section>
+  );
+}
+
+function AuditContent({ historyOpen, onOpenHistory, notify }: { historyOpen: boolean; onOpenHistory: () => void; notify: Notify }) {
   const [tab, setTab] = useState<AuditContentTab>(readStoredAuditTab);
   const [comments, setComments] = useState(commentRows);
   const [scholars, setScholars] = useState(scholarRows);
@@ -3326,7 +3397,10 @@ function AuditContent() {
     if (!rejectingReport) return;
     const reason = reportRejectReason.trim();
     setReportRejectSubmitted(true);
-    if (!reason) return;
+    if (!reason) {
+      notify("审核驳回失败，请填写驳回原因", "error");
+      return;
+    }
     setReportAuditRecords((records) => [
       ...records,
       {
@@ -3339,8 +3413,10 @@ function AuditContent() {
       },
     ]);
     setReports((list) => list.filter((item) => item.id !== rejectingReport.id));
+    notify("审核驳回成功");
     closeReportReject();
   };
+  if (historyOpen) return <ReportAuditHistoryPage />;
   return (
     <section className="card page-card audit-content-page">
       <div className="subtabs gkx-tabs-primary arco-tabs-header arco-tabs-header-nav-line arco-tabs-header-nav-horizontal arco-tabs-header-size-small" role="tablist" aria-label="审核内容类型">
@@ -3423,7 +3499,7 @@ function AuditContent() {
       {tab === "reports" && (
         <div className="audit-report-list-page">
           <div className="list-toolbar is-stacked audit-report-list-toolbar">
-            <div className="list-toolbar-actions audit-report-toolbar"><Button variant="primary">查看审核记录</Button></div>
+            <div className="list-toolbar-actions audit-report-toolbar"><Button variant="primary" onClick={onOpenHistory}>查看审核记录</Button></div>
             <form
             className="list-toolbar-filters audit-report-filter-bar"
             onSubmit={(event) => {
@@ -3468,7 +3544,10 @@ function AuditContent() {
                 preserveOrder
                 onAction={(action) => {
                   const report = reports.find((item) => item.id === String(row.报告ID));
-                  if (!report) return;
+                  if (!report) {
+                    notify("审核操作失败，记录不存在或状态已更新", "error");
+                    return;
+                  }
                   if (action === "查看") {
                     setSelectedReport(report);
                     return;
@@ -3480,6 +3559,18 @@ function AuditContent() {
                     return;
                   }
                   setReports((list) => list.filter((item) => item.id !== report.id));
+                  setReportAuditRecords((records) => [
+                    ...records,
+                    {
+                      reportId: report.id,
+                      reportTitle: report.报告名称,
+                      reviewer: "系统管理员",
+                      auditedAt: new Date().toLocaleString("zh-CN", { hour12: false }),
+                      version: report.提交版本,
+                      reason: "审核通过",
+                    },
+                  ]);
+                  notify("审核通过成功");
                 }}
               />
             )}
@@ -5891,6 +5982,7 @@ function TopBar({ collapsed, onMenu, onSearch }: { collapsed: boolean; onMenu: (
 export default function App() {
   const [active, setActive] = useState<PageKey>(readStoredActivePage);
   const [reportOperationRecordsOpen, setReportOperationRecordsOpen] = useState(readStoredReportOperationRecordsOpen);
+  const [auditReportHistoryOpen, setAuditReportHistoryOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [formWorkspaceOpen, setFormWorkspaceOpen] = useState(false);
@@ -5908,6 +6000,7 @@ export default function App() {
   useEffect(() => {
     if (active !== "form-center") setFormWorkspaceOpen(false);
     if (active !== "report-management") setReportOperationRecordsOpen(false);
+    if (active !== "audit-content") setAuditReportHistoryOpen(false);
   }, [active]);
   useEffect(() => {
     try {
@@ -5936,10 +6029,12 @@ export default function App() {
   });
   const go = (key: PageKey) => {
     if (key === "report-management") setReportOperationRecordsOpen(false);
+    if (key === "audit-content") setAuditReportHistoryOpen(false);
     setActive(key);
     setMobileOpen(false);
   };
   const returnToReportManagement = () => setReportOperationRecordsOpen(false);
+  const returnToAuditReports = () => setAuditReportHistoryOpen(false);
   const returnToFormCenter = () => {
     setFormWorkspaceOpen(false);
     setFormCenterVersion((version) => version + 1);
@@ -5952,7 +6047,7 @@ export default function App() {
     if (active === "announcement-management") return <AnnouncementManagement openModal={openModal} notify={notify} />;
     if (active === "workflow-center") return <WorkflowCenter openModal={openModal} notify={notify} />;
     if (active === "form-center") return <FormCenter key={formCenterVersion} openModal={openModal} notify={notify} onWorkspaceChange={setFormWorkspaceOpen} />;
-    if (active === "audit-content") return <AuditContent />;
+    if (active === "audit-content") return <AuditContent historyOpen={auditReportHistoryOpen} onOpenHistory={() => setAuditReportHistoryOpen(true)} notify={notify} />;
     if (active === "event-info") return <EventTracking key="event-info" initialTab="info" openModal={openModal} />;
     if (active === "event-dashboard") return <EventTracking key="event-dashboard" initialTab="stats" openModal={openModal} />;
     if (active === "org-management" || active === "user-management") return <UserManagement openModal={openModal} notify={notify} />;
@@ -5960,16 +6055,19 @@ export default function App() {
     if (active === "page-management") return <PageManagement openModal={openModal} notify={notify} />;
     if (active === "resource-management") return <ResourceManagement openModal={openModal} notify={notify} />;
     return <PermissionConfig notify={notify} />;
-  }, [active, formCenterVersion, reportOperationRecordsOpen]);
+  }, [active, auditReportHistoryOpen, formCenterVersion, reportOperationRecordsOpen]);
   return (
     <div className={`app-shell ${collapsed ? "is-sidebar-collapsed" : ""}`}>
       <div className={mobileOpen ? "mobile-sidebar open" : "mobile-sidebar"}><Sidebar active={active} setActive={go} collapsed={collapsed} setCollapsed={setCollapsed} /></div>
       {mobileOpen && <button className="mobile-overlay" onClick={() => setMobileOpen(false)} aria-label="关闭导航" />}
       <TopBar collapsed={collapsed} onMenu={() => setMobileOpen(!mobileOpen)} onSearch={() => setCommand(true)} />
       <main className={collapsed ? "main collapsed" : "main"}>
-        <div className={`page-heading ${active === "report-management" && reportOperationRecordsOpen ? "has-back-action" : ""}`}>
+        <div className={`page-heading ${(active === "report-management" && reportOperationRecordsOpen) || (active === "audit-content" && auditReportHistoryOpen) ? "has-back-action" : ""}`}>
           {active === "report-management" && reportOperationRecordsOpen && (
             <button type="button" className="breadcrumb-back" onClick={returnToReportManagement}><ChevronLeft aria-hidden="true" size={16} />返回</button>
+          )}
+          {active === "audit-content" && auditReportHistoryOpen && (
+            <button type="button" className="breadcrumb-back" onClick={returnToAuditReports}><ChevronLeft aria-hidden="true" size={16} />返回</button>
           )}
           <nav className="breadcrumb" aria-label="面包屑">
             {active === "report-management" && reportOperationRecordsOpen ? (
@@ -5977,6 +6075,14 @@ export default function App() {
                 <button type="button" className="breadcrumb-link" onClick={returnToReportManagement}>报告管理</button>
                 <span className="breadcrumb-separator" aria-hidden="true">/</span>
                 <span className="breadcrumb-current" aria-current="page">操作记录</span>
+              </>
+            ) : active === "audit-content" && auditReportHistoryOpen ? (
+              <>
+                <span className="breadcrumb-section">审核管理</span>
+                <span className="breadcrumb-separator" aria-hidden="true">/</span>
+                <button type="button" className="breadcrumb-link" onClick={returnToAuditReports}>评论审核</button>
+                <span className="breadcrumb-separator" aria-hidden="true">/</span>
+                <span className="breadcrumb-current" aria-current="page">历史审核记录</span>
               </>
             ) : (
               <>
