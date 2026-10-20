@@ -130,6 +130,7 @@
 - 二级 Tab 复用 Arco `capsule` 结构（`gkx-tabs-secondary + arco-tabs-header-nav-capsule`）：外层 #F2F3F5，padding 4px，圆角 4px；单项高 32px、左右 padding 16px，选中项白底蓝字、无下划线；未选项之间使用 1px 中性分隔线。
 - 一级与二级 Tab 不得混用视觉层级。资源管理、权限配置、用户管理、审核内容等页面继续遵循相同规则。
 - 禁止页面级覆盖共享 Tab 的高度、项间距或下划线厚度；审核内容不再使用 29px 高、32px gap 或 3px 下划线的局部样式。
+- Tab 内部 `arco-tabs-header-title-text` 必须继承按钮的 14px 字号、22px 行高、字重和状态颜色；禁止复用历史 9px 灰色徽标、灰底或圆角样式。
 - 左侧侧栏的一级/二级菜单选中样式不属于内容区 Tab，按侧栏规则处理。
 
 ### 当前表格合同

@@ -308,8 +308,6 @@ tbody tr:hover { background: #fafcff; }
 .subtabs button, .resource-tabs button { position: relative; height: 40px; color: #66758a; font-size: 12px; }
 .subtabs button.active, .resource-tabs button.active { color: var(--primary); font-weight: 600; }
 .subtabs button.active::after, .resource-tabs button.active::after { content: ""; position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--primary); border-radius: 2px 2px 0 0; }
-.subtabs span, .resource-tabs span { padding: 1px 5px; color: #7c8ba0; background: #eef1f5; border-radius: 8px; font-size: 9px; }
-
 .process-layout { height: calc(100vh - 240px); min-height: 600px; display: grid; grid-template-columns: 210px minmax(500px,1fr) 254px; gap: 14px; }
 .process-list, .property-panel { overflow: hidden; }
 .mini-search { margin: 1px 14px 12px; height: 31px; }

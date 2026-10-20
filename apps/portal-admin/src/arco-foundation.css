@@ -123,7 +123,15 @@ body {
   background: rgb(var(--primary-6));
   border-radius: 2px 2px 0 0;
 }
-.gkx-tabs-primary .arco-tabs-header-title-text { padding: 0; background: transparent; }
+.gkx-tabs-primary .arco-tabs-header-title-text {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border-radius: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
 
 /* Arco capsule tabs for secondary content navigation. */
 .gkx-tabs-secondary {
@@ -175,7 +183,15 @@ body {
 .gkx-tabs-secondary > .arco-tabs-header-title-active::after { display: none; }
 .gkx-tabs-secondary > .arco-tabs-header-title-active::before,
 .gkx-tabs-secondary > .arco-tabs-header-title-active + .arco-tabs-header-title::before { opacity: 0; }
-.gkx-tabs-secondary .arco-tabs-header-title-text { padding: 0; background: transparent; }
+.gkx-tabs-secondary .arco-tabs-header-title-text {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border-radius: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
 
 .filter-field .arco-input { height: 32px; border: 1px solid var(--color-fill-3); background: #fff; font-size: 14px; line-height: 22px; }
 .filter-field .arco-input:hover { background: #fff; border-color: var(--color-fill-4); }
