@@ -2052,41 +2052,46 @@ a.mg-partner-logo:focus-visible {
   margin: 0;
 }
 
-@media (max-width: 1180px) {
-  .mg-loop-visual {
-    grid-template-columns: 1fr;
-  }
+/* Figma homepage fidelity: dry/wet loop, evaluation and strategy */
+.mg-loop-section,
+.mg-evaluation-section {
+  background: linear-gradient(180deg, #f7f8fa 0%, #eff2f9 100%);
+}
 
-  .mg-loop-notes {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
+.mg-strategy-section {
+  background: linear-gradient(180deg, #eff2f9 0%, #f7f8fa 100%);
+}
 
-  .mg-loop-notes p {
-    white-space: normal;
-    text-align: left;
-  }
+.mg-loop-section .mg-centered-heading,
+.mg-evaluation-section .mg-centered-heading,
+.mg-strategy-section .mg-centered-heading {
+  max-width: 768px;
+}
 
-  .mg-loop-notes p::after {
-    display: none;
-  }
+.mg-loop-section .mg-centered-heading h2,
+.mg-evaluation-section .mg-centered-heading h2,
+.mg-strategy-section .mg-centered-heading h2 {
+  color: #1d2129;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 40px;
+}
 
-  .mg-infinity-wrap {
-    width: min(650px, 100%);
-    margin: 8px auto;
-  }
+.mg-loop-section .mg-centered-heading p,
+.mg-evaluation-section .mg-centered-heading p,
+.mg-strategy-section .mg-centered-heading p {
+  margin-top: 24px;
+  color: #4e5969;
+  font-size: 16px;
+  line-height: 24px;
+}
 
-  .mg-strategy-flow {
-    grid-template-columns: minmax(0, 1fr) 96px minmax(300px, .82fr);
-  }
+.mg-loop-section .mg-centered-heading p + p {
+  margin-top: 8px;
+}
 
-  .mg-strategy-engine > div {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .mg-partners-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+@media (max-width: 1343px) {
+  .mg-partners-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 900px) {
@@ -2459,6 +2464,139 @@ a.mg-partner-logo:focus-visible {
 
   .mg-report-page ul {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1343px) {
+  .mg-loop-section .mg-centered-heading,
+  .mg-evaluation-section .mg-centered-heading,
+  .mg-strategy-section .mg-centered-heading {
+    margin-bottom: 48px;
+  }
+
+  .mg-loop-visual {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .mg-loop-section,
+  .mg-evaluation-section,
+  .mg-strategy-section {
+    padding: 64px 0;
+  }
+
+  .mg-loop-section .mg-centered-heading,
+  .mg-evaluation-section .mg-centered-heading,
+  .mg-strategy-section .mg-centered-heading {
+    margin-bottom: 32px;
+  }
+
+  .mg-loop-section .mg-centered-heading h2,
+  .mg-evaluation-section .mg-centered-heading h2,
+  .mg-strategy-section .mg-centered-heading h2 {
+    font-size: 26px;
+    line-height: 36px;
+  }
+
+  .mg-loop-section .mg-centered-heading p,
+  .mg-evaluation-section .mg-centered-heading p,
+  .mg-strategy-section .mg-centered-heading p {
+    margin-top: 16px;
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  .mg-loop-section .mg-centered-heading p + p {
+    margin-top: 4px;
+  }
+
+  .mg-loop-visual {
+    gap: 18px;
+  }
+
+  .mg-loop-notes {
+    gap: 10px;
+  }
+
+  .mg-loop-notes p {
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid rgba(144, 158, 190, 0.18);
+    border-radius: 12px;
+    color: #4e5969;
+    background: rgba(255, 255, 255, 0.74);
+    font-size: 15px;
+    line-height: 24px;
+  }
+
+  .mg-infinity-wrap {
+    margin: 4px auto;
+  }
+
+  .mg-loop-steps {
+    gap: 14px;
+    margin-top: 34px;
+  }
+
+  .mg-loop-steps li {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .mg-loop-steps h3 {
+    color: #1d2129;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .mg-loop-steps p {
+    color: #4e5969;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .mg-evaluation-card > p,
+  .mg-strategy-prompt > p {
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .mg-strategy-prompt {
+    padding: 18px 62px 18px 18px;
+  }
+
+  .mg-strategy-prompt > div {
+    gap: 8px;
+  }
+
+  .mg-strategy-prompt button {
+    min-width: 64px;
+    height: 44px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .mg-strategy-prompt > a {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .mg-education-card:hover,
+  .mg-education-card:focus-visible,
+  a.mg-evaluation-card:hover,
+  a.mg-evaluation-card:focus-visible,
+  .mg-report-preview:hover,
+  .mg-report-preview:focus-visible {
+    transform: none;
+  }
+
+  .mg-education-card:active,
+  a.mg-evaluation-card:active,
+  .mg-report-preview:active {
+    filter: brightness(0.98);
   }
 }
 

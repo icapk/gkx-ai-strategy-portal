@@ -550,12 +550,11 @@
 .ttf-talent-panel { padding: 20px 22px; background: #fff; border-radius: 8px; }
 .ttf-talent-index { margin-top: 15px; }
 .ttf-talent-metrics { margin-top: 16px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); background: #f7f8fa; border-radius: 6px; }
-.ttf-talent-metrics > div { min-height: 112px; padding: 18px 22px; display: grid; align-content: center; gap: 5px; }
+.ttf-talent-metrics > div { min-height: 92px; padding: 16px 22px; display: grid; align-content: center; gap: 4px; }
 .ttf-talent-metrics > div + div { border-left: 1px solid #e5e6eb; }
 .ttf-talent-metrics span { color: #4e5969; font-size: 13px; line-height: 22px; }
 .ttf-talent-metrics strong { color: #1d2129; font-size: 28px; line-height: 36px; font-weight: 600; }
 .ttf-talent-metrics strong.is-growth { color: #f53f3f; }
-.ttf-talent-metrics small { color: #86909c; font-size: 12px; line-height: 20px; }
 .ttf-talent-primary-grid,
 .ttf-talent-secondary-grid { margin-top: 16px; display: grid; grid-template-columns: 720px 464px; gap: 16px; align-items: stretch; }
 .ttf-talent-city-panel,
@@ -583,7 +582,7 @@
 .ttf-radar g[role="button"]:hover text,
 .ttf-radar g[role="button"].is-active text { fill: #165dff; font-weight: 600; }
 .ttf-radar g[role="button"]:focus-visible .ttf-radar-hit { fill: rgba(22,93,255,.08); stroke: #165dff; stroke-width: 1.5; }
-.ttf-talent-radar-tooltip { position: absolute; top: 16px; right: 2px; width: 118px; padding: 10px 12px; display: grid; gap: 6px; color: #4e5969; background: #fff; border: 1px solid #e5e6eb; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,.1); font-size: 12px; line-height: 20px; }
+.ttf-talent-radar-tooltip { position: absolute; top: 16px; right: 2px; width: 118px; padding: 10px 12px; display: grid; gap: 6px; color: #4e5969; background: #fff; border: 1px solid #e5e6eb; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,.1); font-size: 12px; line-height: 20px; pointer-events: none; }
 .ttf-talent-radar-tooltip strong { color: #1d2129; font-size: 13px; font-weight: 500; }
 .ttf-talent-radar-tooltip span { display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: 5px; }
 .ttf-talent-radar-tooltip i { width: 7px; height: 7px; border-radius: 50%; }

@@ -332,6 +332,14 @@ html.is-portal-embed .fp-back-to-portal:focus-visible {
 .sdc-shell > .sdc-main-column,
 .trs-shell > .trs-main-column { grid-column: 2; grid-row: 1; }
 
+/* Keep the decision-support content beside its module navigation. The shared
+   section locator occupies the same grid cell before being translated into
+   the right rail, so auto-placement would otherwise push the content into the
+   narrow navigation column on the next row. */
+@media (min-width: 769px) {
+  .tds-shell > .tds-main-column { grid-column: 2; grid-row: 1; }
+}
+
 @media (max-width: 1500px) {
   .fp-brand { flex-basis: 218px; }
   .fp-main-nav > a,
@@ -356,3 +364,10 @@ html.is-portal-embed .fp-back-to-portal:focus-visible {
 }
 
 @media (max-width: 1431px) { .fp-section-locator.fp-section-locator { display: none; } }
+
+/* The translated decision-support locator needs a 1560px viewport to remain
+   inside the canvas. Hide only this page's locator below that width so it does
+   not create horizontal overflow. */
+@media (min-width: 769px) and (max-width: 1559px) {
+  .tds-shell > .fp-section-locator.fp-section-locator { display: none; }
+}

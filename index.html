@@ -3,7 +3,7 @@
 <head>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23006eff%22/%3E%3C/svg%3E">
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <meta name="description" content="深圳国际科技信息中心门户，连接 AI 科研、战略咨询、未来教育与科技评价核心服务。">
   <title>深圳国际科技信息中心｜科技创新服务门户</title>
@@ -3011,7 +3011,8 @@
   </style>
   <link rel="stylesheet" href="home-additions.css">
   <link rel="stylesheet" href="portal-extras.css?v=20261013-arco-buttons-1">
-  <link rel="stylesheet" href="mastergo-v2.css">
+  <link rel="stylesheet" href="mastergo-v2.css?v=20261014-structured-sections">
+  <link rel="stylesheet" href="home-section-fidelity.css?v=20261014-1">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261012-alert">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
   <style>
@@ -4023,37 +4024,21 @@
             </header>
 
             <div class="mg-loop-visual">
+              <figure class="mg-infinity-wrap" aria-label="AI 驱动的干实验与湿实验闭环">
+                <img class="mg-infinity" src="assets/mastergo-v2/research-loop-art.webp" width="605" height="280" alt="" loading="lazy" decoding="async">
+                <div class="mg-loop-label mg-loop-label--dry"><strong>干实验</strong><span>计算</span></div>
+                <div class="mg-loop-label mg-loop-label--wet"><strong>湿实验</strong><span>验证</span></div>
+                <span class="mg-loop-ai-label">AI驱动</span>
+              </figure>
               <div class="mg-loop-notes mg-loop-notes--dry">
+                <h3 class="mg-loop-group-title">干实验 · 计算</h3>
                 <p><strong>载体：</strong>AI 模型、仿真软件</p>
                 <p><strong>优势：</strong>速度快、成本低、高并发</p>
                 <p class="is-limit"><strong>局限：</strong>依赖数据精度，无法代替真实过程</p>
               </div>
 
-              <div class="mg-infinity-wrap" aria-label="AI 驱动的干实验与湿实验闭环">
-                <svg class="mg-infinity" viewBox="0 0 660 280" role="img" aria-labelledby="mgInfinityTitle">
-                  <title id="mgInfinityTitle">干实验计算与湿实验验证形成持续迭代闭环</title>
-                  <defs>
-                    <linearGradient id="mgInfinityGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0" stop-color="#dce3ff"></stop>
-                      <stop offset=".48" stop-color="#6b68f4"></stop>
-                      <stop offset="1" stop-color="#d8e3ff"></stop>
-                    </linearGradient>
-                    <filter id="mgInfinityShadow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#7181c8" flood-opacity=".18"></feDropShadow>
-                    </filter>
-                  </defs>
-                  <path d="M330 140C257 19 82 28 65 128c-19 112 124 157 202 68l126-134c74-78 203-35 201 74-2 103-139 137-209 50Z" fill="none" stroke="url(#mgInfinityGradient)" stroke-width="44" stroke-linecap="round" filter="url(#mgInfinityShadow)"></path>
-                  <path d="M330 140C403 19 578 28 595 128c19 112-124 157-202 68L267 62C193-16 64 27 66 136c2 103 139 137 209 50Z" fill="none" stroke="rgba(255,255,255,.72)" stroke-width="3"></path>
-                  <circle cx="330" cy="140" r="41" fill="#5d5bf0" stroke="rgba(255,255,255,.92)" stroke-width="7"></circle>
-                  <text x="330" y="146" text-anchor="middle" fill="#fff" font-size="18">AI驱动</text>
-                  <text x="190" y="136" text-anchor="middle" fill="#343950" font-size="22">干实验</text>
-                  <text x="190" y="170" text-anchor="middle" fill="#677187" font-size="16">计算</text>
-                  <text x="470" y="136" text-anchor="middle" fill="#343950" font-size="22">湿实验</text>
-                  <text x="470" y="170" text-anchor="middle" fill="#677187" font-size="16">验证</text>
-                </svg>
-              </div>
-
               <div class="mg-loop-notes mg-loop-notes--wet">
+                <h3 class="mg-loop-group-title">湿实验 · 验证</h3>
                 <p><strong>载体：</strong>自动化机器人、生化试剂</p>
                 <p><strong>优势：</strong>结果真实、发现未知</p>
                 <p class="is-limit"><strong>局限：</strong>周期长、成本高、通量有限</p>
@@ -4129,32 +4114,27 @@
 
             <div class="mg-evaluation-grid">
               <a class="mg-evaluation-card mg-evaluation-card--talent" href="https://vip.itic-sci.com/talent/index/" target="_blank" rel="noopener noreferrer">
-                <div class="mg-card-titlebar">
+                <h3 class="mg-card-titlebar">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2"></circle><circle cx="18" cy="6" r="2"></circle><circle cx="12" cy="18" r="2"></circle><path d="m7.5 7.5 3.3 8M16.5 7.5l-3.3 8M8 6h8"></path></svg>
                   人才图谱
-                </div>
+                </h3>
                 <p>利用 AI 构建海量人才、论文、专利、项目间的语义关联网络。<br>通过全路径追踪，实现成果原创性、影响力和专家回避关系的自动分析。</p>
                 <div class="mg-tag-row"><span>技术成熟度</span><span>专家回避路径</span><span>交叉学科热点</span></div>
-                <span class="mg-talent-network" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                <img class="mg-talent-art" src="assets/mastergo-v2/talent-network.webp" width="343" height="206" alt="" loading="lazy" decoding="async">
               </a>
 
               <article class="mg-evaluation-card">
-                <div class="mg-card-titlebar">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"></circle><circle cx="16" cy="16" r="3"></circle><path d="M10.5 9.5 13.5 14.5M15 6h5v5M4 14v6h6"></path></svg>
+                <h3 class="mg-card-titlebar">
                   大小同行互证
-                </div>
+                </h3>
                 <p>打破单一维度：小同行看技术“深度”，精准识别创新门槛；大同行看产业“广度”，评估全局价值与跨界潜能。</p>
-                <div class="mg-proof-pair">
-                  <span><strong>小同行</strong><small>精准｜垂直｜严谨</small></span>
-                  <span><strong>大同行</strong><small>宏观｜战略｜跨界</small></span>
-                </div>
               </article>
 
               <article class="mg-evaluation-card">
-                <div class="mg-card-titlebar">
+                <h3 class="mg-card-titlebar">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5-9 5Z"></path><path d="M7 12v5c3.5 2 6.5 2 10 0v-5"></path></svg>
                   专家评价
-                </div>
+                </h3>
                 <p>基于 AI 推荐最契合的评议专家，辅助专家在海量数据支持下给出更客观、带证据链的深度评语。</p>
                 <div class="mg-proof-pair">
                   <span><strong>自动专家匹配</strong><small>基于研究领域与成果关键词精准推荐</small></span>
@@ -4176,24 +4156,24 @@
               <div class="mg-strategy-request">
                 <div class="mg-strategy-prompt">
                   <p>帮我产出关于细胞与基因战略报告</p>
-                  <div>
-                    <button type="button" data-mg-query="AI 仿真实验">练仿真</button>
-                    <button type="button" data-mg-query="论文">搜论文</button>
-                    <button type="button" data-mg-query="科研专家">找专家</button>
-                    <button class="is-active" type="button" data-mg-query="低空经济战略报告">看战略</button>
+                  <div role="group" aria-label="科研服务快捷入口">
+                    <button type="button" data-mg-query="AI 仿真实验"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6m-7-4a7 7 0 1 1 8 0l-1 4H9zm2 7h4"></path></svg>练仿真</button>
+                    <button type="button" data-mg-query="论文"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zm9 0v5h4M9 12h7m-7 4h7"></path></svg>搜论文</button>
+                    <button type="button" data-mg-query="科研专家"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-4 9 4-9 4zm3 3v6c4 3 8 3 12 0v-6m3-3v8"></path></svg>找专家</button>
+                    <button class="is-active" type="button" data-mg-query="低空经济战略报告"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zm9 0v5h4M9 12h7m-7 4h7"></path></svg>看战略</button>
                   </div>
                   <a href="https://effortless-licorice-cdaa9f.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="进入新型高端智库生成战略报告">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4.5 14-3-5.5Z"></path><path d="m11.5 13.5 3-3"></path></svg>
                   </a>
                 </div>
-                <div class="mg-flow-down"><span>发送请求</span><i aria-hidden="true"></i></div>
+                <div class="mg-flow-down" aria-hidden="true"><i></i></div>
                 <div class="mg-strategy-engine">
                   <h3>国际科技信息中心平台</h3>
                   <div>
-                    <article><span>↗</span><strong>数据自动拉取</strong><small>连接多源产业数据库</small></article>
-                    <article><span>◇</span><strong>智能维度分析</strong><small>SWOT/PEST自动选模</small></article>
-                    <article><span>▤</span><strong>结论标准化输出</strong><small>AI提炼核心观点</small></article>
-                    <article><span>▧</span><strong>报告一键排版</strong><small>即时导出专业文档</small></article>
+                    <article><img src="assets/mastergo-v2/strategy-data-icon.webp" width="70" height="73" alt="" loading="lazy" decoding="async"><strong>数据自动拉取</strong><small>连接多源产业数据库</small></article>
+                    <article><img src="assets/mastergo-v2/strategy-analysis-icon.webp" width="70" height="73" alt="" loading="lazy" decoding="async"><strong>智能维度分析</strong><small>SWOT/PEST自动建模</small></article>
+                    <article><img src="assets/mastergo-v2/strategy-conclusion-icon.webp" width="70" height="73" alt="" loading="lazy" decoding="async"><strong>结论标准化输出</strong><small>AI提炼核心观点</small></article>
+                    <article><img src="assets/mastergo-v2/strategy-report-icon.webp" width="70" height="73" alt="" loading="lazy" decoding="async"><strong>报告一键排版</strong><small>即时导出专业文档</small></article>
                   </div>
                 </div>
               </div>
@@ -4201,13 +4181,8 @@
               <div class="mg-flow-across"><span>生成报告</span><i aria-hidden="true"></i></div>
 
               <a class="mg-report-preview" href="https://effortless-licorice-cdaa9f.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="查看产业战略报告示例">
-                <div class="mg-report-page">
-                  <h3>产业概念解构</h3>
-                  <p>融合论文、专利、政策、企业与人才等多源科技数据，形成可追溯的产业分析链路。</p>
-                  <div class="mg-report-diagram"><span>核心技术</span><i></i><i></i><i></i><i></i><i></i><i></i></div>
-                  <ul><li>技术趋势与演进路径</li><li>区域创新资源布局</li><li>产业发展机会窗口</li></ul>
-                  <div class="mg-report-footer-visual"><i></i><i></i></div>
-                </div>
+                <img src="assets/mastergo-v2/strategy-report-preview.webp" width="421" height="508" alt="产业战略报告示例缩略图：产业概念解构、技术关系图与细胞基因治疗分析" loading="lazy" decoding="async">
+                <span class="mg-report-open">查看报告示例 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"></path></svg></span>
               </a>
             </div>
           </div>
@@ -5289,9 +5264,9 @@
           items: [
             { label: "科技信息交流", url: "apps/cluster-service/dist/index.html?page=information-exchange&embed=portal&build=20261013-mobile-adapt-1#ie-top", action: "embed", embedTitle: "科技信息交流", hideEmbeddedToolbar: true },
             { label: "科技资源服务", url: "apps/cluster-service/dist/index.html?page=technology-resource-service&embed=portal&build=20261012-highend-route-3#trs-top", action: "embed", embedTitle: "科技资源服务", hideEmbeddedToolbar: true },
-            { label: "科技决策支持", url: "apps/cluster-service/dist/index.html?page=technology-decision-support&embed=portal&build=20261012-highend-route-3#tds-top", action: "embed", embedTitle: "科技决策支持", hideEmbeddedToolbar: true },
+            { label: "科技决策支持", url: "apps/cluster-service/dist/index.html?page=technology-decision-support&embed=portal&build=20261020-layout-fix-1#tds-top", action: "embed", embedTitle: "科技决策支持", hideEmbeddedToolbar: true },
             { label: "科学数据中心", url: "apps/cluster-service/dist/index.html?page=scientific-data-center&embed=portal&build=20261013-mobile-adapt-1#sdc-top", action: "embed", embedTitle: "科学数据中心", hideEmbeddedToolbar: true },
-            { label: "新型高端智库", url: "apps/cluster-service/dist/index.html?page=think-tank&embed=portal&build=20261013-mobile-adapt-1#top", action: "embed", embedTitle: "新型高端智库", hideEmbeddedToolbar: true },
+            { label: "新型高端智库", url: "apps/cluster-service/dist/index.html?page=think-tank&embed=portal&build=20261019-talent-tooltip-1#top", action: "embed", embedTitle: "新型高端智库", hideEmbeddedToolbar: true },
             { label: "科技专题服务", url: "apps/cluster-service/dist/index.html?page=technology-topic-service&embed=portal&build=20261012-highend-route-3#tp-top", action: "embed", embedTitle: "科技专题服务", hideEmbeddedToolbar: true }
           ]
         },
@@ -8427,6 +8402,23 @@
           renderHeroRecommendations(button.dataset.recommendationGroup);
           if (mgHeroSearchInput) {
             mgHeroSearchInput.value = button.dataset.mgQuery || "";
+          }
+        });
+      });
+      const strategyShortcuts = [...document.querySelectorAll(".mg-strategy-prompt [data-mg-query]")];
+      const strategyGroups = ["simulation", "paper", "expert", "strategy"];
+      strategyShortcuts.forEach((button, index) => {
+        button.setAttribute("aria-pressed", String(button.classList.contains("is-active")));
+        button.addEventListener("click", () => {
+          strategyShortcuts.forEach((item) => {
+            item.classList.toggle("is-active", item === button);
+            item.setAttribute("aria-pressed", String(item === button));
+          });
+          renderHeroRecommendations(strategyGroups[index]);
+          if (mgHeroSearchInput) {
+            mgHeroSearchInput.value = button.dataset.mgQuery || "";
+            mgHeroSearchInput.focus({ preventScroll: true });
+            mgHeroSearchInput.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
           }
         });
       });

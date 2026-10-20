@@ -813,24 +813,24 @@ const talentDimensions = ["人才储备", "成果储备", "学术影响力", "�
 type TalentDomain = "人工智能" | "生物医药" | "新能源";
 type TalentCity = { name: string; value: number; radar: readonly number[] };
 type TalentDomainData = {
-  metrics: Array<{ label: string; value: string; note: string }>;
+  metrics: Array<{ label: string; value: string }>;
   cities: TalentCity[];
   hotspots: Array<{ name: string; heat: number }>;
 };
 
 const talentDashboardData: Record<TalentDomain, TalentDomainData> = {
   人工智能: {
-    metrics: [{ label: "人才总数", value: "12,345", note: "覆盖重点城市与机构" }, { label: "成果总数", value: "3,256", note: "论文、专利与转化成果" }, { label: "环比增加成果数", value: "+1,345", note: "较上一统计周期增长" }],
+    metrics: [{ label: "人才总数", value: "12,345" }, { label: "成果总数", value: "3,256" }, { label: "环比增加成果数", value: "+1,345" }],
     cities: [{ name: "北京", value: 12580, radar: [92,90,95,96,82,86] }, { name: "上海", value: 10500, radar: [88,91,90,89,94,82] }, { name: "深圳", value: 8900, radar: [81,85,84,78,97,90] }, { name: "杭州", value: 6800, radar: [76,82,80,73,88,92] }, { name: "广州", value: 5200, radar: [72,76,79,74,81,78] }],
     hotspots: [{ name: "大模型", heat: 98 }, { name: "具身智能", heat: 91 }, { name: "多模态", heat: 87 }, { name: "智能体", heat: 84 }, { name: "计算机视觉", heat: 78 }, { name: "自然语言处理", heat: 74 }, { name: "强化学习", heat: 68 }, { name: "知识图谱", heat: 63 }],
   },
   生物医药: {
-    metrics: [{ label: "人才总数", value: "9,680", note: "覆盖重点城市与机构" }, { label: "成果总数", value: "2,748", note: "论文、专利与转化成果" }, { label: "环比增加成果数", value: "+986", note: "较上一统计周期增长" }],
+    metrics: [{ label: "人才总数", value: "9,680" }, { label: "成果总数", value: "2,748" }, { label: "环比增加成果数", value: "+986" }],
     cities: [{ name: "上海", value: 9680, radar: [91,94,93,90,92,83] }, { name: "北京", value: 9250, radar: [90,89,95,94,80,82] }, { name: "广州", value: 7360, radar: [78,82,84,79,86,80] }, { name: "深圳", value: 6910, radar: [76,79,78,72,91,86] }, { name: "杭州", value: 5480, radar: [70,76,75,68,82,84] }],
     hotspots: [{ name: "创新药", heat: 96 }, { name: "精准医疗", heat: 90 }, { name: "合成生物", heat: 88 }, { name: "医学影像", heat: 82 }, { name: "基因治疗", heat: 78 }, { name: "生物制造", heat: 73 }, { name: "数字疗法", heat: 67 }, { name: "疫苗研发", heat: 62 }],
   },
   新能源: {
-    metrics: [{ label: "人才总数", value: "8,942", note: "覆盖重点城市与机构" }, { label: "成果总数", value: "2,186", note: "论文、专利与转化成果" }, { label: "环比增加成果数", value: "+812", note: "较上一统计周期增长" }],
+    metrics: [{ label: "人才总数", value: "8,942" }, { label: "成果总数", value: "2,186" }, { label: "环比增加成果数", value: "+812" }],
     cities: [{ name: "深圳", value: 8942, radar: [86,88,82,80,96,89] }, { name: "上海", value: 8260, radar: [84,90,88,85,91,78] }, { name: "北京", value: 7510, radar: [82,83,92,91,76,75] }, { name: "杭州", value: 6240, radar: [74,80,79,72,85,83] }, { name: "广州", value: 5170, radar: [70,74,76,68,82,77] }],
     hotspots: [{ name: "新型储能", heat: 97 }, { name: "动力电池", heat: 92 }, { name: "光伏材料", heat: 86 }, { name: "氢能", heat: 82 }, { name: "智能电网", heat: 79 }, { name: "风电装备", heat: 71 }, { name: "碳管理", heat: 67 }, { name: "能源互联网", heat: 64 }],
   },
@@ -850,7 +850,7 @@ function radarPoint(index: number, value: number, radius = 112) {
   return [180 + Math.cos(angle) * scaledRadius, 160 + Math.sin(angle) * scaledRadius] as const;
 }
 
-function RadarChart({ primary, secondary, visible, activeIndex, onActiveIndexChange }: { primary: TalentCity; secondary: TalentCity; visible: { primary: boolean; secondary: boolean }; activeIndex: number; onActiveIndexChange: (index: number) => void }) {
+function RadarChart({ primary, secondary, visible, activeIndex, onActiveIndexChange }: { primary: TalentCity; secondary: TalentCity; visible: { primary: boolean; secondary: boolean }; activeIndex: number | null; onActiveIndexChange: (index: number | null) => void }) {
   const polygon = (values: readonly number[]) => values.map((value,index) => radarPoint(index,value).join(",")).join(" ");
   const ring = (scale: number) => talentDimensions.map((_,index) => radarPoint(index,scale).join(",")).join(" ");
   return <svg className="ttf-radar" viewBox="0 0 360 330" role="img" aria-label={`${primary.name}与${secondary.name}人才影响力六维对比`}>
@@ -860,7 +860,7 @@ function RadarChart({ primary, secondary, visible, activeIndex, onActiveIndexCha
     {visible.secondary?<polygon points={polygon(secondary.radar)} fill="rgba(0,180,42,.09)" stroke="#00b42a" strokeWidth="2"/>:null}
     {visible.primary?primary.radar.map((value,index)=>{const [x,y]=radarPoint(index,value);return <circle key={`${primary.name}-${talentDimensions[index]}`} cx={x} cy={y} r="3.5" fill="#165dff"><title>{primary.name} · {talentDimensions[index]}：{value}</title></circle>;}):null}
     {visible.secondary?secondary.radar.map((value,index)=>{const [x,y]=radarPoint(index,value);return <circle key={`${secondary.name}-${talentDimensions[index]}`} cx={x} cy={y} r="3.5" fill="#00b42a"><title>{secondary.name} · {talentDimensions[index]}：{value}</title></circle>;}):null}
-    {talentDimensions.map((dimension,index)=>{const [x,y]=radarPoint(index,128);return <g className={activeIndex===index?"is-active":""} role="button" tabIndex={0} aria-label={`查看${dimension}对比`} onMouseEnter={()=>onActiveIndexChange(index)} onClick={()=>onActiveIndexChange(index)} onKeyDown={(event)=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();onActiveIndexChange(index);}}} key={dimension}><circle className="ttf-radar-hit" cx={x} cy={y} r="22"/><text x={x} y={y+4} textAnchor={x>190?"start":x<170?"end":"middle"}>{dimension}</text></g>;})}
+    {talentDimensions.map((dimension,index)=>{const [x,y]=radarPoint(index,128);return <g className={activeIndex===index?"is-active":""} role="button" tabIndex={0} aria-label={`查看${dimension}对比`} onMouseEnter={()=>onActiveIndexChange(index)} onMouseLeave={()=>onActiveIndexChange(null)} onFocus={()=>onActiveIndexChange(index)} onBlur={()=>onActiveIndexChange(null)} onClick={()=>onActiveIndexChange(index)} onKeyDown={(event)=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();onActiveIndexChange(index);}}} key={dimension}><circle className="ttf-radar-hit" cx={x} cy={y} r="22"/><text x={x} y={y+4} textAnchor={x>190?"start":x<170?"end":"middle"}>{dimension}</text></g>;})}
   </svg>;
 }
 
@@ -870,7 +870,7 @@ function TalentSection() {
   const [radarPrimaryCity,setRadarPrimaryCity]=useState("北京");
   const [compareCity,setCompareCity]=useState("上海");
   const [activeHotspot,setActiveHotspot]=useState("大模型");
-  const [activeRadarDimension,setActiveRadarDimension]=useState(0);
+  const [activeRadarDimension,setActiveRadarDimension]=useState<number | null>(null);
   const [radarVisible,setRadarVisible]=useState({primary:true,secondary:true});
   const data=talentDashboardData[domain];
   const primaryCity=data.cities.find((city)=>city.name===radarPrimaryCity)??data.cities[0];
@@ -885,7 +885,7 @@ function TalentSection() {
     setRadarPrimaryCity(next.cities[0].name);
     setCompareCity(next.cities[1].name);
     setActiveHotspot(next.hotspots[0].name);
-    setActiveRadarDimension(0);
+    setActiveRadarDimension(null);
     setRadarVisible({primary:true,secondary:true});
   },[domain]);
 
@@ -896,10 +896,10 @@ function TalentSection() {
 
   return <section id="talent" className="ttf-section ttf-talent">
     <SectionHeading title="人才分布态势区" subtitle="人才指数｜全国人才分布｜地区影响力对比｜科研热点｜机构排名"><div className="ttf-talent-domain-control"><span>当前领域</span><ArcoFilterSelect label="当前领域" value={domain} options={Object.keys(talentDashboardData)} onChange={(value)=>setDomain(value as TalentDomain)}/></div></SectionHeading>
-    <article className="ttf-talent-panel ttf-talent-index"><PanelTitle title="人才指数" aside="多维度人才统计分析"/><div className="ttf-talent-metrics">{data.metrics.map((item,index)=><div key={item.label}><span>{item.label}</span><strong className={index===2?"is-growth":""}>{item.value}</strong><small>{item.note}</small></div>)}</div></article>
+    <article className="ttf-talent-panel ttf-talent-index"><PanelTitle title="人才指数" aside="多维度人才统计分析"/><div className="ttf-talent-metrics">{data.metrics.map((item,index)=><div key={item.label}><span>{item.label}</span><strong className={index===2?"is-growth":""}>{item.value}</strong></div>)}</div></article>
     <div className="ttf-talent-primary-grid">
       <article className="ttf-talent-panel ttf-talent-city-panel"><PanelTitle title="全国人才分布" aside="人才最密集 TOP 5 城市"/><div className="ttf-talent-city-bars" role="list" aria-label={`${domain}领域全国人才分布前五城市`}>{data.cities.map((city,index)=><button type="button" role="listitem" className={selectedCity===city.name?"is-active":""} aria-pressed={selectedCity===city.name} onClick={()=>setSelectedCity(city.name)} key={city.name}><b>{String(index+1).padStart(2,"0")}</b><span>{city.name}</span><i><em style={{width:`${Math.round(city.value/maxCityValue*100)}%`}}/></i><strong>{city.value.toLocaleString("zh-CN")}</strong></button>)}</div><p className="ttf-talent-chart-note">点击城市可查看对应城市的人才机构排名。</p></article>
-      <article className="ttf-talent-panel ttf-talent-radar-panel"><PanelTitle title="地区影响力对比" aside="六维参考指数"/><div className="ttf-talent-city-selects"><ArcoFilterSelect label="城市一" value={radarPrimaryCity} options={cityOptions} onChange={selectRadarPrimaryCity}/><span>对比</span><ArcoFilterSelect label="城市二" value={compareCity} options={cityOptions} onChange={(value)=>value!==radarPrimaryCity&&setCompareCity(value)}/></div><div className="ttf-talent-radar-stage"><RadarChart primary={primaryCity} secondary={secondaryCity} visible={radarVisible} activeIndex={activeRadarDimension} onActiveIndexChange={setActiveRadarDimension}/><div className="ttf-talent-radar-tooltip" aria-live="polite"><strong>{talentDimensions[activeRadarDimension]}</strong><span><i className="is-blue"/>{primaryCity.name}<b>{primaryCity.radar[activeRadarDimension]}</b></span><span><i className="is-green"/>{secondaryCity.name}<b>{secondaryCity.radar[activeRadarDimension]}</b></span></div></div><div className="ttf-talent-radar-legend"><button type="button" className={radarVisible.primary?"is-active":""} aria-pressed={radarVisible.primary} onClick={()=>setRadarVisible((current)=>({...current,primary:!current.primary}))}><i className="is-blue"/>{primaryCity.name}</button><button type="button" className={radarVisible.secondary?"is-active":""} aria-pressed={radarVisible.secondary} onClick={()=>setRadarVisible((current)=>({...current,secondary:!current.secondary}))}><i className="is-green"/>{secondaryCity.name}</button></div></article>
+      <article className="ttf-talent-panel ttf-talent-radar-panel"><PanelTitle title="地区影响力对比" aside="六维参考指数"/><div className="ttf-talent-city-selects"><ArcoFilterSelect label="城市一" value={radarPrimaryCity} options={cityOptions} onChange={selectRadarPrimaryCity}/><span>对比</span><ArcoFilterSelect label="城市二" value={compareCity} options={cityOptions} onChange={(value)=>value!==radarPrimaryCity&&setCompareCity(value)}/></div><div className="ttf-talent-radar-stage"><RadarChart primary={primaryCity} secondary={secondaryCity} visible={radarVisible} activeIndex={activeRadarDimension} onActiveIndexChange={setActiveRadarDimension}/>{activeRadarDimension!==null?<div className="ttf-talent-radar-tooltip" aria-live="polite"><strong>{talentDimensions[activeRadarDimension]}</strong><span><i className="is-blue"/>{primaryCity.name}<b>{primaryCity.radar[activeRadarDimension]}</b></span><span><i className="is-green"/>{secondaryCity.name}<b>{secondaryCity.radar[activeRadarDimension]}</b></span></div>:null}</div><div className="ttf-talent-radar-legend"><button type="button" className={radarVisible.primary?"is-active":""} aria-pressed={radarVisible.primary} onClick={()=>setRadarVisible((current)=>({...current,primary:!current.primary}))}><i className="is-blue"/>{primaryCity.name}</button><button type="button" className={radarVisible.secondary?"is-active":""} aria-pressed={radarVisible.secondary} onClick={()=>setRadarVisible((current)=>({...current,secondary:!current.secondary}))}><i className="is-green"/>{secondaryCity.name}</button></div></article>
     </div>
     <div className="ttf-talent-secondary-grid">
       <article className="ttf-talent-panel ttf-talent-hotspot-panel"><PanelTitle title="科研热点" aside="近五年热门研究领域"/><div className="ttf-talent-hotspots" aria-label={`${domain}领域科研热点`}>{data.hotspots.map((item)=><button type="button" className={activeHotspot===item.name?"is-active":""} aria-pressed={activeHotspot===item.name} style={{fontSize:`${13+Math.round((item.heat-60)*.12)}px`}} onClick={()=>setActiveHotspot(item.name)} key={item.name}><span>{item.name}</span><small>{item.heat}</small></button>)}</div></article>
