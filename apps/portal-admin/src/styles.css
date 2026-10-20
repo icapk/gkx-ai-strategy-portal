@@ -3905,6 +3905,96 @@ tbody tr:hover {
   opacity: 0;
 }
 
+.year-field-control {
+  position: relative;
+  width: 100%;
+  height: var(--control-height);
+}
+
+.year-field-trigger {
+  width: 100%;
+  height: 100%;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--gkx-text-primary);
+  background: #fff;
+  border: 1px solid var(--gkx-border);
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: left;
+}
+
+.year-field-trigger span.is-placeholder {
+  color: var(--gkx-text-tertiary);
+}
+
+.year-field-trigger svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  color: var(--gkx-text-tertiary);
+  stroke-width: 1.2;
+}
+
+.year-field-trigger:hover {
+  border-color: var(--gkx-text-disabled);
+}
+
+.year-field-control.is-open .year-field-trigger,
+.year-field-trigger:focus-visible {
+  border-color: var(--gkx-brand-hover);
+  box-shadow: 0 0 0 2px rgba(22,93,255,.1);
+  outline: 0;
+}
+
+.year-field-control.is-open .year-field-trigger svg {
+  color: var(--gkx-brand);
+}
+
+.year-picker-menu {
+  position: fixed;
+  z-index: 120;
+  max-height: 280px;
+  padding: 8px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--gkx-border);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(29,33,41,.12);
+}
+
+.year-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.year-picker-grid button {
+  height: 32px;
+  padding: 0 4px;
+  color: var(--gkx-text-primary);
+  background: transparent;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.year-picker-grid button:hover,
+.year-picker-grid button.is-active {
+  color: var(--gkx-brand);
+  background: var(--gkx-bg-subtle);
+}
+
+.year-picker-grid button.active {
+  color: var(--gkx-brand);
+  background: var(--gkx-brand-light);
+  font-weight: 500;
+}
+
 .form-field input[type="file"] {
   padding: 0;
   color: var(--gkx-text-tertiary);

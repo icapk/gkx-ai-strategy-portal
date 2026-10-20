@@ -215,6 +215,10 @@ const breadcrumbSections: Record<PageKey, "系统管理" | "权限管理" | "审
 };
 
 const reportTypeOptions = ["研究报告", "洞察报告", "战略咨询报告"];
+const reportSourceOptions = ["平台创作", "用户创造", "外部研报"];
+const reportDomainOptions = ["机械运输", "信息电子", "化学与化学工程", "能源动力", "土木建筑", "环境与水利", "农业", "医药卫生"];
+const reportTopicOptions = ["新能源专题库", "数字基建专题库", "公共卫生专题库", "环境保护专题库", "人工智能专题库"];
+const reportYearOptions = Array.from({ length: 28 }, (_, index) => String(2027 - index));
 const reportSortFieldOptions = ["上传时间"] as const;
 type ReportSortField = (typeof reportSortFieldOptions)[number];
 type ReportSortDirection = "升序" | "降序";
@@ -231,6 +235,9 @@ type ReportRow = {
   上传时间: string;
   置顶: boolean;
   内容摘要?: string;
+  主题分类?: string;
+  发布机构?: string;
+  发布年份?: string;
   驳回原因?: string;
   审核人?: string;
   审核时间?: string;
@@ -241,13 +248,13 @@ const roleOptions = ["普通用户", "机构用户", "政府用户"];
 const resourcePermissionOptions = ["人才库资源", "报告资源", "智库资源"];
 
 const reportRows: ReportRow[] = [
-  { 报告标题: "先进储能技术发展研究", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "储能技术", 状态: "待上架", 版本信息: "V1.0 · 2026-09-30 09:50", 上传时间: "2026-09-30", 置顶: false },
-  { 报告标题: "未来产业报告：智能制造", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "智能制造", 状态: "草稿", 版本信息: "尚未提交", 上传时间: "2026-09-28", 置顶: false },
-  { 报告标题: "新能源汽车消费趋势洞察", 报告来源: "用户创作", 报告类型: "洞察报告", 所属栏目: "洞察报告", 署名信息: "作者：陈思敏", 行业分类: "新能源汽车", 状态: "待审核", 版本信息: "V1.2 · 2026-09-27 09:50", 上传时间: "2026-09-27", 置顶: false },
-  { 报告标题: "TR报告：人工智能", 报告来源: "平台创作", 报告类型: "战略咨询报告", 所属栏目: "战略咨询报告", 署名信息: "作者：平台创作", 行业分类: "人工智能", 状态: "已驳回", 版本信息: "V1.0 · 2026-09-25 09:50", 上传时间: "2026-09-25", 置顶: false },
-  { 报告标题: "量子计算产业研究", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "量子科技", 状态: "已上架", 版本信息: "线上 V1.1 · 2026-09-20 09:50", 上传时间: "2026-09-20", 置顶: false },
-  { 报告标题: "2026全球AI产业研报", 报告来源: "外部研报", 报告类型: "研究报告", 所属栏目: "研报库", 署名信息: "发布机构：IDC", 行业分类: "人工智能", 状态: "已下架", 版本信息: "V1.1 · 2026-09-18 09:50", 上传时间: "2026-09-18", 置顶: false },
-  { 报告标题: "全球机器人市场报告", 报告来源: "外部研报", 报告类型: "洞察报告", 所属栏目: "研报库", 署名信息: "发布机构：IFR", 行业分类: "机器人", 状态: "发布失败", 版本信息: "V1.0 · 2026-09-16 09:50", 上传时间: "2026-09-16", 置顶: false },
+  { 报告标题: "先进储能技术发展研究", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "能源动力", 状态: "待上架", 版本信息: "V1.0 · 2026-09-30 09:50", 上传时间: "2026-09-30", 置顶: false, 主题分类: "新能源专题库", 发布机构: "国科信研究中心", 发布年份: "2026" },
+  { 报告标题: "未来产业报告：智能制造", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "机械运输", 状态: "草稿", 版本信息: "尚未提交", 上传时间: "2026-09-28", 置顶: false, 主题分类: "数字基建专题库", 发布机构: "国科信研究中心", 发布年份: "2026" },
+  { 报告标题: "新能源汽车消费趋势洞察", 报告来源: "用户创造", 报告类型: "洞察报告", 所属栏目: "洞察报告", 署名信息: "作者：陈思敏", 行业分类: "机械运输", 状态: "待审核", 版本信息: "V1.2 · 2026-09-27 09:50", 上传时间: "2026-09-27", 置顶: false, 主题分类: "新能源专题库", 发布机构: "个人创作者", 发布年份: "2026" },
+  { 报告标题: "TR报告：人工智能", 报告来源: "平台创作", 报告类型: "战略咨询报告", 所属栏目: "战略咨询报告", 署名信息: "作者：平台创作", 行业分类: "信息电子", 状态: "已驳回", 版本信息: "V1.0 · 2026-09-25 09:50", 上传时间: "2026-09-25", 置顶: false, 主题分类: "人工智能专题库", 发布机构: "国科信研究中心", 发布年份: "2026" },
+  { 报告标题: "量子计算产业研究", 报告来源: "平台创作", 报告类型: "研究报告", 所属栏目: "研究报告", 署名信息: "作者：平台创作", 行业分类: "信息电子", 状态: "已上架", 版本信息: "线上 V1.1 · 2026-09-20 09:50", 上传时间: "2026-09-20", 置顶: false, 主题分类: "人工智能专题库", 发布机构: "国科信研究中心", 发布年份: "2026" },
+  { 报告标题: "2026全球AI产业研报", 报告来源: "外部研报", 报告类型: "研究报告", 所属栏目: "研报库", 署名信息: "发布机构：IDC", 行业分类: "信息电子", 状态: "已下架", 版本信息: "V1.1 · 2026-09-18 09:50", 上传时间: "2026-09-18", 置顶: false, 主题分类: "人工智能专题库", 发布机构: "IDC", 发布年份: "2026" },
+  { 报告标题: "全球机器人市场报告", 报告来源: "外部研报", 报告类型: "洞察报告", 所属栏目: "研报库", 署名信息: "发布机构：IFR", 行业分类: "机械运输", 状态: "发布失败", 版本信息: "V1.0 · 2026-09-16 09:50", 上传时间: "2026-09-16", 置顶: false, 主题分类: "人工智能专题库", 发布机构: "IFR", 发布年份: "2026" },
 ];
 
 function isAdminEditableReport(report: ReportRow) {
@@ -566,7 +573,7 @@ type AuditHistoryRecord = {
 const auditHistoryRows: AuditHistoryRecord[] = [
   { id: "history-1", 报告标题: "未来产业报告：智能制造", 入库方式: "平台创作", 展示栏目: "研究报告", 提交版本: "V1.2 · 2026-10-09 14:20", 提交人: "张明远", 提交时间: "2026-10-09 14:20", 处理结果: "已驳回", 处理人: "审核员B", 处理时间: "2026-10-10 17:40" },
   { id: "history-2", 报告标题: "2026全球AI产业研报", 入库方式: "外部研报", 展示栏目: "研报库", 提交版本: "V1.1 · 2026-10-09 08:40", 提交人: "管理员A", 提交时间: "2026-10-09 08:40", 处理结果: "已通过", 处理人: "审核员B", 处理时间: "2026-10-10 10:15" },
-  { id: "history-3", 报告标题: "新能源汽车消费趋势洞察", 入库方式: "用户创作", 展示栏目: "洞察报告", 提交版本: "V1.3 · 2026-10-07 18:35", 提交人: "陈思敏", 提交时间: "2026-10-07 18:35", 处理结果: "已撤回", 处理人: "陈思敏", 处理时间: "2026-10-08 09:12" },
+  { id: "history-3", 报告标题: "新能源汽车消费趋势洞察", 入库方式: "用户创造", 展示栏目: "洞察报告", 提交版本: "V1.3 · 2026-10-07 18:35", 提交人: "陈思敏", 提交时间: "2026-10-07 18:35", 处理结果: "已撤回", 处理人: "陈思敏", 处理时间: "2026-10-08 09:12" },
   { id: "history-4", 报告标题: "未来产业报告：智能制造", 入库方式: "平台创作", 展示栏目: "研究报告", 提交版本: "V1.1 · 2026-10-02 11:05", 提交人: "张明远", 提交时间: "2026-10-02 11:05", 处理结果: "已通过", 处理人: "审核员A", 处理时间: "2026-10-03 16:30" },
   { id: "history-5", 报告标题: "2026全球AI产业研报", 入库方式: "外部研报", 展示栏目: "研报库", 提交版本: "V1.0 · 2026-09-30 09:20", 提交人: "管理员A", 提交时间: "2026-09-30 09:20", 处理结果: "已驳回", 处理人: "审核员C", 处理时间: "2026-10-01 10:06" },
 ];
@@ -1768,11 +1775,14 @@ function ReportApplicationSummary({ report }: { report: ReportRow }) {
       <div><dt>当前状态</dt><dd><ReportStatusCell status={report.状态} /></dd></div>
       <div><dt>报告来源</dt><dd>{report.报告来源}</dd></div>
       <div><dt>报告类型</dt><dd>{report.报告类型}</dd></div>
+      <div><dt>发布机构</dt><dd>{report.发布机构 || "未填写"}</dd></div>
+      <div><dt>发布年份</dt><dd>{report.发布年份 || "未填写"}</dd></div>
       <div><dt>所属栏目</dt><dd>{report.所属栏目}</dd></div>
       <div><dt>行业分类</dt><dd>{report.行业分类}</dd></div>
       <div><dt>署名信息</dt><dd>{report.署名信息}</dd></div>
       <div><dt>版本信息</dt><dd>{report.版本信息}</dd></div>
       <div><dt>上传时间</dt><dd>{report.上传时间}</dd></div>
+      <div><dt>主题分类</dt><dd>{report.主题分类 || "未分类"}</dd></div>
       <div className="report-action-summary"><dt>内容摘要</dt><dd>{report.内容摘要 || "暂无内容摘要"}</dd></div>
     </dl>
   );
@@ -1799,14 +1809,16 @@ function ReportActionDialog({
     报告类型: report.报告类型,
     报告来源: report.报告来源,
     所属领域: report.行业分类,
+    发布机构: report.发布机构 || "",
+    发布年份: report.发布年份 || "",
+    主题分类: report.主题分类 || "",
     上传时间: report.上传时间,
     内容摘要: report.内容摘要 || "",
   });
   const [fileName, setFileName] = useState("");
   const [downReason, setDownReason] = useState("");
   const setValue = (field: string, value: string) => setValues((current) => ({ ...current, [field]: value }));
-  const canSave = ["报告标题", "报告类型", "报告来源", "所属领域", "上传时间"].every((field) => values[field]?.trim());
-  const editableDomains = Array.from(new Set([report.行业分类, "人工智能", "智能制造", "新材料", "低空经济"]));
+  const canSave = ["报告标题", "报告类型", "报告来源", "所属领域", "发布机构", "发布年份", "主题分类", "上传时间"].every((field) => values[field]?.trim());
 
   if (type === "withdraw") return createPortal(
     <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && close()}>
@@ -1836,10 +1848,17 @@ function ReportActionDialog({
               <FormField label="报告类型" required><FormSelect options={reportTypeOptions} value={values.报告类型} onChange={(value) => setValue("报告类型", value)} /></FormField>
             </div>
             <div className="form-row">
-              <FormField label="报告来源" required><input value={values.报告来源} onChange={(event) => setValue("报告来源", event.target.value)} /></FormField>
-              <FormField label="所属领域" required><FormSelect options={editableDomains} value={values.所属领域} onChange={(value) => setValue("所属领域", value)} /></FormField>
+              <FormField label="报告来源" required><FormSelect options={reportSourceOptions} value={values.报告来源} onChange={(value) => setValue("报告来源", value)} /></FormField>
+              <FormField label="所属领域" required><FormSelect options={reportDomainOptions} value={values.所属领域} onChange={(value) => setValue("所属领域", value)} /></FormField>
             </div>
-            <FormField label="上传时间" required><DateField value={values.上传时间} onChange={(value) => setValue("上传时间", value)} /></FormField>
+            <div className="form-row">
+              <FormField label="发布机构" required><input value={values.发布机构} onChange={(event) => setValue("发布机构", event.target.value)} /></FormField>
+              <FormField label="发布年份" required><YearField value={values.发布年份} onChange={(value) => setValue("发布年份", value)} /></FormField>
+            </div>
+            <div className="form-row">
+              <FormField label="主题分类" required><FormSelect options={reportTopicOptions} value={values.主题分类} onChange={(value) => setValue("主题分类", value)} /></FormField>
+              <FormField label="上传时间" required><DateField value={values.上传时间} onChange={(value) => setValue("上传时间", value)} /></FormField>
+            </div>
             <FormField label="内容摘要"><textarea value={values.内容摘要} onChange={(event) => setValue("内容摘要", event.target.value)} /></FormField>
           </div>
           <div className="modal-footer">
@@ -1916,7 +1935,7 @@ function ReportManagement({ openModal, notify, onOpenOperationRecords }: { openM
     .filter((report) => {
       const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
       if (!normalizedQuery) return true;
-      return [report.报告标题, report.报告来源, report.报告类型, report.所属栏目, report.署名信息, report.行业分类, report.状态]
+      return [report.报告标题, report.报告来源, report.报告类型, report.所属栏目, report.署名信息, report.行业分类, report.发布机构 || "", report.发布年份 || "", report.主题分类 || "", report.状态]
         .some((value) => value.toLocaleLowerCase("zh-CN").includes(normalizedQuery));
     })
     .map((report, index) => ({ report, index }))
@@ -1955,6 +1974,9 @@ function ReportManagement({ openModal, notify, onOpenOperationRecords }: { openM
                   上传时间: values.上传时间,
                   置顶: false,
                   内容摘要: values.内容摘要,
+                  主题分类: values.主题分类,
+                  发布机构: values.发布机构,
+                  发布年份: values.发布年份,
                 },
               ]),
             })}
@@ -1968,8 +1990,8 @@ function ReportManagement({ openModal, notify, onOpenOperationRecords }: { openM
         </div>
       </div>
       <DataTable
-        columns={["报告标题", "报告来源", "报告类型", "所属栏目", "署名信息", "行业分类", "状态", "版本", "上传时间"]}
-        columnWidthOverrides={{ 报告标题: 190, 报告来源: 112, 报告类型: 112, 所属栏目: 120, 署名信息: 180, 行业分类: 112, 状态: 104, 版本: 200, 上传时间: 120 }}
+        columns={["报告标题", "报告来源", "报告类型", "所属栏目", "署名信息", "行业分类", "发布机构", "发布年份", "主题分类", "状态", "版本", "上传时间"]}
+        columnWidthOverrides={{ 报告标题: 190, 报告来源: 112, 报告类型: 112, 所属栏目: 120, 署名信息: 180, 行业分类: 112, 发布机构: 140, 发布年份: 104, 主题分类: 140, 状态: 104, 版本: 200, 上传时间: 120 }}
         rows={visibleReports.map((row) => ({ ...row, 状态: <ReportStatusCell status={row.状态} />, 版本: <span className="report-version-cell" title={row.版本信息}>{row.版本信息}</span>, 原始状态: row.状态 }))}
         renderHeader={(column) => reportSortFieldOptions.includes(column as ReportSortField)
           ? <SortableTableHeader field={column as ReportSortField} activeField={sortField} activeDirection={sortDirection} onSort={(field, direction) => { setSortField(field); setSortDirection(direction); }} />
@@ -2045,6 +2067,9 @@ function ReportManagement({ openModal, notify, onOpenOperationRecords }: { openM
               行业分类: values.所属领域,
               上传时间: values.上传时间,
               内容摘要: values.内容摘要,
+              主题分类: values.主题分类,
+              发布机构: values.发布机构,
+              发布年份: values.发布年份,
               状态: submit ? "待审核" : "草稿",
               版本信息: submit ? nextVersion : item.版本信息,
               置顶: false,
@@ -5333,7 +5358,7 @@ function PermissionConfig({ notify }: { notify: Notify }) {
   );
 }
 
-const reportFormFields = ["报告标题", "报告类型", "报告来源", "所属领域", "上传时间", "内容摘要"] as const;
+const reportFormFields = ["报告标题", "报告类型", "报告来源", "所属领域", "发布机构", "发布年份", "主题分类", "上传时间", "内容摘要"] as const;
 const trackingFormFields = ["事件ID", "所属功能模块", "埋点标签", "埋点路径", "触发机制"] as const;
 const userFormFields = ["姓名", "手机号", "邮箱", "所属组织"] as const;
 const roleFormFields = ["角色名称", "角色描述", "状态"] as const;
@@ -5401,7 +5426,7 @@ function ReportModal({ close, mode, payload, onSave }: { close: () => void; mode
   const { values, setValue } = useModalValues(payload, reportFormFields);
   const [fileName, setFileName] = useState("");
   const isEdit = mode === "edit";
-  const canSubmit = ["报告标题", "报告类型", "报告来源", "所属领域", "上传时间"].every((field) => values[field]?.trim()) && (isEdit || fileName.length > 0);
+  const canSubmit = ["报告标题", "报告类型", "报告来源", "所属领域", "发布机构", "发布年份", "主题分类", "上传时间"].every((field) => values[field]?.trim()) && (isEdit || fileName.length > 0);
   return (
     <>
       <ModalHeader title="报告上传/信息修改" close={close} />
@@ -5413,10 +5438,17 @@ function ReportModal({ close, mode, payload, onSave }: { close: () => void; mode
             <FormField label="报告类型" required><FormSelect options={reportTypeOptions} value={values.报告类型} onChange={(value) => setValue("报告类型", value)} /></FormField>
           </div>
           <div className="form-row">
-            <FormField label="报告来源" required><input value={values.报告来源} onChange={(event) => setValue("报告来源", event.target.value)} /></FormField>
-            <FormField label="所属领域" required><FormSelect options={["人工智能", "智能制造", "新材料", "低空经济"]} value={values.所属领域} onChange={(value) => setValue("所属领域", value)} /></FormField>
+            <FormField label="报告来源" required><FormSelect options={reportSourceOptions} value={values.报告来源} onChange={(value) => setValue("报告来源", value)} /></FormField>
+            <FormField label="所属领域" required><FormSelect options={reportDomainOptions} value={values.所属领域} onChange={(value) => setValue("所属领域", value)} /></FormField>
           </div>
-          <FormField label="上传时间" required><DateField value={values.上传时间} onChange={(value) => setValue("上传时间", value)} /></FormField>
+          <div className="form-row">
+            <FormField label="发布机构" required><input value={values.发布机构} onChange={(event) => setValue("发布机构", event.target.value)} /></FormField>
+            <FormField label="发布年份" required><YearField value={values.发布年份} onChange={(value) => setValue("发布年份", value)} /></FormField>
+          </div>
+          <div className="form-row">
+            <FormField label="主题分类" required><FormSelect options={reportTopicOptions} value={values.主题分类} onChange={(value) => setValue("主题分类", value)} /></FormField>
+            <FormField label="上传时间" required><DateField value={values.上传时间} onChange={(value) => setValue("上传时间", value)} /></FormField>
+          </div>
           <FormField label="内容摘要"><textarea value={values.内容摘要} onChange={(event) => setValue("内容摘要", event.target.value)} /></FormField>
         </div>
         <div className="modal-footer"><Button onClick={close}>取消</Button><Button type="submit" variant="primary" disabled={!canSubmit}>保存</Button></div>
@@ -5902,6 +5934,94 @@ function DateField({ id, value, onChange }: { id?: string; value?: string; onCha
       <input id={id} type="date" value={value} onChange={(event) => onChange?.(event.target.value)} />
       <CalendarDays aria-hidden="true" size={16} />
     </span>
+  );
+}
+
+function YearField({ id, value = "", onChange }: { id?: string; value?: string; onChange?: (value: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(() => Math.max(0, reportYearOptions.indexOf(value)));
+  const [menuPosition, setMenuPosition] = useState<SelectMenuPosition | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+  const updateMenuPosition = () => {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setMenuPosition({ left: rect.left, top: rect.bottom + 4, width: rect.width });
+  };
+  const openMenu = () => {
+    updateMenuPosition();
+    setActiveIndex(Math.max(0, reportYearOptions.indexOf(value)));
+    setOpen(true);
+  };
+  const selectYear = (year: string) => {
+    onChange?.(year);
+    setOpen(false);
+  };
+  useEffect(() => {
+    if (!open) return undefined;
+    const closeOnExternalPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (!triggerRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
+    };
+    window.addEventListener("resize", updateMenuPosition);
+    window.addEventListener("scroll", updateMenuPosition, true);
+    document.addEventListener("pointerdown", closeOnExternalPointerDown);
+    return () => {
+      window.removeEventListener("resize", updateMenuPosition);
+      window.removeEventListener("scroll", updateMenuPosition, true);
+      document.removeEventListener("pointerdown", closeOnExternalPointerDown);
+    };
+  }, [open]);
+  return (
+    <div className={`year-field-control ${open ? "is-open" : ""}`}>
+      <button
+        ref={triggerRef}
+        id={id}
+        type="button"
+        role="combobox"
+        className="year-field-trigger"
+        aria-label="发布年份"
+        aria-controls={menuId}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        onClick={() => open ? setOpen(false) : openMenu()}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            if (!open) openMenu();
+            else setActiveIndex((current) => (current + (event.key === "ArrowDown" ? 1 : -1) + reportYearOptions.length) % reportYearOptions.length);
+          } else if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            if (!open) openMenu();
+            else selectYear(reportYearOptions[activeIndex]);
+          } else if (event.key === "Escape") setOpen(false);
+        }}
+      >
+        <span className={value ? "" : "is-placeholder"}>{value || "请选择年份"}</span>
+        <CalendarDays aria-hidden="true" size={16} />
+      </button>
+      {open && menuPosition && createPortal(
+        <div ref={menuRef} id={menuId} className="year-picker-menu" role="listbox" aria-label="发布年份选项" style={menuPosition} onMouseDown={(event) => event.preventDefault()}>
+          <div className="year-picker-grid">
+            {reportYearOptions.map((year, index) => (
+              <button
+                type="button"
+                role="option"
+                aria-selected={value === year}
+                className={`${value === year ? "active" : ""} ${activeIndex === index ? "is-active" : ""}`.trim()}
+                key={year}
+                onClick={() => { setActiveIndex(index); selectYear(year); }}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+        </div>,
+        document.body,
+      )}
+    </div>
   );
 }
 
