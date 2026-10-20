@@ -119,6 +119,7 @@
 - 列表页主操作始终位于工具栏左侧，筛选、查询和重置组成同一个筛选组；查询、重置属于筛选组操作，但不计入筛选条件数量。
 - 当筛选条件不超过 2 个时，主操作靠左、筛选组靠右，同一行展示；当筛选条件超过 2 个时，完整筛选组独占上方一行，主操作在下一行靠左并紧邻表格，不拆散筛选条件与查询、重置按钮。
 - 标准桌面工具栏使用 16px 行列间距；筛选行、主操作行与表格之间均保持 16px，禁止 margin 与父级 gap 叠加成 32px。空间不足时允许整组换到下一行；不得压缩控件到不可读宽度，也不得产生页面级横向滚动。
+- 全局业务按钮组间距统一为 16px，覆盖页面工具栏、筛选操作区、表单/设计工作区操作区及弹窗 Footer。表格行内文字操作、分页、Tab、方向/增删图标工具继续使用各自紧凑间距，不套用本规则。
 - 普通文字按钮统一只显示按钮文字，不添加上传、新增、保存、预览、打印、网络等装饰性前置图标。关闭、展开/收起、翻页和表头排序等独立功能控件可以保留图标，并必须提供准确的无障碍名称；搜索输入内部不得保留搜索或清除 icon。
 - 全局次按钮统一使用白底线性样式：高度 32px、左右 padding 16px、圆角 4px，默认文字 `#1D2129`、边框 `#E5E6EB`；hover 使用品牌蓝文字与 `#4080FF` 边框，active 使用 `#0E42D2`，focus-visible 增加品牌蓝轮廓，disabled 使用 `#F7F8FA` 背景、`#C9CDD4` 文字和 `#E5E6EB` 边框。
 - `default` 是新页面的标准次按钮入口；历史 `outline`、`linear` 仅作为兼容名称并必须渲染成完全相同的次按钮。工具栏、筛选区、弹窗 Footer 中的取消/关闭/重置等次按钮不得使用另一套浅灰填充或局部覆盖。
@@ -154,7 +155,7 @@
 ### 当前弹窗、提示与状态反馈
 
 - 标准弹窗分为 560 / 640 / 960 / 1280px：危险操作短确认 560px；普通新增、生成、编辑 640px；复杂配置和穿梭框 960px；表格或多列权限内容 1280px。
-- 弹窗使用固定 Header、可滚动 Body、固定 Footer。Header 固定高 56px、左右 24px，只显示主标题和关闭按钮，不显示副标题，Header 与 Body 之间不显示分隔线；Body 顶部 padding 为 8px、左右和底部为 24px，使“标题文字底部 → Body 首项顶部”的实际距离为 24px；Footer 高 64px、左右 24px、按钮右对齐且间距 12px。
+- 弹窗使用固定 Header、可滚动 Body、固定 Footer。Header 固定高 56px、左右 24px，只显示主标题和关闭按钮，不显示副标题，Header 与 Body 之间不显示分隔线；Body 顶部 padding 为 8px、左右和底部为 24px，使“标题文字底部 → Body 首项顶部”的实际距离为 24px；Footer 高 64px、左右 24px、按钮右对齐且间距 16px。
 - 新增、生成、编辑弹窗必须在实现前逐字段判断必填性：名称/标题、唯一标识、文件或路径、业务类型、状态、所属关系等缺失后会导致对象无法识别、无法保存或后续流程无法执行的字段为必填；描述、摘要、补充说明以及创建人、关联时间等系统自动生成字段默认可选。
 - 必填字段在字段标签最前显示红色 `*`，星号与字段名间距 3px；只读详情弹窗不显示必填星号。禁止所有字段一律标必填，也禁止只显示星号却仍允许保存空值。
 - 必填标识必须与校验联动：字段未完成时禁用主要提交按钮，或在提交后于对应控件下方显示明确错误文案；手机号、邮箱、URL、文件格式等还需继续执行格式校验。禁用的主要按钮统一使用 `#F7F8FA` 背景、`#C9CDD4` 文字、`#E5E6EB` 边框和 `not-allowed` 光标，不得继续呈现为可点击的品牌蓝。
@@ -193,6 +194,7 @@
 - “查看操作记录”进入独立子页面；页头左侧使用灰色“返回”按钮，与“报告管理 / 操作记录”面包屑保持同一行和 16px 间距。返回按钮 hover/focus-visible 变为品牌蓝且背景保持透明；报告管理和返回按钮均可返回，刷新后保持在该子页面。
 - 操作记录页内容区不显示页面标题、副标题或说明文字。
 - 操作记录页筛选顺序固定为：操作类型、操作时间、搜索报告标题、查询、重置。搜索框位于最后两个按钮之前；查询统一提交三项条件，重置同时清空待选值与已应用条件。筛选组左对齐，宽度为 249.33px / 249.33px / 280px / 查询 / 重置，间距 16px，并使用当前 32px Arco 线性输入与 Trigger + Listbox。
+- 操作类型只允许：上传、编辑、提交审核、撤回、上架、下架、置顶、取消置顶、删除；筛选下拉使用同一组选项，不显示“替换版本”等未定义类型。
 - 操作记录表格列：报告标题、操作类型、版本、操作人、操作时间、结果、原因／说明；不显示“操作前”“操作后”和“操作”列，也不提供行内查看入口。默认按操作时间倒序。
 - 版本字段统一使用 `V主版本.次版本 YYYY-MM-DD HH:mm`，大写 `V`，版本号与时间之间一个空格，例如 `V1.0 2025-10-13 12:00`；表格和详情弹窗保持一致。
 - 操作记录页使用全局标准分页器，底部显示总数、上一页/下一页、页码和每页条数；不再显示“默认按操作时间倒序排列”的说明文字。
@@ -1008,7 +1010,7 @@ The deletion examples use a focused confirmation dialog over a dimmed page. All 
 - Keep the body copy concise and action-oriented: one primary confirmation sentence followed by one muted irreversible-effect sentence.
 - Header and Footer stay fixed; only Body may scroll. The Modal panel itself must use `overflow: hidden` and must not scroll as a whole.
 - 确认/删除/撤回弹窗与普通弹窗使用同一外壳：Header 56px、左右 24px、无副标题和底部分隔线；Body 顶部 8px、左右和底部 24px；Footer 64px、左右 24px。确认正文保持 16px/24px，辅助说明为 14px/22px `#86909C`，间距 12px。
-- Footer actions align right; cancel button is left of the confirm button; button gap is 12px.
+- Footer actions align right; cancel button is left of the confirm button; button gap is 16px.
 - The underlying page remains visible but blocked by an overlay scrim.
 
 ### Detail / Edit / Create Large Overlay
@@ -1027,7 +1029,7 @@ The detail modal style is confirmed from `情报管理系统` node `1998:23719` 
 - Detail label/value rows use 14px text, 22px line-height, 8px gap; labels are `#4E5969`, right-aligned, 128px wide; values are `#1D2129`.
 - Long intro fields span the remaining 456px content width and may wrap to multiple 22px lines.
 - Section separators are 1px `#E5E6EB`, full 592px width.
-- Footer is fixed inside the modal bottom: 64px high, 1px top border `#E5E6EB`, actions aligned right, 24px horizontal padding, and 12px button gap. Detail mode usually has one primary `关闭` button.
+- Footer is fixed inside the modal bottom: 64px high, 1px top border `#E5E6EB`, actions aligned right, 24px horizontal padding, and 16px button gap. Detail mode usually has one primary `关闭` button.
 - In Modal footers, the cancel button uses `#F2F3F5` background with secondary text and no visible border; confirm/save uses the brand primary button, while destructive confirmation uses the danger button.
 - Edit and create modes use the same structure, replacing read-only rows with `数据输入/输入框`, upload blocks, add-more controls, and delete controls.
 - For multi-block content, use repeated 592px-wide sections rather than nested cards.
@@ -1070,7 +1072,7 @@ All Modal implementations must follow this structure:
 - Use two field groups per row only when the content is relatively dense, the fields are short, and side-by-side scanning improves efficiency.
 - In two-column Modal forms, each column is a complete vertical field group; keep 16px column gap and 16px row gap, and keep controls equal length within their columns.
 - Ordinary form modals and complex config modals must use the same field-group layout rules.
-- Footer button gap: 12px.
+- Footer button gap: 16px.
 - Footer button order: cancel on the left, confirm on the right.
 
 Do not continue using a normal Modal when content exceeds any of these limits:
@@ -1091,7 +1093,7 @@ Do not continue using a normal Modal when content exceeds any of these limits:
 - Overlay scrim is `rgba(0,0,0,0.50)` when the flow is presented as an overlay. The underlying page remains visible but visually blocked.
 - Header uses 24px horizontal padding, title 16px medium, and a 16px close icon at the top right. Header is fixed.
 - Body is the only scrollable region if content grows.
-- Footer is fixed at the bottom, 64px high, 1px top border `#E5E6EB`, white background, actions right-aligned, 24px horizontal padding, and 12px button gap.
+- Footer is fixed at the bottom, 64px high, 1px top border `#E5E6EB`, white background, actions right-aligned, 24px horizontal padding, and 16px button gap.
 - Step 1: choose/upload file and provide template/download affordance.
 - Import steps are compact and centered: steps container width 320px, step icon 28px circle, 12px gap between icon/title/tail.
 - Completed step icon uses `#E8F3FF` background with brand-blue check. Current step icon uses `#165DFF` background with white number. Inactive step icon uses `#F2F3F5` background with `#4E5969` number.
@@ -1166,7 +1168,7 @@ Generation tools may correctly choose Arco components but keep Arco default visu
 - Arco Table visual override is mandatory. `.arco-table-container` uses `1px solid #E5E6EB`, `4px` radius, white background, and `overflow: hidden`; the native table uses `table-layout: fixed`, `border-collapse: separate`, and `border-spacing: 0`.
 - Table cells and header cells use `height: 40px`, `padding: 0 16px`, `border-bottom: 1px solid #E5E6EB`, `white-space: nowrap`, `overflow: hidden`, and `text-overflow: ellipsis`. Header background is `#F7F8FA`; header text is `#4E5969`, 14px/22px, weight 500.
 - A generated table is wrong if it renders row cards, zebra blocks, tall wrapped rows, gray strip modules behind the table, icon-only action cells, blue filled pagination buttons, or a second white table card inside the single white work card.
-- Modal visual and scroll override is mandatory. Arco Modal behavior is allowed, but the visual shell must use the modal width scale, `max-width: calc(100vw - 48px)`, `max-height: calc(100vh - 48px)`, left-aligned fixed Header, scrollable Body, fixed Footer, 24px horizontal padding, and 12px Footer button gap. The whole modal must not scroll, and the Modal Body must not scroll horizontally.
+- Modal visual and scroll override is mandatory. Arco Modal behavior is allowed, but the visual shell must use the modal width scale, `max-width: calc(100vw - 48px)`, `max-height: calc(100vh - 48px)`, left-aligned fixed Header, scrollable Body, fixed Footer, 24px horizontal padding, and 16px Footer button gap. The whole modal must not scroll, and the Modal Body must not scroll horizontally.
 - If generated output shows different button heights, input heights, input internal misalignment, default Arco search styling, pill-shaped page tabs, solid filled tab bars, tabs touching the white work-card edge, Arco default table visuals, arbitrary modal width, or a modal whose whole panel scrolls, treat it as a style error and override the component CSS.
 
 Minimal override CSS for generated React / Arco / static preview output:
@@ -1959,7 +1961,7 @@ AI / design / code generation tools often treat spacing rules as decorative reco
 8. 动作区使用横向 Auto Layout：左侧批量/新增等动作按原型顺序排列，右侧只有原型可见的辅助动作；按钮高度统一 32px。
 9. 表单页使用纵向 Auto Layout 分组；普通页面表单可以左右 label/control 布局，弹窗内表单使用上下布局。字段行、组间距和按钮区都必须由 Auto Layout gap 控制。
 10. 多模块页面先使用灰底模块区作为纵向 Auto Layout 容器，模块间 gap 为 16px；简单模块直接放灰底中，复杂模块再使用小白卡。
-11. Modal / Drawer 使用纵向 Auto Layout：Header 固定，Body Fill 且仅 Body 可滚动，Footer 固定。Footer 按钮使用横向 Auto Layout，按钮 gap 为 12px 或指定的弹窗按钮间距。
+11. Modal / Drawer 使用纵向 Auto Layout：Header 固定，Body Fill 且仅 Body 可滚动，Footer 固定。Footer 按钮使用横向 Auto Layout，按钮 gap 统一为 16px。
 
 允许使用绝对定位的例外：
 

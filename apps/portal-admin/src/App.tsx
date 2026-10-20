@@ -267,7 +267,7 @@ function getReportActions(report: ReportRow) {
 type ReportOperationRecord = {
   id: string;
   报告标题: string;
-  操作类型: "上架" | "下架" | "替换版本";
+  操作类型: "上传" | "编辑" | "提交审核" | "撤回" | "上架" | "下架" | "置顶" | "取消置顶" | "删除";
   版本: string;
   操作人: string;
   操作时间: string;
@@ -279,7 +279,7 @@ type ReportOperationRecord = {
 
 const reportOperationRows: ReportOperationRecord[] = [
   { id: "record-1", 报告标题: "量子计算产业研究", 操作类型: "下架", 版本: "V1.0", 操作人: "管理员A", 操作时间: "2026-10-11 15:20", 操作前: "已上架", 操作后: "已下架", 结果: "成功", "原因／说明": "报告内容需要更新" },
-  { id: "record-2", 报告标题: "未来产业报告：智能制造", 操作类型: "替换版本", 版本: "V1.1", 操作人: "管理员A", 操作时间: "2026-10-10 14:06", 操作前: "已上架", 操作后: "已上架", 结果: "成功", "原因／说明": "使用已审核的修订版本" },
+  { id: "record-2", 报告标题: "未来产业报告：智能制造", 操作类型: "编辑", 版本: "V1.1", 操作人: "管理员A", 操作时间: "2026-10-10 14:06", 操作前: "已上架", 操作后: "已上架", 结果: "成功", "原因／说明": "使用已审核的修订版本" },
   { id: "record-3", 报告标题: "新能源汽车消费趋势洞察", 操作类型: "上架", 版本: "V1.2", 操作人: "管理员B", 操作时间: "2026-10-09 17:35", 操作前: "待上架", 操作后: "已上架", 结果: "成功", "原因／说明": "审核通过后手动上架" },
   { id: "record-4", 报告标题: "2026全球AI产业研报", 操作类型: "下架", 版本: "V1.1", 操作人: "管理员B", 操作时间: "2026-10-08 09:18", 操作前: "已上架", 操作后: "已下架", 结果: "成功", "原因／说明": "授权范围调整，暂停展示" },
   { id: "record-5", 报告标题: "量子计算产业研究", 操作类型: "上架", 版本: "V1.0", 操作人: "管理员A", 操作时间: "2026-10-03 10:22", 操作前: "待上架", 操作后: "已上架", 结果: "成功", "原因／说明": "审核通过后手动上架" },
@@ -2093,7 +2093,7 @@ function ReportOperationRecords() {
         event.preventDefault();
         setFilters({ search: searchValue, operationType, operationTime });
       }}>
-        <FilterSelect label="操作类型" options={["全部", "上架", "下架", "替换版本"]} value={operationType} onChange={setOperationType} />
+        <FilterSelect label="操作类型" options={["全部", "上传", "编辑", "提交审核", "撤回", "上架", "下架", "置顶", "取消置顶", "删除"]} value={operationType} onChange={setOperationType} />
         <FilterSelect label="操作时间" options={["全部", "2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-03"]} value={operationTime} onChange={setOperationTime} />
         <FilterInput label="" ariaLabel="搜索报告标题" placeholder="搜索报告标题" clearable value={searchValue} onChange={setSearchValue} onEnter={() => setFilters({ search: searchValue, operationType, operationTime })} />
         <Button variant="primary" type="submit">查询</Button>

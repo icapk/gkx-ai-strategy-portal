@@ -57,7 +57,7 @@
 .organization-sync-toolbar .btn { min-width: 128px; }
 .user-list-context { justify-content: flex-start; }
 .user-management-filters { grid-template-columns: minmax(240px, 1fr) minmax(240px, 1fr) max-content; }
-.user-filter-actions { height: var(--control-height); display: flex; align-items: center; gap: 8px; }
+.user-filter-actions { height: var(--control-height); display: flex; align-items: center; gap: 16px; }
 .user-filter-actions .btn { min-width: 64px; }
 .user-management-toolbar { margin: 16px 0; }
 .account-status-switch { position: relative; width: 32px; height: 18px; padding: 0; background: #c9cdd4; border: 0; border-radius: 999px; transition: background .16s ease; }
@@ -279,7 +279,7 @@ kbd { padding: 2px 6px; color: #8a96a9; background: #fff; border: 1px solid #dfe
 .select-field, .date-field { min-width: 132px; height: 34px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; color: #58677d; background: white; border: 1px solid #dce3ec; border-radius: 6px; font-size: 12px; }
 .date-field { min-width: 190px; justify-content: flex-start; color: #778599; }
 .table-toolbar { min-height: 62px; display: flex; align-items: center; justify-content: space-between; }
-.table-toolbar > div { display: flex; gap: 8px; }
+.table-toolbar > div { display: flex; gap: 16px; }
 .table-wrap { width: 100%; overflow-x: auto; border: 1px solid #e7ebf1; border-radius: 7px; }
 table { width: 100%; min-width: 930px; border-collapse: collapse; font-size: 11px; }
 th { height: 42px; padding: 0 12px; color: #68768b; background: #f7f9fc; text-align: left; font-weight: 600; white-space: nowrap; }
@@ -495,9 +495,9 @@ input[type="checkbox"]:not(table input):not(.resource-toolbar input):not(.asset-
 input[type="checkbox"]:not(table input):not(.resource-toolbar input):not(.asset-card input):not(.data-scope input):not(.form-preview-options input):not(.gkx-checkbox)::after { content: ""; display: block; width: 13px; height: 13px; background: white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.18); transition: .2s; }
 input[type="checkbox"]:not(table input):not(.resource-toolbar input):not(.asset-card input):not(.data-scope input):not(.form-preview-options input):not(.gkx-checkbox):checked { background: var(--primary); }
 input[type="checkbox"]:not(table input):not(.resource-toolbar input):not(.asset-card input):not(.data-scope input):not(.form-preview-options input):not(.gkx-checkbox):checked::after { transform: translateX(13px); }
-.modal-footer { min-height: 64px; margin: 5px -20px 0; padding: 13px 20px; display: flex; align-items: center; justify-content: flex-end; gap: 9px; border-top: 1px solid var(--line); background: #fbfcfd; }
+.modal-footer { min-height: 64px; margin: 5px -20px 0; padding: 13px 20px; display: flex; align-items: center; justify-content: flex-end; gap: 16px; border-top: 1px solid var(--line); background: #fbfcfd; }
 .modal-footer.spread { margin: 0; justify-content: space-between; }
-.modal-footer.spread > div { display: flex; gap: 9px; }
+.modal-footer.spread > div { display: flex; gap: 16px; }
 .avatar-upload { margin-bottom: 18px; display: flex; align-items: center; gap: 13px; }
 .avatar-upload > span { width: 62px; height: 62px; display: grid; place-items: center; color: #7c8b9f; background: #eef2f7; border-radius: 50%; }
 .avatar-upload > div { display: flex; align-items: center; gap: 10px; }
@@ -2012,7 +2012,7 @@ textarea:focus-visible {
 }
 
 .table-toolbar > div {
-  gap: var(--space-small);
+  gap: var(--space-medium);
 }
 
 /* Shared list toolbar: actions lead; up to two filters stay on the same row. */
@@ -2036,7 +2036,7 @@ textarea:focus-visible {
 
 .list-toolbar-actions {
   justify-self: start;
-  gap: var(--space-small);
+  gap: var(--space-medium);
 }
 
 .list-toolbar-filters {
@@ -4013,7 +4013,7 @@ tbody tr:hover {
   margin: 0;
   padding: 16px 24px;
   flex: 0 0 64px;
-  gap: 12px;
+  gap: 16px;
   background: #fff;
   border-top: 1px solid var(--gkx-border);
 }
@@ -4211,7 +4211,7 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 16px;
 }
 
 .form-workspace-identity {
