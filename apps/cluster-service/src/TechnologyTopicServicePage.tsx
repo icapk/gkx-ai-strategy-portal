@@ -3102,6 +3102,23 @@ export default function TechnologyTopicServicePage() {
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => document.getElementById("tp-subsection-report-view")?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" })));
   };
 
+  if (activeModule === "one-map") return <main className="tp-page tp-one-map-figma-page">
+    <div id="tp-workspace" className="tp-one-map-figma" data-node-id="1162:2016">
+      <nav className="tp-one-map-directory" aria-label="科技专题服务一级功能" data-node-id="1162:2091">
+        {moduleDefinitions.map((item) => <button className={item.id === "one-map" ? "active" : ""} type="button" aria-current={item.id === "one-map" ? "page" : undefined} onClick={() => selectModule(item.id, true)} key={item.id}>{item.label}</button>)}
+      </nav>
+      <section className="tp-one-map-glass" aria-label="专题一张图" data-node-id="1162:2088">
+        <div className="tp-one-map-content" data-node-id="1162:2089">
+          {activeDefinition.subs.map((sub) => <section id={`tp-subsection-${sub.id}`} className="tp-one-map-section" aria-labelledby={`tp-one-map-title-${sub.id}`} key={sub.id}>
+            <h2 id={`tp-one-map-title-${sub.id}`} className="tp-one-map-section-name">{sub.label}</h2>
+            <OneMapModule subId={sub.id} industry={industry} industries={industries} onIndustryChange={(value) => selectIndustry(value as Industry)} />
+          </section>)}
+          <p className="tp-one-map-data-note"><CircleAlert size={14} aria-hidden="true" />当前页面中的数据、对象、位置与统计结果均为交互演示，不代表真实情况。</p>
+        </div>
+      </section>
+    </div>
+  </main>;
+
   return <main className="tp-page">
     <PortalHeader currentPage="technology-topic-service" />
 

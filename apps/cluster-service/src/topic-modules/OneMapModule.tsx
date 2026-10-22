@@ -3,7 +3,6 @@ import {
   Atom,
   BookOpen,
   Building2,
-  ChevronDown,
   CircleAlert,
   GraduationCap,
   MapPin,
@@ -12,35 +11,25 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { useMemo, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { lazy, Suspense, useId, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { TopicOutlineInput, TopicOutlineSelect } from "../TopicControls";
+import { SHENZHEN_DISTRICTS, type ShenzhenDistrictName, type ShenzhenMapMarker } from "./shenzhenMapData";
 import "./one-map-module.css";
+
+const ShenzhenGeoMap = lazy(() => import("./ShenzhenGeoMap"));
 
 type OneMapModuleProps = {
   subId: string;
   industry: string;
+  industries?: readonly string[];
+  onIndustryChange?: (industry: string) => void;
 };
 
-type DistrictName =
-  | "南山区"
-  | "福田区"
-  | "罗湖区"
-  | "宝安区"
-  | "龙岗区"
-  | "光明区"
-  | "龙华区"
-  | "坪山区"
-  | "盐田区"
-  | "大鹏新区";
+type DistrictName = ShenzhenDistrictName;
 
 type IndicatorId = "industry" | "technology" | "enterprise" | "talent" | "research";
 type LayerId = IndicatorId | "policy";
 type EntityType = "重点企业" | "科研机构";
-
-type DistrictDefinition = {
-  name: DistrictName;
-  path: string;
-  center: [number, number];
-};
 
 type DistrictMetrics = {
   industry: number;
@@ -59,29 +48,28 @@ type MapEntity = {
   address: string;
   founded: string;
   focus: string;
-  offset: [number, number];
+  coordinate: [number, number];
 };
 
 type TrendSeries = {
   label: string;
   values: number[];
   color?: string;
+  unit?: string;
 };
 
-const YEARS = [2020, 2021, 2022, 2023, 2024, 2025];
+const YEARS = [2021, 2022, 2023, 2024, 2025];
 
-const DISTRICTS: DistrictDefinition[] = [
-  { name: "宝安区", path: "M52 48 L157 28 L214 70 L184 133 L93 145 L35 105 Z", center: [118, 89] },
-  { name: "光明区", path: "M157 28 L251 38 L272 91 L214 70 Z", center: [220, 55] },
-  { name: "龙华区", path: "M214 70 L272 91 L291 154 L222 170 L184 133 Z", center: [238, 124] },
-  { name: "南山区", path: "M93 145 L184 133 L222 170 L203 235 L105 249 L57 201 Z", center: [145, 193] },
-  { name: "福田区", path: "M203 235 L222 170 L291 154 L325 203 L296 246 Z", center: [263, 211] },
-  { name: "罗湖区", path: "M325 203 L291 154 L358 134 L394 183 L375 231 Z", center: [345, 185] },
-  { name: "龙岗区", path: "M272 91 L367 62 L459 101 L477 176 L394 183 L358 134 L291 154 Z", center: [382, 119] },
-  { name: "坪山区", path: "M477 176 L459 101 L538 126 L556 188 L511 220 Z", center: [506, 168] },
-  { name: "盐田区", path: "M375 231 L394 183 L477 176 L511 220 L450 252 Z", center: [442, 216] },
-  { name: "大鹏新区", path: "M511 220 L556 188 L617 217 L590 278 L523 292 L450 252 Z", center: [548, 247] },
-];
+const DEFAULT_INDUSTRIES = [
+  "合成生物",
+  "区块链",
+  "细胞与基因",
+  "空天技术",
+  "脑科学与类脑智能",
+  "深地深海",
+  "可见光通信与光计算",
+  "量子信息",
+] as const;
 
 const INDICATORS: { id: IndicatorId; label: string; icon: LucideIcon }[] = [
   { id: "industry", label: "产业指标", icon: Activity },
@@ -92,12 +80,12 @@ const INDICATORS: { id: IndicatorId; label: string; icon: LucideIcon }[] = [
 ];
 
 const LAYERS: { id: LayerId; label: string; metric: string; unit: string }[] = [
-  { id: "industry", label: "产业发展", metric: "产业发展指数", unit: "" },
-  { id: "technology", label: "技术分布", metric: "技术活跃指数", unit: "" },
-  { id: "enterprise", label: "企业分布", metric: "企业数量", unit: "家" },
-  { id: "research", label: "科研机构", metric: "科研机构数量", unit: "家" },
-  { id: "talent", label: "人才分布", metric: "人才数量", unit: "人" },
-  { id: "policy", label: "政策支持", metric: "政策数量", unit: "条" },
+  { id: "industry", label: "产业发展专题图", metric: "产业发展指数", unit: "" },
+  { id: "technology", label: "技术分布专题图", metric: "技术活跃指数", unit: "" },
+  { id: "enterprise", label: "企业分布专题图", metric: "企业数量", unit: "家" },
+  { id: "research", label: "科研机构专题图", metric: "科研机构数量", unit: "家" },
+  { id: "talent", label: "人才分布专题图", metric: "人才数量", unit: "人" },
+  { id: "policy", label: "政策支持专题图", metric: "政策数量", unit: "条" },
 ];
 
 function hashString(value: string) {
@@ -131,15 +119,15 @@ function createTrend(seed: number, salt: string, start: number, end: number) {
 
 function buildDistrictMetrics(industry: string) {
   const seed = hashString(industry);
-  return DISTRICTS.reduce<Record<DistrictName, DistrictMetrics>>((record, district, index) => {
-    const districtWeight = [1.1, .86, .74, 1.03, .95, .9, .93, .76, .61, .54][index];
-    record[district.name] = {
-      industry: Math.round(stableNumber(seed, `${district.name}-industry`, 52, 92) * districtWeight),
-      technology: Math.round(stableNumber(seed, `${district.name}-technology`, 49, 96) * districtWeight),
-      enterprise: Math.max(8, Math.round(stableNumber(seed, `${district.name}-enterprise`, 26, 116) * districtWeight)),
-      talent: Math.max(90, Math.round(stableNumber(seed, `${district.name}-talent`, 180, 920) * districtWeight)),
-      research: Math.max(3, Math.round(stableNumber(seed, `${district.name}-research`, 8, 42) * districtWeight)),
-      policy: Math.max(4, Math.round(stableNumber(seed, `${district.name}-policy`, 9, 38) * districtWeight)),
+  return SHENZHEN_DISTRICTS.reduce<Record<DistrictName, DistrictMetrics>>((record, district, index) => {
+    const districtWeight = [1.1, .86, .74, 1.03, .95, .9, .93, .76, .61][index];
+    record[district] = {
+      industry: Math.round(stableNumber(seed, `${district}-industry`, 52, 92) * districtWeight),
+      technology: Math.round(stableNumber(seed, `${district}-technology`, 49, 96) * districtWeight),
+      enterprise: Math.max(8, Math.round(stableNumber(seed, `${district}-enterprise`, 26, 116) * districtWeight)),
+      talent: Math.max(90, Math.round(stableNumber(seed, `${district}-talent`, 180, 920) * districtWeight)),
+      research: Math.max(3, Math.round(stableNumber(seed, `${district}-research`, 8, 42) * districtWeight)),
+      policy: Math.max(4, Math.round(stableNumber(seed, `${district}-policy`, 9, 38) * districtWeight)),
     };
     return record;
   }, {} as Record<DistrictName, DistrictMetrics>);
@@ -148,14 +136,14 @@ function buildDistrictMetrics(industry: string) {
 function buildEntities(industry: string): MapEntity[] {
   const shortName = industry.length > 6 ? industry.slice(0, 6) : industry;
   return [
-    { id: "enterprise-1", type: "重点企业", name: `${shortName}工程技术有限公司（演示）`, district: "南山区", address: "南山区科技园片区（位置示意）", founded: "2018 年", focus: "产品研发、工程验证与场景交付", offset: [18, -16] },
-    { id: "enterprise-2", type: "重点企业", name: `${shortName}产业创新有限公司（演示）`, district: "宝安区", address: "宝安区新兴产业片区（位置示意）", founded: "2020 年", focus: "中试放大、生产服务与产业协同", offset: [-19, 17] },
-    { id: "enterprise-3", type: "重点企业", name: `鹏城${shortName}科技有限公司（演示）`, district: "龙岗区", address: "龙岗区大运片区（位置示意）", founded: "2017 年", focus: "核心部件、系统集成与应用服务", offset: [18, -17] },
-    { id: "enterprise-4", type: "重点企业", name: `深湾${shortName}应用有限公司（演示）`, district: "坪山区", address: "坪山区产业园片区（位置示意）", founded: "2021 年", focus: "产业化验证与规模制造", offset: [18, -16] },
-    { id: "research-1", type: "科研机构", name: `${shortName}交叉科学研究中心（演示）`, district: "光明区", address: "光明科学城片区（位置示意）", founded: "2019 年", focus: "基础研究、技术评价与成果转化", offset: [17, 17] },
-    { id: "research-2", type: "科研机构", name: `湾区${shortName}技术研究院（演示）`, district: "福田区", address: "福田中心区（位置示意）", founded: "2016 年", focus: "产业战略、共性技术与开放服务", offset: [18, -17] },
-    { id: "research-3", type: "科研机构", name: `深圳${shortName}联合实验室（演示）`, district: "龙华区", address: "龙华数字产业片区（位置示意）", founded: "2022 年", focus: "关键技术攻关与工程化验证", offset: [-18, 17] },
-    { id: "research-4", type: "科研机构", name: `${shortName}前沿技术中心（演示）`, district: "盐田区", address: "盐田区创新园片区（位置示意）", founded: "2020 年", focus: "前沿研究、人才培养与产业咨询", offset: [17, 17] },
+    { id: "enterprise-1", type: "重点企业", name: `${shortName}工程技术有限公司`, district: "南山区", address: "南山区科技园片区", founded: "2018 年", focus: "产品研发、工程验证与场景交付", coordinate: [113.946, 22.54] },
+    { id: "enterprise-2", type: "重点企业", name: `${shortName}产业创新有限公司`, district: "宝安区", address: "宝安区新兴产业片区", founded: "2020 年", focus: "中试放大、生产服务与产业协同", coordinate: [113.884, 22.578] },
+    { id: "enterprise-3", type: "重点企业", name: `鹏城${shortName}科技有限公司`, district: "龙岗区", address: "龙岗区大运片区", founded: "2017 年", focus: "核心部件、系统集成与应用服务", coordinate: [114.223, 22.692] },
+    { id: "enterprise-4", type: "重点企业", name: `深湾${shortName}应用有限公司`, district: "坪山区", address: "坪山区产业园片区", founded: "2021 年", focus: "产业化验证与规模制造", coordinate: [114.351, 22.691] },
+    { id: "research-1", type: "科研机构", name: `${shortName}交叉科学研究中心`, district: "光明区", address: "光明科学城片区", founded: "2019 年", focus: "基础研究、技术评价与成果转化", coordinate: [113.938, 22.749] },
+    { id: "research-2", type: "科研机构", name: `湾区${shortName}技术研究院`, district: "福田区", address: "福田中心区", founded: "2016 年", focus: "产业战略、共性技术与开放服务", coordinate: [114.055, 22.541] },
+    { id: "research-3", type: "科研机构", name: `深圳${shortName}联合实验室`, district: "龙华区", address: "龙华数字产业片区", founded: "2022 年", focus: "关键技术攻关与工程化验证", coordinate: [114.042, 22.659] },
+    { id: "research-4", type: "科研机构", name: `${shortName}前沿技术中心`, district: "盐田区", address: "盐田区创新园片区", founded: "2020 年", focus: "前沿研究、人才培养与产业咨询", coordinate: [114.237, 22.558] },
   ];
 }
 
@@ -163,43 +151,110 @@ function DemoNotice({ children = "以下为稳定演示数据，不作为正式�
   return <span className="om-demo-notice"><CircleAlert size={14} aria-hidden="true" />{children}</span>;
 }
 
-function ModuleIntro({ title, description }: { title: string; description: string }) {
+function ModuleIntro({ title, description, action, showNotice = true }: { title: string; description: string; action?: ReactNode; showNotice?: boolean }) {
   return <header className="om-intro">
     <div><h3>{title}</h3><p>{description}</p></div>
-    <DemoNotice />
+    {action ?? (showNotice ? <DemoNotice /> : null)}
   </header>;
 }
 
+function IndustrySelect({ industry, industries, onChange }: { industry: string; industries: readonly string[]; onChange?: (industry: string) => void }) {
+  return <label className="om-industry-select">
+    <span className="om-visually-hidden">选择专题产业</span>
+    <TopicOutlineSelect ariaLabel="选择专题产业" value={industry} options={industries} onChange={onChange} disabled={!onChange} />
+  </label>;
+}
+
 function MetricCard({ label, value, unit, note, icon: Icon }: { label: string; value: string; unit?: string; note: string; icon: LucideIcon }) {
+  const figmaIcon = label === "产业规模"
+    ? "./assets/figma-topic-one-map/metric-industry.png"
+    : label === "企业机构数量"
+      ? "./assets/figma-topic-one-map/metric-enterprise.png"
+      : null;
   return <article className="om-metric-card">
-    <span className="om-metric-icon"><Icon size={18} aria-hidden="true" /></span>
-    <div><span>{label}</span><strong>{value}<small>{unit}</small></strong><p>{note}</p></div>
+    <span className={`om-metric-icon${figmaIcon ? " has-figma-asset" : ""}`}>{figmaIcon ? <img src={figmaIcon} alt="" /> : <Icon size={18} aria-hidden="true" />}</span>
+    <div><span>{label}{unit && <small>（{unit}）</small>}</span><strong>{value}</strong><p>{note}</p></div>
   </article>;
 }
 
 function TrendChart({ title, unit, series }: { title: string; unit: string; series: TrendSeries[] }) {
-  const width = 610;
-  const height = 224;
-  const allValues = series.flatMap((item) => item.values);
-  const max = Math.max(...allValues, 1);
-  const min = Math.min(...allValues, 0);
-  const range = Math.max(max - min, 1);
-  const pointsFor = (values: number[]) => values.map((value, index) => ({
-    x: 44 + index * ((width - 78) / (YEARS.length - 1)),
-    y: 26 + (1 - (value - min) / range) * 132,
+  const [activeSeries, setActiveSeries] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [lockedIndex, setLockedIndex] = useState<number | null>(null);
+  const gradientId = useId().replace(/:/g, "");
+  const width = 1078;
+  const height = 168;
+  const currentSeries = series[Math.min(activeSeries, series.length - 1)];
+  const currentUnit = currentSeries.unit ?? unit;
+  const chartMax = Math.max(120, Math.ceil(Math.max(...currentSeries.values, 1) / 30) * 30);
+  const xStart = 80;
+  const xEnd = 1038;
+  const yTop = 9;
+  const yBottom = 139;
+  const points = currentSeries.values.map((value, index) => ({
+    x: xStart + index * ((xEnd - xStart) / Math.max(YEARS.length - 1, 1)),
+    y: yTop + (1 - value / chartMax) * (yBottom - yTop),
   }));
+  const path = points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x},${point.y}`).join(" ");
+  const areaPath = `${path} L${points[points.length - 1].x},${yBottom} L${points[0].x},${yBottom} Z`;
+  const yTicks = [chartMax, chartMax * .75, chartMax * .5, chartMax * .25, 0];
+  const activePointIndex = lockedIndex ?? hoveredIndex;
+  const activePoint = activePointIndex === null ? null : points[activePointIndex];
+  const activeYear = activePointIndex === null ? null : YEARS[activePointIndex];
+  const activeValue = activePointIndex === null ? null : currentSeries.values[activePointIndex];
+  const setNearestPoint = (clientX: number, target: SVGSVGElement) => {
+    if (lockedIndex !== null) return;
+    const rect = target.getBoundingClientRect();
+    const svgX = (clientX - rect.left) / Math.max(rect.width, 1) * width;
+    const nearestIndex = points.reduce((nearest, point, index) => Math.abs(point.x - svgX) < Math.abs(points[nearest].x - svgX) ? index : nearest, 0);
+    setHoveredIndex(nearestIndex);
+  };
+  const handlePointerMove = (event: ReactPointerEvent<SVGSVGElement>) => setNearestPoint(event.clientX, event.currentTarget);
+  const handleKeyDown = (event: ReactKeyboardEvent<SVGSVGElement>) => {
+    const currentIndex = activePointIndex ?? 0;
+    let nextIndex = currentIndex;
+    if (event.key === "ArrowRight") nextIndex = Math.min(YEARS.length - 1, currentIndex + 1);
+    else if (event.key === "ArrowLeft") nextIndex = Math.max(0, currentIndex - 1);
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = YEARS.length - 1;
+    else if (event.key === "Escape") {
+      setLockedIndex(null);
+      setHoveredIndex(null);
+      return;
+    } else return;
+    event.preventDefault();
+    setLockedIndex(nextIndex);
+    setHoveredIndex(nextIndex);
+  };
+  const selectSeries = (index: number) => {
+    setActiveSeries(index);
+    setHoveredIndex(null);
+    setLockedIndex(null);
+  };
+  const tooltipWidth = 176;
+  const tooltipHeight = 48;
+  const tooltipX = activePoint ? Math.min(Math.max(activePoint.x - tooltipWidth / 2, 48), width - tooltipWidth - 12) : 0;
+  const tooltipY = activePoint ? Math.max(3, activePoint.y - tooltipHeight - 10) : 0;
   return <figure className="om-chart om-trend-chart">
-    <div className="om-chart-heading"><div><h4>{title}</h4><span>2020—2025</span></div><div className="om-chart-legend">{series.map((item, index) => <span key={item.label}><i style={{ background: item.color ?? (index === 0 ? "var(--tp-data-primary, #1769ff)" : "var(--tp-data-compare, #18a875)") }} />{item.label}</span>)}</div></div>
-    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title}：${series.map((item) => `${item.label}${item.values.map((value, index) => `${YEARS[index]}年${value}${unit}`).join("，")}`).join("；")}。演示数据。`}>
-      {[26, 59, 92, 125, 158].map((y) => <line key={y} x1="44" x2="576" y1={y} y2={y} />)}
-      {series.map((item, seriesIndex) => {
-        const points = pointsFor(item.values);
-        const color = item.color ?? (seriesIndex === 0 ? "var(--tp-data-primary, #1769ff)" : "var(--tp-data-compare, #18a875)");
-        const path = points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x},${point.y}`).join(" ");
-        return <g key={item.label} style={{ color }}><path d={path} />{points.map((point, index) => <circle key={`${item.label}-${YEARS[index]}`} cx={point.x} cy={point.y} r="4" />)}</g>;
+    <div className="om-chart-heading"><div><h4>{title}</h4></div><div className="om-chart-legend" role="group" aria-label={`${title}指标切换`}>{series.map((item, index) => <button className={activeSeries === index ? "active" : ""} type="button" aria-pressed={activeSeries === index} onClick={() => selectSeries(index)} key={item.label}>{item.label}</button>)}</div></div>
+    <svg viewBox={`0 0 ${width} ${height}`} role="group" tabIndex={0} aria-label={`${title}：${currentSeries.label}${currentSeries.values.map((value, index) => `${YEARS[index]}年${value}${currentUnit}`).join("，")}。使用左右方向键切换年份，按 Escape 取消锁定。`} onFocus={() => { if (activePointIndex === null) setHoveredIndex(0); }} onBlur={() => { if (lockedIndex === null) setHoveredIndex(null); }} onPointerMove={handlePointerMove} onPointerLeave={() => { if (lockedIndex === null) setHoveredIndex(null); }} onKeyDown={handleKeyDown}>
+      <defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#165dff" stopOpacity=".14" /><stop offset="1" stopColor="#165dff" stopOpacity="0" /></linearGradient></defs>
+      {yTicks.map((tick, index) => {
+        const y = yTop + index * ((yBottom - yTop) / 4);
+        return <g key={tick}><text x="32" y={y + 4} textAnchor="end">{Math.round(tick)}</text><line x1="48" x2="1078" y1={y} y2={y} /></g>;
       })}
-      {YEARS.map((year, index) => <text key={year} x={44 + index * ((width - 78) / (YEARS.length - 1))} y="198" textAnchor="middle">{year}</text>)}
+      <rect className="om-trend-hit-area" x="48" y="0" width="1030" height={height} />
+      <path className="om-trend-area" d={areaPath} style={{ fill: `url(#${gradientId})` }} />
+      <path className="om-trend-line" d={path} />
+      {activePoint && <line className="om-trend-guide" x1={activePoint.x} x2={activePoint.x} y1={yTop} y2={yBottom} />}
+      {points.map((point, index) => <circle className={`om-trend-point${activePointIndex === index ? " active" : ""}${lockedIndex === index ? " locked" : ""}`} key={`${currentSeries.label}-${YEARS[index]}`} cx={point.x} cy={point.y} r="4" onClick={() => { setLockedIndex((current) => current === index ? null : index); setHoveredIndex(index); }} />)}
+      {YEARS.map((year, index) => <text key={year} x={64 + index * ((1022 - 64) / Math.max(YEARS.length - 1, 1))} y="164" textAnchor="middle">{year}</text>)}
+      {activePoint && activeYear !== null && activeValue !== null && <g className="om-trend-tooltip" transform={`translate(${tooltipX} ${tooltipY})`}>
+        <rect width={tooltipWidth} height={tooltipHeight} rx="5" />
+        <text x="12" y="19"><tspan className="om-trend-tooltip-year">{activeYear} 年</tspan><tspan x="12" dy="19">{currentSeries.label}：{activeValue.toLocaleString()}{currentUnit}</tspan></text>
+      </g>}
     </svg>
+    <span className="om-visually-hidden" aria-live="polite">{activeYear !== null && activeValue !== null ? `${activeYear}年，${currentSeries.label}${activeValue}${currentUnit}${lockedIndex !== null ? "，已锁定" : ""}` : ""}</span>
   </figure>;
 }
 
@@ -217,7 +272,7 @@ function BarChart({ title, unit, items }: { title: string; unit: string; items: 
 function RankingList({ title, items, unit }: { title: string; items: { label: string; value: number }[]; unit: string }) {
   return <section className="om-chart om-ranking" aria-label={`${title}，演示数据`}>
     <div className="om-chart-heading"><div><h4>{title}</h4><span>仅展示统计结果，不构成正式排名</span></div></div>
-    <ol>{items.map((item, index) => <li key={item.label}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{item.label}</strong><small>虚构样例机构</small></div><b>{item.value.toLocaleString()}<small>{unit}</small></b></li>)}</ol>
+    <ol>{items.map((item, index) => <li key={item.label}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{item.label}</strong></div><b><small>{unit}</small><span>{item.value.toLocaleString()}</span></b></li>)}</ol>
   </section>;
 }
 
@@ -229,6 +284,21 @@ function StatisticsContent({ industry, indicator }: { industry: string; indicato
   const patentCount = stableNumber(seed, "patent-count", 1760, 4200);
   const talentCount = stableNumber(seed, "talent-count", 1900, 4600);
   const researchCount = stableNumber(seed, "research-count", 46, 98);
+  const employeeBandWeights = [
+    { label: "50 人以下", weight: stableNumber(seed, "employee-band-under-50", 34, 46) },
+    { label: "50–199 人", weight: stableNumber(seed, "employee-band-50-199", 24, 34) },
+    { label: "200–499 人", weight: stableNumber(seed, "employee-band-200-499", 14, 24) },
+    { label: "500 人以上", weight: stableNumber(seed, "employee-band-500-plus", 7, 15) },
+  ];
+  const employeeBandWeightTotal = employeeBandWeights.reduce((sum, item) => sum + item.weight, 0);
+  let assignedEnterpriseCount = 0;
+  const enterpriseHeadcountDistribution = employeeBandWeights.map((item, index) => {
+    const value = index === employeeBandWeights.length - 1
+      ? enterpriseCount - assignedEnterpriseCount
+      : Math.round(enterpriseCount * item.weight / employeeBandWeightTotal);
+    assignedEnterpriseCount += value;
+    return { label: item.label, value };
+  });
 
   if (indicator === "industry") return <>
     <div className="om-metric-grid om-metric-grid-2">
@@ -236,8 +306,10 @@ function StatisticsContent({ industry, indicator }: { industry: string; indicato
       <MetricCard icon={Building2} label="企业机构数量" value={enterpriseCount.toLocaleString()} unit="家" note="2025 年深圳演示统计" />
     </div>
     <div className="om-visual-grid">
-      <TrendChart title="产业规模及趋势" unit="亿元" series={[{ label: "产业规模", values: createTrend(seed, "industry-scale-trend", Math.round(industryScale * .54), industryScale) }]} />
-      <TrendChart title="企业机构数量及趋势" unit="家" series={[{ label: "企业机构", values: createTrend(seed, "industry-enterprise-trend", Math.round(enterpriseCount * .58), enterpriseCount) }]} />
+      <TrendChart title="产业指标趋势" unit="亿元" series={[
+        { label: "产业规模", values: industry === "合成生物" ? [40, 47, 70, 98, 112] : createTrend(seed, "industry-scale-trend", Math.round(industryScale * .54), industryScale) },
+        { label: "企业机构数量", unit: "家", values: createTrend(seed, "industry-enterprise-trend", Math.round(enterpriseCount * .58), enterpriseCount) },
+      ]} />
     </div>
   </>;
 
@@ -247,11 +319,11 @@ function StatisticsContent({ industry, indicator }: { industry: string; indicato
       <div className="om-metric-grid om-metric-grid-3">
         <MetricCard icon={BookOpen} label="论文数量" value={paperCount.toLocaleString()} unit="篇" note="累计演示样本" />
         <MetricCard icon={Atom} label="专利数量" value={patentCount.toLocaleString()} unit="件" note="累计演示样本" />
-        <MetricCard icon={Activity} label="技术转化额" value={institutes.reduce((sum, item) => sum + item.value, 0).toLocaleString()} unit="百万元" note="重点专利机构演示统计" />
+        <MetricCard icon={Activity} label="技术转化额" value={institutes.reduce((sum, item) => sum + item.value, 0).toLocaleString()} unit="百万元" note="重点机构专利技术转化额" />
       </div>
       <div className="om-visual-grid">
-        <TrendChart title="论文与专利数量趋势" unit="项" series={[{ label: "论文", values: createTrend(seed, "papers", Math.round(paperCount * .48), paperCount) }, { label: "专利", values: createTrend(seed, "patents", Math.round(patentCount * .45), patentCount) }]} />
-        <BarChart title="专利重点机构技术转化额" unit="百万元" items={institutes} />
+        <TrendChart title="论文与专利数量趋势" unit="项" series={[{ label: "论文", unit: "篇", values: createTrend(seed, "papers", Math.round(paperCount * .48), paperCount) }, { label: "专利", unit: "件", values: createTrend(seed, "patents", Math.round(patentCount * .45), patentCount) }]} />
+        <BarChart title="重点机构专利技术转化额" unit="百万元" items={institutes} />
       </div>
     </>;
   }
@@ -266,7 +338,7 @@ function StatisticsContent({ industry, indicator }: { industry: string; indicato
       <TrendChart title="企业数量及趋势" unit="家" series={[{ label: "企业数量", values: createTrend(seed, "enterprise-trend", Math.round(enterpriseCount * .55), enterpriseCount) }]} />
       <div className="om-stack-charts">
         <BarChart title="企业规模分布" unit="家" items={[{ label: "大型企业", value: stableNumber(seed, "company-large", 18, 36) }, { label: "中型企业", value: stableNumber(seed, "company-medium", 42, 74) }, { label: "小型企业", value: stableNumber(seed, "company-small", 58, 102) }, { label: "微型企业", value: stableNumber(seed, "company-micro", 24, 52) }]} />
-        <BarChart title="企业人数分布" unit="人" items={[{ label: "研发人员", value: stableNumber(seed, "worker-rd", 3600, 6400) }, { label: "工程技术人员", value: stableNumber(seed, "worker-engineer", 2900, 5200) }, { label: "生产与运营人员", value: stableNumber(seed, "worker-production", 2500, 4600) }]} />
+        <BarChart title="企业人数分布" unit="家" items={enterpriseHeadcountDistribution} />
       </div>
     </div>
   </>;
@@ -295,18 +367,18 @@ function StatisticsContent({ industry, indicator }: { industry: string; indicato
     </div>
     <div className="om-visual-grid">
       <TrendChart title="科研机构数量及趋势" unit="家" series={[{ label: "科研机构", values: createTrend(seed, "research-trend", Math.round(researchCount * .62), researchCount) }]} />
-      <div className="om-stack-charts">
+      <div className="om-stack-charts om-research-stack">
         <BarChart title="科研机构领域统计" unit="家" items={researchDomains} />
-        <RankingList title="重点科研机构" unit="示意值" items={institutions} />
+        <RankingList title="重点科研机构" unit="综合指数" items={institutions} />
       </div>
     </div>
   </>;
 }
 
-function StatisticsView({ industry }: { industry: string }) {
+function StatisticsView({ industry, industries, onIndustryChange }: { industry: string; industries: readonly string[]; onIndustryChange?: (industry: string) => void }) {
   const [indicator, setIndicator] = useState<IndicatorId>("industry");
   return <div className="om-module om-statistics-view">
-    <ModuleIntro title="专题产业相关统计" description={`以图表呈现深圳${industry}产业、技术、企业、人才与科研五类指标。`} />
+    <ModuleIntro title="专题产业相关统计" description={`以图表呈现深圳${industry}产业、技术、企业、人才与科研五类指标。`} action={<IndustrySelect industry={industry} industries={industries} onChange={onIndustryChange} />} />
     <div className="om-indicator-tabs" role="tablist" aria-label="五类专题统计指标">
       {INDICATORS.map((item) => {
         const Icon = item.icon;
@@ -334,72 +406,70 @@ function EntityDetails({ entity, industry }: { entity: MapEntity | null; industr
       <div><dt>所属产业</dt><dd>{industry}</dd></div>
       <div><dt>业务 / 研究方向</dt><dd>{entity.focus}</dd></div>
     </dl>
-    <DemoNotice>名称、地址和信息均为演示</DemoNotice>
+    <DemoNotice>对象名称、地址与信息为示意数据</DemoNotice>
   </article>;
 }
 
 function MapFigure({
   layer,
   metrics,
-  entities,
+  entities = [],
   selectedDistrict,
   selectedEntity,
   onDistrictChange,
   onEntityChange,
   showAllEntities = false,
+  showValues = true,
 }: {
   layer: LayerId;
   metrics: Record<DistrictName, DistrictMetrics>;
-  entities: MapEntity[];
+  entities?: MapEntity[];
   selectedDistrict: DistrictName;
   selectedEntity: MapEntity | null;
   onDistrictChange: (district: DistrictName) => void;
-  onEntityChange: (entity: MapEntity) => void;
+  onEntityChange?: (entity: MapEntity) => void;
   showAllEntities?: boolean;
+  showValues?: boolean;
 }) {
   const detail = getLayerDetails(layer);
-  const values = DISTRICTS.map((district) => metrics[district.name][layer]);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const visibleEntities = showAllEntities ? entities : entities.filter((entity) => (layer === "enterprise" ? entity.type === "重点企业" : layer === "research" ? entity.type === "科研机构" : false));
-  const keyboardSelect = (event: KeyboardEvent<SVGGElement>, callback: () => void) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      callback();
-    }
-  };
-  return <figure className="om-map-figure">
-    <svg viewBox="0 0 650 320" role="group" aria-label={`深圳十个行政区${detail.label}示意地图，可点选行政区`}>
-      <title>深圳行政区专题示意图</title>
-      <desc>本图不代表真实行政边界，所有指标、位置和对象信息均为演示数据。</desc>
-      {DISTRICTS.map((district) => {
-        const value = metrics[district.name][layer];
-        const level = .2 + (value - min) / Math.max(max - min, 1) * .68;
-        return <g className={`om-district ${selectedDistrict === district.name ? "active" : ""}`} role="button" tabIndex={0} aria-label={`选择${district.name}，${detail.metric}${value}${detail.unit}`} aria-pressed={selectedDistrict === district.name} onClick={() => onDistrictChange(district.name)} onKeyDown={(event) => keyboardSelect(event, () => onDistrictChange(district.name))} key={district.name}>
-          <path d={district.path} style={{ "--om-level": `${Math.round(level * 100)}%` } as CSSProperties} />
-          <text x={district.center[0]} y={district.center[1] - 4} textAnchor="middle">{district.name.replace("新区", "")}</text>
-          <text className="om-district-value" x={district.center[0]} y={district.center[1] + 12} textAnchor="middle">{value}{detail.unit}</text>
-        </g>;
-      })}
-      {visibleEntities.map((entity) => {
-        const district = DISTRICTS.find((item) => item.name === entity.district)!;
-        const x = district.center[0] + entity.offset[0];
-        const y = district.center[1] + entity.offset[1];
-        return <g className={`om-map-marker ${entity.type === "科研机构" ? "research" : "enterprise"} ${selectedEntity?.id === entity.id ? "active" : ""}`} role="button" tabIndex={0} aria-label={`查看${entity.name}基本信息`} aria-pressed={selectedEntity?.id === entity.id} transform={`translate(${x} ${y})`} onClick={(event) => { event.stopPropagation(); onEntityChange(entity); }} onKeyDown={(event) => keyboardSelect(event, () => onEntityChange(entity))} key={entity.id}>
-          <circle className="om-marker-ring" r="10" /><circle r="4" />
-        </g>;
-      })}
-    </svg>
-    {visibleEntities.length > 0 && <div className="om-map-marker-legend" aria-label="地图要素图例"><span><i className="enterprise" />重点企业</span><span><i className="research" />科研机构</span></div>}
-    <figcaption><span>深圳行政区专题示意 · {detail.label}</span><small>非真实行政边界，颜色仅表示演示指标相对高低</small></figcaption>
-  </figure>;
+  const values = SHENZHEN_DISTRICTS.reduce<Record<DistrictName, number>>((record, district) => {
+    record[district] = metrics[district][layer];
+    return record;
+  }, {} as Record<DistrictName, number>);
+  const visibleEntities = showAllEntities
+    ? entities
+    : entities.filter((entity) => layer === "enterprise" ? entity.type === "重点企业" : layer === "research" ? entity.type === "科研机构" : false);
+  const markers: ShenzhenMapMarker[] = visibleEntities.map((entity) => ({
+    id: entity.id,
+    name: entity.name,
+    type: entity.type,
+    district: entity.district,
+    coordinate: entity.coordinate,
+  }));
+  return <Suspense fallback={<div className="om-map-loading" role="status">正在加载深圳行政区地图…</div>}>
+    <ShenzhenGeoMap
+      ariaLabel={`深圳九个行政区${detail.label}地图`}
+      values={values}
+      selectedDistrict={selectedDistrict}
+      onDistrictChange={onDistrictChange}
+      metricLabel={detail.metric}
+      unit={detail.unit}
+      showValues={showValues}
+      markers={markers}
+      selectedMarkerId={selectedEntity?.id}
+      onMarkerSelect={(marker) => {
+        const entity = entities.find((item) => item.id === marker.id);
+        if (entity) onEntityChange?.(entity);
+      }}
+    />
+  </Suspense>;
 }
 
 function DistrictSummary({ district, industry, metrics, layer }: { district: DistrictName; industry: string; metrics: DistrictMetrics; layer: LayerId }) {
   const detail = getLayerDetails(layer);
   return <aside className="om-district-summary" aria-live="polite">
     <header><span>当前行政区</span><h4>{district}</h4><p>{industry} · {detail.label}</p></header>
-    <div className="om-primary-reading"><span>{detail.metric}</span><strong>{metrics[layer].toLocaleString()}<small>{detail.unit}</small></strong></div>
+    <div className="om-primary-reading"><span>{industry}·{detail.metric}</span><strong>{metrics[layer].toLocaleString()}<small>{detail.unit}</small></strong></div>
     <dl>
       <div><dt>企业</dt><dd>{metrics.enterprise}<small>家</small></dd></div>
       <div><dt>科研机构</dt><dd>{metrics.research}<small>家</small></dd></div>
@@ -416,7 +486,7 @@ function LayerTabs({ value, onChange }: { value: LayerId; onChange: (value: Laye
   </div>;
 }
 
-function MapIndicatorsView({ industry }: { industry: string }) {
+function MapIndicatorsView({ industry, industries, onIndustryChange }: { industry: string; industries: readonly string[]; onIndustryChange?: (industry: string) => void }) {
   const [layer, setLayer] = useState<LayerId>("industry");
   const [selectedDistrict, setSelectedDistrict] = useState<DistrictName>("南山区");
   const [selectedEntity, setSelectedEntity] = useState<MapEntity | null>(null);
@@ -431,7 +501,7 @@ function MapIndicatorsView({ industry }: { industry: string }) {
     setSelectedDistrict(entity.district);
   };
   return <div className="om-module om-map-view">
-    <ModuleIntro title="专题产业相关指标" description={`以空间方式对比深圳十个行政区的${industry}产业发展差异。`} />
+    <ModuleIntro title="专题产业相关指标" description={`以空间方式对比深圳九个正式行政区的${industry}产业发展差异。`} action={<IndustrySelect industry={industry} industries={industries} onChange={onIndustryChange} />} />
     <section className="om-map-panel">
       <header className="om-map-panel-header"><div><h4>深圳产业专题图</h4><p>切换六类专题图层，点选行政区查看对应指标。</p></div><DemoNotice>地图与数据均为演示</DemoNotice></header>
       <LayerTabs value={layer} onChange={changeLayer} />
@@ -439,7 +509,7 @@ function MapIndicatorsView({ industry }: { industry: string }) {
         <MapFigure layer={layer} metrics={metrics} entities={entities} selectedDistrict={selectedDistrict} selectedEntity={selectedEntity} onDistrictChange={(district) => { setSelectedDistrict(district); setSelectedEntity(null); }} onEntityChange={selectEntity} />
         <DistrictSummary district={selectedDistrict} industry={industry} metrics={metrics[selectedDistrict]} layer={layer} />
       </div>
-      {(layer === "enterprise" || layer === "research") && <div className="om-entity-detail"><EntityDetails entity={selectedEntity} industry={industry} /></div>}
+      {(layer === "enterprise" || layer === "research") && selectedEntity && <div className="om-entity-detail"><EntityDetails entity={selectedEntity} industry={industry} /></div>}
     </section>
   </div>;
 }
@@ -448,44 +518,98 @@ function SearchResults({ query, entities, selectedEntity, onSelect }: { query: s
   const normalized = query.trim().toLowerCase();
   const results = normalized ? entities.filter((entity) => `${entity.name}${entity.type}${entity.district}${entity.address}${entity.focus}`.toLowerCase().includes(normalized)) : entities;
   return <section className="om-search-results" aria-label="地图要素检索结果">
-    <header><strong>企业 / 科研机构</strong><span>{results.length} 条演示结果</span></header>
-    <div>{results.length ? results.map((entity) => <button type="button" aria-pressed={selectedEntity?.id === entity.id} className={selectedEntity?.id === entity.id ? "active" : ""} onClick={() => onSelect(entity)} key={entity.id}><MapPin size={15} aria-hidden="true" /><span><strong>{entity.name}</strong><small>{entity.type} · {entity.district}</small></span></button>) : <p>未找到匹配的演示企业或科研机构，请更换关键词。</p>}</div>
+    <header><strong>企业 / 科研机构</strong><span>{results.length} 条结果</span></header>
+    <div>{results.length ? results.map((entity) => <button type="button" aria-pressed={selectedEntity?.id === entity.id} className={selectedEntity?.id === entity.id ? "active" : ""} onClick={() => onSelect(entity)} key={entity.id}>
+      <span className={`om-result-type ${entity.type === "重点企业" ? "is-enterprise" : "is-research"}`}>{entity.type}</span>
+      <strong className="om-result-name">{entity.name}</strong>
+      <span className="om-result-district">{entity.district}</span>
+      <span className="om-result-locate"><MapPin size={14} aria-hidden="true" />定位</span>
+    </button>) : <p>未找到匹配的企业或科研机构，请更换关键词。</p>}</div>
   </section>;
 }
 
-function MapToolsView({ industry }: { industry: string }) {
+function IndustryStatisticsList({ industries, district }: { industries: readonly string[]; district: DistrictName }) {
+  const districtSeed = hashString(district);
+  const rows = industries.map((item) => ({ label: item, value: stableNumber(districtSeed, `${item}-industry-index`, 48, 96) }));
+  return <aside className="om-industry-statistics" aria-label={`${district}各项产业统计指标`}>
+    <header><div><i aria-hidden="true" /><strong>各项产业统计指标</strong></div><span>共 {industries.length} 项</span></header>
+    <div className="om-industry-statistics-columns" aria-hidden="true"><span>产业方向</span><span>指标值</span></div>
+    <dl>{rows.map((item) => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>
+  </aside>;
+}
+
+function MapToolsView({ industry, industries }: { industry: string; industries: readonly string[] }) {
   const [selectedDistrict, setSelectedDistrict] = useState<DistrictName>("南山区");
   const [selectedEntity, setSelectedEntity] = useState<MapEntity | null>(null);
   const [query, setQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
   const metrics = useMemo(() => buildDistrictMetrics(industry), [industry]);
   const entities = useMemo(() => buildEntities(industry), [industry]);
+  const searchResults = useMemo(() => {
+    const normalized = submittedQuery.trim().toLocaleLowerCase();
+    if (!normalized) return entities;
+    return entities.filter((entity) => `${entity.name}${entity.type}${entity.district}${entity.address}${entity.focus}`.toLocaleLowerCase().includes(normalized));
+  }, [entities, submittedQuery]);
   const selectEntity = (entity: MapEntity) => {
     setSelectedEntity(entity);
     setSelectedDistrict(entity.district);
   };
+  const changeDistrict = (district: DistrictName) => {
+    setSelectedDistrict(district);
+    setSelectedEntity(null);
+    setQuery("");
+    setSubmittedQuery("");
+  };
+  const locateQuery = () => {
+    const normalized = query.trim().toLocaleLowerCase();
+    if (!normalized) {
+      setSubmittedQuery("");
+      return;
+    }
+    setSubmittedQuery(normalized);
+    const district = SHENZHEN_DISTRICTS.find((item) => item.toLocaleLowerCase().includes(normalized));
+    if (district) {
+      setSelectedDistrict(district);
+      setSelectedEntity(null);
+      return;
+    }
+    const matchedEntities = entities.filter((item) => `${item.name}${item.type}${item.district}${item.address}${item.focus}`.toLocaleLowerCase().includes(normalized));
+    if (matchedEntities.length) {
+      selectEntity(matchedEntities[0]);
+      return;
+    }
+    setSelectedEntity(null);
+  };
+  const resetQuery = () => {
+    setQuery("");
+    setSubmittedQuery("");
+    setSelectedDistrict("南山区");
+    setSelectedEntity(null);
+  };
   return <div className="om-module om-map-tools-view">
-    <ModuleIntro title="地图分析工具" description="支持地图点选或下拉切换行政区，并检索重点企业、科研机构后定位。" />
+    <ModuleIntro title="地图分析工具" description="支持地图点选或下拉切换行政区，并检索重点企业、科研机构后定位。" showNotice={false} />
     <section className="om-map-panel">
       <div className="om-map-tools-bar">
-        <label><span>行政区</span><div><select value={selectedDistrict} onChange={(event) => { setSelectedDistrict(event.target.value as DistrictName); setSelectedEntity(null); }} aria-label="选择深圳行政区">{DISTRICTS.map((district) => <option key={district.name}>{district.name}</option>)}</select><ChevronDown size={15} aria-hidden="true" /></div></label>
-        <label className="om-map-search"><span>搜索要素定位</span><div><Search size={16} aria-hidden="true" /><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="输入企业、科研机构或行政区关键词" /></div></label>
+        <label><span className="om-visually-hidden">行政区</span><div><TopicOutlineSelect ariaLabel="选择深圳行政区" value={selectedDistrict} options={SHENZHEN_DISTRICTS} onChange={changeDistrict} /></div></label>
+        <label className="om-map-search"><span className="om-visually-hidden">搜索要素定位</span><div><TopicOutlineInput ariaLabel="搜索重点企业或科研机构" value={query} maxLength={80} onChange={setQuery} onPressEnter={(event) => { event.preventDefault(); locateQuery(); }} placeholder="输入企业、科研机构关键词查询" /></div></label>
+        <div className="om-map-query-actions"><button type="button" onClick={locateQuery}>查询</button><button type="button" onClick={resetQuery}>重置</button></div>
       </div>
       <div className="om-map-stage">
-        <MapFigure layer="industry" metrics={metrics} entities={entities} selectedDistrict={selectedDistrict} selectedEntity={selectedEntity} onDistrictChange={(district) => { setSelectedDistrict(district); setSelectedEntity(null); }} onEntityChange={selectEntity} showAllEntities />
-        <DistrictSummary district={selectedDistrict} industry={industry} metrics={metrics[selectedDistrict]} layer="industry" />
+        <MapFigure layer="industry" metrics={metrics} entities={submittedQuery ? searchResults : []} selectedDistrict={selectedDistrict} selectedEntity={selectedEntity} onDistrictChange={changeDistrict} onEntityChange={selectEntity} showAllEntities showValues={false} />
+        <IndustryStatisticsList industries={industries} district={selectedDistrict} />
       </div>
       <div className="om-tools-lower">
-        <SearchResults query={query} entities={entities} selectedEntity={selectedEntity} onSelect={selectEntity} />
-        <EntityDetails entity={selectedEntity} industry={industry} />
+        <SearchResults query={submittedQuery} entities={entities} selectedEntity={selectedEntity} onSelect={selectEntity} />
       </div>
+      <p className="om-map-data-disclaimer">对象名称、统计值与位置坐标为示意数据，不作为实际决策依据。</p>
     </section>
   </div>;
 }
 
-export function OneMapModule({ subId, industry }: OneMapModuleProps) {
-  if (subId === "map-statistics") return <StatisticsView industry={industry} />;
-  if (subId === "map-indicators") return <MapIndicatorsView industry={industry} />;
-  return <MapToolsView industry={industry} />;
+export function OneMapModule({ subId, industry, industries = DEFAULT_INDUSTRIES, onIndustryChange }: OneMapModuleProps) {
+  if (subId === "map-statistics") return <StatisticsView industry={industry} industries={industries} onIndustryChange={onIndustryChange} />;
+  if (subId === "map-indicators") return <MapIndicatorsView industry={industry} industries={industries} onIndustryChange={onIndustryChange} />;
+  return <MapToolsView industry={industry} industries={industries} />;
 }
 
 export default OneMapModule;

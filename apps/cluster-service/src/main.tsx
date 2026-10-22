@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "@arco-design/web-react/dist/css/arco.css";
 import FigmaThinkTankPage from "./FigmaThinkTankPage";
 import InformationExchangePage from "./InformationExchangePage";
 import ScientificDataCenterPage from "./ScientificDataCenterPage";
