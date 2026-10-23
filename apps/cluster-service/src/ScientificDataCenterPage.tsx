@@ -23,12 +23,10 @@ import {
 import {
   useEffect,
   useMemo,
-  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
 } from "react";
-import PageSectionLocator from "./PageSectionLocator";
 import PortalHeader from "./PortalHeader";
 import "./scientific-data-center.css";
 
@@ -59,7 +57,6 @@ const topicDefinitions: TopicDefinition[] = [
     icon: Network,
     sections: [
       { id: "science-index", label: "专题索引" },
-      { id: "science-notes", label: "数据说明" },
     ],
     contentTypes: ["统一入口", "专题索引"],
   },
@@ -175,47 +172,33 @@ function EmptyResource({ label = "暂无链接" }: { label?: string }) {
 }
 
 function NavigationContent({ onOpen }: { onOpen: (topicId: TopicId) => void }) {
+  const topics = topicDefinitions.slice(1);
   return (
-    <>
-      <ContentSection
-        id="science-index"
-        title="专题索引"
-        description="按专题名称、主要内容与数据形态快速进入对应科学数据服务。"
-      >
-        <div className="sdc-index-list">
-          {topicDefinitions.slice(1).map((topic) => {
-            const Icon = topic.icon;
-            return (
-              <article className="sdc-index-row" key={topic.id}>
-                <span className="sdc-index-icon"><Icon size={19} aria-hidden="true" /></span>
-                <div className="sdc-index-copy">
-                  <h4>{topic.label}</h4>
-                  <p>{topic.description}</p>
-                </div>
-                <div className="sdc-index-types" aria-label={`${topic.label}内容类型`}>
-                  {topic.contentTypes.map((item) => <span key={item}>{item}</span>)}
-                </div>
-                <button type="button" onClick={() => onOpen(topic.id)}>进入专题</button>
-              </article>
-            );
-          })}
-        </div>
-      </ContentSection>
-
-      <ContentSection
-        id="science-notes"
-        title="数据说明"
-        description="当前页面用于功能结构与交互演示。"
-      >
-        <div className="sdc-note-strip">
-          <Database size={20} aria-hidden="true" />
-          <div>
-            <strong>演示边界清晰</strong>
-            <p>图谱节点、材料记录、排放指标和论文条目均为界面演示数据；没有正式地址的课程、平台与论文入口保持不可点击。</p>
-          </div>
-        </div>
-      </ContentSection>
-    </>
+    <section id="science-index" className="sdc-navigation-section" aria-label="科学专题入口">
+      <ul className="sdc-route-nodes">
+        {topics.map((topic) => {
+          const Icon = topic.icon;
+          return (
+            <li className="sdc-route-node" key={topic.id}>
+              <button type="button" className="sdc-route-link" aria-label={`进入${topic.label}`} onClick={() => onOpen(topic.id)}>
+                <span className="sdc-route-visual">
+                  <span className="sdc-route-icon"><Icon size={20} aria-hidden="true" /></span>
+                </span>
+                <span className="sdc-route-main">
+                  <span className="sdc-route-copy"><strong>{topic.label}</strong><small>{topic.description}</small></span>
+                  <span className="sdc-route-footer">
+                    <span className="sdc-route-types" aria-label={`${topic.label}内容类型`}>
+                      {topic.contentTypes.map((item) => <span key={item}>{item}</span>)}
+                    </span>
+                    <span className="sdc-route-action">进入专题<ChevronRight size={14} aria-hidden="true" /></span>
+                  </span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
@@ -802,17 +785,7 @@ function TopicContent({ topicId, onOpen }: { topicId: TopicId; onOpen: (topicId:
 export default function ScientificDataCenterPage() {
   const [activeTopic, setActiveTopic] = useState<TopicId>(() => parseTopicFromUrl());
   const activeDefinition = topicById.get(activeTopic) ?? topicDefinitions[0];
-  const [activeAnchor, setActiveAnchor] = useState(activeDefinition.sections[0].id);
   const ActiveIcon = activeDefinition.icon;
-  const topicNavRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (!window.matchMedia("(max-width: 768px)").matches) return;
-    const frame = window.requestAnimationFrame(() => {
-      topicNavRef.current?.querySelector<HTMLElement>("[aria-current='page']")?.scrollIntoView({ block: "nearest", inline: "center" });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [activeTopic]);
 
   useEffect(() => {
     const canonicalUrl = new URL(window.location.href);
@@ -824,10 +797,6 @@ export default function ScientificDataCenterPage() {
     const syncRoute = () => {
       const topic = parseTopicFromUrl();
       setActiveTopic(topic);
-      const definition = topicById.get(topic) ?? topicDefinitions[0];
-      const hashId = window.location.hash.slice(1);
-      const nextAnchor = definition.sections.some((section) => section.id === hashId) ? hashId : definition.sections[0].id;
-      setActiveAnchor(nextAnchor);
     };
     window.addEventListener("popstate", syncRoute);
     window.addEventListener("hashchange", syncRoute);
@@ -837,25 +806,7 @@ export default function ScientificDataCenterPage() {
     };
   }, []);
 
-  useEffect(() => {
-    setActiveAnchor(activeDefinition.sections[0].id);
-    const sections = activeDefinition.sections.map((section) => document.getElementById(section.id)).filter((section): section is HTMLElement => Boolean(section));
-    if (!sections.length) return;
-    let frame = 0;
-    const updateAnchor = () => {
-      const activationLine = activeTopic === "brain-atlas" ? 180 : 116;
-      const current = sections.reduce((selected, section) => section.getBoundingClientRect().top <= activationLine ? section : selected, sections[0]);
-      setActiveAnchor(current.id);
-    };
-    const schedule = () => { window.cancelAnimationFrame(frame); frame = window.requestAnimationFrame(updateAnchor); };
-    updateAnchor();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    return () => { window.cancelAnimationFrame(frame); window.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); };
-  }, [activeDefinition]);
-
   const openTopic = (topicId: TopicId) => {
-    const definition = topicById.get(topicId) ?? topicDefinitions[0];
     const url = new URL(window.location.href);
     url.searchParams.set("page", "scientific-data-center");
     url.searchParams.set("module", topicId);
@@ -864,23 +815,14 @@ export default function ScientificDataCenterPage() {
     url.hash = `sdc-module-${topicId}`;
     window.history.pushState(window.history.state, "", url);
     setActiveTopic(topicId);
-    setActiveAnchor(definition.sections[0].id);
     window.requestAnimationFrame(() => document.getElementById("sdc-workspace")?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" }));
   };
 
-  const locateSection = (sectionId: string) => {
-    setActiveAnchor(sectionId);
-    const url = new URL(window.location.href);
-    url.hash = sectionId;
-    window.history.replaceState(window.history.state, "", url);
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" });
-  };
-
   return (
-    <main className={`sdc-page${activeTopic === "brain-atlas" ? " is-brain-atlas" : ""}`}>
+    <main className={`sdc-page${activeTopic === "brain-atlas" ? " is-brain-atlas" : ""}${activeTopic === "navigation" ? " is-navigation" : ""}`}>
       <PortalHeader currentPage="scientific-data-center" />
 
-      <section id="sdc-top" className="sdc-hero" aria-labelledby="sdc-title">
+      {activeTopic === "brain-atlas" ? null : <section id="sdc-top" className="sdc-hero" aria-labelledby="sdc-title">
         <img src="./assets/figma-scientific-data/scientific-data-hero-art.png" alt="" />
         <div className="sdc-hero-inner">
           <div>
@@ -888,27 +830,18 @@ export default function ScientificDataCenterPage() {
             <p>汇集医学、脑图谱、工程细胞、材料与碳足迹专题数据，提供结构清晰的科学导航与可视化入口。</p>
           </div>
         </div>
-      </section>
+      </section>}
 
       <div id="sdc-workspace" className="sdc-shell">
-        <nav className="sdc-topic-nav" ref={topicNavRef} aria-label="科学数据中心专题目录">
-          <header><strong>专题目录</strong><small>7 项科学数据服务</small></header>
-          {topicDefinitions.map((topic) => {
-            const Icon = topic.icon;
-            return <button type="button" className={activeTopic === topic.id ? "is-active" : ""} aria-current={activeTopic === topic.id ? "page" : undefined} onClick={() => openTopic(topic.id)} key={topic.id}><Icon size={17} aria-hidden="true" /><span>{topic.label}</span></button>;
-          })}
-        </nav>
-
         <section className="sdc-main-column" id={`sdc-module-${activeTopic}`} aria-labelledby="sdc-topic-title">
-          <header className="sdc-topic-heading">
-            <span>{activeTopic === "brain-atlas" ? <img src="./assets/figma-scientific-data/brain-topic-icon.png" alt="" /> : <ActiveIcon size={23} aria-hidden="true" />}</span>
+          <header className={`sdc-topic-heading${activeTopic === "navigation" ? "" : " has-back"}`}>
+            {activeTopic === "navigation" ? null : <button type="button" className="sdc-back-navigation" onClick={() => openTopic("navigation")}><ChevronLeft size={16} aria-hidden="true" />返回科学导航</button>}
+            {activeTopic === "navigation" ? null : <span>{activeTopic === "brain-atlas" ? <img src="./assets/figma-scientific-data/brain-topic-icon.png" alt="" /> : <ActiveIcon size={23} aria-hidden="true" />}</span>}
             <div><h2 id="sdc-topic-title">{activeDefinition.label}</h2><p>{activeDefinition.description}</p></div>
-            {activeTopic === "brain-atlas" ? null : <DemoBadge>功能演示</DemoBadge>}
+            {activeTopic === "navigation" || activeTopic === "brain-atlas" ? null : <DemoBadge>功能演示</DemoBadge>}
           </header>
-          <div className="sdc-content-flow" key={activeTopic}><TopicContent topicId={activeTopic} onOpen={openTopic} /></div>
+          <div className={`sdc-content-flow${activeTopic === "navigation" ? " is-navigation" : ""}`} key={activeTopic}><TopicContent topicId={activeTopic} onOpen={openTopic} /></div>
         </section>
-
-        <PageSectionLocator className="sdc-section-locator" items={activeDefinition.sections} topId="sdc-top" label={`${activeDefinition.label}内容定位`} activeId={activeAnchor} onLocate={locateSection} />
 
         {activeTopic === "brain-atlas" ? null : <footer className="sdc-footer"><div><img src="./assets/gkx-logo.png" alt="" /><span><strong>科学数据中心</strong><small>深圳国际科技信息中心</small></span></div><p>当前页面仅用于标书功能与交互演示；所有数据、对象、图谱关系和统计结果均不代表真实结论。</p></footer>}
       </div>

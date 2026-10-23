@@ -312,13 +312,16 @@ html.is-portal-embed .fp-site-header { display: none; }
   .tds-warning-detail { grid-template-columns: 20px 1fr; }
   .tds-warning-detail > :nth-child(n + 3) { grid-column: 2; }
 
-  .sdc-index-row,
   .sdc-knowledge-layout,
   .sdc-brain-view,
   .sdc-master-detail,
   .sdc-carbon-dashboard,
   .sdc-trend-layout { grid-template-columns: 1fr; }
-  .sdc-index-types { display: none; }
+  .sdc-page.is-navigation .sdc-index-list { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .sdc-page.is-navigation .sdc-shell { width: calc(100vw - 32px); margin-right: 16px; margin-left: 16px; }
+  .sdc-page.is-navigation .sdc-index-card { min-height: 0; padding: 20px; }
+  .sdc-page.is-navigation .sdc-index-card-footer { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .sdc-page.is-navigation .sdc-footer { width: 100%; }
   .sdc-segmented { grid-template-columns: repeat(2, 1fr); }
   .sdc-case-table,
   .sdc-data-table-wrap { overflow-x: auto; }
@@ -1240,7 +1243,7 @@ html.is-portal-embed .fp-site-header { display: none; }
     width: 100%;
     min-width: 0;
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
   }
 
   .sdc-page.is-brain-atlas .sdc-topic-heading {

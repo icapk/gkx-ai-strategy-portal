@@ -329,7 +329,6 @@ html.is-portal-embed .fp-back-to-portal:focus-visible {
 .trs-shell > .fp-section-locator.fp-section-locator,
 .tds-shell > .fp-section-locator.fp-section-locator { grid-column: 2; grid-row: 1; }
 .tp-service-shell > .fp-section-locator.fp-section-locator { grid-column: 3; grid-row: 1; }
-.sdc-shell > .sdc-main-column,
 .trs-shell > .trs-main-column { grid-column: 2; grid-row: 1; }
 
 /* Keep the decision-support content beside its module navigation. The shared
