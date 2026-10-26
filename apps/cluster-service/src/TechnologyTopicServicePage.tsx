@@ -61,6 +61,7 @@ import {
 } from "react";
 import PageSectionLocator from "./PageSectionLocator";
 import PortalHeader from "./PortalHeader";
+import { TopicOutlineInput, TopicOutlineSelect } from "./TopicControls";
 import { OneMapModule } from "./topic-modules/OneMapModule";
 import { PolicyModule } from "./topic-modules/PolicyModule";
 import { ServiceModule } from "./topic-modules/ServiceModule";
@@ -1687,8 +1688,8 @@ function EnterpriseDirectory({ records, label, shenzhen = false, selectedNodeNam
   useEffect(() => { setExpanded(false); setQuery(""); setType("全部类型"); setSelectedRecordId(records[0]?.id ?? ""); }, [label]);
   return <div className="tp-enterprise-directory-block">
     <div className="tp-enterprise-directory-toolbar">
-      <label><Search size={16} aria-hidden="true" /><input value={query} onChange={(event) => { setQuery(event.target.value); setExpanded(false); }} placeholder="搜索企业、产品或关键词" aria-label="搜索重点企业" /></label>
-      <select value={type} onChange={(event) => { setType(event.target.value as "全部类型" | EnterpriseTypeLabel); setExpanded(false); }} aria-label="筛选企业类型"><option>全部类型</option>{enterpriseTypeLabels.map((item) => <option key={item}>{item}</option>)}</select>
+      <label><TopicOutlineInput ariaLabel="搜索重点企业" value={query} onChange={(value) => { setQuery(value); setExpanded(false); }} placeholder="搜索企业、产品或关键词" prefix={<Search size={16} aria-hidden="true" />} /></label>
+      <TopicOutlineSelect ariaLabel="筛选企业类型" value={type} options={["全部类型", ...enterpriseTypeLabels]} onChange={(value) => { setType(value as "全部类型" | EnterpriseTypeLabel); setExpanded(false); }} />
       {selectedNodeName ? <button type="button" onClick={onClearNode}>产业链节点：{selectedNodeName}<X size={14} aria-hidden="true" /></button> : null}
       <span>共 {filteredRecords.length} 家</span>
     </div>
@@ -2507,7 +2508,7 @@ function ShenzhenMapWorkbench({ industry, compact = false, openDialog }: { indus
   };
   return <div className={`tp-map-workbench ${compact ? "tp-map-workbench-compact" : ""}`}>
     <div className="tp-map-toolbar">
-      <label><span>行政区</span><select value={district} onChange={(event) => setDistrict(event.target.value as DistrictName)}>{districts.map((item) => <option key={item.name}>{item.name}</option>)}</select><ChevronDown size={15} /></label>
+      <label><span>行政区</span><TopicOutlineSelect ariaLabel="选择行政区" value={district} options={districts.map((item) => item.name)} onChange={(value) => setDistrict(value as DistrictName)} /></label>
       <div className="tp-layer-tabs" role="group" aria-label="专题图层">{mapLayers.map((item) => <button className={layer === item ? "active" : ""} type="button" aria-pressed={layer === item} onClick={() => setLayer(item)} key={item}>{item}</button>)}</div>
     </div>
     <div className="tp-map-main">
@@ -2532,7 +2533,7 @@ function ShenzhenMapWorkbench({ industry, compact = false, openDialog }: { indus
       </aside>
     </div>
     {!compact && <section className="tp-map-search">
-      <label><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索重点企业或科研机构" aria-label="搜索地图要素" /></label>
+      <label><TopicOutlineInput ariaLabel="搜索地图要素" value={query} onChange={setQuery} placeholder="搜索重点企业或科研机构" prefix={<Search size={17} aria-hidden="true" />} /></label>
       <div>{(query.trim() ? matchedEntities : mapEntities).map((entity) => <button type="button" onClick={() => selectEntity(entity)} key={entity.name}><MapPin size={15} /><span><strong>{entity.name}</strong><small>{entity.type} · {entity.district}</small></span><ArrowRight size={15} /></button>)}</div>
     </section>}
   </div>;
@@ -2678,9 +2679,9 @@ function ReportsContent({ subId, industry, selectedReportId, onSelectReport, sho
   if (subId === "report-view") return <Panel title="产研报告查看保存" description="在线浏览当前报告，并将相同内容下载至本地保存" action={<DemoBadge>演示报告，不是正式成果</DemoBadge>}><ReportReader report={selectedReport} onDownload={download} /></Panel>;
   return <Panel title="产研报告目录" description="按产业类型、细分领域、发布时间范围和研究机构筛选" action={<DemoBadge>目录内容为演示</DemoBadge>}>
     <form className="tp-report-filters" onSubmit={(event) => event.preventDefault()}>
-      <label><span>产业类型</span><select value={industryFilter} onChange={(event) => { setIndustryFilter(event.target.value); setSubfield("全部细分领域"); }}><option>全部产业</option>{industries.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={15} /></label>
-      <label><span>细分领域</span><select value={subfield} onChange={(event) => setSubfield(event.target.value)}><option>全部细分领域</option>{subfields.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={15} /></label>
-      <label><span>研究机构</span><select value={institution} onChange={(event) => setInstitution(event.target.value)}><option>全部机构</option>{institutions.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={15} /></label>
+      <label><span>产业类型</span><TopicOutlineSelect ariaLabel="筛选报告产业类型" value={industryFilter} options={["全部产业", ...industries]} onChange={(value) => { setIndustryFilter(value); setSubfield("全部细分领域"); }} /></label>
+      <label><span>细分领域</span><TopicOutlineSelect ariaLabel="筛选报告细分领域" value={subfield} options={["全部细分领域", ...subfields]} onChange={setSubfield} /></label>
+      <label><span>研究机构</span><TopicOutlineSelect ariaLabel="筛选报告研究机构" value={institution} options={["全部机构", ...institutions]} onChange={setInstitution} /></label>
       <label className="tp-report-date-field"><span>开始日期</span><input type="date" value={startDate} max={endDate || undefined} onInput={(event) => setStartDate(event.currentTarget.value)} onChange={(event) => setStartDate(event.target.value)} aria-label="报告发布时间开始日期" /></label>
       <label className="tp-report-date-field"><span>结束日期</span><input type="date" value={endDate} min={startDate || undefined} onInput={(event) => setEndDate(event.currentTarget.value)} onChange={(event) => setEndDate(event.target.value)} aria-label="报告发布时间结束日期" /></label>
       <button type="button" onClick={() => { setIndustryFilter("全部产业"); setSubfield("全部细分领域"); setStartDate(""); setEndDate(""); setInstitution("全部机构"); }}><RotateCcw size={15} />重置筛选</button>
@@ -2819,7 +2820,7 @@ function PlatformFeedbackContent({ showToast }: { showToast: (message: string) =
   return <div className="tp-feedback-layout">
     <Panel title="问题咨询" description="支持文字、图片及相关附件的演示提交">
       <form className="tp-feedback-form" onSubmit={submitFeedback} noValidate>
-        <label><span>问题类型</span><span className="tp-feedback-select"><select value={feedbackCategory} onChange={(event) => setFeedbackCategory(event.target.value)}><option>数据问题</option><option>功能建议</option><option>内容纠错</option><option>其他咨询</option></select><ChevronDown size={15} aria-hidden="true" /></span></label>
+        <label><span>问题类型</span><span className="tp-feedback-select"><TopicOutlineSelect ariaLabel="选择问题类型" value={feedbackCategory} options={["数据问题", "功能建议", "内容纠错", "其他咨询"]} onChange={setFeedbackCategory} /></span></label>
         <label><span>咨询主题</span><input value={subject} onChange={(event) => { setSubject(event.target.value); setFeedbackError(""); }} maxLength={60} placeholder="请输入咨询或建议主题" aria-invalid={Boolean(feedbackError && !subject.trim())} aria-describedby={feedbackError ? "tp-feedback-error" : undefined} required /></label>
         <label><span>咨询内容</span><textarea value={content} onChange={(event) => { setContent(event.target.value); setFeedbackError(""); }} maxLength={500} rows={6} placeholder="请描述数据问题、疑问或改进建议" aria-invalid={Boolean(feedbackError && content.trim().length < 10)} aria-describedby={feedbackError ? "tp-feedback-error" : undefined} required /><small>{content.length} / 500</small></label>
         <label className="tp-file-field"><span>图片或附件</span><span className="tp-upload-control"><Upload size={17} />选择文件<input type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" aria-describedby="tp-upload-note" onChange={(event) => { handleAttachmentFiles(event.target.files); event.currentTarget.value = ""; }} /></span><small id="tp-upload-note">支持图片、PDF、Word、TXT；单个不超过 10 MB，最多 5 个。文件仅保留在本次演示会话。</small></label>
@@ -2920,7 +2921,7 @@ function SearchContent({ subId, onNavigate }: { subId: string; onNavigate: (modu
   const searchForm = <>
     <form className="tp-global-search" onSubmit={(event) => { event.preventDefault(); runSearch(); }}>
       <div className="tp-search-mode" role="group" aria-label="检索方式"><button className={mode === "fuzzy" ? "active" : ""} type="button" aria-pressed={mode === "fuzzy"} onClick={() => setMode("fuzzy")}>模糊搜索</button><button className={mode === "regex" ? "active" : ""} type="button" aria-pressed={mode === "regex"} onClick={() => setMode("regex")}>关联搜索</button></div>
-      <label><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={mode === "regex" ? "输入正则表达式，如 产业链|技术链" : "输入标题或正文关键词"} aria-label="全文检索关键词" /><button type="submit">开始检索<SearchCheck size={17} /></button></label>
+      <label><TopicOutlineInput ariaLabel="全文检索关键词" value={query} onChange={setQuery} placeholder={mode === "regex" ? "输入正则表达式，如 产业链|技术链" : "输入标题或正文关键词"} prefix={<Search size={20} aria-hidden="true" />} size="regular" /><button type="submit">开始检索<SearchCheck size={17} /></button></label>
       {error && <p role="alert"><CircleAlert size={15} />{error}</p>}
     </form>
     <div className="tp-search-shortcuts">
@@ -3130,7 +3131,7 @@ export default function TechnologyTopicServicePage() {
           <p>聚焦八大未来产业，汇集产业、技术、企业、科研、人才、服务、政策与空间信息。</p>
           <label className="tp-hero-industry">
             <span>当前专题产业</span>
-            <div><select value={industry} onChange={(event) => selectIndustry(event.target.value as Industry)} aria-label="选择专题产业">{industries.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={16} aria-hidden="true" /></div>
+            <div><TopicOutlineSelect ariaLabel="选择专题产业" value={industry} options={industries} onChange={(value) => selectIndustry(value as Industry)} size="regular" /></div>
             <small>选择产业后同步更新相关指标与内容</small>
           </label>
         </div>

@@ -11,7 +11,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { lazy, Suspense, useId, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { TopicOutlineInput, TopicOutlineSelect } from "../TopicControls";
 import { SHENZHEN_DISTRICTS, type ShenzhenDistrictName, type ShenzhenMapMarker } from "./shenzhenMapData";
 import "./one-map-module.css";
@@ -181,14 +181,15 @@ function TrendChart({ title, unit, series }: { title: string; unit: string; seri
   const [activeSeries, setActiveSeries] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [lockedIndex, setLockedIndex] = useState<number | null>(null);
+  const [width, setWidth] = useState(1078);
+  const chartRef = useRef<SVGSVGElement | null>(null);
   const gradientId = useId().replace(/:/g, "");
-  const width = 1078;
   const height = 168;
   const currentSeries = series[Math.min(activeSeries, series.length - 1)];
   const currentUnit = currentSeries.unit ?? unit;
   const chartMax = Math.max(120, Math.ceil(Math.max(...currentSeries.values, 1) / 30) * 30);
-  const xStart = 80;
-  const xEnd = 1038;
+  const xStart = 64;
+  const xEnd = width - 40;
   const yTop = 9;
   const yBottom = 139;
   const points = currentSeries.values.map((value, index) => ({
@@ -202,6 +203,22 @@ function TrendChart({ title, unit, series }: { title: string; unit: string; seri
   const activePoint = activePointIndex === null ? null : points[activePointIndex];
   const activeYear = activePointIndex === null ? null : YEARS[activePointIndex];
   const activeValue = activePointIndex === null ? null : currentSeries.values[activePointIndex];
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    const updateWidth = () => {
+      const nextWidth = Math.max(320, Math.round(chart.getBoundingClientRect().width));
+      setWidth((current) => Math.abs(current - nextWidth) > 1 ? nextWidth : current);
+    };
+    updateWidth();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateWidth);
+      return () => window.removeEventListener("resize", updateWidth);
+    }
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(chart);
+    return () => observer.disconnect();
+  }, []);
   const setNearestPoint = (clientX: number, target: SVGSVGElement) => {
     if (lockedIndex !== null) return;
     const rect = target.getBoundingClientRect();
@@ -237,18 +254,18 @@ function TrendChart({ title, unit, series }: { title: string; unit: string; seri
   const tooltipY = activePoint ? Math.max(3, activePoint.y - tooltipHeight - 10) : 0;
   return <figure className="om-chart om-trend-chart">
     <div className="om-chart-heading"><div><h4>{title}</h4></div><div className="om-chart-legend" role="group" aria-label={`${title}指标切换`}>{series.map((item, index) => <button className={activeSeries === index ? "active" : ""} type="button" aria-pressed={activeSeries === index} onClick={() => selectSeries(index)} key={item.label}>{item.label}</button>)}</div></div>
-    <svg viewBox={`0 0 ${width} ${height}`} role="group" tabIndex={0} aria-label={`${title}：${currentSeries.label}${currentSeries.values.map((value, index) => `${YEARS[index]}年${value}${currentUnit}`).join("，")}。使用左右方向键切换年份，按 Escape 取消锁定。`} onFocus={() => { if (activePointIndex === null) setHoveredIndex(0); }} onBlur={() => { if (lockedIndex === null) setHoveredIndex(null); }} onPointerMove={handlePointerMove} onPointerLeave={() => { if (lockedIndex === null) setHoveredIndex(null); }} onKeyDown={handleKeyDown}>
+    <svg ref={chartRef} viewBox={`0 0 ${width} ${height}`} role="group" tabIndex={0} aria-label={`${title}：${currentSeries.label}${currentSeries.values.map((value, index) => `${YEARS[index]}年${value}${currentUnit}`).join("，")}。使用左右方向键切换年份，按 Escape 取消锁定。`} onFocus={() => { if (activePointIndex === null) setHoveredIndex(0); }} onBlur={() => { if (lockedIndex === null) setHoveredIndex(null); }} onPointerMove={handlePointerMove} onPointerLeave={() => { if (lockedIndex === null) setHoveredIndex(null); }} onKeyDown={handleKeyDown}>
       <defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#165dff" stopOpacity=".14" /><stop offset="1" stopColor="#165dff" stopOpacity="0" /></linearGradient></defs>
       {yTicks.map((tick, index) => {
         const y = yTop + index * ((yBottom - yTop) / 4);
-        return <g key={tick}><text x="32" y={y + 4} textAnchor="end">{Math.round(tick)}</text><line x1="48" x2="1078" y1={y} y2={y} /></g>;
+        return <g key={tick}><text x="32" y={y + 4} textAnchor="end">{Math.round(tick)}</text><line x1="48" x2={width} y1={y} y2={y} /></g>;
       })}
-      <rect className="om-trend-hit-area" x="48" y="0" width="1030" height={height} />
+      <rect className="om-trend-hit-area" x="48" y="0" width={Math.max(0, width - 48)} height={height} />
       <path className="om-trend-area" d={areaPath} style={{ fill: `url(#${gradientId})` }} />
       <path className="om-trend-line" d={path} />
       {activePoint && <line className="om-trend-guide" x1={activePoint.x} x2={activePoint.x} y1={yTop} y2={yBottom} />}
       {points.map((point, index) => <circle className={`om-trend-point${activePointIndex === index ? " active" : ""}${lockedIndex === index ? " locked" : ""}`} key={`${currentSeries.label}-${YEARS[index]}`} cx={point.x} cy={point.y} r="4" onClick={() => { setLockedIndex((current) => current === index ? null : index); setHoveredIndex(index); }} />)}
-      {YEARS.map((year, index) => <text key={year} x={64 + index * ((1022 - 64) / Math.max(YEARS.length - 1, 1))} y="164" textAnchor="middle">{year}</text>)}
+      {YEARS.map((year, index) => <text key={year} x={points[index].x} y="164" textAnchor="middle">{year}</text>)}
       {activePoint && activeYear !== null && activeValue !== null && <g className="om-trend-tooltip" transform={`translate(${tooltipX} ${tooltipY})`}>
         <rect width={tooltipWidth} height={tooltipHeight} rx="5" />
         <text x="12" y="19"><tspan className="om-trend-tooltip-year">{activeYear} 年</tspan><tspan x="12" dy="19">{currentSeries.label}：{activeValue.toLocaleString()}{currentUnit}</tspan></text>

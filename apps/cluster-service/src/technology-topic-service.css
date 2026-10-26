@@ -3325,7 +3325,6 @@
 @media (max-width: 900px) {
   .tp-one-map-figma .om-stack-charts { grid-template-columns: minmax(0, 1fr); }
 }
-
 /* Preserve the existing native-control icons outside the isolated one-map route. */
 .tp-map-toolbar > label svg { position: absolute; right: 9px; color: #6c8198; pointer-events: none; }
 .tp-report-filters label > svg { position: absolute; top: 15px; right: 9px; color: #71849a; pointer-events: none; }

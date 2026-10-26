@@ -1163,6 +1163,301 @@ html.is-portal-embed .fp-site-header { display: none; }
   }
 }
 
+/* Technology topic service: "one map" mobile workspace. */
+@media (max-width: 768px) {
+  .tp-one-map-figma-page {
+    width: 100%;
+    min-width: 0;
+    height: 100dvh;
+    overflow: hidden;
+    background: #f4f7fc;
+  }
+
+  .tp-one-map-figma-page::before,
+  .tp-one-map-figma-page::after { display: none; }
+
+  .tp-one-map-figma {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    display: block;
+    overflow: hidden;
+  }
+
+  .tp-one-map-directory { display: none; }
+
+  .tp-one-map-glass {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    display: block;
+    overflow: hidden;
+    background: #fff;
+    border: 0;
+    border-radius: 0;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .tp-one-map-content {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    gap: 32px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: auto;
+    border-radius: 0;
+  }
+
+  .tp-one-map-section { width: 100%; scroll-margin-top: 12px; }
+
+  .tp-one-map-figma .om-intro {
+    min-height: 0;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tp-one-map-figma .om-intro h3 { font-size: 18px; line-height: 26px; }
+  .tp-one-map-figma .om-intro p { font-size: 14px; line-height: 22px; }
+
+  .tp-one-map-figma .om-industry-select {
+    width: 100%;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .tp-one-map-figma .om-industry-select .tp-arco-outline,
+  .tp-one-map-figma .om-industry-select .arco-select-view { height: 44px; }
+
+  .tp-one-map-figma .om-indicator-tabs {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 16px;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    background: #fff;
+    border-bottom: 1px solid #e5e6eb;
+    border-radius: 0;
+    scroll-snap-type: x proximity;
+  }
+
+  .tp-one-map-figma .om-indicator-tabs::-webkit-scrollbar,
+  .tp-one-map-figma .om-layer-tabs::-webkit-scrollbar,
+  .tp-one-map-figma .om-chart-legend::-webkit-scrollbar { display: none; }
+
+  .tp-one-map-figma .om-indicator-tabs button {
+    min-width: 92px;
+    min-height: 46px;
+    padding: 0 12px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .tp-one-map-figma .om-statistics-panel {
+    padding: 12px 0 0;
+    background: transparent;
+  }
+
+  .tp-one-map-figma .om-metric-grid,
+  .tp-one-map-figma .om-metric-grid-2,
+  .tp-one-map-figma .om-metric-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .tp-one-map-figma .om-metric-grid-3 > .om-metric-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+  .tp-one-map-figma .om-metric-card {
+    min-height: 84px;
+    padding: 10px;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 8px;
+    border: 1px solid #edf0f5;
+  }
+
+  .tp-one-map-figma .om-metric-icon,
+  .tp-one-map-figma .om-metric-icon.has-figma-asset img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .tp-one-map-figma .om-metric-card > div { gap: 2px; }
+  .tp-one-map-figma .om-metric-card > div > span { font-size: 12px; line-height: 18px; }
+  .tp-one-map-figma .om-metric-card strong { font-size: 20px; line-height: 28px; }
+  .tp-one-map-figma .om-metric-card strong small { font-size: 11px; }
+
+  .tp-one-map-figma .om-visual-grid,
+  .tp-one-map-figma .om-stack-charts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .tp-one-map-figma .om-chart,
+  .tp-one-map-figma .om-research-stack > .om-chart {
+    width: 100%;
+    height: auto;
+    min-height: 240px;
+    padding: 16px;
+    gap: 12px;
+    border: 1px solid #edf0f5;
+  }
+
+  .tp-one-map-figma .om-chart-heading {
+    min-height: 0;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tp-one-map-figma .om-chart-heading h4 { font-size: 15px; line-height: 22px; }
+
+  .tp-one-map-figma .om-chart-legend {
+    width: 100%;
+    height: 40px;
+    padding: 3px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tp-one-map-figma .om-chart-legend button { min-width: 96px; height: 34px; flex: 0 0 auto; }
+
+  .tp-one-map-figma .om-trend-chart > svg {
+    height: 180px;
+    min-height: 180px;
+    flex-basis: 180px;
+  }
+
+  .tp-one-map-figma .om-bar-chart { min-height: 260px; }
+
+  .tp-one-map-figma .om-layer-tabs {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 0 8px;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    background: #fff;
+    border: 0;
+    border-bottom: 1px solid #e5e6eb;
+    border-radius: 0;
+    scroll-snap-type: x proximity;
+  }
+
+  .tp-one-map-figma .om-layer-tabs button {
+    min-width: 124px;
+    min-height: 44px;
+    padding: 0 12px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .tp-one-map-figma .om-map-view .om-map-stage { margin-top: 12px; }
+
+  .tp-one-map-figma .om-map-stage {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    background: #fff;
+  }
+
+  .tp-one-map-figma .om-map-figure {
+    width: 100%;
+    height: 360px;
+    min-height: 360px;
+  }
+
+  .tp-one-map-figma .om-echarts-map-canvas { min-height: 320px; }
+
+  .tp-one-map-figma .om-echarts-marker-legend {
+    right: 8px;
+    left: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .tp-one-map-figma .om-echarts-map figcaption { padding-inline: 10px; }
+  .tp-one-map-figma .om-echarts-map figcaption small { display: none; }
+
+  .tp-one-map-figma .om-district-summary {
+    width: 100%;
+    height: auto;
+    padding: 14px;
+  }
+
+  .tp-one-map-figma .om-district-summary > header {
+    height: auto;
+    min-height: 52px;
+    padding-bottom: 12px;
+  }
+
+  .tp-one-map-figma .om-primary-reading { height: auto; min-height: 58px; }
+  .tp-one-map-figma .om-district-summary dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tp-one-map-figma .om-district-summary dl div { min-height: 58px; }
+
+  .tp-one-map-figma .om-entity-detail { margin-top: 12px; padding-top: 12px; }
+
+  .tp-one-map-figma .om-map-tools-bar {
+    width: 100%;
+    min-height: 0;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .tp-one-map-figma .om-map-tools-bar label > div,
+  .tp-one-map-figma .om-map-tools-bar select,
+  .tp-one-map-figma .om-map-tools-bar input { height: 44px; }
+
+  .tp-one-map-figma .om-map-query-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .tp-one-map-figma .om-map-query-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .tp-one-map-figma .om-tools-lower {
+    margin-top: 12px;
+    padding: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tp-one-map-figma .om-search-results { max-height: 340px; }
+  .tp-one-map-figma .om-search-results > div { max-height: 292px; }
+  .tp-one-map-figma .om-search-results button {
+    height: auto;
+    min-height: 56px;
+    padding: 8px 10px;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .tp-one-map-figma .om-search-results .om-result-locate { display: none; }
+  .tp-one-map-figma .om-map-data-disclaimer { text-align: left; }
+
+  .tp-one-map-figma .om-industry-statistics { width: 100%; padding: 14px; }
+  .tp-one-map-figma .om-industry-statistics header > span { font-size: 11px; }
+}
+
 /* Scientific data center — brain atlas. */
 @media (max-width: 768px) {
   .sdc-page.is-brain-atlas .sdc-hero {
