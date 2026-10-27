@@ -2701,8 +2701,7 @@
     const submittedContext=SR.userContextVersion(),eventId='recommend-search-'+srId();let delay=0;
     if(SR.snapshot().userId){
       try{
-        const normalized=SR.normalizeKeyword(query),matched=SR.fixtures.searchResources.filter(item=>SR.normalizeKeyword([item.title,item.summary,item.author,item.personName,...(item.tags||[])].filter(Boolean).join(' ')).includes(normalized));
-        const domainTags=[...new Set([query,...matched.flatMap(item=>[...(item.tags||[]),...(item.domainTags||[]),...(SR.fixtures.resourceDomains?.[item.portalPaperId||item.id]||[])])])];
+        const domainTags=SR.searchQueryTopics(query);
         await SR.recordBehavior({eventId,eventType:'SEARCH',query,queryId:eventId,domainTags,source:'recommendation-search'});
         if(submittedContext!==SR.userContextVersion())return;
         watchState=loadWatchState();renderKeywordFollows();
