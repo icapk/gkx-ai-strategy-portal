@@ -1,0 +1,10 @@
+.portal-resource-filter select { width: 100%; min-height: 34px; border: 1px solid #d5dbe3; border-radius: 5px; padding: 6px 8px; background: #fff; color: #35435b; font: inherit; }
+.portal-entity-detail { margin-top: 16px; padding: 16px 0 0; border-top: 1px solid #e6eaf0; color: #35435b; }
+.portal-entity-detail h4 { margin: 0 0 12px; font-size: 14px; }
+.portal-entity-detail p { line-height: 1.7; }
+.portal-entity-detail-note { color: #718096; font-size: 12px; }
+.portal-result-type-icon[data-result-type="会议"] { background: #eaf3ff; color: #2469b7; }
+.portal-result-type-icon[data-result-type="课程"] { background: #eaf7f0; color: #21835a; }
+.portal-result-type-icon[data-result-type="活动"] { background: #fff1e7; color: #b56628; }
+
+.keyword-v1-tools{display:flex;gap:10px;padding:8px 0 12px}.keyword-v1-tools[hidden]{display:none}.keyword-v1-tools button{border:1px solid #d5dbe3;border-radius:6px;padding:5px 10px;background:#fff;color:#53657d;font:inherit;cursor:pointer}.keyword-v1-tools button.is-active{color:#1764eb;border-color:#bcd1fa;background:#eff5ff}.keyword-v1-demo-note{margin:8px 0 0;color:#8996a8;font-size:12px}

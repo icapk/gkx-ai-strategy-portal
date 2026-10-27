@@ -3737,6 +3737,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
 </head>
 <body>
   <header class="site-header" id="siteHeader">
@@ -3903,7 +3904,7 @@
                 </button>
               </div>
               <label class="sr-only" for="mgHeroSearchInput">搜索科研资源与智能服务</label>
-              <input id="mgHeroSearchInput" type="search" autocomplete="off" placeholder="输入关键词，检索论文、专利、报告、专家等资源全文">
+              <input id="mgHeroSearchInput" type="search" autocomplete="off" data-query-max-characters="200" placeholder="输入关键词，检索论文、专利、报告、专家等资源全文">
               <div class="mg-search-intents" id="mgFulltextShortcuts" role="tablist" aria-label="全文搜索快捷入口">
                 <button class="is-active" id="mgRecommendationTabSimulation" type="button" role="tab" aria-selected="true" aria-controls="mgRecommendationPreview" tabindex="0" data-mg-query="AI 仿真实验" data-recommendation-group="simulation">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h10v4l-3 4v4.5a2 2 0 0 1-4 0V13L7 9Z"></path><path d="M9 3h6M8.5 15h7"></path></svg>
@@ -3932,7 +3933,7 @@
               </div>
               <div class="mg-ai-search-guide" id="mgKeywordSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">词</span>
-                <span>支持单个或多个关键词、精确查找、AND/OR组合，以及翻译、同义词与上下位概念的词位扩展</span>
+                <span>支持单个或多个关键词精确查找，并按搜索范围和筛选条件查看资源</span>
               </div>
               <div class="mg-ai-search-guide" id="mgV2QaSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">问</span>
@@ -4689,29 +4690,14 @@
           <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="关键词">关键词搜索</button>
         </div>
 
-        <div class="search-service-path" data-search-service-path="results" aria-label="当前功能路径：基础服务，智能搜索，全文搜索；服务能力：信息搜索、搜索结果展示、搜索结果定位">
-          <span class="search-service-path-label">功能路径</span>
-          <span class="search-service-path-route">
-            <span class="search-service-path-node">基础服务</span>
-            <span class="search-service-path-separator" aria-hidden="true">›</span>
-            <span class="search-service-path-node">智能搜索</span>
-            <span class="search-service-path-separator" aria-hidden="true">›</span>
-            <strong class="search-service-path-node is-current" data-search-service-mode>全文搜索</strong>
-          </span>
-          <span class="search-service-path-features" data-search-service-features>
-            <span class="search-service-path-feature">信息搜索</span>
-            <span class="search-service-path-feature">搜索结果展示</span>
-            <span class="search-service-path-feature">搜索结果定位</span>
-          </span>
-        </div>
-
         <div class="portal-search-toolbar">
           <form class="portal-search-form" id="portalResultSearchForm" role="search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 4.5 4.5"></path></svg>
             <label class="sr-only" for="portalResultSearchInput">信息搜索</label>
-            <input class="portal-search-input" id="portalResultSearchInput" type="search" autocomplete="off" maxlength="120" aria-describedby="portalSearchFeedback" placeholder="搜索论文、专利、报告、人才、资讯、项目">
+            <input class="portal-search-input" id="portalResultSearchInput" type="search" autocomplete="off" data-query-max-characters="200" aria-describedby="portalSearchFeedback" placeholder="搜索论文、专利、报告、人才、资讯、会议、课程、活动">
             <button class="portal-search-button" type="submit">搜索</button>
           </form>
+          <p class="keyword-v1-demo-note">原型演示 · 示例数据与模拟服务</p>
           <p class="portal-search-feedback" id="portalSearchFeedback" role="status" aria-live="polite"></p>
         </div>
 
@@ -4938,21 +4924,14 @@
             </div>
             <form id="portalSearchFilters">
               <fieldset class="portal-search-filter-group" data-filter-mode="all">
-                <legend class="portal-search-filter-heading">资源范围</legend>
+                <legend class="portal-search-filter-heading">搜索范围</legend>
                 <label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="全部资源" checked><span>全部资源</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="仅标题"><span>仅标题</span></label>
                 <label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="标题与摘要"><span>标题与摘要</span></label>
-                <label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="全文"><span>全文</span></label>
-              </fieldset>
-              <fieldset class="portal-search-filter-group" data-filter-mode="keyword">
-                <legend class="portal-search-filter-heading">匹配方式</legend>
-                <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="智能匹配" checked><span>智能匹配</span></label>
-                <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="精确匹配"><span>精确查找</span></label>
-                <label class="portal-search-filter-option"><input type="radio" name="matchMode" value="模糊匹配"><span>模糊匹配</span></label>
               </fieldset>
               <fieldset class="portal-search-filter-group portal-search-filter-fields" data-filter-mode="all">
                 <legend class="portal-search-filter-heading">二次筛选</legend>
-                <p class="portal-resource-filter-hint" id="portalResourceFilterHint">选择“论文、专利或人才”资源类型后，展示对应的专业筛选项。</p>
+                <p class="portal-resource-filter-hint" id="portalResourceFilterHint">选择具体资源类型后，展示对应的专业筛选项。</p>
                 <div class="portal-resource-filter" data-filter-resource="人才" hidden>
                   <label><span>学者姓名</span><input type="search" name="personNameFilter" placeholder="学者姓名"></label>
                   <label><span>机构名称</span><input type="search" name="institutionFilter" placeholder="机构名称"></label>
@@ -4970,6 +4949,9 @@
                   <label><span>公布时间（起）</span><input type="date" name="publicationStart"></label>
                   <label><span>公布时间（止）</span><input type="date" name="publicationEnd"></label>
                 </div>
+                <div class="portal-resource-filter" data-filter-resource="会议" hidden><label><span>会议地点</span><input type="search" name="conferenceLocation" placeholder="会议地点"></label><label><span>会议等级</span><select name="conferenceLevel"><option value="">全部</option><option value="国际">国际</option><option value="国内">国内</option></select></label><label><span>投稿状态</span><select name="conferenceSubmission"><option value="">全部</option><option value="OPEN">征稿中</option><option value="CLOSED">已截稿</option><option value="UNKNOWN">暂无征稿信息</option></select></label><label><span>开始时间（起）</span><input type="date" name="conferenceStartFrom"></label><label><span>开始时间（止）</span><input type="date" name="conferenceStartTo"></label></div>
+                <div class="portal-resource-filter" data-filter-resource="课程" hidden><label><span>讲师</span><input type="search" name="courseLecturer" placeholder="讲师"></label><label><span>授课机构</span><input type="search" name="courseInstitution" placeholder="授课机构"></label><label><span>课程等级</span><select name="courseLevel"><option value="">全部</option><option value="进阶">进阶</option><option value="入门">入门</option></select></label></div>
+                <div class="portal-resource-filter" data-filter-resource="活动" hidden><label><span>活动地点</span><input type="search" name="activityLocation" placeholder="活动地点"></label><label><span>活动类型</span><select name="activityType"><option value="">全部</option><option value="LECTURE">讲座</option><option value="FORUM">论坛</option><option value="SALON">沙龙</option><option value="DEBATE">思辨会</option><option value="OTHER">其他</option></select></label><label><span>报名状态</span><select name="activityRegistration"><option value="">全部</option><option value="NOT_STARTED">未开始报名</option><option value="OPEN">开放报名</option><option value="FULL">已满员</option><option value="CLOSED">已截止</option><option value="NOT_REQUIRED">无需报名</option></select></label><label><span>开始时间（起）</span><input type="date" name="activityStartFrom"></label><label><span>开始时间（止）</span><input type="date" name="activityStartTo"></label></div>
               </fieldset>
               <fieldset class="portal-search-filter-group">
                 <legend class="portal-search-filter-heading">发表时间</legend>
@@ -5021,7 +5003,9 @@
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="报告"><span>报告</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="人才"><span>人才</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="资讯"><span>资讯</span><small data-search-type-count>0</small></button>
-                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="项目"><span>项目</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="会议"><span>会议</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="课程"><span>课程</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="活动"><span>活动</span><small data-search-type-count>0</small></button>
               </div>
 
               <div class="portal-active-filters" id="portalActiveFilters" aria-label="当前筛选条件" hidden></div>
@@ -5031,7 +5015,7 @@
             <div class="portal-search-empty" id="portalSearchEmpty" hidden>
               <span class="portal-empty-icon" aria-hidden="true">⌕</span>
               <h2>没有找到符合当前条件的结果</h2>
-              <p>可尝试减少关键词、切换资源范围，或清除筛选条件后重新检索。</p>
+              <p>可尝试减少关键词、切换搜索范围，或清除筛选条件后重新检索。</p>
               <button id="portalEmptyReset" type="button">清除筛选条件</button>
             </div>
             <nav class="portal-search-pagination" id="portalSearchPagination" aria-label="搜索结果分页"></nav>
@@ -5198,7 +5182,7 @@
     </section>
   </main>
 
-  <script>
+  <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-keyword-v1"></script><script>
     (() => {
       "use strict";
 
@@ -5527,7 +5511,7 @@
         },
         keyword: {
           mode: "关键词搜索",
-          features: ["精确查找", "词位扩展"]
+          features: ["精确查找", "二次筛选"]
         }
       };
       const RESULT_MODE_SERVICE_PATH = {
@@ -5554,17 +5538,21 @@
       let activeRecommendationType = "为你推荐";
       let recommendationBatch = 0;
       let activeSearchType = "全部";
-      let activeHeroSearchMode = "fulltext";
+      let activeHeroSearchMode = "keyword";
       let activeHeroExperience = "classic";
       let activeV2HeroMode = "search";
       let lastClassicHeroMode = "fulltext";
       let returnHeroExperience = "classic";
       let activeHeroRecommendation = "simulation";
-      let activeSearchMode = "全文";
+      let activeSearchMode = "关键词";
       let activeSearchPage = 1;
+      let submittedSearchQuery = "";
+      let searchSubmissionRevision = 0;
+      let searchSubmissionTicket = 0;
+      function getSubmittedSearchQuery() { return submittedSearchQuery; }
       const activeExpansionTerms = new Set();
       let keywordLogic = "AND";
-      let keywordExact = false;
+      let keywordExact = true;
       let keywordExpansionOpen = false;
       let associationDetailsOpen = true;
       let associationScope = "all";
@@ -6066,71 +6054,1012 @@
         }
       ];
 
-      const PAPER_COMMENT_SEEDS = {
-        "Deep Learning for AI": [
-          { author: "林岚", date: "2026-08-24 16:20", status: "已通过", likes: 8, content: "建议补充模型在跨数据集迁移场景下的对比实验，便于读者判断方法的泛化边界。" },
-          { author: "陈启", date: "2026-08-23 09:42", status: "已通过", likes: 5, content: "综述对表示学习与神经网络的关系梳理得很清晰，期待补充最新开放数据集说明。" }
-        ],
-        "面向科学发现的生成式智能体协作框架": [
-          { author: "周研", date: "2026-08-24 11:16", status: "已通过", likes: 6, content: "建议进一步说明证据校验节点的输入输出，方便复现科学发现工作流。" },
-          { author: "顾宁", date: "2026-08-22 15:08", status: "已通过", likes: 3, content: "材料发现任务的评测指标很有参考价值，建议增加失败案例与人工复核边界。" }
-        ],
-        "大语言模型驱动的药物靶点发现：方法、证据与验证边界": [
-          { author: "李然", date: "2026-08-21 10:25", status: "已通过", likes: 4, content: "建议把数据偏差、实验验证和知识图谱覆盖范围拆成独立的限制项。" }
-        ]
-      };
-      const paperCommentState = new Map();
-
-      function getPaperComments(item) {
-        if (!paperCommentState.has(item.title)) {
-          paperCommentState.set(item.title, (PAPER_COMMENT_SEEDS[item.title] || []).map((comment) => ({ ...comment })));
+      const BASELINE_QA_ITEMS = SEARCH_ITEMS.slice();
+      const ADDED_ENTITY_FIXTURES = {
+  "conferences": [
+    {
+      "id": "conference-prototype-scientific-agents-2026",
+      "name": "人工智能与科学智能体协作会议（原型）",
+      "fullNameEn": null,
+      "level": "国际",
+      "tags": [
+        "人工智能",
+        "科学智能体",
+        "科研协作"
+      ],
+      "location": "原型会议中心A",
+      "startAt": "2026-11-20T09:00:00+08:00",
+      "endAt": "2026-11-22T18:00:00+08:00",
+      "submissionDeadline": "2026-11-05T23:59:00+08:00",
+      "submissionCount": 420,
+      "participantCount": 680,
+      "heatValue": 7600,
+      "status": "UPCOMING",
+      "submissionStatus": "OPEN",
+      "recommendScore": null,
+      "recommendReason": null,
+      "detailUrl": null,
+      "submissionGuideUrl": null
+    },
+    {
+      "id": "conference-prototype-quantum-learning-2026",
+      "name": "量子计算与人工智能方法会议（原型）",
+      "fullNameEn": null,
+      "level": "国内",
+      "tags": [
+        "人工智能",
+        "量子计算",
+        "机器学习"
+      ],
+      "location": "原型会议中心B",
+      "startAt": "2026-12-12T09:30:00+08:00",
+      "endAt": "2026-12-13T17:00:00+08:00",
+      "submissionDeadline": "2026-10-15T23:59:00+08:00",
+      "submissionCount": 260,
+      "participantCount": 390,
+      "heatValue": 6100,
+      "status": "UPCOMING",
+      "submissionStatus": "CLOSED",
+      "recommendScore": null,
+      "recommendReason": null,
+      "detailUrl": null,
+      "submissionGuideUrl": null
+    },
+    {
+      "id": "conference-prototype-material-discovery-2027",
+      "name": "人工智能驱动材料发现会议（原型）",
+      "fullNameEn": null,
+      "level": "国际",
+      "tags": [
+        "人工智能",
+        "先进材料",
+        "材料计算"
+      ],
+      "location": "原型会议中心C",
+      "startAt": "2027-01-16T09:00:00+08:00",
+      "endAt": "2027-01-18T17:30:00+08:00",
+      "submissionDeadline": "2026-12-10T23:59:00+08:00",
+      "submissionCount": 350,
+      "participantCount": 520,
+      "heatValue": 6900,
+      "status": "UPCOMING",
+      "submissionStatus": "OPEN",
+      "recommendScore": null,
+      "recommendReason": null,
+      "detailUrl": null,
+      "submissionGuideUrl": null
+    },
+    {
+      "id": "conference-prototype-research-evidence-2027",
+      "name": "人工智能科研证据与可复现方法会议（原型）",
+      "fullNameEn": null,
+      "level": "国内",
+      "tags": [
+        "人工智能",
+        "证据追溯",
+        "可复现研究"
+      ],
+      "location": "线上会议",
+      "startAt": "2027-02-06T09:00:00+08:00",
+      "endAt": "2027-02-07T17:00:00+08:00",
+      "submissionDeadline": null,
+      "submissionCount": null,
+      "participantCount": null,
+      "heatValue": null,
+      "status": "UPCOMING",
+      "submissionStatus": "UNKNOWN",
+      "recommendScore": null,
+      "recommendReason": null,
+      "detailUrl": null,
+      "submissionGuideUrl": null
+    }
+  ],
+  "courses": [
+    {
+      "id": "course-prototype-scientific-agents-2026",
+      "name": "人工智能与科学智能体工作流课程（原型）",
+      "summary": "示例课程：介绍科学智能体的任务拆解、检索协作、来源核查与人工确认流程。",
+      "publishedAt": "2026-10-15T09:00:00+08:00",
+      "coverUrl": null,
+      "level": "进阶",
+      "lecturers": [
+        {
+          "name": "原型讲师A"
         }
-        return paperCommentState.get(item.title);
+      ],
+      "institution": "原型教学机构A",
+      "durationText": "8周",
+      "learnerCount": 860,
+      "domainTags": [
+        "人工智能",
+        "科学智能体",
+        "科研工作流"
+      ],
+      "matchScore": null,
+      "isFavorite": null,
+      "recommendReason": null,
+      "detailUrl": null
+    },
+    {
+      "id": "course-prototype-quantum-learning-2026",
+      "name": "量子计算与人工智能基础课程（原型）",
+      "summary": "示例课程：介绍量子计算基本概念及其与机器学习方法的结合，区分模型假设与验证结果。",
+      "publishedAt": "2026-09-24T10:00:00+08:00",
+      "coverUrl": null,
+      "level": "入门",
+      "lecturers": [
+        {
+          "name": "原型讲师B"
+        }
+      ],
+      "institution": "原型教学机构B",
+      "durationText": "6周",
+      "learnerCount": 620,
+      "domainTags": [
+        "人工智能",
+        "量子计算",
+        "机器学习"
+      ],
+      "matchScore": null,
+      "isFavorite": null,
+      "recommendReason": null,
+      "detailUrl": null
+    },
+    {
+      "id": "course-prototype-material-discovery-2026",
+      "name": "人工智能材料计算与实验验证课程（原型）",
+      "summary": "示例课程：围绕材料性质预测、候选材料筛选和实验验证，学习数据质量与误差分析方法。",
+      "publishedAt": "2026-09-05T09:30:00+08:00",
+      "coverUrl": null,
+      "level": "进阶",
+      "lecturers": [
+        {
+          "name": "原型讲师C"
+        }
+      ],
+      "institution": "原型教学机构C",
+      "durationText": "10周",
+      "learnerCount": 430,
+      "domainTags": [
+        "人工智能",
+        "先进材料",
+        "材料计算"
+      ],
+      "matchScore": null,
+      "isFavorite": null,
+      "recommendReason": null,
+      "detailUrl": null
+    },
+    {
+      "id": "course-prototype-research-evidence-2026",
+      "name": "人工智能文献证据综合课程（原型）",
+      "summary": "示例课程：学习文献问题定义、来源记录、证据比较和可复现研究记录的组织方式。",
+      "publishedAt": "2026-08-18T14:00:00+08:00",
+      "coverUrl": null,
+      "level": "入门",
+      "lecturers": [
+        {
+          "name": "原型讲师D"
+        }
+      ],
+      "institution": "原型教学机构A",
+      "durationText": "5周",
+      "learnerCount": null,
+      "domainTags": [
+        "人工智能",
+        "文献研读",
+        "证据追溯"
+      ],
+      "matchScore": null,
+      "isFavorite": null,
+      "recommendReason": null,
+      "detailUrl": null
+    }
+  ],
+  "activities": [
+    {
+      "id": "activity-prototype-scientific-agents-2026",
+      "name": "人工智能科学智能体实践讲座（原型）",
+      "organizer": "原型活动组织A",
+      "location": "原型交流中心A",
+      "startAt": "2026-11-08T14:00:00+08:00",
+      "endAt": "2026-11-08T17:00:00+08:00",
+      "type": "LECTURE",
+      "registrationStatus": "OPEN",
+      "summary": "示例活动：交流科学智能体的任务规划、工具调用与结果核查方法。",
+      "domainTags": [
+        "人工智能",
+        "科学智能体"
+      ],
+      "topicTags": [
+        "科研协作",
+        "结果核查"
+      ],
+      "isFavorite": null,
+      "recommendReason": null,
+      "detailUrl": null,
+      "registrationUrl": null,
+      "replayUrl": null
+    },
+    {
+      "id": "activity-prototype-quantum-learning-2026",
+      "name": "量子计算与人工智能方法论坛（原型）",
+      "organizer": "原型活动组织B",
+      "location": "线上交流",
+      "startAt": "2026-12-05T09:00:00+08:00",
+      "endAt": "2026-12-05T16:30:00+08:00",
+      "type": "FORUM",
+      "registrationStatus": "NOT_STARTED",
+      "summary": "示例活动：讨论量子计算与机器学习结合的适用场景、验证条件与研究问题。",
+      "domainTags": [
+        "人工智能",
+        "量子计算"
+      ],
+      "topicTags": [
+        "机器学习",
+        "方法验证"
+      ],
+      "isFavorite": null,
+      "recommendReason": null,
+      "detailUrl": null,
+      "registrationUrl": null,
+      "replayUrl": null
+    },
+    {
+      "id": "activity-prototype-material-discovery-2027",
+      "name": "人工智能材料发现技术沙龙（原型）",
+      "organizer": "原型活动组织C",
+      "location": "原型交流中心C",
+      "startAt": "2027-01-09T14:00:00+08:00",
+      "endAt": "2027-01-09T18:00:00+08:00",
+      "type": "SALON",
+      "registrationStatus": "FULL",
+      "summary": "示例活动：围绕材料数据整理、性质预测和实验结果复核交流案例。",
+      "domainTags": [
+        "人工智能",
+        "先进材料"
+      ],
+      "topicTags": [
+        "材料发现",
+        "实验验证"
+      ],
+      "isFavorite": null,
+      "recommendReason": null,
+      "detailUrl": null,
+      "registrationUrl": null,
+      "replayUrl": null
+    },
+    {
+      "id": "activity-prototype-research-evidence-2027",
+      "name": "人工智能科研证据边界思辨会（原型）",
+      "organizer": "原型活动组织D",
+      "location": "线上交流",
+      "startAt": "2027-02-13T15:00:00+08:00",
+      "endAt": "2027-02-13T17:30:00+08:00",
+      "type": "DEBATE",
+      "registrationStatus": "NOT_REQUIRED",
+      "summary": "示例活动：讨论自动生成内容的来源披露、证据充分性及人工复核责任。",
+      "domainTags": [
+        "人工智能",
+        "科研方法"
+      ],
+      "topicTags": [
+        "证据边界",
+        "可复现研究"
+      ],
+      "isFavorite": null,
+      "recommendReason": null,
+      "detailUrl": null,
+      "registrationUrl": null,
+      "replayUrl": null
+    }
+  ]
+};
+      const ADDED_ENTITY_TYPES = new Set(["会议", "课程", "活动"]);
+      const ENTITY_SUBMISSION_LABELS = { OPEN: "征稿中", CLOSED: "已截稿", UNKNOWN: "暂无征稿信息" };
+      const ENTITY_CONFERENCE_LABELS = { UPCOMING: "即将举行", ONGOING: "进行中", ENDED: "已结束" };
+      const ENTITY_ACTIVITY_LABELS = { LECTURE: "讲座", FORUM: "论坛", SALON: "沙龙", DEBATE: "思辨会", OTHER: "其他" };
+      const ENTITY_REGISTRATION_LABELS = { NOT_STARTED: "未开始报名", OPEN: "开放报名", FULL: "已满员", CLOSED: "已截止", NOT_REQUIRED: "无需报名" };
+
+      function adaptAddedEntity(raw, type) {
+        const now = Date.parse(window.PortalSearchRecommend?.now() || new Date().toISOString());
+        const start = Date.parse(raw.startAt), end = Date.parse(raw.endAt);
+        const conferenceStatus = Number.isFinite(end) && end < now ? "ENDED"
+          : Number.isFinite(start) && start <= now ? "ONGOING" : "UPCOMING";
+        const submissionStatus = raw.submissionDeadline && Date.parse(raw.submissionDeadline) < now ? "CLOSED" : raw.submissionStatus;
+        const registrationStatus = Number.isFinite(end) && end < now ? "CLOSED" : raw.registrationStatus;
+        return {
+          ...raw,
+          type,
+          activityType: type === "活动" ? raw.type : undefined,
+          conferenceStatus: type === "会议" ? conferenceStatus : undefined,
+          submissionStatus: type === "会议" ? submissionStatus : raw.submissionStatus,
+          registrationStatus: type === "活动" ? registrationStatus : raw.registrationStatus,
+          title: raw.name,
+          date: String(raw.publishedAt || raw.startAt || "").slice(0, 10),
+          summary: raw.summary || "",
+          detail: raw.summary || "",
+          tags: [...new Set([...(raw.tags || []), ...(raw.domainTags || []), ...(raw.topicTags || [])])],
+          source: raw.institution || raw.organizer || "",
+          meta: type,
+          status: "原型数据",
+          accessible: true,
+          matches: [],
+          fulltextStatus: "实体资源",
+          matchField: "资源信息"
+        };
       }
 
-      function getPaperCommentPanelMarkup(item) {
-        const comments = getPaperComments(item);
-        const tags = item.tags.slice(0, 4).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
-        const commentList = comments.length
-          ? comments.map((comment) => `
-              <li>
-                <header><div><strong>${escapeHtml(comment.author)}</strong><span class="portal-paper-comment-status ${comment.status === "已通过" ? "is-approved" : "is-pending"}">${escapeHtml(comment.status)}</span></div><time>${escapeHtml(comment.date)}</time></header>
-                <p>${escapeHtml(comment.content)}</p>
-                <small>赞同 ${comment.likes}</small>
-              </li>`).join("")
-          : `<li class="portal-paper-comment-empty">暂无公开评论，欢迎发表第一条评论。</li>`;
-        return `
-          <section class="portal-paper-comment-panel" data-paper-comment-panel aria-labelledby="portal-paper-comment-title-${SEARCH_ITEMS.indexOf(item)}" hidden>
-            <header class="portal-paper-comment-header">
-              <div>
-                <span class="portal-paper-comment-kicker">论文详情 · 门户论文评论</span>
-                <h4 id="portal-paper-comment-title-${SEARCH_ITEMS.indexOf(item)}">${escapeHtml(item.title)}</h4>
-                <p>${escapeHtml(item.type)} · ${escapeHtml(item.source)} · ${escapeHtml(item.date.slice(0, 4))}</p>
-              </div>
-              <span class="portal-paper-comment-review"><span aria-hidden="true">✓</span>评论提交后审核</span>
-            </header>
-            <div class="portal-paper-comment-grid">
-              <article class="portal-paper-summary">
-                <div><strong>论文摘要</strong><span>演示题录</span></div>
-                <p>${escapeHtml(item.summary)}</p>
-                <dl><div><dt>作者</dt><dd>${escapeHtml(item.author || "原型作者")}</dd></div><div><dt>期刊／会议</dt><dd>${escapeHtml(item.venue || item.source)}</dd></div><div><dt>可见范围</dt><dd>门户用户可查看</dd></div></dl>
-                <div class="portal-paper-comment-tags">${tags}</div>
-              </article>
-              <aside class="portal-paper-comment-card">
-                <header><div><span aria-hidden="true">◌</span><strong>门户论文评论</strong></div><span>${comments.length} 条评论</span></header>
-                <p class="portal-paper-comment-policy"><span aria-hidden="true">✓</span>提交后进入审核队列，审核通过后对外展示。</p>
-                <form class="portal-paper-comment-form" data-paper-comment-form data-paper-comment-key="${escapeHtml(item.title)}">
-                  <label for="portal-paper-comment-input-${SEARCH_ITEMS.indexOf(item)}">发表评论</label>
-                  <textarea id="portal-paper-comment-input-${SEARCH_ITEMS.indexOf(item)}" name="comment" maxlength="300" placeholder="分享你对这篇论文的观点或补充信息"></textarea>
-                  <div><small>不超过 300 字 · 请勿发布违法或不当内容</small><button type="submit">提交评论</button></div>
-                  <p class="portal-paper-comment-success" data-paper-comment-success role="status" hidden>✓ 评论已提交，当前状态：待审核</p>
-                </form>
-                <ol class="portal-paper-comment-list" aria-label="论文评论列表">${commentList}</ol>
-              </aside>
-            </div>
-            <p class="portal-paper-comment-boundary">原型交互：评论提交与后台审核接口待接入，当前仅在本次浏览会话中演示状态流转。</p>
-          </section>`;
+      // Append without changing the indices used by existing citations and feedback.
+      SEARCH_ITEMS.push(
+        ...ADDED_ENTITY_FIXTURES.conferences.map(item => adaptAddedEntity(item, "会议")),
+        ...ADDED_ENTITY_FIXTURES.courses.map(item => adaptAddedEntity(item, "课程")),
+        ...ADDED_ENTITY_FIXTURES.activities.map(item => adaptAddedEntity(item, "活动"))
+      );
+
+      function getAddedEntitySearchFields(item) {
+        if (!ADDED_ENTITY_TYPES.has(item.type)) return [];
+        return [item.fullNameEn, item.location, item.level, item.organizer,
+          ...(item.lecturers || []).map(person => person.name),
+          ENTITY_SUBMISSION_LABELS[item.submissionStatus],
+          ENTITY_CONFERENCE_LABELS[item.conferenceStatus],
+          ENTITY_ACTIVITY_LABELS[item.activityType],
+          ENTITY_REGISTRATION_LABELS[item.registrationStatus]].filter(Boolean);
       }
+
+      function matchesAddedEntityFilters(item, values) {
+        const value = key => String(values.get(key) || "").trim();
+        const contains = (text, key) => !value(key) || normalizeExactText(text).includes(normalizeExactText(value(key)));
+        const equals = (text, key) => !value(key) || text === value(key);
+        const dateBetween = (date, from, to) => (!value(from) || String(date).slice(0, 10) >= value(from)) && (!value(to) || String(date).slice(0, 10) <= value(to));
+        if (item.type === "会议") return contains(item.location, "conferenceLocation")
+          && equals(item.level, "conferenceLevel") && equals(item.submissionStatus, "conferenceSubmission")
+          && dateBetween(item.startAt, "conferenceStartFrom", "conferenceStartTo");
+        if (item.type === "课程") return (!value("courseLecturer") || (item.lecturers || []).some(person => contains(person.name, "courseLecturer")))
+          && contains(item.institution, "courseInstitution") && equals(item.level, "courseLevel");
+        if (item.type === "活动") return contains(item.location, "activityLocation")
+          && equals(item.activityType, "activityType") && equals(item.registrationStatus, "activityRegistration")
+          && dateBetween(item.startAt, "activityStartFrom", "activityStartTo");
+        return true;
+      }
+
+      function formatAddedEntityTime(value) {
+        return value ? String(value).replace("T", " ").slice(0, 16) : "暂无信息";
+      }
+
+      function getAddedEntityMetadata(item, detail = false) {
+        if (item.type === "会议") return [
+          ["会议时间", `${formatAddedEntityTime(item.startAt)} — ${formatAddedEntityTime(item.endAt)}`],
+          ["会议地点", item.location || "暂无地点"], ["会议等级", item.level || "暂无等级"],
+          ["投稿状态", ENTITY_SUBMISSION_LABELS[item.submissionStatus] || "暂无征稿信息"],
+          ["会议状态", ENTITY_CONFERENCE_LABELS[item.conferenceStatus] || "暂无状态"],
+          ...(detail ? [["投稿截止", formatAddedEntityTime(item.submissionDeadline)]] : [])
+        ];
+        if (item.type === "课程") return [
+          ["讲师", (item.lecturers || []).map(person => person.name).join("、") || "暂无讲师"],
+          ["授课机构", item.institution || "暂无机构"], ["课程等级", item.level || "暂无等级"],
+          ["课程周期", item.durationText || "暂无周期"],
+          ...(detail ? [["发布时间", formatAddedEntityTime(item.publishedAt)]] : [])
+        ];
+        return [
+          ["主办单位", item.organizer || "暂无主办单位"], ["活动地点", item.location || "暂无地点"],
+          ["活动时间", `${formatAddedEntityTime(item.startAt)} — ${formatAddedEntityTime(item.endAt)}`],
+          ["活动类型", ENTITY_ACTIVITY_LABELS[item.activityType] || "其他"],
+          ["报名状态", ENTITY_REGISTRATION_LABELS[item.registrationStatus] || "暂无报名信息"]
+        ];
+      }
+
+      function createAddedEntityCard(item, index) {
+        const article = document.createElement("article");
+        article.className = "portal-search-card";
+        article.dataset.type = item.type;
+        article.dataset.date = item.date;
+        const resultIndex = SEARCH_ITEMS.indexOf(item);
+        article.dataset.resultId = `result-${resultIndex}`;
+        const query = getSubmittedSearchQuery();
+        const detailId = `entity-detail-${item.id}`;
+        const dateLabel = item.type === "课程" ? "发布时间" : "开始时间";
+        const icons = {
+          "会议": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M4 10h16M8 14h3M8 17h7"></path></svg>',
+          "课程": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h7l2 2 2-2h7v15h-7l-2-2-2 2H3ZM12 7v11"></path></svg>',
+          "活动": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"></path></svg>'
+        };
+        const metadataMarkup = rows => rows.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("");
+        article.innerHTML = `
+          <div class="portal-result-rail"><span class="portal-result-type-icon" data-result-type="${item.type}">${icons[item.type]}</span><span class="portal-result-index">${String((activeSearchPage - 1) * SEARCH_PAGE_SIZE + index + 1).padStart(2, "0")}</span></div>
+          <div class="portal-result-content">
+            <div class="portal-result-kicker"><span>${item.type}</span><time datetime="${escapeHtml(item.type === "课程" ? item.publishedAt : item.startAt)}">${dateLabel} ${escapeHtml(item.date)}</time></div>
+            <h3 class="portal-search-card-title">${highlightResultText(item.title, query)}</h3>
+            <dl class="portal-result-metadata">${metadataMarkup(getAddedEntityMetadata(item))}</dl>
+            ${item.summary ? `<p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>` : ""}
+            <div class="portal-result-bottomline"><div class="portal-search-card-tags">${item.tags.slice(0, 3).map(tag => `<span class="portal-search-card-tag">${escapeHtml(tag)}</span>`).join("")}</div>
+              <div class="portal-search-card-actions"><button class="portal-search-card-action is-primary" type="button" data-entity-detail aria-expanded="false" aria-controls="${detailId}">查看详情</button></div>
+            </div>
+            <section class="portal-entity-detail" id="${detailId}" aria-label="${escapeHtml(item.title)}详情" hidden>
+              <h4>${escapeHtml(item.title)}</h4>
+              <dl class="portal-result-metadata">${metadataMarkup(getAddedEntityMetadata(item, true))}</dl>
+              ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
+              <p class="portal-entity-detail-note">${item.detailUrl ? `<a href="${escapeHtml(item.detailUrl)}" target="_blank" rel="noopener noreferrer">打开原始资源详情 ↗</a>` : "暂无原始资源详情链接"}</p>
+            </section>
+          </div>`;
+        const toggle = article.querySelector("[data-entity-detail]");
+        toggle.addEventListener("click", () => {
+          const detail = article.querySelector(".portal-entity-detail");
+          detail.hidden = !detail.hidden;
+          toggle.setAttribute("aria-expanded", String(!detail.hidden));
+          toggle.textContent = detail.hidden ? "查看详情" : "收起详情";
+        });
+        return article;
+      }
+
+      const EXACT_FIELD_TERM_FIXTURES = {
+  "Deep Learning for AI": [
+    "Deep Learning",
+    "AI"
+  ],
+  "How can neural networks learn the rich internal representations required for difficult tasks such as recognizing objects or understanding language?": [
+    "neural networks",
+    "internal representations",
+    "difficult tasks",
+    "recognizing objects",
+    "understanding language"
+  ],
+  "论文详情页提供摘要、关键词、DOI、原文链接及登录后可用的AI智能解析等能力。": [
+    "论文详情页",
+    "摘要",
+    "关键词",
+    "DOI",
+    "原文链接",
+    "AI",
+    "智能解析"
+  ],
+  "面向科学发现的生成式智能体协作框架": [
+    "科学发现",
+    "生成式智能体",
+    "协作框架"
+  ],
+  "研究提出一套可验证、可追溯的多智能体科学发现工作流，并通过材料发现任务进行系统评测。": [
+    "可验证",
+    "可追溯",
+    "多智能体",
+    "科学发现",
+    "工作流",
+    "材料发现",
+    "系统评测"
+  ],
+  "覆盖任务拆解、工具调用、证据校验与研究过程回溯，适合用于智能科研工作流设计参考。": [
+    "任务拆解",
+    "工具调用",
+    "证据校验",
+    "研究过程回溯",
+    "智能科研工作流",
+    "设计参考"
+  ],
+  "多智能体协作框架通过检索、证据校验和冲突识别，使科学发现过程能够被追溯与复核。": [
+    "多智能体",
+    "协作框架",
+    "检索",
+    "证据校验",
+    "冲突识别",
+    "科学发现",
+    "追溯",
+    "复核"
+  ],
+  "在材料发现任务中，语义检索与关键词召回互补，有效提升了候选证据的覆盖率。": [
+    "材料发现",
+    "语义检索",
+    "关键词召回",
+    "候选证据",
+    "覆盖率"
+  ],
+  "研究同时指出，智能体结论必须绑定原始文献证据，避免生成内容替代可核验事实。": [
+    "智能体",
+    "原始文献证据",
+    "生成内容",
+    "可核验事实"
+  ],
+  "大语言模型驱动的药物靶点发现：方法、证据与验证边界": [
+    "大语言模型",
+    "药物靶点发现",
+    "方法",
+    "证据",
+    "验证边界"
+  ],
+  "综述大语言模型在靶点识别、知识关联、候选优先级排序和实验假设生成中的应用，并讨论数据偏差与验证限制。": [
+    "大语言模型",
+    "靶点识别",
+    "知识关联",
+    "候选优先级排序",
+    "实验假设生成",
+    "数据偏差",
+    "验证限制"
+  ],
+  "文章将药物靶点发现拆分为证据检索、关系推断、候选排序和实验验证四个环节。": [
+    "药物靶点发现",
+    "证据检索",
+    "关系推断",
+    "候选排序",
+    "实验验证"
+  ],
+  "大语言模型可融合文献、组学数据与知识图谱，为潜在药物靶点建立可追溯的候选证据链。": [
+    "大语言模型",
+    "文献",
+    "组学数据",
+    "知识图谱",
+    "药物靶点",
+    "可追溯",
+    "候选证据链"
+  ],
+  "模型生成的靶点假设仍需通过独立数据与湿实验验证，训练数据偏差可能放大既有研究热点。": [
+    "靶点假设",
+    "独立数据",
+    "湿实验验证",
+    "训练数据偏差",
+    "研究热点"
+  ],
+  "固态电池界面稳定性的多尺度建模研究": [
+    "固态电池",
+    "界面稳定性",
+    "多尺度建模",
+    "研究"
+  ],
+  "从材料计算、界面反应与实验表征三个层面分析固态电池界面的稳定性及失效机制。": [
+    "材料计算",
+    "界面反应",
+    "实验表征",
+    "固态电池",
+    "界面",
+    "稳定性",
+    "失效机制"
+  ],
+  "该条用于演示论文类型推荐与检索落地，正式上线前需由真实文献数据替换。": [
+    "论文类型推荐",
+    "检索落地",
+    "真实文献数据"
+  ],
+  "多尺度建模能够连接原子尺度界面反应与宏观电化学性能，为固态电池界面稳定性分析提供统一框架。": [
+    "多尺度建模",
+    "原子尺度界面反应",
+    "宏观电化学性能",
+    "固态电池",
+    "界面稳定性",
+    "统一框架"
+  ],
+  "基于知识图谱与语言模型的药物靶点候选排序方法": [
+    "知识图谱",
+    "语言模型",
+    "药物靶点",
+    "候选排序",
+    "方法"
+  ],
+  "公开一种结合生物医学知识图谱与语言模型进行候选靶点召回、评分和解释的方法。": [
+    "生物医学知识图谱",
+    "语言模型",
+    "候选靶点召回",
+    "评分",
+    "解释"
+  ],
+  "专利元数据包含IPC分类、申请人、发明人和申请时间，正文授权状态待数据源确认。": [
+    "专利元数据",
+    "IPC分类",
+    "申请人",
+    "发明人",
+    "申请时间",
+    "正文授权状态",
+    "数据源"
+  ],
+  "周明远 · AI药物发现与生物医学知识图谱": [
+    "周明远",
+    "AI",
+    "药物发现",
+    "生物医学知识图谱",
+    "AI药物发现"
+  ],
+  "研究方向包括大语言模型辅助药物发现、生物医学实体关系抽取与可解释靶点优先级排序。": [
+    "大语言模型",
+    "药物发现",
+    "生物医学实体关系抽取",
+    "可解释靶点优先级排序"
+  ],
+  "专家关联来自公开成果、机构与合作网络的模拟数据。": [
+    "专家关联",
+    "公开成果",
+    "机构",
+    "合作网络",
+    "模拟数据"
+  ],
+  "2026 全球人工智能科技创新态势报告": [
+    "2026",
+    "人工智能",
+    "科技创新态势报告"
+  ],
+  "系统梳理基础模型、智能体、具身智能与 AI for Science 的技术进展、区域格局和政策方向。": [
+    "基础模型",
+    "智能体",
+    "具身智能",
+    "AI for Science",
+    "技术进展",
+    "区域格局",
+    "政策方向"
+  ],
+  "报告由全球创新信号、关键技术赛道、区域竞争格局与行动建议四部分构成。": [
+    "全球创新信号",
+    "关键技术赛道",
+    "区域竞争格局",
+    "行动建议"
+  ],
+  "一种高离子电导率复合固态电解质及其制备方法": [
+    "高离子电导率",
+    "复合固态电解质",
+    "制备方法"
+  ],
+  "面向全固态电池的复合电解质材料方案，聚焦界面稳定性、离子传导与规模化制备工艺。": [
+    "全固态电池",
+    "复合电解质材料方案",
+    "界面稳定性",
+    "离子传导",
+    "规模化制备工艺"
+  ],
+  "包含材料组成、制备参数、性能验证与可实施例信息，支持进一步开展专利对比分析。": [
+    "材料组成",
+    "制备参数",
+    "性能验证",
+    "可实施例信息",
+    "专利对比分析"
+  ],
+  "林知远 · 具身智能与机器人学习": [
+    "林知远",
+    "具身智能",
+    "机器人学习"
+  ],
+  "聚焦多模态感知、世界模型与灵巧操作，在顶级会议发表论文 38 篇。": [
+    "多模态感知",
+    "世界模型",
+    "灵巧操作",
+    "顶级会议",
+    "论文"
+  ],
+  "画像由公开科研成果、机构经历与合作网络生成，评价结论可回溯至对应证据。": [
+    "公开科研成果",
+    "机构经历",
+    "合作网络",
+    "评价结论",
+    "证据"
+  ],
+  "陈晓岚 · 科学智能体与可验证科研工作流": [
+    "陈晓岚",
+    "科学智能体",
+    "可验证科研工作流"
+  ],
+  "关注生成式智能体、科学工作流、证据校验与可验证科研推理。": [
+    "生成式智能体",
+    "科学工作流",
+    "证据校验",
+    "可验证科研推理"
+  ],
+  "该条用于演示专家推荐与关联检索，正式上线前需由真实人才数据替换。": [
+    "专家推荐",
+    "关联检索",
+    "真实人才数据"
+  ],
+  "低空经济技术图谱与区域创新格局更新": [
+    "低空经济",
+    "技术图谱",
+    "区域创新格局",
+    "更新"
+  ],
+  "从飞控、感知、通信、动力与运营服务等环节更新低空经济产业链和区域创新信号。": [
+    "飞控",
+    "感知",
+    "通信",
+    "动力",
+    "运营服务",
+    "低空经济产业链",
+    "区域创新信号"
+  ],
+  "可进一步进入科技信息展示系统查看区域分布、产业链节点和动态监测数据。": [
+    "科技信息展示系统",
+    "区域分布",
+    "产业链节点",
+    "动态监测数据"
+  ],
+  "低空经济技术图谱覆盖飞控、感知、通信、动力和运营服务等关键技术环节。": [
+    "低空经济",
+    "技术图谱",
+    "飞控",
+    "感知",
+    "通信",
+    "动力",
+    "运营服务",
+    "关键技术环节"
+  ],
+  "未来产业技术链与机会窗口研判": [
+    "未来产业",
+    "技术链",
+    "机会窗口",
+    "研判"
+  ],
+  "综合论文、专利、政策与企业信息，识别未来产业关键技术链、潜在瓶颈与近期布局窗口。": [
+    "论文",
+    "专利",
+    "政策",
+    "企业信息",
+    "未来产业",
+    "关键技术链",
+    "潜在瓶颈",
+    "近期布局窗口"
+  ],
+  "支持从技术节点、区域资源和重点主体三个维度继续追踪专题变化。": [
+    "技术节点",
+    "区域资源",
+    "重点主体",
+    "专题变化"
+  ],
+  "未来产业机会窗口的判断需要综合论文、专利、政策与企业信号，并持续校验信号之间的冲突。": [
+    "未来产业",
+    "机会窗口",
+    "论文",
+    "专利",
+    "政策",
+    "企业信号",
+    "校验",
+    "冲突"
+  ],
+  "AI 科研工具与开放科学数据库导航更新": [
+    "AI",
+    "科研工具",
+    "开放科学数据库",
+    "导航更新"
+  ],
+  "汇总近期开放的科研智能体、文献研读工具与高质量科学数据库入口。": [
+    "科研智能体",
+    "文献研读工具",
+    "高质量科学数据库",
+    "入口"
+  ],
+  "所有入口均标注资源类型、访问条件与适用学科，便于研究者快速筛选。": [
+    "资源类型",
+    "访问条件",
+    "适用学科",
+    "研究者",
+    "筛选"
+  ],
+  "人工智能与科学智能体协作会议（原型）": [
+    "人工智能",
+    "科学智能体",
+    "协作会议"
+  ],
+  "量子计算与人工智能方法会议（原型）": [
+    "量子计算",
+    "人工智能",
+    "方法会议"
+  ],
+  "人工智能驱动材料发现会议（原型）": [
+    "人工智能",
+    "材料发现",
+    "会议"
+  ],
+  "人工智能科研证据与可复现方法会议（原型）": [
+    "人工智能",
+    "科研证据",
+    "可复现方法",
+    "会议"
+  ],
+  "人工智能与科学智能体工作流课程（原型）": [
+    "人工智能",
+    "科学智能体",
+    "工作流",
+    "课程"
+  ],
+  "示例课程：介绍科学智能体的任务拆解、检索协作、来源核查与人工确认流程。": [
+    "科学智能体",
+    "任务拆解",
+    "检索协作",
+    "来源核查",
+    "人工确认流程"
+  ],
+  "量子计算与人工智能基础课程（原型）": [
+    "量子计算",
+    "人工智能",
+    "基础课程"
+  ],
+  "示例课程：介绍量子计算基本概念及其与机器学习方法的结合，区分模型假设与验证结果。": [
+    "量子计算",
+    "基本概念",
+    "机器学习方法",
+    "模型假设",
+    "验证结果"
+  ],
+  "人工智能材料计算与实验验证课程（原型）": [
+    "人工智能",
+    "材料计算",
+    "实验验证",
+    "课程"
+  ],
+  "示例课程：围绕材料性质预测、候选材料筛选和实验验证，学习数据质量与误差分析方法。": [
+    "材料性质预测",
+    "候选材料筛选",
+    "实验验证",
+    "数据质量",
+    "误差分析方法"
+  ],
+  "人工智能文献证据综合课程（原型）": [
+    "人工智能",
+    "文献证据综合",
+    "课程"
+  ],
+  "示例课程：学习文献问题定义、来源记录、证据比较和可复现研究记录的组织方式。": [
+    "文献问题定义",
+    "来源记录",
+    "证据比较",
+    "可复现研究记录",
+    "组织方式"
+  ],
+  "人工智能科学智能体实践讲座（原型）": [
+    "人工智能",
+    "科学智能体",
+    "实践讲座"
+  ],
+  "示例活动：交流科学智能体的任务规划、工具调用与结果核查方法。": [
+    "科学智能体",
+    "任务规划",
+    "工具调用",
+    "结果核查方法"
+  ],
+  "量子计算与人工智能方法论坛（原型）": [
+    "量子计算",
+    "人工智能",
+    "方法论坛"
+  ],
+  "示例活动：讨论量子计算与机器学习结合的适用场景、验证条件与研究问题。": [
+    "量子计算",
+    "机器学习",
+    "适用场景",
+    "验证条件",
+    "研究问题"
+  ],
+  "人工智能材料发现技术沙龙（原型）": [
+    "人工智能",
+    "材料发现",
+    "技术沙龙"
+  ],
+  "示例活动：围绕材料数据整理、性质预测和实验结果复核交流案例。": [
+    "材料数据整理",
+    "性质预测",
+    "实验结果复核",
+    "案例"
+  ],
+  "人工智能科研证据边界思辨会（原型）": [
+    "人工智能",
+    "科研证据边界",
+    "思辨会"
+  ],
+  "示例活动：讨论自动生成内容的来源披露、证据充分性及人工复核责任。": [
+    "自动生成内容",
+    "来源披露",
+    "证据充分性",
+    "人工复核责任"
+  ]
+};
+      // Exact lookup uses the prototype's field terms without alias expansion.
+
+      function normalizeExactText(value) {
+        return String(value || "")
+          .replace(/[！-～]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
+          .replace(/\u3000/g, " ")
+          .toLocaleLowerCase("zh-CN")
+          .trim().replace(/\s+/g, " ");
+      }
+
+      const EXACT_FIELD_TERMS = new Map(Object.entries(EXACT_FIELD_TERM_FIXTURES)
+        .map(([field, terms]) => [normalizeExactText(field), terms]));
+
+      function exactConceptKey(value) {
+        return `term:${normalizeExactText(value)}`;
+      }
+
+      function getExactPeople(value) {
+        return String(value || "").split(/[·•,，;；、]/).flatMap(part => {
+          const name = part.trim();
+          return /^[\p{Script=Han}]+(?:\s+[\p{Script=Han}]+)+$/u.test(name)
+            ? name.split(/\s+/) : [name];
+        }).filter(Boolean);
+      }
+
+      function getExactStructuredValues(item) {
+        return [
+          ...(item.tags || []), item.personName, ...getExactPeople(item.author),
+          item.institution, item.venue, item.ipc, item.applicant,
+          ...getExactPeople(item.inventor), item.source,
+          ...getAddedEntitySearchFields(item)
+        ].filter(Boolean);
+      }
+
+      // Registered phrases and complete names stay whole when parsing queries.
+      // Field matching below reads reviewed field terms, never inner substrings.
+      const EXACT_LEXICON = [...new Set([
+        ...EXACT_FIELD_TERMS.values(),
+        ...SEARCH_ITEMS.filter(item => item.type !== "项目").flatMap(getExactStructuredValues)
+      ].flat().map(normalizeExactText).filter(Boolean))].sort((a, b) => b.length - a.length);
+      const EXACT_QUERY_PHRASES = new Set([
+        ...EXACT_LEXICON,
+        ...SEARCH_ITEMS.filter(item => item.type !== "项目").map(item => normalizeExactText(item.title))
+      ]);
+
+      function hasBalancedExactQuotes(query) {
+        let closing = "";
+        for (const char of normalizeExactText(query)) {
+          if (closing) {
+            if (char === closing) closing = "";
+          } else if (char === '"') closing = '"';
+          else if (char === "“") closing = "”";
+          else if (char === "”") return false;
+        }
+        return !closing;
+      }
+
+      function getExactQueryTerms(query) {
+        if (!hasBalancedExactQuotes(query)) return [];
+        const complete = normalizeExactText(query).replace(/^["“]|["”]$/g, "");
+        if (EXACT_QUERY_PHRASES.has(complete)) return [complete];
+        const chunks = normalizeExactText(query).match(/"[^"]*"|“[^”]*”|[^,;、"“”]+/gu) || [];
+        const terms = [];
+        chunks.forEach(chunk => {
+          if (/^(?:".*"|“.*”)$/u.test(chunk)) {
+            const phrase = normalizeExactText(chunk.slice(1, -1));
+            if (phrase) terms.push(phrase);
+            return;
+          }
+          const words = chunk.trim().split(/\s+/).filter(Boolean);
+          for (let start = 0; start < words.length;) {
+            let end = words.length;
+            while (end > start + 1 && !EXACT_QUERY_PHRASES.has(words.slice(start, end).join(" "))) end--;
+            terms.push(words.slice(start, end).join(" "));
+            start = end;
+          }
+        });
+        // Unknown terms are deliberately retained: AND with an unknown term,
+        // or OR containing only unknown terms, must not become a match-all.
+        return [...new Set(terms)];
+      }
+
+      function getExactTextConcepts(value) {
+        const text = normalizeExactText(value);
+        // A field supplies only its explicitly indexed, reviewed complete terms.
+        // An unknown Chinese compound is never split by substring heuristics.
+        const terms = EXACT_FIELD_TERMS.get(text) || [];
+        return new Set(terms.filter(term => text.includes(normalizeExactText(term))).map(exactConceptKey));
+      }
+
+      function getExactScopeFields(item, scope) {
+        const text = value => ({ value, kind: "text" });
+        const keyword = value => ({ value, kind: "keyword" });
+        if (scope === "仅标题") return [text(item.title)];
+        if (scope === "标题与摘要") return [text(item.title), text(item.summary)];
+        if (scope === "全文") return (item.matches || []).map(match => text(match.text));
+        return [
+          text(item.title), text(item.summary),
+          ...getExactStructuredValues(item).map(keyword)
+        ];
+      }
+
+      function matchesExactSearch(item, terms, scope, logic) {
+        if (!terms.length) return false;
+        const fields = getExactScopeFields(item, scope).filter(field => normalizeExactText(field.value));
+        const fieldConcepts = fields.map(field => ({
+          fullValue: exactConceptKey(field.value),
+          concepts: field.kind === "text" ? getExactTextConcepts(field.value) : new Set()
+        }));
+        const matches = terms.map(term => {
+          const concept = exactConceptKey(term);
+          return fieldConcepts.some(field => field.fullValue === concept || field.concepts.has(concept));
+        });
+        // AND may span allowed fields of one resource; each term/phrase must
+        // remain whole within one field or one body paragraph.
+        const exact = logic === "OR" ? matches.some(Boolean) : matches.every(Boolean);
+        return exact;
+      }
+
 
       const MESSAGE_STATUS_TABS = [
         { value: "UNREAD", label: "未读消息" },
@@ -6502,7 +7431,6 @@
           "人才": `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5.5 20c.6-4 2.8-6 6.5-6s5.9 2 6.5 6"></path></svg>`,
           "报告": `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5Z"></path><path d="M8.5 15.5v-3M12 15.5V9M15.5 15.5v-5"></path></svg>`,
           "资讯": `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4Z"></path><path d="M7.5 9h4M7.5 12h9M7.5 15h7"></path></svg>`,
-          "项目": `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h6l2 2h8v10H4Z"></path><path d="M4 7V5h6l2 2"></path></svg>`
         };
         return icons[type] || icons["报告"];
       }
@@ -6568,7 +7496,8 @@
           } else {
             const structuredFields = [
               ["作者", item.author], ["期刊／会议", item.venue], ["机构", item.institution],
-              ["IPC", item.ipc], ["申请人", item.applicant], ["发明人", item.inventor]
+              ["IPC", item.ipc], ["申请人", item.applicant], ["发明人", item.inventor],
+              ...getAddedEntitySearchFields(item).map(value => ["资源信息", value])
             ];
             field = structuredFields.find(([, value]) => findField(value))?.[0] || "";
           }
@@ -6808,7 +7737,7 @@
             label: "开始AI搜索"
           },
           keyword: {
-            placeholder: "输入单个或多个关键词，进行精确查找与词位扩展",
+            placeholder: "输入单个或多个关键词，进行精确查找",
             label: "开始关键词搜索"
           }
         };
@@ -6957,13 +7886,12 @@
         if (/专家|学者|人才|团队|机构/.test(text)) types.push("人才");
         if (/报告|研判|趋势/.test(text)) types.push("报告");
         if (/资讯|动态|新闻/.test(text)) types.push("资讯");
-        if (/项目|课题|合作/.test(text)) types.push("项目");
         return [...new Set(types)];
       }
 
       function getAssociationRelation(item) {
         if (item.type === "人才") return { key: "expert", label: "专家与机构" };
-        if (["论文", "专利", "项目"].includes(item.type)) return { key: "outcome", label: "相似成果" };
+        if (["论文", "专利"].includes(item.type)) return { key: "outcome", label: "相似成果" };
         return { key: "topic", label: "相关主题" };
       }
 
@@ -7202,7 +8130,7 @@
         }), `已将${config.type}计入“${topic}”模型，结果已重新排序。`);
       }
 
-      function getAssociationFeedbackState(itemIndex, query = lastAssociationQuery || portalResultSearchInput.value.trim()) {
+      function getAssociationFeedbackState(itemIndex, query = lastAssociationQuery || getSubmittedSearchQuery()) {
         const transientFeedback = associationFeedback.get(itemIndex);
         if (transientFeedback) return transientFeedback;
         const normalizedQuery = String(query || "").trim().toLocaleLowerCase("zh-CN");
@@ -7433,7 +8361,7 @@
         portalAssociationGenerateSummary.disabled = selectedItems.length === 0;
         portalAssociationSummary.hidden = !associationSummaryOpen || selectedItems.length === 0;
         portalAssociationSummaryList.innerHTML = selectedItems.map((item) => {
-          const profile = getAssociationProfile(item, portalResultSearchInput.value.trim());
+          const profile = getAssociationProfile(item, getSubmittedSearchQuery());
           return `<li><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(profile.reason)}；来源：${escapeHtml(item.source)}</span></li>`;
         }).join("");
         portalAssociationFeedbackStatus.hidden = !associationLastFeedback;
@@ -7483,7 +8411,7 @@
         const entityValues = entities.map(([, value]) => value);
         const semanticTerms = getSemanticTerms(safeQuery).filter((term) => term.length >= 2).slice(0, 6);
         const resourceIntent = getAssociationResourceIntent(safeQuery);
-        const resourceTypes = resourceIntent.length ? resourceIntent : ["论文", "专利", "报告", "人才", "资讯", "项目"];
+        const resourceTypes = resourceIntent.length ? resourceIntent : ["论文", "专利", "报告", "人才", "资讯", "会议", "课程", "活动"];
         const candidates = context.candidates || [];
         const filteredItems = context.items || [];
         const visibleItems = context.visibleItems || [];
@@ -7547,7 +8475,7 @@
 
       function normalizeKeywordMatchMode(query) {
         const terms = getQueryTerms(query).map((term) => term.toLocaleLowerCase("zh-CN"));
-        const knownTerms = [...new Set(SEARCH_ITEMS.flatMap((item) => [item.title, ...item.tags, item.personName, item.author, item.institution, item.venue, item.ipc, item.applicant, item.inventor].filter(Boolean)))]
+        const knownTerms = [...new Set(SEARCH_ITEMS.filter(item => item.type !== "项目").flatMap((item) => [item.title, ...item.tags, item.personName, item.author, item.institution, item.venue, item.ipc, item.applicant, item.inventor, ...getAddedEntitySearchFields(item)].filter(Boolean)))]
           .map((term) => String(term).toLocaleLowerCase("zh-CN"));
         const normalized = terms.map((term) => {
           if (knownTerms.some((known) => known.includes(term))) return term;
@@ -7573,7 +8501,7 @@
         const expansionExpression = [...activeExpansionTerms].map((term) => `\"${term}\"`).join(" OR ");
         portalKeywordExpression.textContent = expansionExpression ? `(${baseExpression}) OR (${expansionExpression})` : baseExpression;
         portalKeywordStatus.textContent = keywordExact
-          ? "精确查找已开启，不进行词位扩展；结果必须包含完整词项。"
+          ? "精确查找已开启：仅在所选范围内匹配完整词项，不进行模糊或上下位扩展。"
           : `原始关键词按 ${keywordLogic} 组合；扩展词作为可撤销的召回补充。`;
         portalKeywordExactToggle.classList.toggle("is-active", keywordExact);
         portalKeywordExactToggle.setAttribute("aria-pressed", String(keywordExact));
@@ -7586,27 +8514,31 @@
       }
 
       function updateSecondaryFilterVisibility() {
-        const supportedType = ["人才", "论文", "专利"].includes(activeSearchType) ? activeSearchType : "";
+        const supportedType = ["人才", "论文", "专利", "会议", "课程", "活动"].includes(activeSearchType) ? activeSearchType : "";
         portalResourceFilterHint.hidden = Boolean(supportedType);
         portalSearchFilters.querySelectorAll("[data-filter-resource]").forEach((group) => {
           const visible = group.dataset.filterResource === supportedType;
           group.hidden = !visible;
-          group.querySelectorAll("input").forEach((input) => { input.disabled = !visible; });
+          group.querySelectorAll("input, select").forEach((input) => { input.disabled = !visible; });
         });
+        const timeGroup = portalSearchFilters.querySelector('input[name="publishTime"]').closest("fieldset");
+        const hasStartTime = ["会议", "活动"].includes(activeSearchType);
+        timeGroup.hidden = hasStartTime;
+        timeGroup.querySelectorAll("input").forEach(input => { input.disabled = hasStartTime; });
+        timeGroup.querySelector("legend").textContent = activeSearchType === "课程" ? "发布时间" : "发表时间";
+        portalSearchSort.querySelector('[value="latest"]').textContent = hasStartTime ? "开始时间从早到晚" : "最新发布";
       }
 
       function getActiveFilterDescriptors() {
         const data = new FormData(portalSearchFilters);
         const descriptors = [];
         const scope = String(data.get("resourceScope") || "全部资源");
-        const matchMode = String(data.get("matchMode") || "智能匹配");
         const publishTime = String(data.get("publishTime") || "不限时间");
         if (scope !== "全部资源") descriptors.push({ key: "resourceScope", label: scope, kind: "radio" });
-        if (activeSearchMode === "关键词" && matchMode !== "智能匹配") descriptors.push({ key: "matchMode", label: matchMode, kind: "radio" });
         if (publishTime !== "不限时间") descriptors.push({ key: "publishTime", label: publishTime, kind: "radio" });
         if (document.getElementById("accessibleOnly")?.checked) descriptors.push({ key: "accessibleOnly", label: "仅可访问", kind: "checkbox" });
-        portalSearchFilters.querySelectorAll("input[type='search']:not(:disabled),input[type='date']:not(:disabled)").forEach((input) => {
-          if (input.value.trim()) descriptors.push({ key: input.name, label: `${input.previousElementSibling?.textContent || "条件"}：${input.value.trim()}`, kind: "value" });
+        portalSearchFilters.querySelectorAll("input[type='search']:not(:disabled),input[type='date']:not(:disabled),select[name]:not(:disabled)").forEach((input) => {
+          if (input.value.trim()) descriptors.push({ key: input.name, label: `${input.previousElementSibling?.textContent || "条件"}：${input.tagName === "SELECT" ? input.selectedOptions[0].textContent : input.value.trim()}`, kind: "value" });
         });
         portalSearchFilters.querySelectorAll("input[type='checkbox'][name]:checked").forEach((input) => {
           descriptors.push({ key: input.name, value: input.value, label: input.value, kind: "namedCheckbox" });
@@ -7639,9 +8571,8 @@
           });
           updateSecondaryFilterVisibility();
         } else if (descriptor.kind === "radio") {
-          const fallback = descriptor.key === "resourceScope" ? "全部资源" : descriptor.key === "publishTime" ? "不限时间" : "智能匹配";
+          const fallback = descriptor.key === "resourceScope" ? "全部资源" : "不限时间";
           portalSearchFilters.querySelector(`input[name="${descriptor.key}"][value="${fallback}"]`).checked = true;
-          if (descriptor.key === "matchMode") keywordExact = false;
         } else if (descriptor.kind === "checkbox") {
           document.getElementById(descriptor.key).checked = false;
         } else if (descriptor.kind === "namedCheckbox") {
@@ -7671,7 +8602,7 @@
       }
 
       function updateSearchModePanels(resultContext = {}) {
-        const query = portalResultSearchInput.value.trim();
+        const query = getSubmittedSearchQuery();
         const isAi = RESULT_MODE_PANELS_ENABLED && activeSearchMode === "AI 搜索";
         const isAssociation = ASSOCIATION_KNOWLEDGE_RETRIEVAL_ENABLED && activeSearchMode === "关联";
         const isKeyword = RESULT_MODE_PANELS_ENABLED && activeSearchMode === "关键词";
@@ -7717,13 +8648,13 @@
       }
 
       function getFilteredSearchItems(options = {}) {
-        const rawQuery = portalResultSearchInput.value.trim();
+        const rawQuery = getSubmittedSearchQuery();
         const query = rawQuery.toLocaleLowerCase("zh-CN");
         const filterValues = new FormData(portalSearchFilters);
-        const matchMode = String(filterValues.get("matchMode") || "智能匹配");
-        const originalTerms = (activeSearchMode === "关键词" && matchMode !== "精确匹配"
-          ? normalizeKeywordMatchMode(query)
-          : getQueryTerms(query).map((term) => term.toLocaleLowerCase("zh-CN")));
+        const isExactKeyword = activeSearchMode === "关键词";
+        const originalTerms = isExactKeyword
+          ? getExactQueryTerms(rawQuery)
+          : getQueryTerms(query).map((term) => term.toLocaleLowerCase("zh-CN"));
         const expansionTerms = [...activeExpansionTerms].map((term) => term.toLocaleLowerCase("zh-CN"));
         const semanticTerms = getSemanticTerms(query).map((term) => term.toLocaleLowerCase("zh-CN"));
         const scope = String(filterValues.get("resourceScope") || "全部资源");
@@ -7747,7 +8678,8 @@
           return (!start || date >= start) && (!end || date <= end);
         };
         let items = SEARCH_ITEMS.filter((item) => {
-          const fullSearchable = [item.title, item.summary, item.detail, item.type, item.source, item.meta, item.author, item.venue, item.personName, item.institution, item.ipc, item.applicant, item.inventor, ...item.tags, ...(item.matches || []).map((match) => match.text)].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN");
+          if (item.type === "项目") return false;
+          const fullSearchable = [item.title, item.summary, item.detail, item.type, item.source, item.meta, item.author, item.venue, item.personName, item.institution, item.ipc, item.applicant, item.inventor, ...getAddedEntitySearchFields(item), ...item.tags, ...(item.matches || []).map((match) => match.text)].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN");
           const scopedSearchable = scope === "仅标题"
             ? item.title.toLocaleLowerCase("zh-CN")
             : scope === "标题与摘要"
@@ -7755,47 +8687,43 @@
               : scope === "全文"
                 ? (item.matches || []).map((match) => match.text).join(" ").toLocaleLowerCase("zh-CN")
                 : fullSearchable;
-          const exactFields = [item.title, ...item.tags, item.personName, item.author, item.institution, item.venue, item.ipc, item.applicant, item.inventor]
-            .filter(Boolean)
-            .map((field) => String(field).toLocaleLowerCase("zh-CN"));
-          const exactTermMatches = originalTerms.map((term) => exactFields.some((field) => field === term || field.includes(term)));
-          const exactPhraseMatch = !originalTerms.length || (keywordLogic === "AND" ? exactTermMatches.every(Boolean) : exactTermMatches.some(Boolean));
+          const exactPhraseMatch = isExactKeyword && matchesExactSearch(item, originalTerms, scope, keywordLogic);
           const originalMatch = !originalTerms.length || (activeSearchMode === "关键词" && keywordLogic === "AND"
             ? originalTerms.every((term) => scopedSearchable.includes(term))
             : originalTerms.some((term) => scopedSearchable.includes(term)));
           const expansionMatch = activeSearchMode === "关键词" && !keywordExact && expansionTerms.some((term) => scopedSearchable.includes(term));
           const semanticMatch = (activeSearchMode === "AI 搜索" || activeSearchMode === "关联")
             && semanticTerms.some((term) => fullSearchable.includes(term));
-          const queryMatch = activeSearchMode === "关键词" && (keywordExact || matchMode === "精确匹配")
+          const queryMatch = isExactKeyword
             ? exactPhraseMatch
             : originalMatch || expansionMatch || semanticMatch;
           const typeMatch = options.ignoreType || activeSearchType === "全部" || item.type === activeSearchType;
           const accessMatch = options.ignoreFacets || !document.getElementById("accessibleOnly")?.checked || item.accessible;
           const scopeMatch = options.ignoreFacets || scope !== "全文" || Boolean(item.matches?.length);
           const publishTime = String(filterValues.get("publishTime") || "不限时间");
-          const yearThreshold = publishTime === "近一年" ? 2025 : publishTime === "近三年" ? 2023 : publishTime === "近五年" ? 2021 : 0;
-          const timeMatch = options.ignoreFacets || !yearThreshold || Number(String(item.date).slice(0, 4)) >= yearThreshold;
+          const yearsBack = {"近一年":1,"近三年":3,"近五年":5}[publishTime] || 0; const threshold = new Date(); threshold.setFullYear(threshold.getFullYear()-yearsBack); const yearThreshold = yearsBack ? threshold.toISOString().slice(0,10) : "";
+          const timeMatch = options.ignoreFacets || !yearThreshold || String(item.date).slice(0,10) >= yearThreshold;
           const disciplineText = [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN");
           const disciplineMatch = options.ignoreFacets || !selectedDisciplines.length || selectedDisciplines.some((discipline) => (disciplineAliases[discipline] || [discipline]).some((alias) => disciplineText.includes(alias)));
           const sourceMatch = options.ignoreFacets || !selectedSources.length || selectedSources.some((source) => (sourceGroups[source] || []).includes(item.type));
-          const secondaryMatch = options.ignoreFacets || ((!fieldValue("personNameFilter") || String(item.personName || "").toLocaleLowerCase("zh-CN").includes(fieldValue("personNameFilter")))
-            && (!fieldValue("institutionFilter") || String(item.institution || "").toLocaleLowerCase("zh-CN").includes(fieldValue("institutionFilter")))
-            && (!fieldValue("authorFilter") || String(item.author || "").toLocaleLowerCase("zh-CN").includes(fieldValue("authorFilter")))
-            && (!fieldValue("venueFilter") || String(item.venue || "").toLocaleLowerCase("zh-CN").includes(fieldValue("venueFilter")))
-            && (!fieldValue("ipcFilter") || String(item.ipc || "").toLocaleLowerCase("zh-CN").includes(fieldValue("ipcFilter")))
-            && (!fieldValue("applicantFilter") || String(item.applicant || "").toLocaleLowerCase("zh-CN").includes(fieldValue("applicantFilter")))
-            && (!fieldValue("inventorFilter") || String(item.inventor || "").toLocaleLowerCase("zh-CN").includes(fieldValue("inventorFilter")))
+          const secondaryMatch = options.ignoreFacets || ((!fieldValue("personNameFilter") || normalizeExactText(item.personName).includes(normalizeExactText(fieldValue("personNameFilter"))))
+            && (!fieldValue("institutionFilter") || normalizeExactText(item.institution).includes(normalizeExactText(fieldValue("institutionFilter"))))
+            && (!fieldValue("authorFilter") || getExactPeople(item.author).some(name => normalizeExactText(name).includes(normalizeExactText(fieldValue("authorFilter")))))
+            && (!fieldValue("venueFilter") || normalizeExactText(item.venue).includes(normalizeExactText(fieldValue("venueFilter"))))
+            && (!fieldValue("ipcFilter") || normalizeExactText(item.ipc).includes(normalizeExactText(fieldValue("ipcFilter"))))
+            && (!fieldValue("applicantFilter") || normalizeExactText(item.applicant).includes(normalizeExactText(fieldValue("applicantFilter"))))
+            && (!fieldValue("inventorFilter") || getExactPeople(item.inventor).some(name => normalizeExactText(name).includes(normalizeExactText(fieldValue("inventorFilter")))))
             && withinDateRange(item.applicationDate, String(filterValues.get("applicationStart") || ""), String(filterValues.get("applicationEnd") || ""))
             && withinDateRange(item.publicationDate, String(filterValues.get("publicationStart") || ""), String(filterValues.get("publicationEnd") || "")));
           const associationRelation = getAssociationRelation(item);
           const associationScopeMatch = options.ignoreAssociationScope || activeSearchMode !== "关联" || associationScope === "all" || associationRelation.key === associationScope;
           const adoptedMatch = options.ignoreAssociationScope || activeSearchMode !== "关联" || !associationOnlyAdopted || adoptedAssociationItems.has(SEARCH_ITEMS.indexOf(item));
           const userModelMatch = options.ignorePersonalization || activeSearchMode !== "关联" || !getAssociationModelInfluence(item)?.suppressed;
-          return queryMatch && typeMatch && accessMatch && scopeMatch && timeMatch && disciplineMatch && sourceMatch && secondaryMatch && associationScopeMatch && adoptedMatch && userModelMatch;
+          return queryMatch && typeMatch && accessMatch && scopeMatch && timeMatch && disciplineMatch && sourceMatch && secondaryMatch && (options.ignoreFacets || matchesAddedEntityFilters(item, filterValues)) && associationScopeMatch && adoptedMatch && userModelMatch;
         });
 
         if (portalSearchSort.value === "latest") {
-          items = items.sort((a, b) => b.date.localeCompare(a.date));
+          items = items.sort((a, b) => ["会议", "活动"].includes(activeSearchType) ? String(a.startAt || a.date || "").localeCompare(String(b.startAt || b.date || "")) : b.date.localeCompare(a.date));
         } else if (portalSearchSort.value === "title") {
           items = items.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
         } else if (activeSearchMode === "关联") {
@@ -7805,13 +8733,14 @@
       }
 
       function createSearchResultCard(item, index) {
+        if (ADDED_ENTITY_TYPES.has(item.type)) return createAddedEntityCard(item, index);
         const article = document.createElement("article");
         article.className = "portal-search-card";
         article.dataset.type = item.type;
         article.dataset.date = item.date;
         const itemIndex = SEARCH_ITEMS.indexOf(item);
         article.dataset.resultId = `result-${itemIndex}`;
-        const query = portalResultSearchInput.value.trim();
+        const query = getSubmittedSearchQuery();
         const metadata = getResultMetadata(item);
         const associationProfile = activeSearchMode === "关联" ? getAssociationProfile(item, query) : null;
         const currentFeedback = getAssociationFeedbackState(itemIndex, query);
@@ -7868,16 +8797,12 @@
               <div class="portal-search-card-tags">${item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag">${tag}</span>`).join("")}</div>
               <div class="portal-search-card-actions">
                 ${associationActionsMarkup}
-                ${item.type === "论文"
-                  ? `<button class="portal-search-card-action portal-paper-comment-toggle" type="button" data-paper-comment-toggle aria-expanded="false">查看论文并评论</button>`
-                  : ""}
                 ${resultDetailUrl
                   ? `<a class="portal-search-card-action is-primary" data-result-detail-link href="${escapeHtml(resultDetailUrl)}" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开 ${escapeHtml(item.title)}${item.type === "论文" ? " 论文详情" : " 资源详情"}">${resultDetailLabel}&nbsp;↗</a>`
                   : ""}
               </div>
             </div>
             ${associationFeedbackMarkup}
-            ${item.type === "论文" ? getPaperCommentPanelMarkup(item) : ""}
           </div>`;
         return article;
       }
@@ -8171,7 +9096,7 @@
 
       function getQaSources(question) {
         const terms = getSemanticTerms(question).map((term) => term.toLocaleLowerCase("zh-CN"));
-        const scored = SEARCH_ITEMS.map((item) => {
+        const scored = BASELINE_QA_ITEMS.map((item) => {
           const searchable = [item.title, item.summary, item.source, item.author, item.personName, ...item.tags].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN");
           const score = terms.reduce((total, term) => total + (searchable.includes(term) ? 1 : 0), 0);
           return { item, score };
@@ -8293,12 +9218,27 @@
           (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
           return;
         }
-        if (!isUsableSearchQuery(query)) {
+        if ([...query].length > 200) {
+          setPortalSearchFeedback("检索内容最多200个字符，请缩短后重试。", "error");
+          (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
+          return;
+        }
+        const requestedMode = options.mode || activeSearchMode;
+        const isExactRequest = requestedMode === "关键词";
+        if (isExactRequest && !hasBalancedExactQuotes(query)) {
+          setPortalSearchFeedback("精确查找的引号需成对，请补全或删除引号后重试。", "error");
+          (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
+          return;
+        }
+        if (!isUsableSearchQuery(isExactRequest ? normalizeExactText(query) : query)) {
           setPortalSearchFeedback("检索提问需包含文字或数字，请修改后重试。", "error");
           (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
           return;
         }
 
+        submittedSearchQuery = query;
+        searchSubmissionRevision += 1;
+        searchSubmissionTicket += 1;
         if (options.mode) setSearchMode(options.mode);
         if (options.resourceType) setSearchType(options.resourceType);
         if (activeSearchMode === "关键词") originalKeywordQuery = query;
@@ -8306,7 +9246,7 @@
           resetAssociationSession(query);
           updateAssociationProfileFromQuery(query);
         }
-        portalResultSearchInput.value = query;
+        if (!options.preserveDraft) portalResultSearchInput.value = query;
         activeSearchPage = 1;
         searchResultQuery.textContent = `“${query}”`;
         renderSearchResults();
@@ -8314,10 +9254,60 @@
           ? "知识检索已完成，可查看规范化过程、关联依据并采用有用信息。"
           : "检索已完成，可继续使用资源类型和筛选条件缩小范围。" );
         showSurface("search", { focusTarget: portalResultSearchInput });
+        if (activeSearchMode === "关键词") setPortalSearchFeedback("");
+        if (options.trackSearch !== false && activeSearchMode === "关键词") {
+          const service = window.PortalSearchRecommend;
+          if (service?.snapshot().userId) {
+            const queryId = `keyword-${Date.now().toString(36)}-${searchSubmissionRevision}`;
+            const domainTags = [...new Set(getFilteredSearchItems().flatMap(item => item.domainTags || item.tags || []))];
+            service.recordBehavior({ eventId: queryId, queryId, eventType: "SEARCH", query, domainTags })
+              .catch(error => setPortalSearchFeedback(error.message || "词汇关注暂未保存，请重试。", "error"));
+          }
+        }
+        return true;
       }
+
+      // Keyword V1: exact original terms only; expansion is outside this phase.
+      const originalSearchModePanels = updateSearchModePanels;
+      const keywordTools = document.createElement("div");
+      keywordTools.className = "keyword-v1-tools";
+      keywordTools.setAttribute("aria-label", "关键词组合方式");
+      keywordTools.append(...portalKeywordPanel.querySelectorAll("[data-keyword-logic]"));
+      portalResultSearchForm.parentElement.append(keywordTools);
+      keywordTools.querySelectorAll("[data-keyword-logic]").forEach(button => {
+        button.textContent = button.dataset.keywordLogic === "AND" ? "全部包含" : "任一包含";
+      });
+      keywordTools.addEventListener("click", event => {
+        const button = event.target.closest("[data-keyword-logic]");
+        if (!button) return;
+        keywordLogic = button.dataset.keywordLogic;
+        activeSearchPage = 1;
+        renderSearchResults();
+      });
+      updateSearchModePanels = function (context = {}) {
+        keywordExpansionOpen = false;
+        activeExpansionTerms.clear();
+        keywordExact = true;
+        originalSearchModePanels(context);
+        portalKeywordPanel.hidden = true;
+        portalSearchCapabilities.hidden = true;
+        portalExpansionToggle.hidden = true;
+        portalExpansionToggle.disabled = true;
+        keywordTools.hidden = activeSearchMode !== "关键词";
+        keywordTools.querySelectorAll("[data-keyword-logic]").forEach(button => {
+          const active = button.dataset.keywordLogic === keywordLogic;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+      window.PortalSearchRecommend?.registerResources(SEARCH_ITEMS.filter(item => item.type !== "项目"));
 
       setHeroSearchMode(activeHeroSearchMode, false);
       setHeroExperience(returnHeroExperience, false);
+      if (activeHeroExperience === "classic" && activeHeroSearchMode === "keyword") {
+        mgFulltextShortcuts.hidden = false;
+        mgSmartRecommendations.hidden = false;
+      }
       setSearchMode(activeSearchMode);
       renderHeroRecommendations(activeHeroRecommendation);
       renderRecommendations();
@@ -8330,8 +9320,9 @@
       const entryType = entrySearchParams.get("type");
       if (entryQuery) {
         performSearch(entryQuery, {
-          mode: SEARCH_MODE_CONFIG[entryMode] ? entryMode : "全文",
-          resourceType: entryType || undefined
+          mode: SEARCH_MODE_CONFIG[entryMode] ? entryMode : "关键词",
+          resourceType: entryType || undefined,
+          trackSearch: false
         });
       }
 
@@ -8340,7 +9331,7 @@
         event.preventDefault();
         if (activeHeroExperience === "v2") {
           if (activeV2HeroMode === "qa") performQuestion(mgHeroSearchInput?.value);
-          else performSearch(mgHeroSearchInput?.value, { mode: "全文", focusTarget: mgHeroSearchInput });
+          else performSearch(mgHeroSearchInput?.value, { mode: "关键词", focusTarget: mgHeroSearchInput });
           return;
         }
         const heroToResultMode = {
@@ -8588,20 +9579,39 @@
       portalResultSearchForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const query = portalResultSearchInput.value.trim();
-        if (!query || !isUsableSearchQuery(query)) {
+        if ([...query].length > 200) {
+          setPortalSearchFeedback("检索内容最多200个字符，请缩短后重试。", "error");
+          portalResultSearchInput.focus();
+          return;
+        }
+        const isExactRequest = activeSearchMode === "关键词";
+        if (isExactRequest && !hasBalancedExactQuotes(query)) {
+          setPortalSearchFeedback("精确查找的引号需成对，请补全或删除引号后重试。", "error");
+          portalResultSearchInput.focus();
+          return;
+        }
+        if (!query || !isUsableSearchQuery(isExactRequest ? normalizeExactText(query) : query)) {
           setPortalSearchFeedback(query ? "检索提问需包含文字或数字，请修改后重试。" : "请输入要检索的研究主题、问题、成果或专家名称。", "error");
           portalResultSearchInput.focus();
           return;
         }
         const submitButton = portalResultSearchForm.querySelector("button[type='submit']");
         if (submitButton.disabled) return;
+        const submissionTicket = ++searchSubmissionTicket;
+        const submissionUserContext = window.PortalSearchRecommend?.userContextVersion();
         submitButton.disabled = true;
         submitButton.setAttribute("aria-busy", "true");
         submitButton.textContent = activeSearchMode === "关联" ? "知识检索中" : "检索中";
         portalSearchResultList.setAttribute("aria-busy", "true");
         setPortalSearchFeedback(activeSearchMode === "关联" ? "正在预处理提问并检索原型知识库……" : "正在检索……", "loading");
         window.setTimeout(() => {
-          performSearch(query);
+          if (submissionTicket !== searchSubmissionTicket || submissionUserContext !== window.PortalSearchRecommend?.userContextVersion()) {
+            submitButton.disabled = false;
+            submitButton.removeAttribute("aria-busy");
+            submitButton.textContent = "搜索";
+            return;
+          }
+          performSearch(query, { preserveDraft: true });
           submitButton.disabled = false;
           submitButton.removeAttribute("aria-busy");
           submitButton.textContent = "搜索";
@@ -8612,11 +9622,11 @@
         if (!tab) return;
         setSearchMode(tab.dataset.searchMode);
         if (activeSearchMode === "关联") {
-          const query = portalResultSearchInput.value.trim();
+          const query = getSubmittedSearchQuery();
           resetAssociationSession(query);
           updateAssociationProfileFromQuery(query);
         }
-        if (activeSearchMode === "关键词" && portalResultSearchInput.value.trim()) originalKeywordQuery = portalResultSearchInput.value.trim();
+        if (activeSearchMode === "关键词" && getSubmittedSearchQuery()) originalKeywordQuery = getSubmittedSearchQuery();
         activeSearchPage = 1;
         renderSearchResults();
         portalResultSearchInput.focus();
@@ -8634,11 +9644,11 @@
         const target = tabs[(nextIndex + tabs.length) % tabs.length];
         setSearchMode(target.dataset.searchMode);
         if (activeSearchMode === "关联") {
-          const query = portalResultSearchInput.value.trim();
+          const query = getSubmittedSearchQuery();
           resetAssociationSession(query);
           updateAssociationProfileFromQuery(query);
         }
-        if (activeSearchMode === "关键词" && portalResultSearchInput.value.trim()) originalKeywordQuery = portalResultSearchInput.value.trim();
+        if (activeSearchMode === "关键词" && getSubmittedSearchQuery()) originalKeywordQuery = getSubmittedSearchQuery();
         activeSearchPage = 1;
         renderSearchResults();
         target.focus();
@@ -8763,45 +9773,7 @@
           trigger?.focus();
           return;
         }
-        const toggle = event.target.closest("[data-paper-comment-toggle]");
-        if (!toggle) return;
-        const card = toggle.closest(".portal-search-card");
-        const panel = card?.querySelector("[data-paper-comment-panel]");
-        if (!card || !panel) return;
-        const open = panel.hidden;
-        panel.hidden = !open;
-        card.classList.toggle("is-comment-open", open);
-        toggle.setAttribute("aria-expanded", String(open));
-        toggle.textContent = open ? "收起评论" : "查看论文并评论";
-        if (open) {
-          panel.scrollIntoView({ behavior: reduceCarouselMotion.matches ? "auto" : "smooth", block: "nearest" });
-          panel.querySelector("textarea")?.focus({ preventScroll: true });
-        }
-      });
-      portalSearchResultList.addEventListener("submit", (event) => {
-        const form = event.target.closest("[data-paper-comment-form]");
-        if (!form) return;
-        event.preventDefault();
-        const content = form.querySelector("textarea")?.value.trim() || "";
-        const key = form.dataset.paperCommentKey;
-        if (!content || !key) return;
-        const comments = paperCommentState.get(key) || [];
-        comments.unshift({ author: "当前用户", date: "2026-08-25 14:20", status: "待审核", likes: 0, content });
-        paperCommentState.set(key, comments);
-        const item = SEARCH_ITEMS.find((candidate) => candidate.title === key);
-        const card = form.closest(".portal-search-card");
-        if (!item || !card) return;
-        const panel = card.querySelector("[data-paper-comment-panel]");
-        const toggle = card.querySelector("[data-paper-comment-toggle]");
-        if (panel) panel.outerHTML = getPaperCommentPanelMarkup(item);
-        const nextPanel = card.querySelector("[data-paper-comment-panel]");
-        if (nextPanel) {
-          nextPanel.hidden = false;
-          nextPanel.querySelector("[data-paper-comment-success]")?.removeAttribute("hidden");
-        }
-        card.classList.add("is-comment-open");
-        toggle?.setAttribute("aria-expanded", "true");
-        if (toggle) toggle.textContent = "收起评论";
+
       });
       portalSearchTypeTabs.addEventListener("keydown", (event) => {
         const tabs = [...portalSearchTypeTabs.querySelectorAll("[data-search-type]")];
@@ -8823,10 +9795,6 @@
         renderSearchResults();
       });
       portalSearchFilters.addEventListener("change", (event) => {
-        if (activeSearchMode === "关键词" && event.target.name === "matchMode") {
-          keywordExact = event.target.value === "精确匹配";
-          if (keywordExact) activeExpansionTerms.clear();
-        }
         activeSearchPage = 1;
         renderSearchResults();
       });
@@ -8851,7 +9819,7 @@
           item.tabIndex = active ? 0 : -1;
         });
         keywordLogic = "AND";
-        keywordExact = false;
+        keywordExact = true;
         updateSecondaryFilterVisibility();
         renderSearchResults();
       });
@@ -8919,7 +9887,7 @@
         const summaryText = [...adoptedAssociationItems].map((itemIndex, index) => {
           const item = SEARCH_ITEMS[itemIndex];
           if (!item) return "";
-          const profile = getAssociationProfile(item, portalResultSearchInput.value.trim());
+          const profile = getAssociationProfile(item, getSubmittedSearchQuery());
           return `${index + 1}. ${item.title}\n${profile.reason}\n来源：${item.source}`;
         }).filter(Boolean).join("\n\n");
         try {
@@ -8985,7 +9953,7 @@
         next.consent = true;
         next.enabled = true;
         Object.keys(next.sources).forEach((source) => { next.sources[source] = selectedSources.includes(source); });
-        const currentQuery = portalResultSearchInput.value.trim();
+        const currentQuery = getSubmittedSearchQuery();
         if (portalUserModelIncludeQuery.checked && next.sources.search && currentQuery) {
           const topic = getAssociationModelTopic(currentQuery);
           if (topic) next.signals.unshift(createUserModelSignal({
@@ -9107,11 +10075,8 @@
         }
       });
       portalKeywordExactToggle.addEventListener("click", () => {
-        keywordExact = !keywordExact;
-        if (keywordExact) activeExpansionTerms.clear();
-        const exactRadio = portalSearchFilters.querySelector(`input[name="matchMode"][value="精确匹配"]`);
-        const intelligentRadio = portalSearchFilters.querySelector(`input[name="matchMode"][value="智能匹配"]`);
-        (keywordExact ? exactRadio : intelligentRadio).checked = true;
+        keywordExact = true;
+        activeExpansionTerms.clear();
         activeSearchPage = 1;
         renderSearchResults();
       });
@@ -9136,8 +10101,7 @@
         activeExpansionTerms.clear();
         if (originalKeywordQuery) portalResultSearchInput.value = originalKeywordQuery;
         keywordLogic = "AND";
-        keywordExact = false;
-        portalSearchFilters.querySelector(`input[name="matchMode"][value="智能匹配"]`).checked = true;
+        keywordExact = true;
         activeSearchPage = 1;
         renderSearchResults();
       });

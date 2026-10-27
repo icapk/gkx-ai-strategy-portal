@@ -24,12 +24,11 @@
       resultMode: "关键词",
       label: "关键词搜索",
       placeholder: "输入一个或多个关键词，可在结果页继续精确筛选...",
-      guide: "支持精确查找、同义词与中英文词位扩展，并按资源字段继续筛选"
+      guide: "支持关键词精确查找，并按资源字段继续筛选"
     }
   };
 
   const KEYWORD_WATCH_STORAGE_KEY = "gkx-keyword-watches-v1";
-  const KEYWORD_WATCH_LIMIT = 8;
   const BASE_MESSAGE_COUNT = 5;
   const NEWS_VIEW_STORAGE_KEY = "gkx-news-browse-records-v1";
   const NEWS_PAGE_SIZE = 4;
@@ -186,7 +185,7 @@
     "新能源": ["储能", "动力电池", "产业政策"]
   };
 
-  const PROTOTYPE_REFERENCE_TIME = Date.parse("2026-08-27T12:00:00+08:00");
+  const PROTOTYPE_REFERENCE_TIME = Date.now();
   const PAPER_STORAGE_KEY = "gkx-paper-recommendations-v1";
   const AUTHOR_STORAGE_KEY = "gkx-author-recommendations-v1";
   const REPORT_STORAGE_KEY = "gkx-report-recommendations-v1";
@@ -1361,7 +1360,7 @@
       visible.forEach(function (item, index) { paperList.appendChild(createPaperCard(item, index)); });
     }
     const modeLabel = ({ latest: "最新文献推荐", hot: "热门文献推荐", following: "关注作者文献推荐" })[activePaperMode];
-    const sortLabel = activePaperMode === "hot" ? "按独立综合热度排序" : "按发表时间倒序";
+    const sortLabel = activePaperMode === "hot" ? "综合热度筛选热门候选 · 按发表时间倒序" : "按发表时间倒序";
     replaceModuleStatus(paperStatus, modeLabel, "当前显示 " + visible.length + " / 共 " + items.length + " 条 · " + sortLabel);
     updateMoreButton(paperMoreButton, items.length, paperVisibleCount, "文献");
     paperList.setAttribute("aria-busy", "false");
@@ -1378,21 +1377,22 @@
     renderPapers();
   }
 
-  function togglePaperSave(id) {
+  async function togglePaperSave(id) {
     const saved = paperState.saved.includes(id);
     const nextSaved = saved ? paperState.saved.filter(function (itemId) { return itemId !== id; }) : paperState.saved.concat(id);
-    savePaperState({ ...paperState, saved: nextSaved });
+    if (!await savePaperState({ ...paperState, saved: nextSaved })) { renderPapers(); return false; }
     renderPapers();
     showToast(saved ? "已取消收藏文献" : "已收藏文献", {
       label: "撤销",
-      onAction: function () {
-        savePaperState({
+      onAction: async function () {
+        if (!await savePaperState({
           ...paperState,
           saved: saved ? Array.from(new Set(paperState.saved.concat(id))) : paperState.saved.filter(function (itemId) { return itemId !== id; })
-        });
+        })) { renderPapers(); return; }
         renderPapers();
       }
     });
+    return true;
   }
 
   function freshnessScore(value, horizonDays) {
@@ -1423,7 +1423,7 @@
       if (activeReportMode === "hot") {
         return reportPopularityScore(right) - reportPopularityScore(left) || Date.parse(right.publishedAt) - Date.parse(left.publishedAt);
       }
-      if ((reportRule?.value || "latest") === "composite") {
+      if (activeReportMode === "latest" && (reportRule?.value || "latest") === "composite") {
         return reportCompositeScore(right) - reportCompositeScore(left) || Date.parse(right.publishedAt) - Date.parse(left.publishedAt);
       }
       return Date.parse(right.publishedAt) - Date.parse(left.publishedAt);
@@ -1504,6 +1504,12 @@
 
   function renderReports() {
     if (!reportGrid || !reportState) return;
+    if (reportRule) {
+      const ruleGroup = reportRule.closest(".rec-module-controls");
+      ruleGroup.hidden = activeReportMode !== "latest";
+      ruleGroup.style.display = activeReportMode === "latest" ? "" : "none";
+      reportRule.disabled = activeReportMode !== "latest";
+    }
     const items = getReportItems();
     const visibleLimit = activeReportMode === "latest" ? MODULE_PAGE_SIZE : reportVisibleCount;
     const visible = items.slice(0, visibleLimit);
@@ -1551,17 +1557,17 @@
     renderReports();
   }
 
-  function toggleReportPersonalState(id, key, activeMessage, inactiveMessage) {
+  async function toggleReportPersonalState(id, key, activeMessage, inactiveMessage) {
     const active = reportState[key].includes(id);
     const next = active ? reportState[key].filter(function (itemId) { return itemId !== id; }) : reportState[key].concat(id);
-    saveReportState({ ...reportState, [key]: next });
+    if (!await saveReportState({ ...reportState, [key]: next })) { renderReports(); return false; }
     renderReports();
     showToast(active ? inactiveMessage : activeMessage, {
       label: "撤销",
-      onAction: function () {
+      onAction: async function () {
         const current = reportState[key];
         const restored = active ? Array.from(new Set(current.concat(id))) : current.filter(function (itemId) { return itemId !== id; });
-        saveReportState({ ...reportState, [key]: restored });
+        if (!await saveReportState({ ...reportState, [key]: restored })) { renderReports(); return; }
         renderReports();
       }
     });
@@ -1690,38 +1696,40 @@
     }
   }
 
-  function setAuthorFollowing(authorId) {
+  async function setAuthorFollowing(authorId) {
     const previous = { ...authorRecommendationState(authorId) };
     const nextAuthor = previous.following
       ? { following: false, everFollowed: true, dismissed: false }
       : { following: true, everFollowed: true, dismissed: false };
-    saveAuthorState({ ...authorState, authors: { ...authorState.authors, [authorId]: nextAuthor } });
+    if (!await saveAuthorState({ ...authorState, authors: { ...authorState.authors, [authorId]: nextAuthor } })) { renderTalentRecommendations(); return false; }
     renderTalentRecommendations();
     if (activePaperMode === "following") renderPapers();
     showToast(previous.following ? "已取消关注；仍保留“曾关注”推荐依据" : "已关注作者，相关文献与动态已更新", {
       label: "撤销",
-      onAction: function () {
-        saveAuthorState({ ...authorState, authors: { ...authorState.authors, [authorId]: previous } });
+      onAction: async function () {
+        if (!await saveAuthorState({ ...authorState, authors: { ...authorState.authors, [authorId]: previous } })) { renderTalentRecommendations(); return; }
         renderTalentRecommendations();
         if (activePaperMode === "following") renderPapers();
       }
     });
+    return true;
   }
 
-  function dismissFormerAuthor(authorId) {
+  async function dismissFormerAuthor(authorId) {
     const previous = { ...authorRecommendationState(authorId) };
     const nextAuthor = { ...previous, dismissed: true };
-    saveAuthorState({ ...authorState, authors: { ...authorState.authors, [authorId]: nextAuthor } });
+    if (!await saveAuthorState({ ...authorState, authors: { ...authorState.authors, [authorId]: nextAuthor } })) { renderTalentRecommendations(); return false; }
     renderTalentRecommendations();
     if (activePaperMode === "following") renderPapers();
     showToast("已停止依据该曾关注作者推荐", {
       label: "撤销",
-      onAction: function () {
-        saveAuthorState({ ...authorState, authors: { ...authorState.authors, [authorId]: previous } });
+      onAction: async function () {
+        if (!await saveAuthorState({ ...authorState, authors: { ...authorState.authors, [authorId]: previous } })) { renderTalentRecommendations(); return; }
         renderTalentRecommendations();
         if (activePaperMode === "following") renderPapers();
       }
     });
+    return true;
   }
 
   function conferencePopularityScore(item) {
@@ -1924,17 +1932,17 @@
     courseGrid.setAttribute("aria-busy", "false");
   }
 
-  function toggleCourseSave(id) {
+  async function toggleCourseSave(id) {
     const saved = courseState.saved.includes(id);
     const next = saved ? courseState.saved.filter(function (itemId) { return itemId !== id; }) : courseState.saved.concat(id);
-    saveCourseState({ ...courseState, saved: next });
+    if (!await saveCourseState({ ...courseState, saved: next })) { renderCourses(); return false; }
     renderCourses();
     showToast(saved ? "已取消收藏课程" : "已收藏课程", {
       label: "撤销",
-      onAction: function () {
+      onAction: async function () {
         const current = courseState.saved;
         const restored = saved ? Array.from(new Set(current.concat(id))) : current.filter(function (itemId) { return itemId !== id; });
-        saveCourseState({ ...courseState, saved: restored });
+        if (!await saveCourseState({ ...courseState, saved: restored })) { renderCourses(); return; }
         renderCourses();
       }
     });
@@ -2284,8 +2292,7 @@
           if (!watch || seen.has(watch.key)) return false;
           seen.add(watch.key);
           return true;
-        })
-        .slice(0, KEYWORD_WATCH_LIMIT);
+        });
       return { version: 1, autoFollow: parsed.autoFollow !== false, watches: watches };
     } catch (_error) {
       return fallback;
@@ -2352,7 +2359,6 @@
       return { status: "existing", watch: updated };
     }
 
-    if (watchState.watches.length >= KEYWORD_WATCH_LIMIT) return { status: "limit", keyword: keyword };
     const watch = createKeywordWatch(keyword, source, MODE_CONFIG[mode] ? mode : "ai");
     if (!saveWatchState({ ...watchState, watches: [watch].concat(watchState.watches) })) return { status: "error" };
     return { status: "created", watch: watch };
@@ -2372,12 +2378,13 @@
 
   function renderWatchStatus() {
     if (!keywordFollowStatus || !watchState) return;
-    const count = watchState.watches.length;
+    const keywordArchive = window.PortalSearchRecommend.snapshot().follows.filter(function (follow) { return follow.kind === "KEYWORD"; });
+    const count = keywordArchive.filter(function (follow) { return follow.following; }).length;
     const unread = totalKeywordUnread();
     const title = watchState.autoFollow ? "自动关注已开启" : "自动关注已关闭";
     let detail = "尚未关注词汇，可搜索或从下方推荐词开始。";
     if (count > 0) {
-      detail = "已关注 " + count + "/" + KEYWORD_WATCH_LIMIT + " 个词汇";
+      detail = "已关注 " + count + "/" + keywordArchive.length + " 个词汇";
       detail += unread > 0 ? "，有 " + unread + " 条未读动态。" : "，暂无未读动态。";
     }
     keywordFollowStatus.replaceChildren(createElement("strong", "", title), createElement("span", "", detail));
@@ -2623,10 +2630,6 @@
     showToast("已停止关注“" + removed.keyword + "”", {
       label: "撤销",
       onAction: function () {
-        if (watchState.watches.length >= KEYWORD_WATCH_LIMIT) {
-          showToast("关注词已达上限，无法撤销");
-          return;
-        }
         if (!saveWatchState({ ...watchState, watches: [removed].concat(watchState.watches) })) return;
         expandedWatchKey = removed.key;
         renderKeywordFollows();
@@ -2684,58 +2687,29 @@
     setSearchMode(modeSelect.value, true);
   });
 
-  searchForm?.addEventListener("submit", function (event) {
+  searchForm?.addEventListener("submit", async function (event) {
     event.preventDefault();
-    const query = searchInput?.value.trim();
-    if (!query) {
-      showToast("请先输入要检索的内容");
-      searchInput?.focus();
-      return;
+    const query=searchInput?.value.trim();
+    if(!query){showToast("请先输入要检索的内容");searchInput?.focus();return}
+    if(!isUsableKeyword(query)){showToast("检索内容需包含文字或数字，请修改后重试");searchInput?.focus();return}
+    if(Array.from(query).length>200){showToast("搜索内容最多200个字符");searchInput?.focus();return}
+    if(activeMode==='keyword'&&(query.replace(/[“”]/g,'"').match(/"/g)||[]).length%2){showToast("精确查找的引号需成对，请补全或删除引号后重试。");searchInput?.focus();return}
+    const mode=MODE_CONFIG[activeMode]?.resultMode||"关键词",params=new URLSearchParams({query,mode}),submitButton=searchForm.querySelector('button[type="submit"]'),submitLabel=submitButton?.querySelector('span');
+    if(submitButton?.disabled)return;
+    if(submitButton){submitButton.disabled=true;submitButton.setAttribute('aria-busy','true')}
+    if(submitLabel)submitLabel.textContent='搜索中';
+    const submittedContext=SR.userContextVersion(),eventId='recommend-search-'+srId();let delay=0;
+    if(SR.snapshot().userId){
+      try{
+        const normalized=SR.normalizeKeyword(query),matched=SR.fixtures.searchResources.filter(item=>SR.normalizeKeyword([item.title,item.summary,item.author,item.personName,...(item.tags||[])].filter(Boolean).join(' ')).includes(normalized));
+        const domainTags=[...new Set([query,...matched.flatMap(item=>[...(item.tags||[]),...(item.domainTags||[]),...(SR.fixtures.resourceDomains?.[item.portalPaperId||item.id]||[])])])];
+        await SR.recordBehavior({eventId,eventType:'SEARCH',query,queryId:eventId,domainTags,source:'recommendation-search'});
+        if(submittedContext!==SR.userContextVersion())return;
+        watchState=loadWatchState();renderKeywordFollows();
+      }catch(err){if(submittedContext!==SR.userContextVersion())return;showToast(err.message||'搜索行为暂未保存，本次继续检索');delay=900}
     }
-    if (!isUsableKeyword(query)) {
-      showToast("检索内容需包含文字或数字，请修改后重试");
-      searchInput?.focus();
-      return;
-    }
-
-    const mode = MODE_CONFIG[activeMode]?.resultMode || "全文";
-    const params = new URLSearchParams({ query: query, mode: mode });
-    const submitButton = searchForm.querySelector("button[type=\"submit\"]");
-    const submitLabel = submitButton?.querySelector("span");
-    if (submitButton?.disabled) return;
-    if (submitButton) {
-      submitButton.disabled = true;
-      submitButton.setAttribute("aria-busy", "true");
-    }
-    if (submitLabel) submitLabel.textContent = "搜索中";
-
-    let delay = 0;
-    if (watchState.autoFollow) {
-      const result = upsertKeywordWatch(query, "search", activeMode);
-      if (result.status === "created") {
-        expandedWatchKey = result.watch.key;
-        renderKeywordFollows();
-        showToast("已根据搜索自动关注“" + result.watch.keyword + "”，正在生成相关动态");
-        delay = 720;
-      } else if (result.status === "existing") {
-        renderKeywordFollows();
-        showToast("已更新“" + result.watch.keyword + "”的搜索关注数据");
-        delay = 620;
-      } else if (result.status === "limit") {
-        showToast("已达到 " + KEYWORD_WATCH_LIMIT + " 个关注上限，本次继续搜索但不新增关注");
-        delay = 1000;
-      } else if (result.status === "invalid") {
-        showToast("未能从本次搜索中识别可关注词汇，本次将继续搜索");
-        delay = 900;
-      } else if (result.status === "error") {
-        delay = 1000;
-      }
-    }
-
     window.clearTimeout(searchNavigationTimer);
-    searchNavigationTimer = window.setTimeout(function () {
-      window.location.href = "index.html?" + params.toString();
-    }, delay);
+    searchNavigationTimer=window.setTimeout(()=>{if(submittedContext===SR.userContextVersion())window.location.href='index.html?'+params.toString()},delay);
   });
 
   document.querySelectorAll("[data-hot-query]").forEach(function (button) {
@@ -2843,7 +2817,7 @@
     if (showingAll && !items.slice(0, MODULE_PAGE_SIZE).some(function (item) { return item.id === expandedPaperId; })) expandedPaperId = "";
     renderPapers();
   });
-  paperList?.addEventListener("click", function (event) {
+  paperList?.addEventListener("click", async function (event) {
     const button = event.target.closest("button");
     if (!button || !paperList.contains(button)) return;
     if (button.dataset.paperRecover === "all") {
@@ -2861,7 +2835,9 @@
     if (button.dataset.paperSave) {
       const id = button.dataset.paperSave;
       const wasSaved = paperState.saved.includes(id);
-      togglePaperSave(id);
+      button.disabled = true;
+      await togglePaperSave(id);
+      button.disabled = false;
       const focusSelector = paperSavedOnly?.checked && wasSaved
         ? "[data-paper-save], [data-paper-recover='all']"
         : "[data-paper-save='" + id + "']";
@@ -2900,8 +2876,11 @@
       const id = button.dataset.paperClearRating;
       const nextRatings = { ...paperState.ratings };
       delete nextRatings[id];
-      savePaperState({ ...paperState, ratings: nextRatings });
+      button.disabled = true;
+      const cleared = await savePaperState({ ...paperState, ratings: nextRatings });
+      button.disabled = false;
       renderPapers();
+      if (!cleared) return;
       showToast("已清除我的评分");
       focusRenderedControl(paperList, "#rec-paper-rating-" + id + " input[type='radio']");
       return;
@@ -2947,13 +2926,16 @@
     renderPapers();
     focusRenderedControl(paperList, "[data-paper-citation-mode='" + nextMode + "'][data-paper-id='" + tab.dataset.paperId + "']");
   });
-  paperList?.addEventListener("change", function (event) {
+  paperList?.addEventListener("change", async function (event) {
     const input = event.target.closest("input[data-paper-rating]");
     if (!input || !paperList.contains(input)) return;
     const id = input.dataset.paperRating;
     const rating = Number(input.value);
-    savePaperState({ ...paperState, ratings: { ...paperState.ratings, [id]: rating } });
+    input.disabled = true;
+    const updated = await savePaperState({ ...paperState, ratings: { ...paperState.ratings, [id]: rating } });
+    input.disabled = false;
     renderPapers();
+    if (!updated) return;
     showToast("我的评分已更新为 " + rating + " 分");
     focusRenderedControl(paperList, "#rec-paper-rating-" + id + " input[value='" + rating + "']");
   });
@@ -3009,7 +2991,7 @@
     reportVisibleCount = showingAll ? MODULE_PAGE_SIZE : Math.min(items.length, reportVisibleCount + MODULE_PAGE_SIZE);
     renderReports();
   });
-  reportGrid?.addEventListener("click", function (event) {
+  reportGrid?.addEventListener("click", async function (event) {
     const button = event.target.closest("button");
     if (!button || !reportGrid.contains(button)) return;
     if (button.dataset.reportRecover) {
@@ -3028,24 +3010,26 @@
       return;
     }
     if (button.dataset.reportSave) {
-      toggleReportPersonalState(button.dataset.reportSave, "saved", "已收藏报告", "已取消收藏报告");
+      await toggleReportPersonalState(button.dataset.reportSave, "saved", "已收藏报告", "已取消收藏报告");
       focusRenderedControl(reportGrid, "[data-report-save='" + button.dataset.reportSave + "']");
       return;
     }
     if (button.dataset.reportLike) {
-      toggleReportPersonalState(button.dataset.reportLike, "liked", "已点赞报告", "已取消点赞报告");
+      await toggleReportPersonalState(button.dataset.reportLike, "liked", "已点赞报告", "已取消点赞报告");
       focusRenderedControl(reportGrid, "[data-report-like='" + button.dataset.reportLike + "']");
     }
   });
 
-  talentLibrary?.addEventListener("click", function (event) {
+  talentLibrary?.addEventListener("click", async function (event) {
     const button = event.target.closest("button[data-author-follow]");
     if (!button || !talentLibrary.contains(button)) return;
     const id = button.dataset.authorFollow;
-    setAuthorFollowing(id);
+    button.disabled = true;
+    await setAuthorFollowing(id);
+    button.disabled = false;
     focusRenderedControl(talentLibrary, "[data-author-follow='" + id + "']");
   });
-  authorUpdates?.addEventListener("click", function (event) {
+  authorUpdates?.addEventListener("click", async function (event) {
     const button = event.target.closest("button");
     if (!button || !authorUpdates.contains(button)) return;
     if (button.dataset.authorLocateLibrary) {
@@ -3061,7 +3045,9 @@
       return;
     }
     if (button.dataset.authorDismiss) {
-      dismissFormerAuthor(button.dataset.authorDismiss);
+      button.disabled = true;
+      await dismissFormerAuthor(button.dataset.authorDismiss);
+      button.disabled = false;
       focusRenderedControl(authorUpdates, "[data-author-update-toggle]");
     }
   });
@@ -3090,7 +3076,7 @@
     courseVisibleCount = showingAll ? MODULE_PAGE_SIZE : Math.min(COURSE_ITEMS.length, courseVisibleCount + MODULE_PAGE_SIZE);
     renderCourses();
   });
-  courseGrid?.addEventListener("click", function (event) {
+  courseGrid?.addEventListener("click", async function (event) {
     const button = event.target.closest("button");
     if (!button || !courseGrid.contains(button)) return;
     if (button.dataset.courseToggle) {
@@ -3101,7 +3087,7 @@
       return;
     }
     if (button.dataset.courseSave) {
-      toggleCourseSave(button.dataset.courseSave);
+      await toggleCourseSave(button.dataset.courseSave);
       focusRenderedControl(courseGrid, "[data-course-save='" + button.dataset.courseSave + "']");
     }
   });
@@ -3325,8 +3311,6 @@
         renderKeywordFollows();
         focusGridControl("data-watch-toggle", result.watch.key);
         showToast("该词汇已在关注中");
-      } else if (result.status === "limit") {
-        showToast("最多可同时关注 " + KEYWORD_WATCH_LIMIT + " 个词汇，请先停止一个关注");
       }
       return;
     }
@@ -3444,7 +3428,7 @@
       searchInput.value = "AI 仿真实验";
       setSearchMode("association", false);
     } else {
-      setSearchMode(params.get("mode") || "ai", false);
+      setSearchMode(params.get("mode") || "keyword", false);
     }
 
     const sectionId = window.location.hash.slice(1);
@@ -3480,6 +3464,111 @@
     "[data-conference-mode]", "#recConferenceMore", "#recCourseMore",
     "[data-event-mode]", "#recEventMore"
   ].join(", ")).forEach(function (control) { control.disabled = false; });
+
+  // Shared adapter wiring inside the original recommendation controller.
+  const SR=window.PortalSearchRecommend;
+  const srSafe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const srId=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);
+  SR.registerResources([...NEWS_ITEMS.map(x=>({...x,type:'资讯'})),...PAPER_ITEMS.map(x=>({...x,type:'论文'})),...REPORT_ITEMS.map(x=>({...x,type:'报告'})),...COURSE_ITEMS.map(x=>({...x,type:'课程'}))]);
+  function srRecommend(type,scene,items){return SR.recommendSnapshot({resourceType:type,scene,items}).items}
+  getNewsInterestTopics=function(){return SR.snapshot().follows.filter(x=>x.following&&['DOMAIN','JOURNAL'].includes(x.kind)).map(x=>({keyword:x.targetId,source:'当前关注'}))};
+  getNewsItems=function(mode){return srRecommend('NEWS',mode,NEWS_ITEMS.map(x=>({...x,topics:[x.topic,...x.tags]})))};
+  const srNewsCard=createNewsCard;
+  createNewsCard=function(item,i){const card=srNewsCard(item,i);if(item.moduleEntries?.length){const links=createElement('div','sr-note','相关服务：');item.moduleEntries.forEach(m=>{const a=createElement('a','',m.label+' ↗ ');a.href=m.url;links.appendChild(a)});card.querySelector('.rec-news-detail').appendChild(links)}return card};
+  newsRecommendationReason=function(item){if(activeNewsMode==='following')return '匹配当前关注领域或期刊 · 发布时间倒序';if(activeNewsMode==='hot')return '当前平台领域热度候选 · 发布时间倒序';return item.personalized?'行为兴趣候选 · 发布时间倒序':'公共最新资讯 · 暂无匹配的个人行为依据'};
+  paperAuthorReason=function(item){const id=item.authorIds.find(id=>authorState?.authors[id]?.following);if(!id)return '';return '当前关注作者“'+(AUTHORS.find(a=>a.id===id)?.name||id)+'”'};
+  getPaperItems=function(){let items=srRecommend('PAPER',activePaperMode,PAPER_ITEMS);const range=paperTimeRange?.value||'all';if(range!=='all')items=items.filter(x=>Date.now()-Date.parse(x.publishedAt)>=0&&Date.now()-Date.parse(x.publishedAt)<=Number(range)*86400000);if(paperSavedOnly?.checked)items=items.filter(x=>paperState.saved.includes(x.id));return items};
+  const srSaveAuthor=saveAuthorState;
+  saveAuthorState=async function(next,silent){const context=SR.userContextVersion(),before=authorState||emptyAuthorState(),changes=Object.entries(next.authors).filter(([id,value])=>['following','everFollowed','dismissed'].some(key=>before.authors[id]?.[key]!==value[key])).map(([targetId,value])=>({kind:'AUTHOR',targetId,...value}));try{if(changes.length){const reply=await SR.setFollow({changes,version:SR.followsVersion(),userContextVersion:context,clientMutationId:'author-'+srId()});if(context!==SR.userContextVersion())return false;next={...next,authors:{...authorState.authors}};reply.changedFollows.forEach(f=>{next.authors[f.targetId]={following:f.following,everFollowed:f.everFollowed,dismissed:f.dismissed}})}srSaveAuthor(next,silent);return true}catch(error){if(context===SR.userContextVersion())showToast(error.message||'作者关注未保存，请重试');return false}};
+  const srSavePaper=savePaperState;
+  savePaperState=async function(next,silent){const context=SR.userContextVersion(),before=paperState||emptyPaperState(),changed=PAPER_ITEMS.filter(x=>before.saved.includes(x.id)!==next.saved.includes(x.id)||before.ratings[x.id]!==next.ratings[x.id]);try{for(const x of changed){await SR.setResourceState({resourceId:x.id,isFavorite:next.saved.includes(x.id),rating:next.ratings[x.id]||null,domainTags:x.tags});if(context!==SR.userContextVersion())return false}if(changed.length){const shared=loadPaperState();next={...next,saved:shared.saved,ratings:shared.ratings}}srSavePaper(next,silent);return true}catch(error){if(context===SR.userContextVersion())showToast(error.message||'文献状态未保存，请重试');return false}};
+  createPaperComments=function(item){const s=SR.commentsSnapshot(item.id),wrapper=createElement('section','rec-paper-comments');wrapper.id='rec-paper-comments-'+item.id;wrapper.innerHTML='<h4>评论</h4>'+s.publicItems.map(c=>`<article><strong>已审核 · 公开可见</strong><p>${srSafe(c.text)}</p><time>${srSafe(formatPrototypeDate(c.createdAt,true))}</time>${c.authorUserId===SR.snapshot().userId?`<button type="button" data-sr-withdraw="${c.commentId}">撤回本人评论</button>`:''}</article>`).join('')+(s.publicItems.length?'':'<p>暂无已审核公开评论。</p>')+s.myItems.map(c=>`<article class="is-own-comment"><strong>我的评论 · ${({PENDING:'待审核',RETURNED:'退回修改',REJECTED:'已驳回'})[c.status]} · 仅本人可见</strong><p>${srSafe(c.text)}</p><small>${srSafe(c.reason)}</small><button type="button" data-sr-withdraw="${c.commentId}">撤回评论</button>${c.status==='RETURNED'?`<form data-sr-paper-comment="${item.id}" data-comment-id="${c.commentId}" data-version="${c.version}"><textarea name="comment" maxlength="300" required>${srSafe(c.text)}</textarea><button>修改后重新提交</button><small role="status"></small></form>`:''}</article>`).join('')+`<form class="rec-comment-form" data-sr-paper-comment="${item.id}"><label>发表评论（1–300字）<textarea name="comment" rows="3" maxlength="300" required placeholder="请围绕文献内容理性交流"></textarea></label><button type="submit">提交审核</button><small role="status">提交审核后仅本人可见，通过后公开。</small></form>`;return wrapper};
+  paperList?.addEventListener('submit',async e=>{const form=e.target.closest('[data-sr-paper-comment]');if(!form)return;e.preventDefault();const b=form.querySelector('button');b.disabled=true;try{await SR.submitComment({paperId:form.dataset.srPaperComment,text:form.querySelector('textarea').value,commentId:form.dataset.commentId,version:Number(form.dataset.version),clientMutationId:srId()});renderPapers();showToast('评论已提交审核，仅本人可见')}catch(err){form.querySelector('[role=status]').textContent=err.message;b.disabled=false}});
+  paperList?.addEventListener('click',async e=>{const b=e.target.closest('[data-sr-withdraw]');if(!b)return;try{await SR.withdrawComment(b.dataset.srWithdraw);renderPapers();showToast('评论已撤回')}catch(err){showToast(err.message||'评论未撤回')}});
+  const srReports=getReportItems;
+  function srReportRequest(items){const portalContext={profileVersion:SR.profile().profileVersion};if(activeReportMode==='latest')portalContext.reportRule=reportRule?.value==='composite'?'COMPOSITE':'LATEST';if(activeReportMode==='exclusive')portalContext.audiencePreference=({government:'GOVERNMENT',research:'RESEARCH_INSTITUTION',innovation:'INNOVATION_ENTITY'})[activeReportAudience];return{resourceType:'REPORT',scene:({latest:'LATEST',hot:'POPULAR',exclusive:'EXCLUSIVE'})[activeReportMode],items,portalContext,serverTime:new Date(PROTOTYPE_REFERENCE_TIME).toISOString()}}
+  getReportItems=function(){let items=srReports();if(activeReportMode==='exclusive'){const audience=SR.snapshot().audience;items=items.filter(x=>x.audiences.includes(audience))}return SR.recommendSnapshot(srReportRequest(items)).items};
+  const srTalentRender=renderTalentRecommendations;
+  renderTalentRecommendations=function(){srTalentRender();const items=srRecommend('SCHOLAR','talent',AUTHORS);talentLibrary.replaceChildren(...items.map(createTalentCard));if(!items.length)talentLibrary.appendChild(createElement('p','rec-empty-state','暂无符合当前账户资料和兴趣的人才。'));risingStars.replaceChildren(...SR.risingCandidates().map(createRisingStarCard))};
+  renderCourses=function(){if(!courseGrid||!courseState)return;const result=srRecommend('COURSE','personal',COURSE_ITEMS);courseGrid.replaceChildren(...result.slice(0,courseVisibleCount).map(createCourseCard));replaceModuleStatus(courseStatus,'推荐课程列表',`当前 ${Math.min(courseVisibleCount,result.length)} / ${result.length} 门 · ${result.some(item=>item.hasEvidence)?'按已有搜索、浏览、收藏行为依据计算':'公共推荐，搜索、浏览、收藏均暂无依据'}`);updateMoreButton(courseMoreButton,result.length,courseVisibleCount,'课程');courseGrid.setAttribute('aria-busy','false')};
+  createCourseChart=function(item){const chart=createElement('div','rec-course-chart');chart.setAttribute('aria-label',item.title+'行为匹配维度');Object.entries(item.dimensions).forEach(([label,value])=>{const row=createElement('div','rec-chart-row');row.appendChild(createElement('span','',label));if(value===null||value===undefined){row.appendChild(createElement('span','rec-chart-no-evidence','暂无依据'))}else{const track=createElement('div','rec-chart-track');track.setAttribute('role','progressbar');track.setAttribute('aria-label',label+'匹配度');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','100');track.setAttribute('aria-valuenow',String(value));const fill=createElement('span','rec-chart-fill');fill.style.width=value+'%';track.appendChild(fill);row.append(track,createElement('strong','',value+'%'))}chart.appendChild(row)});return chart};
+  const srCourseCard=createCourseCard;
+  createCourseCard=function(item){const card=srCourseCard(item);if(!item.hasEvidence)card.querySelector('.rec-recommendation-reason').textContent='公共推荐 · 暂无行为依据';return card};
+  const srConferenceItems=getConferenceItems;
+  getConferenceItems=function(){const items=srConferenceItems();return activeConferenceMode==='recent'?items.filter(x=>Date.parse(x.endAt)>=PROTOTYPE_REFERENCE_TIME):items};
+  const srGetEvents=getEventItems;getEventItems=function(){const items=srGetEvents();return activeEventMode==='archive'?items:srRecommend('ACTIVITY',activeEventMode,items)};
+  const srEventCard=createEventCard;
+  createEventCard=function(item){const copy={...item,record:item.record?.replace(/原型回放资源尚未接入，当前不可播放。/,'')};if(eventStatus(item)==='ended'&&!copy.record)copy.record='本地演示活动摘要：'+item.summary;const card=srEventCard(copy);const region=card.querySelector('.rec-event-records');if(region){region.querySelector('small')?.remove();const video=document.createElement('video');video.controls=true;video.preload='metadata';video.className='sr-media';video.setAttribute('aria-label','活动回放交互示例');const status=createElement('p','sr-note','正在加载回放描述…');region.append(video,status);SR.getPlayback(item.id).then(r=>{if(r.status==='AVAILABLE'){video.src=r.url;status.textContent=r.sourceTitle;video.addEventListener('error',()=>status.textContent='示例媒体加载失败，请重试');}else{video.hidden=true;status.textContent='回放暂不可用'}}).catch(err=>{video.hidden=true;status.textContent=err.message;const retry=createElement('button','','重试回放');retry.type='button';retry.onclick=()=>renderEvents();region.appendChild(retry)})}return card};
+  // Only opened details count as views. Closing, rating or citation controls do not.
+  document.addEventListener('click', e => {
+    const b=e.target.closest('button'); if(!b)return;
+    let item=null;
+    if(b.dataset.newsToggle && expandedNewsId===b.dataset.newsToggle)item=NEWS_ITEMS.find(x=>x.id===b.dataset.newsToggle);
+    else if(b.dataset.paperAction==='detail' && expandedPaperId===b.dataset.paperId)item=PAPER_ITEMS.find(x=>x.id===b.dataset.paperId);
+    else if(b.dataset.reportToggle && expandedReportId===b.dataset.reportToggle)item=REPORT_ITEMS.find(x=>x.id===b.dataset.reportToggle);
+    else if(b.dataset.courseToggle && expandedCourseId===b.dataset.courseToggle)item=COURSE_ITEMS.find(x=>x.id===b.dataset.courseToggle);
+    if(item)SR.recordBehavior({eventId:srId(),eventType:'VIEW',resourceId:item.id,domainTags:[...new Set([...(item.tags||[]),...(item.topics||[]),...(item.topic?[item.topic]:[])])]}).catch(()=>{});
+  });
+  function srRenderHot(){const container=document.querySelector('.rec-hot-grid'),words=srRecommend('HOT_WORD','personal',[]);container.innerHTML=words.map((w,i)=>`<button class="rec-hot-card ${i<3?'is-top':''}" type="button" data-sr-hot-query="${srSafe(w.topic)}"><strong>${srSafe(w.topic)}</strong><em>#${i+1}</em><span>近7天行为权重 ${w.current}</span><small>${w.hasPersonalEvidence?'兴趣相关 '+Math.round(w.relevance*100)+'%':'公共热点 · 无个人行为'}</small></button>`).join('')}
+  document.querySelector('.rec-hot-grid')?.addEventListener('click',e=>{const b=e.target.closest('[data-sr-hot-query]');if(b){searchInput.value=b.dataset.srHotQuery;setSearchMode('keyword');searchForm.requestSubmit()}});
+  // Replace only the original interest rail contents; keep its location and style.
+  const srInterest=document.querySelector('.rec-add-interest')?.parentElement;
+  function srRenderInterests(){if(!srInterest)return;const follows=SR.snapshot().follows.filter(f=>f.following&&['DOMAIN','JOURNAL'].includes(f.kind));srInterest.innerHTML='<h3><span aria-hidden="true">🎯</span> 关注领域热词</h3>'+follows.map(f=>`<div class="sr-follow-target"><strong>${srSafe(f.targetId)}</strong><button type="button" data-sr-unfollow="${srSafe(f.targetId)}" data-kind="${f.kind}" aria-label="移除${srSafe(f.targetId)}关注">×</button></div>`).join('')+(follows.length?'':'<p class="sr-note">暂无关注领域或期刊</p>')+'<button class="rec-add-interest" type="button" data-sr-follow-settings>＋ 新增关注领域 / 邮箱设置</button><p id="sr-weekly-summary" class="sr-note"></p>';SR.getWeeklyEmail().then(w=>{const n=document.getElementById('sr-weekly-summary');if(n)n.textContent=w.email?`每周邮件：${w.email} · ${w.enabled?'已启用，每周推送':'已停用'}（原型配置演示）`:'未提供邮箱，不发送每周邮件'})}
+  let srDialog=null;
+  async function srOpenFollowDialog(){
+    if(!SR.snapshot().userId){showToast('请先登录后操作');return}
+    let current=SR.snapshot(),weekly=await SR.getWeeklyEmail();
+    srDialog?.remove();const d=document.createElement('dialog');srDialog=d;d.className='sr-dialog';
+    d.innerHTML=`<form novalidate><h3>关注领域 / 期刊与每周邮件</h3><div class="sr-target-options">${SR.fixtures.availableTargets.map((t,i)=>`<label><input type="checkbox" name="target" value="${i}" ${current.follows.some(f=>f.kind===t.kind&&f.targetId===t.targetId&&f.following)?'checked':''}>${t.kind==='DOMAIN'?'领域':'期刊'} · ${srSafe(t.label)}</label>`).join('')}</div><label>接收邮箱<input type="email" name="email" value="${srSafe(weekly.email||'')}" placeholder="提供有效邮箱后启用每周推送"></label><label><input type="checkbox" name="weekly" ${weekly.enabled||!weekly.email?'checked':''}>每周推送最新与热门论文</label><small>原型仅在当前浏览器保存配置，不发送真实邮件。</small><span role="status"></span><menu><button type="button" data-sr-cancel>取消</button><button type="submit">保存设置</button></menu></form>`;
+    document.body.append(d);d.showModal();d.querySelector('[data-sr-cancel]').onclick=()=>d.close();
+    d.querySelector('form').onsubmit=async e=>{
+      e.preventDefault();const form=e.target,email=form.elements.email.value.trim(),status=form.querySelector('[role=status]'),submit=form.querySelector('[type=submit]');
+      if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status.textContent='请输入有效邮箱地址，设置未保存';return}
+      submit.disabled=true;let followed=false;
+      if(current.userContextVersion!==SR.userContextVersion()){status.textContent='身份已变化，请重新打开设置';submit.disabled=false;return}
+      try{
+        const checked=new Set([...form.querySelectorAll('[name=target]:checked')].map(x=>Number(x.value)));
+        const changes=SR.fixtures.availableTargets.flatMap((t,i)=>{const before=current.follows.find(f=>f.kind===t.kind&&f.targetId===t.targetId),following=checked.has(i);return !!before?.following===following?[]:[{kind:t.kind,targetId:t.targetId,following}]});
+        if(changes.length){await SR.setFollow({changes,version:current.followsVersion,userContextVersion:current.userContextVersion,clientMutationId:'settings-'+srId()});followed=true;current=SR.snapshot()}
+        weekly=await SR.saveWeeklyEmail({email:email||null,enabled:form.elements.weekly.checked,version:weekly.version});
+        d.close();srRenderInterests();renderNewsRecommendations();renderPapers();showToast('关注与每周邮件配置已保存');
+      }catch(err){
+        current=SR.snapshot();weekly=await SR.getWeeklyEmail();
+        status.textContent=(followed?'关注已保存，邮箱配置未保存：':'设置未保存：')+(err.message||'请稍后重试');
+      }finally{submit.disabled=false}
+    };
+  }
+
+  document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-sr-follow-settings'))srOpenFollowDialog();if(b.dataset.srUnfollow){await SR.setFollow({kind:b.dataset.kind,targetId:b.dataset.srUnfollow,following:false});srRenderInterests();renderNewsRecommendations();renderPapers()}});
+  // Keyword watches use the shared state and actual resource update times.
+  // A displayed word may wrap/ellipsis, but its complete normalized identity is never truncated.
+  normalizeKeyword=function(value){return String(value||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim()};
+  keywordKey=function(value){return SR.normalizeKeyword(value)};
+  const srCreateWatch=createKeywordWatch;
+  createKeywordWatch=function(keyword,source,mode){const x=srCreateWatch(keyword,source,mode);x.updates=[];x.metrics={todayNew:0,weekNew:0,relatedResources:SR.fixtures.searchResources.filter(r=>[r.title,...(r.tags||[])].join(' ').includes(keyword)).length};return x};
+  createKeywordUpdates=function(){return []};
+  const srLoadWatch=loadWatchState;
+  loadWatchState=function(){let s=SR.snapshot();if(s.userId==='demo-user'&&!s.keywordWatchMigrationCompleted){try{const legacy=srLoadWatch(),raw=JSON.parse(window.localStorage.getItem(KEYWORD_WATCH_STORAGE_KEY)||'{}');legacy.userId=raw.userId;SR.migrateKeywordWatchesSnapshot(legacy);s=SR.snapshot()}catch(error){showToast(error.message)}}const projection=SR.updatesSnapshot({kind:'KEYWORD'}),at=projection.serverTime,today=new Date(at).toLocaleDateString('en-CA',{timeZone:'Asia/Shanghai'});const watches=s.follows.filter(f=>f.kind==='KEYWORD'&&f.following).map(f=>{const watch=createKeywordWatch(f.targetId,'search','keyword'),updates=projection.items.filter(u=>u.followId===f.followId).map(u=>({...u,id:u.updateId,createdAt:u.updatedAt}));return{...watch,id:f.followId,followId:f.followId,key:f.normalizedKey||keywordKey(f.targetId),keyword:f.targetId,frequency:f.frequency||'daily',createdAt:f.createdAt,updatedAt:f.updatedAt,updates,metrics:{...watch.metrics,todayNew:updates.filter(u=>new Date(u.createdAt).toLocaleDateString('en-CA',{timeZone:'Asia/Shanghai'})===today).length,weekNew:updates.filter(u=>Date.parse(at)-Date.parse(u.createdAt)<7*86400000).length}}});return{version:1,followStateVersion:projection.version,userContextVersion:projection.userContextVersion,autoFollow:s.autoFollowSearchKeywords,watches}};
+  const srSaveWatch=saveWatchState;
+  saveWatchState=function(next){try{const s=SR.snapshot(),existing=s.follows.filter(f=>f.kind==='KEYWORD'),wanted=new Map(next.watches.map(w=>[keywordKey(w.keyword),w])),changes=[];for(const f of existing)if(f.following&&!wanted.has(f.normalizedKey||keywordKey(f.targetId)))changes.push({followId:f.followId,kind:'KEYWORD',targetId:f.targetId,following:false});for(const w of next.watches){const f=existing.find(item=>(item.normalizedKey||keywordKey(item.targetId))===keywordKey(w.keyword)),readUpdateIds=w.updates.filter(u=>u.read).map(u=>u.updateId||u.id);if(!f||!f.following||f.frequency!==w.frequency||readUpdateIds.some(id=>!f.readUpdateIds.includes(id)))changes.push({...(f?{followId:f.followId}:{}),kind:'KEYWORD',targetId:f?.targetId||w.keyword,following:true,frequency:w.frequency,readUpdateIds})}if(changes.length||next.autoFollow!==s.autoFollowSearchKeywords)SR.saveFollowsSnapshot({changes,autoFollowSearchKeywords:next.autoFollow,version:next.followStateVersion??SR.followsVersion(),userContextVersion:next.userContextVersion||SR.userContextVersion(),clientMutationId:'watch-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)});watchState=loadWatchState();return true}catch(error){watchState=loadWatchState();renderKeywordFollows();showToast(error.message||'词汇关注未保存，请重试');return false}};
+  const srInitialAuthor=loadAuthorState;
+  loadAuthorState=function(){const old=srInitialAuthor();if(SR.snapshot().userId!=='demo-user')AUTHORS.forEach(a=>old.authors[a.id]={following:false,everFollowed:false,dismissed:false});SR.snapshot().follows.filter(f=>f.kind==='AUTHOR').forEach(f=>{old.authors[f.targetId]={following:f.following,everFollowed:f.everFollowed,dismissed:!!f.dismissed}});return old};
+  const srLoadPaper=loadPaperState;loadPaperState=function(){const old=SR.snapshot().userId==='demo-user'?srLoadPaper():emptyPaperState();old.saved=[];old.ratings={};const values=SR.snapshot().resourceStates;PAPER_ITEMS.forEach(p=>{const v=values[p.id];if(!v)return;if(v.isFavorite)old.saved.push(p.id);if(v.rating)old.ratings[p.id]=v.rating});return old};
+  const srOriginalLoadReport=loadReportState, srOriginalSaveReport=saveReportState;
+  loadReportState=function(){const old=SR.snapshot().userId==='demo-user'?srOriginalLoadReport():emptyReportState(),values=SR.snapshot().resourceStates;return{...old,saved:REPORT_ITEMS.filter(x=>values[x.id]?.isFavorite).map(x=>x.id),liked:REPORT_ITEMS.filter(x=>values[x.id]?.isLiked).map(x=>x.id)}};
+  saveReportState=async function(next,silent){try{for(const item of REPORT_ITEMS){const favorite=next.saved.includes(item.id),liked=next.liked.includes(item.id);if(reportState.saved.includes(item.id)!==favorite||reportState.liked.includes(item.id)!==liked)await SR.setResourceState({resourceId:item.id,isFavorite:favorite,isLiked:liked,domainTags:item.tags||[]})}srOriginalSaveReport(next,silent);return true}catch(err){showToast(err.message||'报告状态未保存');return false}};
+  const srOriginalLoadCourse=loadCourseState, srOriginalSaveCourse=saveCourseState;
+  loadCourseState=function(){const values=SR.snapshot().resourceStates;return{version:1,saved:COURSE_ITEMS.filter(x=>values[x.id]?.isFavorite).map(x=>x.id)}};
+  saveCourseState=async function(next,silent){try{for(const item of COURSE_ITEMS){const favorite=next.saved.includes(item.id);if(courseState.saved.includes(item.id)!==favorite)await SR.setResourceState({resourceId:item.id,isFavorite:favorite,domainTags:item.tags||[]})}srOriginalSaveCourse(next,silent);return true}catch(err){showToast(err.message||'课程状态未保存');return false}};
+  let srRepaintQueued=false;
+  SR.subscribe(()=>{if(srRepaintQueued)return;srRepaintQueued=true;queueMicrotask(()=>{
+    srRepaintQueued=false;if(!paperState)return;
+    if(watchState?.userContextVersion&&watchState.userContextVersion!==SR.userContextVersion()){pendingRemovalKey='';expandedWatchKey='';expandedUpdateId='';window.clearTimeout(pendingRemovalTimer)}
+    paperState=loadPaperState();reportState=loadReportState();courseState=loadCourseState();watchState=loadWatchState();authorState=loadAuthorState();
+    srRenderHot();srRenderInterests();renderCourses();renderNewsRecommendations();renderPapers();renderReports();renderKeywordFollows();renderTalentRecommendations();
+  })});
+
+  queueMicrotask(async()=>{const imported=PAPER_ITEMS.flatMap(p=>p.reviewedComments.map(c=>({commentId:c.id,paperId:p.id,authorUserId:'seed-reviewed',authorDisplayName:c.author,text:c.text,status:'APPROVED',createdAt:c.createdAt,updatedAt:c.createdAt,version:1}))).concat(Object.entries(paperState.comments||{}).flatMap(([paperId,rows])=>rows.map(c=>({commentId:c.id,paperId,authorUserId:SR.snapshot().userId,authorDisplayName:'当前用户',text:c.text,status:'PENDING',createdAt:c.createdAt,updatedAt:c.createdAt,version:1}))));SR.migrateComments(imported);srRenderHot();srRenderInterests();const s=SR.snapshot();if(s.userId==='demo-user'&&!s.follows.some(f=>f.kind==='AUTHOR'))try{await SR.setFollow({changes:Object.entries(authorState.authors).map(([targetId,v])=>({kind:'AUTHOR',targetId,...v})),version:SR.followsVersion(),userContextVersion:SR.userContextVersion(),clientMutationId:'author-initial-'+srId()})}catch(error){showToast(error.message||'作者关注未保存，请重试')}});
 
   watchState = loadWatchState();
   newsViewState = loadNewsViewState();
