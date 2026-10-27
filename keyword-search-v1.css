@@ -1,0 +1,11 @@
+.keyword-search-v1-active .keyword-v1-filter-options { max-height: 140px; overflow-y: auto; padding-right: 3px; }
+.keyword-search-v1-active .keyword-v1-filter-options .portal-search-filter-option { min-height: 26px; }
+.keyword-search-v1-active .keyword-v1-custom-dates { margin-top: 8px; }
+.keyword-search-v1-active .keyword-v1-custom-dates[hidden] { display: none; }
+.keyword-search-v1-active label.is-disabled { opacity: .55; }
+.keyword-search-v1-active .keyword-v1-filter-hint { margin: 8px 0 0; font-size: 12px; color: #8996a8; }
+.keyword-search-v1-active .keyword-v1-source-status { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; color: #718096; font-size: 12px; }
+.keyword-search-v1-active .keyword-v1-source-status[hidden] { display: none; }
+.keyword-search-v1-active .keyword-v1-source-status button { border: 0; background: transparent; padding: 0 2px; color: #1764eb; font: inherit; cursor: pointer; }
+.keyword-search-v1-active .keyword-v1-page-label { display: inline-flex; align-items: center; padding: 0 10px; color: #718096; font-size: 13px; }
+.keyword-search-v1-active .portal-search-page-button:disabled { opacity: .45; cursor: default; }

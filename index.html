@@ -3738,6 +3738,7 @@
     }
   </style>
   <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
+  <link rel="stylesheet" href="keyword-search-v1.css?v=20261028-1">
 </head>
 <body>
   <header class="site-header" id="siteHeader">
@@ -5182,7 +5183,9 @@
     </section>
   </main>
 
-  <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script><script>
+  <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
+  <script src="keyword-search-model.js?v=20261028-1"></script>
+  <script src="keyword-search-ui.js?v=20261028-1"></script><script>
     (() => {
       "use strict";
 
@@ -5549,6 +5552,7 @@
       let submittedSearchQuery = "";
       let searchSubmissionRevision = 0;
       let searchSubmissionTicket = 0;
+      let keywordSearchV1 = null;
       function getSubmittedSearchQuery() { return submittedSearchQuery; }
       const activeExpansionTerms = new Set();
       let keywordLogic = "AND";
@@ -7437,6 +7441,20 @@
 
       function getResultMetadata(item) {
         const metadata = [];
+        if (activeSearchMode === "关键词") {
+          if (item.type === "论文") {
+            if (item.author) metadata.push(["作者", item.author]);
+            metadata.push(["期刊／会议", item.venue || item.source || "暂无"]);
+            return metadata;
+          }
+          if (item.type === "人才") {
+            if (item.institution) metadata.push(["机构", item.institution]);
+            metadata.push(["研究方向", item.researchDirections?.join("、") || "暂无"]);
+            return metadata;
+          }
+          if (item.type === "报告") return [["来源", item.source || "暂无"], ["报告类型", item.reportType || "暂无"]];
+          if (item.type === "资讯") return [["来源", item.source || "暂无"]];
+        }
         if (item.type === "论文") {
           if (item.author) metadata.push(["作者", item.author]);
           metadata.push(["期刊／会议", item.venue || item.source]);
@@ -7707,6 +7725,8 @@
           group.hidden = activeSearchMode !== "关键词";
           group.querySelectorAll("input").forEach((input) => { input.disabled = activeSearchMode !== "关键词"; });
         });
+        keywordSearchV1?.setActive(activeSearchMode === "关键词");
+        if (keywordSearchV1 && activeSearchMode !== "关键词") updateSecondaryFilterVisibility();
         updateSearchModePanels();
       }
 
@@ -8514,6 +8534,7 @@
       }
 
       function updateSecondaryFilterVisibility() {
+        if (activeSearchMode === "关键词" && keywordSearchV1) return keywordSearchV1.render();
         const supportedType = ["人才", "论文", "专利", "会议", "课程", "活动"].includes(activeSearchType) ? activeSearchType : "";
         portalResourceFilterHint.hidden = Boolean(supportedType);
         portalSearchFilters.querySelectorAll("[data-filter-resource]").forEach((group) => {
@@ -8741,7 +8762,8 @@
         const itemIndex = SEARCH_ITEMS.indexOf(item);
         article.dataset.resultId = `result-${itemIndex}`;
         const query = getSubmittedSearchQuery();
-        const metadata = getResultMetadata(item);
+        const metadata = getResultMetadata(item).map(row => activeSearchMode === "关键词"
+          ? row.map(value => escapeHtml(String(value))) : row);
         const associationProfile = activeSearchMode === "关联" ? getAssociationProfile(item, query) : null;
         const currentFeedback = getAssociationFeedbackState(itemIndex, query);
         const isAdopted = adoptedAssociationItems.has(itemIndex);
@@ -8749,7 +8771,7 @@
         const feedbackPanelId = `portal-association-feedback-${itemIndex}`;
         const feedbackPanelOpen = associationFeedbackPanelIndex === itemIndex;
         const resultDetailUrl = item.type === "论文"
-          ? item.detailUrl || PAPER_DETAIL_URL
+          ? item.detailUrl || (activeSearchMode === "关键词" ? "" : PAPER_DETAIL_URL)
           : item.detailUrl || item.url || "";
         const resultDetailLabel = item.type === "论文" ? "查看论文详情" : "查看资源详情";
         const resultTitle = highlightResultText(item.title, query);
@@ -8794,7 +8816,7 @@
             <p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>
             ${associationReasonMarkup}
             <div class="portal-result-bottomline">
-              <div class="portal-search-card-tags">${item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag">${tag}</span>`).join("")}</div>
+              <div class="portal-search-card-tags">${item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag">${activeSearchMode === "关键词" ? escapeHtml(String(tag)) : tag}</span>`).join("")}</div>
               <div class="portal-search-card-actions">
                 ${associationActionsMarkup}
                 ${resultDetailUrl
@@ -8846,6 +8868,7 @@
       }
 
       function renderSearchResults() {
+        if (activeSearchMode === "关键词" && keywordSearchV1) return keywordSearchV1.render();
         const items = getFilteredSearchItems();
         const allTypeItems = getFilteredSearchItems({ ignoreType: true });
         const associationCandidates = activeSearchMode === "关联"
@@ -9212,6 +9235,10 @@
       }
 
       function performSearch(rawQuery, options = {}) {
+        if ((options.mode || activeSearchMode) === "关键词" && keywordSearchV1) {
+          if (options.mode) setSearchMode(options.mode);
+          return keywordSearchV1.submit(rawQuery, options);
+        }
         const query = String(rawQuery || "").trim();
         if (!query) {
           setPortalSearchFeedback("请输入要检索的研究主题、问题、成果或专家名称。", "error");
@@ -9301,6 +9328,99 @@
         });
       };
       window.PortalSearchRecommend?.registerResources(SEARCH_ITEMS.filter(item => item.type !== "项目"));
+
+      // Keep the V1 controller scoped to keyword results. Other search modes and
+      // the home/recommendation surfaces keep their existing handlers and data.
+      if (window.PortalKeywordModel && window.PortalKeywordUI) {
+        keywordSearchV1 = window.PortalKeywordUI.create({
+          records: window.PortalKeywordModel.createFixtures(SEARCH_ITEMS),
+          getMode: () => activeSearchMode,
+          getQuery: getSubmittedSearchQuery,
+          getType: () => activeSearchType,
+          getLogic: () => keywordLogic,
+          getUserContext: () => {
+            const service = window.PortalSearchRecommend;
+            const snapshot = service?.snapshot();
+            return { id: service?.userContextVersion() || "anonymous", userId: snapshot?.userId || null };
+          },
+          setCommitted(query, options = {}) {
+            submittedSearchQuery = query;
+            originalKeywordQuery = query;
+            searchSubmissionRevision += 1;
+            searchSubmissionTicket += 1;
+            if (!options.preserveDraft) portalResultSearchInput.value = query;
+            searchResultQuery.textContent = `“${query}”`;
+          },
+          setTypeState(type) {
+            activeSearchType = type;
+            portalSearchTypeTabs.querySelectorAll("[data-search-type]").forEach(tab => {
+              const active = tab.dataset.searchType === type;
+              tab.classList.toggle("is-active", active);
+              tab.setAttribute("aria-selected", String(active));
+              tab.tabIndex = active ? 0 : -1;
+            });
+          },
+          setLogicState(logic) {
+            keywordLogic = logic;
+            keywordTools.querySelectorAll("[data-keyword-logic]").forEach(button => {
+              const active = button.dataset.keywordLogic === logic;
+              button.classList.toggle("is-active", active);
+              button.setAttribute("aria-pressed", String(active));
+            });
+          },
+          renderCard(record, index, absoluteIndex = index) {
+            const raw = record.raw || record;
+            const personName = person => typeof person === "string" ? person : person?.name;
+            const display = {
+              ...raw, ...record,
+              title: record.type === "人才" ? (raw.title || record.name) : (record.title || record.name),
+              summary: record.abstract ?? record.summary ?? "",
+              tags: record.tags || record.domainTags || [],
+              author: record.authors?.map(personName).filter(Boolean).join(" · ") || raw.author || "",
+              venue: record.source || raw.venue || "",
+              meta: record.reportType || raw.meta || "",
+              detailUrl: record.detailUrl || "",
+              date: String(record.type === "报告" ? (record.uploadedAt || "") : (record.publishedAt || record.startAt || raw.date || "")).slice(0, 10)
+            };
+            const previousPage = activeSearchPage;
+            let card;
+            try {
+              activeSearchPage = 1;
+              card = createSearchResultCard(display, absoluteIndex);
+            } finally {
+              activeSearchPage = previousPage;
+            }
+            // Existing markup is reused; only keyword-specific mappings change.
+            if (!record.detailUrl && !ADDED_ENTITY_TYPES.has(record.type)) {
+              card.querySelectorAll("[data-result-detail-link]").forEach(link => {
+                if (link.closest("h3")) {
+                  const title = document.createElement("span");
+                  title.textContent = display.title;
+                  link.replaceWith(title);
+                } else link.remove();
+              });
+            }
+            const time = card.querySelector(".portal-result-kicker time");
+            if (time && !ADDED_ENTITY_TYPES.has(record.type)) {
+              const label = record.type === "报告" ? "上传时间" : record.type === "资讯" ? "发布时间" : record.type === "论文" ? "发表时间" : "";
+              if (record.type === "人才" || !display.date) time.remove();
+              else time.textContent = `${label} ${display.date}`.trim();
+            }
+            return card;
+          },
+          showSearch() { showSurface("search", { focusTarget: portalResultSearchInput }); },
+          feedback: setPortalSearchFeedback,
+          onSubmit(query, options = {}, records = []) {
+            if (options.trackSearch === false) return;
+            const service = window.PortalSearchRecommend;
+            if (!service?.snapshot().userId) return;
+            const queryId = `keyword-${Date.now().toString(36)}-${searchSubmissionRevision}`;
+            const domainTags = [...new Set(records.flatMap(record => record.domainTags || record.tags || []))];
+            service.recordBehavior({ eventId: queryId, queryId, eventType: "SEARCH", query, domainTags })
+              .catch(error => setPortalSearchFeedback(error.message || "词汇关注暂未保存，请重试。", "error"));
+          }
+        });
+      }
 
       setHeroSearchMode(activeHeroSearchMode, false);
       setHeroExperience(returnHeroExperience, false);
