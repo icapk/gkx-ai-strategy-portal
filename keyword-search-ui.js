@@ -115,7 +115,7 @@
       const signature = JSON.stringify([type, domains, sources, levels, dictionaries.reportTypes || []]);
       if (signature === filterSignature) return;
       filterSignature = signature;
-      let html = group("搜索范围", ["全部资源", "仅标题", "标题与摘要"].map(scope => `<label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="${esc(scope)}"><span>${esc(scope)}</span></label>`).join(""));
+      let html = type === "论文" ? group("搜索范围", ["全部资源", "仅标题", "标题与摘要"].map(scope => `<label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="${esc(scope)}"><span>${esc(scope)}</span></label>`).join("")) : "";
       let professional = "";
       if (type === "人才") {
         professional = field("personNameFilter", "search", null, "学者姓名") + field("institutionFilter", "search", null, "机构名称") + field("researchFieldFilter", null, domains);
@@ -251,13 +251,14 @@
       const source = state.sources?.[state.currentType];
       const sourceStates = Object.values(state.sources || {});
       const anySuccess = sourceStates.some(value => value.status === "success");
-      let title = "未找到相关资源", text = "可尝试更换关键词或搜索范围。", button = "清除筛选条件";
+      const paper = state.currentType === "论文";
+      let title = "未找到相关资源", text = paper ? "可尝试更换关键词或搜索范围。" : "可尝试更换关键词或清除筛选条件。", button = "清除筛选条件";
       let showButton = true;
       emptyAction = "clear";
       if (!state.query) { title = "请输入关键词"; text = "输入关键词后开始搜索。"; showButton = false; }
       else if (state.authError) { title = state.authError.message; text = "重新登录后再继续检索。"; showButton = false; }
       else if (state.currentType === "专利") { title = "专利待接入"; text = "专利搜索接口接入后可检索并筛选。"; showButton = false; }
-      else if (source?.status === "unsupported" || (all && !anySuccess && state.unsupportedTypes?.length && !state.loading)) { title = source?.error === "检索能力暂不可用" ? "检索能力暂不可用" : "不支持该检索条件"; text = "当前资源暂不支持该检索条件，请切换搜索范围。"; button = "切换至全部资源"; emptyAction = "scope"; showButton = title !== "检索能力暂不可用"; }
+      else if (source?.status === "unsupported" || (all && !anySuccess && state.unsupportedTypes?.length && !state.loading)) { title = source?.error === "检索能力暂不可用" ? "检索能力暂不可用" : "不支持该检索条件"; text = paper ? "当前资源暂不支持该检索条件，请切换搜索范围。" : "当前资源暂不支持该检索条件，请切换资源类型。"; button = "切换至全部资源"; emptyAction = "scope"; showButton = paper && title !== "检索能力暂不可用"; }
       else if (state.loading && !items.length) { title = "正在检索……"; text = "各类资源正在加载。"; showButton = false; }
       else if (state.failedTypes?.length && (!items.length || view.status === "error")) { title = anySuccess ? "部分资源检索失败" : "搜索失败，请重试"; text = "失败来源未作为零结果统计。"; button = "重试"; emptyAction = "retry"; }
       else if (filterDescriptors(state).length && view.filterMode !== "server") {

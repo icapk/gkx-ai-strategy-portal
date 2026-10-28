@@ -156,14 +156,16 @@
     const capabilities = options.capabilities || {};
     const listeners = new Set(), cache = new Map(), endPages = new Map();
     const contextKey = () => { const value = getUserContext(); return typeof value === "string" ? value : JSON.stringify(value); };
-    let userContext = contextKey(), version = 0, query = "", scope = "全部资源", logic = "AND", currentType = "全部", validation = null, authError = null;
-    const makeView = type => ({ type, page: 1, filters: {}, sources: {}, loaded: false, loading: false, requestToken: 0, pendingPage: null, retainedResults: false, error: null, validation: null });
+    let userContext = contextKey(), version = 0, query = "", logic = "AND", currentType = "全部", validation = null, authError = null;
+    const makeView = type => ({ type, scope: "全部资源", scopeVersion: 0, page: 1, filters: {}, sources: {}, loaded: false, loading: false, requestToken: 0, pendingPage: null, retainedResults: false, error: null, validation: null });
     let views = Object.fromEntries(["全部", ...TYPES].map(type => [type, makeView(type)]));
+    const viewScope = view => view.type === "论文" ? view.scope : "全部资源";
+    const scopeNamespace = view => view.type === "论文" ? `paper:${view.scopeVersion}` : "shared";
     const cap = type => ({ exact: true, scopes: type === "人才" ? ["全部资源"] : ["全部资源", "仅标题", "标题与摘要"], serverFilters: false, ...capabilities[type] });
-    const eligible = type => type !== "专利" && cap(type).exact && cap(type).scopes.includes(scope);
-    const localMode = view => view.type === "全部" ? !CONNECTED.every(type => !eligible(type) || cap(type).serverFilters) : !cap(view.type).serverFilters;
-    const sourceKey = (type, page, filters) => JSON.stringify([userContext, query, scope, logic, version, type, page, filters]);
-    const endKey = (type, filters) => JSON.stringify([userContext, query, scope, logic, version, type, filters]);
+    const eligible = (type, view) => type !== "专利" && cap(type).exact && cap(type).scopes.includes(viewScope(view));
+    const localMode = view => view.type === "全部" ? !CONNECTED.every(type => !eligible(type, view) || cap(type).serverFilters) : !cap(view.type).serverFilters;
+    const sourceKey = (type, page, filters, requestScope, view) => JSON.stringify([userContext, query, requestScope, logic, version, type, page, filters, scopeNamespace(view)]);
+    const endKey = (type, filters, requestScope, view) => JSON.stringify([userContext, query, requestScope, logic, version, type, filters, scopeNamespace(view)]);
     const dictionaries = { sources: {}, domains: {}, reportTypes: [], levels: {} };
     const unique = values => [...new Set(values.filter(value => value != null && value !== ""))];
     TYPES.forEach(type => { const items = records.filter(record => record.type === type); dictionaries.sources[type] = unique(items.map(item => item.source)); dictionaries.domains[type] = unique(items.flatMap(item => list(item.domainTags || item.tags || item.researchFields))); dictionaries.levels[type] = unique(items.map(item => item.level)); });
@@ -201,24 +203,24 @@
       const hasMore = typeof data.hasMore === "boolean" ? data.hasMore : total == null ? null : page * PAGE_SIZE < total;
       return { status: "success", page, rawItems: valid, total, hasMore, paginationUnknown: hasMore == null, error: null, invalidCount, requestId: response.requestId || null };
     }
-    function idleSource(type, page) { return { status: type === "专利" ? "unconnected" : !eligible(type) ? "unsupported" : "idle", page, rawItems: [], displayItems: [], total: null, hasMore: type === "专利" || !eligible(type) ? false : null, paginationUnknown: false, error: type === "专利" ? "待接入" : !eligible(type) ? cap(type).exact ? "不支持该检索条件" : "检索能力暂不可用" : null }; }
+    function idleSource(type, page, view) { return { status: type === "专利" ? "unconnected" : !eligible(type, view) ? "unsupported" : "idle", page, rawItems: [], displayItems: [], total: null, hasMore: type === "专利" || !eligible(type, view) ? false : null, paginationUnknown: false, error: type === "专利" ? "待接入" : !eligible(type, view) ? cap(type).exact ? "不支持该检索条件" : "检索能力暂不可用" : null }; }
     function materializeSource(source, view) {
       const result = { ...source, rawItems: source.rawItems || [] };
       result.displayItems = result.status === "success" ? localMode(view) ? result.rawItems.filter(record => filterRecord(record, view.filters, now)) : result.rawItems : [];
       return result;
     }
     function totalForView(view) {
-      const types = (view.type === "全部" ? TYPES : [view.type]).filter(eligible);
+      const types = (view.type === "全部" ? TYPES : [view.type]).filter(type => eligible(type, view));
       const sources = types.map(type => view.sources[type]);
       return sources.length && sources.every(source => source && source.status === "success" && source.total != null) ? sources.reduce((sum, source) => sum + source.total, 0) : null;
     }
     function snapshot() {
-      const view = views[currentType], typeList = currentType === "全部" ? TYPES : [currentType];
-      const stateSources = Object.fromEntries(typeList.map(type => [type, materializeSource((view.pending && !view.pending.committed ? view.pending.sources[type] : view.failureSources ? view.failureSources[type] : view.sources[type]) || idleSource(type, view.page), view)]));
+      const view = views[currentType], scope = viewScope(view), typeList = currentType === "全部" ? TYPES : [currentType];
+      const stateSources = Object.fromEntries(typeList.map(type => [type, materializeSource((view.pending && !view.pending.committed ? view.pending.sources[type] : view.failureSources ? view.failureSources[type] : view.sources[type]) || idleSource(type, view.page, view), view)]));
       const resultSources = view.retainedResults || view.pending && !view.pending.committed && view.loaded ? view.sources : stateSources;
-      const renderedSources = Object.fromEntries(typeList.map(type => [type, materializeSource(resultSources[type] || idleSource(type, view.page), view)]));
+      const renderedSources = Object.fromEntries(typeList.map(type => [type, materializeSource(resultSources[type] || idleSource(type, view.page, view), view)]));
       const displayItems = typeList.flatMap(type => renderedSources[type].displayItems), rawItems = typeList.flatMap(type => renderedSources[type].rawItems);
-      const activeSources = typeList.filter(type => eligible(type)).map(type => renderedSources[type]);
+      const activeSources = typeList.filter(type => eligible(type, view)).map(type => renderedSources[type]);
       const total = activeSources.length && activeSources.every(source => source.status === "success" && source.total != null) ? activeSources.reduce((sum, source) => sum + source.total, 0) : null;
       const failedTypes = typeList.filter(type => stateSources[type].status === "error");
       const unsupportedTypes = typeList.filter(type => stateSources[type].status === "unsupported");
@@ -227,11 +229,11 @@
       TYPES.forEach(type => { const source = currentType === "全部" ? stateSources[type] : type === currentType ? stateSources[type] : views["全部"].sources[type]; counts[type] = source && source.status === "success" ? source.total : null; });
       const allTotal = totalForView(views["全部"]);
       counts["全部"] = allTotal;
-      const publicView = { type: view.type, page: view.page, pendingPage: view.pendingPage, filters: copy(view.filters), filterMode: localMode(view) ? "local" : "server", rawItems, displayItems, total, shownCount: displayItems.length, hasMore, paginationUnknown: activeSources.some(source => source.paginationUnknown), status: authError ? "error" : view.loading ? "loading" : view.error && !displayItems.length ? "error" : view.loaded ? "success" : "idle", validation: view.validation, error: authError ? authError.message : view.error, retainedResults: view.retainedResults };
-      return { query, scope, logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { page: value.page, filters: copy(value.filters), loaded: value.loaded, total: totalForView(value), filterMode: localMode(value) ? "local" : "server" }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: localMode(view) ? `仅筛选当前已返回数据，其他页可能仍有符合项${failedTypes.length ? "；失败来源未参与筛选" : ""}` : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
+      const publicView = { type: view.type, scope, page: view.page, pendingPage: view.pendingPage, filters: copy(view.filters), filterMode: localMode(view) ? "local" : "server", rawItems, displayItems, total, shownCount: displayItems.length, hasMore, paginationUnknown: activeSources.some(source => source.paginationUnknown), status: authError ? "error" : view.loading ? "loading" : view.error && !displayItems.length ? "error" : view.loaded ? "success" : "idle", validation: view.validation, error: authError ? authError.message : view.error, retainedResults: view.retainedResults };
+      return { query, scope, logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: totalForView(value), filterMode: localMode(value) ? "local" : "server" }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: localMode(view) ? `仅筛选当前已返回数据，其他页可能仍有符合项${failedTypes.length ? "；失败来源未参与筛选" : ""}` : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
     }
     function emit() { const state = snapshot(); listeners.forEach(listener => listener(state)); }
-    function resetContexts(clearFilters) { version++; cache.clear(); endPages.clear(); views = Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { ...makeView(type), filters: clearFilters ? {} : copy(value.filters) }])); }
+    function resetContexts(clearFilters) { version++; cache.clear(); endPages.clear(); views = Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { ...makeView(type), scope: viewScope(value), scopeVersion: value.scopeVersion, filters: clearFilters ? {} : copy(value.filters) }])); }
     function checkContext() { const next = contextKey(); if (next !== userContext) { userContext = next; authError = null; resetContexts(false); return true; } return false; }
     function loggedIn() {
       if (options.isAuthenticated) return Boolean(options.isAuthenticated());
@@ -243,7 +245,7 @@
       resetContexts(false);
       authError = { code: error.code || error.status || 401, message: "登录已失效，请重新登录" };
       const view = views[currentType], sourceTypes = currentType === "全部" ? TYPES : [currentType];
-      view.sources = Object.fromEntries(sourceTypes.map(type => [type, eligible(type) ? { ...idleSource(type, 1), status: "error", code: authError.code, error: authError.message } : idleSource(type, 1)]));
+      view.sources = Object.fromEntries(sourceTypes.map(type => [type, eligible(type, view) ? { ...idleSource(type, 1, view), status: "error", code: authError.code, error: authError.message } : idleSource(type, 1, view)]));
       view.error = authError.message;
       emit();
     }
@@ -251,44 +253,44 @@
       if (checkContext()) { view = views[view.type]; targetPage = 1; }
       if (authError) { emit(); return snapshot(); }
       if (!query) { emit(); return snapshot(); }
-      const ticket = ++view.requestToken, requestVersion = version, requestUser = userContext, typeList = view.type === "全部" ? TYPES : [view.type];
+      const ticket = ++view.requestToken, requestVersion = version, requestScope = viewScope(view), requestUser = userContext, typeList = view.type === "全部" ? TYPES : [view.type];
       const prior = { page: view.page, sources: view.sources, loaded: view.loaded };
       const samePageRetry = targetPage === view.page && view.loaded;
       const preservedSources = view.failureSources || view.sources;
-      const sources = Object.fromEntries(typeList.map(type => [type, onlyType && type !== onlyType ? preservedSources[type] || idleSource(type, targetPage) : idleSource(type, targetPage)]));
+      const sources = Object.fromEntries(typeList.map(type => [type, onlyType && type !== onlyType ? preservedSources[type] || idleSource(type, targetPage, view) : idleSource(type, targetPage, view)]));
       const pending = { page: targetPage, sources, committed: samePageRetry };
       view.pending = pending; view.pendingPage = targetPage; view.loading = true; view.error = null; view.retainedResults = false; view.failureSources = null;
       if (samePageRetry) view.sources = sources;
       const sourceFilters = localMode(view) ? {} : copy(view.filters);
-      const requestedTypes = typeList.filter(type => (!onlyType || type === onlyType) && eligible(type));
+      const requestedTypes = typeList.filter(type => (!onlyType || type === onlyType) && eligible(type, view));
       requestedTypes.forEach(type => {
-        const end = endPages.get(endKey(type, sourceFilters));
-        sources[type] = end != null && targetPage > end.page ? { ...idleSource(type, targetPage), status: "success", total: end.total, hasMore: false, paginationUnknown: false } : { ...idleSource(type, targetPage), status: "loading" };
+        const end = endPages.get(endKey(type, sourceFilters, requestScope, view));
+        sources[type] = end != null && targetPage > end.page ? { ...idleSource(type, targetPage, view), status: "success", total: end.total, hasMore: false, paginationUnknown: false } : { ...idleSource(type, targetPage, view), status: "loading" };
       });
       const attemptedTypes = requestedTypes.filter(type => sources[type].status === "loading");
       emit();
-      const valid = () => requestVersion === version && requestUser === contextKey() && view.requestToken === ticket;
+      const valid = () => requestVersion === version && requestUser === contextKey() && views[view.type] === view && viewScope(view) === requestScope && view.requestToken === ticket;
       await Promise.all(requestedTypes.map(async type => {
         if (sources[type].status !== "loading") return;
-        const key = sourceKey(type, targetPage, sourceFilters);
+        const key = sourceKey(type, targetPage, sourceFilters, requestScope, view);
         try {
           let result = cache.get(key);
           if (!result) {
-            const response = await service({ type, query, scope, logic, page: targetPage, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters: sourceFilters, userContext, queryVersion: requestVersion });
+            const response = await service({ type, query, scope: requestScope, logic, page: targetPage, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters: sourceFilters, userContext, queryVersion: requestVersion });
             result = normalizeResponse(response, type, targetPage);
             if (!valid()) return;
             cache.set(key, result);
           }
           if (!valid()) return;
           sources[type] = { ...result };
-          if (result.hasMore === false) endPages.set(endKey(type, sourceFilters), { page: targetPage, total: result.total });
+          if (result.hasMore === false) endPages.set(endKey(type, sourceFilters, requestScope, view), { page: targetPage, total: result.total });
           if (!pending.committed) { view.page = targetPage; view.sources = sources; view.loaded = true; pending.committed = true; }
         } catch (error) {
           if (!valid()) return;
           const code = error.code || error.status || null;
           if ((Number(code) === 401 || code === "AUTH_REQUIRED") && loggedIn()) { expireAuthentication(error); return; }
           const message = Number(code) === 401 || code === "AUTH_REQUIRED" ? "请先登录后搜索" : Number(code) === 403 ? "无权访问该资源" : error.message || "搜索失败，请重试";
-          sources[type] = { ...idleSource(type, targetPage), status: "error", error: message, code, requestId: error.requestId || null };
+          sources[type] = { ...idleSource(type, targetPage, view), status: "error", error: message, code, requestId: error.requestId || null };
         }
         if (valid()) emit();
       }));
@@ -306,8 +308,8 @@
       emit(); return snapshot();
     }
     const api = {
-      submit(input, params) { const parsed = parse(input); validation = parsed.error; if (validation) { emit(); return Promise.resolve(snapshot()); } checkContext(); params = params || {}; const changed = parsed.query !== query; query = parsed.query; if (params.scope) scope = params.scope; if (params.logic) logic = params.logic; if (params.type && ["全部", ...TYPES].includes(params.type)) currentType = params.type; resetContexts(changed); return load(views[currentType], 1); },
-      setScope(value) { if (!["全部资源", "仅标题", "标题与摘要"].includes(value)) return Promise.resolve(snapshot()); if (scope === value) return Promise.resolve(snapshot()); scope = value; validation = null; resetContexts(false); return load(views[currentType], 1); },
+      submit(input, params) { const parsed = parse(input); validation = parsed.error; if (validation) { emit(); return Promise.resolve(snapshot()); } checkContext(); params = params || {}; const visiblePaperScope = currentType === "论文" && (!params.type || params.type === "论文"); const changed = parsed.query !== query; query = parsed.query; if (visiblePaperScope && ["全部资源", "仅标题", "标题与摘要"].includes(params.scope)) views["论文"].scope = params.scope; if (params.logic) logic = params.logic; if (params.type && ["全部", ...TYPES].includes(params.type)) currentType = params.type; resetContexts(changed); return load(views[currentType], 1); },
+      setScope(value) { if (currentType !== "论文" || !["全部资源", "仅标题", "标题与摘要"].includes(value)) return Promise.resolve(snapshot()); checkContext(); const prior = views["论文"]; if (prior.scope === value) return Promise.resolve(snapshot()); prior.requestToken++; const namespace = scopeNamespace(prior); for (const key of cache.keys()) if (JSON.parse(key).at(-1) === namespace) cache.delete(key); for (const key of endPages.keys()) if (JSON.parse(key).at(-1) === namespace) endPages.delete(key); views["论文"] = { ...makeView("论文"), scope: value, scopeVersion: prior.scopeVersion + 1, filters: copy(prior.filters) }; validation = null; return load(views["论文"], 1); },
       setLogic(value) { if (!["AND", "OR"].includes(value) || logic === value) return Promise.resolve(snapshot()); logic = value; validation = null; resetContexts(false); return load(views[currentType], 1); },
       selectType(type) { if (!["全部", ...TYPES].includes(type)) return Promise.resolve(snapshot()); checkContext(); currentType = type; validation = null; const view = views[type]; if (view.loaded || view.loading) { emit(); return Promise.resolve(snapshot()); } return load(view, view.page); },
       setFilter(name, value) { const view = views[currentType], filters = { ...(view.validation && view.validation.values || view.filters), ...(typeof name === "object" ? name : { [name]: value }) }; const error = nonempty(filters.discipline) ? { field: "discipline", message: "当前资源暂不支持该检索条件" } : filterError(filters); view.validation = error ? { ...error, values: copy(filters) } : null; validation = null; if (error) { emit(); return Promise.resolve(snapshot()); } view.filters = filters; if (localMode(view)) { emit(); return Promise.resolve(snapshot()); } view.loaded = false; return load(view, 1); },
