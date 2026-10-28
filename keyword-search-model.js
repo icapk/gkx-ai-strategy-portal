@@ -1,8 +1,9 @@
 (function (root) {
   "use strict";
 
-  const TYPES = ["论文", "专利", "报告", "人才", "资讯", "会议", "课程", "活动"];
-  const CONNECTED = TYPES.filter(type => type !== "专利");
+  const TYPES = ["论文", "专利", "报告", "人才", "资讯", "会议", "课程", "活动", "练仿真"];
+  const isUnconnected = type => type === "专利" || type === "练仿真";
+  const CONNECTED = TYPES.filter(type => !isUnconnected(type));
   const PAGE_SIZE = 10;
   const segmenter = typeof Intl.Segmenter === "function" ? new Intl.Segmenter("zh-CN", { granularity: "word" }) : null;
   const normalize = value => String(value == null ? "" : value)
@@ -162,7 +163,7 @@
     const viewScope = view => view.type === "论文" ? view.scope : "全部资源";
     const scopeNamespace = view => view.type === "论文" ? `paper:${view.scopeVersion}` : "shared";
     const cap = type => ({ exact: true, scopes: type === "人才" ? ["全部资源"] : ["全部资源", "仅标题", "标题与摘要"], serverFilters: false, ...capabilities[type] });
-    const eligible = (type, view) => type !== "专利" && cap(type).exact && cap(type).scopes.includes(viewScope(view));
+    const eligible = (type, view) => !isUnconnected(type) && cap(type).exact && cap(type).scopes.includes(viewScope(view));
     const localMode = view => view.type === "全部" ? !CONNECTED.every(type => !eligible(type, view) || cap(type).serverFilters) : !cap(view.type).serverFilters;
     const sourceKey = (type, page, filters, requestScope, view) => JSON.stringify([userContext, query, requestScope, logic, version, type, page, filters, scopeNamespace(view)]);
     const endKey = (type, filters, requestScope, view) => JSON.stringify([userContext, query, requestScope, logic, version, type, filters, scopeNamespace(view)]);
@@ -203,7 +204,7 @@
       const hasMore = typeof data.hasMore === "boolean" ? data.hasMore : total == null ? null : page * PAGE_SIZE < total;
       return { status: "success", page, rawItems: valid, total, hasMore, paginationUnknown: hasMore == null, error: null, invalidCount, requestId: response.requestId || null };
     }
-    function idleSource(type, page, view) { return { status: type === "专利" ? "unconnected" : !eligible(type, view) ? "unsupported" : "idle", page, rawItems: [], displayItems: [], total: null, hasMore: type === "专利" || !eligible(type, view) ? false : null, paginationUnknown: false, error: type === "专利" ? "待接入" : !eligible(type, view) ? cap(type).exact ? "不支持该检索条件" : "检索能力暂不可用" : null }; }
+    function idleSource(type, page, view) { return { status: isUnconnected(type) ? "unconnected" : !eligible(type, view) ? "unsupported" : "idle", page, rawItems: [], displayItems: [], total: null, hasMore: isUnconnected(type) || !eligible(type, view) ? false : null, paginationUnknown: false, error: isUnconnected(type) ? "待接入" : !eligible(type, view) ? cap(type).exact ? "不支持该检索条件" : "检索能力暂不可用" : null }; }
     function materializeSource(source, view) {
       const result = { ...source, rawItems: source.rawItems || [] };
       result.displayItems = result.status === "success" ? localMode(view) ? result.rawItems.filter(record => filterRecord(record, view.filters, now)) : result.rawItems : [];
@@ -323,5 +324,5 @@
     return api;
   }
 
-  root.PortalKeywordModel = Object.freeze({ TYPES: TYPES.slice(), PAGE_SIZE, normalize, parse, validate, match, createFixtures, create, filterRecord, fields });
+  root.PortalKeywordModel = Object.freeze({ TYPES: TYPES.slice(), PAGE_SIZE, isUnconnected, normalize, parse, validate, match, createFixtures, create, filterRecord, fields });
 })(typeof window !== "undefined" ? window : globalThis);

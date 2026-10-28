@@ -3,7 +3,8 @@
 
   // This controller owns the keyword result surface only. Original nodes are
   // restored, rather than re-created, when another search mode is selected.
-  const TYPES = ["论文", "专利", "报告", "人才", "资讯", "会议", "课程", "活动"];
+  const TYPES = ["论文", "专利", "报告", "人才", "资讯", "会议", "课程", "活动", "练仿真"];
+  const isUnconnected = type => type === "专利" || type === "练仿真";
   const LABELS = {
     personNameFilter: "学者姓名", institutionFilter: "机构名称", researchFieldFilter: "研究领域",
     authorFilter: "作者", venueFilter: "会议／期刊", ipcFilter: "IPC 分类",
@@ -132,7 +133,7 @@
       } else if (type === "活动") {
         professional = field("activityLocation", "search", null, "活动地点") + field("activityType", null, ACTIVITY) + field("activityRegistration", null, REGISTRATION) + field("activityStartFrom", "date") + field("activityStartTo", "date");
       }
-      const prompt = type === "全部" ? "选择具体资源类型后，展示对应的专业筛选项。" : type === "专利" ? "专利搜索待接入。" : "";
+      const prompt = type === "全部" ? "选择具体资源类型后，展示对应的专业筛选项。" : isUnconnected(type) ? `${type}搜索待接入。` : "";
       if (professional || prompt) html += group("二次筛选", `${prompt ? `<p class="portal-resource-filter-hint">${esc(prompt)}</p>` : ""}<div class="portal-resource-filter">${professional}</div>`, "portal-search-filter-fields");
       if (["论文", "报告", "资讯", "课程"].includes(type)) {
         const title = type === "报告" ? "上传时间" : type === "资讯" || type === "课程" ? "发布时间" : "发表时间";
@@ -162,7 +163,7 @@
       const type = state.currentType;
       const source = state.sources?.[type];
       const loading = type === "全部" ? Boolean(state.loading) : source?.status === "loading";
-      const unconnected = type === "专利";
+      const unconnected = isUnconnected(type);
       const unavailable = source?.status === "unsupported";
       const validation = state.validation || view.validation;
       // Invalid input is a draft. Keep the entire draft visible while the list,
@@ -211,6 +212,11 @@
     function sourceMessage(state) {
       const types = state.currentType === "全部" ? TYPES : [state.currentType];
       const entries = [];
+      if (isUnconnected(state.currentType)) {
+        sourceStatus.replaceChildren();
+        sourceStatus.hidden = true;
+        return;
+      }
       if (state.authError) {
         sourceStatus.textContent = state.authError.message;
         sourceStatus.hidden = false;
@@ -237,7 +243,7 @@
         const counter = tab.querySelector("[data-search-type-count]");
         const source = state.sources?.[type];
         const value = type === "全部" ? state.allTotal : state.counts?.[type];
-        if (counter) counter.textContent = type === "专利" ? "待接入" : source?.status === "unsupported" ? "不支持" : Number.isFinite(value) ? String(value) : "—";
+        if (counter) counter.textContent = isUnconnected(type) ? "待接入" : source?.status === "unsupported" ? "不支持" : Number.isFinite(value) ? String(value) : "—";
       });
       bridge.setLogicState?.(state.logic);
       doc.querySelectorAll(".keyword-v1-tools [data-keyword-logic]").forEach(button => {
@@ -255,9 +261,9 @@
       let title = "未找到相关资源", text = paper ? "可尝试更换关键词或搜索范围。" : "可尝试更换关键词或清除筛选条件。", button = "清除筛选条件";
       let showButton = true;
       emptyAction = "clear";
-      if (!state.query) { title = "请输入关键词"; text = "输入关键词后开始搜索。"; showButton = false; }
+      if (isUnconnected(state.currentType)) { title = `${state.currentType}待接入`; text = state.currentType === "练仿真" ? "练仿真搜索接口接入后可检索。" : "专利搜索接口接入后可检索并筛选。"; showButton = false; }
+      else if (!state.query) { title = "请输入关键词"; text = "输入关键词后开始搜索。"; showButton = false; }
       else if (state.authError) { title = state.authError.message; text = "重新登录后再继续检索。"; showButton = false; }
-      else if (state.currentType === "专利") { title = "专利待接入"; text = "专利搜索接口接入后可检索并筛选。"; showButton = false; }
       else if (source?.status === "unsupported" || (all && !anySuccess && state.unsupportedTypes?.length && !state.loading)) { title = source?.error === "检索能力暂不可用" ? "检索能力暂不可用" : "不支持该检索条件"; text = paper ? "当前资源暂不支持该检索条件，请切换搜索范围。" : "当前资源暂不支持该检索条件，请切换资源类型。"; button = "切换至全部资源"; emptyAction = "scope"; showButton = paper && title !== "检索能力暂不可用"; }
       else if (state.loading && !items.length) { title = "正在检索……"; text = "各类资源正在加载。"; showButton = false; }
       else if (state.failedTypes?.length && (!items.length || view.status === "error")) { title = anySuccess ? "部分资源检索失败" : "搜索失败，请重试"; text = "失败来源未作为零结果统计。"; button = "重试"; emptyAction = "retry"; }
@@ -277,9 +283,9 @@
     function renderPaging(state) {
       const view = state.view || {}, all = state.currentType === "全部", page = Number(view.page) || 1;
       const hasMore = view.hasMore ?? state.hasMore;
-      const disabled = state.loading || !state.query || state.currentType === "专利" || view.status === "unsupported";
+      const disabled = state.loading || !state.query || isUnconnected(state.currentType) || view.status === "unsupported";
       paging.replaceChildren();
-      paging.hidden = !state.query || state.currentType === "专利" || (page === 1 && hasMore === false);
+      paging.hidden = !state.query || isUnconnected(state.currentType) || (page === 1 && hasMore === false);
       if (paging.hidden) return;
       const make = (label, direction, off) => {
         const button = doc.createElement("button"); button.type = "button";
@@ -295,18 +301,19 @@
     function render() {
       if (!isKeyword()) { if (active) setActive(false); return false; }
       if (!active) { setActive(true); return true; }
-      const state = model.snapshot(), view = state.view || {}, items = state.displayItems || view.displayItems || [];
+      const state = model.snapshot(), view = state.view || {}, unconnected = isUnconnected(state.currentType);
+      const items = unconnected ? [] : state.displayItems || view.displayItems || [];
       buildFilters(state); syncFilters(state); renderTabs(state); renderChips(state); sourceMessage(state);
       const total = view.total;
-      if (!state.query) heading.textContent = "搜索结果";
+      if (unconnected) heading.textContent = "待接入";
+      else if (!state.query) heading.textContent = "搜索结果";
       else if (state.authError) heading.textContent = state.authError.message;
-      else if (state.currentType === "专利") heading.textContent = "待接入";
       else if (state.sources?.[state.currentType]?.status === "unsupported") heading.textContent = "不支持该检索条件";
       else heading.textContent = Number.isFinite(total) ? `${total} 条结果` : state.loading ? "检索中" : "结果总数未知";
       const unit = state.currentType === "全部" ? "批" : "页", page = Number(view.page) || 1;
-      range.textContent = !state.query ? "输入关键词后查看资源" : state.currentType === "专利" ? "专利搜索接口待接入" : `第 ${page} ${unit} · 本${unit}显示 ${items.length} 条${view.paginationUnknown ? " · 分页状态待确认" : ""}${state.retainedResults || view.retainedResults ? " · 仍显示原查询结果" : ""}`;
+      range.textContent = unconnected ? `${state.currentType}搜索接口待接入` : !state.query ? "输入关键词后查看资源" : `第 ${page} ${unit} · 本${unit}显示 ${items.length} 条${view.paginationUnknown ? " · 分页状态待确认" : ""}${state.retainedResults || view.retainedResults ? " · 仍显示原查询结果" : ""}`;
       if (state.currentType === "全部" && state.query) range.textContent += " · 已接通资源范围";
-      hint.hidden = !state.query || state.currentType === "专利" || view.status === "unsupported";
+      hint.hidden = !state.query || unconnected || view.status === "unsupported";
       hint.textContent = view.filterMode === "server" ? "按当前条件筛选全部结果" : `本${unit}筛选 · 仅筛选当前已返回数据，其他页可能仍有符合项`;
       const fragment = doc.createDocumentFragment();
       items.forEach((record, index) => {

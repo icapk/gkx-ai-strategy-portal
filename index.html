@@ -3906,20 +3906,20 @@
               </div>
               <label class="sr-only" for="mgHeroSearchInput">搜索科研资源与智能服务</label>
               <input id="mgHeroSearchInput" type="search" autocomplete="off" data-query-max-characters="200" placeholder="输入关键词，检索论文、专利、报告、专家等资源全文">
-              <div class="mg-search-intents" id="mgFulltextShortcuts" role="tablist" aria-label="全文搜索快捷入口">
-                <button class="is-active" id="mgRecommendationTabSimulation" type="button" role="tab" aria-selected="true" aria-controls="mgRecommendationPreview" tabindex="0" data-mg-query="AI 仿真实验" data-recommendation-group="simulation">
+              <div class="mg-search-intents" id="mgFulltextShortcuts" role="group" aria-label="搜索快捷入口">
+                <button id="mgRecommendationTabSimulation" type="button" data-special-search-type="练仿真" data-recommendation-group="simulation">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h10v4l-3 4v4.5a2 2 0 0 1-4 0V13L7 9Z"></path><path d="M9 3h6M8.5 15h7"></path></svg>
                   练仿真
                 </button>
-                <button id="mgRecommendationTabPaper" type="button" role="tab" aria-selected="false" aria-controls="mgRecommendationPreview" tabindex="-1" data-mg-query="论文" data-recommendation-group="paper">
+                <button id="mgRecommendationTabPaper" type="button" data-special-search-type="论文" data-recommendation-group="paper">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h9l3 3V20H6Z"></path><path d="M15 3.5V7h3M9 11h6M9 15h6"></path></svg>
                   搜论文
                 </button>
-                <button id="mgRecommendationTabExpert" type="button" role="tab" aria-selected="false" aria-controls="mgRecommendationPreview" tabindex="-1" data-mg-query="科研专家" data-recommendation-group="expert">
+                <button id="mgRecommendationTabExpert" type="button" aria-pressed="false" data-mg-query="科研专家" data-recommendation-group="expert">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8.5 9-5 9 5-9 5Z"></path><path d="M7 11v5.5c3.3 2 6.7 2 10 0V11M20 10v5"></path></svg>
                   找专家
                 </button>
-                <button id="mgRecommendationTabStrategy" type="button" role="tab" aria-selected="false" aria-controls="mgRecommendationPreview" tabindex="-1" data-mg-query="战略咨询" data-recommendation-group="strategy">
+                <button id="mgRecommendationTabStrategy" type="button" aria-pressed="false" data-mg-query="战略咨询" data-recommendation-group="strategy">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4Z"></path><path d="m8 15 2.8-3 2.4 2 3.8-5M8 8h3"></path></svg>
                   看战略
                 </button>
@@ -5007,6 +5007,7 @@
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="会议"><span>会议</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="课程"><span>课程</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="活动"><span>活动</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="练仿真" data-keyword-only hidden><span>练仿真</span><small data-search-type-count>待接入</small></button>
               </div>
 
               <div class="portal-active-filters" id="portalActiveFilters" aria-label="当前筛选条件" hidden></div>
@@ -5184,8 +5185,8 @@
   </main>
 
   <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
-  <script src="keyword-search-model.js?v=20261028-3"></script>
-  <script src="keyword-search-ui.js?v=20261028-3"></script><script>
+  <script src="keyword-search-model.js?v=20261028-4"></script>
+  <script src="keyword-search-ui.js?v=20261028-4"></script><script>
     (() => {
       "use strict";
 
@@ -7585,7 +7586,7 @@
         return control;
       }
 
-      function renderHeroRecommendations(groupKey) {
+      function renderHeroRecommendations(groupKey, activateShortcut = true) {
         const group = HERO_RECOMMENDATION_GROUPS[groupKey] || HERO_RECOMMENDATION_GROUPS.simulation;
         activeHeroRecommendation = groupKey in HERO_RECOMMENDATION_GROUPS ? groupKey : "simulation";
         try {
@@ -7598,10 +7599,9 @@
         mgRecommendationPreview.dataset.recommendationGroup = activeHeroRecommendation;
         mgRecommendationPreview.replaceChildren(...group.items.map((item, index) => createHeroRecommendationCard(item, activeHeroRecommendation, index)));
         mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]").forEach((button) => {
-          const active = button.dataset.recommendationGroup === activeHeroRecommendation;
+          const active = activateShortcut && !button.dataset.specialSearchType && button.dataset.recommendationGroup === activeHeroRecommendation;
           button.classList.toggle("is-active", active);
-          button.setAttribute("aria-selected", String(active));
-          button.tabIndex = active ? 0 : -1;
+          if (!button.dataset.specialSearchType) button.setAttribute("aria-pressed", String(active));
         });
       }
 
@@ -7708,6 +7708,7 @@
       function setSearchMode(mode) {
         const previousMode = activeSearchMode;
         activeSearchMode = SEARCH_MODE_CONFIG[mode] ? mode : "全文";
+        portalSearchTypeTabs.querySelectorAll("[data-keyword-only]").forEach(tab => { tab.hidden = activeSearchMode !== "关键词"; });
         if (activeSearchMode === "关键词" && previousMode !== "关键词") keywordExpansionOpen = false;
         if (activeSearchMode === "关联" && previousMode !== "关联") associationDetailsOpen = !window.matchMedia("(max-width: 720px)").matches;
         portalSearchModes.querySelectorAll("[data-search-mode]").forEach((tab) => {
@@ -7726,13 +7727,14 @@
           group.querySelectorAll("input").forEach((input) => { input.disabled = activeSearchMode !== "关键词"; });
         });
         keywordSearchV1?.setActive(activeSearchMode === "关键词");
+        if (activeSearchMode !== "关键词" && activeSearchType === "练仿真") setSearchType("全部");
         if (keywordSearchV1 && activeSearchMode !== "关键词") updateSecondaryFilterVisibility();
         updateSearchModePanels();
       }
 
       function setSearchType(type) {
         const tabs = [...portalSearchTypeTabs.querySelectorAll("[data-search-type]")];
-        activeSearchType = tabs.some((tab) => tab.dataset.searchType === type) ? type : "全部";
+        activeSearchType = tabs.some((tab) => !tab.hidden && tab.dataset.searchType === type) ? type : "全部";
         tabs.forEach((tab) => {
           const active = tab.dataset.searchType === activeSearchType;
           tab.classList.toggle("is-active", active);
@@ -9429,7 +9431,7 @@
         mgSmartRecommendations.hidden = false;
       }
       setSearchMode(activeSearchMode);
-      renderHeroRecommendations(activeHeroRecommendation);
+      renderHeroRecommendations(activeHeroRecommendation, false);
       renderRecommendations();
       updateSecondaryFilterVisibility();
       renderSearchResults();
@@ -9446,12 +9448,25 @@
         });
       }
 
+      function performHeroKeywordSearch(resourceType) {
+        const validation = window.PortalKeywordModel.validate(mgHeroSearchInput?.value);
+        if (mgHeroSearchInput) {
+          mgHeroSearchInput.setCustomValidity(validation?.message || "");
+          if (validation) {
+            mgHeroSearchInput.reportValidity();
+            mgHeroSearchInput.focus();
+            return;
+          }
+        }
+        return performSearch(mgHeroSearchInput?.value, { mode: "关键词", resourceType, focusTarget: mgHeroSearchInput });
+      }
+      mgHeroSearchInput?.addEventListener("input", () => mgHeroSearchInput.setCustomValidity(""));
       mgVoiceInputButton?.addEventListener("click", toggleHeroVoiceInput);
       mgHeroSearchForm?.addEventListener("submit", (event) => {
         event.preventDefault();
         if (activeHeroExperience === "v2") {
           if (activeV2HeroMode === "qa") performQuestion(mgHeroSearchInput?.value);
-          else performSearch(mgHeroSearchInput?.value, { mode: "关键词", focusTarget: mgHeroSearchInput });
+          else performHeroKeywordSearch("全部");
           return;
         }
         const heroToResultMode = {
@@ -9460,6 +9475,7 @@
           ai: "AI 搜索",
           keyword: "关键词"
         };
+        if (activeHeroSearchMode === "keyword") { performHeroKeywordSearch("全部"); return; }
         performSearch(mgHeroSearchInput?.value, {
           mode: heroToResultMode[activeHeroSearchMode],
           focusTarget: mgHeroSearchInput
@@ -9510,9 +9526,14 @@
       });
       document.querySelectorAll(".mg-search-intents [data-recommendation-group]").forEach((button) => {
         button.addEventListener("click", () => {
+          if (button.dataset.specialSearchType) {
+            performHeroKeywordSearch(button.dataset.specialSearchType);
+            return;
+          }
           renderHeroRecommendations(button.dataset.recommendationGroup);
           if (mgHeroSearchInput) {
             mgHeroSearchInput.value = button.dataset.mgQuery || "";
+            mgHeroSearchInput.setCustomValidity("");
           }
         });
       });
@@ -9528,6 +9549,7 @@
           renderHeroRecommendations(strategyGroups[index]);
           if (mgHeroSearchInput) {
             mgHeroSearchInput.value = button.dataset.mgQuery || "";
+            mgHeroSearchInput.setCustomValidity("");
             mgHeroSearchInput.focus({ preventScroll: true });
             mgHeroSearchInput.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
           }
@@ -9535,7 +9557,8 @@
       });
       mgFulltextShortcuts?.addEventListener("keydown", (event) => {
         const tabs = [...mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]")];
-        const currentIndex = tabs.findIndex((tab) => tab.dataset.recommendationGroup === activeHeroRecommendation);
+        const currentIndex = tabs.indexOf(event.target.closest("[data-recommendation-group]"));
+        if (currentIndex < 0) return;
         let nextIndex = currentIndex;
         if (event.key === "ArrowRight") nextIndex += 1;
         else if (event.key === "ArrowLeft") nextIndex -= 1;
@@ -9544,8 +9567,6 @@
         else return;
         event.preventDefault();
         const target = tabs[(nextIndex + tabs.length) % tabs.length];
-        renderHeroRecommendations(target.dataset.recommendationGroup);
-        if (mgHeroSearchInput) mgHeroSearchInput.value = target.dataset.mgQuery || "";
         target.focus();
       });
       mgRecommendationMore?.addEventListener("click", openHeroRecommendationLanding);
@@ -9896,7 +9917,7 @@
 
       });
       portalSearchTypeTabs.addEventListener("keydown", (event) => {
-        const tabs = [...portalSearchTypeTabs.querySelectorAll("[data-search-type]")];
+        const tabs = [...portalSearchTypeTabs.querySelectorAll("[data-search-type]")].filter(tab => !tab.hidden);
         const currentIndex = tabs.findIndex((tab) => tab.dataset.searchType === activeSearchType);
         let nextIndex = currentIndex;
         if (event.key === "ArrowRight") nextIndex += 1;
