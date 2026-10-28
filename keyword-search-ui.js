@@ -41,6 +41,8 @@
       buttonHidden: get("portalEmptyReset").hidden
     };
     const originalSortHidden = sort ? sort.hidden : false;
+    const optionalQueryControls = [doc.querySelector(".keyword-v1-tools"), doc.querySelector(".keyword-v1-demo-note")]
+      .filter(Boolean).map(node => ({ node, parent: node.parentNode, next: node.nextSibling }));
     const records = bridge.records || global.PortalKeywordModel.createFixtures(bridge.items || []);
     const model = bridge.model || global.PortalKeywordModel.create({ records, getUserContext: bridge.getUserContext });
     const hint = doc.createElement("p");
@@ -67,10 +69,12 @@
       surface?.classList.toggle("keyword-search-v1-active", active);
       if (sort) sort.hidden = active ? true : originalSortHidden;
       if (active) {
+        optionalQueryControls.forEach(({ node }) => node.remove());
         form.replaceChildren();
         filterSignature = "";
         render();
       } else {
+        optionalQueryControls.forEach(({ node, parent, next }) => parent.insertBefore(node, next?.parentNode === parent ? next : null));
         clearValidationFeedback();
         form.replaceChildren(...originalNodes);
         filterSignature = "";
@@ -330,7 +334,7 @@
       const prior = model.snapshot();
       const requestedType = options.resourceType || options.type || prior.currentType || bridge.getType?.() || "全部";
       try {
-        await model.submit(query, { scope: prior.scope || "全部资源", logic: prior.logic || bridge.getLogic?.() || "AND", type: requestedType });
+        await model.submit(query, { scope: prior.scope || "全部资源", logic: "AND", type: requestedType });
         const current = model.snapshot();
         if (ticket === submitting && context === contextKey() && current.query === query && options.trackSearch !== false) bridge.onSubmit?.(query, options, current.displayItems || []);
         return true;
