@@ -5,6 +5,7 @@
   const isUnconnected = type => type === "专利" || type === "练仿真";
   const CONNECTED = TYPES.filter(type => !isUnconnected(type));
   const PAGE_SIZE = 10;
+  const PAPER_SCOPES = ["标题和摘要", "标题", "摘要"];
   const segmenter = typeof Intl.Segmenter === "function" ? new Intl.Segmenter("zh-CN", { granularity: "word" }) : null;
   const normalize = value => String(value == null ? "" : value)
     .replace(/[！-～]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
@@ -46,9 +47,10 @@
   }
   function fields(record, scope) {
     const titles = titleFields(record);
-    if (scope === "仅标题") return titles;
+    if (scope === "标题") return titles;
     const summary = record.type === "论文" ? record.abstract : record.summary;
-    if (scope === "标题与摘要") return record.type === "人才" ? [] : [...titles, ...(record.type === "会议" ? [] : [summary])];
+    if (scope === "摘要") return record.type === "人才" || record.type === "会议" ? [] : [summary];
+    if (scope === "标题和摘要") return record.type === "人才" ? [] : [...titles, ...(record.type === "会议" ? [] : [summary])];
     switch (record.type) {
       case "论文": return [...titles, record.abstract, ...textList(record.authors), record.source, ...list(record.tags)];
       case "报告": return [...titles, record.summary, record.source, record.reportType, ...list(record.domainTags)];
@@ -123,6 +125,8 @@
     return ["year", "month", "day"].map(type => parts.find(part => part.type === type).value).join("-");
   }
   function filterError(filters) {
+    for (const key of ["publishedYearFrom", "publishedYearTo"]) if (nonempty(filters[key]) && !/^[1-9]\d{3}$/.test(String(filters[key]))) return { field: key, message: "请输入4位年份" };
+    if (nonempty(filters.publishedYearFrom) && nonempty(filters.publishedYearTo) && Number(filters.publishedYearFrom) > Number(filters.publishedYearTo)) return { field: "publishedYearFrom", message: "起始年份不能晚于结束年份" };
     const ranges = [["dateFrom", "dateTo"], ["publishedFrom", "publishedTo"], ["uploadedFrom", "uploadedTo"], ["applicationStart", "applicationEnd"], ["applicationFrom", "applicationTo"], ["publicationStart", "publicationEnd"], ["publicationFrom", "publicationTo"], ["conferenceStartFrom", "conferenceStartTo"], ["activityStartFrom", "activityStartTo"], ["startFrom", "startTo"]];
     for (const [from, to] of ranges) if (filters[from] && filters[to] && String(filters[from]) > String(filters[to])) return { field: from, message: "开始日期不能晚于结束日期" };
     for (const key of ["minHIndex", "maxHIndex"]) if (filters[key] !== "" && filters[key] != null && (!Number.isInteger(Number(filters[key])) || Number(filters[key]) < 0)) return { field: key, message: "H指数须为非负整数" };
@@ -142,7 +146,13 @@
     if (years) { const today = new Date(now()); today.setUTCFullYear(today.getUTCFullYear() - years); from = day(today.toISOString()); }
     if (!date(timeField, from, to)) return false;
     if (type === "人才") return contains(record.name, f.personNameFilter) && contains(record.institution, f.institutionFilter) && equals(record.researchFields, f.researchFieldFilter) && (!nonempty(f.minHIndex) || Number.isFinite(record.hIndex) && record.hIndex >= Number(f.minHIndex)) && (!nonempty(f.maxHIndex) || Number.isFinite(record.hIndex) && record.hIndex <= Number(f.maxHIndex));
-    if (type === "论文") return contains(textList(record.authors), f.authorFilter) && contains(record.source, f.venueFilter);
+    if (type === "论文") {
+      const publishedYear = /^([1-9]\d{3})(?:-|$)/.exec(String(record.publishedAt || ""));
+      const year = publishedYear ? Number(publishedYear[1]) : null;
+      if (nonempty(f.publishedYearFrom) && (year == null || year < Number(f.publishedYearFrom))) return false;
+      if (nonempty(f.publishedYearTo) && (year == null || year > Number(f.publishedYearTo))) return false;
+      return contains(textList(record.authors), f.authorFilter) && contains(record.source, f.venueFilter);
+    }
     if (type === "报告") return equals(record.reportType, f.reportType);
     if (type === "会议") return contains(record.location, f.conferenceLocation) && equals(record.level, f.conferenceLevel) && equals(record.submissionStatus, f.conferenceSubmission) && date(record.startAt, f.conferenceStartFrom, f.conferenceStartTo);
     if (type === "课程") return contains(textList(record.lecturers), f.courseLecturer) && contains(record.institution, f.courseInstitution || f.institutionFilter) && equals(record.level, f.courseLevel);
@@ -158,11 +168,11 @@
     const listeners = new Set(), cache = new Map(), endPages = new Map();
     const contextKey = () => { const value = getUserContext(); return typeof value === "string" ? value : JSON.stringify(value); };
     let userContext = contextKey(), version = 0, query = "", logic = "AND", currentType = "全部", validation = null, authError = null;
-    const makeView = type => ({ type, scope: "全部资源", scopeVersion: 0, page: 1, filters: {}, sources: {}, loaded: false, loading: false, requestToken: 0, pendingPage: null, retainedResults: false, error: null, validation: null });
+    const makeView = type => ({ type, scope: type === "论文" ? PAPER_SCOPES[0] : "全部资源", scopeVersion: 0, page: 1, filters: {}, sources: {}, loaded: false, loading: false, requestToken: 0, pendingPage: null, retainedResults: false, error: null, validation: null });
     let views = Object.fromEntries(["全部", ...TYPES].map(type => [type, makeView(type)]));
     const viewScope = view => view.type === "论文" ? view.scope : "全部资源";
     const scopeNamespace = view => view.type === "论文" ? `paper:${view.scopeVersion}` : "shared";
-    const cap = type => ({ exact: true, scopes: type === "人才" ? ["全部资源"] : ["全部资源", "仅标题", "标题与摘要"], serverFilters: false, ...capabilities[type] });
+    const cap = type => ({ exact: true, scopes: type === "论文" ? ["全部资源", ...PAPER_SCOPES] : ["全部资源"], serverFilters: false, ...capabilities[type] });
     const eligible = (type, view) => !isUnconnected(type) && cap(type).exact && cap(type).scopes.includes(viewScope(view));
     const localMode = view => view.type === "全部" ? !CONNECTED.every(type => !eligible(type, view) || cap(type).serverFilters) : !cap(view.type).serverFilters;
     const sourceKey = (type, page, filters, requestScope, view) => JSON.stringify([userContext, query, requestScope, logic, version, type, page, filters, scopeNamespace(view)]);
@@ -176,7 +186,7 @@
     function mainRecords(request) {
       const parsed = parse(request.query);
       let candidates = records.filter(record => record.type === request.type);
-      const exactTitles = candidates.filter(record => titleFields(record).some(title => normalize(title) === parsed.fullQuery));
+      const exactTitles = request.scope === "摘要" ? [] : candidates.filter(record => titleFields(record).some(title => normalize(title) === parsed.fullQuery));
       candidates = exactTitles.length ? exactTitles : candidates.filter(record => match(record, parsed, request.scope, request.logic));
       if (request.filters && Object.keys(request.filters).length) candidates = candidates.filter(record => filterRecord(record, request.filters, now));
       return candidates;
@@ -309,8 +319,8 @@
       emit(); return snapshot();
     }
     const api = {
-      submit(input, params) { const parsed = parse(input); validation = parsed.error; if (validation) { emit(); return Promise.resolve(snapshot()); } checkContext(); params = params || {}; const visiblePaperScope = currentType === "论文" && (!params.type || params.type === "论文"); const changed = parsed.query !== query; query = parsed.query; if (visiblePaperScope && ["全部资源", "仅标题", "标题与摘要"].includes(params.scope)) views["论文"].scope = params.scope; if (params.logic) logic = params.logic; if (params.type && ["全部", ...TYPES].includes(params.type)) currentType = params.type; resetContexts(changed); return load(views[currentType], 1); },
-      setScope(value) { if (currentType !== "论文" || !["全部资源", "仅标题", "标题与摘要"].includes(value)) return Promise.resolve(snapshot()); checkContext(); const prior = views["论文"]; if (prior.scope === value) return Promise.resolve(snapshot()); prior.requestToken++; const namespace = scopeNamespace(prior); for (const key of cache.keys()) if (JSON.parse(key).at(-1) === namespace) cache.delete(key); for (const key of endPages.keys()) if (JSON.parse(key).at(-1) === namespace) endPages.delete(key); views["论文"] = { ...makeView("论文"), scope: value, scopeVersion: prior.scopeVersion + 1, filters: copy(prior.filters) }; validation = null; return load(views["论文"], 1); },
+      submit(input, params) { const parsed = parse(input); validation = parsed.error; if (validation) { emit(); return Promise.resolve(snapshot()); } checkContext(); params = params || {}; const visiblePaperScope = currentType === "论文" && (!params.type || params.type === "论文"); const changed = parsed.query !== query; query = parsed.query; if (visiblePaperScope && PAPER_SCOPES.includes(params.scope)) views["论文"].scope = params.scope; if (params.logic) logic = params.logic; if (params.type && ["全部", ...TYPES].includes(params.type)) currentType = params.type; resetContexts(changed); return load(views[currentType], 1); },
+      setScope(value) { if (currentType !== "论文" || !PAPER_SCOPES.includes(value)) return Promise.resolve(snapshot()); checkContext(); const prior = views["论文"]; if (prior.scope === value) return Promise.resolve(snapshot()); prior.requestToken++; const namespace = scopeNamespace(prior); for (const key of cache.keys()) if (JSON.parse(key).at(-1) === namespace) cache.delete(key); for (const key of endPages.keys()) if (JSON.parse(key).at(-1) === namespace) endPages.delete(key); views["论文"] = { ...makeView("论文"), scope: value, scopeVersion: prior.scopeVersion + 1, filters: copy(prior.filters) }; validation = null; return load(views["论文"], 1); },
       setLogic(value) { if (!["AND", "OR"].includes(value) || logic === value) return Promise.resolve(snapshot()); logic = value; validation = null; resetContexts(false); return load(views[currentType], 1); },
       selectType(type) { if (!["全部", ...TYPES].includes(type)) return Promise.resolve(snapshot()); checkContext(); currentType = type; validation = null; const view = views[type]; if (view.loaded || view.loading) { emit(); return Promise.resolve(snapshot()); } return load(view, view.page); },
       setFilter(name, value) { const view = views[currentType], filters = { ...(view.validation && view.validation.values || view.filters), ...(typeof name === "object" ? name : { [name]: value }) }; const error = nonempty(filters.discipline) ? { field: "discipline", message: "当前资源暂不支持该检索条件" } : filterError(filters); view.validation = error ? { ...error, values: copy(filters) } : null; validation = null; if (error) { emit(); return Promise.resolve(snapshot()); } view.filters = filters; if (localMode(view)) { emit(); return Promise.resolve(snapshot()); } view.loaded = false; return load(view, 1); },

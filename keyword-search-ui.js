@@ -15,7 +15,7 @@
     courseLecturer: "讲师", courseInstitution: "授课机构", courseLevel: "课程等级",
     activityLocation: "活动地点", activityType: "活动类型", activityRegistration: "报名状态",
     activityStartFrom: "开始时间（起）", activityStartTo: "开始时间（止）",
-    sources: "来源", domains: "学科领域", publishTime: "时间", dateFrom: "日期（起）", dateTo: "日期（止）"
+    sources: "来源", domains: "学科领域", publishTime: "时间", dateFrom: "日期（起）", dateTo: "日期（止）", publishedYearFrom: "起始年份", publishedYearTo: "结束年份"
   };
   const SUBMISSION = [["OPEN", "征稿中"], ["CLOSED", "已截稿"], ["UNKNOWN", "暂无征稿信息"]];
   const ACTIVITY = [["LECTURE", "讲座"], ["FORUM", "论坛"], ["SALON", "沙龙"], ["DEBATE", "思辨会"], ["OTHER", "其他"]];
@@ -101,7 +101,7 @@
           const pair = Array.isArray(o) ? o : [o, o];
           return `<option value="${esc(pair[0])}">${esc(pair[1])}</option>`;
         }).join("")}</select>`
-        : `<input type="${type || "search"}" name="${esc(name)}"${placeholder ? ` placeholder="${esc(placeholder)}"` : ""}>`;
+        : `<input type="${type || "search"}" name="${esc(name)}"${["publishedYearFrom", "publishedYearTo"].includes(name) ? ' inputmode="numeric" maxlength="4" pattern="[0-9]{4}"' : ""}${placeholder ? ` placeholder="${esc(placeholder)}"` : ""}>`;
       return `<label><span>${esc(label)}</span>${control}</label>`;
     }
     function checks(name, values) {
@@ -116,7 +116,7 @@
       const signature = JSON.stringify([type, domains, sources, levels, dictionaries.reportTypes || []]);
       if (signature === filterSignature) return;
       filterSignature = signature;
-      let html = type === "论文" ? group("搜索范围", ["全部资源", "仅标题", "标题与摘要"].map(scope => `<label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="${esc(scope)}"><span>${esc(scope)}</span></label>`).join("")) : "";
+      let html = type === "论文" ? group("搜索范围", ["标题和摘要", "标题", "摘要"].map(scope => `<label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="${esc(scope)}"><span>${esc(scope)}</span></label>`).join("")) : "";
       let professional = "";
       if (type === "人才") {
         professional = field("personNameFilter", "search", null, "学者姓名") + field("institutionFilter", "search", null, "机构名称") + field("researchFieldFilter", null, domains);
@@ -135,7 +135,9 @@
       }
       const prompt = type === "全部" ? "选择具体资源类型后，展示对应的专业筛选项。" : isUnconnected(type) ? `${type}搜索待接入。` : "";
       if (professional || prompt) html += group("二次筛选", `${prompt ? `<p class="portal-resource-filter-hint">${esc(prompt)}</p>` : ""}<div class="portal-resource-filter">${professional}</div>`, "portal-search-filter-fields");
-      if (["论文", "报告", "资讯", "课程"].includes(type)) {
+      if (type === "论文") {
+        html += group("发表时间", `<div class="portal-resource-filter">${field("publishedYearFrom", "text", null, "YYYY")}${field("publishedYearTo", "text", null, "YYYY")}</div>`, "portal-search-filter-fields");
+      } else if (["报告", "资讯", "课程"].includes(type)) {
         const title = type === "报告" ? "上传时间" : type === "资讯" || type === "课程" ? "发布时间" : "发表时间";
         html += group(title, ["不限时间", "近一年", "近三年", "近五年", "自定义"].map(value => `<label class="portal-search-filter-option"><input type="radio" name="publishTime" value="${value}"><span>${value}</span></label>`).join("") + `<div class="portal-resource-filter keyword-v1-custom-dates" data-keyword-custom-dates>${field("dateFrom", "date")}${field("dateTo", "date")}</div>`);
       }
@@ -264,7 +266,7 @@
       if (isUnconnected(state.currentType)) { title = `${state.currentType}待接入`; text = state.currentType === "练仿真" ? "练仿真搜索接口接入后可检索。" : "专利搜索接口接入后可检索并筛选。"; showButton = false; }
       else if (!state.query) { title = "请输入关键词"; text = "输入关键词后开始搜索。"; showButton = false; }
       else if (state.authError) { title = state.authError.message; text = "重新登录后再继续检索。"; showButton = false; }
-      else if (source?.status === "unsupported" || (all && !anySuccess && state.unsupportedTypes?.length && !state.loading)) { title = source?.error === "检索能力暂不可用" ? "检索能力暂不可用" : "不支持该检索条件"; text = paper ? "当前资源暂不支持该检索条件，请切换搜索范围。" : "当前资源暂不支持该检索条件，请切换资源类型。"; button = "切换至全部资源"; emptyAction = "scope"; showButton = paper && title !== "检索能力暂不可用"; }
+      else if (source?.status === "unsupported" || (all && !anySuccess && state.unsupportedTypes?.length && !state.loading)) { title = source?.error === "检索能力暂不可用" ? "检索能力暂不可用" : "不支持该检索条件"; text = paper ? "当前资源暂不支持该检索条件，请切换搜索范围。" : "当前资源暂不支持该检索条件，请切换资源类型。"; button = "切换至标题和摘要"; emptyAction = "scope"; showButton = paper && title !== "检索能力暂不可用"; }
       else if (state.loading && !items.length) { title = "正在检索……"; text = "各类资源正在加载。"; showButton = false; }
       else if (state.failedTypes?.length && (!items.length || view.status === "error")) { title = anySuccess ? "部分资源检索失败" : "搜索失败，请重试"; text = "失败来源未作为零结果统计。"; button = "重试"; emptyAction = "retry"; }
       else if (filterDescriptors(state).length && view.filterMode !== "server") {
@@ -379,7 +381,7 @@
       else if (target.dataset.keywordRemoveFilter) operation = () => model.setFilter(target.dataset.keywordRemoveFilter, ["domains", "sources"].includes(target.dataset.keywordRemoveFilter) ? [] : "");
       else if (target.hasAttribute("data-keyword-clear-filters") || target.id === "portalSearchReset") operation = () => model.clearFilters();
       else if (target.id === "portalEmptyReset") operation = () => {
-        if (emptyAction === "scope") return model.setScope("全部资源");
+        if (emptyAction === "scope") return model.setScope("标题和摘要");
         if (emptyAction === "retry") return Promise.all((model.snapshot().failedTypes || []).map(type => model.retry(type)));
         return model.clearFilters();
       };
