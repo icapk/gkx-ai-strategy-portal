@@ -9,3 +9,7 @@
 .keyword-search-v1-active .keyword-v1-source-status button { border: 0; background: transparent; padding: 0 2px; color: #1764eb; font: inherit; cursor: pointer; }
 .keyword-search-v1-active .keyword-v1-page-label { display: inline-flex; align-items: center; padding: 0 10px; color: #718096; font-size: 13px; }
 .keyword-search-v1-active .portal-search-page-button:disabled { opacity: .45; cursor: default; }
+.keyword-search-v1-active .keyword-v1-no-filters { padding: 14px; margin: 0; }
+.keyword-search-v1-active .keyword-v1-simulation-cover { float: right; width: 144px; height: 96px; margin: 0 0 12px 20px; object-fit: cover; border-radius: 6px; }
+.keyword-search-v1-active .keyword-v1-entry-unavailable { color: #8996a8; font-size: 12px; }
+.keyword-search-v1-active .portal-search-card-action:disabled { opacity: .55; cursor: default; }

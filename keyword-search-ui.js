@@ -4,18 +4,19 @@
   // This controller owns the keyword result surface only. Original nodes are
   // restored, rather than re-created, when another search mode is selected.
   const TYPES = ["论文", "专利", "报告", "人才", "资讯", "会议", "课程", "活动", "练仿真"];
-  const isUnconnected = type => type === "专利" || type === "练仿真";
+  const isUnconnected = type => Boolean(global.PortalKeywordModel?.isUnconnected(type));
+  const SECONDARY_TYPES = ["论文", "专利", "人才"];
   const LABELS = {
     personNameFilter: "学者姓名", institutionFilter: "机构名称", researchFieldFilter: "研究领域",
     authorFilter: "作者", venueFilter: "会议／期刊", ipcFilter: "IPC 分类",
-    applicantFilter: "申请人", inventorFilter: "发明人", applicationStart: "申请时间（起）",
-    applicationEnd: "申请时间（止）", publicationStart: "公布时间（起）", publicationEnd: "公布时间（止）",
+    applicantFilter: "申请人", inventorFilter: "发明人", applicationStart: "申请日期（起）",
+    applicationEnd: "申请日期（止）", publicationStart: "公布日期（起）", publicationEnd: "公布日期（止）",
     reportType: "报告类型", conferenceLocation: "会议地点", conferenceLevel: "会议等级",
     conferenceSubmission: "投稿状态", conferenceStartFrom: "开始时间（起）", conferenceStartTo: "开始时间（止）",
     courseLecturer: "讲师", courseInstitution: "授课机构", courseLevel: "课程等级",
     activityLocation: "活动地点", activityType: "活动类型", activityRegistration: "报名状态",
     activityStartFrom: "开始时间（起）", activityStartTo: "开始时间（止）",
-    sources: "来源", domains: "学科领域", publishTime: "时间", dateFrom: "日期（起）", dateTo: "日期（止）", publishedYearFrom: "起始年份", publishedYearTo: "结束年份"
+    sources: "来源", domains: "领域", publishTime: "时间", dateFrom: "日期（起）", dateTo: "日期（止）", publishedYearFrom: "起始年份", publishedYearTo: "结束年份"
   };
   const SUBMISSION = [["OPEN", "征稿中"], ["CLOSED", "已截稿"], ["UNKNOWN", "暂无征稿信息"]];
   const ACTIVITY = [["LECTURE", "讲座"], ["FORUM", "论坛"], ["SALON", "沙龙"], ["DEBATE", "思辨会"], ["OTHER", "其他"]];
@@ -109,11 +110,10 @@
       return `<div class="keyword-v1-filter-options">${values.map(value => `<label class="portal-search-filter-option"><input type="checkbox" name="${esc(name)}" value="${esc(value)}"><span>${esc(value)}</span></label>`).join("")}</div>`;
     }
     function buildFilters(state) {
-      const type = state.currentType, dictionaries = state.dictionaries || {};
-      const domains = dictionaries.domains?.[type] || [];
-      const sources = dictionaries.sources?.[type] || [];
-      const levels = dictionaries.levels?.[type] || [];
-      const signature = JSON.stringify([type, domains, sources, levels, dictionaries.reportTypes || []]);
+      const type = state.currentType, rows = state.view?.rawItems || [], filters = state.view?.filters || {};
+      const selected = type === "人才" ? [filters.researchFieldFilter] : filters.domains || [];
+      const domains = [...new Set([...rows.flatMap(row => type === "人才" ? row.researchFields || [] : row.domainTags || []), ...selected].filter(value => value != null && value !== ""))];
+      const signature = JSON.stringify([type, domains]);
       if (signature === filterSignature) return;
       filterSignature = signature;
       let html = type === "论文" ? group("搜索范围", ["标题和摘要", "标题", "摘要"].map(scope => `<label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="${esc(scope)}"><span>${esc(scope)}</span></label>`).join("")) : "";
@@ -124,29 +124,15 @@
         professional = field("authorFilter", "search", null, "作者姓名") + field("venueFilter", "search", null, "会议或期刊名称");
       } else if (type === "专利") {
         professional = field("ipcFilter", "search", null, "例如 G16B") + field("applicantFilter", "search", null, "申请人名称") + field("inventorFilter", "search", null, "发明人姓名") + field("applicationStart", "date") + field("applicationEnd", "date") + field("publicationStart", "date") + field("publicationEnd", "date");
-      } else if (type === "报告") {
-        professional = field("reportType", null, dictionaries.reportTypes || []);
-      } else if (type === "会议") {
-        professional = field("conferenceLocation", "search", null, "会议地点") + field("conferenceLevel", null, levels) + field("conferenceSubmission", null, SUBMISSION) + field("conferenceStartFrom", "date") + field("conferenceStartTo", "date");
-      } else if (type === "课程") {
-        professional = field("courseLecturer", "search", null, "讲师") + field("courseInstitution", "search", null, "授课机构") + field("courseLevel", null, levels);
-      } else if (type === "活动") {
-        professional = field("activityLocation", "search", null, "活动地点") + field("activityType", null, ACTIVITY) + field("activityRegistration", null, REGISTRATION) + field("activityStartFrom", "date") + field("activityStartTo", "date");
       }
-      const prompt = type === "全部" ? "选择具体资源类型后，展示对应的专业筛选项。" : isUnconnected(type) ? `${type}搜索待接入。` : "";
-      if (professional || prompt) html += group("二次筛选", `${prompt ? `<p class="portal-resource-filter-hint">${esc(prompt)}</p>` : ""}<div class="portal-resource-filter">${professional}</div>`, "portal-search-filter-fields");
+      if (professional) html += group("二次筛选", `<div class="portal-resource-filter">${professional}</div>`, "portal-search-filter-fields");
+      else html += '<p class="portal-resource-filter-hint keyword-v1-no-filters">选择论文、专利或人才，可使用二次筛选。</p>';
       if (type === "论文") {
         html += group("发表时间", `<div class="portal-resource-filter">${field("publishedYearFrom", "text", null, "YYYY")}${field("publishedYearTo", "text", null, "YYYY")}</div>`, "portal-search-filter-fields");
-      } else if (["报告", "资讯", "课程"].includes(type)) {
-        const title = type === "报告" ? "上传时间" : type === "资讯" || type === "课程" ? "发布时间" : "发表时间";
-        html += group(title, ["不限时间", "近一年", "近三年", "近五年", "自定义"].map(value => `<label class="portal-search-filter-option"><input type="radio" name="publishTime" value="${value}"><span>${value}</span></label>`).join("") + `<div class="portal-resource-filter keyword-v1-custom-dates" data-keyword-custom-dates>${field("dateFrom", "date")}${field("dateTo", "date")}</div>`);
       }
-      if (type === "人才") {
-        html += group("学科领域", `<p class="portal-resource-filter-hint">独立学科字段暂未接入</p>${domains.slice(0, 4).map(value => `<label class="portal-search-filter-option"><input type="checkbox" disabled><span>${esc(value)}</span></label>`).join("")}`);
-      } else if (domains.length || type === "全部") {
-        html += group("学科领域", checks("domains", domains));
+      if (type === "论文") {
+        html += group("领域", checks("domains", domains));
       }
-      if (["报告", "资讯"].includes(type)) html += group("来源", checks("sources", sources));
       form.innerHTML = html;
     }
 
@@ -211,6 +197,98 @@
       chips.innerHTML = descriptors.map(item => `<button type="button" data-keyword-remove-filter="${esc(item.name)}" aria-label="移除筛选 ${esc(item.label)}"><span>${esc(item.label)}</span><b aria-hidden="true">×</b></button>`).join("") + (descriptors.length ? '<button type="button" class="portal-clear-filters" data-keyword-clear-filters>清除全部</button>' : "");
       if (countBadge) { countBadge.hidden = !descriptors.length; countBadge.textContent = String(descriptors.length); }
     }
+    function renderCard(record, absoluteIndex, query) {
+      const type = record.type, raw = record.raw || record;
+      const values = value => (Array.isArray(value) ? value : value == null ? [] : [value]).filter(value => value != null && value !== "");
+      const names = value => values(value).map(item => typeof item === "object" ? item.name : item).filter(Boolean).join(" · ");
+      const text = value => Array.isArray(value) ? names(value) : value == null ? "" : String(value);
+      const present = value => value != null && String(value).trim() !== "";
+      const link = value => {
+        if (!present(value)) return "";
+        try { const url = new URL(String(value), doc.baseURI); return ["https:", "http:"].includes(url.protocol) ? url.href : ""; }
+        catch { return ""; }
+      };
+      const date = value => /^\d{4}(?:-\d{2}(?:-\d{2})?)?/.exec(String(value || ""))?.[0] || "";
+      const moment = value => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(value || "")) ? String(value).slice(0, 16).replace("T", " ") : date(value);
+      const interval = (from, to) => [moment(from), moment(to)].filter(Boolean).join(" — ");
+      const title = text(type === "人才" ? record.name : record.name || record.title);
+      const parsed = global.PortalKeywordModel.parse(query);
+      const terms = parsed.error ? [] : [...new Set(parsed.terms.map(term => term.text))].filter(Boolean).sort((a, b) => b.length - a.length);
+      const pattern = terms.length ? new RegExp(terms.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "giu") : null;
+      const highlight = value => {
+        const source = text(value);
+        if (!pattern) return esc(source);
+        let result = "", offset = 0;
+        for (const match of source.matchAll(pattern)) {
+          result += esc(source.slice(offset, match.index)) + `<mark>${esc(match[0])}</mark>`;
+          offset = match.index + match[0].length;
+        }
+        return result + esc(source.slice(offset));
+      };
+      const rows = [], more = [];
+      const row = (label, value, target = rows) => { if (present(value)) target.push([label, text(value)]); };
+      const enumLabel = (choices, value) => choices.find(pair => pair[0] === value)?.[1] || value;
+      let summary = "", dateLabel = "", dateValue = "", tags = [];
+      if (type === "论文") {
+        row("作者", names(record.authors)); row("期刊／会议", record.source);
+        summary = record.abstract; dateLabel = "发表时间"; dateValue = date(record.publishedAt); tags = values(record.tags);
+      } else if (type === "专利") {
+        row("IPC", names(record.ipc)); row("申请人", names(record.applicant)); row("发明人", names(record.inventor));
+        row("申请日期", date(record.applicationDate)); row("公布日期", date(record.publicationDate));
+        summary = record.abstract ?? record.summary; tags = values(record.tags);
+      } else if (type === "报告") {
+        row("来源", record.source); row("报告类型", record.reportType);
+        summary = record.summary; dateLabel = "上传时间"; dateValue = date(record.uploadedAt); tags = values(record.domainTags);
+      } else if (type === "人才") {
+        row("机构", record.institution); row("研究方向", names(record.researchDirections)); row("研究领域", names(record.researchFields));
+        row("H指数", record.hIndex); row("论文数", record.paperCount); row("引用数", record.citationCount);
+      } else if (type === "资讯") {
+        row("来源", record.source); summary = record.summary;
+        dateLabel = "发布时间"; dateValue = date(record.publishedAt); tags = values(record.domainTags);
+      } else if (type === "会议") {
+        row("会议时间", interval(record.startAt, record.endAt)); row("地点", record.location); row("等级", record.level);
+        row("投稿状态", enumLabel(SUBMISSION, record.submissionStatus));
+        row("会议状态", enumLabel([["UPCOMING", "未开始"], ["ONGOING", "进行中"], ["ENDED", "已结束"]], record.status));
+        row("投稿截止时间", moment(record.submissionDeadline), more); tags = values(record.tags);
+      } else if (type === "课程") {
+        row("讲师", names(record.lecturers)); row("授课机构", record.institution); row("课程等级", record.level); row("课程周期", record.durationText);
+        summary = record.summary; dateLabel = "发布时间"; dateValue = date(record.publishedAt); tags = values(record.domainTags);
+      } else if (type === "活动") {
+        row("主办单位", record.organizer); row("活动地点", record.location); row("活动时间", interval(record.startAt, record.endAt));
+        row("活动类型", enumLabel(ACTIVITY, record.activityType || (raw.type !== "活动" ? raw.type : "")));
+        row("报名状态", enumLabel(REGISTRATION, record.registrationStatus)); summary = record.summary;
+        tags = [...new Set([...values(record.domainTags), ...values(record.topicTags)])];
+      } else if (type === "练仿真") {
+        row("分类", names(record.category || record.categories)); summary = record.summary;
+        tags = values(record.domainTags); row("分类", names(record.category || record.categories), more); row("领域", names(record.domainTags), more);
+      }
+      const detailUrl = link(record.detailUrl), launchUrl = link(record.launchUrl), coverUrl = type === "练仿真" ? link(record.coverUrl) : "";
+      const metadata = items => items.length ? `<dl class="portal-result-metadata">${items.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl>` : "";
+      const article = doc.createElement("article");
+      article.className = "portal-search-card";
+      article.dataset.type = type; article.dataset.resultId = `${type}:${record.id}`;
+      const detailId = `keyword-detail-${type}-${String(record.id).replace(/[^a-z0-9_-]/giu, "-")}`;
+      const hasInlineDetail = type === "练仿真" || more.length > 0;
+      const detailControl = detailUrl ? `<a class="portal-search-card-action is-primary" data-result-detail-link href="${esc(detailUrl)}" target="_blank" rel="noopener noreferrer">查看${type === "论文" ? "论文" : "资源"}详情 ↗</a>` : "";
+      const launchControl = type === "练仿真" ? launchUrl
+        ? `<a class="portal-search-card-action is-primary" data-keyword-launch href="${esc(launchUrl)}" target="_blank" rel="noopener noreferrer">开始仿真 ↗</a>`
+        : '<button class="portal-search-card-action" type="button" disabled title="暂无可用启动入口">开始仿真</button><span class="keyword-v1-entry-unavailable">暂无可用启动入口</span>' : "";
+      article.innerHTML = `<div class="portal-result-rail"><span class="portal-result-type-icon" data-result-type="${esc(type)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7"></path></svg></span><span class="portal-result-index">${String(absoluteIndex + 1).padStart(2, "0")}</span></div>
+        <div class="portal-result-content"><div class="portal-result-kicker"><span>${esc(type)}</span>${dateValue ? `<time>${esc(dateLabel)} ${esc(dateValue)}</time>` : ""}</div>
+          ${coverUrl ? `<img class="keyword-v1-simulation-cover" src="${esc(coverUrl)}" alt="${esc(title)}封面" loading="lazy">` : ""}
+          <h3 class="portal-search-card-title">${detailUrl ? `<a class="portal-result-detail-link" data-result-detail-link href="${esc(detailUrl)}" target="_blank" rel="noopener noreferrer">${highlight(title)}<span class="portal-title-external-mark" aria-hidden="true">↗</span><small>新标签页</small></a>` : `<span>${highlight(title)}</span>`}</h3>
+          ${metadata(rows)}${present(summary) ? `<p class="portal-search-card-summary">${highlight(summary)}</p>` : ""}
+          <div class="portal-result-bottomline"><div class="portal-search-card-tags">${tags.slice(0, 3).map(value => `<span class="portal-search-card-tag">${esc(value)}</span>`).join("")}</div><div class="portal-search-card-actions">
+          ${hasInlineDetail ? `<button class="portal-search-card-action" type="button" data-keyword-detail aria-expanded="false" aria-controls="${esc(detailId)}">${type === "练仿真" ? "查看实验详情" : "展开信息"}</button>` : ""}${detailControl}${launchControl}</div></div>
+          ${hasInlineDetail ? `<section class="portal-entity-detail" id="${esc(detailId)}" hidden><h4>${esc(title)}</h4>${metadata(more)}${type === "练仿真" && present(summary) ? `<p>${esc(summary)}</p>` : ""}</section>` : ""}</div>`;
+      const toggle = article.querySelector("[data-keyword-detail]");
+      toggle?.addEventListener("click", () => {
+        const detail = article.querySelector(".portal-entity-detail"); detail.hidden = !detail.hidden;
+        toggle.setAttribute("aria-expanded", String(!detail.hidden));
+        toggle.textContent = detail.hidden ? type === "练仿真" ? "查看实验详情" : "展开信息" : "收起详情";
+      });
+      return article;
+    }
     function sourceMessage(state) {
       const types = state.currentType === "全部" ? TYPES : [state.currentType];
       const entries = [];
@@ -261,7 +339,7 @@
       const anySuccess = sourceStates.some(value => value.status === "success");
       const paper = state.currentType === "论文";
       let title = "未找到相关资源", text = paper ? "可尝试更换关键词或搜索范围。" : "可尝试更换关键词或清除筛选条件。", button = "清除筛选条件";
-      let showButton = true;
+      let showButton = SECONDARY_TYPES.includes(state.currentType) && filterDescriptors(state).length > 0;
       emptyAction = "clear";
       if (isUnconnected(state.currentType)) { title = `${state.currentType}待接入`; text = state.currentType === "练仿真" ? "练仿真搜索接口接入后可检索。" : "专利搜索接口接入后可检索并筛选。"; showButton = false; }
       else if (!state.query) { title = "请输入关键词"; text = "输入关键词后开始搜索。"; showButton = false; }
@@ -270,10 +348,10 @@
       else if (state.loading && !items.length) { title = "正在检索……"; text = "各类资源正在加载。"; showButton = false; }
       else if (state.failedTypes?.length && (!items.length || view.status === "error")) { title = anySuccess ? "部分资源检索失败" : "搜索失败，请重试"; text = "失败来源未作为零结果统计。"; button = "重试"; emptyAction = "retry"; }
       else if (filterDescriptors(state).length && view.filterMode !== "server") {
-        title = all ? "本批暂无符合筛选条件的结果，可清除筛选或翻页" : "本页暂无符合筛选条件的结果，可清除筛选或翻页";
+        title = "本页暂无符合筛选条件的结果，可清除筛选或翻页";
         text = "仅筛选当前已返回数据，其他页可能仍有符合项。";
       } else if ((view.page || 1) > 1 || view.paginationUnknown || (Number.isFinite(view.total) && view.total > 0)) {
-        title = all ? "本批暂无结果" : "本页暂无结果";
+        title = "本页暂无结果";
         text = "可继续翻页或调整筛选条件。";
       }
       empty.hidden = items.length > 0;
@@ -297,8 +375,8 @@
       };
       const current = doc.createElement("span");
       current.className = "keyword-v1-page-label";
-      current.textContent = `第 ${page} ${all ? "批" : "页"}`;
-      paging.append(make(all ? "上一批" : "上一页", "previous", disabled || page <= 1), current, make(all ? "下一批" : "下一页", "next", disabled || hasMore === false));
+      current.textContent = `第 ${page} 页`;
+      paging.append(make("上一页", "previous", disabled || page <= 1), current, make("下一页", "next", disabled || hasMore === false));
     }
     function render() {
       if (!isKeyword()) { if (active) setActive(false); return false; }
@@ -312,15 +390,14 @@
       else if (state.authError) heading.textContent = state.authError.message;
       else if (state.sources?.[state.currentType]?.status === "unsupported") heading.textContent = "不支持该检索条件";
       else heading.textContent = Number.isFinite(total) ? `${total} 条结果` : state.loading ? "检索中" : "结果总数未知";
-      const unit = state.currentType === "全部" ? "批" : "页", page = Number(view.page) || 1;
-      range.textContent = unconnected ? `${state.currentType}搜索接口待接入` : !state.query ? "输入关键词后查看资源" : `第 ${page} ${unit} · 本${unit}显示 ${items.length} 条${view.paginationUnknown ? " · 分页状态待确认" : ""}${state.retainedResults || view.retainedResults ? " · 仍显示原查询结果" : ""}`;
-      if (state.currentType === "全部" && state.query) range.textContent += " · 已接通资源范围";
-      hint.hidden = !state.query || unconnected || view.status === "unsupported";
-      hint.textContent = view.filterMode === "server" ? "按当前条件筛选全部结果" : `本${unit}筛选 · 仅筛选当前已返回数据，其他页可能仍有符合项`;
+      const page = Number(view.page) || 1;
+      range.textContent = unconnected ? `${state.currentType}搜索接口待接入` : !state.query ? "输入关键词后查看资源" : `第 ${page} 页 · 本页显示 ${items.length} 条${view.paginationUnknown ? " · 分页状态待确认" : ""}${state.retainedResults || view.retainedResults ? " · 仍显示原查询结果" : ""}`;
+      hint.hidden = !state.query || !SECONDARY_TYPES.includes(state.currentType) || unconnected || view.status === "unsupported";
+      hint.textContent = view.filterMode === "server" ? "按当前条件筛选全部结果" : "本页筛选 · 仅筛选当前已返回数据，其他页可能仍有符合项";
       const fragment = doc.createDocumentFragment();
       items.forEach((record, index) => {
-        const absoluteIndex = state.currentType === "全部" ? index : (page - 1) * 10 + index;
-        const card = bridge.renderCard(record, index, absoluteIndex);
+        const absoluteIndex = Number.isFinite(view.startIndex) ? view.startIndex + index : (page - 1) * 10 + index;
+        const card = renderCard(record, absoluteIndex, state.query);
         if (card) fragment.append(card);
       });
       list.replaceChildren(fragment); list.hidden = !items.length;

@@ -3738,7 +3738,7 @@
     }
   </style>
   <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
-  <link rel="stylesheet" href="keyword-search-v1.css?v=20261028-1">
+  <link rel="stylesheet" href="keyword-search-v1.css?v=20261029-2">
 </head>
 <body>
   <header class="site-header" id="siteHeader">
@@ -5007,7 +5007,7 @@
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="会议"><span>会议</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="课程"><span>课程</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="活动"><span>活动</span><small data-search-type-count>0</small></button>
-                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="练仿真" data-keyword-only hidden><span>练仿真</span><small data-search-type-count>待接入</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="练仿真" data-keyword-only hidden><span>练仿真</span><small data-search-type-count>—</small></button>
               </div>
 
               <div class="portal-active-filters" id="portalActiveFilters" aria-label="当前筛选条件" hidden></div>
@@ -5185,8 +5185,9 @@
   </main>
 
   <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
-  <script src="keyword-search-model.js?v=20261029-1"></script>
-  <script src="keyword-search-ui.js?v=20261029-1"></script><script>
+  <script src="keyword-search-model.js?v=20261029-2"></script>
+  <script src="keyword-search-completion-fixtures.js?v=20261029-2"></script>
+  <script src="keyword-search-ui.js?v=20261029-2"></script><script>
     (() => {
       "use strict";
 
@@ -9335,7 +9336,7 @@
       // the home/recommendation surfaces keep their existing handlers and data.
       if (window.PortalKeywordModel && window.PortalKeywordUI) {
         keywordSearchV1 = window.PortalKeywordUI.create({
-          records: window.PortalKeywordModel.createFixtures(SEARCH_ITEMS),
+          records: window.PortalKeywordCompletionFixtures?.prepare(window.PortalKeywordModel.createFixtures(SEARCH_ITEMS)) || window.PortalKeywordModel.createFixtures(SEARCH_ITEMS),
           getMode: () => activeSearchMode,
           getQuery: getSubmittedSearchQuery,
           getType: () => activeSearchType,
