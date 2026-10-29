@@ -15,12 +15,25 @@
     const seeds = source.recommendationSeeds || {}, domains = source.resourceDomains || {};
     const records = (existingRecords || []).map(item => {
       const record = { ...item };
+      // Explicit classifications for these prototype records; unknown provider
+      // values are not inferred from a report title or a generic category.
+      if (record.type === "报告") {
+        if (["kw-report-ai-2026", "search-6"].includes(record.id)) record.reportType = "1";
+        if (["kw-report-future-industries", "search-12"].includes(record.id)) record.reportType = "3";
+      }
       if (record.type === "论文") record.domainTags = Array.isArray(item.domainTags) ? item.domainTags.slice() : (domains[item.id] || []).slice();
       if (record.type === "会议" && record.status === "原型数据") record.status = ["UPCOMING", "ONGOING", "ENDED"].includes(record.conferenceStatus) ? record.conferenceStatus : null;
       if (record.type === "人才") {
         for (const key of ["hIndex", "paperCount", "citationCount"]) if (record[key] === undefined) record[key] = null;
       }
       return record;
+    });
+    records.push({
+      id: "keyword-report-ai-insight-demo", type: "报告", reportType: "2",
+      title: "人工智能科研应用洞察报告（原型示例）",
+      summary: "围绕 AI 科研应用的资料整理、证据核对与使用反馈，梳理应用观察方法和后续跟踪重点。",
+      source: "原型示例", uploadedAt: "2026-10-30", domainTags: ["人工智能", "科研应用"],
+      detailUrl: null, fixtureSource: "LOCAL_PROTOTYPE", accessible: true
     });
     (seeds.PAPER_ITEMS || []).slice(0, 4).forEach(item => {
       records.push({
@@ -44,7 +57,8 @@
     });
     SIMULATIONS.forEach(item => records.push({ ...item, type: "练仿真", title: item.name, detailUrl: null, launchUrl: null, fixtureSource: "EXISTING_PROTOTYPE" }));
     const seen = new Set();
-    return records.filter(item => { const key = `${item.type}:${item.id}`; if (seen.has(key)) return false; seen.add(key); return true; });
+    const uniqueRecords = records.filter(item => { const key = `${item.type}:${item.id}`; if (seen.has(key)) return false; seen.add(key); return true; });
+    return root.PortalReportFulltextFixtures ? root.PortalReportFulltextFixtures.attach(uniqueRecords) : uniqueRecords;
   }
   root.PortalKeywordCompletionFixtures = Object.freeze({ prepare });
 })(typeof window !== "undefined" ? window : globalThis);

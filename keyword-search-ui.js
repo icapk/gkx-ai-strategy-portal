@@ -5,13 +5,13 @@
   // restored, rather than re-created, when another search mode is selected.
   const TYPES = ["论文", "专利", "报告", "人才", "资讯", "会议", "课程", "活动", "练仿真"];
   const isUnconnected = type => Boolean(global.PortalKeywordModel?.isUnconnected(type));
-  const SECONDARY_TYPES = ["论文", "专利", "人才"];
+  const SECONDARY_TYPES = ["论文", "专利", "人才", "报告"];
   const LABELS = {
     personNameFilter: "学者姓名", institutionFilter: "机构名称", researchFieldFilter: "研究领域",
     authorFilter: "作者", venueFilter: "会议／期刊", ipcFilter: "IPC 分类",
     applicantFilter: "申请人", inventorFilter: "发明人", applicationStart: "申请日期（起）",
     applicationEnd: "申请日期（止）", publicationStart: "公布日期（起）", publicationEnd: "公布日期（止）",
-    reportType: "报告类型", conferenceLocation: "会议地点", conferenceLevel: "会议等级",
+    reportType: "报告类型", reportTypes: "报告类型", conferenceLocation: "会议地点", conferenceLevel: "会议等级",
     conferenceSubmission: "投稿状态", conferenceStartFrom: "开始时间（起）", conferenceStartTo: "开始时间（止）",
     courseLecturer: "讲师", courseInstitution: "授课机构", courseLevel: "课程等级",
     activityLocation: "活动地点", activityType: "活动类型", activityRegistration: "报名状态",
@@ -107,7 +107,10 @@
     }
     function checks(name, values) {
       if (!values.length) return `<p class="portal-resource-filter-hint">暂无可用选项</p>`;
-      return `<div class="keyword-v1-filter-options">${values.map(value => `<label class="portal-search-filter-option"><input type="checkbox" name="${esc(name)}" value="${esc(value)}"><span>${esc(value)}</span></label>`).join("")}</div>`;
+      return `<div class="keyword-v1-filter-options">${values.map(value => {
+        const [code, label] = Array.isArray(value) ? value : [value, value];
+        return `<label class="portal-search-filter-option"><input type="checkbox" name="${esc(name)}" value="${esc(code)}"><span>${esc(label)}</span></label>`;
+      }).join("")}</div>`;
     }
     function buildFilters(state) {
       const type = state.currentType, rows = state.view?.rawItems || [], filters = state.view?.filters || {};
@@ -125,9 +128,11 @@
         professional = field("authorFilter", "search", null, "作者姓名") + field("venueFilter", "search", null, "会议或期刊名称");
       } else if (type === "专利") {
         professional = field("ipcFilter", "search", null, "例如 G16B") + field("applicantFilter", "search", null, "申请人名称") + field("inventorFilter", "search", null, "发明人姓名") + field("applicationStart", "date") + field("applicationEnd", "date") + field("publicationStart", "date") + field("publicationEnd", "date");
+      } else if (type === "报告") {
+        professional = `<div class="keyword-report-type-filter" role="group" aria-label="报告类型"><span class="keyword-report-type-label">报告类型</span>${checks("reportTypes", global.PortalKeywordModel.REPORT_TYPES)}</div>`;
       }
-      if (professional) html += group("二次筛选", `<div class="portal-resource-filter">${professional}</div>`, "portal-search-filter-fields");
-      else if (type !== "报告") html += '<p class="portal-resource-filter-hint keyword-v1-no-filters">选择论文、专利或人才，可使用二次筛选。</p>';
+      if (professional) html += group("二次筛选", type === "报告" ? professional : `<div class="portal-resource-filter">${professional}</div>`, type === "报告" ? "" : "portal-search-filter-fields");
+      else html += '<p class="portal-resource-filter-hint keyword-v1-no-filters">选择论文、专利、人才或报告，可使用二次筛选。</p>';
       if (type === "论文") {
         html += group("发表时间", `<div class="portal-resource-filter">${field("publishedYearFrom", "text", null, "YYYY")}${field("publishedYearTo", "text", null, "YYYY")}</div>`, "portal-search-filter-fields");
       }
@@ -172,7 +177,7 @@
         if (control.type === "checkbox") control.checked = Array.isArray(value) && value.includes(control.value);
         else if (control.type === "radio") control.checked = control.value === value;
         else if ((draft || doc.activeElement !== control) && control.value !== String(value)) control.value = String(value);
-        control.disabled = loading || unconnected || unavailable || !state.query;
+        control.disabled = loading && control.name !== "reportTypes" || unconnected || unavailable || !state.query;
         control.closest("label")?.classList.toggle("is-disabled", control.disabled);
       });
       const custom = form.querySelector("[data-keyword-custom-dates]");
@@ -187,6 +192,7 @@
       const filters = state.view?.filters || {};
       return Object.entries(filters).filter(([name, value]) => name !== "publishTime" || value !== "不限时间").filter(([, value]) => Array.isArray(value) ? value.length : value !== "" && value != null).map(([name, value]) => {
         let display = Array.isArray(value) ? value.join("、") : value;
+        if (name === "reportTypes") display = (Array.isArray(value) ? value : [value]).map(global.PortalKeywordModel.reportTypeLabel).join("、");
         const control = form.elements.namedItem(name);
         if (control?.tagName === "SELECT") display = control.selectedOptions[0]?.textContent || display;
         return { name, label: `${LABELS[name] || name}：${display}` };
@@ -238,7 +244,7 @@
         row("申请日期", date(record.applicationDate)); row("公布日期", date(record.publicationDate));
         summary = record.abstract ?? record.summary; tags = values(record.tags);
       } else if (type === "报告") {
-        row("来源", record.source); row("报告类型", record.reportType);
+        row("来源", record.source); row("报告类型", global.PortalKeywordModel.reportTypeLabel(record.reportType));
         summary = record.summary; dateLabel = "上传时间"; dateValue = date(record.uploadedAt); tags = values(record.domainTags);
       } else if (type === "人才") {
         row("机构", record.institution); row("研究方向", names(record.researchDirections)); row("研究领域", names(record.researchFields));
@@ -347,7 +353,7 @@
       const sourceStates = Object.values(state.sources || {});
       const anySuccess = sourceStates.some(value => value.status === "success");
       const paper = state.currentType === "论文", scoped = paper || state.currentType === "报告";
-      let title = "未找到相关资源", text = scoped ? "可尝试更换关键词或搜索范围。" : "可尝试更换关键词或清除筛选条件。", button = "清除筛选条件";
+      let title = "未找到相关资源", text = state.currentType === "报告" ? "可尝试更换关键词、搜索范围或清除筛选条件。" : scoped ? "可尝试更换关键词或搜索范围。" : "可尝试更换关键词或清除筛选条件。", button = "清除筛选条件";
       let showButton = SECONDARY_TYPES.includes(state.currentType) && filterDescriptors(state).length > 0;
       emptyAction = "clear";
       if (isUnconnected(state.currentType)) { title = `${state.currentType}待接入`; text = state.currentType === "练仿真" ? "练仿真搜索接口接入后可检索。" : "专利搜索接口接入后可检索并筛选。"; showButton = false; }
@@ -464,7 +470,7 @@
       else if (logic) operation = () => model.setLogic(logic.dataset.keywordLogic);
       else if (target.dataset.keywordPage) operation = () => model.page(target.dataset.keywordPage);
       else if (target.dataset.keywordRetry) operation = () => model.retry(target.dataset.keywordRetry);
-      else if (target.dataset.keywordRemoveFilter) operation = () => model.setFilter(target.dataset.keywordRemoveFilter, ["domains", "sources"].includes(target.dataset.keywordRemoveFilter) ? [] : "");
+      else if (target.dataset.keywordRemoveFilter) operation = () => model.setFilter(target.dataset.keywordRemoveFilter, ["domains", "sources", "reportTypes"].includes(target.dataset.keywordRemoveFilter) ? [] : "");
       else if (target.hasAttribute("data-keyword-clear-filters") || target.id === "portalSearchReset") operation = () => model.clearFilters();
       else if (target.id === "portalEmptyReset") operation = () => {
         if (emptyAction === "scope") return model.setScope("标题和摘要");

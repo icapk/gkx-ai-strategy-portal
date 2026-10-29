@@ -13,6 +13,8 @@
 .keyword-search-v1-active .keyword-v1-simulation-cover { float: right; width: 144px; height: 96px; margin: 0 0 12px 20px; object-fit: cover; border-radius: 6px; }
 .keyword-search-v1-active .keyword-v1-entry-unavailable { color: #8996a8; font-size: 12px; }
 .keyword-search-v1-active .portal-search-card-action:disabled { opacity: .55; cursor: default; }
+.keyword-report-type-filter { display: grid; gap: 8px; }
+.keyword-report-type-label { color: #65758b; font-size: 12px; }
 
 .keyword-report-hits { margin: 14px 0 16px; }
 .keyword-report-hits-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 8px; font-size: 12px; }

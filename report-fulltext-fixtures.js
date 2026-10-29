@@ -1,9 +1,9 @@
 (function (root) {
   "use strict";
 
-  // Authored only for this interaction prototype. These five-page documents
+  // Authored only for this interaction prototype. These example documents
   // are not extracts from the reports named in the existing resource catalogue.
-  const notice = "原型示例正文，共5页；由本原型编写，用于演示检索与定位，并非同名报告的真实全文。";
+  const notice = "原型示例正文；由本原型编写，用于演示检索与定位，并非同名报告的真实全文。";
   const definitions = [
     {
       resourceId: "kw-report-ai-2026", resourceIdAliases: ["search-6"], documentId: "prototype-report-ai-2026", documentVersion: "local-demo-20261030-v1",
@@ -64,6 +64,24 @@
           "技术链追踪清单可包含节点名称、主要来源、最新信息日期与待核对问题，便于持续更新。",
           "人工智能与新材料等方向可以采用同一信息记录方式，但各自的产业判断标准仍需具体说明。",
           "追踪过程中应保留历次判断与修订依据，使后续研究能够了解结论发生变化的原因。"
+        ]]
+      ]
+    },
+    {
+      resourceId: "keyword-report-ai-insight-demo", resourceIdAliases: [], documentId: "prototype-report-ai-insight", documentVersion: "local-demo-20261030-v1",
+      title: "人工智能科研应用洞察报告（原型示例）",
+      chapters: [
+        ["科研应用的观察范围", [
+          "AI 科研应用可从资料整理、信息检索、证据核对与过程记录几个环节开展观察。",
+          "不同研究任务需要的资料范围和核对方式各不相同，记录应用背景有助于理解使用反馈。"
+        ]],
+        ["证据核对与可追溯性", [
+          "AI 辅助整理的信息应保留原始来源，关键结论的可追溯性需要结合来源内容逐项核对。",
+          "遇到来源之间的冲突，应分别记录各方内容和发布日期，再判断是否需要进一步补充资料。"
+        ]],
+        ["使用反馈与后续观察", [
+          "AI 科研应用的使用反馈应结合具体任务、人工投入与结果质量共同记录。",
+          "后续观察按资料来源、使用问题和待核对结论形成清单，获得新证据后持续更新。"
         ]]
       ]
     }
