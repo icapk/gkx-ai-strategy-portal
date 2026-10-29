@@ -203,7 +203,7 @@
     const contextKey = () => { const value = getUserContext(); return typeof value === "string" ? value : JSON.stringify(value); };
     const FILTER_TYPES = ["论文", "专利", "人才"];
     const filterModeFor = type => type === "报告" ? "server" : FILTER_TYPES.includes(type) ? "local" : "none";
-    let userContext = contextKey(), version = 0, query = "", logic = "AND", currentType = "全部", validation = null, authError = null;
+    let userContext = contextKey(), version = 0, query = "", logic = "AND", currentType = "全部", validation = null, authError = null, association = false;
     const scopedTypes = { "论文": PAPER_SCOPES, "报告": REPORT_SCOPES };
     const makeView = type => ({ type, scope: scopedTypes[type] ? scopedTypes[type][0] : "全部资源", page: 1, filters: {}, sources: {}, loaded: false, loading: false, requestToken: 0, pendingPage: null, retainedResults: false, error: null, validation: null });
     let views = Object.fromEntries(["全部", ...TYPES].map(type => [type, makeView(type)]));
@@ -216,11 +216,21 @@
     const unique = values => [...new Set(values.filter(value => value != null && value !== ""))];
     function mainRecords(request) {
       const parsed = parse(request.query);
-      let candidates = records.filter(record => record.type === request.type && match(record, parsed, request.scope, request.logic));
+      // Association expands the complete candidate set before filtering/paging.
+      // Full-text keeps its original body-only matching and reader locations.
+      const related = request.association && request.scope !== "全文检索"
+        ? parsed.terms.map(term => [
+          { ...parsed, terms: [term] },
+          ...unique(options.associationTerms?.(term.text) || []).filter(value => normalize(value) !== normalize(term.text)).map(value => parse(value)).filter(value => !value.error)
+        ]) : [];
+      let candidates = records.filter(record => record.type === request.type && (match(record, parsed, request.scope, request.logic)
+        || related.length > 0 && related.every(concept => concept.some(term => match(record, term, request.scope, "AND")))));
       if (request.type === "报告") candidates = candidates.filter(record => filterRecord(record, request.filters || {}, now));
       if (request.type === "报告" && request.scope === "全文检索") return candidates.map(record => ({ ...record, fulltextHits: fulltextHits(record, parsed) })).filter(record => record.fulltextHits.length);
       // Exact titles come first; other matching records remain in the result set.
       if (request.scope !== "摘要") candidates = candidates.map((record, index) => ({ record, index, exact: titleFields(record).some(title => normalize(title) === parsed.fullQuery) })).sort((a, b) => Number(b.exact) - Number(a.exact) || a.index - b.index).map(value => value.record);
+      if (request.association) candidates = candidates.map((record, index) => ({ record, index, original: match(record, parsed, request.scope, request.logic) }))
+        .sort((a, b) => Number(b.original) - Number(a.original) || a.index - b.index).map(value => value.record);
       return candidates;
     }
     async function demoService(request) {
@@ -297,7 +307,7 @@
       dictionaries.domains[currentType] = unique(rawItems.flatMap(item => list(currentType === "论文" ? item.domainTags : currentType === "人才" ? item.researchFields : [])));
       const filterMode = filterModeFor(currentType);
       const publicView = { type: view.type, scope: viewScope(view), page: view.page, startIndex, pendingPage: view.pendingPage, filters: copy(view.filters), filterMode, rawItems, displayItems, total, shownCount: displayItems.length, hasMore, paginationUnknown: activeSources.some(source => source.paginationUnknown), status: authError ? "error" : view.loading ? "loading" : view.error && !displayItems.length ? "error" : view.loaded ? "success" : "idle", validation: view.validation, error: authError ? authError.message : view.error, retainedResults: view.retainedResults };
-      return { query, scope: viewScope(view), logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: totalForView(value), filterMode: filterModeFor(type) }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: filterMode === "local" ? "仅筛选当前已返回数据，其他页可能仍有符合项" : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
+      return { query, association, scope: viewScope(view), logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: totalForView(value), filterMode: filterModeFor(type) }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: filterMode === "local" ? "仅筛选当前已返回数据，其他页可能仍有符合项" : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
     }
     function emit() { const state = snapshot(); listeners.forEach(listener => listener(state)); }
     function resetContexts(clearFilters) {
@@ -316,9 +326,9 @@
       sourceTypes(view).forEach(type => { view.sources[type] = { ...idleSource(type, 1, view), status: "error", code: authError.code, error: authError.message }; }); emit();
     }
     async function fetchPage(type, page, view, valid) {
-      const scope = requestScope(type, view), filters = requestFilters(type, view), key = JSON.stringify([userContext, query, scope, logic, type, page, filters]);
+      const scope = requestScope(type, view), filters = requestFilters(type, view), key = JSON.stringify([userContext, query, scope, logic, type, page, filters, association]);
       if (cache.has(key)) return copy(cache.get(key));
-      const response = await service({ type, query, scope, logic, page, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters, userContext, queryVersion: version });
+      const response = await service({ type, query, scope, logic, page, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters, association, userContext, queryVersion: version });
       const result = normalizeResponse(response, type, page);
       if (valid()) cache.set(key, result);
       return result;
@@ -386,6 +396,12 @@
         views[currentType] = { ...makeView(currentType), scope: value, filters: copy(prior.filters) }; validation = null; return load(views[currentType], 1);
       },
       setLogic(value) { if (value !== "AND") return Promise.resolve(snapshot()); return Promise.resolve(snapshot()); },
+      setAssociation(value) {
+        value = Boolean(value);
+        if (association === value) return Promise.resolve(snapshot());
+        association = value; checkContext(); resetContexts(false);
+        return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot()));
+      },
       selectType(type) { if (!["全部", ...TYPES].includes(type)) return Promise.resolve(snapshot()); checkContext(); currentType = type; validation = null; const view = views[type]; if (view.loaded || view.loading) { emit(); return Promise.resolve(snapshot()); } return load(view, view.page); },
       setFilter(name, value) {
         if (!FILTER_TYPES.includes(currentType) && currentType !== "报告") return Promise.resolve(snapshot());

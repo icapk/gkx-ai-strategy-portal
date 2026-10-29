@@ -31,3 +31,36 @@
 .keyword-report-hit mark { padding: 1px 2px; border-radius: 2px; background: #fff0ac; color: inherit; }
 .keyword-report-more { margin-top: 8px; }
 .keyword-report-more > summary { width: fit-content; margin-bottom: 8px; color: #1764eb; cursor: pointer; font-size: 12px; }
+#searchResultsPage .portal-association-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary, #64748b);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#searchResultsPage .portal-association-control[hidden] { display: none; }
+#searchResultsPage .portal-association-control input {
+  appearance: none;
+  width: 28px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #e2e8f0;
+  cursor: pointer;
+}
+#searchResultsPage .portal-association-control input::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: 2px;
+  border-radius: 50%;
+  background: #fff;
+}
+#searchResultsPage .portal-association-control input:checked { background: #2468f2; border-color: #2468f2; }
+#searchResultsPage .portal-association-control input:checked::before { transform: translateX(12px); }
+#searchResultsPage .portal-association-control input:focus-visible { outline: 2px solid #2468f2; outline-offset: 3px; }
+#searchResultsPage .portal-association-control input:disabled { cursor: default; opacity: .5; }
