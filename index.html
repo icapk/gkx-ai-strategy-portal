@@ -3100,6 +3100,10 @@
       min-height: 212px;
     }
 
+    .mg-search-card[data-search-mode="keyword"] {
+      min-height: 0;
+    }
+
     .mg-search-card .search-service-path {
       margin-top: 8px;
     }
@@ -3933,28 +3937,9 @@
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">联</span>
                 <span>从当前问题出发，发现相似主题、上下游成果、相关专家与机构，并说明推荐理由</span>
               </div>
-              <div class="mg-ai-search-guide" id="mgKeywordSearchGuide" hidden>
-                <span class="mg-ai-search-guide-icon" aria-hidden="true">词</span>
-                <span>支持单个或多个关键词精确查找，并按搜索范围和筛选条件查看资源</span>
-              </div>
               <div class="mg-ai-search-guide" id="mgV2QaSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">问</span>
                 <span>从可访问的论文、专利、专家与报告中检索证据，生成带编号引用和边界说明的回答</span>
-              </div>
-              <div class="search-service-path" data-search-service-path="hero" aria-label="当前功能路径：基础服务，智能搜索，全文搜索；服务能力：信息搜索、搜索结果展示、搜索结果定位">
-                <span class="search-service-path-label">服务能力</span>
-                <span class="search-service-path-route">
-                  <span class="search-service-path-node">基础服务</span>
-                  <span class="search-service-path-separator" aria-hidden="true">›</span>
-                  <span class="search-service-path-node">智能搜索</span>
-                  <span class="search-service-path-separator" aria-hidden="true">›</span>
-                  <strong class="search-service-path-node is-current" data-search-service-mode>全文搜索</strong>
-                </span>
-                <span class="search-service-path-features" data-search-service-features>
-                  <span class="search-service-path-feature">信息搜索</span>
-                  <span class="search-service-path-feature">搜索结果展示</span>
-                  <span class="search-service-path-feature">搜索结果定位</span>
-                </span>
               </div>
               <div class="mg-search-actions">
                 <button class="mg-voice-input" id="mgVoiceInputButton" type="button" aria-label="开始语音输入" aria-pressed="false" aria-controls="mgHeroSearchInput" title="语音输入">
@@ -5362,9 +5347,7 @@
       const mgRecommendationMore = document.getElementById("mgRecommendationMore");
       const mgAiSearchGuide = document.getElementById("mgAiSearchGuide");
       const mgAssociationSearchGuide = document.getElementById("mgAssociationSearchGuide");
-      const mgKeywordSearchGuide = document.getElementById("mgKeywordSearchGuide");
       const mgV2QaSearchGuide = document.getElementById("mgV2QaSearchGuide");
-      const mgHeroSearchServicePath = document.querySelector('[data-search-service-path="hero"]');
       const portalSearchServicePath = document.querySelector('[data-search-service-path="results"]');
       const profilePage = document.getElementById("profilePage");
       const ticketServiceButton = document.getElementById("ticketServiceButton");
@@ -7780,10 +7763,8 @@
         mgSmartRecommendations.hidden = activeHeroExperience === "classic" && activeHeroSearchMode !== "fulltext";
         mgAssociationSearchGuide.hidden = activeHeroSearchMode !== "association";
         mgAiSearchGuide.hidden = activeHeroSearchMode !== "ai";
-        mgKeywordSearchGuide.hidden = activeHeroSearchMode !== "keyword";
         mgV2QaSearchGuide.hidden = true;
         mgHeroSearchInput.placeholder = modes[activeHeroSearchMode].placeholder;
-        updateSearchServicePath(mgHeroSearchServicePath, activeHeroSearchMode);
         const submit = mgHeroSearchForm.querySelector(".mg-search-submit");
         submit.setAttribute("aria-label", modes[activeHeroSearchMode].label);
         if (focusInput) mgHeroSearchInput.focus();
@@ -7812,7 +7793,6 @@
         mgSmartRecommendations.hidden = false;
         mgAssociationSearchGuide.hidden = true;
         mgAiSearchGuide.hidden = true;
-        mgKeywordSearchGuide.hidden = true;
         mgV2QaSearchGuide.hidden = activeV2HeroMode !== "qa";
         mgHeroSearchInput.placeholder = modes[activeV2HeroMode].placeholder;
         mgHeroSearchForm.querySelector(".mg-search-submit").setAttribute("aria-label", modes[activeV2HeroMode].label);
@@ -7826,7 +7806,6 @@
         mgHeroSearchForm.dataset.searchExperience = activeHeroExperience;
         mgClassicSearchModeRow.hidden = isV2;
         mgV2SearchModeRow.hidden = !isV2;
-        if (mgHeroSearchServicePath) mgHeroSearchServicePath.hidden = isV2;
         mgV2ExperienceSwitch.setAttribute("aria-expanded", String(isV2));
         if (isV2) {
           setV2HeroMode(activeV2HeroMode, false);
