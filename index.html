@@ -3,6 +3,7 @@
 <head>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23006eff%22/%3E%3C/svg%3E">
   <meta charset="utf-8">
+  <link rel="stylesheet" href="ai-rag-search.css?v=20261030-ai-results-1">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <meta name="description" content="深圳国际科技信息中心门户，连接 AI 科研、战略咨询、未来教育与科技评价核心服务。">
@@ -5173,7 +5174,8 @@
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
   <script src="search-methods.js?v=20261030-exact-auto"></script>
-  <script src="keyword-search-ui.js?v=20261030-exact-auto"></script><script>
+  <script src="keyword-search-ui.js?v=20261030-exact-auto"></script>
+  <script src="ai-rag-search.js?v=20261030-ai-results-1"></script><script>
     (() => {
       "use strict";
 
@@ -5541,6 +5543,7 @@
       let searchSubmissionTicket = 0;
       let keywordSearchV1 = null;
       let keywordSearchMethods = null;
+      let aiRagSearch = null;
       function getSubmittedSearchQuery() { return submittedSearchQuery; }
       const activeExpansionTerms = new Set();
       let keywordLogic = "AND";
@@ -7714,13 +7717,15 @@
           else url.searchParams.delete("plan");
           if (current?.searchMethod === "expansion" && current.expansionTerms.length) url.searchParams.set("expansions", JSON.stringify(current.expansionTerms));
           else url.searchParams.delete("expansions");
-        } else ["feature", "plan", "expansions", "scope", "reportTypes"].forEach(key => url.searchParams.delete(key));
+        } else ["feature", "plan", "expansions", "scope", "reportTypes", "type"].forEach(key => url.searchParams.delete(key));
         if (url.href !== window.location.href) window.history.replaceState(null, "", url);
       }
 
       function setSearchMode(mode) {
         const previousMode = activeSearchMode;
         activeSearchMode = mode === "AI 搜索" || mode === "AI搜索" ? "AI 搜索" : "关键词";
+        searchResultsPage.classList.toggle("ai-rag-mode", activeSearchMode === "AI 搜索");
+        if (activeSearchMode !== "AI 搜索") aiRagSearch?.cancel();
         if (mode === "关联" || activeSearchMode === "AI 搜索")
           keywordSearchV1?.model.setSearchMethod(mode === "关联" ? "association" : "exact").catch(error => setPortalSearchFeedback(error.message, "error"));
         portalSearchTypeTabs.querySelectorAll("[data-keyword-only]").forEach(tab => { tab.hidden = activeSearchMode !== "关键词"; });
@@ -8886,6 +8891,7 @@
       }
 
       function renderSearchResults() {
+        if (activeSearchMode === "AI 搜索" && aiRagSearch) return aiRagSearch.submit(getSubmittedSearchQuery());
         if (activeSearchMode === "关键词" && keywordSearchV1) return keywordSearchV1.render();
         const items = getFilteredSearchItems();
         const allTypeItems = getFilteredSearchItems({ ignoreType: true });
@@ -8939,6 +8945,7 @@
       }
 
       function showSurface(name, options = {}) {
+        if (name !== "search") aiRagSearch?.cancel();
         if (name !== "qa") window.clearTimeout(qaAnswerTimer);
         if (name !== "home" && mgVoiceListening) setHeroVoiceListening(false);
         Object.entries(SURFACES).forEach(([key, node]) => {
@@ -9304,7 +9311,7 @@
         setPortalSearchFeedback(activeSearchMode === "关联"
           ? "知识检索已完成，可查看规范化过程、关联依据并采用有用信息。"
           : "检索已完成，可继续使用资源类型和筛选条件缩小范围。" );
-        showSurface("search", { focusTarget: portalResultSearchInput });
+        showSurface("search", { focusTarget: activeSearchMode === "AI 搜索" ? aiRagSearch?.input : portalResultSearchInput });
         if (activeSearchMode === "关键词") setPortalSearchFeedback("");
         if (options.trackSearch !== false && activeSearchMode === "关键词") {
           const service = window.PortalSearchRecommend;
@@ -9464,6 +9471,11 @@
           feedback: setPortalSearchFeedback
         });
       }
+      aiRagSearch = window.PortalAiRagSearch.create({
+        host: searchResultsPage,
+        records: window.PortalAiDemoFixtures?.records || [],
+        onSubmit: query => performSearch(query, { mode: "AI 搜索" })
+      });
       setHeroSearchMode(activeHeroSearchMode, false);
       setHeroExperience(returnHeroExperience, false);
       if (activeHeroExperience === "classic" && activeHeroSearchMode === "keyword") {
@@ -10977,7 +10989,7 @@
       embeddedSystem.addEventListener("load", persistPortalViewState);
       window.addEventListener("pagehide", persistPortalViewState);
       window.addEventListener("beforeunload", persistPortalViewState);
-      if (!openClusterServiceRoute()) restorePortalViewState();
+      if (!openClusterServiceRoute() && !(entryQuery && ["AI 搜索", "AI搜索"].includes(entryMode))) restorePortalViewState();
     })();
   </script>
 </body>
