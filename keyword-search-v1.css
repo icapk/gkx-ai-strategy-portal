@@ -13,3 +13,19 @@
 .keyword-search-v1-active .keyword-v1-simulation-cover { float: right; width: 144px; height: 96px; margin: 0 0 12px 20px; object-fit: cover; border-radius: 6px; }
 .keyword-search-v1-active .keyword-v1-entry-unavailable { color: #8996a8; font-size: 12px; }
 .keyword-search-v1-active .portal-search-card-action:disabled { opacity: .55; cursor: default; }
+
+.keyword-report-hits { margin: 14px 0 16px; }
+.keyword-report-hits-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 8px; font-size: 12px; }
+.keyword-report-hits-heading strong { color: #3b4c62; font-weight: 500; }
+.keyword-report-hits-heading > span { color: #8894a5; }
+.keyword-report-hits ul { list-style: none; padding: 0; margin: 0; }
+.keyword-report-hits li + li { margin-top: 6px; }
+.keyword-report-hit { display: flex; align-items: baseline; gap: 12px; width: 100%; padding: 10px 12px; border: 1px solid transparent; border-radius: 6px; background: #f7f9fc; color: #465970; text-align: left; font: inherit; font-size: 13px; line-height: 1.8; cursor: pointer; }
+.keyword-report-hit:hover { border-color: #b8d2fc; background: #f1f6ff; }
+.keyword-report-hit:focus-visible { outline: 2px solid #1764eb; outline-offset: 2px; }
+.keyword-report-hit-page { flex: 0 0 52px; color: #1764eb; white-space: nowrap; font-size: 12px; }
+.keyword-report-hit-sentence { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.keyword-report-hit-open { flex: 0 0 auto; color: #6481a6; white-space: nowrap; font-size: 12px; }
+.keyword-report-hit mark { padding: 1px 2px; border-radius: 2px; background: #fff0ac; color: inherit; }
+.keyword-report-more { margin-top: 8px; }
+.keyword-report-more > summary { width: fit-content; margin-bottom: 8px; color: #1764eb; cursor: pointer; font-size: 12px; }

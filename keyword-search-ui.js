@@ -113,10 +113,11 @@
       const type = state.currentType, rows = state.view?.rawItems || [], filters = state.view?.filters || {};
       const selected = type === "人才" ? [filters.researchFieldFilter] : filters.domains || [];
       const domains = [...new Set([...rows.flatMap(row => type === "人才" ? row.researchFields || [] : row.domainTags || []), ...selected].filter(value => value != null && value !== ""))];
-      const signature = JSON.stringify([type, domains]);
+      const signature = JSON.stringify([type, ["论文", "人才"].includes(type) ? domains : []]);
       if (signature === filterSignature) return;
       filterSignature = signature;
-      let html = type === "论文" ? group("搜索范围", ["标题和摘要", "标题", "摘要"].map(scope => `<label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="${esc(scope)}"><span>${esc(scope)}</span></label>`).join("")) : "";
+      const scopes = type === "论文" ? ["标题和摘要", "标题", "摘要"] : type === "报告" ? ["标题和摘要", "标题", "摘要", "全文检索"] : [];
+      let html = scopes.length ? group("搜索范围", scopes.map(scope => `<label class="portal-search-filter-option"><input type="radio" name="resourceScope" value="${esc(scope)}"><span>${esc(scope)}</span></label>`).join("")) : "";
       let professional = "";
       if (type === "人才") {
         professional = field("personNameFilter", "search", null, "学者姓名") + field("institutionFilter", "search", null, "机构名称") + field("researchFieldFilter", null, domains);
@@ -126,7 +127,7 @@
         professional = field("ipcFilter", "search", null, "例如 G16B") + field("applicantFilter", "search", null, "申请人名称") + field("inventorFilter", "search", null, "发明人姓名") + field("applicationStart", "date") + field("applicationEnd", "date") + field("publicationStart", "date") + field("publicationEnd", "date");
       }
       if (professional) html += group("二次筛选", `<div class="portal-resource-filter">${professional}</div>`, "portal-search-filter-fields");
-      else html += '<p class="portal-resource-filter-hint keyword-v1-no-filters">选择论文、专利或人才，可使用二次筛选。</p>';
+      else if (type !== "报告") html += '<p class="portal-resource-filter-hint keyword-v1-no-filters">选择论文、专利或人才，可使用二次筛选。</p>';
       if (type === "论文") {
         html += group("发表时间", `<div class="portal-resource-filter">${field("publishedYearFrom", "text", null, "YYYY")}${field("publishedYearTo", "text", null, "YYYY")}</div>`, "portal-search-filter-fields");
       }
@@ -197,7 +198,7 @@
       chips.innerHTML = descriptors.map(item => `<button type="button" data-keyword-remove-filter="${esc(item.name)}" aria-label="移除筛选 ${esc(item.label)}"><span>${esc(item.label)}</span><b aria-hidden="true">×</b></button>`).join("") + (descriptors.length ? '<button type="button" class="portal-clear-filters" data-keyword-clear-filters>清除全部</button>' : "");
       if (countBadge) { countBadge.hidden = !descriptors.length; countBadge.textContent = String(descriptors.length); }
     }
-    function renderCard(record, absoluteIndex, query) {
+    function renderCard(record, absoluteIndex, query, scope) {
       const type = record.type, raw = record.raw || record;
       const values = value => (Array.isArray(value) ? value : value == null ? [] : [value]).filter(value => value != null && value !== "");
       const names = value => values(value).map(item => typeof item === "object" ? item.name : item).filter(Boolean).join(" · ");
@@ -273,11 +274,15 @@
       const launchControl = type === "练仿真" ? launchUrl
         ? `<a class="portal-search-card-action is-primary" data-keyword-launch href="${esc(launchUrl)}" target="_blank" rel="noopener noreferrer">开始仿真 ↗</a>`
         : '<button class="portal-search-card-action" type="button" disabled title="暂无可用启动入口">开始仿真</button><span class="keyword-v1-entry-unavailable">暂无可用启动入口</span>' : "";
+      const fulltext = type === "报告" && scope === "全文检索";
+      const hits = fulltext ? record.fulltextHits || [] : [];
+      const hitButton = (hit, index) => `<li><button type="button" class="keyword-report-hit" data-report-hit="${index}" aria-label="定位第 ${esc(hit.pageNumber)} 页：${esc(hit.sentence)}"><span class="keyword-report-hit-page">第 ${esc(hit.pageNumber)} 页</span><span class="keyword-report-hit-sentence">${highlight(hit.sentence)}</span><span class="keyword-report-hit-open" aria-hidden="true">定位全文 ↗</span></button></li>`;
+      const hitMarkup = fulltext ? `<section class="keyword-report-hits" aria-label="全文命中内容"><div class="keyword-report-hits-heading"><strong>全文命中 ${hits.length} 处</strong>${record.document?.sourceKind === "LOCAL_PROTOTYPE" ? '<span>原型示例正文（非报告原文）</span>' : ""}</div><ul>${hits.slice(0, 3).map(hitButton).join("")}</ul>${hits.length > 3 ? `<details class="keyword-report-more"><summary>展开其余 ${hits.length - 3} 处命中</summary><ul>${hits.slice(3).map((hit, index) => hitButton(hit, index + 3)).join("")}</ul></details>` : ""}</section>` : "";
       article.innerHTML = `<div class="portal-result-rail"><span class="portal-result-type-icon" data-result-type="${esc(type)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7"></path></svg></span><span class="portal-result-index">${String(absoluteIndex + 1).padStart(2, "0")}</span></div>
         <div class="portal-result-content"><div class="portal-result-kicker"><span>${esc(type)}</span>${dateValue ? `<time>${esc(dateLabel)} ${esc(dateValue)}</time>` : ""}</div>
           ${coverUrl ? `<img class="keyword-v1-simulation-cover" src="${esc(coverUrl)}" alt="${esc(title)}封面" loading="lazy">` : ""}
           <h3 class="portal-search-card-title">${detailUrl ? `<a class="portal-result-detail-link" data-result-detail-link href="${esc(detailUrl)}" target="_blank" rel="noopener noreferrer">${highlight(title)}<span class="portal-title-external-mark" aria-hidden="true">↗</span><small>新标签页</small></a>` : `<span>${highlight(title)}</span>`}</h3>
-          ${metadata(rows)}${present(summary) ? `<p class="portal-search-card-summary">${highlight(summary)}</p>` : ""}
+          ${metadata(rows)}${!fulltext && present(summary) ? `<p class="portal-search-card-summary">${highlight(summary)}</p>` : ""}${hitMarkup}
           <div class="portal-result-bottomline"><div class="portal-search-card-tags">${tags.slice(0, 3).map(value => `<span class="portal-search-card-tag">${esc(value)}</span>`).join("")}</div><div class="portal-search-card-actions">
           ${hasInlineDetail ? `<button class="portal-search-card-action" type="button" data-keyword-detail aria-expanded="false" aria-controls="${esc(detailId)}">${type === "练仿真" ? "查看实验详情" : "展开信息"}</button>` : ""}${detailControl}${launchControl}</div></div>
           ${hasInlineDetail ? `<section class="portal-entity-detail" id="${esc(detailId)}" hidden><h4>${esc(title)}</h4>${metadata(more)}${type === "练仿真" && present(summary) ? `<p>${esc(summary)}</p>` : ""}</section>` : ""}</div>`;
@@ -287,6 +292,10 @@
         toggle.setAttribute("aria-expanded", String(!detail.hidden));
         toggle.textContent = detail.hidden ? type === "练仿真" ? "查看实验详情" : "展开信息" : "收起详情";
       });
+      article.querySelectorAll("[data-report-hit]").forEach(button => button.addEventListener("click", () => {
+        const opened = global.PortalReportReader?.open({ record, hitIndex: Number(button.dataset.reportHit), query, trigger: button });
+        if (!opened) bridge.feedback?.("该内容暂无法定位，请重新检索后重试。", "error");
+      }));
       return article;
     }
     function sourceMessage(state) {
@@ -337,14 +346,14 @@
       const source = state.sources?.[state.currentType];
       const sourceStates = Object.values(state.sources || {});
       const anySuccess = sourceStates.some(value => value.status === "success");
-      const paper = state.currentType === "论文";
-      let title = "未找到相关资源", text = paper ? "可尝试更换关键词或搜索范围。" : "可尝试更换关键词或清除筛选条件。", button = "清除筛选条件";
+      const paper = state.currentType === "论文", scoped = paper || state.currentType === "报告";
+      let title = "未找到相关资源", text = scoped ? "可尝试更换关键词或搜索范围。" : "可尝试更换关键词或清除筛选条件。", button = "清除筛选条件";
       let showButton = SECONDARY_TYPES.includes(state.currentType) && filterDescriptors(state).length > 0;
       emptyAction = "clear";
       if (isUnconnected(state.currentType)) { title = `${state.currentType}待接入`; text = state.currentType === "练仿真" ? "练仿真搜索接口接入后可检索。" : "专利搜索接口接入后可检索并筛选。"; showButton = false; }
       else if (!state.query) { title = "请输入关键词"; text = "输入关键词后开始搜索。"; showButton = false; }
       else if (state.authError) { title = state.authError.message; text = "重新登录后再继续检索。"; showButton = false; }
-      else if (source?.status === "unsupported" || (all && !anySuccess && state.unsupportedTypes?.length && !state.loading)) { title = source?.error === "检索能力暂不可用" ? "检索能力暂不可用" : "不支持该检索条件"; text = paper ? "当前资源暂不支持该检索条件，请切换搜索范围。" : "当前资源暂不支持该检索条件，请切换资源类型。"; button = "切换至标题和摘要"; emptyAction = "scope"; showButton = paper && title !== "检索能力暂不可用"; }
+      else if (source?.status === "unsupported" || (all && !anySuccess && state.unsupportedTypes?.length && !state.loading)) { title = source?.error === "检索能力暂不可用" ? "检索能力暂不可用" : "不支持该检索条件"; text = scoped ? "当前资源暂不支持该检索条件，请切换搜索范围。" : "当前资源暂不支持该检索条件，请切换资源类型。"; button = "切换至标题和摘要"; emptyAction = "scope"; showButton = scoped && title !== "检索能力暂不可用"; }
       else if (state.loading && !items.length) { title = "正在检索……"; text = "各类资源正在加载。"; showButton = false; }
       else if (state.failedTypes?.length && (!items.length || view.status === "error")) { title = anySuccess ? "部分资源检索失败" : "搜索失败，请重试"; text = "失败来源未作为零结果统计。"; button = "重试"; emptyAction = "retry"; }
       else if (filterDescriptors(state).length && view.filterMode !== "server") {
@@ -397,7 +406,7 @@
       const fragment = doc.createDocumentFragment();
       items.forEach((record, index) => {
         const absoluteIndex = Number.isFinite(view.startIndex) ? view.startIndex + index : (page - 1) * 10 + index;
-        const card = renderCard(record, absoluteIndex, state.query);
+        const card = renderCard(record, absoluteIndex, state.query, state.scope);
         if (card) fragment.append(card);
       });
       list.replaceChildren(fragment); list.hidden = !items.length;

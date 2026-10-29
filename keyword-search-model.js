@@ -8,6 +8,7 @@
   const CONNECTED = TYPES.slice();
   const PAGE_SIZE = 10;
   const PAPER_SCOPES = ["标题和摘要", "标题", "摘要"];
+  const REPORT_SCOPES = ["标题和摘要", "标题", "摘要", "全文检索"];
   const segmenter = typeof Intl.Segmenter === "function" ? new Intl.Segmenter("zh-CN", { granularity: "word" }) : null;
   const normalize = value => String(value == null ? "" : value)
     .replace(/[！-～]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
@@ -48,6 +49,7 @@
     return record.type === "会议" ? [record.name || record.title, record.fullNameEn] : [record.title || record.name];
   }
   function fields(record, scope) {
+    if (record.type === "报告" && scope === "全文检索") return documentParagraphs(record).map(value => value.paragraph.text);
     const titles = titleFields(record);
     if (scope === "标题") return titles;
     const summary = record.type === "论文" ? record.abstract : record.summary;
@@ -80,6 +82,27 @@
     }
     return false;
   }
+  // Only the separately declared prototype documents supply full text. Legacy
+  // metadata, tags and the old matches[] demonstration are never a fallback.
+  function documentParagraphs(record) {
+    const document = record && record.document;
+    if (record?.type !== "报告" || document?.sourceKind !== "LOCAL_PROTOTYPE" || !document.documentId || !document.documentVersion || !Array.isArray(document.pages)) return [];
+    const resourceIds = [document.resourceId, ...(Array.isArray(document.resourceIdAliases) ? document.resourceIdAliases : [])].filter(id => typeof id === "string" && id.trim());
+    if (!resourceIds.includes(record.id)) return [];
+    return document.pages.flatMap(page => page && Number.isInteger(page.pageNumber) && page.pageNumber > 0 && Array.isArray(page.paragraphs)
+      ? page.paragraphs.filter(paragraph => paragraph && typeof paragraph.paragraphId === "string" && paragraph.paragraphId.trim() && typeof paragraph.text === "string").map(paragraph => ({ document, page, paragraph })) : []);
+  }
+  function fulltextHits(record, input) {
+    const parsed = typeof input === "string" ? parse(input) : input;
+    if (!parsed || parsed.error || !parsed.terms.length) return [];
+    return documentParagraphs(record).flatMap(({ document, page, paragraph }) => {
+      const sentences = paragraph.text.match(/[^。！？!?]+[。！？!?]?/gu) || [paragraph.text];
+      return sentences.map(sentence => sentence.trim()).filter(sentence => sentence && parsed.terms.some(term => whole(sentence, term.text))).map(sentence => ({
+        documentId: document.documentId, documentVersion: document.documentVersion, version: document.documentVersion,
+        pageNumber: page.pageNumber, paragraphId: paragraph.paragraphId, sentence
+      }));
+    });
+  }
   function match(record, parsed, scope, logic) {
     if (typeof parsed === "string") parsed = parse(parsed);
     if (!parsed || parsed.error || !parsed.terms.length || record.type === "人才" && scope !== "全部资源") return false;
@@ -92,7 +115,7 @@
   const LEGACY_IDS = ["kw-paper-deep-learning-ai", "kw-paper-scientific-agents", "kw-paper-drug-target", "kw-paper-material-model", "kw-patent-drug-target", "kw-scholar-zhou", "kw-report-ai-2026", "kw-patent-electrolyte", "kw-scholar-lin", "kw-scholar-chen", "kw-news-low-altitude", "kw-project-quantum", "kw-report-future-industries", "kw-news-science-tools"];
   const LEGACY_AUTHORS = [["Yoshua Bengio", "Yann LeCun", "Geoffrey Hinton"], ["陈晓岚", "王祺"], ["李铭", "周明远"], ["原型作者"]];
   function createFixtures(items) {
-    return items.filter(item => TYPES.includes(item.type)).map(item => {
+    const records = items.filter(item => TYPES.includes(item.type)).map(item => {
       const index = items.indexOf(item), type = item.type;
       const record = { ...item, raw: item, id: item.id || item.portalResourceId || item.portalPaperId || LEGACY_IDS[index] || null };
       record.domainTags = list(type === "论文" ? item.domainTags : item.domainTags || item.tags);
@@ -103,6 +126,7 @@
       if (["会议", "课程", "活动"].includes(type)) record.name = item.name || item.title;
       return record;
     });
+    return root.PortalReportFulltextFixtures ? root.PortalReportFulltextFixtures.attach(records) : records;
   }
 
   const ALIASES = { personName: "personNameFilter", institution: "institutionFilter", author: "authorFilter", venue: "venueFilter", ipc: "ipcFilter", applicant: "applicantFilter", inventor: "inventorFilter", applicationFrom: "applicationStart", applicationTo: "applicationEnd", publicationFrom: "publicationStart", publicationTo: "publicationEnd", domainTags: "domains", researchFields: "researchFieldFilter", reportTypes: "reportType", lecturer: "courseLecturer", registrationStatus: "activityRegistration" };
@@ -173,17 +197,19 @@
     const contextKey = () => { const value = getUserContext(); return typeof value === "string" ? value : JSON.stringify(value); };
     const FILTER_TYPES = ["论文", "专利", "人才"];
     let userContext = contextKey(), version = 0, query = "", logic = "AND", currentType = "全部", validation = null, authError = null;
-    const makeView = type => ({ type, scope: type === "论文" ? PAPER_SCOPES[0] : "全部资源", page: 1, filters: {}, sources: {}, loaded: false, loading: false, requestToken: 0, pendingPage: null, retainedResults: false, error: null, validation: null });
+    const scopedTypes = { "论文": PAPER_SCOPES, "报告": REPORT_SCOPES };
+    const makeView = type => ({ type, scope: scopedTypes[type] ? scopedTypes[type][0] : "全部资源", page: 1, filters: {}, sources: {}, loaded: false, loading: false, requestToken: 0, pendingPage: null, retainedResults: false, error: null, validation: null });
     let views = Object.fromEntries(["全部", ...TYPES].map(type => [type, makeView(type)]));
-    const viewScope = view => view.type === "论文" ? view.scope : "全部资源";
-    const requestScope = (type, view) => type === "论文" ? view.type === "论文" ? view.scope : PAPER_SCOPES[0] : "全部资源";
+    const viewScope = view => scopedTypes[view.type] ? view.scope : "全部资源";
+    const requestScope = (type, view) => scopedTypes[type] ? view.type === type ? view.scope : type === "报告" ? "全部资源" : scopedTypes[type][0] : "全部资源";
     const sourceTypes = view => view.type === "全部" ? ALL_TYPES : [view.type];
-    const cap = type => ({ exact: true, scopes: type === "论文" ? PAPER_SCOPES : ["全部资源"], ...capabilities[type] });
+    const cap = type => ({ exact: true, scopes: type === "报告" ? [...REPORT_SCOPES, "全部资源"] : scopedTypes[type] || ["全部资源"], ...capabilities[type] });
     const eligible = (type, view) => cap(type).exact && cap(type).scopes.includes(requestScope(type, view));
     const unique = values => [...new Set(values.filter(value => value != null && value !== ""))];
     function mainRecords(request) {
       const parsed = parse(request.query);
       let candidates = records.filter(record => record.type === request.type && match(record, parsed, request.scope, request.logic));
+      if (request.type === "报告" && request.scope === "全文检索") return candidates.map(record => ({ ...record, fulltextHits: fulltextHits(record, parsed) })).filter(record => record.fulltextHits.length);
       // Exact titles come first; other matching records remain in the result set.
       if (request.scope !== "摘要") candidates = candidates.map((record, index) => ({ record, index, exact: titleFields(record).some(title => normalize(title) === parsed.fullQuery) })).sort((a, b) => Number(b.exact) - Number(a.exact) || a.index - b.index).map(value => value.record);
       return candidates;
@@ -340,14 +366,15 @@
         if (validation) { emit(); return Promise.resolve(snapshot()); }
         checkContext(); params = params || {};
         const changed = parsed.query !== query; query = parsed.query;
-        if (currentType === "论文" && (!params.type || params.type === "论文") && PAPER_SCOPES.includes(params.scope)) views["论文"].scope = params.scope;
+        const targetType = params.type || currentType;
+        if (scopedTypes[targetType]?.includes(params.scope)) views[targetType].scope = params.scope;
         if (params.type && ["全部", ...TYPES].includes(params.type)) currentType = params.type;
         logic = "AND"; resetContexts(changed); return load(views[currentType], 1);
       },
       setScope(value) {
-        if (currentType !== "论文" || !PAPER_SCOPES.includes(value) || views["论文"].scope === value) return Promise.resolve(snapshot());
-        checkContext(); const prior = views["论文"]; prior.requestToken++;
-        views["论文"] = { ...makeView("论文"), scope: value, filters: copy(prior.filters) }; validation = null; return load(views["论文"], 1);
+        if (!scopedTypes[currentType]?.includes(value) || views[currentType].scope === value) return Promise.resolve(snapshot());
+        checkContext(); const prior = views[currentType]; prior.requestToken++;
+        views[currentType] = { ...makeView(currentType), scope: value, filters: copy(prior.filters) }; validation = null; return load(views[currentType], 1);
       },
       setLogic(value) { if (value !== "AND") return Promise.resolve(snapshot()); return Promise.resolve(snapshot()); },
       selectType(type) { if (!["全部", ...TYPES].includes(type)) return Promise.resolve(snapshot()); checkContext(); currentType = type; validation = null; const view = views[type]; if (view.loaded || view.loading) { emit(); return Promise.resolve(snapshot()); } return load(view, view.page); },
@@ -367,5 +394,5 @@
     return api;
   }
 
-  root.PortalKeywordModel = Object.freeze({ TYPES: TYPES.slice(), ALL_TYPES: ALL_TYPES.slice(), PAGE_SIZE, isUnconnected, normalize, parse, validate, match, createFixtures, create, filterRecord, fields });
+  root.PortalKeywordModel = Object.freeze({ TYPES: TYPES.slice(), ALL_TYPES: ALL_TYPES.slice(), PAPER_SCOPES: PAPER_SCOPES.slice(), REPORT_SCOPES: REPORT_SCOPES.slice(), PAGE_SIZE, isUnconnected, normalize, parse, validate, match, fulltextHits, createFixtures, create, filterRecord, fields });
 })(typeof window !== "undefined" ? window : globalThis);
