@@ -38,6 +38,8 @@
 .search-method-choice input { margin: 0; width: 15px; height: 15px; accent-color: #1764eb; }
 .search-method-choice label:has(input:checked) { color: #1764eb; }
 .search-method-choice label:has(input:disabled) { opacity: .5; cursor: default; }
+.search-automatic-rules { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.search-automatic-rules > span { padding: 4px 8px; border: 1px solid #dce7f8; border-radius: 4px; background: #f4f7fd; color: #4d6c98; font-size: 12px; line-height: 1.5; }
 .search-method-body { margin-top: 14px; padding-top: 12px; border-top: 1px solid #e7edf6; }
 #searchAssociationTools:not([hidden]) { display: flex; flex-wrap: wrap; gap: 12px 28px; }
 #searchAssociationTools > details { flex: 1 1 360px; min-width: 0; }

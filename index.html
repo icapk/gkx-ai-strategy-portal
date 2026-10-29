@@ -3742,7 +3742,7 @@
     }
   </style>
   <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
-  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-three-methods">
+  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-exact-auto">
   <link rel="stylesheet" href="report-fulltext.css?v=20261030-report">
 </head>
 <body>
@@ -5168,12 +5168,12 @@
 
   <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
   <script src="report-fulltext-fixtures.js?v=20261030-report-types"></script>
-  <script src="keyword-search-model.js?v=20261030-three-methods"></script>
+  <script src="keyword-search-model.js?v=20261030-exact-auto"></script>
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
-  <script src="report-fulltext-reader.js?v=20261030-report"></script>
-  <script src="search-methods.js?v=20261030-three-methods"></script>
-  <script src="keyword-search-ui.js?v=20261030-three-methods"></script><script>
+  <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
+  <script src="search-methods.js?v=20261030-exact-auto"></script>
+  <script src="keyword-search-ui.js?v=20261030-exact-auto"></script><script>
     (() => {
       "use strict";
 
@@ -9318,7 +9318,7 @@
         return true;
       }
 
-      // Keyword V1: exact original terms only; expansion is outside this phase.
+      // Keep legacy keyword controls hidden; current search methods own expansion.
       const originalSearchModePanels = updateSearchModePanels;
       const keywordTools = document.createElement("div");
       keywordTools.className = "keyword-v1-tools";
@@ -9363,6 +9363,7 @@
           associationInfluence: record => keywordSearchMethods?.influence(record),
           associationPlan: window.PortalSearchMethods.analyze,
           parseConcepts: window.PortalSearchMethods.parseConcepts,
+          automaticRules: window.PortalSearchMethods.automaticRules,
           onRender: syncConsolidatedSearch,
           getQuery: getSubmittedSearchQuery,
           getType: () => activeSearchType,

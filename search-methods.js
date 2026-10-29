@@ -4,7 +4,7 @@
   // Prototype terminology examples. These are not an external model response.
   const DICTIONARY = [
     { pattern: /智能体|\bagents?\b/iu, automatic: ["智能代理", "多智能体"], translation: ["智能体"], broader: ["人工智能"], narrower: ["科研智能体", "自主智能体"] },
-    { pattern: /人工智能|^ai$|\bartificial intelligence\b/iu, automatic: ["生成式AI", "机器智能"], translation: ["人工智能"], broader: ["计算机科学"], narrower: ["机器学习", "大语言模型"] },
+    { pattern: /人工智能|^ai$|\bartificial intelligence\b/iu, automatic: ["人工智能", "生成式AI", "机器智能"], translation: ["人工智能"], broader: ["计算机科学"], narrower: ["神经网络", "智能体", "机器学习", "大语言模型"] },
     { pattern: /大模型|语言模型|^llm$|\blarge language model\b/iu, automatic: ["基础模型", "预训练模型"], translation: ["大语言模型"], broader: ["人工智能"], narrower: ["多模态大模型", "行业大模型"] },
     { pattern: /固态电池|\bsolid[- ]state batter(?:y|ies)\b/iu, automatic: ["全固态电池", "固态储能电池"], translation: ["固态电池"], broader: ["储能电池"], narrower: ["硫化物固态电池", "氧化物固态电池"] },
     { pattern: /电池|\bbattery\b/iu, automatic: ["储能电池"], translation: ["电池"], broader: ["储能技术"], narrower: ["固态电池", "锂离子电池"] },
@@ -57,12 +57,22 @@
       const entry = DICTIONARY.find(value => value.pattern.test(concept));
       if (!entry) return;
       GROUPS.forEach(([group]) => (entry[group] || []).forEach(text => {
-        const key = (concept + ":" + text).toLowerCase();
+        const key = (group + ":" + concept + ":" + text).toLowerCase();
         if (norm(concept).toLowerCase() === norm(text).toLowerCase() || seen.has(key)) return;
         seen.add(key); result.push({ concept, text, group });
       }));
     });
     return result;
+  }
+  function automaticRules(query) {
+    const values = candidates(query), counts = new Map();
+    return values.filter(value => {
+      const key = value.group + ":" + value.concept.toLowerCase();
+      const limit = value.group === "narrower" && /^(?:ai|artificial intelligence|人工智能)$/iu.test(value.concept) ? 2 : 1;
+      const count = counts.get(key) || 0;
+      counts.set(key, count + 1);
+      return count < limit;
+    }).sort((a, b) => ["automatic", "broader", "narrower", "translation"].indexOf(a.group) - ["automatic", "broader", "narrower", "translation"].indexOf(b.group));
   }
   function create(bridge) {
     const doc = root.document, model = bridge.controller.model;
@@ -71,6 +81,7 @@
       <label><input type="radio" name="keywordSearchMethod" value="exact" checked>精确查找</label>
       <label><input type="radio" name="keywordSearchMethod" value="association">智能关联搜索</label>
       <label><input type="radio" name="keywordSearchMethod" value="expansion">词位扩展</label></fieldset>
+      <div id="searchAutomaticRules" class="search-automatic-rules" role="list" aria-label="已应用扩展规则" hidden></div>
       <div id="searchAssociationTools" class="search-method-body" hidden><p id="searchAssociationNotice" class="search-method-note" hidden></p>
         <details id="searchAssociationDetails"><summary>检索条件</summary><form id="searchAssociationForm" class="search-association-form">
           <label for="searchAssociationQuery">检索词</label><input id="searchAssociationQuery" type="text" maxlength="200"><button type="submit">应用</button><button type="button" data-plan-reset>恢复原词</button>
@@ -144,10 +155,15 @@
     function render(next) {
       state = next || model.snapshot(); node.hidden = bridge.getMode() !== "关键词";
       const method = state.searchMethod || "exact", bodyOnly = state.scope === "全文检索";
+      const appliedRules = method === "exact" ? state.automaticRules || [] : [];
+      get("searchAutomaticRules").hidden = !appliedRules.length;
+      const shownRules = new Map();
+      appliedRules.forEach(rule => { const key = rule.group + ":" + rule.concept; const item = shownRules.get(key) || { ...rule, words: [] }; item.words.push(rule.text); shownRules.set(key, item); });
+      get("searchAutomaticRules").innerHTML = [...shownRules.values()].map(rule => `<span role="listitem" data-auto-rule-type="${esc(rule.group)}" title="原关键词：${esc(rule.concept)}">${esc(GROUPS.find(([group]) => group === rule.group)?.[1] || rule.group)}：${esc(rule.words.join("、"))}</span>`).join("");
       node.querySelectorAll("input[name=keywordSearchMethod]").forEach(input => {
         input.checked = input.value === method;
         input.disabled = bodyOnly && input.value !== "exact";
-        input.closest("label").title = input.disabled ? "全文检索仅按正文原词匹配" : "";
+        input.closest("label").title = input.disabled ? "全文范围使用精确查找，扩展词仅在正文内匹配" : "";
       });
       get("searchAssociationTools").hidden = method !== "association";
       get("searchExpansionTools").hidden = method !== "expansion";
@@ -228,5 +244,5 @@
     render(state);
     return { render, influence, recordSearch(query, options) { if (options?.trackSearch !== false) recordBehavior("search", query); } };
   }
-  root.PortalSearchMethods = Object.freeze({ create, candidates, analyze, parseConcepts, normalizeQuery: norm, GROUPS });
+  root.PortalSearchMethods = Object.freeze({ create, candidates, automaticRules, analyze, parseConcepts, normalizeQuery: norm, GROUPS });
 })(typeof window !== "undefined" ? window : globalThis);

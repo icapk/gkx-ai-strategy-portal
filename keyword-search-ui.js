@@ -46,7 +46,7 @@
     const optionalQueryControls = [doc.querySelector(".keyword-v1-tools"), doc.querySelector(".keyword-v1-demo-note")]
       .filter(Boolean).map(node => ({ node, parent: node.parentNode, next: node.nextSibling }));
     const records = bridge.records || global.PortalKeywordModel.createFixtures(bridge.items || []);
-    const model = bridge.model || global.PortalKeywordModel.create({ records, getUserContext: bridge.getUserContext, associationTerms: bridge.associationTerms, associationInfluence: bridge.associationInfluence, associationPlan: bridge.associationPlan, parseConcepts: bridge.parseConcepts });
+    const model = bridge.model || global.PortalKeywordModel.create({ records, getUserContext: bridge.getUserContext, associationTerms: bridge.associationTerms, associationInfluence: bridge.associationInfluence, associationPlan: bridge.associationPlan, parseConcepts: bridge.parseConcepts, automaticRules: bridge.automaticRules });
     const hint = doc.createElement("p");
     hint.className = "portal-resource-filter-hint keyword-v1-filter-hint";
     hint.id = "portalKeywordFilterHint";
@@ -220,7 +220,7 @@
       const interval = (from, to) => [moment(from), moment(to)].filter(Boolean).join(" — ");
       const title = text(type === "人才" ? record.name : record.name || record.title);
       const parsed = global.PortalKeywordModel.parse(query);
-      const terms = parsed.error ? [] : [...new Set(parsed.terms.map(term => term.text))].filter(Boolean).sort((a, b) => b.length - a.length);
+      const terms = parsed.error ? [] : [...new Set([...parsed.terms.map(term => term.text), ...(record.searchHighlightTerms || [])])].filter(Boolean).sort((a, b) => b.length - a.length);
       const pattern = terms.length ? new RegExp(terms.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "giu") : null;
       const highlight = value => {
         const source = text(value);
@@ -299,7 +299,7 @@
         toggle.textContent = detail.hidden ? type === "练仿真" ? "查看实验详情" : "展开信息" : "收起详情";
       });
       article.querySelectorAll("[data-report-hit]").forEach(button => button.addEventListener("click", () => {
-        const opened = global.PortalReportReader?.open({ record, hitIndex: Number(button.dataset.reportHit), query, trigger: button });
+        const opened = global.PortalReportReader?.open({ record, hitIndex: Number(button.dataset.reportHit), query, highlightTerms: record.searchHighlightTerms, trigger: button });
         if (!opened) bridge.feedback?.("该内容暂无法定位，请重新检索后重试。", "error");
       }));
       return article;

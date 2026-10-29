@@ -4,10 +4,10 @@
   const esc = value => String(value == null ? "" : value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
   let dialog = null, state = null;
 
-  function highlight(value, query) {
+  function highlight(value, query, extraTerms = []) {
     const parsed = global.PortalKeywordModel?.parse(query);
     const terms = parsed && !parsed.error ? parsed.terms.map(term => term.text) : String(query || "").trim().split(/\s+/u);
-    const needles = [...new Set(terms.filter(Boolean))].sort((a, b) => b.length - a.length);
+    const needles = [...new Set([...terms, ...(Array.isArray(extraTerms) ? extraTerms : [])].filter(term => typeof term === "string" && term.trim()))].sort((a, b) => b.length - a.length);
     if (!needles.length) return esc(value);
     const pattern = new RegExp(needles.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "giu");
     const source = String(value == null ? "" : value);
@@ -109,7 +109,7 @@
   function open(options) {
     ensureDialog();
     if (state) close(false);
-    const { record, query = "", trigger = document.activeElement } = options || {};
+    const { record, query = "", highlightTerms = [], trigger = document.activeElement } = options || {};
     const source = record?.document;
     const object = value => value != null && typeof value === "object" && !Array.isArray(value);
     const aliases = Array.isArray(source?.resourceIdAliases) ? source.resourceIdAliases : [];
@@ -145,8 +145,8 @@
     dialog.querySelector("#reportFulltextPageCount").textContent = pages.length ? `共 ${pages.length} 页` : "";
     dialog.querySelector("#reportFulltextPageSelect").innerHTML = pages.map(page => `<option value="${esc(page.pageNumber)}">第 ${esc(page.pageNumber)} 页</option>`).join("");
     dialog.querySelector("#reportFulltextPageSelect").disabled = !pages.length;
-    dialog.querySelector("#reportFulltextPages").innerHTML = pages.map((page, pageIndex) => `<article class="report-fulltext-paper" id="report-fulltext-page-${pageIndex}" data-report-page="${esc(page.pageNumber)}" aria-label="报告第 ${esc(page.pageNumber)} 页"><header><span>${esc(source.title || record.title)}</span><strong>第 ${esc(page.pageNumber)} 页</strong></header>${page.heading || page.title ? `<h3>${esc(page.heading || page.title)}</h3>` : ""}${page.paragraphs.map((paragraph, paragraphIndex) => `<p class="report-fulltext-paragraph" id="report-fulltext-paragraph-${pageIndex}-${paragraphIndex}" tabindex="-1" data-paragraph-id="${esc(paragraph.paragraphId || paragraph.id)}">${highlight(paragraph.text, query)}</p>`).join("")}<footer>${esc(page.pageNumber)}</footer></article>`).join("");
-    dialog.querySelector("#reportFulltextHitList").innerHTML = hits.map(({ hit }, index) => `<li><button type="button" data-report-reader-hit="${index}"><span class="report-fulltext-hit-page">第 ${esc(hit.pageNumber)} 页</span><span>${highlight(hit.sentence, query)}</span></button></li>`).join("") || '<li class="report-fulltext-no-hits">暂无可定位的命中句</li>';
+    dialog.querySelector("#reportFulltextPages").innerHTML = pages.map((page, pageIndex) => `<article class="report-fulltext-paper" id="report-fulltext-page-${pageIndex}" data-report-page="${esc(page.pageNumber)}" aria-label="报告第 ${esc(page.pageNumber)} 页"><header><span>${esc(source.title || record.title)}</span><strong>第 ${esc(page.pageNumber)} 页</strong></header>${page.heading || page.title ? `<h3>${esc(page.heading || page.title)}</h3>` : ""}${page.paragraphs.map((paragraph, paragraphIndex) => `<p class="report-fulltext-paragraph" id="report-fulltext-paragraph-${pageIndex}-${paragraphIndex}" tabindex="-1" data-paragraph-id="${esc(paragraph.paragraphId || paragraph.id)}">${highlight(paragraph.text, query, highlightTerms)}</p>`).join("")}<footer>${esc(page.pageNumber)}</footer></article>`).join("");
+    dialog.querySelector("#reportFulltextHitList").innerHTML = hits.map(({ hit }, index) => `<li><button type="button" data-report-reader-hit="${index}"><span class="report-fulltext-hit-page">第 ${esc(hit.pageNumber)} 页</span><span>${highlight(hit.sentence, query, highlightTerms)}</span></button></li>`).join("") || '<li class="report-fulltext-no-hits">暂无可定位的命中句</li>';
     const error = dialog.querySelector("#reportFulltextError");
     error.hidden = !invalidParts && hits.length === rawHits.length && hits.length > 0;
     error.textContent = source && !resourceMatches ? "报告与正文的资源标识不一致，已停止展示与定位。" : !pages.length ? "未取得报告正文，暂时无法定位。" : !hits.length ? "未取得与当前文档版本一致的定位信息，请返回结果列表重新检索。" : invalidParts ? "部分正文数据异常，已跳过异常内容；当前仅展示可核验的正文与定位位置。" : "部分命中位置与当前文档不一致，仅展示已核验的定位位置。";
