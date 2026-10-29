@@ -2,7 +2,7 @@
   "use strict";
 
   const TYPES = ["论文", "专利", "报告", "人才", "资讯", "会议", "课程", "活动", "练仿真"];
-  const ALL_TYPES = TYPES.filter(type => type !== "练仿真");
+  const ALL_TYPES = TYPES.slice();
   // This prototype shows the delivered design. It does not claim a live API connection.
   const isUnconnected = () => false;
   const CONNECTED = TYPES.slice();

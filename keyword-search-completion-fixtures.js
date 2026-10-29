@@ -1,8 +1,8 @@
 (function (root) {
   "use strict";
 
-  // Keyword-only presentation fixtures. These reuse existing prototype content;
-  // they are not examples of a delivered provider response or an API contract.
+  // Keyword-only presentation fixtures and explicitly authored AI demo records;
+  // these are not a delivered provider response or an API contract.
   const SIMULATIONS = [
     { id: "keyword-sim-number-pairs", name: "生物结构仿真", summary: "通过数字配对与结构交互观察生物体系中的组合规律。", category: "生命科学", domainTags: ["生命科学", "交互实验"], coverUrl: "assets/mastergo-v2/sim-number-pairs.png" },
     { id: "keyword-sim-quantum-coin", name: "量子测量实验", summary: "用量子抛硬币实验理解测量、概率与量子态变化。", category: "量子科学", domainTags: ["量子科学", "概念验证"], coverUrl: "assets/mastergo-v2/sim-quantum-coin.png" },
@@ -56,8 +56,9 @@
       });
     });
     SIMULATIONS.forEach(item => records.push({ ...item, type: "练仿真", title: item.name, detailUrl: null, launchUrl: null, fixtureSource: "EXISTING_PROTOTYPE" }));
+    const aiDemoRecords = (root.PortalAiDemoFixtures?.records || []).map(record => ({ ...record }));
     const seen = new Set();
-    const uniqueRecords = records.filter(item => { const key = `${item.type}:${item.id}`; if (seen.has(key)) return false; seen.add(key); return true; });
+    const uniqueRecords = [...aiDemoRecords, ...records].filter(item => { const key = `${item.type}:${item.id}`; if (seen.has(key)) return false; seen.add(key); return true; });
     return root.PortalReportFulltextFixtures ? root.PortalReportFulltextFixtures.attach(uniqueRecords) : uniqueRecords;
   }
   root.PortalKeywordCompletionFixtures = Object.freeze({ prepare });
