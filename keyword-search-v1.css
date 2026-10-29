@@ -31,36 +31,37 @@
 .keyword-report-hit mark { padding: 1px 2px; border-radius: 2px; background: #fff0ac; color: inherit; }
 .keyword-report-more { margin-top: 8px; }
 .keyword-report-more > summary { width: fit-content; margin-bottom: 8px; color: #1764eb; cursor: pointer; font-size: 12px; }
-#searchResultsPage .portal-association-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--text-secondary, #64748b);
-  font-size: 12px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-#searchResultsPage .portal-association-control[hidden] { display: none; }
-#searchResultsPage .portal-association-control input {
-  appearance: none;
-  width: 28px;
-  height: 16px;
-  margin: 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  background: #e2e8f0;
-  cursor: pointer;
-}
-#searchResultsPage .portal-association-control input::before {
-  content: "";
-  display: block;
-  width: 10px;
-  height: 10px;
-  margin: 2px;
-  border-radius: 50%;
-  background: #fff;
-}
-#searchResultsPage .portal-association-control input:checked { background: #2468f2; border-color: #2468f2; }
-#searchResultsPage .portal-association-control input:checked::before { transform: translateX(12px); }
-#searchResultsPage .portal-association-control input:focus-visible { outline: 2px solid #2468f2; outline-offset: 3px; }
-#searchResultsPage .portal-association-control input:disabled { cursor: default; opacity: .5; }
+.search-method-tools { margin-top: 12px; color: #526176; font-size: 13px; }
+.search-method-tools[hidden], .search-method-tools [hidden] { display: none; }
+.search-method-choice { display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 0; margin: 0; border: 0; }
+.search-method-choice label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+.search-method-choice input { margin: 0; width: 15px; height: 15px; accent-color: #1764eb; }
+.search-method-choice label:has(input:checked) { color: #1764eb; }
+.search-method-choice label:has(input:disabled) { opacity: .5; cursor: default; }
+.search-method-body { margin-top: 14px; padding-top: 12px; border-top: 1px solid #e7edf6; }
+#searchAssociationTools:not([hidden]) { display: flex; flex-wrap: wrap; gap: 12px 28px; }
+#searchAssociationTools > details { flex: 1 1 360px; min-width: 0; }
+#searchAssociationNotice { flex-basis: 100%; margin: 0; }
+.search-method-tools summary { width: fit-content; cursor: pointer; color: #376ab4; }
+.search-method-tools button { padding: 5px 10px; border: 1px solid #d9e3f3; border-radius: 5px; background: #fff; color: #376ab4; font: inherit; cursor: pointer; }
+.search-method-tools button:hover { background: #f2f6ff; }
+.search-method-tools button:disabled { opacity: .5; cursor: default; }
+.search-method-tools button:focus-visible, .search-method-tools input:focus-visible { outline: 2px solid #1764eb; outline-offset: 2px; }
+.search-association-form { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.search-association-form > input { flex: 1 1 170px; min-width: 0; padding: 7px 9px; border: 1px solid #cedbef; border-radius: 5px; font: inherit; }
+.search-association-form > code { flex-basis: 100%; padding: 8px 0; overflow-wrap: anywhere; color: #51637b; font-size: 12px; }
+.search-method-note { color: #8793a4; font-size: 12px; line-height: 1.7; margin: 5px 0; }
+.search-method-error { flex-basis: 100%; margin: 0; color: #be3941; }
+.search-expansion-groups { display: grid; gap: 12px; }
+.search-expansion-groups > section { display: flex; align-items: baseline; gap: 16px; }
+.search-expansion-groups h3 { flex: 0 0 100px; margin: 0; font-size: 13px; font-weight: 500; }
+.search-expansion-groups h3 small { display: block; color: #8793a4; font-size: 10px; font-weight: 400; }
+.search-expansion-groups section > div, .search-expansion-selected { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.search-expansion-groups button[aria-pressed=true], .search-expansion-selected button { background: #edf3ff; border-color: #b6cdf4; color: #1764eb; }
+.search-expansion-selected { margin-top: 14px; }
+.search-preference-body { margin-top: 12px; }
+.search-preference-body table { width: 100%; margin: 10px 0; border-collapse: collapse; font-size: 12px; }
+.search-preference-body th, .search-preference-body td { padding: 7px 5px; text-align: left; border-bottom: 1px solid #e7edf6; }
+.search-preference-body td button { margin: 2px; padding: 3px 5px; font-size: 11px; }
+.search-preference-body ul { padding-left: 18px; color: #8793a4; font-size: 12px; max-height: 160px; overflow-y: auto; }
+#searchPreferenceClear { margin-top: 10px; }

@@ -202,35 +202,62 @@
     const capabilities = options.capabilities || {}, listeners = new Set(), cache = new Map();
     const contextKey = () => { const value = getUserContext(); return typeof value === "string" ? value : JSON.stringify(value); };
     const FILTER_TYPES = ["论文", "专利", "人才"];
-    const filterModeFor = type => type === "报告" ? "server" : FILTER_TYPES.includes(type) ? "local" : "none";
+    const filterModeFor = type => type === "报告" || searchMethod !== "exact" && FILTER_TYPES.includes(type) ? "server" : FILTER_TYPES.includes(type) ? "local" : "none";
     let userContext = contextKey(), version = 0, query = "", logic = "AND", currentType = "全部", validation = null, authError = null, association = false;
+    let searchMethod = "exact", associationQuery = "", expansionTerms = [];
+    let automaticAssociationType = "", explicitAssociationType = false, automaticAssociationFilters = {}, manualAssociationFilters = {};
     const scopedTypes = { "论文": PAPER_SCOPES, "报告": REPORT_SCOPES };
     const makeView = type => ({ type, scope: scopedTypes[type] ? scopedTypes[type][0] : "全部资源", page: 1, filters: {}, sources: {}, loaded: false, loading: false, requestToken: 0, pendingPage: null, retainedResults: false, error: null, validation: null });
     let views = Object.fromEntries(["全部", ...TYPES].map(type => [type, makeView(type)]));
     const viewScope = view => scopedTypes[view.type] ? view.scope : "全部资源";
     const requestScope = (type, view) => scopedTypes[type] ? view.type === type ? view.scope : type === "报告" ? "全部资源" : scopedTypes[type][0] : "全部资源";
     const sourceTypes = view => view.type === "全部" ? ALL_TYPES : [view.type];
-    const requestFilters = (type, view) => type === "报告" && view.type === "报告" && nonempty(view.filters.reportTypes) ? { reportTypes: reportFilterValues(view.filters.reportTypes) } : {};
+    const requestFilters = (type, view) => view.type === type && searchMethod !== "exact" ? copy(view.filters)
+      : type === "报告" && view.type === "报告" && nonempty(view.filters.reportTypes) ? { reportTypes: reportFilterValues(view.filters.reportTypes) } : {};
     const cap = type => ({ exact: true, scopes: type === "报告" ? [...REPORT_SCOPES, "全部资源"] : scopedTypes[type] || ["全部资源"], ...capabilities[type] });
     const eligible = (type, view) => cap(type).exact && cap(type).scopes.includes(requestScope(type, view));
     const unique = values => [...new Set(values.filter(value => value != null && value !== ""))];
+    const associationPlanFor = value => options.associationPlan?.(value) || { query: value, resourceType: "", filters: {}, warnings: [] };
+    const conceptParse = value => options.parseConcepts?.(value) || parse(value);
+    function prepareAssociationView() {
+      if (searchMethod !== "association" || !query) return;
+      const plan = associationPlanFor(associationQuery || query);
+      if (!explicitAssociationType && TYPES.includes(plan.resourceType) && (currentType === "全部" || automaticAssociationType === currentType)) {
+        currentType = plan.resourceType; automaticAssociationType = currentType;
+      }
+      if (currentType === "论文") {
+        const filters = views[currentType].filters, prior = automaticAssociationFilters[currentType] || {};
+        Object.entries(prior).forEach(([key, value]) => { if (filters[key] === value && !manualAssociationFilters[currentType]?.has(key)) delete filters[key]; });
+        automaticAssociationFilters[currentType] = {};
+        if (!filterError(plan.filters || {})) Object.entries(plan.filters || {}).forEach(([key, value]) => {
+          if (!manualAssociationFilters[currentType]?.has(key) && !nonempty(filters[key])) {
+            filters[key] = value; automaticAssociationFilters[currentType][key] = value;
+          }
+        });
+      }
+    }
     function mainRecords(request) {
-      const parsed = parse(request.query);
+      const text = request.association ? associationPlanFor(request.associationQuery || request.query).query : request.query;
+      const parsed = request.searchMethod === "exact" ? parse(text) : conceptParse(text);
+      const original = request.searchMethod === "expansion" ? parse(request.query) : parsed;
       // Association expands the complete candidate set before filtering/paging.
       // Full-text keeps its original body-only matching and reader locations.
-      const related = request.association && request.scope !== "全文检索"
+      const related = request.searchMethod !== "exact" && request.scope !== "全文检索"
         ? parsed.terms.map(term => [
           { ...parsed, terms: [term] },
-          ...unique(options.associationTerms?.(term.text) || []).filter(value => normalize(value) !== normalize(term.text)).map(value => parse(value)).filter(value => !value.error)
+          ...unique(request.association ? options.associationTerms?.(term.text) || []
+            : request.expansionTerms.filter(value => normalize(value.concept) === normalize(term.text)).map(value => value.text))
+            .filter(value => normalize(value) !== normalize(term.text)).map(value => conceptParse(value)).filter(value => !value.error)
         ]) : [];
-      let candidates = records.filter(record => record.type === request.type && (match(record, parsed, request.scope, request.logic)
+      let candidates = records.filter(record => record.type === request.type && (match(record, original, request.scope, request.logic)
         || related.length > 0 && related.every(concept => concept.some(term => match(record, term, request.scope, "AND")))));
-      if (request.type === "报告") candidates = candidates.filter(record => filterRecord(record, request.filters || {}, now));
+      if (request.type === "报告" || request.searchMethod !== "exact") candidates = candidates.filter(record => filterRecord(record, request.filters || {}, now));
       if (request.type === "报告" && request.scope === "全文检索") return candidates.map(record => ({ ...record, fulltextHits: fulltextHits(record, parsed) })).filter(record => record.fulltextHits.length);
       // Exact titles come first; other matching records remain in the result set.
       if (request.scope !== "摘要") candidates = candidates.map((record, index) => ({ record, index, exact: titleFields(record).some(title => normalize(title) === parsed.fullQuery) })).sort((a, b) => Number(b.exact) - Number(a.exact) || a.index - b.index).map(value => value.record);
-      if (request.association) candidates = candidates.map((record, index) => ({ record, index, original: match(record, parsed, request.scope, request.logic) }))
-        .sort((a, b) => Number(b.original) - Number(a.original) || a.index - b.index).map(value => value.record);
+      if (request.association) candidates = candidates.map((record, index) => ({ record, index, original: match(record, parsed, request.scope, request.logic), influence: options.associationInfluence?.(record) || {} }))
+        .filter(value => !value.influence.suppressed)
+        .sort((a, b) => (Number(b.original) * 2 + (b.influence.bonus || 0)) - (Number(a.original) * 2 + (a.influence.bonus || 0)) || a.index - b.index).map(value => value.record);
       return candidates;
     }
     async function demoService(request) {
@@ -307,12 +334,12 @@
       dictionaries.domains[currentType] = unique(rawItems.flatMap(item => list(currentType === "论文" ? item.domainTags : currentType === "人才" ? item.researchFields : [])));
       const filterMode = filterModeFor(currentType);
       const publicView = { type: view.type, scope: viewScope(view), page: view.page, startIndex, pendingPage: view.pendingPage, filters: copy(view.filters), filterMode, rawItems, displayItems, total, shownCount: displayItems.length, hasMore, paginationUnknown: activeSources.some(source => source.paginationUnknown), status: authError ? "error" : view.loading ? "loading" : view.error && !displayItems.length ? "error" : view.loaded ? "success" : "idle", validation: view.validation, error: authError ? authError.message : view.error, retainedResults: view.retainedResults };
-      return { query, association, scope: viewScope(view), logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: totalForView(value), filterMode: filterModeFor(type) }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: filterMode === "local" ? "仅筛选当前已返回数据，其他页可能仍有符合项" : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
+      return { query, association, searchMethod, associationQuery, associationPlan: searchMethod === "association" ? associationPlanFor(associationQuery || query) : null, expansionTerms: copy(expansionTerms), scope: viewScope(view), logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: totalForView(value), filterMode: filterModeFor(type) }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: filterMode === "local" ? "仅筛选当前已返回数据，其他页可能仍有符合项" : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
     }
     function emit() { const state = snapshot(); listeners.forEach(listener => listener(state)); }
     function resetContexts(clearFilters) {
       version++; cache.clear();
-      views = Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { ...makeView(type), scope: viewScope(value), filters: clearFilters ? {} : copy(value.filters) }]));
+      views = Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { ...makeView(type), scope: viewScope(value), filters: clearFilters ? {} : copy(value.filters), validation: clearFilters ? null : copy(value.validation) }]));
     }
     function checkContext() { const next = contextKey(); if (next !== userContext) { userContext = next; authError = null; resetContexts(false); return true; } return false; }
     function loggedIn() {
@@ -326,15 +353,19 @@
       sourceTypes(view).forEach(type => { view.sources[type] = { ...idleSource(type, 1, view), status: "error", code: authError.code, error: authError.message }; }); emit();
     }
     async function fetchPage(type, page, view, valid) {
-      const scope = requestScope(type, view), filters = requestFilters(type, view), key = JSON.stringify([userContext, query, scope, logic, type, page, filters, association]);
+      const scope = requestScope(type, view), filters = requestFilters(type, view), key = JSON.stringify([userContext, query, scope, logic, type, page, filters, searchMethod, associationQuery, expansionTerms]);
       if (cache.has(key)) return copy(cache.get(key));
-      const response = await service({ type, query, scope, logic, page, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters, association, userContext, queryVersion: version });
+      const response = await service({ type, query, scope, logic, page, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters, association, searchMethod, associationQuery, expansionTerms: copy(expansionTerms), userContext, queryVersion: version });
       const result = normalizeResponse(response, type, page);
       if (valid()) cache.set(key, result);
       return result;
     }
     async function load(view, targetPage, onlyType) {
       if (checkContext()) { view = views[view.type]; targetPage = 1; }
+      if (viewScope(view) === "全文检索" && searchMethod !== "exact") {
+        searchMethod = "exact"; association = false; associationQuery = ""; expansionTerms = [];
+        resetContexts(false); view = views[view.type]; targetPage = 1;
+      }
       if (authError || !query) { emit(); return snapshot(); }
       // Once all sources settle, ordinary list pagination only changes the global slice.
       if (view.type === "全部" && view.loaded && !onlyType) { view.page = targetPage; view.pendingPage = null; emit(); return snapshot(); }
@@ -385,10 +416,11 @@
         if (validation) { emit(); return Promise.resolve(snapshot()); }
         checkContext(); params = params || {};
         const changed = parsed.query !== query; query = parsed.query;
+        if (changed) { associationQuery = ""; expansionTerms = []; automaticAssociationFilters = {}; manualAssociationFilters = {}; }
         const targetType = params.type || currentType;
         if (scopedTypes[targetType]?.includes(params.scope)) views[targetType].scope = params.scope;
-        if (params.type && ["全部", ...TYPES].includes(params.type)) currentType = params.type;
-        logic = "AND"; resetContexts(changed); return load(views[currentType], 1);
+        if (params.type && ["全部", ...TYPES].includes(params.type)) { if (params.type !== currentType) explicitAssociationType = true; currentType = params.type; }
+        logic = "AND"; resetContexts(changed); prepareAssociationView(); return load(views[currentType], 1);
       },
       setScope(value) {
         if (!scopedTypes[currentType]?.includes(value) || views[currentType].scope === value) return Promise.resolve(snapshot());
@@ -397,19 +429,48 @@
       },
       setLogic(value) { if (value !== "AND") return Promise.resolve(snapshot()); return Promise.resolve(snapshot()); },
       setAssociation(value) {
-        value = Boolean(value);
-        if (association === value) return Promise.resolve(snapshot());
-        association = value; checkContext(); resetContexts(false);
+        return api.setSearchMethod(value ? "association" : "exact");
+      },
+      setSearchMethod(value) {
+        if (!["exact", "association", "expansion"].includes(value)) return Promise.resolve(snapshot());
+        if (viewScope(views[currentType]) === "全文检索") value = "exact";
+        if (searchMethod === value) return Promise.resolve(snapshot());
+        searchMethod = value; association = value === "association"; validation = null;
+        if (!association) associationQuery = "";
+        if (value !== "expansion") expansionTerms = [];
+        checkContext(); resetContexts(false); prepareAssociationView();
         return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot()));
       },
-      selectType(type) { if (!["全部", ...TYPES].includes(type)) return Promise.resolve(snapshot()); checkContext(); currentType = type; validation = null; const view = views[type]; if (view.loaded || view.loading) { emit(); return Promise.resolve(snapshot()); } return load(view, view.page); },
+      setAssociationQuery(value) {
+        if (searchMethod !== "association") return Promise.resolve(snapshot());
+        const parsed = parse(value); validation = parsed.error;
+        if (validation) { emit(); return Promise.resolve(snapshot()); }
+        associationQuery = parsed.query === query ? "" : parsed.query;
+        checkContext(); resetContexts(false); prepareAssociationView(); return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot()));
+      },
+      setExpansionTerms(values) {
+        if (searchMethod !== "expansion") return Promise.resolve(snapshot());
+        const concepts = conceptParse(query).terms.map(term => normalize(term.text)), seen = new Set();
+        const next = (Array.isArray(values) ? values : []).filter(value => value && typeof value.text === "string" && typeof value.concept === "string"
+          && concepts.includes(normalize(value.concept)) && !parse(value.text).error && value.text.length <= 100)
+          .filter(value => { const key = normalize(value.concept) + ":" + normalize(value.text); if (seen.has(key)) return false; seen.add(key); return true; })
+          .slice(0, 40).map(({ concept, text }) => ({ concept, text })).sort((a, b) => (a.concept + a.text).localeCompare(b.concept + b.text));
+        if (JSON.stringify(next) === JSON.stringify(expansionTerms)) return Promise.resolve(snapshot());
+        expansionTerms = next; checkContext(); resetContexts(false);
+        return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot()));
+      },
+      refreshRanking() { checkContext(); resetContexts(false); return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot())); },
+      selectType(type) { if (!["全部", ...TYPES].includes(type)) return Promise.resolve(snapshot()); checkContext(); explicitAssociationType = true; currentType = type; validation = null; const view = views[type]; if (view.loaded || view.loading) { emit(); return Promise.resolve(snapshot()); } return load(view, view.page); },
       setFilter(name, value) {
         if (!FILTER_TYPES.includes(currentType) && currentType !== "报告") return Promise.resolve(snapshot());
-        if (currentType === "报告") checkContext();
+        if (currentType === "报告" || searchMethod !== "exact") checkContext();
+        const changedFields = typeof name === "object" ? Object.keys(name) : [name];
+        manualAssociationFilters[currentType] ||= new Set();
+        changedFields.forEach(key => { manualAssociationFilters[currentType].add(key); if (automaticAssociationFilters[currentType]) delete automaticAssociationFilters[currentType][key]; });
         const view = views[currentType], draft = { ...(view.validation?.values || view.filters), ...(typeof name === "object" ? name : { [name]: value }) };
         const filters = currentType === "报告" ? normalizedFilters(draft, currentType) : draft;
         const error = filterError(filters); view.validation = error ? { ...error, values: copy(filters) } : null; validation = null;
-        if (!error && currentType === "报告") {
+        if (!error && (currentType === "报告" || searchMethod !== "exact")) {
           if (JSON.stringify(view.filters) === JSON.stringify(filters)) { emit(); return Promise.resolve(snapshot()); }
           view.requestToken++;
           views[currentType] = { ...makeView(currentType), scope: view.scope, filters };
@@ -419,7 +480,10 @@
         emit(); return Promise.resolve(snapshot());
       },
       clearFilters() {
-        if (currentType === "报告") {
+        manualAssociationFilters[currentType] ||= new Set();
+        [...Object.keys(views[currentType].filters), ...Object.keys(automaticAssociationFilters[currentType] || {})].forEach(key => manualAssociationFilters[currentType].add(key));
+        automaticAssociationFilters[currentType] = {};
+        if (currentType === "报告" || searchMethod !== "exact") {
           checkContext(); const view = views[currentType]; view.requestToken++;
           views[currentType] = { ...makeView(currentType), scope: view.scope }; validation = null;
           return load(views[currentType], 1);

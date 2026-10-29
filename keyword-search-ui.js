@@ -46,7 +46,7 @@
     const optionalQueryControls = [doc.querySelector(".keyword-v1-tools"), doc.querySelector(".keyword-v1-demo-note")]
       .filter(Boolean).map(node => ({ node, parent: node.parentNode, next: node.nextSibling }));
     const records = bridge.records || global.PortalKeywordModel.createFixtures(bridge.items || []);
-    const model = bridge.model || global.PortalKeywordModel.create({ records, getUserContext: bridge.getUserContext, associationTerms: bridge.associationTerms });
+    const model = bridge.model || global.PortalKeywordModel.create({ records, getUserContext: bridge.getUserContext, associationTerms: bridge.associationTerms, associationInfluence: bridge.associationInfluence, associationPlan: bridge.associationPlan, parseConcepts: bridge.parseConcepts });
     const hint = doc.createElement("p");
     hint.className = "portal-resource-filter-hint keyword-v1-filter-hint";
     hint.id = "portalKeywordFilterHint";

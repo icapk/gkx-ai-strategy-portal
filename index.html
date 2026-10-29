@@ -3742,7 +3742,7 @@
     }
   </style>
   <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
-  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-two-tabs">
+  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-three-methods">
   <link rel="stylesheet" href="report-fulltext.css?v=20261030-report">
 </head>
 <body>
@@ -4971,7 +4971,6 @@
                   <p class="portal-results-range" id="portalSearchResultRange">正在准备结果</p>
                 </div>
                 <div class="portal-results-controls">
-                  <label class="portal-association-control" id="portalAssociationControl"><input id="portalAssociationToggle" type="checkbox" role="switch"><span>智能关联搜索</span></label>
                   <button class="portal-mobile-filter-toggle" id="portalMobileFilterToggle" type="button" aria-controls="portalSearchSidebar" aria-expanded="false">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
                     <span>筛选</span><b id="portalActiveFilterCount" hidden>0</b>
@@ -5169,11 +5168,12 @@
 
   <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
   <script src="report-fulltext-fixtures.js?v=20261030-report-types"></script>
-  <script src="keyword-search-model.js?v=20261030-two-tabs"></script>
+  <script src="keyword-search-model.js?v=20261030-three-methods"></script>
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-report"></script>
-  <script src="keyword-search-ui.js?v=20261030-two-tabs"></script><script>
+  <script src="search-methods.js?v=20261030-three-methods"></script>
+  <script src="keyword-search-ui.js?v=20261030-three-methods"></script><script>
     (() => {
       "use strict";
 
@@ -5534,13 +5534,13 @@
       let returnHeroExperience = "classic";
       let activeHeroRecommendation = "simulation";
       let activeSearchMode = "关键词";
-      let associationEnabled = false;
       const initialSearchParams = new URLSearchParams(window.location.search);
       let activeSearchPage = 1;
       let submittedSearchQuery = "";
       let searchSubmissionRevision = 0;
       let searchSubmissionTicket = 0;
       let keywordSearchV1 = null;
+      let keywordSearchMethods = null;
       function getSubmittedSearchQuery() { return submittedSearchQuery; }
       const activeExpansionTerms = new Set();
       let keywordLogic = "AND";
@@ -7693,23 +7693,14 @@
       }
 
       function syncConsolidatedSearch(state) {
-        const control = document.getElementById("portalAssociationControl");
-        const toggle = document.getElementById("portalAssociationToggle");
         const current = state || keywordSearchV1?.snapshot();
-        const bodyOnly = activeSearchMode === "关键词" && current?.scope === "全文检索";
-        if (bodyOnly && associationEnabled) {
-          associationEnabled = false;
-          keywordSearchV1?.model.setAssociation(false).catch(error => setPortalSearchFeedback(error.message, "error"));
-        }
-        control.hidden = activeSearchMode !== "关键词";
-        toggle.checked = associationEnabled;
-        toggle.disabled = !getSubmittedSearchQuery() || bodyOnly;
-        control.title = bodyOnly ? "全文检索按正文原词匹配，暂不支持关联扩展" : "";
+        keywordSearchMethods?.render(current);
         const query = getSubmittedSearchQuery();
         if (!query) return;
         const url = new URL(window.location.href);
         url.searchParams.set("query", query);
         url.searchParams.set("mode", activeSearchMode);
+        url.searchParams.delete("association");
         if (activeSearchMode === "关键词") {
           if (current?.currentType && current.currentType !== "全部") url.searchParams.set("type", current.currentType);
           else url.searchParams.delete("type");
@@ -7717,18 +7708,21 @@
           else url.searchParams.delete("scope");
           if (current?.view?.filters?.reportTypes?.length) url.searchParams.set("reportTypes", current.view.filters.reportTypes.join(","));
           else url.searchParams.delete("reportTypes");
-          if (associationEnabled) url.searchParams.set("association", "1");
-          else url.searchParams.delete("association");
-        } else ["association", "scope", "reportTypes"].forEach(key => url.searchParams.delete(key));
+          if (current?.searchMethod && current.searchMethod !== "exact") url.searchParams.set("feature", current.searchMethod);
+          else url.searchParams.delete("feature");
+          if (current?.searchMethod === "association" && current.associationQuery) url.searchParams.set("plan", current.associationQuery);
+          else url.searchParams.delete("plan");
+          if (current?.searchMethod === "expansion" && current.expansionTerms.length) url.searchParams.set("expansions", JSON.stringify(current.expansionTerms));
+          else url.searchParams.delete("expansions");
+        } else ["feature", "plan", "expansions", "scope", "reportTypes"].forEach(key => url.searchParams.delete(key));
         if (url.href !== window.location.href) window.history.replaceState(null, "", url);
       }
 
       function setSearchMode(mode) {
         const previousMode = activeSearchMode;
         activeSearchMode = mode === "AI 搜索" || mode === "AI搜索" ? "AI 搜索" : "关键词";
-        if (mode === "关联") associationEnabled = true;
-        if (activeSearchMode === "AI 搜索") associationEnabled = false;
-        keywordSearchV1?.model.setAssociation(associationEnabled).catch(error => setPortalSearchFeedback(error.message, "error"));
+        if (mode === "关联" || activeSearchMode === "AI 搜索")
+          keywordSearchV1?.model.setSearchMethod(mode === "关联" ? "association" : "exact").catch(error => setPortalSearchFeedback(error.message, "error"));
         portalSearchTypeTabs.querySelectorAll("[data-keyword-only]").forEach(tab => { tab.hidden = activeSearchMode !== "关键词"; });
         if (activeSearchMode === "关键词" && previousMode !== "关键词") keywordExpansionOpen = false;
         if (activeSearchMode === "关联" && previousMode !== "关联") associationDetailsOpen = !window.matchMedia("(max-width: 720px)").matches;
@@ -7903,7 +7897,7 @@
       function getSemanticTerms(query) {
         const text = String(query || "");
         const terms = getQueryTerms(text);
-        if (/AI|人工智能|大模型|智能体/i.test(text)) terms.push("人工智能", "AI", "大模型", "语言模型", "智能体", "AI for Science");
+        if (/\bAI\b|人工智能|大模型|智能体/i.test(text)) terms.push("人工智能", "AI", "大模型", "语言模型", "智能体", "AI for Science");
         if (/具身|机器人|工业质检/.test(text)) terms.push("具身智能", "机器人学习", "人工智能", "产业应用");
         if (/药物|靶点|生物医药/.test(text)) terms.push("药物", "靶点", "生物医学", "知识图谱");
         if (/低空/.test(text)) terms.push("低空经济", "飞控", "产业链");
@@ -8040,8 +8034,8 @@
         if (/固态|电池|储能/.test(text)) return "固态电池";
         if (/量子/.test(text)) return "量子计算";
         if (/基因|CRISPR/i.test(text)) return "基因编辑";
-        if (/智能体|Agent|具身智能/i.test(text)) return "智能体";
-        if (/AI|人工智能|大模型|机器学习|深度学习/i.test(text)) return "AI for Science";
+        if (/智能体|\bagents?\b|具身智能/i.test(text)) return "智能体";
+        if (/\bAI\b|人工智能|大模型|机器学习|深度学习/i.test(text)) return "AI for Science";
         return text.replace(/[\s，。！？、；：,.!?;:()（）【】\[\]"']/g, "").slice(0, 10);
       }
 
@@ -9263,7 +9257,7 @@
           const resourceType = options.resourceType || "报告";
           options = { ...options, mode: "关键词", resourceType, scope: resourceType === "报告" ? "全文检索" : options.scope };
         }
-        if (options.mode === "关联") { associationEnabled = true; options = { ...options, mode: "关键词" }; }
+        if (options.mode === "关联") { keywordSearchV1?.model.setSearchMethod("association"); options = { ...options, mode: "关键词" }; }
         if ((options.mode || activeSearchMode) === "关键词" && keywordSearchV1) {
           if (options.mode) setSearchMode(options.mode);
           return keywordSearchV1.submit(rawQuery, options);
@@ -9366,6 +9360,9 @@
           records: window.PortalKeywordCompletionFixtures?.prepare(window.PortalKeywordModel.createFixtures(SEARCH_ITEMS)) || window.PortalKeywordModel.createFixtures(SEARCH_ITEMS),
           getMode: () => activeSearchMode,
           associationTerms: getSemanticTerms,
+          associationInfluence: record => keywordSearchMethods?.influence(record),
+          associationPlan: window.PortalSearchMethods.analyze,
+          parseConcepts: window.PortalSearchMethods.parseConcepts,
           onRender: syncConsolidatedSearch,
           getQuery: getSubmittedSearchQuery,
           getType: () => activeSearchType,
@@ -9444,6 +9441,7 @@
           feedback: setPortalSearchFeedback,
           onSubmit(query, options = {}, records = []) {
             if (options.trackSearch === false) return;
+            keywordSearchMethods?.recordSearch(query, options);
             const service = window.PortalSearchRecommend;
             if (!service?.snapshot().userId) return;
             const queryId = `keyword-${Date.now().toString(36)}-${searchSubmissionRevision}`;
@@ -9454,6 +9452,17 @@
         });
       }
 
+      if (keywordSearchV1 && window.PortalSearchMethods) {
+        keywordSearchMethods = window.PortalSearchMethods.create({
+          controller: keywordSearchV1,
+          getMode: () => activeSearchMode,
+          getUserId: () => window.PortalSearchRecommend?.snapshot().userId || "anonymous",
+          topic: getAssociationModelTopic,
+          topicAliases: getAssociationTopicAliases,
+          associationTerms: getSemanticTerms,
+          feedback: setPortalSearchFeedback
+        });
+      }
       setHeroSearchMode(activeHeroSearchMode, false);
       setHeroExperience(returnHeroExperience, false);
       if (activeHeroExperience === "classic" && activeHeroSearchMode === "keyword") {
@@ -9471,16 +9480,24 @@
       const entryMode = entrySearchParams.get("mode");
       const entryType = entrySearchParams.get("type");
       if (entryQuery) {
-        associationEnabled = entryMode === "关联" || entrySearchParams.get("association") === "1";
+        const feature = entrySearchParams.get("feature");
+        const entryMethod = ["exact", "association", "expansion"].includes(feature) ? feature
+          : entryMode === "关联" || entrySearchParams.get("association") === "1" ? "association" : "exact";
+        if (entryMode !== "AI 搜索" && entryMode !== "AI搜索") keywordSearchV1?.model.setSearchMethod(entryMethod);
         Promise.resolve(performSearch(entryQuery, {
-          mode: entryMode === "AI搜索" ? "AI 搜索" : SEARCH_MODE_CONFIG[entryMode] ? entryMode : "关键词",
+          mode: entryMode === "AI搜索" ? "AI 搜索" : entryMode === "关联" ? "关键词" : SEARCH_MODE_CONFIG[entryMode] ? entryMode : "关键词",
           resourceType: entryType || undefined,
           scope: entrySearchParams.get("scope") || undefined,
           trackSearch: false
-        })).then(() => {
+        })).then(async () => {
+          if (activeSearchMode !== "关键词" || keywordSearchV1?.snapshot().query !== entryQuery) return;
           const types = entrySearchParams.get("reportTypes");
-          if (types && activeSearchMode === "关键词" && keywordSearchV1?.snapshot().currentType === "报告")
-            return keywordSearchV1.model.setFilter("reportTypes", types.split(","));
+          if (types && keywordSearchV1.snapshot().currentType === "报告") await keywordSearchV1.model.setFilter("reportTypes", types.split(","));
+          if (keywordSearchV1.snapshot().query !== entryQuery) return;
+          if (entryMethod === "association" && entrySearchParams.get("plan")) await keywordSearchV1.model.setAssociationQuery(entrySearchParams.get("plan"));
+          if (entryMethod === "expansion" && entrySearchParams.get("expansions")) {
+            try { await keywordSearchV1.model.setExpansionTerms(JSON.parse(entrySearchParams.get("expansions"))); } catch (_) { /* Ignore malformed optional URL selection. */ }
+          }
         }).catch(error => setPortalSearchFeedback(error.message, "error"));
       }
 
@@ -9793,11 +9810,6 @@
           submitButton.removeAttribute("aria-busy");
           submitButton.textContent = "搜索";
         }, reduceCarouselMotion.matches ? 0 : 260);
-      });
-      document.getElementById("portalAssociationToggle").addEventListener("change", event => {
-        associationEnabled = event.target.checked;
-        syncConsolidatedSearch();
-        keywordSearchV1?.model.setAssociation(associationEnabled).catch(error => setPortalSearchFeedback(error.message, "error"));
       });
       portalSearchModes.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-search-mode]");
