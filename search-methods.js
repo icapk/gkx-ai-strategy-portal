@@ -108,6 +108,7 @@
         <details id="searchPreferenceDetails" class="search-preference-details"><summary>搜索偏好（行为分析/信息处理） <span id="searchPreferenceSummary"></span></summary><div class="search-preference-body">
           <div class="search-preference-controls"><label><input id="searchPreferenceEnabled" type="checkbox">开启搜索偏好</label><button type="button" id="searchPreferenceClear">清除偏好</button></div>
           <p class="search-method-note">按近30天记录更新兴趣：搜索 +1，打开结果 +2。关键词相关性优先，兴趣仅辅助排序。当前原型记录保存在本机。</p>
+          <h4 id="searchPreferenceModelHeading" class="search-preference-model-title">用户模型</h4>
           <p id="searchPreferenceIntent" class="search-method-note"></p><div id="searchPreferenceInterests" class="search-preference-interests" aria-live="polite"></div>
           <p id="searchPreferenceStatus" class="search-method-note" role="status"></p></div></details></div>`;
     doc.querySelector(".portal-search-toolbar").append(node);

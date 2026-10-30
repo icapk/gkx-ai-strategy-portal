@@ -75,6 +75,7 @@
 .search-expansion-groups button[aria-pressed=true], .search-expansion-selected button { background: #edf3ff; border-color: #b6cdf4; color: #1764eb; }
 .search-expansion-selected { margin-top: 14px; }
 .search-preference-body { margin-top: 12px; }
+.search-preference-model-title { margin: 12px 0 6px; color: #35475d; font-size: 13px; font-weight: 600; }
 .search-preference-details { border-top: 1px solid #edf1f7; padding-top: 12px; }
 #searchPreferenceSummary { margin-left: 10px; color: #8793a4; font-size: 12px; }
 .search-preference-controls { display: flex; align-items: center; gap: 18px; }
