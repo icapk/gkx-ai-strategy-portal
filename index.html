@@ -7798,7 +7798,7 @@
           tab.tabIndex = active ? 0 : -1;
         });
         mgFulltextShortcuts.hidden = activeHeroExperience === "v2" ? activeV2HeroMode !== "search" : activeHeroSearchMode !== "keyword";
-        mgSmartRecommendations.hidden = activeHeroExperience === "classic" && activeHeroSearchMode !== "keyword";
+        mgSmartRecommendations.hidden = false;
         mgAssociationSearchGuide.hidden = activeHeroSearchMode !== "association";
         mgAiSearchGuide.hidden = activeHeroSearchMode !== "ai";
         mgV2QaSearchGuide.hidden = true;
