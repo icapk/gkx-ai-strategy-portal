@@ -96,14 +96,10 @@
       <div id="searchAutomaticRules" class="search-automatic-rules" role="list" aria-label="词位扩展规则开关" hidden></div>
       <div id="searchAssociationTools" class="search-method-body" hidden>
         <section class="search-association-plan" aria-labelledby="searchAssociationHeading">
-          <div class="search-association-heading"><h3 id="searchAssociationHeading">已理解的检索条件（用户搜索）</h3><button type="button" data-plan-edit aria-expanded="false" aria-controls="searchAssociationForm">修改条件</button></div>
+          <div class="search-association-heading"><h3 id="searchAssociationHeading">已理解的检索条件（用户搜索）</h3></div>
           <div id="searchAssociationSummary" class="search-association-summary" aria-live="polite"></div>
           <p id="searchAssociationRelated" class="search-association-related"></p><p id="searchAssociationNotice" class="search-method-note" hidden></p>
-          <form id="searchAssociationForm" class="search-association-form" hidden>
-            <label for="searchAssociationQuery">检索提问</label><input id="searchAssociationQuery" type="text" maxlength="200" placeholder="例如：帮我找近三年AI药物发现的论文"><button type="submit" class="search-association-apply">重新搜索</button><button type="button" data-plan-reset>恢复原提问</button>
-            <p class="search-method-note">可修改主题、资源类型和年份；已手动设置的筛选条件优先。</p></form>
           <p id="searchAssociationError" class="search-method-error" role="status"></p>
-          <details id="searchAssociationDetails" class="search-association-expression"><summary>查看检索式</summary><code id="searchAssociationExpression"></code></details>
         </section>
         <details id="searchPreferenceDetails" class="search-preference-details"><summary>搜索偏好（行为分析/信息处理） <span id="searchPreferenceSummary"></span></summary><div class="search-preference-body">
           <div class="search-preference-controls"><label><input id="searchPreferenceEnabled" type="checkbox">开启搜索偏好</label><button type="button" id="searchPreferenceClear">清除偏好</button></div>
@@ -113,7 +109,7 @@
           <p id="searchPreferenceStatus" class="search-method-note" role="status"></p></div></details></div>`;
     doc.querySelector(".portal-search-toolbar").append(node);
     const get = id => doc.getElementById(id);
-    let state = model.snapshot(), planKey = "", prefsContext = "", prefs;
+    let state = model.snapshot(), prefsContext = "", prefs;
     const context = () => String(bridge.getUserId?.() || "anonymous");
     const now = () => Date.now();
     const fresh = () => ({ version: 1, enabled: false, events: [], corrections: {} });
@@ -164,7 +160,8 @@
     }
     function recordBehavior(type, label, record) {
       if (!ensurePrefs().enabled || !state.query) return false;
-      const effectiveQuery = state.searchMethod === "association" ? state.associationPlan?.query || state.associationQuery || state.query : state.query;
+      const effectiveQuery = state.searchMethod === "association" ? state.associationPlan?.query ?? state.query : state.query;
+      if (!effectiveQuery) return false;
       const topicSource = record ? [record.title, record.name, record.abstract, record.summary, ...(record.domainTags || []), ...(record.tags || [])].filter(Boolean).join(" ") : effectiveQuery;
       const topic = bridge.topic?.(topicSource) || norm(topicSource).slice(0, 20);
       prefs.events.push({ type, topic, query: state.query, resourceType: record?.type || state.currentType, label: norm(label).slice(0, 200), at: now() });
@@ -193,28 +190,27 @@
       });
       get("searchAssociationTools").hidden = method !== "association";
       if (method === "association") {
-        const key = state.query + "\0" + state.associationQuery;
         const plan = state.associationPlan || analyze(state.associationQuery || state.query);
-        if (key !== planKey) { get("searchAssociationQuery").value = state.associationQuery || state.query; planKey = key; }
         const parsed = parseConcepts(plan.query);
         const filters = state.view.filters || {}, years = state.currentType === "论文" && (filters.publishedYearFrom || filters.publishedYearTo)
           ? `${filters.publishedYearFrom || "不限"}—${filters.publishedYearTo || "不限"}` : "不限";
-        get("searchAssociationSummary").innerHTML = [
-          ["关键词", parsed.terms.map(term => associationGroup(term.text)?.[0] || term.text).join("、") || plan.query],
-          ["资源", state.currentType === "全部" ? "全部资源" : typeLabel(state.currentType)], ["年份", years]
-        ].map(([label, value]) => `<span>${label}<strong>${esc(value)}</strong></span>`).join("");
+        const disabled = state.loading ? "disabled" : "";
+        const keywordChips = parsed.terms.map(term => {
+          const label = associationGroup(term.text)?.[0] || term.text;
+          return `<span class="search-association-chip">关键词<strong>${esc(label)}</strong><button type="button" data-remove-association-keyword="${esc(term.text)}" aria-label="取消关键词 ${esc(label)}" title="取消关键词" ${disabled}>×</button></span>`;
+        }).join("");
+        const resourceChip = state.currentType !== "全部" ? `<span class="search-association-chip">资源<strong>${esc(typeLabel(state.currentType))}</strong><button type="button" data-clear-association-resource aria-label="取消资源类型 ${esc(typeLabel(state.currentType))}" title="取消资源条件" ${disabled}>×</button></span>` : "";
+        get("searchAssociationSummary").innerHTML = (keywordChips || '<span class="search-method-note">关键词已全部取消，请在上方输入关键词重新搜索。</span>')
+          + resourceChip + `<span>年份<strong>${esc(years)}</strong></span>`;
         const related = [...new Set(parsed.terms.flatMap(term => [term.text, ...(bridge.associationTerms?.(term.text) || [])]))];
         get("searchAssociationRelated").textContent = related.length > parsed.terms.length ? `关联检索：${related.join("、")}` : "按当前关键词查找相关资源。";
-        get("searchAssociationExpression").textContent = parsed.error ? "输入检索词后生成条件" : parsed.terms.map(term => {
-          const terms = [...new Set([term.text, ...(bridge.associationTerms?.(term.text) || [])])];
-          return "(" + terms.map(value => '"' + value.replace(/"/g, "") + '"').join(" OR ") + ")";
-        }).join(" AND ");
-        const warnings = [...(plan.warnings || [])];
-        if (plan.filters?.publishedYearFrom && state.currentType !== "论文") warnings.push("当前资源暂不支持年份条件，请切换论文或调整检索条件。");
-        if (plan.resourceType && state.currentType !== "全部" && plan.resourceType !== state.currentType) warnings.push("提问中的资源类型与当前选择不同，按当前资源类型检索。");
+        get("searchAssociationRelated").hidden = !parsed.terms.length;
+        const warnings = state.associationEmpty ? [] : [...(plan.warnings || [])];
+        if (!state.associationEmpty && plan.filters?.publishedYearFrom && state.currentType !== "论文") warnings.push("当前资源暂不支持年份条件，请切换论文或调整检索条件。");
+        if (!state.associationEmpty && plan.resourceType && state.currentType !== "全部" && plan.resourceType !== state.currentType) warnings.push("提问中的资源类型与当前选择不同，按当前资源类型检索。");
         get("searchAssociationNotice").textContent = warnings.join("；");
         get("searchAssociationNotice").hidden = !warnings.length;
-        get("searchAssociationError").textContent = state.validation?.message || "";
+        get("searchAssociationError").textContent = state.associationEmpty ? "" : state.validation?.message || "";
         renderPreferences();
       }
     }
@@ -222,13 +218,14 @@
     function refreshAfterSearch(recorded) {
       if (recorded && state.searchMethod === "association") return model.refreshRanking();
     }
-    async function applyAssociation(value) {
-      const original = state.query, requested = norm(value);
-      const next = await model.setAssociationQuery(requested);
-      if (next.query !== original || (next.associationQuery || next.query) !== requested || next.validation || next.error || next.retainedResults) return;
-      get("searchAssociationForm").hidden = true;
-      node.querySelector("[data-plan-edit]").setAttribute("aria-expanded", "false");
-      await refreshAfterSearch(recordBehavior("search", requested));
+    async function removeAssociationCondition(button) {
+      const original = state.query;
+      const next = button.hasAttribute("data-remove-association-keyword")
+        ? await model.removeAssociationKeyword(button.dataset.removeAssociationKeyword)
+        : await model.clearAssociationResource();
+      if (next.query !== original) return;
+      const target = get("searchAssociationSummary").querySelector("button:not(:disabled)") || get("portalResultSearchInput");
+      target?.focus({ preventScroll: true });
     }
     node.addEventListener("change", event => {
       if (event.target.hasAttribute("data-auto-rule-group")) action(model.setAutomaticRuleEnabled(event.target.dataset.autoRuleGroup, event.target.dataset.autoRuleConcept, event.target.checked));
@@ -239,18 +236,10 @@
         action(model.refreshRanking());
       }
     });
-    get("searchAssociationForm").addEventListener("submit", event => {
-      event.preventDefault(); event.stopPropagation(); action(applyAssociation(get("searchAssociationQuery").value));
-    });
     node.addEventListener("click", event => {
       const button = event.target.closest("button"); if (!button) return;
       if (button.hasAttribute("data-auto-rules-toggle-all")) action(model.setAllAutomaticRulesEnabled(!state.availableAutomaticRules.some(rule => rule.enabled !== false)));
-      if (button.hasAttribute("data-plan-edit")) {
-        const open = get("searchAssociationForm").hidden;
-        get("searchAssociationForm").hidden = !open; button.setAttribute("aria-expanded", String(open));
-        if (open) get("searchAssociationQuery").focus();
-      }
-      if (button.hasAttribute("data-plan-reset")) action(applyAssociation(state.query));
+      if (button.hasAttribute("data-remove-association-keyword") || button.hasAttribute("data-clear-association-resource")) action(removeAssociationCondition(button));
       if (button.id === "searchPreferenceClear") { prefs = fresh(); savePrefs(); renderPreferences(); get("searchPreferenceStatus").textContent = "已清除兴趣记录并关闭搜索偏好。"; action(model.refreshRanking()); }
     });
     doc.getElementById("portalSearchResultList").addEventListener("click", event => {

@@ -205,6 +205,8 @@
     const filterModeFor = type => type === "报告" || (searchMethod !== "exact" || allRulesForQuery().length) && FILTER_TYPES.includes(type) ? "server" : FILTER_TYPES.includes(type) ? "local" : "none";
     let userContext = contextKey(), version = 0, query = "", logic = "AND", currentType = "全部", validation = null, authError = null, association = false;
     let searchMethod = "exact", associationQuery = "", expansionTerms = [];
+    // null keeps the understood keywords; [] is an explicit empty search.
+    let associationKeywords = null, associationResourceCleared = false;
     let disabledAutomaticRuleGroups = new Set();
     let automaticAssociationType = "", explicitAssociationType = false, automaticAssociationFilters = {}, manualAssociationFilters = {};
     const scopedTypes = { "论文": PAPER_SCOPES, "报告": REPORT_SCOPES };
@@ -220,6 +222,31 @@
     const unique = values => [...new Set(values.filter(value => value != null && value !== ""))];
     const associationPlanFor = value => options.associationPlan?.(value) || { query: value, resourceType: "", filters: {}, warnings: [] };
     const conceptParse = value => options.parseConcepts?.(value) || parse(value);
+    const serializeAssociationKeywords = keywords => keywords.map(term => term.phrase ? '"' + term.text + '"' : term.text).join(" ");
+    function effectiveAssociationPlan() {
+      const plan = associationPlanFor(associationQuery || query);
+      return { ...plan, query: associationKeywords === null ? plan.query : serializeAssociationKeywords(associationKeywords), resourceType: associationResourceCleared ? "" : plan.resourceType };
+    }
+    function understoodAssociationKeywords() {
+      if (associationKeywords !== null) return copy(associationKeywords);
+      const parsed = conceptParse(effectiveAssociationPlan().query);
+      return parsed.error ? [] : parsed.terms.map(({ text, phrase }) => ({ text, phrase: Boolean(phrase) }));
+    }
+    function validatedAssociationKeywords(values) {
+      if (!Array.isArray(values)) return undefined;
+      const parsed = conceptParse(associationPlanFor(associationQuery || query).query);
+      if (parsed.error) return values.length ? undefined : [];
+      const available = new Map(parsed.terms.map(term => [normalize(term.text) + "\0" + Boolean(term.phrase), { text: term.text, phrase: Boolean(term.phrase) }]));
+      const selected = new Set();
+      for (const term of values) {
+        if (!term || typeof term.text !== "string" || typeof term.phrase !== "boolean") return undefined;
+        const key = normalize(term.text) + "\0" + term.phrase;
+        if (!available.has(key)) return undefined;
+        selected.add(key);
+      }
+      return [...available.entries()].filter(([key]) => selected.has(key)).map(([, term]) => term);
+    }
+    const associationIsEmpty = () => searchMethod === "association" && Boolean(query) && understoodAssociationKeywords().length === 0;
     const ruleGroupKey = (group, concept) => group + ":" + normalize(concept);
     function allRulesForQuery() {
       if (!query || parse(query).error) return [];
@@ -234,7 +261,7 @@
     }
     function prepareAssociationView() {
       if (searchMethod !== "association" || !query) return;
-      const plan = associationPlanFor(associationQuery || query);
+      const plan = effectiveAssociationPlan();
       if (!explicitAssociationType && TYPES.includes(plan.resourceType) && (currentType === "全部" || automaticAssociationType === currentType)) {
         currentType = plan.resourceType; automaticAssociationType = currentType;
       }
@@ -250,9 +277,10 @@
       }
     }
     function mainRecords(request) {
-      const text = request.association ? associationPlanFor(request.associationQuery || request.query).query : request.query;
+      const text = request.association ? request.associationPlan?.query ?? associationPlanFor(request.associationQuery || request.query).query : request.query;
       const automaticRules = request.automaticRules || [];
       const parsed = request.searchMethod === "exact" && !automaticRules.length ? parse(text) : conceptParse(text);
+      if (request.association && (parsed.error || !parsed.terms.length)) return [];
       const original = request.searchMethod === "expansion" || request.searchMethod === "exact" ? parse(request.query) : parsed;
       // Association expands the complete candidate set before filtering/paging.
       // Full-text uses these same concepts against the versioned body only.
@@ -329,7 +357,7 @@
         if (!progress) break;
       }
       ALL_TYPES.forEach(type => result.push(...queues[type].slice(positions[type])));
-      return searchMethod === "association" ? rankAssociation(result, associationPlanFor(associationQuery || query).query, logic, type => requestScope(type, views["全部"])) : result;
+      return searchMethod === "association" ? rankAssociation(result, effectiveAssociationPlan().query, logic, type => requestScope(type, views["全部"])) : result;
     }
     function totalForView(view) {
       const types = sourceTypes(view);
@@ -338,19 +366,20 @@
       return sources.every(source => source?.status === "success" && source.total != null) ? sources.reduce((sum, source) => sum + source.total, 0) : null;
     }
     function snapshot() {
+      const associationEmpty = associationIsEmpty();
       const view = views[currentType], typeList = sourceTypes(view), statusSources = view.pendingSources || view.sources, stateSources = Object.fromEntries(typeList.map(type => [type, statusSources[type] || idleSource(type, view.page, view)]));
-      const ordered = currentType === "全部" ? aggregate(view.sources) : distinct(view.sources[currentType]?.rawItems || []);
+      const ordered = associationEmpty ? [] : currentType === "全部" ? aggregate(view.sources) : distinct(view.sources[currentType]?.rawItems || []);
       const startIndex = (view.page - 1) * PAGE_SIZE;
       const rawItems = currentType === "全部" ? ordered.slice(startIndex, startIndex + PAGE_SIZE) : ordered;
       const displayItems = FILTER_TYPES.includes(currentType) ? rawItems.filter(record => filterRecord(record, view.filters, now)) : rawItems;
-      const total = totalForView(view), allTotal = totalForView(views["全部"]), failedTypes = typeList.filter(type => stateSources[type].status === "error");
+      const total = associationEmpty ? 0 : totalForView(view), allTotal = associationEmpty ? 0 : totalForView(views["全部"]), failedTypes = typeList.filter(type => stateSources[type].status === "error");
       const unsupportedTypes = typeList.filter(type => stateSources[type].status === "unsupported");
       const activeSources = typeList.filter(type => eligible(type, view)).map(type => stateSources[type]);
-      const hasMore = view.retainedResults ? false : currentType === "全部" ? ordered.length > startIndex + PAGE_SIZE : stateSources[currentType]?.hasMore !== false;
+      const hasMore = associationEmpty || view.retainedResults ? false : currentType === "全部" ? ordered.length > startIndex + PAGE_SIZE : stateSources[currentType]?.hasMore !== false;
       const counts = {};
       TYPES.forEach(type => {
         const source = currentType === type ? view.sources[type] : views["全部"].sources[type] || views[type].sources[type];
-        counts[type] = source?.status === "success" ? source.total : null;
+        counts[type] = associationEmpty ? 0 : source?.status === "success" ? source.total : null;
       });
       counts["全部"] = allTotal;
       const dictionaries = { sources: {}, domains: {}, levels: {}, reportTypes: [] };
@@ -358,7 +387,7 @@
       dictionaries.domains[currentType] = unique(rawItems.flatMap(item => list(currentType === "论文" ? item.domainTags : currentType === "人才" ? item.researchFields : [])));
       const filterMode = filterModeFor(currentType);
       const publicView = { type: view.type, scope: viewScope(view), page: view.page, startIndex, pendingPage: view.pendingPage, filters: copy(view.filters), filterMode, rawItems, displayItems, total, shownCount: displayItems.length, hasMore, paginationUnknown: activeSources.some(source => source.paginationUnknown), status: authError ? "error" : view.loading ? "loading" : view.error && !displayItems.length ? "error" : view.loaded ? "success" : "idle", validation: view.validation, error: authError ? authError.message : view.error, retainedResults: view.retainedResults };
-      return { query, association, searchMethod, automaticRules: copy(rulesForQuery()), availableAutomaticRules: searchMethod === "exact" ? allRulesForQuery().map(rule => ({ ...rule, enabled: !disabledAutomaticRuleGroups.has(ruleGroupKey(rule.group, rule.concept)) })) : [], disabledAutomaticRuleGroups: [...disabledAutomaticRuleGroups].sort(), associationQuery, associationPlan: searchMethod === "association" ? associationPlanFor(associationQuery || query) : null, expansionTerms: copy(expansionTerms), scope: viewScope(view), logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: totalForView(value), filterMode: filterModeFor(type) }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: filterMode === "local" ? "仅筛选当前已返回数据，其他页可能仍有符合项" : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
+      return { query, association, searchMethod, automaticRules: copy(rulesForQuery()), availableAutomaticRules: searchMethod === "exact" ? allRulesForQuery().map(rule => ({ ...rule, enabled: !disabledAutomaticRuleGroups.has(ruleGroupKey(rule.group, rule.concept)) })) : [], disabledAutomaticRuleGroups: [...disabledAutomaticRuleGroups].sort(), associationQuery, associationKeywords: copy(associationKeywords), associationResourceCleared, associationEmpty, associationPlan: searchMethod === "association" ? copy(effectiveAssociationPlan()) : null, expansionTerms: copy(expansionTerms), scope: viewScope(view), logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: associationEmpty ? 0 : totalForView(value), filterMode: filterModeFor(type) }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: filterMode === "local" ? "仅筛选当前已返回数据，其他页可能仍有符合项" : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
     }
     function emit() { const state = snapshot(); listeners.forEach(listener => listener(state)); }
     function resetContexts(clearFilters) {
@@ -377,20 +406,27 @@
       sourceTypes(view).forEach(type => { view.sources[type] = { ...idleSource(type, 1, view), status: "error", code: authError.code, error: authError.message }; }); emit();
     }
     async function fetchPage(type, page, view, valid) {
-      const scope = requestScope(type, view), filters = requestFilters(type, view), automaticRules = rulesForQuery(), hasAutomaticRuleOptions = allRulesForQuery().length > 0, key = JSON.stringify([userContext, query, scope, logic, type, page, filters, searchMethod, associationQuery, expansionTerms, automaticRules, hasAutomaticRuleOptions]);
+      const associationPlan = searchMethod === "association" ? effectiveAssociationPlan() : null;
+      const scope = requestScope(type, view), filters = requestFilters(type, view), automaticRules = rulesForQuery(), hasAutomaticRuleOptions = allRulesForQuery().length > 0, key = JSON.stringify([userContext, query, scope, logic, type, page, filters, searchMethod, associationQuery, associationPlan, associationKeywords, associationResourceCleared, expansionTerms, automaticRules, hasAutomaticRuleOptions]);
       if (cache.has(key)) return copy(cache.get(key));
-      const response = await service({ type, query, scope, logic, page, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters, association, searchMethod, automaticRules, hasAutomaticRuleOptions, associationQuery, expansionTerms: copy(expansionTerms), userContext, queryVersion: version });
+      const response = await service({ type, query, scope, logic, page, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters, association, searchMethod, automaticRules, hasAutomaticRuleOptions, associationQuery, associationPlan: copy(associationPlan), associationKeywords: copy(associationKeywords), associationResourceCleared, expansionTerms: copy(expansionTerms), userContext, queryVersion: version });
       const result = normalizeResponse(response, type, page);
       if (valid()) cache.set(key, result);
       return result;
     }
     async function load(view, targetPage, onlyType) {
       if (checkContext()) { view = views[view.type]; targetPage = 1; }
+      if (authError || !query) { emit(); return snapshot(); }
+      if (associationIsEmpty()) {
+        view.requestToken++; view.page = 1; view.pendingPage = null; view.loading = false; view.loaded = true;
+        view.pendingSources = null; view.error = null; view.retainedResults = false;
+        view.sources = Object.fromEntries(sourceTypes(view).map(type => [type, { ...idleSource(type, 1, view), status: "success", total: 0, hasMore: false, error: null }]));
+        emit(); return snapshot();
+      }
       if (viewScope(view) === "全文检索" && searchMethod !== "exact") {
         searchMethod = "exact"; association = false; associationQuery = ""; expansionTerms = [];
         resetContexts(false); view = views[view.type]; targetPage = 1;
       }
-      if (authError || !query) { emit(); return snapshot(); }
       // Once all sources settle, ordinary list pagination only changes the global slice.
       if (view.type === "全部" && view.loaded && !onlyType) { view.page = targetPage; view.pendingPage = null; emit(); return snapshot(); }
       const ticket = ++view.requestToken, requestedVersion = version, requestedUser = userContext, scope = viewScope(view);
@@ -440,7 +476,14 @@
         if (validation) { emit(); return Promise.resolve(snapshot()); }
         checkContext(); params = params || {};
         const changed = parsed.query !== query; query = parsed.query;
-        if (changed) { associationQuery = ""; expansionTerms = []; automaticAssociationFilters = {}; manualAssociationFilters = {}; disabledAutomaticRuleGroups.clear(); }
+        associationQuery = ""; associationKeywords = null; associationResourceCleared = false;
+        explicitAssociationType = false;
+        if (automaticAssociationType !== currentType) automaticAssociationType = "";
+        if (searchMethod === "association" && typeof params.associationQuery === "string") {
+          const restoredQuery = parse(params.associationQuery);
+          if (!restoredQuery.error) associationQuery = restoredQuery.query === query ? "" : restoredQuery.query;
+        }
+        if (changed) { expansionTerms = []; automaticAssociationFilters = {}; manualAssociationFilters = {}; disabledAutomaticRuleGroups.clear(); }
         if (Array.isArray(params.disabledAutomaticRuleGroups)) {
           const available = new Set(allRulesForQuery().map(rule => ruleGroupKey(rule.group, rule.concept)));
           disabledAutomaticRuleGroups = new Set(params.disabledAutomaticRuleGroups.filter(key => typeof key === "string" && available.has(key)));
@@ -448,6 +491,13 @@
         const targetType = params.type || currentType;
         if (scopedTypes[targetType]?.includes(params.scope)) views[targetType].scope = params.scope;
         if (params.type && ["全部", ...TYPES].includes(params.type)) { if (params.type !== currentType) explicitAssociationType = true; currentType = params.type; }
+        if (searchMethod === "association" && params.associationConditions && typeof params.associationConditions === "object") {
+          const restoredKeywords = validatedAssociationKeywords(params.associationConditions.keywords);
+          if (restoredKeywords !== undefined) associationKeywords = restoredKeywords;
+          if (params.associationConditions.resourceCleared === true) {
+            associationResourceCleared = true; explicitAssociationType = true; automaticAssociationType = ""; currentType = "全部";
+          }
+        }
         logic = "AND"; resetContexts(changed); prepareAssociationView(); return load(views[currentType], 1);
       },
       setScope(value) {
@@ -489,7 +539,22 @@
         const parsed = parse(value); validation = parsed.error;
         if (validation) { emit(); return Promise.resolve(snapshot()); }
         associationQuery = parsed.query === query ? "" : parsed.query;
+        associationKeywords = null;
+        if (associationResourceCleared) explicitAssociationType = false;
+        associationResourceCleared = false;
         checkContext(); resetContexts(false); prepareAssociationView(); return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot()));
+      },
+      removeAssociationKeyword(value) {
+        if (searchMethod !== "association" || typeof value !== "string") return Promise.resolve(snapshot());
+        const key = normalize(value), keywords = understoodAssociationKeywords();
+        if (!key || !keywords.some(term => normalize(term.text) === key)) return Promise.resolve(snapshot());
+        associationKeywords = keywords.filter(term => normalize(term.text) !== key); validation = null;
+        checkContext(); resetContexts(false); prepareAssociationView(); return load(views[currentType], 1);
+      },
+      clearAssociationResource() {
+        if (searchMethod !== "association" || currentType === "全部" && associationResourceCleared) return Promise.resolve(snapshot());
+        associationResourceCleared = true; explicitAssociationType = true; automaticAssociationType = ""; currentType = "全部"; validation = null;
+        checkContext(); resetContexts(false); return load(views[currentType], 1);
       },
       setExpansionTerms(values) {
         if (searchMethod !== "expansion") return Promise.resolve(snapshot());
@@ -503,7 +568,7 @@
         return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot()));
       },
       refreshRanking() { checkContext(); resetContexts(false); return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot())); },
-      selectType(type) { if (!["全部", ...TYPES].includes(type)) return Promise.resolve(snapshot()); checkContext(); explicitAssociationType = true; currentType = type; validation = null; const view = views[type]; if (view.loaded || view.loading) { emit(); return Promise.resolve(snapshot()); } return load(view, view.page); },
+      selectType(type) { if (!["全部", ...TYPES].includes(type)) return Promise.resolve(snapshot()); checkContext(); explicitAssociationType = true; associationResourceCleared = type === "全部"; automaticAssociationType = ""; currentType = type; validation = null; const view = views[type]; if (view.loaded || view.loading) { emit(); return Promise.resolve(snapshot()); } return load(view, view.page); },
       setFilter(name, value) {
         if (!FILTER_TYPES.includes(currentType) && currentType !== "报告") return Promise.resolve(snapshot());
         if (currentType === "报告" || searchMethod !== "exact" || allRulesForQuery().length) checkContext();

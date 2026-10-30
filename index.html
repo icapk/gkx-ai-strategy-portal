@@ -3744,7 +3744,7 @@
     }
   </style>
   <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
-  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-user-model-title">
+  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-association-chips">
   <link rel="stylesheet" href="report-fulltext.css?v=20261030-report">
 </head>
 <body>
@@ -5168,12 +5168,12 @@
 
   <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
   <script src="report-fulltext-fixtures.js?v=20261030-report-types"></script>
-  <script src="keyword-search-model.js?v=20261030-rule-toggles"></script>
+  <script src="keyword-search-model.js?v=20261030-association-chips"></script>
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
-  <script src="search-methods.js?v=20261030-user-model-topic"></script>
-  <script src="keyword-search-ui.js?v=20261030-scholar-labels"></script>
+  <script src="search-methods.js?v=20261030-association-chips"></script>
+  <script src="keyword-search-ui.js?v=20261030-association-chips"></script>
   <script src="ai-rag-search.js?v=20261030-independent-results"></script><script>
     (() => {
       "use strict";
@@ -7733,10 +7733,13 @@
           else url.searchParams.delete("feature");
           if (current?.searchMethod === "association" && current.associationQuery) url.searchParams.set("plan", current.associationQuery);
           else url.searchParams.delete("plan");
+          if (current?.searchMethod === "association" && (Array.isArray(current.associationKeywords) || current.associationResourceCleared)) {
+            url.searchParams.set("associationConditions", JSON.stringify({ keywords: current.associationKeywords, resourceCleared: current.associationResourceCleared }));
+          } else url.searchParams.delete("associationConditions");
           url.searchParams.delete("expansions");
           if (current?.disabledAutomaticRuleGroups?.length) url.searchParams.set("autoDisabled", JSON.stringify(current.disabledAutomaticRuleGroups));
           else url.searchParams.delete("autoDisabled");
-        } else ["feature", "plan", "expansions", "scope", "reportTypes", "type", "autoDisabled"].forEach(key => url.searchParams.delete(key));
+        } else ["feature", "plan", "associationConditions", "expansions", "scope", "reportTypes", "type", "autoDisabled"].forEach(key => url.searchParams.delete(key));
         if (url.href !== window.location.href) window.history.replaceState(null, "", url);
       }
 
@@ -9534,6 +9537,11 @@
       if (entryQuery) {
         let entryDisabledAutomaticRules;
         try { const stored = JSON.parse(entrySearchParams.get("autoDisabled") || "null"); if (Array.isArray(stored)) entryDisabledAutomaticRules = stored; } catch (_) { /* Invalid optional state keeps default rules. */ }
+        let entryAssociationConditions;
+        try {
+          const stored = JSON.parse(entrySearchParams.get("associationConditions") || "null");
+          if (stored && !Array.isArray(stored) && typeof stored === "object") entryAssociationConditions = stored;
+        } catch (_) { /* Invalid optional conditions keep the parsed query. */ }
         const feature = entrySearchParams.get("feature");
         const entryMethod = feature === "expansion" ? "exact" : ["exact", "association"].includes(feature) ? feature
           : entryMode === "关联" || entrySearchParams.get("association") === "1" ? "association" : "exact";
@@ -9543,13 +9551,14 @@
           resourceType: entryType || undefined,
           scope: entrySearchParams.get("scope") || undefined,
           disabledAutomaticRuleGroups: entryDisabledAutomaticRules,
+          associationQuery: entryMethod === "association" ? entrySearchParams.get("plan") || undefined : undefined,
+          associationConditions: entryMethod === "association" ? entryAssociationConditions : undefined,
           trackSearch: false
         })).then(async () => {
           if (activeSearchMode !== "关键词" || keywordSearchV1?.snapshot().query !== entryQuery) return;
           const types = entrySearchParams.get("reportTypes");
           if (types && keywordSearchV1.snapshot().currentType === "报告") await keywordSearchV1.model.setFilter("reportTypes", types.split(","));
           if (keywordSearchV1.snapshot().query !== entryQuery) return;
-          if (entryMethod === "association" && entrySearchParams.get("plan")) await keywordSearchV1.model.setAssociationQuery(entrySearchParams.get("plan"));
         }).catch(error => setPortalSearchFeedback(error.message, "error"));
       }
 

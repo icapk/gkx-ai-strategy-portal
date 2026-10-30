@@ -361,6 +361,7 @@
       emptyAction = "clear";
       if (isUnconnected(state.currentType)) { title = `${typeLabel(state.currentType)}待接入`; text = state.currentType === "练仿真" ? "练仿真搜索接口接入后可检索。" : "专利搜索接口接入后可检索并筛选。"; showButton = false; }
       else if (!state.query) { title = "请输入关键词"; text = "输入关键词后开始搜索。"; showButton = false; }
+      else if (state.associationEmpty) { title = "请重新输入关键词"; text = "关键词已全部取消，请在上方输入关键词后搜索。"; showButton = false; }
       else if (state.authError) { title = state.authError.message; text = "重新登录后再继续检索。"; showButton = false; }
       else if (source?.status === "unsupported" || (all && !anySuccess && state.unsupportedTypes?.length && !state.loading)) { title = source?.error === "检索能力暂不可用" ? "检索能力暂不可用" : "不支持该检索条件"; text = scoped ? "当前资源暂不支持该检索条件，请切换搜索范围。" : "当前资源暂不支持该检索条件，请切换资源类型。"; button = "切换至标题和摘要"; emptyAction = "scope"; showButton = scoped && title !== "检索能力暂不可用"; }
       else if (state.loading && !items.length) { title = "正在检索……"; text = "各类资源正在加载。"; showButton = false; }
@@ -381,9 +382,9 @@
     function renderPaging(state) {
       const view = state.view || {}, all = state.currentType === "全部", page = Number(view.page) || 1;
       const hasMore = view.hasMore ?? state.hasMore;
-      const disabled = state.loading || !state.query || isUnconnected(state.currentType) || view.status === "unsupported";
+      const disabled = state.loading || !state.query || state.associationEmpty || isUnconnected(state.currentType) || view.status === "unsupported";
       paging.replaceChildren();
-      paging.hidden = !state.query || isUnconnected(state.currentType) || (page === 1 && hasMore === false);
+      paging.hidden = !state.query || state.associationEmpty || isUnconnected(state.currentType) || (page === 1 && hasMore === false);
       if (paging.hidden) return;
       const make = (label, direction, off) => {
         const button = doc.createElement("button"); button.type = "button";
@@ -409,7 +410,7 @@
       else if (state.sources?.[state.currentType]?.status === "unsupported") heading.textContent = "不支持该检索条件";
       else heading.textContent = Number.isFinite(total) ? `${total} 条结果` : state.loading ? "检索中" : "结果总数未知";
       const page = Number(view.page) || 1;
-      range.textContent = unconnected ? `${typeLabel(state.currentType)}搜索接口待接入` : !state.query ? "输入关键词后查看资源" : `第 ${page} 页 · 本页显示 ${items.length} 条${view.paginationUnknown ? " · 分页状态待确认" : ""}${state.retainedResults || view.retainedResults ? " · 仍显示原查询结果" : ""}`;
+      range.textContent = unconnected ? `${typeLabel(state.currentType)}搜索接口待接入` : state.associationEmpty ? "请在上方输入关键词重新搜索" : !state.query ? "输入关键词后查看资源" : `第 ${page} 页 · 本页显示 ${items.length} 条${view.paginationUnknown ? " · 分页状态待确认" : ""}${state.retainedResults || view.retainedResults ? " · 仍显示原查询结果" : ""}`;
       hint.hidden = !state.query || !SECONDARY_TYPES.includes(state.currentType) || unconnected || view.status === "unsupported";
       hint.textContent = view.filterMode === "server" ? "按当前条件筛选全部结果" : "本页筛选 · 仅筛选当前已返回数据，其他页可能仍有符合项";
       const fragment = doc.createDocumentFragment();
@@ -440,7 +441,7 @@
       const prior = model.snapshot();
       const requestedType = options.resourceType || options.type || prior.currentType || bridge.getType?.() || "全部";
       try {
-        await model.submit(query, { scope: options.scope || (requestedType === prior.currentType ? prior.scope : undefined) || "全部资源", logic: "AND", type: requestedType, disabledAutomaticRuleGroups: options.disabledAutomaticRuleGroups });
+        await model.submit(query, { scope: options.scope || (requestedType === prior.currentType ? prior.scope : undefined) || "全部资源", logic: "AND", type: requestedType, disabledAutomaticRuleGroups: options.disabledAutomaticRuleGroups, associationQuery: options.associationQuery, associationConditions: options.associationConditions });
         const current = model.snapshot();
         if (ticket === submitting && context === contextKey() && current.query === query && options.trackSearch !== false) bridge.onSubmit?.(query, options, current.displayItems || []);
         return true;
