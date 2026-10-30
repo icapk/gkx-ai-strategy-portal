@@ -3372,10 +3372,10 @@
   const SR=window.PortalSearchRecommend;
   const srSafe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const srId=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);
-  SR.registerResources([...NEWS_ITEMS.map(x=>({...x,type:'资讯'})),...PAPER_ITEMS.map(x=>({...x,type:'论文'})),...REPORT_ITEMS.map(x=>({...x,type:'报告'})),...COURSE_ITEMS.map(x=>({...x,type:'课程'}))]);
+  SR.registerResources([...NEWS_ITEMS.map(x=>({...x,type:'资讯',sourceDomainTags:[x.topic]})),...PAPER_ITEMS.map(x=>({...x,type:'论文'})),...REPORT_ITEMS.map(x=>({...x,type:'报告'})),...COURSE_ITEMS.map(x=>({...x,type:'课程'}))]);
   function srRecommend(type,scene,items){return SR.recommendSnapshot({resourceType:type,scene,items}).items}
   getNewsInterestTopics=function(){return SR.snapshot().follows.filter(x=>x.following&&['DOMAIN','JOURNAL'].includes(x.kind)).map(x=>({keyword:x.targetId,source:'当前关注'}))};
-  getNewsItems=function(mode){return srRecommend('NEWS',mode,NEWS_ITEMS.map(x=>({...x,topics:[x.topic,...x.tags]})))};
+  getNewsItems=function(mode){return srRecommend('NEWS',mode,NEWS_ITEMS.map(x=>({...x,topics:[x.topic,...x.tags],sourceDomainTags:[x.topic]})))};
   const srNewsCard=createNewsCard;
   createNewsCard=function(item,i){const card=srNewsCard(item,i);if(item.moduleEntries?.length){const links=createElement('div','sr-note','相关服务：');item.moduleEntries.forEach(m=>{const a=createElement('a','',m.label+' ↗ ');a.href=m.url;links.appendChild(a)});card.querySelector('.rec-news-detail').appendChild(links)}return card};
   newsRecommendationReason=function(item){if(activeNewsMode==='following')return '匹配当前关注领域或期刊 · 发布时间倒序';if(activeNewsMode==='hot')return '当前平台领域热度候选 · 发布时间倒序';return item.personalized?'行为兴趣候选 · 发布时间倒序':'公共最新资讯 · 暂无匹配的个人行为依据'};
@@ -3414,34 +3414,73 @@
   });
   function srRenderHot(){const container=document.querySelector('.rec-hot-grid'),words=srRecommend('HOT_WORD','personal',[]);container.innerHTML=words.map((w,i)=>`<button class="rec-hot-card ${i<3?'is-top':''}" type="button" data-sr-hot-query="${srSafe(w.topic)}"><strong>${srSafe(w.topic)}</strong><em>#${i+1}</em><span>近7天行为权重 ${w.current}</span><small>${w.hasPersonalEvidence?'兴趣相关 '+Math.round(w.relevance*100)+'%':'公共热点 · 无个人行为'}</small></button>`).join('')}
   document.querySelector('.rec-hot-grid')?.addEventListener('click',e=>{const b=e.target.closest('[data-sr-hot-query]');if(b)openKeywordResults(b.dataset.srHotQuery)});
-  // The compact entry opens fixed domain choices and the existing journal follows.
+  // Domain classifications and their manually entered words stay separate from search keyword watches.
   const srInterestButton=document.querySelector('[data-sr-follow-settings]');
   function srRenderInterests(){
     if(!srInterestButton)return;
     const count=SR.snapshot().follows.filter(f=>f.following&&f.kind==='DOMAIN').length;
-    srInterestButton.title=count?'已关注 '+count+' 个领域':'选择关注领域';
+    srInterestButton.title=count?'已关注 '+count+' 个领域':'选择领域并添加关注热词';
   }
   let srDialog=null;
   function srOpenFollowDialog(){
     if(!SR.snapshot().userId){showToast('请先登录后操作');return}
-    const current=SR.snapshot();
+    const current=SR.snapshot(),domainTargets=SR.fixtures.availableTargets.filter(t=>t.kind==='DOMAIN');
+    const draftDomains=new Map(current.follows.filter(f=>f.kind==='DOMAIN'&&f.following&&domainTargets.some(t=>t.targetId===f.targetId)).map(f=>[f.targetId,{hotWords:[...(f.hotWords||[])]}]));
     srDialog?.remove();const d=document.createElement('dialog');srDialog=d;d.className='sr-dialog sr-follow-dialog';
-    const options=kind=>SR.fixtures.availableTargets.flatMap((t,i)=>t.kind===kind?[`<label><input type="checkbox" name="target" value="${i}" ${current.follows.some(f=>f.kind===t.kind&&f.targetId===t.targetId&&f.following)?'checked':''}><span>${srSafe(t.label)}</span></label>`]:[]).join('');
+    const journalOptions=SR.fixtures.availableTargets.flatMap((t,i)=>t.kind==='JOURNAL'?[`<label><input type="checkbox" name="journal" value="${i}" ${current.follows.some(f=>f.kind===t.kind&&f.targetId===t.targetId&&f.following)?'checked':''}><span>${srSafe(t.label)}</span></label>`]:[]).join('');
     d.setAttribute('aria-labelledby','sr-follow-dialog-title');
-    d.innerHTML=`<form novalidate><h3 id="sr-follow-dialog-title">管理关注领域</h3><div class="sr-follow-options"><fieldset><legend>关注领域</legend><div class="sr-target-options">${options('DOMAIN')}</div></fieldset><fieldset><legend>关注期刊</legend><div class="sr-target-options sr-journal-options">${options('JOURNAL')}</div></fieldset></div><span role="status" aria-live="polite"></span><menu><button type="button" data-sr-cancel>取消</button><button type="submit">保存关注</button></menu></form>`;
-    document.body.append(d);d.showModal();d.querySelector('[data-sr-cancel]').onclick=()=>d.close();
-    d.querySelector('form').onsubmit=async e=>{
-      e.preventDefault();const form=e.target,status=form.querySelector('[role=status]'),submit=form.querySelector('[type=submit]');
-      submit.disabled=true;
-      if(current.userContextVersion!==SR.userContextVersion()){status.textContent='身份已变化，请重新打开设置';submit.disabled=false;return}
+    d.innerHTML=`<form novalidate><h3 id="sr-follow-dialog-title">管理关注领域</h3><div class="sr-follow-options"><fieldset><legend>添加领域热词</legend><div class="sr-domain-word-entry"><label for="sr-follow-domain">领域分类<select id="sr-follow-domain" name="domain"><option value="">请选择领域</option>${domainTargets.map(t=>`<option value="${srSafe(t.targetId)}">${srSafe(t.label)}</option>`).join('')}</select></label><label for="sr-follow-hot-word">关注热词<input id="sr-follow-hot-word" name="hotWord" type="text" autocomplete="off" placeholder="请输入要关注的热词" aria-describedby="sr-follow-word-hint"></label><button type="button" data-sr-add-domain-word>添加热词</button></div><p class="sr-domain-word-hint" id="sr-follow-word-hint">每次添加一个热词，1–200 个字符。</p></fieldset><section class="sr-follow-domain-section" aria-labelledby="sr-follow-domain-list-title"><h4 id="sr-follow-domain-list-title">已关注领域热词</h4><div data-sr-domain-word-list></div></section><fieldset class="sr-follow-journals"><legend>关注期刊</legend><div class="sr-target-options sr-journal-options">${journalOptions}</div></fieldset></div><span class="sr-follow-status" role="status" aria-live="polite"></span><menu><button type="button" data-sr-cancel>取消</button><button type="submit">保存关注</button></menu></form>`;
+    const form=d.querySelector('form'),status=form.querySelector('[role=status]'),domainSelect=form.elements.domain,wordInput=form.elements.hotWord,list=form.querySelector('[data-sr-domain-word-list]');
+    let saving=false;
+    function setStatus(message,isSuccess=false){status.textContent=message;status.classList.toggle('is-success',isSuccess)}
+    function renderDraftDomains(){
+      const rows=domainTargets.flatMap((target,domainIndex)=>{
+        const draft=draftDomains.get(target.targetId);if(!draft)return[];
+        const words=draft.hotWords.map((word,wordIndex)=>`<span class="sr-domain-word"><span>${srSafe(word)}</span><button type="button" data-sr-remove-domain-word="${domainIndex}" data-word-index="${wordIndex}" aria-label="移除“${srSafe(target.label)}”中的热词“${srSafe(word)}”">×</button></span>`).join('');
+        return [`<article class="sr-domain-word-group"><header><h5>${srSafe(target.label)}</h5><div><button type="button" data-sr-edit-domain="${domainIndex}" aria-label="为“${srSafe(target.label)}”添加热词">添加热词</button><button type="button" data-sr-remove-domain="${domainIndex}" aria-label="移除“${srSafe(target.label)}”领域关注">移除领域</button></div></header>${words?`<div class="sr-domain-words">${words}</div>`:'<p class="sr-domain-word-empty">尚未添加热词</p>'}</article>`];
+      });
+      list.innerHTML=rows.length?rows.join(''):'<p class="sr-domain-word-empty">暂无关注领域热词，请选择领域并手动添加。</p>';
+    }
+    function addDomainWord(){
+      const domain=domainSelect.value,word=String(wordInput.value||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim();
+      if(!domainTargets.some(t=>t.targetId===domain)){setStatus('请先选择领域分类');domainSelect.focus();return}
+      if(!word){setStatus('请输入关注热词');wordInput.focus();return}
+      if(Array.from(word).length>200){setStatus('关注热词不能超过200个字符');wordInput.focus();return}
+      const draft=draftDomains.get(domain)||{hotWords:[]};
+      if(draft.hotWords.some(existing=>SR.normalizeKeyword(existing)===SR.normalizeKeyword(word))){setStatus('该领域已添加此热词，请勿重复添加');wordInput.focus();return}
+      draft.hotWords.push(word);draftDomains.set(domain,draft);wordInput.value='';renderDraftDomains();setStatus('热词已添加，保存关注后生效',true);wordInput.focus();
+    }
+    form.querySelector('[data-sr-add-domain-word]').addEventListener('click',addDomainWord);
+    wordInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();addDomainWord()}});
+    list.addEventListener('click',e=>{
+      const button=e.target.closest('button');if(!button||saving)return;
+      const domainIndex=button.dataset.srEditDomain??button.dataset.srRemoveDomain??button.dataset.srRemoveDomainWord,target=domainTargets[Number(domainIndex)];if(!target)return;
+      if(button.hasAttribute('data-sr-edit-domain')){domainSelect.value=target.targetId;wordInput.focus();return}
+      if(button.hasAttribute('data-sr-remove-domain'))draftDomains.delete(target.targetId);
+      else if(button.hasAttribute('data-sr-remove-domain-word')){const draft=draftDomains.get(target.targetId);if(!draft)return;draft.hotWords.splice(Number(button.dataset.wordIndex),1);if(!draft.hotWords.length)draftDomains.delete(target.targetId)}
+      renderDraftDomains();setStatus('有未保存的更改',true);
+    });
+    document.body.append(d);renderDraftDomains();d.showModal();
+    form.querySelector('[data-sr-cancel]').addEventListener('click',()=>d.close());
+    d.addEventListener('cancel',e=>{if(saving){e.preventDefault();setStatus('正在保存，请稍候')}});
+    d.addEventListener('close',()=>srInterestButton?.focus());
+    form.onsubmit=async e=>{
+      e.preventDefault();if(saving)return;
+      if(String(wordInput.value||'').trim()){setStatus('请先添加当前热词后再保存');wordInput.focus();return}
+      if(current.userContextVersion!==SR.userContextVersion()){setStatus('身份已变化，请重新打开设置');return}
+      const checkedJournals=new Set([...form.querySelectorAll('[name=journal]:checked')].map(x=>Number(x.value))),changes=[];
+      domainTargets.forEach(target=>{
+        const before=current.follows.find(f=>f.kind==='DOMAIN'&&f.targetId===target.targetId),draft=draftDomains.get(target.targetId);
+        if(draft){if(!before?.following||JSON.stringify(before.hotWords||[])!==JSON.stringify(draft.hotWords))changes.push({kind:'DOMAIN',targetId:target.targetId,following:true,hotWords:[...draft.hotWords]})}
+        else if(before?.following)changes.push({kind:'DOMAIN',targetId:target.targetId,following:false});
+      });
+      SR.fixtures.availableTargets.forEach((target,i)=>{if(target.kind!=='JOURNAL')return;const before=current.follows.find(f=>f.kind===target.kind&&f.targetId===target.targetId),following=checkedJournals.has(i);if(!!before?.following!==following)changes.push({kind:target.kind,targetId:target.targetId,following})});
+      saving=true;form.querySelectorAll('button,input,select').forEach(control=>{control.disabled=true});setStatus('正在保存…',true);
       try{
-        const checked=new Set([...form.querySelectorAll('[name=target]:checked')].map(x=>Number(x.value)));
-        const changes=SR.fixtures.availableTargets.flatMap((t,i)=>{const before=current.follows.find(f=>f.kind===t.kind&&f.targetId===t.targetId),following=checked.has(i);return !!before?.following===following?[]:[{kind:t.kind,targetId:t.targetId,following}]});
         if(changes.length)await SR.setFollow({changes,version:current.followsVersion,userContextVersion:current.userContextVersion,clientMutationId:'settings-'+srId()});
         d.close();srRenderInterests();renderNewsRecommendations();renderPapers();showToast('关注设置已保存');
-      }catch(err){
-        status.textContent='关注设置未保存：'+(err.message||'请稍后重试');
-      }finally{submit.disabled=false}
+      }catch(err){setStatus('关注设置未保存：'+(err.message||'请稍后重试'))}
+      finally{saving=false;form.querySelectorAll('button,input,select').forEach(control=>{control.disabled=false})}
     };
   }
 

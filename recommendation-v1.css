@@ -20,3 +20,25 @@
 .sr-follow-dialog menu{flex-shrink:0;margin:16px 0 0}
 .sr-follow-dialog [type=submit]{border-color:#3151eb;background:#3151eb;color:#fff}
 @media(max-width:620px){.sr-target-options{grid-template-columns:repeat(2,minmax(0,1fr))}.sr-journal-options{grid-template-columns:minmax(0,1fr)}}
+
+.sr-follow-dialog .sr-domain-word-entry{display:grid;grid-template-columns:minmax(160px,1fr) minmax(190px,1.35fr) auto;gap:12px;align-items:end}
+.sr-follow-dialog .sr-domain-word-entry label{min-width:0;margin:0;color:#58677a;font-size:13px;line-height:20px}
+.sr-follow-dialog .sr-domain-word-entry select,.sr-follow-dialog .sr-domain-word-entry input{box-sizing:border-box;min-width:0;height:36px;margin-top:6px;color:#273947;background:#fff;font:inherit}
+.sr-follow-dialog .sr-domain-word-entry button{height:36px;white-space:nowrap;color:#3151eb;border-color:#bdc9fb}
+.sr-domain-word-hint{margin:8px 0 0;color:#84909e;font-size:12px;line-height:18px}
+.sr-follow-domain-section{margin:0 0 20px}
+.sr-follow-domain-section h4{margin:0 0 10px;font-size:13px;font-weight:600;color:#58677a}
+.sr-domain-word-group{padding:10px 12px;border:1px solid #e4e9f0;border-radius:6px;margin-bottom:10px}
+.sr-domain-word-group header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.sr-domain-word-group h5{font-size:13px;line-height:20px;margin:0;font-weight:600;color:#3d4655}
+.sr-domain-word-group header>div{display:flex;gap:10px;flex-shrink:0}
+.sr-follow-dialog .sr-domain-word-group header button{border:0;background:transparent;padding:0;font-size:12px;line-height:20px;color:#687587}
+.sr-follow-dialog .sr-domain-word-group header [data-sr-edit-domain]{color:#3151eb}
+.sr-domain-words{display:flex;flex-wrap:wrap;gap:6px}
+.sr-domain-word{display:inline-flex;align-items:center;max-width:100%;gap:6px;padding:3px 5px 3px 8px;border-radius:5px;background:#f2f5ff;color:#3d4e87;font-size:12px;line-height:20px}
+.sr-domain-word>span{min-width:0;overflow-wrap:anywhere}
+.sr-follow-dialog .sr-domain-word button{flex-shrink:0;padding:0;width:20px;height:20px;border:0;background:transparent;color:#7d89ab;font-size:16px;line-height:20px}
+.sr-domain-word-empty{margin:8px 0;color:#84909e;font-size:12px;line-height:20px}
+.sr-follow-dialog .sr-follow-status{min-height:20px;line-height:20px;padding-top:4px}
+.sr-follow-dialog .sr-follow-status.is-success{color:#687587}
+@media(max-width:620px){.sr-follow-dialog .sr-domain-word-entry{grid-template-columns:minmax(0,1fr)}.sr-follow-dialog .sr-domain-word-entry button{justify-self:start}}
