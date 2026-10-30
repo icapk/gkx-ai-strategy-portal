@@ -98,7 +98,7 @@
         <section class="search-association-plan" aria-labelledby="searchAssociationHeading">
           <div class="search-association-heading"><h3 id="searchAssociationHeading">已理解的检索条件（用户搜索）</h3></div>
           <div id="searchAssociationSummary" class="search-association-summary" aria-live="polite"></div>
-          <p id="searchAssociationRelated" class="search-association-related"></p><p id="searchAssociationNotice" class="search-method-note" hidden></p>
+          <p id="searchAssociationNotice" class="search-method-note" hidden></p>
           <p id="searchAssociationError" class="search-method-error" role="status"></p>
         </section>
         <details id="searchPreferenceDetails" class="search-preference-details"><summary>搜索偏好（行为分析/信息处理） <span id="searchPreferenceSummary"></span></summary><div class="search-preference-body">
@@ -208,9 +208,6 @@
         const scopeChip = ["标题", "摘要"].includes(state.scope) ? `<span class="search-association-chip">搜索范围<strong>${esc(state.scope)}</strong><button type="button" data-clear-association-scope aria-label="取消搜索范围 ${esc(state.scope)}" title="恢复默认搜索范围" ${disabled}>×</button></span>` : "";
         get("searchAssociationSummary").innerHTML = (keywordChips || '<span class="search-method-note">关键词已全部取消，请在上方输入关键词重新搜索。</span>')
           + resourceChip + yearChip + scopeChip;
-        const related = [...new Set(parsed.terms.flatMap(term => [term.text, ...(bridge.associationTerms?.(term.text) || [])]))];
-        get("searchAssociationRelated").textContent = related.length > parsed.terms.length ? `初步检索式：${related.join("、")}` : "按当前关键词查找相关资源。";
-        get("searchAssociationRelated").hidden = !parsed.terms.length;
         const warnings = state.associationEmpty ? [] : [...(plan.warnings || [])];
         if (!state.associationEmpty && plan.filters?.publishedYearFrom && state.currentType !== "论文") warnings.push("当前资源暂不支持年份条件，请切换论文或调整检索条件。");
         if (!state.associationEmpty && plan.resourceType && state.currentType !== "全部" && plan.resourceType !== state.currentType) warnings.push("提问中的资源类型与当前选择不同，按当前资源类型检索。");
