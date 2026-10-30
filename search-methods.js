@@ -91,8 +91,7 @@
     const node = doc.createElement("section"); node.id = "searchMethodTools"; node.className = "search-method-tools";
     node.innerHTML = `<fieldset class="search-method-choice"><legend class="sr-only">关键词检索方式</legend>
       <label><input type="radio" name="keywordSearchMethod" value="exact" checked>精确查找</label>
-      <label><input type="radio" name="keywordSearchMethod" value="association">智能关联搜索</label>
-      <label><input type="radio" name="keywordSearchMethod" value="expansion">词位扩展</label></fieldset>
+      <label><input type="radio" name="keywordSearchMethod" value="association">智能关联搜索</label></fieldset>
       <div id="searchAutomaticRules" class="search-automatic-rules" role="list" aria-label="词位扩展规则开关" hidden></div>
       <div id="searchAssociationTools" class="search-method-body" hidden>
         <section class="search-association-plan" aria-labelledby="searchAssociationHeading">
@@ -109,12 +108,10 @@
           <div class="search-preference-controls"><label><input id="searchPreferenceEnabled" type="checkbox">开启搜索偏好</label><button type="button" id="searchPreferenceClear">清除偏好</button></div>
           <p class="search-method-note">按近30天记录更新兴趣：搜索 +1，打开结果 +2。关键词相关性优先，兴趣仅辅助排序。当前原型记录保存在本机。</p>
           <p id="searchPreferenceIntent" class="search-method-note"></p><div id="searchPreferenceInterests" class="search-preference-interests" aria-live="polite"></div>
-          <p id="searchPreferenceStatus" class="search-method-note" role="status"></p></div></details></div>
-      <div id="searchExpansionTools" class="search-method-body" hidden><p class="search-method-note">原型词表候选，选择后参与检索，取消后撤回。</p>
-        <div id="searchExpansionGroups" class="search-expansion-groups"></div><div id="searchExpansionSelected" class="search-expansion-selected"></div></div>`;
+          <p id="searchPreferenceStatus" class="search-method-note" role="status"></p></div></details></div>`;
     doc.querySelector(".portal-search-toolbar").append(node);
     const get = id => doc.getElementById(id);
-    let state = model.snapshot(), options = [], planKey = "", selectionKey = "", prefsContext = "", prefs;
+    let state = model.snapshot(), planKey = "", prefsContext = "", prefs;
     const context = () => String(bridge.getUserId?.() || "anonymous");
     const now = () => Date.now();
     const fresh = () => ({ version: 1, enabled: false, events: [], corrections: {} });
@@ -193,7 +190,6 @@
         input.closest("label").title = input.disabled ? "全文范围使用精确查找，扩展词仅在正文内匹配" : "";
       });
       get("searchAssociationTools").hidden = method !== "association";
-      get("searchExpansionTools").hidden = method !== "expansion";
       if (method === "association") {
         const key = state.query + "\0" + state.associationQuery;
         const plan = state.associationPlan || analyze(state.associationQuery || state.query);
@@ -218,21 +214,6 @@
         get("searchAssociationNotice").hidden = !warnings.length;
         get("searchAssociationError").textContent = state.validation?.message || "";
         renderPreferences();
-      }
-      if (method === "expansion") {
-        const key = state.query + JSON.stringify(state.expansionTerms);
-        if (key !== selectionKey) {
-          const focused = node.contains(doc.activeElement) && doc.activeElement?.dataset?.expansionText
-            ? { concept: doc.activeElement.dataset.expansionConcept, text: doc.activeElement.dataset.expansionText } : null;
-          options = candidates(state.query); selectionKey = key;
-          const selected = value => state.expansionTerms.some(term => norm(term.concept).toLowerCase() === norm(value.concept).toLowerCase() && norm(term.text).toLowerCase() === norm(value.text).toLowerCase());
-          get("searchExpansionGroups").innerHTML = GROUPS.map(([group, label]) => {
-            const terms = options.map((value, index) => ({ ...value, index })).filter(value => value.group === group);
-            return `<section><h3>${label}${group === "narrower" ? '<small title="需规原文截断，当前按更具体概念演示">规则待确认</small>' : ""}</h3><div>${terms.length ? terms.map(value => `<button type="button" data-expansion-index="${value.index}" data-expansion-concept="${esc(value.concept)}" data-expansion-text="${esc(value.text)}" aria-pressed="${selected(value)}" title="扩展概念：${esc(value.concept)}">${selected(value) ? "✓ " : "+ "}${esc(value.text)}</button>`).join("") : '<span class="search-method-note">暂无可用候选</span>'}</div></section>`;
-          }).join("");
-          get("searchExpansionSelected").innerHTML = state.expansionTerms.length ? '<span>已采用</span>' + state.expansionTerms.map((value, index) => `<button type="button" data-remove-expansion="${index}" data-expansion-concept="${esc(value.concept)}" data-expansion-text="${esc(value.text)}" aria-label="撤回${esc(value.text)}">${esc(value.text)} ×</button>`).join("") : '<span class="search-method-note">未选择扩展词，按原词检索。</span>';
-          if (focused) Array.from(get("searchExpansionGroups").querySelectorAll("button")).find(button => button.dataset.expansionConcept === focused.concept && button.dataset.expansionText === focused.text)?.focus({ preventScroll: true });
-        }
       }
     }
     const action = promise => Promise.resolve(promise).catch(error => bridge.feedback?.(error.message || "操作失败，请重试", "error"));
@@ -268,12 +249,6 @@
         if (open) get("searchAssociationQuery").focus();
       }
       if (button.hasAttribute("data-plan-reset")) action(applyAssociation(state.query));
-      if (button.dataset.expansionIndex != null) {
-        const value = options[Number(button.dataset.expansionIndex)]; if (!value) return;
-        const existing = state.expansionTerms.some(term => norm(term.concept) === norm(value.concept) && norm(term.text) === norm(value.text));
-        action(model.setExpansionTerms(existing ? state.expansionTerms.filter(term => norm(term.concept) !== norm(value.concept) || norm(term.text) !== norm(value.text)) : [...state.expansionTerms, value]));
-      }
-      if (button.dataset.removeExpansion != null) action(model.setExpansionTerms(state.expansionTerms.filter((_, index) => index !== Number(button.dataset.removeExpansion))));
       if (button.id === "searchPreferenceClear") { prefs = fresh(); savePrefs(); renderPreferences(); get("searchPreferenceStatus").textContent = "已清除兴趣记录并关闭搜索偏好。"; action(model.refreshRanking()); }
     });
     doc.getElementById("portalSearchResultList").addEventListener("click", event => {

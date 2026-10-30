@@ -5171,7 +5171,7 @@
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
-  <script src="search-methods.js?v=20261030-rule-toggles"></script>
+  <script src="search-methods.js?v=20261030-auto-only"></script>
   <script src="keyword-search-ui.js?v=20261030-rule-toggles"></script>
   <script src="ai-rag-search.js?v=20261030-independent-results"></script><script>
     (() => {
@@ -7712,12 +7712,11 @@
           else url.searchParams.delete("scope");
           if (current?.view?.filters?.reportTypes?.length) url.searchParams.set("reportTypes", current.view.filters.reportTypes.join(","));
           else url.searchParams.delete("reportTypes");
-          if (current?.searchMethod && current.searchMethod !== "exact") url.searchParams.set("feature", current.searchMethod);
+          if (current?.searchMethod === "association") url.searchParams.set("feature", "association");
           else url.searchParams.delete("feature");
           if (current?.searchMethod === "association" && current.associationQuery) url.searchParams.set("plan", current.associationQuery);
           else url.searchParams.delete("plan");
-          if (current?.searchMethod === "expansion" && current.expansionTerms.length) url.searchParams.set("expansions", JSON.stringify(current.expansionTerms));
-          else url.searchParams.delete("expansions");
+          url.searchParams.delete("expansions");
           if (current?.disabledAutomaticRuleGroups?.length) url.searchParams.set("autoDisabled", JSON.stringify(current.disabledAutomaticRuleGroups));
           else url.searchParams.delete("autoDisabled");
         } else ["feature", "plan", "expansions", "scope", "reportTypes", "type", "autoDisabled"].forEach(key => url.searchParams.delete(key));
@@ -9518,7 +9517,7 @@
         let entryDisabledAutomaticRules;
         try { const stored = JSON.parse(entrySearchParams.get("autoDisabled") || "null"); if (Array.isArray(stored)) entryDisabledAutomaticRules = stored; } catch (_) { /* Invalid optional state keeps default rules. */ }
         const feature = entrySearchParams.get("feature");
-        const entryMethod = ["exact", "association", "expansion"].includes(feature) ? feature
+        const entryMethod = feature === "expansion" ? "exact" : ["exact", "association"].includes(feature) ? feature
           : entryMode === "关联" || entrySearchParams.get("association") === "1" ? "association" : "exact";
         if (entryMode !== "AI 搜索" && entryMode !== "AI搜索") keywordSearchV1?.model.setSearchMethod(entryMethod);
         Promise.resolve(performSearch(entryQuery, {
@@ -9533,9 +9532,6 @@
           if (types && keywordSearchV1.snapshot().currentType === "报告") await keywordSearchV1.model.setFilter("reportTypes", types.split(","));
           if (keywordSearchV1.snapshot().query !== entryQuery) return;
           if (entryMethod === "association" && entrySearchParams.get("plan")) await keywordSearchV1.model.setAssociationQuery(entrySearchParams.get("plan"));
-          if (entryMethod === "expansion" && entrySearchParams.get("expansions")) {
-            try { await keywordSearchV1.model.setExpansionTerms(JSON.parse(entrySearchParams.get("expansions"))); } catch (_) { /* Ignore malformed optional URL selection. */ }
-          }
         }).catch(error => setPortalSearchFeedback(error.message, "error"));
       }
 
