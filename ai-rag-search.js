@@ -49,7 +49,7 @@
     const records = (bridge.records || []).filter(record => ["论文", "专利"].includes(record.type) && /^ai-demo-(paper|patent)-/u.test(record.id));
     const panel = doc.createElement("div");
     panel.className = "ai-rag-workspace";
-    panel.innerHTML = `<div class="rag-body"><div class="rag-main"><section class="rag-answer" aria-labelledby="ragAnswerTitle"><header class="rag-answer-header"><span class="rag-ai-mark" aria-hidden="true">AI</span><strong id="ragAnswerTitle">AI搜索</strong><span class="rag-material-scope">精选论文与专利</span></header><div class="rag-user-message" id="ragUserMessage" role="group" aria-label="用户消息" hidden><p class="rag-user-bubble" id="ragQuestionTitle" tabindex="-1"></p></div>
+    panel.innerHTML = `<div class="rag-body"><div class="rag-main"><section class="rag-answer" aria-labelledby="ragAnswerTitle"><header class="rag-answer-header"><span class="rag-ai-mark" aria-hidden="true">AI</span><strong id="ragAnswerTitle">AI搜索</strong><span class="rag-material-scope">精选论文与专利</span><button class="rag-home-button" type="button" data-rag-return-home>← 返回首页</button></header><div class="rag-user-message" id="ragUserMessage" role="group" aria-label="用户消息" hidden><p class="rag-user-bubble" id="ragQuestionTitle" tabindex="-1"></p></div>
       <details class="rag-status" id="ragStatus" hidden><summary id="ragStatusSummary" role="status" aria-live="polite">正在查找相关资料</summary><ol class="rag-process-tree" id="ragStatusSteps" aria-label="检索与解读过程">${processMarkup()}</ol></details>
       <div class="rag-answer-content" id="ragAnswerContent" aria-live="polite"></div><div class="rag-answer-actions" id="ragAnswerActions" hidden><button type="button" data-rag-copy>复制回答</button><span id="ragCopyStatus" role="status" aria-live="polite"></span></div>
       <div class="rag-composer-area"><form class="rag-composer" id="ragComposer"><label class="sr-only" for="ragQueryInput">输入研究问题</label><textarea id="ragQueryInput" rows="2" placeholder="请输入想要检索的问题…" aria-describedby="ragComposerError"></textarea><p class="rag-error" id="ragComposerError" role="alert" hidden></p><div class="rag-composer-bottom"><span>Enter 发送 · Shift+Enter 换行</span><button class="rag-send" id="ragSend" type="submit" aria-label="发送研究问题"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"></path></svg></button></div></form><p class="rag-ai-disclaimer">本内容由AI生成，请仔细甄别。</p></div></section>
@@ -219,6 +219,7 @@
       }
       const followup = event.target.closest("[data-rag-question]");
       if (followup) { bridge.onSubmit(followup.dataset.ragQuestion); return; }
+      if (event.target.closest("[data-rag-return-home]")) { bridge.onHome?.(); return; }
       if (event.target.closest("[data-rag-copy]")) {
         try { await root.navigator.clipboard.writeText(copyText); get("ragCopyStatus").textContent = "已复制回答"; }
         catch (_) { get("ragCopyStatus").textContent = "浏览器未允许复制，可选中回答内容复制。"; }

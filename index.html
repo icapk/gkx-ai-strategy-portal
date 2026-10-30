@@ -3,7 +3,7 @@
 <head>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23006eff%22/%3E%3C/svg%3E">
   <meta charset="utf-8">
-  <link rel="stylesheet" href="ai-rag-search.css?v=20261030-ai-results-1">
+  <link rel="stylesheet" href="ai-rag-search.css?v=20261030-independent-results">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <meta name="description" content="深圳国际科技信息中心门户，连接 AI 科研、战略咨询、未来教育与科技评价核心服务。">
@@ -4664,15 +4664,13 @@
     <section class="search-results-page portal-search-page" id="searchResultsPage" aria-labelledby="searchResultsTitle" hidden>
       <div class="portal-search-shell portal-search-inner">
         <header class="portal-search-header">
+          <button class="portal-search-return-home" id="portalKeywordReturnHome" type="button">← 返回首页</button>
           <h1 class="portal-search-title" id="searchResultsTitle">信息搜索</h1>
           <p class="portal-search-lead">查看并筛选符合条件的资源。</p>
           <span class="sr-only" id="searchResultQuery"></span>
         </header>
 
-        <div class="portal-search-modes portal-search-mode-tabs" id="portalSearchModes" role="tablist" aria-label="搜索方式">
-          <button class="portal-search-mode portal-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-search-mode="关键词">关键词搜索</button>
-          <button class="portal-search-mode portal-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-mode="AI 搜索">AI搜索</button>
-        </div>
+        <div id="portalSearchModes" hidden></div>
 
         <div class="portal-search-toolbar">
           <form class="portal-search-form" id="portalResultSearchForm" role="search">
@@ -5175,7 +5173,7 @@
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
   <script src="search-methods.js?v=20261030-rule-toggles"></script>
   <script src="keyword-search-ui.js?v=20261030-rule-toggles"></script>
-  <script src="ai-rag-search.js?v=20261030-ai-results-1"></script><script>
+  <script src="ai-rag-search.js?v=20261030-independent-results"></script><script>
     (() => {
       "use strict";
 
@@ -5537,6 +5535,8 @@
       let activeHeroRecommendation = "simulation";
       let activeSearchMode = "关键词";
       const initialSearchParams = new URLSearchParams(window.location.search);
+      const homeModeRoute = !initialSearchParams.get("query") && ["ai", "keyword"].includes(initialSearchParams.get("homeMode"))
+        ? initialSearchParams.get("homeMode") : "";
       let activeSearchPage = 1;
       let submittedSearchQuery = "";
       let searchSubmissionRevision = 0;
@@ -7701,6 +7701,7 @@
         const query = getSubmittedSearchQuery();
         if (!query) return;
         const url = new URL(window.location.href);
+        url.searchParams.delete("homeMode");
         url.searchParams.set("query", query);
         url.searchParams.set("mode", activeSearchMode);
         url.searchParams.delete("association");
@@ -7807,6 +7808,13 @@
         mgHeroSearchInput.placeholder = modes[activeHeroSearchMode].placeholder;
         const submit = mgHeroSearchForm.querySelector(".mg-search-submit");
         submit.setAttribute("aria-label", modes[activeHeroSearchMode].label);
+        if (!homeContent.hidden) {
+          const homeUrl = new URL(window.location.href);
+          if (homeUrl.searchParams.has("homeMode") && !homeUrl.searchParams.has("query")) {
+            homeUrl.searchParams.set("homeMode", activeHeroSearchMode);
+            window.history.replaceState(null, "", homeUrl);
+          }
+        }
         if (focusInput) mgHeroSearchInput.focus();
       }
 
@@ -8947,6 +8955,13 @@
       }
 
       function showSurface(name, options = {}) {
+        if (name !== "home") {
+          const portalUrl = new URL(window.location.href);
+          if (portalUrl.searchParams.has("homeMode")) {
+            portalUrl.searchParams.delete("homeMode");
+            window.history.replaceState(null, "", portalUrl);
+          }
+        }
         if (name !== "search") aiRagSearch?.cancel();
         if (name !== "qa") window.clearTimeout(qaAnswerTimer);
         if (name !== "home" && mgVoiceListening) setHeroVoiceListening(false);
@@ -9476,8 +9491,13 @@
       aiRagSearch = window.PortalAiRagSearch.create({
         host: searchResultsPage,
         records: window.PortalAiDemoFixtures?.records || [],
-        onSubmit: query => performSearch(query, { mode: "AI 搜索" })
+        onSubmit: query => performSearch(query, { mode: "AI 搜索" }),
+        onHome: () => returnSearchHome("ai")
       });
+      if (homeModeRoute) {
+        activeHeroSearchMode = homeModeRoute;
+        returnHeroExperience = "classic";
+      }
       setHeroSearchMode(activeHeroSearchMode, false);
       setHeroExperience(returnHeroExperience, false);
       if (activeHeroExperience === "classic" && activeHeroSearchMode === "keyword") {
@@ -10471,12 +10491,35 @@
         });
       }
 
+      function returnSearchHome(mode) {
+        const homeMode = mode === "ai" ? "ai" : "keyword";
+        const previousQuery = getSubmittedSearchQuery();
+        submittedSearchQuery = "";
+        searchSubmissionTicket += 1;
+        keywordSearchV1?.setActive(false);
+        setHeroSearchMode(homeMode, false);
+        setHeroExperience("classic", false);
+        mgHeroSearchInput.value = previousQuery;
+        const portalUrl = new URL(window.location.href);
+        ["query", "mode", "type", "feature", "plan", "expansions", "scope", "reportTypes", "association", "autoDisabled", "cluster"].forEach(key => portalUrl.searchParams.delete(key));
+        portalUrl.searchParams.set("homeMode", homeMode);
+        portalUrl.hash = "";
+        window.history.replaceState(null, "", portalUrl);
+        showSurface("home", { focusTarget: mgHeroSearchInput });
+      }
+
       function showHome() {
+        if (!searchResultsPage.hidden) {
+          returnSearchHome(activeSearchMode === "AI 搜索" ? "ai" : "keyword");
+          return;
+        }
         const portalUrl = new URL(window.location.href);
         portalUrl.searchParams.delete("cluster");
         window.history.replaceState(null, "", portalUrl);
         showSurface("home");
       }
+
+      document.getElementById("portalKeywordReturnHome").addEventListener("click", () => returnSearchHome("keyword"));
 
       function openClusterServiceRoute() {
         const clusterPage = new URL(window.location.href).searchParams.get("cluster");
@@ -10994,7 +11037,7 @@
       embeddedSystem.addEventListener("load", persistPortalViewState);
       window.addEventListener("pagehide", persistPortalViewState);
       window.addEventListener("beforeunload", persistPortalViewState);
-      if (!openClusterServiceRoute() && !(entryQuery && ["AI 搜索", "AI搜索"].includes(entryMode))) restorePortalViewState();
+      if (!openClusterServiceRoute() && !homeModeRoute && !(entryQuery && ["AI 搜索", "AI搜索"].includes(entryMode))) restorePortalViewState();
     })();
   </script>
 </body>

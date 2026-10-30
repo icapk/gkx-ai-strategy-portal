@@ -137,6 +137,42 @@
   font-weight: 400;
 }
 
+#searchResultsPage .portal-search-header {
+  position: relative;
+  padding-right: 125px;
+}
+
+#searchResultsPage .portal-search-return-home,
+.ai-rag-workspace .rag-home-button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  border: 1px solid #dfe5ef;
+  border-radius: 7px;
+  background: #fff;
+  color: #5b687c;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#searchResultsPage .portal-search-return-home {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+#searchResultsPage .portal-search-return-home:hover,
+.ai-rag-workspace .rag-home-button:hover {
+  border-color: #b9cbfc;
+  background: #f7faff;
+  color: #244db8;
+}
+
 .ai-rag-workspace .rag-send svg {
   fill: none;
   stroke: currentColor;
