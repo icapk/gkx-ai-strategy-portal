@@ -5168,11 +5168,11 @@
 
   <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
   <script src="report-fulltext-fixtures.js?v=20261030-report-types"></script>
-  <script src="keyword-search-model.js?v=20261030-association-chips"></script>
+  <script src="keyword-search-model.js?v=20261030-all-conditions"></script>
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
-  <script src="search-methods.js?v=20261030-association-chips"></script>
+  <script src="search-methods.js?v=20261030-all-conditions"></script>
   <script src="keyword-search-ui.js?v=20261030-association-chips"></script>
   <script src="ai-rag-search.js?v=20261030-independent-results"></script><script>
     (() => {
@@ -7733,8 +7733,8 @@
           else url.searchParams.delete("feature");
           if (current?.searchMethod === "association" && current.associationQuery) url.searchParams.set("plan", current.associationQuery);
           else url.searchParams.delete("plan");
-          if (current?.searchMethod === "association" && (Array.isArray(current.associationKeywords) || current.associationResourceCleared)) {
-            url.searchParams.set("associationConditions", JSON.stringify({ keywords: current.associationKeywords, resourceCleared: current.associationResourceCleared }));
+          if (current?.searchMethod === "association" && (Array.isArray(current.associationKeywords) || current.associationResourceCleared || current.associationYearsCleared || Object.keys(current.view?.filters || {}).length)) {
+            url.searchParams.set("associationConditions", JSON.stringify({ keywords: current.associationKeywords, resourceCleared: current.associationResourceCleared, yearsCleared: current.associationYearsCleared, filters: current.view?.filters || {} }));
           } else url.searchParams.delete("associationConditions");
           url.searchParams.delete("expansions");
           if (current?.disabledAutomaticRuleGroups?.length) url.searchParams.set("autoDisabled", JSON.stringify(current.disabledAutomaticRuleGroups));

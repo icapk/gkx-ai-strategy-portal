@@ -192,16 +192,22 @@
       if (method === "association") {
         const plan = state.associationPlan || analyze(state.associationQuery || state.query);
         const parsed = parseConcepts(plan.query);
-        const filters = state.view.filters || {}, years = state.currentType === "论文" && (filters.publishedYearFrom || filters.publishedYearTo)
-          ? `${filters.publishedYearFrom || "不限"}—${filters.publishedYearTo || "不限"}` : "不限";
+        const filters = state.currentType === "论文" ? state.view.filters || {} : plan.filters || {};
+        const yearParts = [];
+        if (filters.publishedYearFrom || filters.publishedYearTo) yearParts.push(`${filters.publishedYearFrom || "不限"}—${filters.publishedYearTo || "不限"}`);
+        if (filters.dateFrom || filters.dateTo || filters.publishedFrom || filters.publishedTo) yearParts.push(`${filters.dateFrom || filters.publishedFrom || "不限"}—${filters.dateTo || filters.publishedTo || "不限"}`);
+        if (filters.publishTime && !["不限", "不限时间", "自定义"].includes(filters.publishTime)) yearParts.push(filters.publishTime);
+        const years = yearParts.join(" · ");
         const disabled = state.loading ? "disabled" : "";
         const keywordChips = parsed.terms.map(term => {
           const label = associationGroup(term.text)?.[0] || term.text;
           return `<span class="search-association-chip">关键词<strong>${esc(label)}</strong><button type="button" data-remove-association-keyword="${esc(term.text)}" aria-label="取消关键词 ${esc(label)}" title="取消关键词" ${disabled}>×</button></span>`;
         }).join("");
         const resourceChip = state.currentType !== "全部" ? `<span class="search-association-chip">资源<strong>${esc(typeLabel(state.currentType))}</strong><button type="button" data-clear-association-resource aria-label="取消资源类型 ${esc(typeLabel(state.currentType))}" title="取消资源条件" ${disabled}>×</button></span>` : "";
+        const yearChip = years ? `<span class="search-association-chip">${state.currentType === "论文" ? "年份" : "年份（未生效）"}<strong>${esc(years)}</strong><button type="button" data-clear-association-years aria-label="取消年份条件 ${esc(years)}" title="取消年份条件" ${disabled}>×</button></span>` : "";
+        const scopeChip = ["标题", "摘要"].includes(state.scope) ? `<span class="search-association-chip">搜索范围<strong>${esc(state.scope)}</strong><button type="button" data-clear-association-scope aria-label="取消搜索范围 ${esc(state.scope)}" title="恢复默认搜索范围" ${disabled}>×</button></span>` : "";
         get("searchAssociationSummary").innerHTML = (keywordChips || '<span class="search-method-note">关键词已全部取消，请在上方输入关键词重新搜索。</span>')
-          + resourceChip + `<span>年份<strong>${esc(years)}</strong></span>`;
+          + resourceChip + yearChip + scopeChip;
         const related = [...new Set(parsed.terms.flatMap(term => [term.text, ...(bridge.associationTerms?.(term.text) || [])]))];
         get("searchAssociationRelated").textContent = related.length > parsed.terms.length ? `关联检索：${related.join("、")}` : "按当前关键词查找相关资源。";
         get("searchAssociationRelated").hidden = !parsed.terms.length;
@@ -222,7 +228,9 @@
       const original = state.query;
       const next = button.hasAttribute("data-remove-association-keyword")
         ? await model.removeAssociationKeyword(button.dataset.removeAssociationKeyword)
-        : await model.clearAssociationResource();
+        : button.hasAttribute("data-clear-association-years") ? await model.clearAssociationYears()
+          : button.hasAttribute("data-clear-association-scope") ? await model.setScope("标题和摘要")
+            : await model.clearAssociationResource();
       if (next.query !== original) return;
       const target = get("searchAssociationSummary").querySelector("button:not(:disabled)") || get("portalResultSearchInput");
       target?.focus({ preventScroll: true });
@@ -239,7 +247,7 @@
     node.addEventListener("click", event => {
       const button = event.target.closest("button"); if (!button) return;
       if (button.hasAttribute("data-auto-rules-toggle-all")) action(model.setAllAutomaticRulesEnabled(!state.availableAutomaticRules.some(rule => rule.enabled !== false)));
-      if (button.hasAttribute("data-remove-association-keyword") || button.hasAttribute("data-clear-association-resource")) action(removeAssociationCondition(button));
+      if (button.hasAttribute("data-remove-association-keyword") || button.hasAttribute("data-clear-association-resource") || button.hasAttribute("data-clear-association-years") || button.hasAttribute("data-clear-association-scope")) action(removeAssociationCondition(button));
       if (button.id === "searchPreferenceClear") { prefs = fresh(); savePrefs(); renderPreferences(); get("searchPreferenceStatus").textContent = "已清除兴趣记录并关闭搜索偏好。"; action(model.refreshRanking()); }
     });
     doc.getElementById("portalSearchResultList").addEventListener("click", event => {

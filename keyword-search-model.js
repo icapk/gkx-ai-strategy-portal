@@ -206,7 +206,7 @@
     let userContext = contextKey(), version = 0, query = "", logic = "AND", currentType = "全部", validation = null, authError = null, association = false;
     let searchMethod = "exact", associationQuery = "", expansionTerms = [];
     // null keeps the understood keywords; [] is an explicit empty search.
-    let associationKeywords = null, associationResourceCleared = false;
+    let associationKeywords = null, associationResourceCleared = false, associationYearsCleared = false;
     let disabledAutomaticRuleGroups = new Set();
     let automaticAssociationType = "", explicitAssociationType = false, automaticAssociationFilters = {}, manualAssociationFilters = {};
     const scopedTypes = { "论文": PAPER_SCOPES, "报告": REPORT_SCOPES };
@@ -221,11 +221,53 @@
     const eligible = (type, view) => cap(type).exact && cap(type).scopes.includes(requestScope(type, view));
     const unique = values => [...new Set(values.filter(value => value != null && value !== ""))];
     const associationPlanFor = value => options.associationPlan?.(value) || { query: value, resourceType: "", filters: {}, warnings: [] };
+    const associationYearFilterKeys = ["publishedYearFrom", "publishedYearTo", "publishTime", "dateFrom", "dateTo", "publishedFrom", "publishedTo"];
+    const commonAssociationFilterKeys = ["sources", "domains", "publishTime", "dateFrom", "dateTo"];
+    const associationFilterKeysByType = {
+      "论文": [...commonAssociationFilterKeys, "authorFilter", "venueFilter", "publishedYearFrom", "publishedYearTo", "publishedFrom", "publishedTo"],
+      "专利": [...commonAssociationFilterKeys, "ipcFilter", "applicantFilter", "inventorFilter", "applicationStart", "applicationEnd", "publicationStart", "publicationEnd"],
+      "人才": [...commonAssociationFilterKeys, "personNameFilter", "institutionFilter", "researchFieldFilter", "minHIndex", "maxHIndex"],
+      "报告": [...commonAssociationFilterKeys, "reportTypes", "uploadedFrom", "uploadedTo"]
+    };
+    const hasAssociationYears = filters => associationYearFilterKeys.some(key => key === "publishTime"
+      ? ["近一年", "近三年", "近五年"].includes(filters[key]) : nonempty(filters[key]));
     const conceptParse = value => options.parseConcepts?.(value) || parse(value);
     const serializeAssociationKeywords = keywords => keywords.map(term => term.phrase ? '"' + term.text + '"' : term.text).join(" ");
     function effectiveAssociationPlan() {
       const plan = associationPlanFor(associationQuery || query);
-      return { ...plan, query: associationKeywords === null ? plan.query : serializeAssociationKeywords(associationKeywords), resourceType: associationResourceCleared ? "" : plan.resourceType };
+      const filters = { ...(plan.filters || {}) };
+      if (associationYearsCleared) associationYearFilterKeys.forEach(key => delete filters[key]);
+      const warnings = associationYearsCleared ? (plan.warnings || []).filter(warning => !/年份|时间表达/u.test(warning)) : plan.warnings;
+      return { ...plan, query: associationKeywords === null ? plan.query : serializeAssociationKeywords(associationKeywords), resourceType: associationResourceCleared ? "" : plan.resourceType, filters, warnings };
+    }
+    function clearAssociationYearFilters() {
+      const view = views["论文"];
+      associationYearFilterKeys.forEach(key => {
+        delete view.filters[key];
+        if (automaticAssociationFilters["论文"]) delete automaticAssociationFilters["论文"][key];
+        manualAssociationFilters["论文"]?.delete(key);
+      });
+      view.validation = null;
+    }
+    function restoreAssociationYears() {
+      associationYearsCleared = false;
+      // Empty manual overrides may suppress the original question's years after
+      // a new main search. Nonempty user filters keep their existing behavior.
+      associationYearFilterKeys.forEach(key => {
+        if (!nonempty(views["论文"].filters[key]) || key === "publishTime" && !["近一年", "近三年", "近五年"].includes(views["论文"].filters[key])) {
+          delete views["论文"].filters[key];
+          manualAssociationFilters["论文"]?.delete(key);
+        }
+      });
+    }
+    function validatedAssociationFilters(values, type) {
+      if (!values || typeof values !== "object" || Array.isArray(values) || !associationFilterKeysByType[type]) return undefined;
+      const allowed = new Set(associationFilterKeysByType[type]);
+      const input = Object.fromEntries(Object.entries(values).filter(([key, value]) => allowed.has(ALIASES[key] || key)
+        && (typeof value === "string" || Array.isArray(value) && value.every(item => typeof item === "string"))));
+      if (Object.keys(values).length && !Object.keys(input).length) return undefined;
+      const filters = normalizedFilters(input, type);
+      return filterError(filters) ? undefined : filters;
     }
     function understoodAssociationKeywords() {
       if (associationKeywords !== null) return copy(associationKeywords);
@@ -387,7 +429,7 @@
       dictionaries.domains[currentType] = unique(rawItems.flatMap(item => list(currentType === "论文" ? item.domainTags : currentType === "人才" ? item.researchFields : [])));
       const filterMode = filterModeFor(currentType);
       const publicView = { type: view.type, scope: viewScope(view), page: view.page, startIndex, pendingPage: view.pendingPage, filters: copy(view.filters), filterMode, rawItems, displayItems, total, shownCount: displayItems.length, hasMore, paginationUnknown: activeSources.some(source => source.paginationUnknown), status: authError ? "error" : view.loading ? "loading" : view.error && !displayItems.length ? "error" : view.loaded ? "success" : "idle", validation: view.validation, error: authError ? authError.message : view.error, retainedResults: view.retainedResults };
-      return { query, association, searchMethod, automaticRules: copy(rulesForQuery()), availableAutomaticRules: searchMethod === "exact" ? allRulesForQuery().map(rule => ({ ...rule, enabled: !disabledAutomaticRuleGroups.has(ruleGroupKey(rule.group, rule.concept)) })) : [], disabledAutomaticRuleGroups: [...disabledAutomaticRuleGroups].sort(), associationQuery, associationKeywords: copy(associationKeywords), associationResourceCleared, associationEmpty, associationPlan: searchMethod === "association" ? copy(effectiveAssociationPlan()) : null, expansionTerms: copy(expansionTerms), scope: viewScope(view), logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: associationEmpty ? 0 : totalForView(value), filterMode: filterModeFor(type) }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: filterMode === "local" ? "仅筛选当前已返回数据，其他页可能仍有符合项" : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
+      return { query, association, searchMethod, automaticRules: copy(rulesForQuery()), availableAutomaticRules: searchMethod === "exact" ? allRulesForQuery().map(rule => ({ ...rule, enabled: !disabledAutomaticRuleGroups.has(ruleGroupKey(rule.group, rule.concept)) })) : [], disabledAutomaticRuleGroups: [...disabledAutomaticRuleGroups].sort(), associationQuery, associationKeywords: copy(associationKeywords), associationResourceCleared, associationYearsCleared, associationEmpty, associationPlan: searchMethod === "association" ? copy(effectiveAssociationPlan()) : null, expansionTerms: copy(expansionTerms), scope: viewScope(view), logic, currentType, pageSize: PAGE_SIZE, version, loading: view.loading, validation: validation || view.validation, error: authError ? authError.message : view.error, authError, view: publicView, sources: stateSources, views: Object.fromEntries(Object.entries(views).map(([type, value]) => [type, { scope: viewScope(value), page: value.page, filters: copy(value.filters), loaded: value.loaded, total: associationEmpty ? 0 : totalForView(value), filterMode: filterModeFor(type) }])), counts, total, allTotal, displayItems, failedTypes, unsupportedTypes, hasMore, pendingPage: view.pendingPage, retainedPage: view.retainedResults ? view.page : null, retainedResults: view.retainedResults, filterHint: filterMode === "local" ? "仅筛选当前已返回数据，其他页可能仍有符合项" : "", dictionaries, executionKind: options.service ? "ADAPTER" : "LOCAL_MOCK", tokenizerVersion: "Intl.Segmenter-zh-CN-word-v1" };
     }
     function emit() { const state = snapshot(); listeners.forEach(listener => listener(state)); }
     function resetContexts(clearFilters) {
@@ -407,9 +449,9 @@
     }
     async function fetchPage(type, page, view, valid) {
       const associationPlan = searchMethod === "association" ? effectiveAssociationPlan() : null;
-      const scope = requestScope(type, view), filters = requestFilters(type, view), automaticRules = rulesForQuery(), hasAutomaticRuleOptions = allRulesForQuery().length > 0, key = JSON.stringify([userContext, query, scope, logic, type, page, filters, searchMethod, associationQuery, associationPlan, associationKeywords, associationResourceCleared, expansionTerms, automaticRules, hasAutomaticRuleOptions]);
+      const scope = requestScope(type, view), filters = requestFilters(type, view), automaticRules = rulesForQuery(), hasAutomaticRuleOptions = allRulesForQuery().length > 0, key = JSON.stringify([userContext, query, scope, logic, type, page, filters, searchMethod, associationQuery, associationPlan, associationKeywords, associationResourceCleared, associationYearsCleared, expansionTerms, automaticRules, hasAutomaticRuleOptions]);
       if (cache.has(key)) return copy(cache.get(key));
-      const response = await service({ type, query, scope, logic, page, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters, association, searchMethod, automaticRules, hasAutomaticRuleOptions, associationQuery, associationPlan: copy(associationPlan), associationKeywords: copy(associationKeywords), associationResourceCleared, expansionTerms: copy(expansionTerms), userContext, queryVersion: version });
+      const response = await service({ type, query, scope, logic, page, pageSize: PAGE_SIZE, sort: "RELEVANCE", filters, association, searchMethod, automaticRules, hasAutomaticRuleOptions, associationQuery, associationPlan: copy(associationPlan), associationKeywords: copy(associationKeywords), associationResourceCleared, associationYearsCleared, expansionTerms: copy(expansionTerms), userContext, queryVersion: version });
       const result = normalizeResponse(response, type, page);
       if (valid()) cache.set(key, result);
       return result;
@@ -477,6 +519,7 @@
         checkContext(); params = params || {};
         const changed = parsed.query !== query; query = parsed.query;
         associationQuery = ""; associationKeywords = null; associationResourceCleared = false;
+        restoreAssociationYears();
         explicitAssociationType = false;
         if (automaticAssociationType !== currentType) automaticAssociationType = "";
         if (searchMethod === "association" && typeof params.associationQuery === "string") {
@@ -497,8 +540,24 @@
           if (params.associationConditions.resourceCleared === true) {
             associationResourceCleared = true; explicitAssociationType = true; automaticAssociationType = ""; currentType = "全部";
           }
+          if (params.associationConditions.yearsCleared === true) {
+            associationYearsCleared = true;
+          }
         }
-        logic = "AND"; resetContexts(changed); prepareAssociationView(); return load(views[currentType], 1);
+        logic = "AND"; resetContexts(changed);
+        if (searchMethod === "association" && params.associationConditions && typeof params.associationConditions === "object") {
+          const plan = effectiveAssociationPlan(), restoredType = !explicitAssociationType && TYPES.includes(plan.resourceType) && (currentType === "全部" || automaticAssociationType === currentType) ? plan.resourceType : currentType;
+          const filters = validatedAssociationFilters(params.associationConditions.filters, restoredType);
+          if (filters !== undefined) {
+            views[restoredType].filters = filters;
+            manualAssociationFilters[restoredType] = new Set(Object.keys(filters));
+            Object.keys(filters).forEach(key => {
+              if (automaticAssociationFilters[restoredType]) delete automaticAssociationFilters[restoredType][key];
+            });
+          }
+        }
+        if (associationYearsCleared) clearAssociationYearFilters();
+        prepareAssociationView(); return load(views[currentType], 1);
       },
       setScope(value) {
         if (!scopedTypes[currentType]?.includes(value) || views[currentType].scope === value) return Promise.resolve(snapshot());
@@ -540,6 +599,7 @@
         if (validation) { emit(); return Promise.resolve(snapshot()); }
         associationQuery = parsed.query === query ? "" : parsed.query;
         associationKeywords = null;
+        restoreAssociationYears();
         if (associationResourceCleared) explicitAssociationType = false;
         associationResourceCleared = false;
         checkContext(); resetContexts(false); prepareAssociationView(); return query ? load(views[currentType], 1) : (emit(), Promise.resolve(snapshot()));
@@ -555,6 +615,11 @@
         if (searchMethod !== "association" || currentType === "全部" && associationResourceCleared) return Promise.resolve(snapshot());
         associationResourceCleared = true; explicitAssociationType = true; automaticAssociationType = ""; currentType = "全部"; validation = null;
         checkContext(); resetContexts(false); return load(views[currentType], 1);
+      },
+      clearAssociationYears() {
+        if (searchMethod !== "association") return Promise.resolve(snapshot());
+        associationYearsCleared = true; clearAssociationYearFilters(); validation = null;
+        checkContext(); resetContexts(false); prepareAssociationView(); return load(views[currentType], 1);
       },
       setExpansionTerms(values) {
         if (searchMethod !== "expansion") return Promise.resolve(snapshot());
@@ -578,6 +643,7 @@
         const view = views[currentType], draft = { ...(view.validation?.values || view.filters), ...(typeof name === "object" ? name : { [name]: value }) };
         const filters = currentType === "报告" ? normalizedFilters(draft, currentType) : draft;
         const error = filterError(filters); view.validation = error ? { ...error, values: copy(filters) } : null; validation = null;
+        if (!error && searchMethod === "association" && currentType === "论文" && changedFields.some(key => associationYearFilterKeys.includes(key))) associationYearsCleared = !hasAssociationYears(filters);
         if (!error && (currentType === "报告" || searchMethod !== "exact" || allRulesForQuery().length)) {
           if (JSON.stringify(view.filters) === JSON.stringify(filters)) { emit(); return Promise.resolve(snapshot()); }
           view.requestToken++;
@@ -588,6 +654,7 @@
         emit(); return Promise.resolve(snapshot());
       },
       clearFilters() {
+        if (searchMethod === "association" && currentType === "论文") associationYearsCleared = true;
         manualAssociationFilters[currentType] ||= new Set();
         [...Object.keys(views[currentType].filters), ...Object.keys(automaticAssociationFilters[currentType] || {})].forEach(key => manualAssociationFilters[currentType].add(key));
         automaticAssociationFilters[currentType] = {};
