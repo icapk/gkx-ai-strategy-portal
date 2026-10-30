@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="科研情报智能推荐中心，集中展示热词、资讯、文献、报告、人才、会议、课程与活动推荐。">
   <title>科研情报智能推荐｜深圳国际科技信息中心</title>
-  <link rel="stylesheet" href="recommendations.css?v=20260827-recommendation-closure">
+  <link rel="stylesheet" href="recommendations.css?v=20261030-follow-domains">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
-  <link rel="stylesheet" href="recommendation-v1.css?v=20261027-1">
+  <link rel="stylesheet" href="recommendation-v1.css?v=20261030-follow-domains">
 </head>
 <body>
   <a class="rec-skip-link" href="#recommendationMain">跳到主要内容</a>
@@ -58,7 +58,7 @@
   </header>
 
   <div class="rec-prototype-note" role="note">
-    <span>原型演示</span> 推荐内容与计算为浏览器内模拟；邮箱仅保存配置，回放为自有交互示例。真实数据、邮件和活动录制待接入。
+    <span>原型演示</span> 推荐内容与计算为浏览器内模拟，回放为自有交互示例。真实数据和活动录制待接入。
   </div>
 
   <nav class="rec-content-nav" id="recContentNav" aria-label="推荐内容导航">
@@ -99,6 +99,7 @@
               <h2 id="hotTitle">热词推荐</h2>
               <p class="rec-panel-subtitle">智能捕捉行业热点</p>
             </div>
+            <button class="rec-manage-interests" type="button" data-sr-follow-settings aria-haspopup="dialog">管理关注领域</button>
           </header>
           <div class="rec-hot-layout">
             <div class="rec-hot-main">
@@ -142,19 +143,7 @@
                 <p class="rec-source-note">⚡ 原型动态保存在当前浏览器；正式上线后将接入账号、站内信和真实数据源，实现跨设备推送。</p>
               </section>
             </div>
-            <aside class="rec-interest-panel">
-              <h3><span aria-hidden="true">🎯</span> 关注领域热词</h3>
-              <article>
-                <div><strong>人工智能</strong><button type="button" aria-label="移除人工智能关注" data-demo-action="原型中不删除关注领域">×</button></div>
-                <p><button type="button" data-hot-query="Transformer">Transformer</button><button type="button" data-hot-query="LLM">LLM</button><button type="button" data-hot-query="GPT-4">GPT-4</button><button type="button" data-hot-query="强化学习">强化学习</button><button type="button" data-hot-query="迁移学习">迁移学习</button></p>
-              </article>
-              <article>
-                <div><strong>量子计算</strong><button type="button" aria-label="移除量子计算关注" data-demo-action="原型中不删除关注领域">×</button></div>
-                <p><button type="button" data-hot-query="量子比特">量子比特</button><button type="button" data-hot-query="量子纠缠">量子纠缠</button><button type="button" data-hot-query="量子算法">量子算法</button><button type="button" data-hot-query="量子通信">量子通信</button></p>
-              </article>
-              <button class="rec-add-interest" type="button" data-demo-action="新增关注领域将在兴趣画像接入后开放">＋ 新增关注领域</button>
-              <p class="rec-interest-note">📧 重大突破与高质量资源可优先推送，推送偏好将在个人中心配置。</p>
-            </aside>
+
           </div>
         </section>
 
@@ -370,8 +359,8 @@
   </footer>
 
   <div class="rec-toast" id="recToast" role="status" aria-live="polite" hidden></div>
-  <script src="search-recommend-remediation-fixtures.js?v=20261027-1"></script>
-  <script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
-  <script src="recommendations.js?v=20261030-remove-search"></script>
+  <script src="search-recommend-remediation-fixtures.js?v=20261030-follow-domains"></script>
+  <script src="portal-search-recommend-adapter.js?v=20261030-follow-domains"></script>
+  <script src="recommendations.js?v=20261030-follow-domains"></script>
 </body>
 </html>

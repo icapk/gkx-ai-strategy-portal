@@ -3414,35 +3414,38 @@
   });
   function srRenderHot(){const container=document.querySelector('.rec-hot-grid'),words=srRecommend('HOT_WORD','personal',[]);container.innerHTML=words.map((w,i)=>`<button class="rec-hot-card ${i<3?'is-top':''}" type="button" data-sr-hot-query="${srSafe(w.topic)}"><strong>${srSafe(w.topic)}</strong><em>#${i+1}</em><span>近7天行为权重 ${w.current}</span><small>${w.hasPersonalEvidence?'兴趣相关 '+Math.round(w.relevance*100)+'%':'公共热点 · 无个人行为'}</small></button>`).join('')}
   document.querySelector('.rec-hot-grid')?.addEventListener('click',e=>{const b=e.target.closest('[data-sr-hot-query]');if(b)openKeywordResults(b.dataset.srHotQuery)});
-  // Replace only the original interest rail contents; keep its location and style.
-  const srInterest=document.querySelector('.rec-add-interest')?.parentElement;
-  function srRenderInterests(){if(!srInterest)return;const follows=SR.snapshot().follows.filter(f=>f.following&&['DOMAIN','JOURNAL'].includes(f.kind));srInterest.innerHTML='<h3><span aria-hidden="true">🎯</span> 关注领域热词</h3>'+follows.map(f=>`<div class="sr-follow-target"><strong>${srSafe(f.targetId)}</strong><button type="button" data-sr-unfollow="${srSafe(f.targetId)}" data-kind="${f.kind}" aria-label="移除${srSafe(f.targetId)}关注">×</button></div>`).join('')+(follows.length?'':'<p class="sr-note">暂无关注领域或期刊</p>')+'<button class="rec-add-interest" type="button" data-sr-follow-settings>＋ 新增关注领域 / 邮箱设置</button><p id="sr-weekly-summary" class="sr-note"></p>';SR.getWeeklyEmail().then(w=>{const n=document.getElementById('sr-weekly-summary');if(n)n.textContent=w.email?`每周邮件：${w.email} · ${w.enabled?'已启用，每周推送':'已停用'}（原型配置演示）`:'未提供邮箱，不发送每周邮件'})}
+  // The compact entry opens fixed domain choices and the existing journal follows.
+  const srInterestButton=document.querySelector('[data-sr-follow-settings]');
+  function srRenderInterests(){
+    if(!srInterestButton)return;
+    const count=SR.snapshot().follows.filter(f=>f.following&&f.kind==='DOMAIN').length;
+    srInterestButton.title=count?'已关注 '+count+' 个领域':'选择关注领域';
+  }
   let srDialog=null;
-  async function srOpenFollowDialog(){
+  function srOpenFollowDialog(){
     if(!SR.snapshot().userId){showToast('请先登录后操作');return}
-    let current=SR.snapshot(),weekly=await SR.getWeeklyEmail();
-    srDialog?.remove();const d=document.createElement('dialog');srDialog=d;d.className='sr-dialog';
-    d.innerHTML=`<form novalidate><h3>关注领域 / 期刊与每周邮件</h3><div class="sr-target-options">${SR.fixtures.availableTargets.map((t,i)=>`<label><input type="checkbox" name="target" value="${i}" ${current.follows.some(f=>f.kind===t.kind&&f.targetId===t.targetId&&f.following)?'checked':''}>${t.kind==='DOMAIN'?'领域':'期刊'} · ${srSafe(t.label)}</label>`).join('')}</div><label>接收邮箱<input type="email" name="email" value="${srSafe(weekly.email||'')}" placeholder="提供有效邮箱后启用每周推送"></label><label><input type="checkbox" name="weekly" ${weekly.enabled||!weekly.email?'checked':''}>每周推送最新与热门论文</label><small>原型仅在当前浏览器保存配置，不发送真实邮件。</small><span role="status"></span><menu><button type="button" data-sr-cancel>取消</button><button type="submit">保存设置</button></menu></form>`;
+    const current=SR.snapshot();
+    srDialog?.remove();const d=document.createElement('dialog');srDialog=d;d.className='sr-dialog sr-follow-dialog';
+    const options=kind=>SR.fixtures.availableTargets.flatMap((t,i)=>t.kind===kind?[`<label><input type="checkbox" name="target" value="${i}" ${current.follows.some(f=>f.kind===t.kind&&f.targetId===t.targetId&&f.following)?'checked':''}><span>${srSafe(t.label)}</span></label>`]:[]).join('');
+    d.setAttribute('aria-labelledby','sr-follow-dialog-title');
+    d.innerHTML=`<form novalidate><h3 id="sr-follow-dialog-title">管理关注领域</h3><div class="sr-follow-options"><fieldset><legend>关注领域</legend><div class="sr-target-options">${options('DOMAIN')}</div></fieldset><fieldset><legend>关注期刊</legend><div class="sr-target-options sr-journal-options">${options('JOURNAL')}</div></fieldset></div><span role="status" aria-live="polite"></span><menu><button type="button" data-sr-cancel>取消</button><button type="submit">保存关注</button></menu></form>`;
     document.body.append(d);d.showModal();d.querySelector('[data-sr-cancel]').onclick=()=>d.close();
     d.querySelector('form').onsubmit=async e=>{
-      e.preventDefault();const form=e.target,email=form.elements.email.value.trim(),status=form.querySelector('[role=status]'),submit=form.querySelector('[type=submit]');
-      if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status.textContent='请输入有效邮箱地址，设置未保存';return}
-      submit.disabled=true;let followed=false;
+      e.preventDefault();const form=e.target,status=form.querySelector('[role=status]'),submit=form.querySelector('[type=submit]');
+      submit.disabled=true;
       if(current.userContextVersion!==SR.userContextVersion()){status.textContent='身份已变化，请重新打开设置';submit.disabled=false;return}
       try{
         const checked=new Set([...form.querySelectorAll('[name=target]:checked')].map(x=>Number(x.value)));
         const changes=SR.fixtures.availableTargets.flatMap((t,i)=>{const before=current.follows.find(f=>f.kind===t.kind&&f.targetId===t.targetId),following=checked.has(i);return !!before?.following===following?[]:[{kind:t.kind,targetId:t.targetId,following}]});
-        if(changes.length){await SR.setFollow({changes,version:current.followsVersion,userContextVersion:current.userContextVersion,clientMutationId:'settings-'+srId()});followed=true;current=SR.snapshot()}
-        weekly=await SR.saveWeeklyEmail({email:email||null,enabled:form.elements.weekly.checked,version:weekly.version});
-        d.close();srRenderInterests();renderNewsRecommendations();renderPapers();showToast('关注与每周邮件配置已保存');
+        if(changes.length)await SR.setFollow({changes,version:current.followsVersion,userContextVersion:current.userContextVersion,clientMutationId:'settings-'+srId()});
+        d.close();srRenderInterests();renderNewsRecommendations();renderPapers();showToast('关注设置已保存');
       }catch(err){
-        current=SR.snapshot();weekly=await SR.getWeeklyEmail();
-        status.textContent=(followed?'关注已保存，邮箱配置未保存：':'设置未保存：')+(err.message||'请稍后重试');
+        status.textContent='关注设置未保存：'+(err.message||'请稍后重试');
       }finally{submit.disabled=false}
     };
   }
 
-  document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-sr-follow-settings'))srOpenFollowDialog();if(b.dataset.srUnfollow){await SR.setFollow({kind:b.dataset.kind,targetId:b.dataset.srUnfollow,following:false});srRenderInterests();renderNewsRecommendations();renderPapers()}});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-sr-follow-settings]'))srOpenFollowDialog()});
   // Keyword watches use the shared state and actual resource update times.
   // A displayed word may wrap/ellipsis, but its complete normalized identity is never truncated.
   normalizeKeyword=function(value){return String(value||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim()};
