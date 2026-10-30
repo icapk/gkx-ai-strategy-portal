@@ -95,7 +95,7 @@
       <div id="searchAutomaticRules" class="search-automatic-rules" role="list" aria-label="词位扩展规则开关" hidden></div>
       <div id="searchAssociationTools" class="search-method-body" hidden>
         <section class="search-association-plan" aria-labelledby="searchAssociationHeading">
-          <div class="search-association-heading"><h3 id="searchAssociationHeading">已理解的检索条件</h3><button type="button" data-plan-edit aria-expanded="false" aria-controls="searchAssociationForm">修改条件</button></div>
+          <div class="search-association-heading"><h3 id="searchAssociationHeading">已理解的检索条件（用户搜索）</h3><button type="button" data-plan-edit aria-expanded="false" aria-controls="searchAssociationForm">修改条件</button></div>
           <div id="searchAssociationSummary" class="search-association-summary" aria-live="polite"></div>
           <p id="searchAssociationRelated" class="search-association-related"></p><p id="searchAssociationNotice" class="search-method-note" hidden></p>
           <form id="searchAssociationForm" class="search-association-form" hidden>
@@ -104,7 +104,7 @@
           <p id="searchAssociationError" class="search-method-error" role="status"></p>
           <details id="searchAssociationDetails" class="search-association-expression"><summary>查看检索式</summary><code id="searchAssociationExpression"></code></details>
         </section>
-        <details id="searchPreferenceDetails" class="search-preference-details"><summary>搜索偏好 <span id="searchPreferenceSummary"></span></summary><div class="search-preference-body">
+        <details id="searchPreferenceDetails" class="search-preference-details"><summary>搜索偏好（行为分析/信息处理） <span id="searchPreferenceSummary"></span></summary><div class="search-preference-body">
           <div class="search-preference-controls"><label><input id="searchPreferenceEnabled" type="checkbox">开启搜索偏好</label><button type="button" id="searchPreferenceClear">清除偏好</button></div>
           <p class="search-method-note">按近30天记录更新兴趣：搜索 +1，打开结果 +2。关键词相关性优先，兴趣仅辅助排序。当前原型记录保存在本机。</p>
           <p id="searchPreferenceIntent" class="search-method-note"></p><div id="searchPreferenceInterests" class="search-preference-interests" aria-live="polite"></div>
