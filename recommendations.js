@@ -310,12 +310,6 @@
     { id: "event-carbon-forum", type: "论坛", title: "多源碳监测方法论坛（原型）", organizer: "绿色发展活动平台（原型）", location: "福田国际会议中心", startAt: "2026-06-28T09:00:00+08:00", endAt: "2026-06-28T16:00:00+08:00", registration: "closed", themes: ["technology", "topic", "碳监测", "多源数据"], summary: "交流遥感与行业统计交叉校验方法。", reason: "往期热点技术与话题记录", capacity: 240, registered: 226, record: "纪要记录数据时效、空间分辨率和模型假设三类偏差。原型回放资源尚未接入，当前不可播放。" }
   ];
 
-  const modeTabs = Array.from(document.querySelectorAll("[data-rec-search-mode]"));
-  const modeSelect = document.getElementById("recSearchModeSelect");
-  const searchForm = document.getElementById("recSearchForm");
-  const searchInput = document.getElementById("recSearchInput");
-  const searchGuide = document.getElementById("recSearchGuide");
-  const searchFollowTip = document.getElementById("recSearchFollowTip");
   const mobileMenu = document.getElementById("recMobileMenu");
   const mainNav = document.getElementById("recMainNav");
   const contentNav = document.getElementById("recContentNav");
@@ -361,7 +355,6 @@
   const eventGrid = document.getElementById("recEventGrid");
   const eventMoreButton = document.getElementById("recEventMore");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let activeMode = "ai";
   let toastTimer = 0;
   let prototypeStorageFallbackPending = false;
   let prototypeStorageFallbackTimer = 0;
@@ -370,7 +363,6 @@
   let expandedUpdateId = "";
   let pendingRemovalKey = "";
   let pendingRemovalTimer = 0;
-  let searchNavigationTimer = 0;
   let activeNewsMode = "latest";
   let newsVisibleCount = NEWS_PAGE_SIZE;
   let expandedNewsId = "";
@@ -2389,11 +2381,7 @@
     }
     keywordFollowStatus.replaceChildren(createElement("strong", "", title), createElement("span", "", detail));
 
-    if (searchFollowTip) {
-      searchFollowTip.textContent = watchState.autoFollow
-        ? "📌 搜索提交后会自动建立词汇关注并生成相关动态，可在“热词推荐”中管理。"
-        : "📌 搜索词自动关注已关闭；搜索仍会正常进行，也可在“热词推荐”中手动关注。";
-    }
+
   }
 
   function createSuggestionCard(suggestion) {
@@ -2530,10 +2518,6 @@
         createElement("strong", "", "还没有关注的词汇"),
         createElement("span", "", "完成一次搜索后会自动建立关注，也可以从推荐词开始。")
       );
-      const focusSearchButton = createElement("button", "", "去搜索");
-      focusSearchButton.type = "button";
-      focusSearchButton.dataset.focusKeywordSearch = "true";
-      empty.appendChild(focusSearchButton);
       keywordFollowGrid.appendChild(empty);
     }
 
@@ -2639,90 +2623,28 @@
     });
   }
 
-  function setSearchMode(mode, shouldFocus) {
-    const nextMode = MODE_CONFIG[mode] ? mode : "ai";
-    const config = MODE_CONFIG[nextMode];
-    activeMode = nextMode;
-
-    let activeTabId = "";
-    modeTabs.forEach(function (tab, index) {
-      const selected = tab.dataset.recSearchMode === nextMode;
-      tab.id = tab.id || "rec-search-mode-tab-" + index;
-      tab.setAttribute("aria-controls", "recSearchGuide");
-      tab.classList.toggle("is-active", selected);
-      tab.setAttribute("aria-selected", String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-      if (selected) activeTabId = tab.id;
-    });
-
-    if (modeSelect) modeSelect.value = nextMode;
-    if (searchInput) searchInput.placeholder = config.placeholder;
-    if (searchGuide) {
-      searchGuide.innerHTML = "<span aria-hidden=\"true\">💡</span><strong>" + config.label + "：</strong>" + config.guide;
-      searchGuide.setAttribute("role", "tabpanel");
-      searchGuide.setAttribute("aria-labelledby", activeTabId);
+  async function openKeywordResults(value) {
+    const query = String(value || "").trim();
+    if (!isUsableKeyword(query) || Array.from(query).length > 200) return;
+    const params = new URLSearchParams({ query, mode: "关键词" });
+    const submittedContext = SR.userContextVersion();
+    const eventId = "recommend-hot-word-" + srId();
+    if (SR.snapshot().userId) {
+      try {
+        await SR.recordBehavior({ eventId, eventType: "SEARCH", query, queryId: eventId,
+          domainTags: SR.searchQueryTopics(query), source: "recommendation-hot-word" });
+      } catch (error) {
+        // The result page remains available if the local behavior record fails.
+      }
     }
-    if (shouldFocus && searchInput) searchInput.focus();
+    if (submittedContext === SR.userContextVersion()) {
+      window.location.href = "index.html?" + params.toString();
+    }
   }
-
-  modeTabs.forEach(function (tab, index) {
-    tab.addEventListener("click", function () {
-      setSearchMode(tab.dataset.recSearchMode, false);
-    });
-    tab.addEventListener("keydown", function (event) {
-      let nextIndex = index;
-      if (event.key === "ArrowRight") nextIndex = (index + 1) % modeTabs.length;
-      else if (event.key === "ArrowLeft") nextIndex = (index - 1 + modeTabs.length) % modeTabs.length;
-      else if (event.key === "Home") nextIndex = 0;
-      else if (event.key === "End") nextIndex = modeTabs.length - 1;
-      else return;
-      event.preventDefault();
-      const nextTab = modeTabs[nextIndex];
-      setSearchMode(nextTab.dataset.recSearchMode, false);
-      nextTab.focus();
-    });
-  });
-
-  modeSelect?.addEventListener("change", function () {
-    setSearchMode(modeSelect.value, true);
-  });
-
-  searchForm?.addEventListener("submit", async function (event) {
-    event.preventDefault();
-    const query=searchInput?.value.trim();
-    if(!query){showToast("请先输入要检索的内容");searchInput?.focus();return}
-    if(!isUsableKeyword(query)){showToast("检索内容需包含文字或数字，请修改后重试");searchInput?.focus();return}
-    if(Array.from(query).length>200){showToast("搜索内容最多200个字符");searchInput?.focus();return}
-    if(activeMode==='keyword'&&(query.replace(/[“”]/g,'"').match(/"/g)||[]).length%2){showToast("精确查找的引号需成对，请补全或删除引号后重试。");searchInput?.focus();return}
-    const mode=MODE_CONFIG[activeMode]?.resultMode||"关键词",params=new URLSearchParams({query,mode}),submitButton=searchForm.querySelector('button[type="submit"]'),submitLabel=submitButton?.querySelector('span');
-    if(submitButton?.disabled)return;
-    if(submitButton){submitButton.disabled=true;submitButton.setAttribute('aria-busy','true')}
-    if(submitLabel)submitLabel.textContent='搜索中';
-    const submittedContext=SR.userContextVersion(),eventId='recommend-search-'+srId();let delay=0;
-    if(SR.snapshot().userId){
-      try{
-        const domainTags=SR.searchQueryTopics(query);
-        await SR.recordBehavior({eventId,eventType:'SEARCH',query,queryId:eventId,domainTags,source:'recommendation-search'});
-        if(submittedContext!==SR.userContextVersion())return;
-        watchState=loadWatchState();renderKeywordFollows();
-      }catch(err){if(submittedContext!==SR.userContextVersion())return;showToast(err.message||'搜索行为暂未保存，本次继续检索');delay=900}
-    }
-    window.clearTimeout(searchNavigationTimer);
-    searchNavigationTimer=window.setTimeout(()=>{if(submittedContext===SR.userContextVersion())window.location.href='index.html?'+params.toString()},delay);
-  });
 
   document.querySelectorAll("[data-hot-query]").forEach(function (button) {
     button.addEventListener("click", function () {
-      if (!searchInput) return;
-      searchInput.value = button.dataset.hotQuery || button.textContent.trim();
-      document.querySelector(".rec-hero")?.scrollIntoView({
-        behavior: prefersReducedMotion.matches ? "auto" : "smooth",
-        block: "start"
-      });
-      window.setTimeout(function () {
-        searchInput.focus();
-        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-      }, prefersReducedMotion.matches ? 0 : 360);
+      openKeywordResults(button.dataset.hotQuery || button.textContent.trim());
     });
   });
 
@@ -2763,8 +2685,8 @@
         block: "center"
       });
       window.setTimeout(function () {
-        const control = keywordFollowGrid?.querySelector("[data-watch-toggle], [data-keyword-follow], [data-focus-keyword-search]");
-        (control || searchInput)?.focus();
+        const control = keywordFollowGrid?.querySelector("[data-watch-toggle], [data-keyword-follow]");
+        control?.focus();
       }, prefersReducedMotion.matches ? 0 : 360);
       showToast("请新增或调整词汇关注，关注领域资讯会自动更新");
     }
@@ -3278,17 +3200,8 @@
     const button = event.target.closest("button");
     if (!button || !keywordFollowGrid.contains(button)) return;
 
-    if (button.dataset.focusKeywordSearch) {
-      document.querySelector(".rec-hero")?.scrollIntoView({
-        behavior: prefersReducedMotion.matches ? "auto" : "smooth",
-        block: "start"
-      });
-      window.setTimeout(function () { searchInput?.focus(); }, prefersReducedMotion.matches ? 0 : 360);
-      return;
-    }
-
     if (button.dataset.keywordFollow) {
-      const result = upsertKeywordWatch(button.dataset.keywordFollow, "manual", activeMode);
+      const result = upsertKeywordWatch(button.dataset.keywordFollow, "manual", "keyword");
       if (result.status === "created") {
         renderKeywordFollows();
         focusGridControl("data-watch-toggle", result.watch.key);
@@ -3421,15 +3334,6 @@
   });
 
   function initializeFromLocation() {
-    const params = new URLSearchParams(window.location.search);
-    const from = params.get("from");
-    if (from === "simulation" && searchInput) {
-      searchInput.value = "AI 仿真实验";
-      setSearchMode("association", false);
-    } else {
-      setSearchMode(params.get("mode") || "keyword", false);
-    }
-
     const sectionId = window.location.hash.slice(1);
     const target = document.getElementById(sectionId);
     if (target && target.matches("[data-rec-section]")) {
@@ -3509,7 +3413,7 @@
     if(item)SR.recordBehavior({eventId:srId(),eventType:'VIEW',resourceId:item.id,domainTags:[...new Set([...(item.tags||[]),...(item.topics||[]),...(item.topic?[item.topic]:[])])]}).catch(()=>{});
   });
   function srRenderHot(){const container=document.querySelector('.rec-hot-grid'),words=srRecommend('HOT_WORD','personal',[]);container.innerHTML=words.map((w,i)=>`<button class="rec-hot-card ${i<3?'is-top':''}" type="button" data-sr-hot-query="${srSafe(w.topic)}"><strong>${srSafe(w.topic)}</strong><em>#${i+1}</em><span>近7天行为权重 ${w.current}</span><small>${w.hasPersonalEvidence?'兴趣相关 '+Math.round(w.relevance*100)+'%':'公共热点 · 无个人行为'}</small></button>`).join('')}
-  document.querySelector('.rec-hot-grid')?.addEventListener('click',e=>{const b=e.target.closest('[data-sr-hot-query]');if(b){searchInput.value=b.dataset.srHotQuery;setSearchMode('keyword');searchForm.requestSubmit()}});
+  document.querySelector('.rec-hot-grid')?.addEventListener('click',e=>{const b=e.target.closest('[data-sr-hot-query]');if(b)openKeywordResults(b.dataset.srHotQuery)});
   // Replace only the original interest rail contents; keep its location and style.
   const srInterest=document.querySelector('.rec-add-interest')?.parentElement;
   function srRenderInterests(){if(!srInterest)return;const follows=SR.snapshot().follows.filter(f=>f.following&&['DOMAIN','JOURNAL'].includes(f.kind));srInterest.innerHTML='<h3><span aria-hidden="true">🎯</span> 关注领域热词</h3>'+follows.map(f=>`<div class="sr-follow-target"><strong>${srSafe(f.targetId)}</strong><button type="button" data-sr-unfollow="${srSafe(f.targetId)}" data-kind="${f.kind}" aria-label="移除${srSafe(f.targetId)}关注">×</button></div>`).join('')+(follows.length?'':'<p class="sr-note">暂无关注领域或期刊</p>')+'<button class="rec-add-interest" type="button" data-sr-follow-settings>＋ 新增关注领域 / 邮箱设置</button><p id="sr-weekly-summary" class="sr-note"></p>';SR.getWeeklyEmail().then(w=>{const n=document.getElementById('sr-weekly-summary');if(n)n.textContent=w.email?`每周邮件：${w.email} · ${w.enabled?'已启用，每周推送':'已停用'}（原型配置演示）`:'未提供邮箱，不发送每周邮件'})}
