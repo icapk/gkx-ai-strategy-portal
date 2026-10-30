@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="recommendations.css?v=20261030-follow-domains">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
   <link rel="stylesheet" href="recommendation-v1.css?v=20261030-follow-domains">
+  <link rel="stylesheet" href="personal-entry.css?v=20261030-personal-demo">
 </head>
 <body>
   <a class="rec-skip-link" href="#recommendationMain">跳到主要内容</a>
@@ -33,12 +34,12 @@
 
   <header class="rec-header" id="recHeader">
     <div class="rec-header-inner">
-      <a class="rec-brand" href="index.html" aria-label="返回门户首页" data-back-home>
+      <a class="rec-brand" href="index.html?page=home" aria-label="返回门户首页" data-back-home>
         <span class="rec-brand-mark" aria-hidden="true">C</span>
         <span>深圳国际科技信息中心</span>
       </a>
       <nav class="rec-main-nav" id="recMainNav" aria-label="主导航">
-        <a class="portal-glass-tab" href="index.html" data-back-home>首页</a>
+        <a class="portal-glass-tab" href="index.html?page=home" data-back-home>首页</a>
         <a class="portal-glass-tab" href="ai-research.html" aria-current="page">科学研究</a>
         <a class="portal-glass-tab" href="education.html">未来教育</a>
         <a class="portal-glass-tab" href="evaluation.html">科技评价</a>
@@ -49,7 +50,7 @@
           <svg aria-hidden="true"><use href="#rec-icon-bell"></use></svg><span>消息</span><em id="recMessageCount">5</em>
         </button>
         <button class="rec-header-action" type="button" data-demo-action="应用中心为原型入口">应用</button>
-        <button class="rec-login-button" type="button" data-demo-action="登录注册功能将在统一用户中心接入后开放">登录/注册</button>
+        <div class="personal-rec-entry"><button class="personal-account-trigger" id="personalRecTrigger" type="button" aria-label="打开个人中心菜单" aria-controls="personalRecMenu" aria-expanded="false" aria-haspopup="menu"><span class="personal-menu-avatar" aria-hidden="true">q</span><span data-personal-trigger-label>quan…</span><span class="personal-caret" aria-hidden="true">▾</span></button><div class="personal-rec-menu" id="personalRecMenu" role="menu" hidden><a class="personal-account-item" href="personal-center.html" role="menuitem"><span class="personal-menu-avatar" aria-hidden="true">q</span><span class="profile-menu-copy"><strong data-personal-account-name>quan.song@aminer.cn</strong><small data-personal-account-email>quan.song@aminer.cn</small><span class="personal-menu-caption">进入个人中心 ›</span></span></a><button class="personal-logout" id="personalRecLogout" type="button" role="menuitem">退出登录</button></div></div>
         <button class="rec-mobile-menu" id="recMobileMenu" type="button" aria-label="打开导航" aria-expanded="false" aria-controls="recMainNav">
           <svg aria-hidden="true"><use href="#rec-icon-menu"></use></svg>
         </button>
@@ -76,7 +77,7 @@
   <main class="rec-main" id="recommendationMain">
     <div class="rec-shell">
       <nav class="rec-breadcrumb" aria-label="页面路径">
-        <a href="index.html" data-back-home>
+        <a href="index.html?page=home" data-back-home>
           <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg>
           返回首页
         </a>
@@ -355,12 +356,15 @@
   </main>
 
   <footer class="rec-footer">
-    <div class="rec-shell"><strong>深圳国际科技信息中心</strong><span>科研情报智能推荐原型</span><a href="index.html" data-back-home>返回门户首页</a></div>
+    <div class="rec-shell"><strong>深圳国际科技信息中心</strong><span>科研情报智能推荐原型</span><a href="index.html?page=home" data-back-home>返回门户首页</a></div>
   </footer>
 
   <div class="rec-toast" id="recToast" role="status" aria-live="polite" hidden></div>
-  <script src="search-recommend-remediation-fixtures.js?v=20261030-follow-domains"></script>
-  <script src="portal-search-recommend-adapter.js?v=20261030-follow-domains"></script>
-  <script src="recommendations.js?v=20261030-follow-domains"></script>
+  <script src="search-recommend-remediation-fixtures.js?v=20261030-personal-demo"></script>
+  <script src="portal-search-recommend-adapter.js?v=20261030-personal-demo"></script>
+  <script src="personal-resource-catalog.js?v=20261030-personal-demo"></script>
+  <script src="personal-data-demo.js?v=20261030-personal-demo"></script>
+  <script src="recommendations.js?v=20261030-personal-demo"></script>
+  <script src="personal-entry.js?v=20261030-personal-demo"></script>
 </body>
 </html>

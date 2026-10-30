@@ -515,8 +515,8 @@
     return {
       version: 1,
       authors: {
-        "author-lin": { following: true, everFollowed: true, dismissed: false },
-        "author-zhou": { following: false, everFollowed: true, dismissed: false },
+        "author-lin": { following: false, everFollowed: false, dismissed: false },
+        "author-zhou": { following: false, everFollowed: false, dismissed: false },
         "author-chen": { following: false, everFollowed: false, dismissed: false },
         "author-wu": { following: false, everFollowed: false, dismissed: false }
       }

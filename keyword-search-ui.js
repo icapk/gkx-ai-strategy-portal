@@ -274,7 +274,7 @@
       const metadata = items => items.length ? `<dl class="portal-result-metadata">${items.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl>` : "";
       const article = doc.createElement("article");
       article.className = "portal-search-card";
-      article.dataset.type = type; article.dataset.resultId = `${type}:${record.id}`;
+      article.dataset.type = type; article.dataset.resultId = `${type}:${record.id}`; article.__personalResource = record;
       const detailId = `keyword-detail-${type}-${String(record.id).replace(/[^a-z0-9_-]/giu, "-")}`;
       const hasInlineDetail = type === "练仿真" || more.length > 0;
       const detailControl = detailUrl ? `<a class="portal-search-card-action is-primary" data-result-detail-link href="${esc(detailUrl)}" target="_blank" rel="noopener noreferrer">查看${type === "论文" ? "论文" : "资源"}详情 ↗</a>` : "";

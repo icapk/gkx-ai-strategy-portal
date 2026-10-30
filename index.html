@@ -3746,6 +3746,7 @@
   <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
   <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-no-expression-row">
   <link rel="stylesheet" href="report-fulltext.css?v=20261030-report">
+  <link rel="stylesheet" href="personal-entry.css?v=20261030-personal-demo">
 </head>
 <body>
   <header class="site-header" id="siteHeader">
@@ -3789,23 +3790,10 @@
             aria-expanded="false"
             aria-haspopup="menu"
           >
-            <span class="profile-avatar" aria-hidden="true">李</span>
+            <span class="profile-avatar" aria-hidden="true">q</span><span class="personal-trigger-label" data-personal-trigger-label>quan…</span>
           </button>
           <div class="profile-menu profile-account-menu" id="profileMenu" role="menu" aria-label="个人中心" hidden>
-            <button class="profile-menu-item" id="profileCenterOne" type="button" role="menuitem">
-              <span class="profile-menu-copy">
-                <strong>个人中心1</strong>
-                <small>统一用户中心</small>
-              </span>
-              <svg class="profile-menu-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 5.5 4.5 4.5-4.5 4.5"></path></svg>
-            </button>
-            <button class="profile-menu-item" id="profileCenterTwo" type="button" role="menuitem">
-              <span class="profile-menu-copy">
-                <strong>个人中心2</strong>
-                <small>我的内容记录</small>
-              </span>
-              <svg class="profile-menu-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 5.5 4.5 4.5-4.5 4.5"></path></svg>
-            </button>
+<button class="profile-menu-item personal-account-item" id="profileCenterOne" type="button" role="menuitem"><span class="personal-menu-avatar" aria-hidden="true">q</span><span class="profile-menu-copy"><strong data-personal-account-name>quan.song@aminer.cn</strong><small data-personal-account-email>quan.song@aminer.cn</small><span class="personal-menu-caption">进入个人中心 <span aria-hidden="true">›</span></span></span></button><button class="profile-menu-item personal-logout" id="profileCenterTwo" type="button" role="menuitem">退出登录</button>
           </div>
         </div>
       </div>
@@ -5166,14 +5154,16 @@
     </section>
   </main>
 
-  <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
+  <script src="search-recommend-remediation-fixtures.js?v=20261030-personal-demo"></script><script src="portal-search-recommend-adapter.js?v=20261030-personal-demo"></script>
+  <script src="personal-resource-catalog.js?v=20261030-personal-demo"></script>
+  <script src="personal-data-demo.js?v=20261030-personal-demo"></script>
   <script src="report-fulltext-fixtures.js?v=20261030-report-types"></script>
   <script src="keyword-search-model.js?v=20261030-all-conditions"></script>
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
   <script src="search-methods.js?v=20261030-no-expression-row"></script>
-  <script src="keyword-search-ui.js?v=20261030-association-chips"></script>
+  <script src="keyword-search-ui.js?v=20261030-personal-demo"></script>
   <script src="ai-rag-search.js?v=20261030-independent-results"></script><script>
     (() => {
       "use strict";
@@ -6454,6 +6444,7 @@
         article.dataset.date = item.date;
         const resultIndex = SEARCH_ITEMS.indexOf(item);
         article.dataset.resultId = `result-${resultIndex}`;
+        article.__personalResource = item;
         const query = getSubmittedSearchQuery();
         const detailId = `entity-detail-${item.id}`;
         const dateLabel = item.type === "课程" ? "发布时间" : "开始时间";
@@ -8814,6 +8805,7 @@
         article.dataset.date = item.date;
         const itemIndex = SEARCH_ITEMS.indexOf(item);
         article.dataset.resultId = `result-${itemIndex}`;
+        article.__personalResource = item;
         const query = getSubmittedSearchQuery();
         const metadata = getResultMetadata(item).map(row => activeSearchMode === "关键词"
           ? row.map(value => escapeHtml(String(value))) : row);
@@ -9480,6 +9472,7 @@
               if (record.type === "人才" || !display.date) time.remove();
               else time.textContent = `${label} ${display.date}`.trim();
             }
+            card.__personalResource = display;
             return card;
           },
           showSearch() { showSurface("search", { focusTarget: portalResultSearchInput }); },
@@ -9788,7 +9781,8 @@
         setRecommendationType("为你推荐");
       });
       const openPersonalCenter = () => showSurface("iframe", {
-        iframeUrl: "https://edu.itic-sci.com/uc/portal/my-account",
+        iframeUrl: "personal-center.html?embedded=1",
+        hideEmbeddedToolbar: true,
         embedTitle: "个人中心"
       });
       const openPersonalCenterTwo = () => showSurface("iframe", {
@@ -9826,9 +9820,13 @@
         closeProfileMenu();
         openPersonalCenter();
       });
-      profileCenterTwo.addEventListener("click", () => {
-        closeProfileMenu();
-        openPersonalCenterTwo();
+      profileCenterTwo.addEventListener("click", async () => {
+        try {
+          const service = window.PortalSearchRecommend;
+          await service.setDemoIdentity({userId: service.snapshot().userId ? null : 'demo-user', audience: 'research'});
+          closeProfileMenu();
+          showSurface('home');
+        } catch (error) { window.alert(error.message || '账号状态未更新，请重试'); }
       });
 
       portalResultSearchForm.addEventListener("submit", (event) => {
@@ -11064,8 +11062,12 @@
       embeddedSystem.addEventListener("load", persistPortalViewState);
       window.addEventListener("pagehide", persistPortalViewState);
       window.addEventListener("beforeunload", persistPortalViewState);
-      if (!openClusterServiceRoute() && !homeModeRoute && !(entryQuery && ["AI 搜索", "AI搜索"].includes(entryMode))) restorePortalViewState();
+      if (initialSearchParams.get('page') === 'personal-center') openPersonalCenter();
+      else if (initialSearchParams.get('page') === 'home') showSurface('home');
+      else if (entryQuery) clearPortalViewState();
+      else if (!openClusterServiceRoute() && !homeModeRoute) restorePortalViewState();
     })();
   </script>
+  <script src="personal-entry.js?v=20261030-personal-demo"></script>
 </body>
 </html>

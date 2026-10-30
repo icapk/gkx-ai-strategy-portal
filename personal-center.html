@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个人中心 · 深圳国际科技信息中心</title>
+  <link rel="stylesheet" href="personal-center.css?v=20261030">
+</head>
+<body>
+  <header class="pc-site-header">
+    <a class="pc-brand" href="index.html?page=home" target="_top"><span>C</span>深圳国际科技信息中心</a>
+    <nav aria-label="门户导航"><a href="index.html?page=home" target="_top">返回首页</a><a href="recommendations.html" target="_top">智能推荐</a><span class="pc-header-avatar">q</span></nav>
+  </header>
+  <main class="pc-shell">
+    <div class="pc-breadcrumb"><a href="index.html?page=home" target="_top">首页</a><span>/</span><span>个人中心</span></div>
+    <div class="pc-title-row"><div><h1>个人中心</h1><p>管理通知设置，查看你的关注与内容记录。</p></div><a class="pc-text-link" href="recommendations.html" target="_top">探索智能推荐 <span aria-hidden="true">↗</span></a></div>
+    <section class="pc-overview" aria-label="个人资料与记录概览">
+      <div class="pc-identity"><div class="pc-avatar" aria-hidden="true">q</div><div><strong id="pcAccountName">quan.song</strong><span id="pcAccountEmail">quan.song@aminer.cn</span><small id="pcAccountHint">个人账号 · 原型展示</small></div></div>
+      <div class="pc-stats" id="pcStats"></div>
+    </section>
+    <div class="pc-layout">
+      <aside class="pc-sidebar"><nav id="pcNavigation" aria-label="个人中心导航"></nav><div class="pc-interest"><h2>我的兴趣</h2><div id="pcInterestTags"></div><p>来自已记录的搜索、浏览与收藏行为。</p></div></aside>
+      <section class="pc-content" aria-labelledby="pcPanelTitle">
+        <header class="pc-panel-heading"><div><h2 id="pcPanelTitle">浏览历史</h2><p id="pcPanelDescription"></p></div><span id="pcPanelTotal" class="pc-total"></span></header>
+        <div class="pc-toolbar" id="pcToolbar"><label class="pc-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4 4"></path></svg><input id="pcSearch" type="search" placeholder="搜索记录" aria-label="搜索个人记录"></label><select id="pcTypeFilter" aria-label="筛选资源类型"><option value="">全部类型</option></select><select id="pcFavoritesMode" aria-label="收藏记录范围" hidden><option value="current">当前收藏</option><option value="history">收藏历史</option></select></div>
+        <div id="pcRecords" aria-live="polite"></div>
+        <form id="pcNotificationForm" class="pc-notification-form" novalidate hidden>
+          <section class="pc-form-section"><div class="pc-section-heading"><span class="pc-section-icon" aria-hidden="true">@</span><div><h3>接收通知的邮箱</h3><p>用于接收你订阅的推荐内容。</p></div></div><label class="pc-field-label" for="pcEmail">通知邮箱</label><input id="pcEmail" name="email" type="email" autocomplete="email" placeholder="请输入接收通知的邮箱" maxlength="254" aria-describedby="pcEmailHint pcFormStatus"><p class="pc-field-hint" id="pcEmailHint">通知邮箱可与登录账号邮箱不同。</p></section>
+          <section class="pc-form-section pc-subscription-row"><div><h3>每周文献推荐</h3><p>接收关注领域、期刊的最新与热门论文。</p><span class="pc-frequency">每周推送</span></div><label class="pc-switch"><input id="pcWeekly" name="weekly" type="checkbox" aria-label="开启每周文献推荐邮件"><span aria-hidden="true"></span></label></section>
+          <div class="pc-email-summary" id="pcEmailSummary"></div><div class="pc-form-footer"><p id="pcFormStatus" role="status" aria-live="polite"></p><button class="pc-primary-button" id="pcSaveEmail" type="submit">保存设置</button></div>
+        </form>
+      </section>
+    </div>
+    <footer class="pc-local-note">原型演示：包含基于搜推资源生成的示例个人记录；记录与邮箱配置保存在当前浏览器，尚未接入账号同步和真实邮件发送。</footer>
+  </main>
+  <dialog id="pcResourceDialog" class="pc-resource-dialog" aria-labelledby="pcDetailTitle"><div class="pc-dialog-top"><span id="pcDetailType" class="pc-resource-type"></span><button id="pcCloseDetail" type="button" aria-label="关闭资源详情">×</button></div><h2 id="pcDetailTitle"></h2><p id="pcDetailMeta" class="pc-detail-meta"></p><p id="pcDetailSummary"></p><div id="pcDetailTags" class="pc-tags"></div><div class="pc-dialog-actions"><a id="pcSourceLink" class="pc-text-link" target="_blank" rel="noopener noreferrer" hidden>查看原始页面 ↗</a><button id="pcDialogDone" type="button">关闭</button></div></dialog>
+  <div id="pcToast" class="pc-toast" role="status" hidden></div>
+  <script>if(new URLSearchParams(location.search).get('embedded')==='1')document.body.classList.add('is-embedded');</script>
+  <script src="search-recommend-remediation-fixtures.js?v=20261030-personal-demo"></script>
+  <script src="personal-resource-catalog.js?v=20261030"></script>
+  <script src="portal-search-recommend-adapter.js?v=20261030-personal"></script>
+  <script src="personal-data-demo.js?v=20261030-personal-demo"></script>
+  <script src="personal-center.js?v=20261030-personal-demo"></script>
+</body>
+</html>
