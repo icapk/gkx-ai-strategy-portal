@@ -320,6 +320,66 @@
   color: #919aaa;
 }
 
+#mgHeroSearchForm .mg-hero-query-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding-right: 92px;
+}
+
+#mgHeroSearchForm .mg-hero-query-row input {
+  width: auto;
+  min-width: 0;
+  flex: 1;
+  padding-right: 0;
+}
+
+#mgHeroSearchForm .mg-hero-scope-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px 4px 12px;
+  border: 1px solid #bcd0ff;
+  border-radius: 18px;
+  color: #3c6de6;
+  background: #f0f5ff;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+#mgHeroSearchForm .mg-hero-scope-chip[hidden] {
+  display: none;
+}
+
+#mgHeroSearchForm #mgHeroScopeClear {
+  display: inline-flex;
+  width: 21px;
+  height: 21px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #6789da;
+  background: transparent;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#mgHeroSearchForm #mgHeroScopeClear:hover {
+  color: #244db8;
+  background: #dfe9ff;
+}
+
+#mgHeroSearchForm #mgHeroScopeClear:focus-visible {
+  outline: 2px solid #6789da;
+  outline-offset: 2px;
+}
+
 .mg-search-intents {
   display: flex;
   align-items: center;

@@ -13,6 +13,7 @@
     { pattern: /低空经济|\blow.altitude economy\b/iu, automatic: ["低空产业", "低空应用"], translation: ["低空经济"], broader: ["航空经济"], narrower: ["低空物流", "城市空中交通"] },
     { pattern: /机器人|\brobot\b/iu, automatic: ["机器人学习", "具身智能"], translation: ["机器人"], broader: ["智能装备"], narrower: ["人形机器人", "工业机器人"] }
   ];
+  const typeLabel = type => type === "人才" ? "学者" : type;
   const norm = value => String(value || "").normalize("NFKC").replace(/\s+/gu, " ").trim();
   const esc = value => String(value == null ? "" : value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
   const ASSOCIATION_TERMS = [
@@ -147,7 +148,7 @@
       get("searchPreferenceSummary").textContent = current.enabled ? `已开启 · ${rows.length} 个兴趣主题` : "未开启";
       const latest = current.events.at(-1);
       const topicLabel = topic => topic === "AI for Science" ? "人工智能" : topic;
-      get("searchPreferenceIntent").textContent = latest ? `最近关注：${topicLabel(latest.topic)} · ${latest.resourceType === "全部" ? "全部资源" : latest.resourceType || "相关资源"}；${latest.type === "search" ? "搜索 +1" : "打开结果 +2"}` : "";
+      get("searchPreferenceIntent").textContent = latest ? `最近关注：${topicLabel(latest.topic)} · ${latest.resourceType === "全部" ? "全部资源" : typeLabel(latest.resourceType) || "相关资源"}；${latest.type === "search" ? "搜索 +1" : "打开结果 +2"}` : "";
       get("searchPreferenceClear").disabled = !current.events.length;
       get("searchPreferenceInterests").innerHTML = rows.length ? rows.slice(0, 8).map(item => `<span title="搜索 ${item.searches} 次，打开 ${item.opens} 次">${esc(topicLabel(item.topic))}<strong>${item.score} 分</strong></span>`).join("") : `<p class="search-method-note">${current.enabled ? "暂无兴趣记录，搜索或打开结果后自动更新。" : "开启后，根据搜索和打开记录优先展示你关注的相关内容。"}</p>`;
     }
@@ -199,7 +200,7 @@
           ? `${filters.publishedYearFrom || "不限"}—${filters.publishedYearTo || "不限"}` : "不限";
         get("searchAssociationSummary").innerHTML = [
           ["关键词", parsed.terms.map(term => associationGroup(term.text)?.[0] || term.text).join("、") || plan.query],
-          ["资源", state.currentType === "全部" ? "全部资源" : state.currentType], ["年份", years]
+          ["资源", state.currentType === "全部" ? "全部资源" : typeLabel(state.currentType)], ["年份", years]
         ].map(([label, value]) => `<span>${label}<strong>${esc(value)}</strong></span>`).join("");
         const related = [...new Set(parsed.terms.flatMap(term => [term.text, ...(bridge.associationTerms?.(term.text) || [])]))];
         get("searchAssociationRelated").textContent = related.length > parsed.terms.length ? `关联检索：${related.join("、")}` : "按当前关键词查找相关资源。";

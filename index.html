@@ -3012,7 +3012,7 @@
   </style>
   <link rel="stylesheet" href="home-additions.css">
   <link rel="stylesheet" href="portal-extras.css?v=20261013-arco-buttons-1">
-  <link rel="stylesheet" href="mastergo-v2.css?v=20261014-structured-sections">
+  <link rel="stylesheet" href="mastergo-v2.css?v=20261030-home-scopes">
   <link rel="stylesheet" href="home-section-fidelity.css?v=20261014-1">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261012-alert">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
@@ -3909,7 +3909,7 @@
                 </button>
               </div>
               <label class="sr-only" for="mgHeroSearchInput">搜索科研资源与智能服务</label>
-              <input id="mgHeroSearchInput" type="search" autocomplete="off" data-query-max-characters="200" placeholder="输入关键词，检索论文、专利、报告、专家等资源全文">
+              <div class="mg-hero-query-row"><span class="mg-hero-scope-chip" id="mgHeroScopeChip" hidden><span id="mgHeroScopeLabel"></span><button id="mgHeroScopeClear" type="button" aria-label="关闭检索范围">×</button></span><input id="mgHeroSearchInput" type="search" autocomplete="off" data-query-max-characters="200" placeholder="输入关键词，检索论文、专利、报告、专家等资源全文"></div>
               <div class="mg-search-intents" id="mgFulltextShortcuts" role="group" aria-label="搜索快捷入口">
                 <button id="mgRecommendationTabSimulation" type="button" data-special-search-type="练仿真" data-recommendation-group="simulation">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h10v4l-3 4v4.5a2 2 0 0 1-4 0V13L7 9Z"></path><path d="M9 3h6M8.5 15h7"></path></svg>
@@ -4676,7 +4676,7 @@
           <form class="portal-search-form" id="portalResultSearchForm" role="search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 4.5 4.5"></path></svg>
             <label class="sr-only" for="portalResultSearchInput">信息搜索</label>
-            <input class="portal-search-input" id="portalResultSearchInput" type="search" autocomplete="off" data-query-max-characters="200" aria-describedby="portalSearchFeedback" placeholder="搜索论文、专利、报告、人才、资讯、会议、课程、活动">
+            <input class="portal-search-input" id="portalResultSearchInput" type="search" autocomplete="off" data-query-max-characters="200" aria-describedby="portalSearchFeedback" placeholder="搜索论文、专利、报告、学者、资讯、会议、课程、活动">
             <button class="portal-search-button" type="submit">搜索</button>
           </form>
           <p class="keyword-v1-demo-note">原型演示 · 示例数据与模拟服务</p>
@@ -4983,7 +4983,7 @@
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="论文"><span>论文</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="专利"><span>专利</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="报告"><span>报告</span><small data-search-type-count>0</small></button>
-                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="人才"><span>人才</span><small data-search-type-count>0</small></button>
+                <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="人才"><span>学者</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="资讯"><span>资讯</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="会议"><span>会议</span><small data-search-type-count>0</small></button>
                 <button class="portal-search-type-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-search-type="课程"><span>课程</span><small data-search-type-count>0</small></button>
@@ -5171,8 +5171,8 @@
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
-  <script src="search-methods.js?v=20261030-association-labels"></script>
-  <script src="keyword-search-ui.js?v=20261030-rule-toggles"></script>
+  <script src="search-methods.js?v=20261030-scholar-labels"></script>
+  <script src="keyword-search-ui.js?v=20261030-scholar-labels"></script>
   <script src="ai-rag-search.js?v=20261030-independent-results"></script><script>
     (() => {
       "use strict";
@@ -5533,6 +5533,8 @@
       let lastClassicHeroMode = "keyword";
       let returnHeroExperience = "classic";
       let activeHeroRecommendation = "simulation";
+      const HERO_SEARCH_SCOPE_TYPES = Object.freeze({ simulation: "练仿真", paper: "论文", expert: "人才", strategy: "报告" });
+      let selectedHeroSearchType = "全部";
       let activeSearchMode = "关键词";
       const initialSearchParams = new URLSearchParams(window.location.search);
       const homeModeRoute = !initialSearchParams.get("query") && ["ai", "keyword"].includes(initialSearchParams.get("homeMode"))
@@ -7576,6 +7578,24 @@
         return control;
       }
 
+      function renderHeroSearchScope() {
+        const keywordMode = activeHeroExperience === "classic" && activeHeroSearchMode === "keyword";
+        const labels = { "练仿真": "@练仿真", "论文": "@论文检索" };
+        const chip = document.getElementById("mgHeroScopeChip");
+        chip.hidden = !keywordMode || !labels[selectedHeroSearchType];
+        document.getElementById("mgHeroScopeLabel").textContent = labels[selectedHeroSearchType] || "";
+        document.getElementById("mgHeroScopeClear").setAttribute("aria-label", "关闭" + (selectedHeroSearchType === "论文" ? "论文检索" : "练仿真") + "范围");
+        mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]").forEach(button => {
+          const selected = keywordMode && HERO_SEARCH_SCOPE_TYPES[button.dataset.recommendationGroup] === selectedHeroSearchType;
+          button.classList.toggle("is-active", selected);
+          button.setAttribute("aria-pressed", String(selected));
+        });
+        if (keywordMode && selectedHeroSearchType !== "全部") {
+          const label = selectedHeroSearchType === "人才" ? "学者" : selectedHeroSearchType;
+          mgHeroSearchInput.placeholder = "输入关键词，检索" + label;
+        }
+      }
+
       function renderHeroRecommendations(groupKey, activateShortcut = true) {
         const group = HERO_RECOMMENDATION_GROUPS[groupKey] || HERO_RECOMMENDATION_GROUPS.simulation;
         activeHeroRecommendation = groupKey in HERO_RECOMMENDATION_GROUPS ? groupKey : "simulation";
@@ -7588,11 +7608,7 @@
         mgRecommendationPreview.setAttribute("aria-label", `${group.label}智能推荐，共 ${group.items.length} 项`);
         mgRecommendationPreview.dataset.recommendationGroup = activeHeroRecommendation;
         mgRecommendationPreview.replaceChildren(...group.items.map((item, index) => createHeroRecommendationCard(item, activeHeroRecommendation, index)));
-        mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]").forEach((button) => {
-          const active = activateShortcut && !button.dataset.specialSearchType && button.dataset.recommendationGroup === activeHeroRecommendation;
-          button.classList.toggle("is-active", active);
-          if (!button.dataset.specialSearchType) button.setAttribute("aria-pressed", String(active));
-        });
+        renderHeroSearchScope();
       }
 
       function createRecommendationCard(item) {
@@ -7807,6 +7823,7 @@
         mgHeroSearchInput.placeholder = modes[activeHeroSearchMode].placeholder;
         const submit = mgHeroSearchForm.querySelector(".mg-search-submit");
         submit.setAttribute("aria-label", modes[activeHeroSearchMode].label);
+        renderHeroSearchScope();
         if (!homeContent.hidden) {
           const homeUrl = new URL(window.location.href);
           if (homeUrl.searchParams.has("homeMode") && !homeUrl.searchParams.has("query")) {
@@ -9562,7 +9579,7 @@
           ai: "AI 搜索",
           keyword: "关键词"
         };
-        if (activeHeroSearchMode === "keyword") { performHeroKeywordSearch("全部"); return; }
+        if (activeHeroSearchMode === "keyword") { performHeroKeywordSearch(selectedHeroSearchType); return; }
         performSearch(mgHeroSearchInput?.value, {
           mode: heroToResultMode[activeHeroSearchMode],
           focusTarget: mgHeroSearchInput
@@ -9611,18 +9628,18 @@
         setV2HeroMode(target.dataset.v2HeroMode, false);
         target.focus();
       });
-      document.querySelectorAll(".mg-search-intents [data-recommendation-group]").forEach((button) => {
+      mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]").forEach(button => {
         button.addEventListener("click", () => {
-          if (button.dataset.specialSearchType) {
-            performHeroKeywordSearch(button.dataset.specialSearchType);
-            return;
-          }
+          selectedHeroSearchType = HERO_SEARCH_SCOPE_TYPES[button.dataset.recommendationGroup] || "全部";
           renderHeroRecommendations(button.dataset.recommendationGroup);
-          if (mgHeroSearchInput) {
-            mgHeroSearchInput.value = button.dataset.mgQuery || "";
-            mgHeroSearchInput.setCustomValidity("");
-          }
+          mgHeroSearchInput.setCustomValidity("");
+          mgHeroSearchInput.focus();
         });
+      });
+      document.getElementById("mgHeroScopeClear").addEventListener("click", () => {
+        selectedHeroSearchType = "全部";
+        setHeroSearchMode("keyword", false);
+        mgHeroSearchInput.focus();
       });
       const strategyShortcuts = [...document.querySelectorAll(".mg-strategy-prompt [data-mg-query]")];
       const strategyGroups = ["simulation", "paper", "expert", "strategy"];
@@ -10490,6 +10507,10 @@
       function returnSearchHome(mode) {
         const homeMode = mode === "ai" ? "ai" : "keyword";
         const previousQuery = getSubmittedSearchQuery();
+        if (homeMode === "keyword") {
+          const resultType = keywordSearchV1?.snapshot().currentType;
+          selectedHeroSearchType = Object.values(HERO_SEARCH_SCOPE_TYPES).includes(resultType) ? resultType : "全部";
+        }
         submittedSearchQuery = "";
         searchSubmissionTicket += 1;
         keywordSearchV1?.setActive(false);
