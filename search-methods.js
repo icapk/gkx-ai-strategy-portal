@@ -209,7 +209,7 @@
         get("searchAssociationSummary").innerHTML = (keywordChips || '<span class="search-method-note">关键词已全部取消，请在上方输入关键词重新搜索。</span>')
           + resourceChip + yearChip + scopeChip;
         const related = [...new Set(parsed.terms.flatMap(term => [term.text, ...(bridge.associationTerms?.(term.text) || [])]))];
-        get("searchAssociationRelated").textContent = related.length > parsed.terms.length ? `关联检索：${related.join("、")}` : "按当前关键词查找相关资源。";
+        get("searchAssociationRelated").textContent = related.length > parsed.terms.length ? `初步检索式：${related.join("、")}` : "按当前关键词查找相关资源。";
         get("searchAssociationRelated").hidden = !parsed.terms.length;
         const warnings = state.associationEmpty ? [] : [...(plan.warnings || [])];
         if (!state.associationEmpty && plan.filters?.publishedYearFrom && state.currentType !== "论文") warnings.push("当前资源暂不支持年份条件，请切换论文或调整检索条件。");
