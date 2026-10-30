@@ -15,9 +15,21 @@
   ];
   const norm = value => String(value || "").normalize("NFKC").replace(/\s+/gu, " ").trim();
   const esc = value => String(value == null ? "" : value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+  const ASSOCIATION_TERMS = [
+    ["人工智能", "AI", "artificial intelligence"],
+    ["大语言模型", "大模型", "语言模型", "LLM", "large language model"],
+    ["智能体", "智能代理", "AI agent", "agent"],
+    ["固态电池", "全固态电池", "solid-state battery"],
+    ["药物发现", "药物研发", "drug discovery"],
+    ["靶点", "药物靶点", "drug target"],
+    ["低空经济", "低空产业"],
+    ["机器人", "机器人学习"]
+  ];
+  const associationGroup = value => ASSOCIATION_TERMS.find(group => group.some(term => norm(term).toLowerCase() === norm(value).toLowerCase()));
+  const associationTerms = value => (associationGroup(value) || []).filter(term => norm(term).toLowerCase() !== norm(value).toLowerCase());
   function parseConcepts(input) {
     const value = norm(input).split(/("[^"]*"|“[^”]*”|'[^']*')/u).map(part => /^["“']/u.test(part) ? part
-      : part.replace(/\b(?:ai agents?|artificial intelligence|large language model|solid[- ]state batter(?:y|ies)|drug targets?)\b/giu, phrase => '"' + phrase + '"')).join("");
+      : part.replace(/\b(?:ai agents?|artificial intelligence|large language model|solid[- ]state batter(?:y|ies)|drug targets?|drug discovery)\b/giu, phrase => '"' + phrase + '"')).join("");
     return root.PortalKeywordModel.parse(value);
   }
   function analyze(input) {
@@ -42,8 +54,8 @@
     query = query.replace(/^(?:(?:请|帮我|帮忙|我想|我要|查找|搜索|检索|寻找|找|查询|关于|有关|给我|看一下)\s*)+/u, "")
       .replace(/论文|专利|报告|专家|学者|人才|资讯|会议|课程|活动|仿真实验/gu, " ")
       .replace(/相关的?|研究进展|进展|有哪些|是什么|[?？。]/gu, " ")
-      .replace(/(多智能体|科研智能体|智能体|人工智能|固态电池|安全性|大语言模型|大模型|低空经济|机器人|药物|靶点)/gu, " $1 ")
-      .replace(/\s+的\s+/gu, " ");
+      .replace(/(多智能体|科研智能体|智能体|人工智能|全固态电池|固态电池|安全性|大语言模型|大模型|低空经济|机器人学习|机器人|药物发现|药物研发|药物靶点|药物|靶点)/gu, " $1 ")
+      .replace(/(?:^|\s)的(?=\s|$)/gu, " ");
     const unsupported = norm(input).match(/SCI|核心期刊|一区|二区|被引\d+|排名前\d+/giu);
     if (unsupported) warnings.push("暂不支持自动执行“" + unsupported.join("、") + "”条件，请调整检索条件。");
     query = norm(query).replace(/^[与和、\s]+|[与和、\s]+$/gu, "");
@@ -82,14 +94,22 @@
       <label><input type="radio" name="keywordSearchMethod" value="association">智能关联搜索</label>
       <label><input type="radio" name="keywordSearchMethod" value="expansion">词位扩展</label></fieldset>
       <div id="searchAutomaticRules" class="search-automatic-rules" role="list" aria-label="已应用扩展规则" hidden></div>
-      <div id="searchAssociationTools" class="search-method-body" hidden><p id="searchAssociationNotice" class="search-method-note" hidden></p>
-        <details id="searchAssociationDetails"><summary>检索条件</summary><form id="searchAssociationForm" class="search-association-form">
-          <label for="searchAssociationQuery">检索词</label><input id="searchAssociationQuery" type="text" maxlength="200"><button type="submit">应用</button><button type="button" data-plan-reset>恢复原词</button>
-          <code id="searchAssociationExpression"></code><p class="search-method-note">关联条件由本地词表生成，实际检索保留当前资源类型和筛选。</p><p id="searchAssociationError" class="search-method-error" role="status"></p></form></details>
-        <details id="searchPreferenceDetails"><summary>搜索偏好</summary><div class="search-preference-body">
-          <label><input id="searchPreferenceEnabled" type="checkbox">开启搜索偏好</label><p class="search-method-note">仅在本机记录近30天的搜索和打开行为，用于后续关联排序；关闭后停止记录和使用。</p>
-          <p id="searchPreferenceIntent" class="search-method-note"></p><div id="searchPreferenceInterests"></div><details><summary>行为记录 <span id="searchPreferenceEventCount">0</span></summary><ul id="searchPreferenceEvents"></ul></details>
-          <button type="button" id="searchPreferenceClear">清除用户模型</button><p id="searchPreferenceStatus" class="search-method-note" role="status"></p></div></details></div>
+      <div id="searchAssociationTools" class="search-method-body" hidden>
+        <section class="search-association-plan" aria-labelledby="searchAssociationHeading">
+          <div class="search-association-heading"><h3 id="searchAssociationHeading">已理解的检索条件</h3><button type="button" data-plan-edit aria-expanded="false" aria-controls="searchAssociationForm">修改条件</button></div>
+          <div id="searchAssociationSummary" class="search-association-summary" aria-live="polite"></div>
+          <p id="searchAssociationRelated" class="search-association-related"></p><p id="searchAssociationNotice" class="search-method-note" hidden></p>
+          <form id="searchAssociationForm" class="search-association-form" hidden>
+            <label for="searchAssociationQuery">检索提问</label><input id="searchAssociationQuery" type="text" maxlength="200" placeholder="例如：帮我找近三年AI药物发现的论文"><button type="submit" class="search-association-apply">重新搜索</button><button type="button" data-plan-reset>恢复原提问</button>
+            <p class="search-method-note">可修改主题、资源类型和年份；已手动设置的筛选条件优先。</p></form>
+          <p id="searchAssociationError" class="search-method-error" role="status"></p>
+          <details id="searchAssociationDetails" class="search-association-expression"><summary>查看检索式</summary><code id="searchAssociationExpression"></code></details>
+        </section>
+        <details id="searchPreferenceDetails" class="search-preference-details"><summary>搜索偏好 <span id="searchPreferenceSummary"></span></summary><div class="search-preference-body">
+          <div class="search-preference-controls"><label><input id="searchPreferenceEnabled" type="checkbox">开启搜索偏好</label><button type="button" id="searchPreferenceClear">清除偏好</button></div>
+          <p class="search-method-note">按近30天记录更新兴趣：搜索 +1，打开结果 +2。关键词相关性优先，兴趣仅辅助排序。当前原型记录保存在本机。</p>
+          <p id="searchPreferenceIntent" class="search-method-note"></p><div id="searchPreferenceInterests" class="search-preference-interests" aria-live="polite"></div>
+          <p id="searchPreferenceStatus" class="search-method-note" role="status"></p></div></details></div>
       <div id="searchExpansionTools" class="search-method-body" hidden><p class="search-method-note">原型词表候选，选择后参与检索，取消后撤回。</p>
         <div id="searchExpansionGroups" class="search-expansion-groups"></div><div id="searchExpansionSelected" class="search-expansion-selected"></div></div>`;
     doc.querySelector(".portal-search-toolbar").append(node);
@@ -121,19 +141,18 @@
         if (event.type === "search") item.searches++; else item.opens++;
         values.set(event.topic, item);
       });
-      return [...values.values()].map(item => ({ ...item, score: Math.max(0, item.searches + 2 * item.opens + (Number(current.corrections[item.topic]) || 0)) }))
+      return [...values.values()].map(item => ({ ...item, score: item.searches + 2 * item.opens }))
         .sort((a, b) => b.score - a.score || a.topic.localeCompare(b.topic));
     }
     function renderPreferences() {
       const current = ensurePrefs(), rows = interests();
       get("searchPreferenceEnabled").checked = current.enabled;
-      get("searchPreferenceEventCount").textContent = String(current.events.length);
+      get("searchPreferenceSummary").textContent = current.enabled ? `已开启 · ${rows.length} 个兴趣主题` : "未开启";
       const latest = current.events.at(-1);
-      get("searchPreferenceIntent").textContent = latest ? "最近意图：查找" + (latest.resourceType === "全部" ? "跨类型资源" : latest.resourceType || "相关资源") : "";
-      get("searchPreferenceClear").disabled = !current.events.length && !Object.keys(current.corrections).length;
-      get("searchPreferenceInterests").innerHTML = rows.length ? `<table><thead><tr><th>兴趣主题</th><th>搜索 / 打开</th><th>兴趣分</th><th>调整</th></tr></thead><tbody>${rows.slice(0, 8).map((item, index) =>
-        `<tr><td>${esc(item.topic)}</td><td>${item.searches} / ${item.opens}</td><td>${item.score}</td><td><button type="button" data-interest-index="${index}" data-interest-action="boost" ${current.enabled ? "" : "disabled"}>提高此类</button><button type="button" data-interest-index="${index}" data-interest-action="reduce" ${current.enabled ? "" : "disabled"}>减少此类</button><button type="button" data-interest-index="${index}" data-interest-action="restore" ${current.enabled ? "" : "disabled"}>恢复自动</button></td></tr>`).join("")}</tbody></table>` : '<p class="search-method-note">暂无行为记录；开启后实际搜索或打开结果才会建立模型。</p>';
-      get("searchPreferenceEvents").innerHTML = [...current.events].reverse().slice(0, 20).map(event => `<li>${esc(new Date(event.at).toLocaleString("zh-CN"))} · ${event.type === "search" ? "搜索" : "打开"} · ${esc(event.label)} · ${esc(event.topic)} · ${esc(event.resourceType || "相关资源")}</li>`).join("");
+      const topicLabel = topic => topic === "AI for Science" ? "人工智能" : topic;
+      get("searchPreferenceIntent").textContent = latest ? `最近关注：${topicLabel(latest.topic)} · ${latest.resourceType === "全部" ? "全部资源" : latest.resourceType || "相关资源"}；${latest.type === "search" ? "搜索 +1" : "打开结果 +2"}` : "";
+      get("searchPreferenceClear").disabled = !current.events.length;
+      get("searchPreferenceInterests").innerHTML = rows.length ? rows.slice(0, 8).map(item => `<span title="搜索 ${item.searches} 次，打开 ${item.opens} 次">${esc(topicLabel(item.topic))}<strong>${item.score} 分</strong></span>`).join("") : `<p class="search-method-note">${current.enabled ? "暂无兴趣记录，搜索或打开结果后自动更新。" : "开启后，根据搜索和打开记录优先展示你关注的相关内容。"}</p>`;
     }
     function influence(record) {
       if (!ensurePrefs().enabled) return {};
@@ -145,12 +164,12 @@
       return { bonus: matched.length ? Math.min(10, matched[0].score) : 0 };
     }
     function recordBehavior(type, label, record) {
-      if (!ensurePrefs().enabled || !state.query) return;
+      if (!ensurePrefs().enabled || !state.query) return false;
       const effectiveQuery = state.searchMethod === "association" ? state.associationPlan?.query || state.associationQuery || state.query : state.query;
       const topicSource = record ? [record.title, record.name, record.abstract, record.summary, ...(record.domainTags || []), ...(record.tags || [])].filter(Boolean).join(" ") : effectiveQuery;
       const topic = bridge.topic?.(topicSource) || norm(topicSource).slice(0, 20);
       prefs.events.push({ type, topic, query: state.query, resourceType: record?.type || state.currentType, label: norm(label).slice(0, 200), at: now() });
-      savePrefs(); renderPreferences();
+      savePrefs(); renderPreferences(); return true;
     }
     function render(next) {
       state = next || model.snapshot(); node.hidden = bridge.getMode() !== "关键词";
@@ -170,20 +189,25 @@
       if (method === "association") {
         const key = state.query + "\0" + state.associationQuery;
         const plan = state.associationPlan || analyze(state.associationQuery || state.query);
-        if (key !== planKey) { get("searchAssociationQuery").value = plan.query; planKey = key; }
+        if (key !== planKey) { get("searchAssociationQuery").value = state.associationQuery || state.query; planKey = key; }
         const parsed = parseConcepts(plan.query);
+        const filters = state.view.filters || {}, years = state.currentType === "论文" && (filters.publishedYearFrom || filters.publishedYearTo)
+          ? `${filters.publishedYearFrom || "不限"}—${filters.publishedYearTo || "不限"}` : "不限";
+        get("searchAssociationSummary").innerHTML = [
+          ["关键词", parsed.terms.map(term => associationGroup(term.text)?.[0] || term.text).join("、") || plan.query],
+          ["资源", state.currentType === "全部" ? "全部资源" : state.currentType], ["年份", years]
+        ].map(([label, value]) => `<span>${label}<strong>${esc(value)}</strong></span>`).join("");
+        const related = [...new Set(parsed.terms.flatMap(term => [term.text, ...(bridge.associationTerms?.(term.text) || [])]))];
+        get("searchAssociationRelated").textContent = related.length > parsed.terms.length ? `关联检索：${related.join("、")}` : "按当前关键词查找相关资源。";
         get("searchAssociationExpression").textContent = parsed.error ? "输入检索词后生成条件" : parsed.terms.map(term => {
           const terms = [...new Set([term.text, ...(bridge.associationTerms?.(term.text) || [])])];
           return "(" + terms.map(value => '"' + value.replace(/"/g, "") + '"').join(" OR ") + ")";
         }).join(" AND ");
-        const active = [];
-        if (plan.resourceType) active.push("资源：" + (state.currentType === "全部" ? plan.resourceType : state.currentType));
-        if (plan.filters?.publishedYearFrom && state.currentType === "论文") active.push("年份：" + (state.view.filters.publishedYearFrom || "不限") + "—" + (state.view.filters.publishedYearTo || "不限"));
         const warnings = [...(plan.warnings || [])];
         if (plan.filters?.publishedYearFrom && state.currentType !== "论文") warnings.push("当前资源暂不支持年份条件，请切换论文或调整检索条件。");
         if (plan.resourceType && state.currentType !== "全部" && plan.resourceType !== state.currentType) warnings.push("提问中的资源类型与当前选择不同，按当前资源类型检索。");
-        get("searchAssociationNotice").textContent = [...active, ...warnings].join("；");
-        get("searchAssociationNotice").hidden = !active.length && !warnings.length;
+        get("searchAssociationNotice").textContent = warnings.join("；");
+        get("searchAssociationNotice").hidden = !warnings.length;
         get("searchAssociationError").textContent = state.validation?.message || "";
         renderPreferences();
       }
@@ -204,34 +228,43 @@
       }
     }
     const action = promise => Promise.resolve(promise).catch(error => bridge.feedback?.(error.message || "操作失败，请重试", "error"));
+    function refreshAfterSearch(recorded) {
+      if (recorded && state.searchMethod === "association") return model.refreshRanking();
+    }
+    async function applyAssociation(value) {
+      const original = state.query, requested = norm(value);
+      const next = await model.setAssociationQuery(requested);
+      if (next.query !== original || (next.associationQuery || next.query) !== requested || next.validation || next.error || next.retainedResults) return;
+      get("searchAssociationForm").hidden = true;
+      node.querySelector("[data-plan-edit]").setAttribute("aria-expanded", "false");
+      await refreshAfterSearch(recordBehavior("search", requested));
+    }
     node.addEventListener("change", event => {
       if (event.target.name === "keywordSearchMethod") action(model.setSearchMethod(event.target.value));
       if (event.target.id === "searchPreferenceEnabled") {
         ensurePrefs().enabled = event.target.checked; savePrefs(); renderPreferences();
-        get("searchPreferenceStatus").textContent = prefs.enabled ? "已开启，后续实际操作将记入模型。" : "已暂停记录和排序影响，已有模型已保留。";
+        get("searchPreferenceStatus").textContent = prefs.enabled ? "已开启，后续搜索和打开结果会自动更新兴趣。" : "已关闭，停止记录并恢复普通关联排序；已有偏好保留。";
         action(model.refreshRanking());
       }
     });
     get("searchAssociationForm").addEventListener("submit", event => {
-      event.preventDefault(); event.stopPropagation(); action(model.setAssociationQuery(norm(get("searchAssociationQuery").value)));
+      event.preventDefault(); event.stopPropagation(); action(applyAssociation(get("searchAssociationQuery").value));
     });
     node.addEventListener("click", event => {
       const button = event.target.closest("button"); if (!button) return;
-      if (button.hasAttribute("data-plan-reset")) action(model.setAssociationQuery(state.query));
+      if (button.hasAttribute("data-plan-edit")) {
+        const open = get("searchAssociationForm").hidden;
+        get("searchAssociationForm").hidden = !open; button.setAttribute("aria-expanded", String(open));
+        if (open) get("searchAssociationQuery").focus();
+      }
+      if (button.hasAttribute("data-plan-reset")) action(applyAssociation(state.query));
       if (button.dataset.expansionIndex != null) {
         const value = options[Number(button.dataset.expansionIndex)]; if (!value) return;
         const existing = state.expansionTerms.some(term => norm(term.concept) === norm(value.concept) && norm(term.text) === norm(value.text));
         action(model.setExpansionTerms(existing ? state.expansionTerms.filter(term => norm(term.concept) !== norm(value.concept) || norm(term.text) !== norm(value.text)) : [...state.expansionTerms, value]));
       }
       if (button.dataset.removeExpansion != null) action(model.setExpansionTerms(state.expansionTerms.filter((_, index) => index !== Number(button.dataset.removeExpansion))));
-      if (button.dataset.interestAction) {
-        const item = interests()[Number(button.dataset.interestIndex)]; if (!item || !prefs.enabled) return;
-        const direction = button.dataset.interestAction;
-        if (direction === "restore") delete prefs.corrections[item.topic];
-        else prefs.corrections[item.topic] = (Number(prefs.corrections[item.topic]) || 0) + (direction === "boost" ? 2 : -2);
-        savePrefs(); renderPreferences(); action(model.refreshRanking());
-      }
-      if (button.id === "searchPreferenceClear") { prefs = fresh(); savePrefs(); renderPreferences(); get("searchPreferenceStatus").textContent = "已清除用户模型并关闭搜索偏好。"; action(model.refreshRanking()); }
+      if (button.id === "searchPreferenceClear") { prefs = fresh(); savePrefs(); renderPreferences(); get("searchPreferenceStatus").textContent = "已清除兴趣记录并关闭搜索偏好。"; action(model.refreshRanking()); }
     });
     doc.getElementById("portalSearchResultList").addEventListener("click", event => {
       if (bridge.getMode() !== "关键词") return;
@@ -242,7 +275,7 @@
       if (record) recordBehavior("open", record.title || record.name, record);
     }, true);
     render(state);
-    return { render, influence, recordSearch(query, options) { if (options?.trackSearch !== false) recordBehavior("search", query); } };
+    return { render, influence, recordSearch(query, options) { if (options?.trackSearch !== false) action(refreshAfterSearch(recordBehavior("search", query))); } };
   }
-  root.PortalSearchMethods = Object.freeze({ create, candidates, automaticRules, analyze, parseConcepts, normalizeQuery: norm, GROUPS });
+  root.PortalSearchMethods = Object.freeze({ create, candidates, automaticRules, analyze, parseConcepts, associationTerms, normalizeQuery: norm, GROUPS });
 })(typeof window !== "undefined" ? window : globalThis);

@@ -3743,7 +3743,7 @@
     }
   </style>
   <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
-  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-exact-auto">
+  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-association-simple">
   <link rel="stylesheet" href="report-fulltext.css?v=20261030-report">
 </head>
 <body>
@@ -5169,11 +5169,11 @@
 
   <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
   <script src="report-fulltext-fixtures.js?v=20261030-report-types"></script>
-  <script src="keyword-search-model.js?v=20261030-exact-auto"></script>
+  <script src="keyword-search-model.js?v=20261030-association-simple"></script>
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
-  <script src="search-methods.js?v=20261030-exact-auto"></script>
+  <script src="search-methods.js?v=20261030-association-simple"></script>
   <script src="keyword-search-ui.js?v=20261030-exact-auto"></script>
   <script src="ai-rag-search.js?v=20261030-ai-results-1"></script><script>
     (() => {
@@ -9366,7 +9366,7 @@
         keywordSearchV1 = window.PortalKeywordUI.create({
           records: window.PortalKeywordCompletionFixtures?.prepare(window.PortalKeywordModel.createFixtures(SEARCH_ITEMS)) || window.PortalKeywordModel.createFixtures(SEARCH_ITEMS),
           getMode: () => activeSearchMode,
-          associationTerms: getSemanticTerms,
+          associationTerms: window.PortalSearchMethods.associationTerms,
           associationInfluence: record => keywordSearchMethods?.influence(record),
           associationPlan: window.PortalSearchMethods.analyze,
           parseConcepts: window.PortalSearchMethods.parseConcepts,
@@ -9467,7 +9467,7 @@
           getUserId: () => window.PortalSearchRecommend?.snapshot().userId || "anonymous",
           topic: getAssociationModelTopic,
           topicAliases: getAssociationTopicAliases,
-          associationTerms: getSemanticTerms,
+          associationTerms: window.PortalSearchMethods.associationTerms,
           feedback: setPortalSearchFeedback
         });
       }

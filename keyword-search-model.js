@@ -268,9 +268,7 @@
       }
       // Exact titles come first; other matching records remain in the result set.
       if (request.scope !== "摘要") candidates = candidates.map((record, index) => ({ record, index, exact: titleFields(record).some(title => normalize(title) === parsed.fullQuery) })).sort((a, b) => Number(b.exact) - Number(a.exact) || a.index - b.index).map(value => value.record);
-      if (request.association) candidates = candidates.map((record, index) => ({ record, index, original: match(record, parsed, request.scope, request.logic), influence: options.associationInfluence?.(record) || {} }))
-        .filter(value => !value.influence.suppressed)
-        .sort((a, b) => (Number(b.original) * 2 + (b.influence.bonus || 0)) - (Number(a.original) * 2 + (a.influence.bonus || 0)) || a.index - b.index).map(value => value.record);
+      if (request.association) candidates = rankAssociation(candidates, text, request.logic, () => request.scope);
       if (automaticRules.length) candidates = candidates.map((record, index) => ({ record, index, original: match(record, original, request.scope, request.logic) }))
         .sort((a, b) => Number(b.original) - Number(a.original) || a.index - b.index).map(value => ({ ...value.record, searchHighlightTerms }));
       return candidates;
@@ -307,6 +305,12 @@
       const seen = new Set();
       return items.filter(item => { const key = `${item.type}:${item.id}`; if (seen.has(key)) return false; seen.add(key); return true; });
     }
+    function rankAssociation(items, text, queryLogic, scopeFor) {
+      const parsed = conceptParse(text);
+      return items.map((record, index) => ({ record, index, original: match(record, parsed, scopeFor(record.type), queryLogic), influence: options.associationInfluence?.(record) || {} }))
+        .filter(value => !value.influence.suppressed)
+        .sort((a, b) => Number(b.original) - Number(a.original) || (b.influence.bonus || 0) - (a.influence.bonus || 0) || a.index - b.index).map(value => value.record);
+    }
     function aggregate(sources) {
       const queues = Object.fromEntries(ALL_TYPES.map(type => [type, distinct(sources[type]?.rawItems || [])]));
       const positions = Object.fromEntries(ALL_TYPES.map(type => [type, 0])), result = [];
@@ -320,7 +324,7 @@
         if (!progress) break;
       }
       ALL_TYPES.forEach(type => result.push(...queues[type].slice(positions[type])));
-      return result;
+      return searchMethod === "association" ? rankAssociation(result, associationPlanFor(associationQuery || query).query, logic, type => requestScope(type, views["全部"])) : result;
     }
     function totalForView(view) {
       const types = sourceTypes(view);

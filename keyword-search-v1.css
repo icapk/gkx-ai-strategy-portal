@@ -41,9 +41,15 @@
 .search-automatic-rules { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
 .search-automatic-rules > span { padding: 4px 8px; border: 1px solid #dce7f8; border-radius: 4px; background: #f4f7fd; color: #4d6c98; font-size: 12px; line-height: 1.5; }
 .search-method-body { margin-top: 14px; padding-top: 12px; border-top: 1px solid #e7edf6; }
-#searchAssociationTools:not([hidden]) { display: flex; flex-wrap: wrap; gap: 12px 28px; }
-#searchAssociationTools > details { flex: 1 1 360px; min-width: 0; }
-#searchAssociationNotice { flex-basis: 100%; margin: 0; }
+#searchAssociationTools:not([hidden]) { display: grid; gap: 14px; }
+.search-association-plan { min-width: 0; }
+.search-association-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.search-association-heading h3 { margin: 0; color: #35475d; font-size: 13px; font-weight: 600; }
+.search-association-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 10px 0 8px; }
+.search-association-summary > span { display: inline-flex; align-items: baseline; gap: 8px; padding: 5px 10px; border-radius: 5px; background: #f4f7fb; color: #8793a4; font-size: 12px; line-height: 1.6; }
+.search-association-summary strong { color: #42556e; font-weight: 500; overflow-wrap: anywhere; }
+.search-association-related { margin: 0; color: #65778f; font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; }
+#searchAssociationNotice { margin: 5px 0 0; color: #a36a23; }
 .search-method-tools summary { width: fit-content; cursor: pointer; color: #376ab4; }
 .search-method-tools button { padding: 5px 10px; border: 1px solid #d9e3f3; border-radius: 5px; background: #fff; color: #376ab4; font: inherit; cursor: pointer; }
 .search-method-tools button:hover { background: #f2f6ff; }
@@ -51,7 +57,11 @@
 .search-method-tools button:focus-visible, .search-method-tools input:focus-visible { outline: 2px solid #1764eb; outline-offset: 2px; }
 .search-association-form { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .search-association-form > input { flex: 1 1 170px; min-width: 0; padding: 7px 9px; border: 1px solid #cedbef; border-radius: 5px; font: inherit; }
-.search-association-form > code { flex-basis: 100%; padding: 8px 0; overflow-wrap: anywhere; color: #51637b; font-size: 12px; }
+.search-association-form > .search-method-note { flex-basis: 100%; }
+.search-method-tools .search-association-apply { background: #1764eb; border-color: #1764eb; color: #fff; }
+.search-method-tools .search-association-apply:hover { background: #1057d6; }
+.search-association-expression { margin-top: 7px; font-size: 12px; }
+.search-association-expression code { display: block; padding-top: 7px; overflow-wrap: anywhere; color: #65778f; font-size: 12px; line-height: 1.7; }
 .search-method-note { color: #8793a4; font-size: 12px; line-height: 1.7; margin: 5px 0; }
 .search-method-error { flex-basis: 100%; margin: 0; color: #be3941; }
 .search-expansion-groups { display: grid; gap: 12px; }
@@ -62,8 +72,11 @@
 .search-expansion-groups button[aria-pressed=true], .search-expansion-selected button { background: #edf3ff; border-color: #b6cdf4; color: #1764eb; }
 .search-expansion-selected { margin-top: 14px; }
 .search-preference-body { margin-top: 12px; }
-.search-preference-body table { width: 100%; margin: 10px 0; border-collapse: collapse; font-size: 12px; }
-.search-preference-body th, .search-preference-body td { padding: 7px 5px; text-align: left; border-bottom: 1px solid #e7edf6; }
-.search-preference-body td button { margin: 2px; padding: 3px 5px; font-size: 11px; }
-.search-preference-body ul { padding-left: 18px; color: #8793a4; font-size: 12px; max-height: 160px; overflow-y: auto; }
-#searchPreferenceClear { margin-top: 10px; }
+.search-preference-details { border-top: 1px solid #edf1f7; padding-top: 12px; }
+#searchPreferenceSummary { margin-left: 10px; color: #8793a4; font-size: 12px; }
+.search-preference-controls { display: flex; align-items: center; gap: 18px; }
+.search-preference-controls label { display: inline-flex; align-items: center; gap: 6px; }
+.search-preference-controls input { width: 15px; height: 15px; margin: 0; accent-color: #1764eb; }
+.search-preference-interests { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.search-preference-interests > span { display: inline-flex; align-items: center; gap: 12px; padding: 5px 10px; border: 1px solid #e1e9f6; border-radius: 5px; color: #526985; font-size: 12px; }
+.search-preference-interests strong { color: #1764eb; font-weight: 500; }
