@@ -339,6 +339,8 @@
   const reportAudienceFilters = document.getElementById("recReportAudienceFilters");
   const reportGrid = document.getElementById("recReportGrid");
   const reportMoreButton = document.getElementById("recReportMore");
+  const talentTabs = Array.from(document.querySelectorAll("[data-talent-mode]"));
+  const talentPanels = Array.from(document.querySelectorAll("[data-talent-panel]"));
   const talentLibrary = document.getElementById("recTalentLibrary");
   const authorUpdatesStatus = document.getElementById("recAuthorUpdatesStatus");
   const authorUpdates = document.getElementById("recAuthorUpdates");
@@ -384,6 +386,7 @@
   let reportVisibleCount = MODULE_PAGE_SIZE;
   let expandedReportId = "";
   const reportViewedThisSession = new Set();
+  let activeTalentMode = "library";
   let expandedAuthorUpdateId = "";
   let activeConferenceMode = "recent";
   let conferenceVisibleCount = MODULE_PAGE_SIZE;
@@ -1653,6 +1656,21 @@
     return article;
   }
 
+  function setTalentMode(mode, moveFocus) {
+    activeTalentMode = ["library", "updates", "rising"].includes(mode) ? mode : "library";
+    updateDedicatedTabs(talentTabs, "talentMode", activeTalentMode, null, "rec-talent", moveFocus);
+    talentPanels.forEach(function (panel) { panel.hidden = panel.dataset.talentPanel !== activeTalentMode; });
+  }
+
+  function showTalentLibrary() {
+    setTalentMode("library", false);
+    talentLibrary?.scrollIntoView({ behavior: prefersReducedMotion.matches ? "auto" : "smooth", block: "center" });
+    window.setTimeout(function () {
+      const target = talentLibrary?.querySelector("[data-author-follow]") || document.getElementById("recTalentPanelLibrary");
+      target?.focus();
+    }, prefersReducedMotion.matches ? 0 : 360);
+  }
+
   function renderTalentRecommendations() {
     if (!authorState) return;
     if (talentLibrary) {
@@ -2749,8 +2767,7 @@
       return;
     }
     if (button.dataset.paperRecover === "talent") {
-      talentLibrary?.scrollIntoView({ behavior: prefersReducedMotion.matches ? "auto" : "smooth", block: "center" });
-      window.setTimeout(function () { talentLibrary?.querySelector("[data-author-follow]")?.focus(); }, prefersReducedMotion.matches ? 0 : 360);
+      showTalentLibrary();
       return;
     }
     if (button.dataset.paperSave) {
@@ -2888,6 +2905,7 @@
   });
 
   bindDedicatedTabs(reportTabs, "reportMode", ["latest", "hot", "exclusive"], setReportMode);
+  bindDedicatedTabs(talentTabs, "talentMode", ["library", "updates", "rising"], setTalentMode);
   reportRule?.addEventListener("change", function () {
     reportVisibleCount = MODULE_PAGE_SIZE;
     expandedReportId = "";
@@ -2954,8 +2972,7 @@
     const button = event.target.closest("button");
     if (!button || !authorUpdates.contains(button)) return;
     if (button.dataset.authorLocateLibrary) {
-      talentLibrary?.scrollIntoView({ behavior: prefersReducedMotion.matches ? "auto" : "smooth", block: "center" });
-      window.setTimeout(function () { talentLibrary?.querySelector("[data-author-follow]")?.focus(); }, prefersReducedMotion.matches ? 0 : 360);
+      showTalentLibrary();
       return;
     }
     if (button.dataset.authorUpdateToggle) {
@@ -3119,7 +3136,7 @@
   }
 
   document.querySelectorAll(".rec-panel-tabs").forEach(function (tablist, tablistIndex) {
-    if (tablist.querySelector("[data-news-mode], [data-paper-mode], [data-report-mode], [data-conference-mode], [data-event-mode]")) return;
+    if (tablist.querySelector("[data-news-mode], [data-paper-mode], [data-report-mode], [data-talent-mode], [data-conference-mode], [data-event-mode]")) return;
     const tabs = Array.from(tablist.querySelectorAll("[data-panel-tab]"));
     if (!tabs.length) return;
     const panel = tablist.closest(".rec-panel");
@@ -3364,7 +3381,7 @@
     "[data-news-mode]", "#recNewsHistoryToggle", "#recNewsClearHistory", "#recNewsMore",
     "[data-paper-mode]", "#recPaperTimeRange", "#recPaperSavedOnly", "#recPaperMore",
     "[data-report-mode]", "#recReportRule", "#recReportAudienceFilters button", "#recReportMore",
-    "[data-conference-mode]", "#recConferenceMore", "#recCourseMore",
+    "[data-talent-mode]", "[data-conference-mode]", "#recConferenceMore", "#recCourseMore",
     "[data-event-mode]", "#recEventMore"
   ].join(", ")).forEach(function (control) { control.disabled = false; });
 
@@ -3526,6 +3543,7 @@
   setNewsMode("latest", false);
   setPaperMode("latest", false);
   setReportMode("latest", false);
+  setTalentMode("library", false);
   renderTalentRecommendations();
   setConferenceMode("recent", false);
   renderCourses();

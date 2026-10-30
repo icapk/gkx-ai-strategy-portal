@@ -3811,3 +3811,13 @@ select:focus-visible {
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Talent categories share the report-style tabs and occupy one content area. */
+#talent .rec-talent-layout { display: block; }
+#talent .rec-talent-panel { display: block; }
+#talent .rec-talent-panel[hidden] { display: none !important; }
+#recTalentLibrary, #recAuthorUpdates, #recRisingStars {
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  align-items: start;
+}
+#talent .rec-empty-state, #talent .rec-loading-state { grid-column: 1 / -1; }

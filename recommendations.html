@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="科研情报智能推荐中心，集中展示热词、资讯、文献、报告、人才、会议、课程与活动推荐。">
   <title>科研情报智能推荐｜深圳国际科技信息中心</title>
-  <link rel="stylesheet" href="recommendations.css?v=20261030-follow-domains">
+  <link rel="stylesheet" href="recommendations.css?v=20261030-talent-tabs">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
   <link rel="stylesheet" href="recommendation-v1.css?v=20261030-domain-hotwords">
   <link rel="stylesheet" href="personal-entry.css?v=20261030-personal-demo">
@@ -256,22 +256,24 @@
               <p class="rec-panel-subtitle">促进学术合作</p>
             </div>
           </header>
+          <div class="rec-panel-tabs" id="recTalentTabs" role="tablist" aria-label="人才推荐分类">
+            <button class="is-active" id="recTalentTabLibrary" type="button" role="tab" aria-selected="true" aria-controls="recTalentPanelLibrary" tabindex="0" data-talent-mode="library" disabled>人才库推荐</button>
+            <button id="recTalentTabUpdates" type="button" role="tab" aria-selected="false" aria-controls="recTalentPanelUpdates" tabindex="-1" data-talent-mode="updates" disabled>作者动态</button>
+            <button id="recTalentTabRising" type="button" role="tab" aria-selected="false" aria-controls="recTalentPanelRising" tabindex="-1" data-talent-mode="rising" disabled>领域新星</button>
+          </div>
           <div class="rec-talent-layout">
-            <div class="rec-talent-column">
-              <h3>人才库推荐</h3>
+            <div class="rec-talent-column rec-talent-panel" id="recTalentPanelLibrary" role="tabpanel" aria-labelledby="recTalentTabLibrary" data-talent-panel="library" tabindex="0">
               <div id="recTalentLibrary" aria-busy="true">
                 <p class="rec-loading-state">正在加载人才库推荐…</p>
               </div>
             </div>
-            <div class="rec-talent-column rec-author-updates">
-              <h3>作者动态</h3>
+            <div class="rec-talent-column rec-talent-panel rec-author-updates" id="recTalentPanelUpdates" role="tabpanel" aria-labelledby="recTalentTabUpdates" data-talent-panel="updates" tabindex="0" hidden>
               <p class="rec-module-status rec-author-updates-status" id="recAuthorUpdatesStatus" role="status" aria-live="polite" aria-atomic="true">正在核对已关注作者…</p>
               <div id="recAuthorUpdates" aria-describedby="recAuthorUpdatesStatus" aria-busy="true">
                 <p class="rec-loading-state">正在加载作者动态…</p>
               </div>
             </div>
-            <div class="rec-talent-column rec-rising-stars">
-              <h3>领域新星</h3>
+            <div class="rec-talent-column rec-talent-panel rec-rising-stars" id="recTalentPanelRising" role="tabpanel" aria-labelledby="recTalentTabRising" data-talent-panel="rising" tabindex="0" hidden>
               <div id="recRisingStars" aria-busy="true">
                 <p class="rec-loading-state">正在加载领域新星…</p>
               </div>
@@ -364,7 +366,7 @@
   <script src="portal-search-recommend-adapter.js?v=20261030-notification-email"></script>
   <script src="personal-resource-catalog.js?v=20261030-personal-demo"></script>
   <script src="personal-data-demo.js?v=20261030-notification-email"></script>
-  <script src="recommendations.js?v=20261030-domain-hotwords"></script>
+  <script src="recommendations.js?v=20261030-talent-tabs"></script>
   <script src="personal-entry.js?v=20261030-personal-demo"></script>
 </body>
 </html>
