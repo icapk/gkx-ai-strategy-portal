@@ -7580,11 +7580,11 @@
 
       function renderHeroSearchScope() {
         const keywordMode = activeHeroExperience === "classic" && activeHeroSearchMode === "keyword";
-        const labels = { "练仿真": "@练仿真", "论文": "@论文检索" };
+        const labels = { "练仿真": "@练仿真", "论文": "@论文检索", "人才": "@学者检索", "报告": "@报告检索" };
         const chip = document.getElementById("mgHeroScopeChip");
         chip.hidden = !keywordMode || !labels[selectedHeroSearchType];
         document.getElementById("mgHeroScopeLabel").textContent = labels[selectedHeroSearchType] || "";
-        document.getElementById("mgHeroScopeClear").setAttribute("aria-label", "关闭" + (selectedHeroSearchType === "论文" ? "论文检索" : "练仿真") + "范围");
+        document.getElementById("mgHeroScopeClear").setAttribute("aria-label", "关闭" + (labels[selectedHeroSearchType] || "").replace(/^@/, "") + "范围");
         mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]").forEach(button => {
           const selected = keywordMode && HERO_SEARCH_SCOPE_TYPES[button.dataset.recommendationGroup] === selectedHeroSearchType;
           button.classList.toggle("is-active", selected);
