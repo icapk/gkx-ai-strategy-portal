@@ -149,7 +149,7 @@
       get("searchPreferenceSummary").textContent = current.enabled ? `已开启 · ${rows.length} 个兴趣主题` : "未开启";
       const latest = current.events.at(-1);
       const topicLabel = topic => topic === "AI for Science" ? "人工智能" : topic;
-      get("searchPreferenceIntent").textContent = latest ? `最近关注：${topicLabel(latest.topic)} · ${latest.resourceType === "全部" ? "全部资源" : typeLabel(latest.resourceType) || "相关资源"}；${latest.type === "search" ? "搜索 +1" : "打开结果 +2"}` : "";
+      get("searchPreferenceIntent").textContent = latest ? `最近关注：${topicLabel(latest.topic)}；${latest.type === "search" ? "搜索 +1" : "打开结果 +2"}` : "";
       get("searchPreferenceClear").disabled = !current.events.length;
       get("searchPreferenceInterests").innerHTML = rows.length ? rows.slice(0, 8).map(item => `<span title="搜索 ${item.searches} 次，打开 ${item.opens} 次">${esc(topicLabel(item.topic))}<strong>${item.score} 分</strong></span>`).join("") : `<p class="search-method-note">${current.enabled ? "暂无兴趣记录，搜索或打开结果后自动更新。" : "开启后，根据搜索和打开记录优先展示你关注的相关内容。"}</p>`;
     }
