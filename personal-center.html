@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>个人中心 · 深圳国际科技信息中心</title>
-  <link rel="stylesheet" href="personal-center.css?v=20261030">
+  <link rel="stylesheet" href="personal-center.css?v=20261030-notification-email">
 </head>
 <body>
   <header class="pc-site-header">
@@ -25,8 +25,7 @@
         <div class="pc-toolbar" id="pcToolbar"><label class="pc-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4 4"></path></svg><input id="pcSearch" type="search" placeholder="搜索记录" aria-label="搜索个人记录"></label><select id="pcTypeFilter" aria-label="筛选资源类型"><option value="">全部类型</option></select><select id="pcFavoritesMode" aria-label="收藏记录范围" hidden><option value="current">当前收藏</option><option value="history">收藏历史</option></select></div>
         <div id="pcRecords" aria-live="polite"></div>
         <form id="pcNotificationForm" class="pc-notification-form" novalidate hidden>
-          <section class="pc-form-section"><div class="pc-section-heading"><span class="pc-section-icon" aria-hidden="true">@</span><div><h3>接收通知的邮箱</h3><p>用于接收你订阅的推荐内容。</p></div></div><label class="pc-field-label" for="pcEmail">通知邮箱</label><input id="pcEmail" name="email" type="email" autocomplete="email" placeholder="请输入接收通知的邮箱" maxlength="254" aria-describedby="pcEmailHint pcFormStatus"><p class="pc-field-hint" id="pcEmailHint">通知邮箱可与登录账号邮箱不同。</p></section>
-          <section class="pc-form-section pc-subscription-row"><div><h3>每周文献推荐</h3><p>接收关注领域、期刊的最新与热门论文。</p><span class="pc-frequency">每周推送</span></div><label class="pc-switch"><input id="pcWeekly" name="weekly" type="checkbox" aria-label="开启每周文献推荐邮件"><span aria-hidden="true"></span></label></section>
+          <section class="pc-form-section"><div class="pc-section-heading"><span class="pc-section-icon" aria-hidden="true">@</span><div><h3>接收通知的邮箱</h3><p>各业务统一使用此邮箱，按业务既定频率发送邮件通知。</p></div></div><label class="pc-field-label" for="pcEmail">通知邮箱</label><input id="pcEmail" name="email" type="email" autocomplete="email" required placeholder="请输入接收通知的邮箱" maxlength="254" aria-describedby="pcEmailHint pcFormStatus"><p class="pc-field-hint" id="pcEmailHint">通知邮箱可与登录账号邮箱不同。</p></section>
           <div class="pc-email-summary" id="pcEmailSummary"></div><div class="pc-form-footer"><p id="pcFormStatus" role="status" aria-live="polite"></p><button class="pc-primary-button" id="pcSaveEmail" type="submit">保存设置</button></div>
         </form>
       </section>
@@ -38,8 +37,8 @@
   <script>if(new URLSearchParams(location.search).get('embedded')==='1')document.body.classList.add('is-embedded');</script>
   <script src="search-recommend-remediation-fixtures.js?v=20261030-personal-demo"></script>
   <script src="personal-resource-catalog.js?v=20261030"></script>
-  <script src="portal-search-recommend-adapter.js?v=20261030-personal"></script>
-  <script src="personal-data-demo.js?v=20261030-personal-demo"></script>
-  <script src="personal-center.js?v=20261030-personal-demo"></script>
+  <script src="portal-search-recommend-adapter.js?v=20261030-notification-email"></script>
+  <script src="personal-data-demo.js?v=20261030-notification-email"></script>
+  <script src="personal-center.js?v=20261030-notification-email"></script>
 </body>
 </html>

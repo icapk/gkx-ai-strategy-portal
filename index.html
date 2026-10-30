@@ -5154,9 +5154,9 @@
     </section>
   </main>
 
-  <script src="search-recommend-remediation-fixtures.js?v=20261030-personal-demo"></script><script src="portal-search-recommend-adapter.js?v=20261030-personal-demo"></script>
+  <script src="search-recommend-remediation-fixtures.js?v=20261030-personal-demo"></script><script src="portal-search-recommend-adapter.js?v=20261030-notification-email"></script>
   <script src="personal-resource-catalog.js?v=20261030-personal-demo"></script>
-  <script src="personal-data-demo.js?v=20261030-personal-demo"></script>
+  <script src="personal-data-demo.js?v=20261030-notification-email"></script>
   <script src="report-fulltext-fixtures.js?v=20261030-report-types"></script>
   <script src="keyword-search-model.js?v=20261030-all-conditions"></script>
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
@@ -9781,7 +9781,7 @@
         setRecommendationType("为你推荐");
       });
       const openPersonalCenter = () => showSurface("iframe", {
-        iframeUrl: "personal-center.html?embedded=1",
+        iframeUrl: "personal-center.html?embedded=1&v=20261030-notification-email",
         hideEmbeddedToolbar: true,
         embedTitle: "个人中心"
       });

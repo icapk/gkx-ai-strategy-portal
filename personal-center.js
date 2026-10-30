@@ -17,13 +17,13 @@
     searches:{title:'搜索历史',description:'回顾检索过的主题，继续此前的探索。',empty:'还没有搜索记录',hint:'从门户首页发起检索后，你的搜索词将显示在这里。'},
     follows:{title:'我的关注',description:'集中查看关注的词汇、领域、期刊与作者。',empty:'还没有关注对象',hint:'在智能推荐中关注词汇、领域、期刊或作者，持续发现相关内容。'},
     reviews:{title:'我的评价',description:'查看自己的评分、点赞和评论状态。',empty:'还没有评价记录',hint:'你对内容的评分、点赞和评论会汇集在这里。'},
-    notifications:{title:'通知设置',description:'设置接收邮箱，管理每周文献推荐。'}
+    notifications:{title:'通知设置',description:'设置各业务邮件通知的统一接收邮箱。'}
   };
   const icon = key => '<svg viewBox="0 0 24 24" aria-hidden="true">'+paths[key]+'</svg>';
   const kindNames = {KEYWORD:'词汇',DOMAIN:'领域',JOURNAL:'期刊',AUTHOR:'作者'};
   const typeNames = {PAPER:'论文',NEWS:'资讯',REPORT:'报告',COURSE:'课程',SCHOLAR:'人才',PATENT:'专利',CONFERENCE:'会议',ACTIVITY:'活动'};
   let current = sections[location.hash.slice(1)] ? location.hash.slice(1) : 'history';
-  let query = '', type = '', favoritesMode = 'current', weekly = null, dirty = false, saving = false, renderedUser = undefined, toastTimer;
+  let query = '', type = '', favoritesMode = 'current', notificationConfig = null, dirty = false, saving = false, renderedUser = undefined, toastTimer;
   const catalogue = new Map();
   function indexResources() {
     const F=window.PORTAL_REMEDIATION_FIXTURES||{};
@@ -75,12 +75,12 @@
     byId('pcPanelTotal').textContent='共 '+visibleRows.length+' 条';byId('pcRecords').innerHTML=visibleRows.length?'<div class="pc-table-head"><span>'+(current==='searches'?'检索内容':current==='follows'?'关注对象':'内容')+'</span><span>'+(current==='history'?'浏览时间':current==='favorites'?'收藏时间':current==='searches'?'搜索时间':current==='follows'?'更新时间':'评论时间')+'</span><span>操作</span></div>'+visibleRows.map(rowHTML).join(''):emptyHTML(!!needle||!!type);
   }
   function formStatus(message,error=false,warning=false){byId('pcFormStatus').textContent=message;byId('pcFormStatus').className=error?'is-error':warning?'is-warning':''}
-  function updateEmailSummary(s){const w=s.weeklyEmail||{};byId('pcEmailSummary').textContent=w.email?(w.enabled?'当前已启用每周推荐，接收邮箱：':'每周推荐已关闭，已保存邮箱：')+w.email:'尚未设置通知邮箱，暂不接收每周推荐。'}
+  function updateEmailSummary(s){const config=s.notificationEmail||{};byId('pcEmailSummary').textContent=config.email?'已保存通知邮箱：'+config.email:'尚未设置通知邮箱，请填写用于接收各业务邮件通知的邮箱。'}
   function syncEmail(s){
     updateEmailSummary(s);
-    if(renderedUser!==s.userId){dirty=false;weekly=null;byId('pcEmail').value='';byId('pcWeekly').checked=false;formStatus('');}
-    if(!dirty&&!saving){weekly={...(s.weeklyEmail||{email:null,enabled:false,version:1})};byId('pcEmail').value=weekly.email||'';byId('pcWeekly').checked=!!weekly.enabled;}
-    renderedUser=s.userId;byId('pcSaveEmail').disabled=saving||!s.userId;byId('pcEmail').disabled=saving||!s.userId;byId('pcWeekly').disabled=saving||!s.userId;
+    if(renderedUser!==s.userId){dirty=false;notificationConfig=null;byId('pcEmail').value='';formStatus('');}
+    if(!dirty&&!saving){notificationConfig={...(s.notificationEmail||{email:null,version:1})};byId('pcEmail').value=notificationConfig.email||'';}
+    renderedUser=s.userId;byId('pcSaveEmail').disabled=saving||!s.userId;byId('pcEmail').disabled=saving||!s.userId;
   }
   function repaint(){const s=snapshot();renderOverview(s);renderRecords(s);syncEmail(s)}
   function navigate(){const next=location.hash.slice(1);current=sections[next]?next:'history';query='';type='';byId('pcSearch').value='';repaint();}
@@ -98,20 +98,20 @@
   byId('pcSearch').addEventListener('input',event=>{query=event.target.value;renderRecords(snapshot())});
   byId('pcTypeFilter').addEventListener('change',event=>{type=event.target.value;renderRecords(snapshot())});
   byId('pcFavoritesMode').addEventListener('change',event=>{favoritesMode=event.target.value;query='';type='';byId('pcSearch').value='';renderRecords(snapshot())});
-  for(const id of ['pcEmail','pcWeekly'])byId(id).addEventListener('input',()=>{dirty=true;byId('pcEmail').removeAttribute('aria-invalid');formStatus('有未保存的更改',false,true)});
+  byId('pcEmail').addEventListener('input',()=>{dirty=true;byId('pcEmail').removeAttribute('aria-invalid');formStatus('有未保存的更改',false,true)});
   byId('pcNotificationForm').addEventListener('submit',async event=>{
-    event.preventDefault();if(saving)return;const email=byId('pcEmail').value.trim(),enabled=byId('pcWeekly').checked;
-    if((email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))||(enabled&&!email)){byId('pcEmail').setAttribute('aria-invalid','true');formStatus(enabled&&!email?'请填写通知邮箱后开启每周推荐。':'请输入有效的邮箱地址。',true);byId('pcEmail').focus();return}
+    event.preventDefault();if(saving)return;const email=byId('pcEmail').value.trim();
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){byId('pcEmail').setAttribute('aria-invalid','true');formStatus(!email?'请填写接收通知的邮箱。':'请输入有效的邮箱地址。',true);byId('pcEmail').focus();return}
     const userContext=SR.userContextVersion();saving=true;byId('pcSaveEmail').disabled=true;byId('pcSaveEmail').textContent='保存中…';syncEmail(snapshot());formStatus('');
     try{
-      if(!weekly)weekly=await SR.getWeeklyEmail();
+      if(!notificationConfig)notificationConfig=await SR.getNotificationEmail();
       if(userContext!==SR.userContextVersion())throw new Error('账号已变化，请重新打开通知设置。');
-      weekly=await SR.saveWeeklyEmail({email:email||null,enabled,version:weekly.version});dirty=false;byId('pcEmail').removeAttribute('aria-invalid');formStatus(SR.snapshot().persistent?'设置已保存。':'已在本次会话保存，浏览器未允许永久保存。',false,!SR.snapshot().persistent);
-    }catch(error){formStatus('保存失败：'+(error.message||'请稍后重试。'),true);if(error.code==='STALE_VERSION'){weekly={...snapshot().weeklyEmail};formStatus('邮箱配置已在其他页面更新，请核对当前输入后再次保存。',true)}}
+      notificationConfig=await SR.saveNotificationEmail({email,version:notificationConfig.version});dirty=false;byId('pcEmail').removeAttribute('aria-invalid');formStatus(SR.snapshot().persistent?'设置已保存。':'已在本次会话保存，浏览器未允许永久保存。',false,!SR.snapshot().persistent);
+    }catch(error){formStatus('保存失败：'+(error.message||'请稍后重试。'),true);if(error.code==='STALE_VERSION'){notificationConfig={...snapshot().notificationEmail};formStatus('邮箱配置已在其他页面更新，请核对当前输入后再次保存。',true)}}
     finally{saving=false;byId('pcSaveEmail').textContent='保存设置';repaint()}
   });
   for(const id of ['pcCloseDetail','pcDialogDone'])byId(id).addEventListener('click',()=>byId('pcResourceDialog').close());
   byId('pcResourceDialog').addEventListener('click',event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)event.currentTarget.close()}});
   window.addEventListener('hashchange',navigate);SR.subscribe(repaint);repaint();
-  SR.getWeeklyEmail().then(value=>{if(!dirty){weekly=value;syncEmail(snapshot())}}).catch(error=>formStatus('通知设置加载失败：'+error.message,true));
+  SR.getNotificationEmail().then(value=>{if(!dirty){notificationConfig=value;syncEmail(snapshot())}}).catch(error=>formStatus('通知设置加载失败：'+error.message,true));
 })();

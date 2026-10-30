@@ -44,7 +44,7 @@
     papers[0] && { commentId: marker + ':comment-approved', paperId: resourceId(papers[0]), authorUserId: 'demo-user', authorDisplayName: 'quan.song（示例）', text: '示例评论：证据定位与人工复核流程清晰，适合进一步对照科研工作流。', status: 'APPROVED', reason: '', createdAt: at(28, '14:15'), updatedAt: at(28, '15:20'), version: 1, clientMutationId: marker + ':comment-mutation-1', isDemo: true },
     papers[1] && { commentId: marker + ':comment-pending', paperId: resourceId(papers[1]), authorUserId: 'demo-user', authorDisplayName: 'quan.song（示例）', text: '示例评论：希望进一步了解跨节点验证中的同步与纠错开销。', status: 'PENDING', reason: '', createdAt: at(30, '09:45'), updatedAt: at(30, '09:45'), version: 1, clientMutationId: marker + ':comment-mutation-2', isDemo: true }
   ].filter(Boolean);
-  const payload = { marker, userId: 'demo-user', events, follows, resourceStates: states, comments, weeklyEmail: { email: 'researcher@example.com', enabled: true }, createdAt: reference };
+  const payload = { marker, userId: 'demo-user', events, follows, resourceStates: states, comments, notificationEmail: { email: 'researcher@example.com' }, createdAt: reference };
   let pending = false;
   function seed() {
     const state = service.snapshot();
