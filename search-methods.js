@@ -1,6 +1,6 @@
 (function (root) {
   "use strict";
-  const GROUPS = [["automatic", "自动扩展"], ["translation", "自动翻译"], ["broader", "上位词扩展"], ["narrower", "下位词扩展"]];
+  const GROUPS = [["automatic", "词位扩展-自动扩展"], ["translation", "词位扩展-自动翻译"], ["broader", "词位扩展-上位词扩展"], ["narrower", "词位扩展-下位词扩展"]];
   // Prototype terminology examples. These are not an external model response.
   const DICTIONARY = [
     { pattern: /智能体|\bagents?\b/iu, automatic: ["智能代理", "多智能体"], translation: ["智能体"], broader: ["人工智能"], narrower: ["科研智能体", "自主智能体"] },
@@ -93,7 +93,7 @@
       <label><input type="radio" name="keywordSearchMethod" value="exact" checked>精确查找</label>
       <label><input type="radio" name="keywordSearchMethod" value="association">智能关联搜索</label>
       <label><input type="radio" name="keywordSearchMethod" value="expansion">词位扩展</label></fieldset>
-      <div id="searchAutomaticRules" class="search-automatic-rules" role="list" aria-label="已应用扩展规则" hidden></div>
+      <div id="searchAutomaticRules" class="search-automatic-rules" role="list" aria-label="词位扩展规则开关" hidden></div>
       <div id="searchAssociationTools" class="search-method-body" hidden>
         <section class="search-association-plan" aria-labelledby="searchAssociationHeading">
           <div class="search-association-heading"><h3 id="searchAssociationHeading">已理解的检索条件</h3><button type="button" data-plan-edit aria-expanded="false" aria-controls="searchAssociationForm">修改条件</button></div>
@@ -174,11 +174,19 @@
     function render(next) {
       state = next || model.snapshot(); node.hidden = bridge.getMode() !== "关键词";
       const method = state.searchMethod || "exact", bodyOnly = state.scope === "全文检索";
-      const appliedRules = method === "exact" ? state.automaticRules || [] : [];
-      get("searchAutomaticRules").hidden = !appliedRules.length;
+      const availableRules = method === "exact" ? state.availableAutomaticRules || [] : [];
+      const activeControl = doc.activeElement;
+      const focusedRule = get("searchAutomaticRules").contains(activeControl)
+        ? activeControl.hasAttribute("data-auto-rule-group") ? { group: activeControl.dataset.autoRuleGroup, concept: activeControl.dataset.autoRuleConcept }
+          : activeControl.hasAttribute("data-auto-rules-toggle-all") ? { all: true } : null : null;
+      get("searchAutomaticRules").hidden = !availableRules.length;
       const shownRules = new Map();
-      appliedRules.forEach(rule => { const key = rule.group + ":" + rule.concept; const item = shownRules.get(key) || { ...rule, words: [] }; item.words.push(rule.text); shownRules.set(key, item); });
-      get("searchAutomaticRules").innerHTML = [...shownRules.values()].map(rule => `<span role="listitem" data-auto-rule-type="${esc(rule.group)}" title="原关键词：${esc(rule.concept)}">${esc(GROUPS.find(([group]) => group === rule.group)?.[1] || rule.group)}：${esc(rule.words.join("、"))}</span>`).join("");
+      availableRules.forEach(rule => { const key = rule.group + ":" + rule.concept; const item = shownRules.get(key) || { ...rule, words: [] }; item.words.push(rule.text); shownRules.set(key, item); });
+      const anyEnabled = availableRules.some(rule => rule.enabled !== false);
+      get("searchAutomaticRules").innerHTML = [...shownRules.values()].map(rule => `<span role="listitem"><label title="原关键词：${esc(rule.concept)}"><input type="checkbox" data-auto-rule-group="${esc(rule.group)}" data-auto-rule-concept="${esc(rule.concept)}" ${rule.enabled !== false ? "checked" : ""}><span>${esc(GROUPS.find(([group]) => group === rule.group)?.[1] || rule.group)}：${esc(rule.words.join("、"))}</span></label></span>`).join("")
+        + (availableRules.length ? `<button type="button" data-auto-rules-toggle-all>${anyEnabled ? "全部关闭" : "全部开启"}</button>` : "");
+      if (focusedRule) (focusedRule.all ? get("searchAutomaticRules").querySelector("[data-auto-rules-toggle-all]")
+        : Array.from(get("searchAutomaticRules").querySelectorAll("input")).find(input => input.dataset.autoRuleGroup === focusedRule.group && input.dataset.autoRuleConcept === focusedRule.concept))?.focus({ preventScroll: true });
       node.querySelectorAll("input[name=keywordSearchMethod]").forEach(input => {
         input.checked = input.value === method;
         input.disabled = bodyOnly && input.value !== "exact";
@@ -240,6 +248,7 @@
       await refreshAfterSearch(recordBehavior("search", requested));
     }
     node.addEventListener("change", event => {
+      if (event.target.hasAttribute("data-auto-rule-group")) action(model.setAutomaticRuleEnabled(event.target.dataset.autoRuleGroup, event.target.dataset.autoRuleConcept, event.target.checked));
       if (event.target.name === "keywordSearchMethod") action(model.setSearchMethod(event.target.value));
       if (event.target.id === "searchPreferenceEnabled") {
         ensurePrefs().enabled = event.target.checked; savePrefs(); renderPreferences();
@@ -252,6 +261,7 @@
     });
     node.addEventListener("click", event => {
       const button = event.target.closest("button"); if (!button) return;
+      if (button.hasAttribute("data-auto-rules-toggle-all")) action(model.setAllAutomaticRulesEnabled(!state.availableAutomaticRules.some(rule => rule.enabled !== false)));
       if (button.hasAttribute("data-plan-edit")) {
         const open = get("searchAssociationForm").hidden;
         get("searchAssociationForm").hidden = !open; button.setAttribute("aria-expanded", String(open));

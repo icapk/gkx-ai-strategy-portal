@@ -3743,7 +3743,7 @@
     }
   </style>
   <link rel="stylesheet" href="entity-search.css?v=20261027-keyword-v1">
-  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-association-simple">
+  <link rel="stylesheet" href="keyword-search-v1.css?v=20261030-rule-toggles">
   <link rel="stylesheet" href="report-fulltext.css?v=20261030-report">
 </head>
 <body>
@@ -5169,12 +5169,12 @@
 
   <script src="search-recommend-remediation-fixtures.js?v=20261027-keyword-v1"></script><script src="portal-search-recommend-adapter.js?v=20261027-2"></script>
   <script src="report-fulltext-fixtures.js?v=20261030-report-types"></script>
-  <script src="keyword-search-model.js?v=20261030-association-simple"></script>
+  <script src="keyword-search-model.js?v=20261030-rule-toggles"></script>
   <script src="keyword-ai-demo-fixtures.js?v=20261030-ai-demo"></script>
   <script src="keyword-search-completion-fixtures.js?v=20261030-ai-demo"></script>
   <script src="report-fulltext-reader.js?v=20261030-exact-auto"></script>
-  <script src="search-methods.js?v=20261030-association-simple"></script>
-  <script src="keyword-search-ui.js?v=20261030-exact-auto"></script>
+  <script src="search-methods.js?v=20261030-rule-toggles"></script>
+  <script src="keyword-search-ui.js?v=20261030-rule-toggles"></script>
   <script src="ai-rag-search.js?v=20261030-ai-results-1"></script><script>
     (() => {
       "use strict";
@@ -7717,7 +7717,9 @@
           else url.searchParams.delete("plan");
           if (current?.searchMethod === "expansion" && current.expansionTerms.length) url.searchParams.set("expansions", JSON.stringify(current.expansionTerms));
           else url.searchParams.delete("expansions");
-        } else ["feature", "plan", "expansions", "scope", "reportTypes", "type"].forEach(key => url.searchParams.delete(key));
+          if (current?.disabledAutomaticRuleGroups?.length) url.searchParams.set("autoDisabled", JSON.stringify(current.disabledAutomaticRuleGroups));
+          else url.searchParams.delete("autoDisabled");
+        } else ["feature", "plan", "expansions", "scope", "reportTypes", "type", "autoDisabled"].forEach(key => url.searchParams.delete(key));
         if (url.href !== window.location.href) window.history.replaceState(null, "", url);
       }
 
@@ -9493,6 +9495,8 @@
       const entryMode = entrySearchParams.get("mode");
       const entryType = entrySearchParams.get("type");
       if (entryQuery) {
+        let entryDisabledAutomaticRules;
+        try { const stored = JSON.parse(entrySearchParams.get("autoDisabled") || "null"); if (Array.isArray(stored)) entryDisabledAutomaticRules = stored; } catch (_) { /* Invalid optional state keeps default rules. */ }
         const feature = entrySearchParams.get("feature");
         const entryMethod = ["exact", "association", "expansion"].includes(feature) ? feature
           : entryMode === "关联" || entrySearchParams.get("association") === "1" ? "association" : "exact";
@@ -9501,6 +9505,7 @@
           mode: entryMode === "AI搜索" ? "AI 搜索" : entryMode === "关联" ? "关键词" : SEARCH_MODE_CONFIG[entryMode] ? entryMode : "关键词",
           resourceType: entryType || undefined,
           scope: entrySearchParams.get("scope") || undefined,
+          disabledAutomaticRuleGroups: entryDisabledAutomaticRules,
           trackSearch: false
         })).then(async () => {
           if (activeSearchMode !== "关键词" || keywordSearchV1?.snapshot().query !== entryQuery) return;

@@ -437,7 +437,7 @@
       const prior = model.snapshot();
       const requestedType = options.resourceType || options.type || prior.currentType || bridge.getType?.() || "全部";
       try {
-        await model.submit(query, { scope: options.scope || (requestedType === prior.currentType ? prior.scope : undefined) || "全部资源", logic: "AND", type: requestedType });
+        await model.submit(query, { scope: options.scope || (requestedType === prior.currentType ? prior.scope : undefined) || "全部资源", logic: "AND", type: requestedType, disabledAutomaticRuleGroups: options.disabledAutomaticRuleGroups });
         const current = model.snapshot();
         if (ticket === submitting && context === contextKey() && current.query === query && options.trackSearch !== false) bridge.onSubmit?.(query, options, current.displayItems || []);
         return true;
