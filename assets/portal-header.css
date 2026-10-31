@@ -1,0 +1,233 @@
+/* Shared portal navigation. Values extracted from the current homepage. */
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) {
+  --portal-tab-width: 88px;
+  --portal-tab-bar-height: 56px;
+  --portal-tab-active-background: linear-gradient(180deg, rgba(255,255,255,.24), #fff);
+  --portal-tab-bar-background: transparent;
+  --portal-tab-bar-backdrop: blur(8px);
+  height: 56px;
+}
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header)::after { display: none; }
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.header-inner, .rec-header-inner, .lp-header-inner, .fp-site-header-inner) { width: 100%; max-width: none; height: 56px; margin: 0; padding: 0 16px; }
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.brand-home, .rec-brand, .lp-brand, .fp-brand) { gap: 8px; font-size: 16px; font-weight: 500; }
+#recHeader .rec-brand { height: 56px; padding: 6px 2px; }
+#recHeader .rec-brand-mark { flex: 0 0 28px; }
+#recHeader .rec-main-nav { flex: 0 1 auto; }
+#recHeader .rec-header-actions { margin-left: auto; }
+#recHeader .rec-workbench-button { width: 88px; padding: 6px 11px; border-radius: 22px; }
+#recHeader .rec-todo-entry { height: 32px; padding: 6px 11px; border-radius: 22px; }
+#recHeader :is(.rec-workbench-button, .rec-todo-entry, .rec-header-action) { color: #4e5969; }
+#recHeader :is(.rec-workbench-button, .rec-todo-entry) img { display: none; }
+#recHeader :is(.rec-workbench-button, .rec-todo-entry)::before { width: 20px; height: 20px; flex: 0 0 20px; content: ""; background-position: center; background-size: 20px; background-repeat: no-repeat; }
+#recHeader .rec-workbench-button::before { background-image: url("figma-home-20261029/header-workbench.svg"); }
+#recHeader .rec-todo-entry::before { background-image: url("figma-home-20261029/header-todo.svg"); }
+#recHeader .rec-header-action::before { background-image: url("figma-home-20261029/header-message.svg"); }
+#recHeader .rec-workbench-button:is(:hover,:focus-visible,[aria-expanded=true])::before { background-image: url("figma-home-20261029/header-workbench-hover.svg"); }
+#recHeader .rec-todo-entry:is(:hover,:focus-visible)::before { background-image: url("figma-home-20261029/header-todo-hover.svg"); }
+#recHeader .rec-header-action:is(:hover,:focus-visible)::before { background-image: url("figma-home-20261029/header-message-hover.svg"); }
+#recHeader .rec-header-action { width: 100px; min-width: 100px; height: 32px; gap: 2px; padding: 6px 11px; border-radius: 22px; }
+#recHeader #recMessageCount { position: absolute; top: -4px; right: auto; left: 88px; width: auto; min-width: 18px; height: 18px; margin: 0; padding: 0 4px; line-height: 18px; border-radius: 50%; color: #fff; background: #f53f3f; font-size: 10px; }
+#recHeader .personal-account-trigger { width: 112px; height: 40px; gap: 6px; padding: 4px 8px 4px 4px; background: rgba(255,255,255,.48); font-size: 14px; }
+#recHeader .personal-account-trigger .personal-menu-avatar { font-size: 14px; }
+#recHeader .personal-account-trigger [data-personal-trigger-label] { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#recHeader .personal-caret { width: 12px; height: 12px; font-size: 0; background: url("profile-caret-down.svg") center / 12px no-repeat; }
+#recHeader :is(.rec-workbench-button,.rec-todo-entry,.rec-header-action):is(:hover,:focus-visible,[aria-expanded=true]) { border-radius: 4px; color: #165dff; background: rgba(11,94,184,.08); }
+/* Figma 官网 / 10-29. Preserve portal navigation and destination behavior. */
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) {
+  --portal-tab-active-background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), #fff);
+  --portal-tab-bar-backdrop: blur(8px);
+}
+
+/* Preserve the shared header appearance when Arco button styles are loaded. */
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.utility-trigger, .message-center-button) {
+  color: #4e5969;
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.utility-trigger, .message-center-button):is(:hover, :focus-visible, [aria-expanded="true"]) {
+  color: #165dff;
+  background: rgba(11, 94, 184, 0.08);
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) {
+  --portal-tab-bar-background: transparent;
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header)::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: #f7f8fa url("figma-home-20261029/background.png") center -156px / 2000px 1016px no-repeat;
+  -webkit-mask: url("figma-home-20261029/background-mask.svg") center -198px / 2000px 1016px no-repeat;
+  mask: url("figma-home-20261029/background-mask.svg") center -198px / 2000px 1016px no-repeat;
+  pointer-events: none;
+  content: "";
+}
+
+@media (min-width: 1280px) {
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.header-inner, .rec-header-inner, .lp-header-inner, .fp-site-header-inner) {
+    gap: 16px;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.brand-lockup, .rec-brand, .lp-brand, .fp-brand) {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.desktop-nav, .rec-main-nav, .lp-nav, .fp-main-nav) {
+    gap: 4px;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.nav-trigger, .portal-glass-tab) {
+    width: 88px;
+    min-width: 88px;
+    height: 56px;
+    flex: 0 0 88px;
+    border-radius: 2px;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.nav-trigger, .portal-glass-tab):is(.is-active, .is-current, .is-open, [aria-expanded="true"]) {
+    border-radius: 0;
+    background: var(--portal-tab-active-background);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .utility-trigger {
+    padding: 6px 11px;
+    border-radius: 22px;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .ticket-service-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .utility-nav .utility-group {
+    height: auto;
+    align-self: center;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .utility-menu::before {
+    position: absolute;
+    top: -5px;
+    right: 0;
+    left: 0;
+    height: 5px;
+    content: "";
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.header-actions, .rec-header-actions) {
+    gap: 0;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.profile-wrap, .personal-rec-entry) {
+    margin-left: 16px;
+  }
+
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .message-center-button {
+    width: 100px;
+    min-width: 100px;
+    gap: 2px;
+    padding: 6px 11px;
+    border-radius: 22px;
+  }
+
+  /* Keep the existing hover, focus and expanded feedback after the layout pass. */
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.utility-trigger, .message-center-button):is(:hover, :focus-visible, [aria-expanded="true"]) {
+    border-radius: 4px;
+    color: #165dff;
+    background: rgba(11, 94, 184, 0.08);
+    outline: none;
+  }
+
+}
+
+/* Render the exported vectors directly: masks flatten their gradients and white details. */
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) :is(.utility-nav .utility-trigger, .ticket-service-button, .message-center-button)::before {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  background-color: transparent;
+  background-position: center;
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  -webkit-mask: none;
+  mask: none;
+  content: "";
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .utility-nav .utility-trigger::before {
+  background-image: url("figma-home-20261029/header-workbench.svg?v=figma-original");
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .ticket-service-button::before {
+  background-image: url("figma-home-20261029/header-todo.svg?v=figma-original");
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .message-center-button::before {
+  background-image: url("figma-home-20261029/header-message.svg?v=figma-original");
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .utility-nav .utility-trigger:is(:hover, :focus-visible, [aria-expanded="true"])::before {
+  background-image: url("figma-home-20261029/header-workbench-hover.svg");
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .ticket-service-button:is(:hover, :focus-visible, [aria-expanded="true"])::before {
+  background-image: url("figma-home-20261029/header-todo-hover.svg");
+}
+
+:is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header) .message-center-button:is(:hover, :focus-visible, [aria-expanded="true"])::before {
+  background-image: url("figma-home-20261029/header-message-hover.svg");
+}
+
+@media (max-width: 1279px) {
+  :is(#siteHeader, #recHeader, .lp-header.lp-header.lp-header, .fp-site-header.fp-site-header.fp-site-header):has(#mobileMenuButton[aria-expanded="true"])::before {
+    display: none;
+  }
+}
+
+/* The recommendation surface uses Arco menus inside the same portal shell. */
+#recHeader .rec-navigation-popup { position: fixed !important; top: 56px !important; left: 0 !important; right: 0; width: 100vw; transform: none !important; }
+#recHeader .rec-navigation-popup { width: 100%; padding: 0; background: linear-gradient(110deg,rgba(248,251,255,.99),rgba(234,243,255,.99)); box-shadow: 0 12px 28px rgba(52,84,127,.08); }
+#recHeader .rec-mega-menu { position: relative; width: min(100%,1440px); padding: 24px 32px 28px 256px; }
+#recHeader .rec-mega-menu h2 { position: absolute; top: 24px; left: 48px; margin: 0; height: 44px; display: flex; align-items: center; font-size: 20px; font-weight: 500; line-height: 28px; }
+#recHeader .rec-mega-menu .arco-menu { width: 100%; padding: 0; background: transparent; }
+#recHeader .rec-mega-menu .arco-menu-inner { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px 40px; padding: 0; }
+#recHeader .rec-mega-menu .arco-menu-item { height: 44px; margin: 0; border-radius: 4px; font-size: 16px; line-height: 24px; }
+#recHeader .rec-mega-menu .arco-menu-item { background: transparent; }
+#recHeader .rec-mega-menu .arco-menu-item:hover { background: #e8f3ff; color: #165dff; }
+#recHeader .rec-utility-menu .arco-menu { width: 160px; }
+#recHeader .rec-utility-menu .arco-menu-item { height: 40px; font-size: 14px; }
+@media (max-width:1279px) {
+  :is(#siteHeader,#recHeader,.lp-header.lp-header.lp-header,.fp-site-header.fp-site-header.fp-site-header),
+  :is(#siteHeader,#recHeader,.lp-header.lp-header.lp-header,.fp-site-header.fp-site-header.fp-site-header) :is(.header-inner,.rec-header-inner,.lp-header-inner,.fp-site-header-inner) { height: 64px; }
+  #recHeader .rec-brand { width: 180px; min-width: 180px; height: 40px; font-size: 14px; }
+  #recHeader .rec-brand-mark { width: 28px; height: 28px; flex-basis: 28px; }
+  #recHeader .rec-header-actions { height: 40px; gap: 0; }
+  #recHeader .rec-mobile-menu { width: 20px; min-width: 20px; height: 20px; padding: 0; margin-right: 12px; }
+  #recHeader .rec-header-action { width: 20px; min-width: 20px; height: 20px; padding: 0; }
+  #recHeader #recMessageCount { top: -2px; left: 14px; width: 8px; min-width: 8px; height: 8px; padding: 0; font-size: 0; color: transparent; }
+  #recHeader .personal-rec-entry { margin-left: 16px; }
+  #recHeader .personal-account-trigger { width: 32px; min-width: 32px; height: 32px; padding: 3.2px; }
+  #recHeader .personal-account-trigger .personal-menu-avatar { width: 25.6px; height: 25.6px; flex-basis: 25.6px; font-size: 12px; }
+  #recHeader .personal-rec-menu { max-width: calc(100vw - 32px); }
+  #recHeader .rec-navigation-popup { top: 64px !important; }
+  #recHeader .rec-mega-menu { padding: 16px; }
+  #recHeader .rec-mega-menu h2 { position: static; height: 32px; font-size: 16px; }
+  #recHeader .rec-mega-menu .arco-menu-inner { grid-template-columns: minmax(0,1fr); gap: 4px; max-height: 55vh; overflow: auto; }
+  #recHeader .rec-mega-menu .arco-menu-item { font-size: 14px; }
+  #recHeader .rec-main-nav .nav-trigger { width: 100%; min-width: 0; height: 44px; }
+}
+@media (min-width:1280px) and (max-width:1359px) {
+  :is(#siteHeader,#recHeader) :is(.header-inner,.rec-header-inner) { gap: 8px; }
+  :is(#siteHeader,#recHeader) :is(.utility-trigger,.rec-workbench-button) { padding: 6px; }
+  :is(#siteHeader,#recHeader) :is(.message-center-button,.rec-header-action) { width: 90px; min-width: 90px; padding: 6px; }
+  #recHeader .rec-workbench-button { width: 80px; }
+  #recHeader .rec-todo-entry { padding: 6px; }
+  :is(#siteHeader,#recHeader) :is(.profile-wrap,.personal-rec-entry) { margin-left: 8px; }
+  #recHeader #recMessageCount { left: 78px; }
+}
+

@@ -238,7 +238,7 @@ select:focus-visible {
   border-radius: 9px;
   color: #fff;
   background: #ef4444;
-  font-size: 9px;
+  font-size: 12px;
   font-style: normal;
   line-height: 1;
 }
@@ -380,7 +380,7 @@ select:focus-visible {
   padding: 7px 11px;
   color: #617086;
   background: linear-gradient(90deg, rgba(246, 248, 255, 0.94), rgba(251, 252, 255, 0.94));
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -608,7 +608,7 @@ select:focus-visible {
   gap: 6px;
   margin: 10px 0 0;
   color: #59647a;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-section-stack {
@@ -653,7 +653,7 @@ select:focus-visible {
 .rec-panel-subtitle {
   margin: 0;
   color: #778195;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.55;
 }
@@ -793,7 +793,7 @@ select:focus-visible {
   margin: 0 0 6px;
   padding-left: 8px;
   color: #8b95a7;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -885,19 +885,19 @@ select:focus-visible {
 
 .rec-hot-card em {
   color: #ef4444;
-  font-size: 11px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 700;
 }
 
 .rec-hot-card span {
   color: #939cac;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-hot-card small {
   color: #16a34a;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -909,7 +909,7 @@ select:focus-visible {
   border-radius: 7px;
   color: #667085;
   background: #f8fafc;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-keyword-follow {
@@ -932,7 +932,7 @@ select:focus-visible {
   max-width: 62ch;
   margin: 0;
   color: #778195;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.55;
 }
 
@@ -949,7 +949,7 @@ select:focus-visible {
   color: #59647a;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1011,7 +1011,7 @@ select:focus-visible {
   border-radius: 7px;
   color: #667085;
   background: #f8fafc;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-follow-status strong {
@@ -1068,7 +1068,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #5162b9;
   background: #eef2ff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1082,7 +1082,7 @@ select:focus-visible {
   margin: 0;
   overflow: hidden;
   color: #8b95a7;
-  font-size: 11px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1193,7 +1193,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #5162b9;
   background: #eef2ff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1208,7 +1208,7 @@ select:focus-visible {
 .rec-follow-update time,
 .rec-follow-update-state {
   color: #8b95a7;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1226,7 +1226,7 @@ select:focus-visible {
   grid-column: 2 / -1;
   margin: 4px 0 0;
   color: #667085;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.6;
 }
@@ -1245,7 +1245,7 @@ select:focus-visible {
   align-items: center;
   gap: 7px;
   color: #667085;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-follow-preferences select {
@@ -1280,7 +1280,7 @@ select:focus-visible {
   border-radius: 9px;
   color: #667085;
   background: rgba(248, 250, 255, 0.7);
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -1351,7 +1351,7 @@ select:focus-visible {
   gap: 3px 8px;
   margin: 0;
   color: #707b8e;
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1377,7 +1377,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #59647a;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1440,7 +1440,7 @@ select:focus-visible {
   color: #5e6b83;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   transition-property: border-color, color, background-color, transform;
   transition-duration: 0.16s;
@@ -1509,7 +1509,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #64748b;
   background: #f1f5f9;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1525,7 +1525,7 @@ select:focus-visible {
 
 .rec-news-reason {
   color: #6073c8;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1574,7 +1574,7 @@ select:focus-visible {
 .rec-news-field-label,
 .rec-news-meta b {
   color: #536077;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -1586,7 +1586,7 @@ select:focus-visible {
   align-items: start;
   margin-top: 7px;
   color: #667085;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.55;
 }
 
@@ -1603,7 +1603,7 @@ select:focus-visible {
   gap: 5px 10px;
   margin-top: 9px;
   color: #8b95a7;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1652,7 +1652,7 @@ select:focus-visible {
   color: var(--rec-blue);
   background: #f8faff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   transition-property: border-color, color, background-color, transform;
   transition-duration: 0.16s;
@@ -1674,7 +1674,7 @@ select:focus-visible {
   border-radius: 8px;
   color: #667085;
   background: #f8faff;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -1819,7 +1819,7 @@ select:focus-visible {
 .rec-paper-abstract {
   margin: 2px 0;
   color: #758094;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-paper-source {
@@ -1843,7 +1843,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #536176;
   background: #f1f5f9;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-paper-content .rec-tags {
@@ -1856,7 +1856,7 @@ select:focus-visible {
   gap: 12px;
   margin-top: 7px;
   color: #8a94a5;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-paper-actions {
@@ -1874,7 +1874,7 @@ select:focus-visible {
   color: #6d28d9;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-paper-actions button:first-child {
@@ -1957,7 +1957,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #fff;
   background: rgba(234, 88, 12, 0.92);
-  font-size: 10px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 700;
   backdrop-filter: blur(8px);
@@ -1992,7 +1992,7 @@ select:focus-visible {
   overflow: hidden;
   margin: 7px 0 10px;
   color: #7a8496;
-  font-size: 11px;
+  font-size: 12px;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -2005,7 +2005,7 @@ select:focus-visible {
   margin: 0;
   padding: 0;
   color: #8b95a7;
-  font-size: 10px;
+  font-size: 12px;
   list-style: none;
 }
 
@@ -2014,7 +2014,7 @@ select:focus-visible {
   display: block;
   margin-top: 7px;
   color: #9aa3b2;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-report-card footer,
@@ -2089,7 +2089,7 @@ select:focus-visible {
 .rec-rising-stars p {
   margin: 1px 0;
   color: #7a8496;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-person-card .rec-tags {
@@ -2101,7 +2101,7 @@ select:focus-visible {
   display: block;
   margin-top: 5px;
   color: #8b95a7;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .rec-person-card > button {
@@ -2140,7 +2140,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #7c3aed;
   background: #ede9fe;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .rec-author-updates h4 {
@@ -2151,7 +2151,7 @@ select:focus-visible {
 .rec-author-updates p {
   margin: 7px 0 0;
   color: #8b95a7;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-rising-stars > article {
@@ -2175,7 +2175,7 @@ select:focus-visible {
 
 .rec-rising-stars em {
   color: #16a34a;
-  font-size: 10px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 700;
 }
@@ -2206,14 +2206,14 @@ select:focus-visible {
   border-radius: 999px;
   color: #0f766e;
   background: #ccfbf1;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
 .rec-conference-card > header em,
 .rec-event-card > header em {
   color: #16a34a;
-  font-size: 10px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 650;
 }
@@ -2227,7 +2227,7 @@ select:focus-visible {
   border-radius: 7px;
   color: #667085;
   background: #f8fafc;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-conference-card dl > div,
@@ -2262,7 +2262,7 @@ select:focus-visible {
   color: #0f766e;
   background: #f0fdfa;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -2298,7 +2298,7 @@ select:focus-visible {
   display: block;
   margin: 7px 0;
   color: #6d28d9;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -2332,7 +2332,7 @@ select:focus-visible {
 .rec-event-card > small {
   margin: auto 0 10px;
   color: #8b95a7;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-event-card.is-ended {
@@ -2446,7 +2446,7 @@ select:focus-visible {
   min-width: 0;
   margin: 0;
   color: #667085;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.55;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
@@ -2483,7 +2483,7 @@ select:focus-visible {
 .rec-module-controls > label,
 .rec-filter-group > span {
   color: #657085;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -2496,7 +2496,7 @@ select:focus-visible {
   color: #445066;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-control-check {
@@ -2534,7 +2534,7 @@ select:focus-visible {
   color: #5f6b7e;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   transition-property: color, background-color, border-color, box-shadow, transform;
   transition-duration: 0.16s;
@@ -2558,7 +2558,7 @@ select:focus-visible {
   border-radius: 9px;
   color: #667085;
   background: #f8fafc;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.65;
   overflow-wrap: anywhere;
 }
@@ -2636,7 +2636,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #5267c1;
   background: #eef2ff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
   line-height: 1.4;
   overflow-wrap: anywhere;
@@ -2658,13 +2658,13 @@ select:focus-visible {
   color: #667085;
   background: rgba(255, 255, 255, 0.86);
   text-align: center;
-  font-size: 10px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
 .rec-metric-grid dt {
   color: #8a94a5;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -2672,7 +2672,7 @@ select:focus-visible {
   min-width: 0;
   margin: 2px 0 0;
   color: #344054;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -2779,7 +2779,7 @@ select:focus-visible {
   color: #6d28d9;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -2832,7 +2832,7 @@ select:focus-visible {
 .rec-rating-fieldset > small {
   margin: 0;
   color: #756d80;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-rating-fieldset fieldset {
@@ -2848,7 +2848,7 @@ select:focus-visible {
 .rec-rating-fieldset legend {
   padding: 0 5px;
   color: #514765;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -2859,7 +2859,7 @@ select:focus-visible {
   min-height: 40px;
   color: #625d70;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rec-rating-fieldset input {
@@ -2876,7 +2876,7 @@ select:focus-visible {
   display: grid;
   gap: 6px;
   color: #514765;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -2915,7 +2915,7 @@ select:focus-visible {
   color: #fff;
   background: #7c3aed;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -2950,7 +2950,7 @@ select:focus-visible {
 
 .rec-comment-list article time {
   color: #8a8494;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -2963,7 +2963,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #854d0e;
   background: #fffbeb;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -3004,7 +3004,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #9a3412;
   background: #ffedd5;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -3029,7 +3029,7 @@ select:focus-visible {
 .rec-report-source {
   margin: 7px 0 0;
   color: #8a725f;
-  font-size: 10px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
@@ -3053,7 +3053,7 @@ select:focus-visible {
   border-radius: 7px;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   transition-property: color, background-color, border-color, transform;
   transition-duration: 0.16s;
@@ -3123,7 +3123,7 @@ select:focus-visible {
 .rec-talent-card p,
 .rec-rising-star-card p {
   margin: 0;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-talent-card > button,
@@ -3137,7 +3137,7 @@ select:focus-visible {
   color: #6d28d9;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   transition-property: color, background-color, border-color, transform;
   transition-duration: 0.16s;
@@ -3188,7 +3188,7 @@ select:focus-visible {
   border-radius: 999px;
   color: #6d28d9;
   background: #ede9fe;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -3204,7 +3204,7 @@ select:focus-visible {
 .rec-author-update-reason {
   margin: 4px 0 0;
   color: #7c8494;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3236,7 +3236,7 @@ select:focus-visible {
 .rec-author-update-card time {
   display: block;
   color: #8b8496;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3288,7 +3288,7 @@ select:focus-visible {
   margin-top: 6px;
   color: #7a5a08;
   font-weight: 650;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-rising-field > :first-child {
@@ -3336,7 +3336,7 @@ select:focus-visible {
   display: block;
   margin-top: 7px;
   color: #9aa3b2;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3356,7 +3356,7 @@ select:focus-visible {
   gap: 7px;
   align-items: center;
   color: #7a6470;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3423,7 +3423,7 @@ select:focus-visible {
   border-radius: 7px;
   color: #586d78;
   background: #f0f9ff;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .rec-event-theme dt {
@@ -3456,7 +3456,7 @@ select:focus-visible {
   color: #0369a1;
   background: #fff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   transition-property: color, background-color, border-color, transform;
   transition-duration: 0.16s;

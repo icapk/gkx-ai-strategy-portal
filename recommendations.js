@@ -397,6 +397,25 @@
   let eventVisibleCount = MODULE_PAGE_SIZE;
   let expandedEventId = "";
   let expandedEventRecordId = "";
+  const recommendationPages = {};
+  function pageItems(key, items, pageSize) {
+    const signature = items.map(function (item) { return item.id; }).join("|");
+    const previous = recommendationPages[key];
+    const current = previous?.signature === signature ? previous.current : 1;
+    recommendationPages[key] = { current: Math.min(current, Math.max(1, Math.ceil(items.length / pageSize))), total: items.length, pageSize: pageSize, signature: signature };
+    document.dispatchEvent(new CustomEvent("rec-pagination-change", { detail: key }));
+    const start = (recommendationPages[key].current - 1) * pageSize;
+    return items.slice(start, start + pageSize);
+  }
+  window.PortalRecommendationPages = {
+    models: recommendationPages,
+    change: function (key, page) {
+      if (!recommendationPages[key]) return;
+      recommendationPages[key].current = page;
+      const render = { news: renderNewsRecommendations, papers: renderPapers, reports: renderReports, conferences: renderConferences, courses: renderCourses, events: renderEvents }[key];
+      render?.();
+    }
+  };
 
   newsMoreButton?.removeAttribute("data-demo-action");
 
@@ -686,7 +705,11 @@
   }
 
   function focusRenderedControl(container, selector) {
-    window.requestAnimationFrame(function () { container?.querySelector(selector)?.focus(); });
+    window.requestAnimationFrame(function () {
+      const source = container?.querySelector(selector);
+      const mirror = source?.nextElementSibling?.matches("[data-rec-arco]") ? source.nextElementSibling.querySelector("button, input") : null;
+      (mirror || source)?.focus();
+    });
   }
 
   function emptyNewsViewState() {
@@ -958,7 +981,7 @@
   function renderNewsRecommendations() {
     if (!newsGrid || !newsViewState) return;
     const items = getNewsItems(activeNewsMode);
-    const visibleItems = items.slice(0, newsVisibleCount);
+    const visibleItems = pageItems("news", items, NEWS_PAGE_SIZE);
     newsGrid.setAttribute("aria-busy", "true");
     newsGrid.replaceChildren();
 
@@ -975,7 +998,7 @@
       newsGrid.appendChild(empty);
     } else {
       visibleItems.forEach(function (item, index) {
-        newsGrid.appendChild(createNewsCard(item, index));
+        newsGrid.appendChild(createNewsCard(item, (recommendationPages.news.current - 1) * NEWS_PAGE_SIZE + index));
       });
     }
 
@@ -1337,7 +1360,7 @@
   function renderPapers() {
     if (!paperList || !paperState || !authorState) return;
     const items = getPaperItems();
-    const visible = items.slice(0, paperVisibleCount);
+    const visible = pageItems("papers", items, MODULE_PAGE_SIZE);
     paperList.setAttribute("aria-busy", "true");
     paperList.replaceChildren();
     if (!visible.length) {
@@ -1352,7 +1375,7 @@
       empty.appendChild(recover);
       paperList.appendChild(empty);
     } else {
-      visible.forEach(function (item, index) { paperList.appendChild(createPaperCard(item, index)); });
+      visible.forEach(function (item, index) { paperList.appendChild(createPaperCard(item, (recommendationPages.papers.current - 1) * MODULE_PAGE_SIZE + index)); });
     }
     const modeLabel = ({ latest: "最新文献推荐", hot: "热门文献推荐", following: "关注作者文献推荐" })[activePaperMode];
     const sortLabel = activePaperMode === "hot" ? "综合热度筛选热门候选 · 按发表时间倒序" : "按发表时间倒序";
@@ -1506,8 +1529,7 @@
       reportRule.disabled = activeReportMode !== "latest";
     }
     const items = getReportItems();
-    const visibleLimit = activeReportMode === "latest" ? MODULE_PAGE_SIZE : reportVisibleCount;
-    const visible = items.slice(0, visibleLimit);
+    const visible = pageItems("reports", items, MODULE_PAGE_SIZE);
     reportGrid.setAttribute("aria-busy", "true");
     reportGrid.replaceChildren();
     if (!visible.length) {
@@ -1663,6 +1685,7 @@
   }
 
   function showTalentLibrary() {
+    setActiveSection("talent");
     setTalentMode("library", false);
     talentLibrary?.scrollIntoView({ behavior: prefersReducedMotion.matches ? "auto" : "smooth", block: "center" });
     window.setTimeout(function () {
@@ -1839,7 +1862,7 @@
   function renderConferences() {
     if (!conferenceGrid) return;
     const items = getConferenceItems();
-    const visible = items.slice(0, conferenceVisibleCount);
+    const visible = pageItems("conferences", items, MODULE_PAGE_SIZE);
     conferenceGrid.setAttribute("aria-busy", "true");
     conferenceGrid.replaceChildren();
     visible.forEach(function (item) { conferenceGrid.appendChild(createConferenceCard(item)); });
@@ -1933,7 +1956,7 @@
     const items = COURSE_ITEMS.slice().sort(function (left, right) {
       return right.match - left.match || Date.parse(right.publishedAt) - Date.parse(left.publishedAt);
     });
-    const visible = items.slice(0, courseVisibleCount);
+    const visible = pageItems("courses", items, MODULE_PAGE_SIZE);
     courseGrid.setAttribute("aria-busy", "true");
     courseGrid.replaceChildren();
     visible.forEach(function (item) { courseGrid.appendChild(createCourseCard(item)); });
@@ -2078,7 +2101,7 @@
   function renderEvents() {
     if (!eventGrid || !eventState) return;
     const items = getEventItems();
-    const visible = items.slice(0, eventVisibleCount);
+    const visible = pageItems("events", items, MODULE_PAGE_SIZE);
     eventGrid.setAttribute("aria-busy", "true");
     eventGrid.replaceChildren();
     if (!visible.length) {
@@ -2558,7 +2581,8 @@
       const candidate = Array.from(keywordFollowGrid?.querySelectorAll("[" + attribute + "]") || []).find(function (node) {
         return node.getAttribute(attribute) === value;
       });
-      candidate?.focus();
+      const mirror = candidate?.nextElementSibling?.matches("[data-rec-arco]") ? candidate.nextElementSibling.querySelector("button, input") : null;
+      (mirror || candidate)?.focus();
     });
   }
 
@@ -3066,6 +3090,9 @@
   });
 
   function setActiveSection(sectionId) {
+    if (!sections.some(function (section) { return section.id === sectionId; })) sectionId = "hot";
+    sections.forEach(function (section) { section.hidden = section.id !== sectionId; });
+    document.dispatchEvent(new CustomEvent("rec-section-change", { detail: sectionId }));
     sectionLinks.forEach(function (link) {
       const selected = link.dataset.sectionLink === sectionId;
       link.classList.toggle("is-active", selected);
@@ -3091,7 +3118,7 @@
       if (!section) return;
       event.preventDefault();
       setActiveSection(sectionId);
-      section.scrollIntoView({
+      document.getElementById("recommendationMain").scrollIntoView({
         behavior: prefersReducedMotion.matches ? "auto" : "smooth",
         block: "start"
       });
@@ -3112,22 +3139,8 @@
     });
   });
 
-  if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver(function (entries) {
-      if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
-      const scrollAnchor = (parseFloat(window.getComputedStyle(sections[0]).scrollMarginTop) || 118) + 80;
-      let activeSection = sections[0];
-      for (const section of sections) {
-        if (section.getBoundingClientRect().top <= scrollAnchor) activeSection = section;
-        else break;
-      }
-      if (activeSection) setActiveSection(activeSection.id);
-    }, {
-      rootMargin: "0px 0px -58% 0px",
-      threshold: [0.02, 0.16]
-    });
-    sections.forEach(function (section) { observer.observe(section); });
-  }
+  setActiveSection(window.location.hash.slice(1));
+  window.addEventListener("hashchange", function () { setActiveSection(window.location.hash.slice(1)); });
 
   function panelContentFor(panel) {
     return panel.querySelector(
@@ -3358,10 +3371,8 @@
         setActiveSection(sectionId);
         const root = document.documentElement;
         const previousInlineBehavior = root.style.scrollBehavior;
-        const scrollMargin = parseFloat(window.getComputedStyle(target).scrollMarginTop) || 0;
-        const targetTop = target.getBoundingClientRect().top + window.scrollY - scrollMargin;
         root.style.scrollBehavior = "auto";
-        window.scrollTo(0, Math.max(0, targetTop));
+        window.scrollTo(0, 0);
         root.style.scrollBehavior = previousInlineBehavior;
       };
       window.requestAnimationFrame(alignInitialSection);
@@ -3410,7 +3421,7 @@
   getReportItems=function(){let items=srReports();if(activeReportMode==='exclusive'){const audience=SR.snapshot().audience;items=items.filter(x=>x.audiences.includes(audience))}return SR.recommendSnapshot(srReportRequest(items)).items};
   const srTalentRender=renderTalentRecommendations;
   renderTalentRecommendations=function(){srTalentRender();const items=srRecommend('SCHOLAR','talent',AUTHORS);talentLibrary.replaceChildren(...items.map(createTalentCard));if(!items.length)talentLibrary.appendChild(createElement('p','rec-empty-state','暂无符合当前账户资料和兴趣的人才。'));risingStars.replaceChildren(...SR.risingCandidates().map(createRisingStarCard))};
-  renderCourses=function(){if(!courseGrid||!courseState)return;const result=srRecommend('COURSE','personal',COURSE_ITEMS);courseGrid.replaceChildren(...result.slice(0,courseVisibleCount).map(createCourseCard));replaceModuleStatus(courseStatus,'推荐课程列表',`当前 ${Math.min(courseVisibleCount,result.length)} / ${result.length} 门 · ${result.some(item=>item.hasEvidence)?'按已有搜索、浏览、收藏行为依据计算':'公共推荐，搜索、浏览、收藏均暂无依据'}`);updateMoreButton(courseMoreButton,result.length,courseVisibleCount,'课程');courseGrid.setAttribute('aria-busy','false')};
+  renderCourses=function(){if(!courseGrid||!courseState)return;const result=srRecommend('COURSE','personal',COURSE_ITEMS);courseGrid.replaceChildren(...pageItems('courses',result,MODULE_PAGE_SIZE).map(createCourseCard));replaceModuleStatus(courseStatus,'推荐课程列表',`当前 ${Math.min(courseVisibleCount,result.length)} / ${result.length} 门 · ${result.some(item=>item.hasEvidence)?'按已有搜索、浏览、收藏行为依据计算':'公共推荐，搜索、浏览、收藏均暂无依据'}`);updateMoreButton(courseMoreButton,result.length,courseVisibleCount,'课程');courseGrid.setAttribute('aria-busy','false')};
   createCourseChart=function(item){const chart=createElement('div','rec-course-chart');chart.setAttribute('aria-label',item.title+'行为匹配维度');Object.entries(item.dimensions).forEach(([label,value])=>{const row=createElement('div','rec-chart-row');row.appendChild(createElement('span','',label));if(value===null||value===undefined){row.appendChild(createElement('span','rec-chart-no-evidence','暂无依据'))}else{const track=createElement('div','rec-chart-track');track.setAttribute('role','progressbar');track.setAttribute('aria-label',label+'匹配度');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','100');track.setAttribute('aria-valuenow',String(value));const fill=createElement('span','rec-chart-fill');fill.style.width=value+'%';track.appendChild(fill);row.append(track,createElement('strong','',value+'%'))}chart.appendChild(row)});return chart};
   const srCourseCard=createCourseCard;
   createCourseCard=function(item){const card=srCourseCard(item);if(!item.hasEvidence)card.querySelector('.rec-recommendation-reason').textContent='公共推荐 · 暂无行为依据';return card};

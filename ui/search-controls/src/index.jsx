@@ -16,6 +16,7 @@ import '@arco-design/web-react/es/Pagination/style/css.js';
 import { FilterActions, FilterSidebar, FILTER_SCHEMAS } from './sidebar-filters.jsx';
 import reportDocuments from './report-preview.json';
 import { mountAiSearch } from './ai-search.jsx';
+import { SearchReturn } from './search-return.jsx';
 
 let roots;
 let handlers;
@@ -95,32 +96,6 @@ function ResultPagination({ model }) {
   />;
 }
 
-function SearchReturn() {
-  const [tipOpen, setTipOpen] = useState(false);
-  useEffect(() => {
-    const close = () => setTipOpen(false);
-    document.addEventListener('portal-search-transition-start', close);
-    return () => document.removeEventListener('portal-search-transition-start', close);
-  }, []);
-  return <Tooltip
-    content={<span id="portalSearchReturnTip">返回搜索首页</span>}
-    trigger={['hover', 'focus']}
-    position="bottom"
-    escToClose
-    popupVisible={tipOpen}
-    onVisibleChange={setTipOpen}
-    triggerProps={{ mouseEnterDelay: 160, mouseLeaveDelay: 80, containerScrollToClose: true }}
-  >
-    <button className="portal-search-return" id="portalSearchReturn" type="button"
-      aria-label="返回搜索首页" aria-describedby={tipOpen ? 'portalSearchReturnTip' : undefined}
-      onClick={() => { setTipOpen(false); handlers.onSearchReturn(); }}>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </button>
-  </Tooltip>;
-}
-
 function PreferenceInfo() {
   const [tipOpen, setTipOpen] = useState(false);
   return <Tooltip
@@ -166,7 +141,7 @@ window.PortalSearchControls = {
       filters: createRoot(document.getElementById('portalActiveFilters')),
       sidebar: createRoot(document.getElementById('portalSearchFilters'))
     };
-    flushSync(() => roots.searchReturn.render(<SearchReturn />));
+    flushSync(() => roots.searchReturn.render(<SearchReturn onReturn={() => handlers.onSearchReturn()} />));
     mountAiSearch(callbacks);
   },
   update(model) {

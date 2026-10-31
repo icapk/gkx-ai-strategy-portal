@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="科研情报智能推荐中心，集中展示热词、资讯、文献、报告、人才、会议、课程与活动推荐。">
   <title>科研情报智能推荐｜深圳国际科技信息中心</title>
-  <link rel="stylesheet" href="recommendations.css?v=20261030-talent-tabs">
+  <link rel="stylesheet" href="assets/vendor/portal-arco-recommendations.css?v=20261101-recommendations-release">
+  <link rel="stylesheet" href="recommendations.css?v=20261101-recommendations-release">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
   <link rel="stylesheet" href="recommendation-v1.css?v=20261030-domain-hotwords">
+  <link rel="stylesheet" href="portal-choice-controls.css?v=20261101-recommendations">
   <link rel="stylesheet" href="personal-entry.css?v=20261030-personal-demo">
+  <link rel="stylesheet" href="assets/portal-search-return.css?v=20261101-recommendations-release">
+  <link rel="stylesheet" href="recommendations-unified.css?v=20261101-recommendations-release">
+  <link rel="stylesheet" href="assets/portal-header.css?v=20261101-recommendations-release">
 </head>
 <body>
   <a class="rec-skip-link" href="#recommendationMain">跳到主要内容</a>
@@ -35,21 +40,24 @@
   <header class="rec-header" id="recHeader">
     <div class="rec-header-inner">
       <a class="rec-brand" href="index.html?page=home" aria-label="返回门户首页" data-back-home>
-        <span class="rec-brand-mark" aria-hidden="true">C</span>
+        <span class="rec-brand-mark" aria-hidden="true"><img src="apps/cluster-service/dist/assets/gkx-logo.png" width="28" height="28" alt=""></span>
         <span>深圳国际科技信息中心</span>
       </a>
       <nav class="rec-main-nav" id="recMainNav" aria-label="主导航">
-        <a class="portal-glass-tab" href="index.html?page=home" data-back-home>首页</a>
-        <a class="portal-glass-tab" href="ai-research.html" aria-current="page">科学研究</a>
+        <a class="portal-glass-tab" href="index.html?page=home" aria-current="page" data-back-home>首页</a>
+        <a class="portal-glass-tab" href="ai-research.html">科学研究</a>
         <a class="portal-glass-tab" href="education.html">未来教育</a>
         <a class="portal-glass-tab" href="evaluation.html">科技评价</a>
         <a class="portal-glass-tab" href="strategy.html">战略咨询</a>
+        <a class="portal-glass-tab" href="portal-admin-2.html">应用管理</a>
+        <a class="portal-glass-tab" href="index.html?cluster=scientific-data-center">集群服务</a>
       </nav>
       <div class="rec-header-actions">
+        <div id="recWorkbench"></div>
+        <a class="rec-todo-entry" href="portal-ticket-service.html" aria-label="打开待办中心"><img src="assets/header-todo.svg" width="20" height="20" alt="">待办中心</a>
         <button class="rec-header-action is-message" id="recMessageButton" type="button" aria-label="消息，5 条未读">
-          <svg aria-hidden="true"><use href="#rec-icon-bell"></use></svg><span>消息</span><em id="recMessageCount">5</em>
+          <svg aria-hidden="true"><use href="#rec-icon-bell"></use></svg><span>消息中心</span><em id="recMessageCount">5</em>
         </button>
-        <button class="rec-header-action" type="button" data-demo-action="应用中心为原型入口">应用</button>
         <div class="personal-rec-entry"><button class="personal-account-trigger" id="personalRecTrigger" type="button" aria-label="打开个人中心菜单" aria-controls="personalRecMenu" aria-expanded="false" aria-haspopup="menu"><span class="personal-menu-avatar" aria-hidden="true">q</span><span data-personal-trigger-label>quan…</span><span class="personal-caret" aria-hidden="true">▾</span></button><div class="personal-rec-menu" id="personalRecMenu" role="menu" hidden><a class="personal-account-item" href="personal-center.html?v=20261030-notification-email" role="menuitem"><span class="personal-menu-avatar" aria-hidden="true">q</span><span class="profile-menu-copy"><strong data-personal-account-name>quan.song@aminer.cn</strong><small data-personal-account-email>quan.song@aminer.cn</small><span class="personal-menu-caption">进入个人中心 ›</span></span></a><button class="personal-logout" id="personalRecLogout" type="button" role="menuitem">退出登录</button></div></div>
         <button class="rec-mobile-menu" id="recMobileMenu" type="button" aria-label="打开导航" aria-expanded="false" aria-controls="recMainNav">
           <svg aria-hidden="true"><use href="#rec-icon-menu"></use></svg>
@@ -58,12 +66,20 @@
     </div>
   </header>
 
-  <div class="rec-prototype-note" role="note">
-    <span>原型演示</span> 推荐内容与计算为浏览器内模拟，回放为自有交互示例。真实数据和活动录制待接入。
-  </div>
+  <main class="rec-main" id="recommendationMain">
+    <div class="rec-shell">
+      <section class="rec-hero" aria-labelledby="recPageTitle">
+        <header class="rec-hero-heading">
+          <div class="rec-page-title-row"><span id="recSearchReturnMount" data-rec-arco="return"></span><h1 id="recPageTitle">科研情报智能推荐</h1></div>
+          <p>解决科研情报痛点，提供深度学术生涯服务</p>
+        </header>
 
+      </section>
+
+      <div class="rec-workspace">
   <nav class="rec-content-nav" id="recContentNav" aria-label="推荐内容导航">
-    <p>内容导航</p>
+    <p>推荐分类</p>
+    <div id="recCategoryMenu" data-rec-arco="menu"></div>
     <a class="is-active" href="#hot" data-section-link="hot"><svg aria-hidden="true"><use href="#rec-icon-flame"></use></svg><span>热词推荐</span></a>
     <a href="#news" data-section-link="news"><svg aria-hidden="true"><use href="#rec-icon-news"></use></svg><span>资讯推荐</span></a>
     <a href="#papers" data-section-link="papers"><svg aria-hidden="true"><use href="#rec-icon-file"></use></svg><span>文献推荐</span></a>
@@ -74,37 +90,11 @@
     <a href="#events" data-section-link="events"><svg aria-hidden="true"><use href="#rec-icon-calendar"></use></svg><span>活动推荐</span></a>
   </nav>
 
-  <main class="rec-main" id="recommendationMain">
-    <div class="rec-shell">
-      <nav class="rec-breadcrumb" aria-label="页面路径">
-        <a href="index.html?page=home" data-back-home>
-          <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg>
-          返回首页
-        </a>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">智能推荐中心</span>
-      </nav>
-      <section class="rec-hero" aria-labelledby="recPageTitle">
-        <header class="rec-hero-heading">
-          <h1 id="recPageTitle">科研情报智能推荐</h1>
-          <p>解决科研情报痛点，提供深度学术生涯服务</p>
-        </header>
-
-      </section>
-
       <div class="rec-section-stack">
-        <section class="rec-panel rec-panel--hot" id="hot" data-rec-section="hot" aria-labelledby="hotTitle">
-          <header class="rec-panel-title">
-            <svg aria-hidden="true"><use href="#rec-icon-flame"></use></svg>
-            <div class="rec-panel-heading-copy">
-              <h2 id="hotTitle">热词推荐</h2>
-              <p class="rec-panel-subtitle">智能捕捉行业热点</p>
-            </div>
-            <button class="rec-manage-interests" type="button" data-sr-follow-settings aria-haspopup="dialog">管理关注领域</button>
-          </header>
+        <section class="rec-panel rec-panel--hot" id="hot" data-rec-section="hot" aria-label="热词推荐">
           <div class="rec-hot-layout">
             <div class="rec-hot-main">
-              <h3><span aria-hidden="true">🔥</span> 热门词汇</h3>
+              <div class="rec-hot-heading"><h3>热门词汇</h3><button class="rec-manage-interests" type="button" data-sr-follow-settings aria-haspopup="dialog">管理关注领域</button></div>
               <div class="rec-hot-grid">
                 <button class="rec-hot-card is-top" type="button" data-hot-query="ChatGPT"><strong>ChatGPT</strong><em>#1</em><span>28,500</span><small>+320%</small></button>
                 <button class="rec-hot-card is-top" type="button" data-hot-query="量子纠缠"><strong>量子纠缠</strong><em>#2</em><span>15,600</span><small>+156%</small></button>
@@ -123,7 +113,7 @@
               <section class="rec-keyword-follow" aria-labelledby="recKeywordFollowTitle">
                 <header class="rec-follow-heading">
                   <div>
-                    <h3 id="recKeywordFollowTitle"><span aria-hidden="true">📌</span> 词汇关注</h3>
+                    <h3 id="recKeywordFollowTitle">词汇关注</h3>
                     <p>根据搜索词自动建立关注档案，持续汇集相关资讯、文献与报告动态。</p>
                   </div>
                   <label class="rec-auto-follow" for="recAutoFollow">
@@ -150,21 +140,13 @@
 
         <noscript><p class="rec-noscript" role="note">当前浏览器未启用 JavaScript，推荐列表、筛选、详情展开与本机记录功能暂不可用。请启用 JavaScript 后刷新页面。</p></noscript>
 
-        <section class="rec-panel rec-panel--news" id="news" data-rec-section="news" aria-labelledby="newsTitle">
-          <header class="rec-panel-title">
-            <svg aria-hidden="true"><use href="#rec-icon-news"></use></svg>
-            <div class="rec-panel-heading-copy">
-              <h2 id="newsTitle">资讯推荐</h2>
-              <p class="rec-panel-subtitle">个性化精准触达</p>
-            </div>
-          </header>
+        <section class="rec-panel rec-panel--news" id="news" data-rec-section="news" aria-label="资讯推荐">
           <div class="rec-panel-tabs" id="recNewsTabs" role="tablist" aria-label="资讯推荐分类">
             <button class="is-active" id="recNewsTabLatest" type="button" role="tab" aria-selected="true" aria-controls="recNewsGrid" tabindex="0" data-news-mode="latest" disabled>最新资讯</button>
             <button id="recNewsTabHot" type="button" role="tab" aria-selected="false" aria-controls="recNewsGrid" tabindex="-1" data-news-mode="hot" disabled>热门资讯</button>
             <button id="recNewsTabFollowing" type="button" role="tab" aria-selected="false" aria-controls="recNewsGrid" tabindex="-1" data-news-mode="following" disabled>关注领域资讯</button>
           </div>
           <div class="rec-news-toolbar">
-            <p class="rec-news-status" id="recNewsStatus" role="status" aria-live="polite" aria-atomic="true"><strong>资讯推荐</strong><span>正在准备摘要、来源与浏览记录…</span></p>
             <div class="rec-news-toolbar-actions">
               <label class="rec-news-history-toggle" for="recNewsHistoryToggle">
                 <input id="recNewsHistoryToggle" type="checkbox" checked disabled>
@@ -181,21 +163,13 @@
           <p class="rec-personal-note">💡 原型说明：摘要、来源、发布时间与平台浏览量为演示数据；本机浏览记录仅保存在当前浏览器，可随时关闭或清空。</p>
         </section>
 
-        <section class="rec-panel rec-panel--papers" id="papers" data-rec-section="papers" aria-labelledby="papersTitle">
-          <header class="rec-panel-title">
-            <svg aria-hidden="true"><use href="#rec-icon-file"></use></svg>
-            <div class="rec-panel-heading-copy">
-              <h2 id="papersTitle">文献推荐</h2>
-              <p class="rec-panel-subtitle">紧跟学术前沿</p>
-            </div>
-          </header>
+        <section class="rec-panel rec-panel--papers" id="papers" data-rec-section="papers" aria-label="文献推荐">
           <div class="rec-panel-tabs" id="recPaperTabs" role="tablist" aria-label="文献推荐分类">
             <button class="is-active" id="recPaperTabLatest" type="button" role="tab" aria-selected="true" aria-controls="recPaperList" tabindex="0" data-paper-mode="latest" disabled>最新文献推荐</button>
             <button id="recPaperTabHot" type="button" role="tab" aria-selected="false" aria-controls="recPaperList" tabindex="-1" data-paper-mode="hot" disabled>热门文献推荐</button>
             <button id="recPaperTabFollowing" type="button" role="tab" aria-selected="false" aria-controls="recPaperList" tabindex="-1" data-paper-mode="following" disabled>关注作者文献推荐</button>
           </div>
           <div class="rec-module-toolbar">
-            <p class="rec-module-status" id="recPaperStatus" role="status" aria-live="polite" aria-atomic="true">正在准备文献推荐…</p>
             <div class="rec-module-controls">
               <label for="recPaperTimeRange">时间范围</label>
               <select id="recPaperTimeRange" disabled>
@@ -213,21 +187,13 @@
           <button class="rec-more-link" id="recPaperMore" type="button" aria-controls="recPaperList" disabled>查看更多文献 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
         </section>
 
-        <section class="rec-panel rec-panel--reports" id="reports" data-rec-section="reports" aria-labelledby="reportsTitle">
-          <header class="rec-panel-title">
-            <svg aria-hidden="true"><use href="#rec-icon-report"></use></svg>
-            <div class="rec-panel-heading-copy">
-              <h2 id="reportsTitle">报告推荐</h2>
-              <p class="rec-panel-subtitle">深度战略洞察</p>
-            </div>
-          </header>
+        <section class="rec-panel rec-panel--reports" id="reports" data-rec-section="reports" aria-label="报告推荐">
           <div class="rec-panel-tabs" id="recReportTabs" role="tablist" aria-label="报告推荐分类">
             <button class="is-active" id="recReportTabLatest" type="button" role="tab" aria-selected="true" aria-controls="recReportGrid" tabindex="0" data-report-mode="latest" disabled>最新报告</button>
             <button id="recReportTabHot" type="button" role="tab" aria-selected="false" aria-controls="recReportGrid" tabindex="-1" data-report-mode="hot" disabled>热门报告</button>
             <button id="recReportTabExclusive" type="button" role="tab" aria-selected="false" aria-controls="recReportGrid" tabindex="-1" data-report-mode="exclusive" disabled>专属报告</button>
           </div>
           <div class="rec-module-toolbar">
-            <p class="rec-module-status" id="recReportStatus" role="status" aria-live="polite" aria-atomic="true">正在准备报告推荐…</p>
             <div class="rec-module-controls">
               <label for="recReportRule">推荐规则</label>
               <select id="recReportRule" disabled>
@@ -248,14 +214,7 @@
           <button class="rec-more-link" id="recReportMore" type="button" aria-controls="recReportGrid" disabled>查看更多报告 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
         </section>
 
-        <section class="rec-panel rec-panel--talent" id="talent" data-rec-section="talent" aria-labelledby="talentTitle">
-          <header class="rec-panel-title">
-            <svg aria-hidden="true"><use href="#rec-icon-users"></use></svg>
-            <div class="rec-panel-heading-copy">
-              <h2 id="talentTitle">人才推荐</h2>
-              <p class="rec-panel-subtitle">促进学术合作</p>
-            </div>
-          </header>
+        <section class="rec-panel rec-panel--talent" id="talent" data-rec-section="talent" aria-label="人才推荐">
           <div class="rec-panel-tabs" id="recTalentTabs" role="tablist" aria-label="人才推荐分类">
             <button class="is-active" id="recTalentTabLibrary" type="button" role="tab" aria-selected="true" aria-controls="recTalentPanelLibrary" tabindex="0" data-talent-mode="library" disabled>人才库推荐</button>
             <button id="recTalentTabUpdates" type="button" role="tab" aria-selected="false" aria-controls="recTalentPanelUpdates" tabindex="-1" data-talent-mode="updates" disabled>作者动态</button>
@@ -268,8 +227,7 @@
               </div>
             </div>
             <div class="rec-talent-column rec-talent-panel rec-author-updates" id="recTalentPanelUpdates" role="tabpanel" aria-labelledby="recTalentTabUpdates" data-talent-panel="updates" tabindex="0" hidden>
-              <p class="rec-module-status rec-author-updates-status" id="recAuthorUpdatesStatus" role="status" aria-live="polite" aria-atomic="true">正在核对已关注作者…</p>
-              <div id="recAuthorUpdates" aria-describedby="recAuthorUpdatesStatus" aria-busy="true">
+              <div id="recAuthorUpdates" aria-busy="true">
                 <p class="rec-loading-state">正在加载作者动态…</p>
               </div>
             </div>
@@ -281,20 +239,12 @@
           </div>
         </section>
 
-        <section class="rec-panel rec-panel--conferences" id="conferences" data-rec-section="conferences" aria-labelledby="conferenceTitle">
-          <header class="rec-panel-title">
-            <svg aria-hidden="true"><use href="#rec-icon-trophy"></use></svg>
-            <div class="rec-panel-heading-copy">
-              <h2 id="conferenceTitle">顶会推荐</h2>
-              <p class="rec-panel-subtitle">掌握学术会议动态</p>
-            </div>
-          </header>
+        <section class="rec-panel rec-panel--conferences" id="conferences" data-rec-section="conferences" aria-label="顶会推荐">
           <div class="rec-panel-tabs" id="recConferenceTabs" role="tablist" aria-label="顶会推荐分类">
             <button class="is-active" id="recConferenceTabRecent" type="button" role="tab" aria-selected="true" aria-controls="recConferenceGrid" tabindex="0" data-conference-mode="recent" disabled>最近会议</button>
             <button id="recConferenceTabHot" type="button" role="tab" aria-selected="false" aria-controls="recConferenceGrid" tabindex="-1" data-conference-mode="hot" disabled>热门会议</button>
           </div>
           <div class="rec-module-toolbar">
-            <p class="rec-module-status" id="recConferenceStatus" role="status" aria-live="polite" aria-atomic="true">正在准备顶会推荐…</p>
           </div>
           <div class="rec-conference-grid" id="recConferenceGrid" role="tabpanel" aria-labelledby="recConferenceTabRecent" aria-busy="true" tabindex="0">
             <p class="rec-loading-state">正在加载顶会推荐…</p>
@@ -302,21 +252,8 @@
           <button class="rec-more-link" id="recConferenceMore" type="button" aria-controls="recConferenceGrid" disabled>查看更多会议 <svg aria-hidden="true"><use href="#rec-icon-arrow"></use></svg></button>
         </section>
 
-        <section class="rec-panel rec-panel--courses" id="courses" data-rec-section="courses" aria-labelledby="coursesTitle">
-          <header class="rec-panel-title">
-            <svg aria-hidden="true"><use href="#rec-icon-course"></use></svg>
-            <div class="rec-panel-heading-copy">
-              <h2 id="coursesTitle">课程推荐</h2>
-              <p class="rec-panel-subtitle">技能提升专属学习</p>
-              <div class="rec-visible-capabilities" aria-label="课程推荐服务能力">
-                <span class="rec-visible-capabilities-label">服务能力</span>
-                <span>推荐课程列表</span>
-                <span>课程详情查看</span>
-              </div>
-            </div>
-          </header>
+        <section class="rec-panel rec-panel--courses" id="courses" data-rec-section="courses" aria-label="课程推荐">
           <div class="rec-module-toolbar">
-            <p class="rec-module-status" id="recCourseStatus" role="status" aria-live="polite" aria-atomic="true">正在根据行为信号准备课程推荐…</p>
           </div>
           <div class="rec-course-grid" id="recCourseGrid" aria-busy="true">
             <p class="rec-loading-state">正在加载课程推荐…</p>
@@ -325,19 +262,7 @@
           <p class="rec-personal-note">💡 原型逻辑：基于研究方向和兴趣标签精选课程，真实个性化需经用户授权并接入兴趣画像。</p>
         </section>
 
-        <section class="rec-panel rec-panel--events" id="events" data-rec-section="events" aria-labelledby="eventsTitle">
-          <header class="rec-panel-title">
-            <svg aria-hidden="true"><use href="#rec-icon-calendar"></use></svg>
-            <div class="rec-panel-heading-copy">
-              <h2 id="eventsTitle">活动推荐</h2>
-              <p class="rec-panel-subtitle">聚焦深圳“20+8”产业集群</p>
-              <div class="rec-visible-capabilities" aria-label="活动推荐服务能力">
-                <span class="rec-visible-capabilities-label">服务能力</span>
-                <span>推荐活动列表</span>
-                <span>活动详情查看</span>
-              </div>
-            </div>
-          </header>
+        <section class="rec-panel rec-panel--events" id="events" data-rec-section="events" aria-label="活动推荐">
           <div class="rec-panel-tabs" id="recEventTabs" role="tablist" aria-label="活动推荐分类">
             <button class="is-active" id="recEventTabCombined" type="button" role="tab" aria-selected="true" aria-controls="recEventGrid" tabindex="0" data-event-mode="combined" disabled>推荐活动列表</button>
             <button id="recEventTabTechnology" type="button" role="tab" aria-selected="false" aria-controls="recEventGrid" tabindex="-1" data-event-mode="technology" disabled>热点技术</button>
@@ -345,7 +270,6 @@
             <button id="recEventTabArchive" type="button" role="tab" aria-selected="false" aria-controls="recEventGrid" tabindex="-1" data-event-mode="archive" disabled>往期记录</button>
           </div>
           <div class="rec-module-toolbar">
-            <p class="rec-module-status" id="recEventStatus" role="status" aria-live="polite" aria-atomic="true">正在准备活动推荐…</p>
           </div>
           <div class="rec-event-grid" id="recEventGrid" role="tabpanel" aria-labelledby="recEventTabCombined" aria-busy="true" tabindex="0">
             <p class="rec-loading-state">正在加载活动推荐…</p>
@@ -354,6 +278,8 @@
           <p class="rec-personal-note">🎯 原型逻辑：聚合热点技术与产业话题形成活动清单，真实推荐需结合用户授权的兴趣信号。</p>
         </section>
       </div>
+      </div>
+      <p class="rec-prototype-note" role="note">推荐内容为原型演示数据，关注与收藏保存在当前浏览器。</p>
     </div>
   </main>
 
@@ -366,7 +292,8 @@
   <script src="portal-search-recommend-adapter.js?v=20261030-notification-email"></script>
   <script src="personal-resource-catalog.js?v=20261030-personal-demo"></script>
   <script src="personal-data-demo.js?v=20261030-notification-email"></script>
-  <script src="recommendations.js?v=20261030-talent-tabs"></script>
+  <script src="recommendations.js?v=20261101-recommendations-release"></script>
   <script src="personal-entry.js?v=20261030-personal-demo"></script>
+  <script src="assets/vendor/portal-arco-recommendations.js?v=20261101-recommendations-release"></script>
 </body>
 </html>

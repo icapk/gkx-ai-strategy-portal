@@ -1,3 +1,4 @@
+@import url("assets/portal-search-return.css");
 /* Figma 官网 / 搜索后 1246:439. Layout and tokens are taken from the design context. */
 html { scrollbar-gutter: stable; }
 body[data-portal-scene="search"] { position: relative; isolation: isolate; background: #f7f8fa; }
@@ -92,41 +93,6 @@ body:has(#searchResultsPage:not([hidden])) #siteHeader::before {
   line-height: 24px;
 }
 
-#portalSearchReturnMount { display: inline-flex; flex: 0 0 auto; }
-.portal-search-return {
-  position: relative;
-  display: inline-flex;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 6px;
-  margin: -4px -8px;
-  padding: 0;
-  color: #86909c;
-  background: transparent;
-  cursor: pointer;
-  transition: color 140ms ease;
-}
-.portal-search-return::before { position: absolute; inset: 4px; border-radius: 4px; background: transparent; pointer-events: none; transition: background-color 140ms ease; content: ""; }
-
-.portal-search-return svg {
-  position: relative;
-  display: block;
-  width: 16px;
-  height: 16px;
-  transition: transform 140ms ease;
-}
-.portal-search-return:hover, .portal-search-return:focus-visible { color: #165dff; }
-.portal-search-return:hover::before, .portal-search-return:focus-visible::before { background: #e8f3ff; }
-.portal-search-return:hover svg { transform: translateX(-1px); }
-.portal-search-return:active, .portal-search-return.is-returning { color: #165dff; }
-.portal-search-return:active::before, .portal-search-return.is-returning::before { background: #c9e0ff; }
-.portal-search-return:active svg, .portal-search-return.is-returning svg { transform: translateX(-2px) scale(0.94); }
-.portal-search-return:focus-visible, .portal-search-page .portal-search-return:focus-visible { outline: none; }
-.portal-search-return:focus-visible::before { outline: 2px solid #165dff; outline-offset: 1px; }
 
 .portal-search-page .portal-search-lead {
   margin: 8px 0 0 24px;

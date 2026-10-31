@@ -9,6 +9,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "build:recommendations": "node build-recommendations.mjs"
   }
 }
