@@ -13,6 +13,56 @@
   let announcementCleanup = null;
   let workspaceAnimation = null;
   let workspaceCleanup = null;
+  let recommendationGeneration = 0;
+  let recommendationAnimations = [];
+  let recommendationCommit = null;
+  let recommendationCleanup = null;
+
+  function stopRecommendations(commitPending = true) {
+    recommendationGeneration += 1;
+    recommendationAnimations.forEach(animation => animation.cancel());
+    recommendationAnimations = [];
+    recommendationCleanup?.();
+    recommendationCleanup = null;
+    const commit = recommendationCommit;
+    recommendationCommit = null;
+    if (commitPending) commit?.();
+  }
+
+  function changeRecommendations(node, commit, options = {}) {
+    const from = getComputedStyle(node);
+    const opacity = from.opacity;
+    const transform = from.transform;
+    const height = node.getBoundingClientRect().height;
+    stopRecommendations(false);
+    if (options.animate === false || reduced.matches || !visible(node)) { commit(); return; }
+    const generation = recommendationGeneration;
+    const original = { height: node.style.height, overflow: node.style.overflow, willChange: node.style.willChange, pointerEvents: node.style.pointerEvents, inert: node.inert, busy: node.getAttribute('aria-busy') };
+    recommendationCleanup = () => {
+      Object.assign(node.style, { height: original.height, overflow: original.overflow, willChange: original.willChange, pointerEvents: original.pointerEvents });
+      node.inert = original.inert;
+      if (original.busy === null) node.removeAttribute('aria-busy'); else node.setAttribute('aria-busy', original.busy);
+    };
+    recommendationCommit = commit;
+    Object.assign(node.style, { height: `${height}px`, overflow: 'hidden', willChange: 'opacity,transform,height', pointerEvents: 'none' });
+    node.inert = true; node.setAttribute('aria-busy', 'true');
+    const exit = node.animate([{ opacity, transform }, { opacity: 0, transform: 'translateY(-4px)' }], { duration: 100, easing: ease, fill: 'both' });
+    recommendationAnimations = [exit];
+    exit.finished.then(() => {
+      if (generation !== recommendationGeneration) return;
+      commit(); recommendationCommit = null;
+      node.style.height = original.height;
+      const nextHeight = node.getBoundingClientRect().height;
+      node.style.height = `${height}px`;
+      const enter = node.animate([
+        { opacity: 0, transform: 'translateY(8px)', height: `${height}px` },
+        { opacity: 1, transform: 'none', height: `${nextHeight}px` }
+      ], { duration: 240, easing: ease, fill: 'both' });
+      // Replace the exit effect only after the incoming effect is installed.
+      recommendationAnimations = [enter]; exit.cancel();
+      enter.finished.then(() => { if (generation === recommendationGeneration) stopRecommendations(); }).catch(() => {});
+    }).catch(() => {});
+  }
 
   const visible = (node) => Boolean(node && node.getClientRects().length);
   const rect = (node) => {
@@ -34,6 +84,7 @@
     contentAnimations = [];
   }
   function stopSurface() {
+    stopRecommendations();
     surfaceGeneration += 1;
     workspaceAnimation?.cancel();
     workspaceAnimation = null;
@@ -79,7 +130,7 @@
       document.dispatchEvent(new Event('portal-search-workspace-reveal'));
       const animations = originals.map(({ node, baseTransform }) => {
         node.dataset.resultsPhase = 'revealing';
-        return node.animate([{ opacity: 0, transform: `${baseTransform} translateY(8px)` }, { opacity: 1, transform: baseTransform || 'none' }], { duration: 420, easing: ease, fill: 'both' });
+        return node.animate([{ opacity: 0, transform: `${baseTransform} translateY(8px)` }, { opacity: 1, transform: baseTransform || 'none' }], { delay: 140, duration: 260, easing: ease, fill: 'both' });
       });
       const group = { cancel: () => animations.forEach(animation => animation.cancel()) };
       workspaceAnimation = group;
@@ -90,38 +141,12 @@
       });
     };
   }
-  function moveText(node, start, end) {
-    const original = { fontSize: node.style.fontSize, whiteSpace: node.style.whiteSpace, width: node.style.width };
-    const multiline = end.text.height > end.lineHeight * 1.4;
-    let from = end;
-    let fontSize = end.fontSize;
-    if (!multiline) {
-      const available = Math.max(160, document.documentElement.clientWidth - 64);
-      fontSize = Math.min(start.fontSize, end.fontSize * available / end.text.width);
-      node.style.fontSize = `${fontSize}px`;
-      node.style.whiteSpace = 'nowrap';
-      node.style.width = 'max-content';
-      from = rect(node);
-      surfaceCleanups.push(() => Object.assign(node.style, original));
-    }
-    // Match the glyphs, not the width of their surrounding block. Both lines
-    // begin around the same source centre and settle into the result alignment.
-    const left = start.text.left + (start.text.width - from.text.width) / 2;
-    const x = left - from.text.left;
-    const y = start.text.top - from.text.top;
-    animateSurface(node, [
-      { transform: `translate(${x}px,${y}px)`, fontSize: `${fontSize}px` },
-      { transform: 'none', fontSize: `${end.fontSize}px` }
-    ], { duration: 950, easing: 'cubic-bezier(0.42,0,0.58,1)', fill: 'both' });
-  }
-  function revealAiTitle(node, exitAnimations, generation) {
-    // Motion AnimatePresence's "wait" pattern: the old title exits before the
-    // new title enters. Keep the AI label at its final size and alignment.
-    // https://github.com/motiondivision/motion/blob/main/packages/framer-motion/src/components/AnimatePresence/index.tsx
+  function revealSearchHeading(node, exitAnimations, generation) {
+    // Keep labels at their final font size; the composer carries continuity.
     const enter = animateSurface(node, [
       { opacity: 0, transform: 'translateY(6px)' },
       { opacity: 1, transform: 'none' }
-    ], { duration: 380, easing: ease, fill: 'both' });
+    ], { duration: 240, easing: ease, fill: 'both' });
     enter.pause();
     enter.currentTime = 0;
     Promise.all(exitAnimations.map(animation => animation.finished.catch(() => {}))).then(() => {
@@ -250,7 +275,7 @@
       // animation short and exposing the lower area before it is ready.
       if (moving && !workspaceCleanup) stopSurface();
       apply(name, moving && workspaceCleanup ? {...options,deferTransitionFocus:true} : options);
-      if (!(moving && workspaceCleanup) && name === 'search') requestAnimationFrame(() => document.dispatchEvent(new Event('portal-search-workspace-reveal')));
+      if (name === 'search') requestAnimationFrame(() => document.dispatchEvent(new Event('portal-search-workspace-reveal')));
       return;
     }
     const returnIcon = document.getElementById('portalSearchReturn');
@@ -269,7 +294,7 @@
       fadeReturnIconOut(returnIcon, returnOpacity);
       apply(name,{...options,deferTransitionFocus:true});
       document.body.dataset.portalMotionEngine='home-entrance';
-      window.PortalHomeEntrance?.({ focusTarget: options.focusTarget });
+      window.PortalHomeEntrance?.({ focusTarget: options.focusTarget, variant: 'return' });
       Promise.all(surfaceAnimations.map(animation=>animation.finished.catch(()=>{}))).then(()=>{
         if(generation!==surfaceGeneration)return;
         surfaceAnimations.forEach(animation=>animation.cancel());
@@ -280,32 +305,31 @@
     }
     // Measure both lines before detaching either, so their fade stays exactly
     // where the homepage was painted rather than changing the second line's y.
-    const aiTitleSources = search.classList.contains('is-ai')
-      ? [document.querySelector('.mg-hero-heading h1'), document.querySelector('.mg-hero-heading > p')]
+    const titleSources = [document.querySelector('.mg-hero-heading h1'), document.querySelector('.mg-hero-heading > p')]
           .filter(visible).map(node => {
             const computed = getComputedStyle(node);
             return { node, bounds: node.getBoundingClientRect(), style: Object.fromEntries(
               ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'color', 'textAlign', 'opacity']
                 .map(key => [key, computed[key]])) };
-          })
-      : [];
-    const aiTitleExit = aiTitleSources.map(source => fadeHomeText(source.node, 200, source));
+          });
+    const titleExit = titleSources.map(source => fadeHomeText(source.node, 160, source));
     apply(name,{...options,deferTransitionFocus:true});
     document.body.classList.add('portal-surface-transition');
     document.body.dataset.portalMotionEngine='always-visible-single-layer';
     const ai = search.classList.contains('is-ai');
-    const revealWorkspace = prepareWorkspace(ai ? document.getElementById('portalAiConversation') : document.querySelector('.portal-search-layout'), generation);
+    const revealWorkspace = prepareWorkspace(ai
+      ? [document.getElementById('portalAiConversation'), document.getElementById('portalAiCitations')]
+      : document.querySelector('.portal-search-layout'), generation);
     const incoming=targets(name);
     if (name === 'search' && visible(returnIcon)) {
       animateSurface(returnIcon, [{ opacity: 0 }, { opacity: 1 }], {
-        delay: 180, duration: 500, easing: 'cubic-bezier(0.42,0,0.58,1)', fill: 'backwards'
+        delay: 100, duration: 220, easing: ease, fill: 'backwards'
       });
     }
     incoming.forEach((node,index)=>{
       const start=before[index];if(!start||!visible(node))return;
       const end=rect(node);
-      if(ai && index===0) revealAiTitle(node, aiTitleExit, generation);
-      else if(index<2) moveText(node,start,end);
+      if(index<2) revealSearchHeading(node, titleExit, generation);
       else if (ai && window.matchMedia('(min-width: 901px)').matches) {
         // Fit the actual composer width and height instead of scaling its text.
         // Its grid row is bottom-anchored, so compensate for the height fit.
@@ -314,19 +338,14 @@
         animateSurface(node, [
           { width: `${start.width}px`, height: `${start.height}px`, backgroundColor: start.backgroundColor, borderRadius: start.borderRadius, transform: `${end.baseTransform} translate(${start.left-end.left}px,${start.top-end.top+start.height-end.height}px)` },
           { width: `${end.width}px`, height: `${end.height}px`, backgroundColor: end.backgroundColor, borderRadius: end.borderRadius, transform: end.baseTransform || 'none' }
-        ], { duration: 950, easing: 'cubic-bezier(0.42,0,0.58,1)', fill: 'both' });
+        ], { duration: 520, easing: ease, fill: 'both' });
       } else animateSurface(node,[
         {transform:`translate(${start.left-end.left}px,${start.top-end.top}px)`},
         {transform:'none'}
-      ],{duration:950,easing:'cubic-bezier(0.42,0,0.58,1)'});
-      if(index===2) {
-        // Fade the actual dialogue as one surface; its controls never acquire
-        // a second layer or disappear completely during the movement.
-        animateSurface(node,[{opacity:0.64},{opacity:1}],{
-          duration:800,easing:'cubic-bezier(0.42,0,0.58,1)'
-        });
-      }
+      ],{duration:520,easing: ease});
     });
+    // Acknowledge the query and reveal results while the composer is moving.
+    revealWorkspace?.();
     Promise.all(surfaceAnimations.map(animation=>animation.finished.catch(()=>{}))).then(()=>{
       if(generation!==surfaceGeneration)return;
       surfaceAnimations.forEach(animation=>animation.cancel());surfaceAnimations=[];
@@ -335,7 +354,6 @@
       const focus=document.activeElement;
       if(options.focusTarget&&visible(options.focusTarget)&&(focus===document.body||focus===initialFocus||focus===options.focusTarget))options.focusTarget.focus({preventScroll:true});
       layoutChanged();
-      revealWorkspace?.();
     });
   }
   function captureContent() {
@@ -436,5 +454,5 @@
     drawerAnimation?.cancel(); drawerAnimation = null;
     drawerElement?.classList.remove("is-closing");
   });
-  window.PortalSearchMotion = { switchSurface, beforeModeChange, prepareResults, animateResults, reveal, drawerState, announcementState, layoutChanged };
+  window.PortalSearchMotion = { switchSurface, beforeModeChange, prepareResults, animateResults, reveal, drawerState, announcementState, layoutChanged, changeRecommendations };
 })();

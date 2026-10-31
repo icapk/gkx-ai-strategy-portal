@@ -207,7 +207,19 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
   padding: calc(162px - var(--mg-home-offset) + var(--mg-content-top-space)) 0 41px;
 }
 
-/* The dialogue leads; the copy rises from behind its top edge. */
+/* Tall desktop views expose the next section: 48px here + 80px there = 128px. */
+@media (min-width: 901px) and (min-height: 900px) {
+  .mg-hero,
+  .mg-hero .mg-hero-inner {
+    min-height: 0;
+  }
+
+  .mg-hero .mg-hero-inner {
+    padding-bottom: 48px;
+  }
+}
+
+/* The dialogue leads a short, overlapping entrance. */
 .mg-hero[data-home-entrance] .mg-hero-heading {
   position: relative;
   z-index: 1;
@@ -219,17 +231,17 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
 
 .mg-hero[data-home-entrance="pending"] #mgHeroSearchForm {
   opacity: 0;
-  transform: translateY(22px) scale(0.98);
+  transform: translateY(12px);
 }
 
 .mg-hero[data-home-entrance="pending"] .mg-hero-heading {
   opacity: 0;
-  transform: translateY(var(--mg-heading-rise, 112px));
+  transform: translateY(var(--mg-heading-rise, 20px));
 }
 
 .mg-hero[data-home-entrance="pending"] #mgSmartRecommendations {
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(12px);
 }
 
 .mg-hero[data-home-entrance] :is(.mg-hero-heading, #mgHeroSearchForm, #mgSmartRecommendations) {
@@ -239,6 +251,14 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
 /* A single animation engine owns entry; keep existing hover styles independent. */
 .mg-hero :is(.mg-simulation-card, .mg-recommendation-preview-card) {
   animation: none;
+}
+
+.mg-hero .mg-search-submit {
+  transition: background-color 140ms ease, transform 120ms ease;
+}
+
+.mg-hero .mg-search-submit:active {
+  transform: scale(0.94);
 }
 
 @media (prefers-reduced-motion: reduce) {

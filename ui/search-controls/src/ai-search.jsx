@@ -39,16 +39,15 @@ const topicFor = source => source.id.startsWith('ai-demo-')
   ? topics[Number(source.id.at(-1)) - 1].key
   : topics.find(topic => topic.test.test(`${source.title} ${source.summary}`))?.key || 'evidence';
 const initialState = () => ({ query: '', draft: '', sources: [], step: -1, phase: 'idle', ready: false, chunks: 0,
-  open: true, manualOpen: false, filter: '全部', sourcePage: 1, expanded: new Set(), focused: '', copied: false,
+  open: false, manualOpen: false, filter: '全部', sourcePage: 1, expanded: new Set(), focused: '', copied: false,
   error: '', awaiting: false, running: false, startedAt: 0, elapsed: 0, mobileSourcesOpen: false,
-  layout: 'centered', sourcesVisible: false });
+  layout: 'settled', sourcesVisible: false });
 let state = initialState();
 let roots;
 let callbacks;
 let generation = 0;
 let timers = new Set();
 let focusTicket = 0;
-let shiftCleanup;
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = () => window.innerWidth <= 900;
 const pageVisible = () => !document.getElementById('searchResultsPage').hidden && document.getElementById('searchResultsPage').classList.contains('is-ai');
@@ -71,7 +70,7 @@ function render() {
 }
 function renderComposer() { if (roots) flushSync(() => roots.composer.render(<Composer />)); }
 function renderSources() { if (roots) { syncLayout(); flushSync(() => roots.sources.render(<Sources />)); } }
-function stopTimers() { generation += 1; timers.forEach(clearTimeout); timers.clear(); shiftCleanup?.(); shiftCleanup = null; }
+function stopTimers() { generation += 1; timers.forEach(clearTimeout); timers.clear(); }
 function later(ms, action) {
   const version = generation;
   const timer = setTimeout(() => { timers.delete(timer); if (version === generation && pageVisible()) action(); }, ms);
@@ -102,28 +101,6 @@ function cite(id) {
   });
   const ticket = ++focusTicket;
   later(1400, () => { if (ticket === focusTicket) { state.focused = ''; renderSources(); } });
-}
-// Keep the same conversation and composer nodes throughout the sequence.
-// References become interactive only after the actual slide has finished.
-function revealSources() {
-  state.layout = 'settled'; state.sourcesVisible = true;
-  state.mobileSourcesOpen = mobile() && Boolean(state.focused);
-  renderSources();
-}
-function settleConversation() {
-  if (state.layout === 'settled' || reduced() || mobile()) { revealSources(); return; }
-  const version = generation;
-  const conversation = document.getElementById('portalAiConversation');
-  const finish = () => {
-    if (generation !== version || !pageVisible()) return;
-    shiftCleanup?.(); shiftCleanup = null; revealSources();
-  };
-  const onEnd = event => { if (event.target === conversation && event.propertyName === 'transform') finish(); };
-  conversation.addEventListener('transitionend', onEnd);
-  shiftCleanup = () => conversation.removeEventListener('transitionend', onEnd);
-  state.layout = 'shifting'; syncLayout();
-  // Also settle if a resize or interrupted transition suppresses transitionend.
-  later(760, finish);
 }
 function Citation({ source }) {
   return <Button type="text" size="mini" className="portal-ai-citation" aria-label={`查看引用${source.number}：${source.title}`} onClick={() => cite(source.id)}>{source.number}</Button>;
@@ -227,7 +204,7 @@ function SourceContents() {
 function Sources() {
   if (!mobile()) return <SourceContents />;
   return <>
-    {createPortal(state.sourcesVisible && <Button type="text" size="small" className="portal-ai-mobile-citations" onClick={() => { state.mobileSourcesOpen = true; renderSources(); }}>引用 {state.sources.length}</Button>, document.getElementById('portalAiMobileSourcesMount'))}
+    {createPortal(state.sourcesVisible && state.ready && <Button type="text" size="small" className="portal-ai-mobile-citations" onClick={() => { state.mobileSourcesOpen = true; renderSources(); }}>引用 {state.sources.length}</Button>, document.getElementById('portalAiMobileSourcesMount'))}
     <Drawer visible={state.mobileSourcesOpen && state.sourcesVisible && pageVisible()} placement="right" width="min(100vw, 420px)" title={null} footer={null} closable={false} escToExit
       className="portal-ai-sources-drawer" bodyStyle={{ padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
       onCancel={() => { state.mobileSourcesOpen = false; renderSources(); }}>
@@ -266,24 +243,28 @@ window.PortalAiSearch = {
   prepare(query, fallback = []) {
     stopTimers();
     const initial = document.getElementById('searchResultsPage').hidden;
-    const layout = initial ? 'centered' : state.layout;
-    state = { ...initialState(), query, draft: initial ? query : '', sources: makeSources(query, fallback), phase: 'waiting', awaiting: true, layout };
+    state = { ...initialState(), query, draft: initial ? query : '', sources: makeSources(query, fallback), phase: 'waiting', awaiting: true, sourcesVisible: true };
     render(); document.getElementById('portalAiConversation').scrollTop = 0;
   },
   begin() {
     if (!state.awaiting || !pageVisible()) return;
-    state.awaiting = false; state.draft = ''; state.step = 0; state.running = true; state.startedAt = Date.now(); state.phase = 'processing'; render();
-    if (reduced()) { state.step = 3; state.ready = true; state.running = false; state.chunks = 4; state.phase = 'done'; state.open = false; render(); revealSources(); return; }
-    later(650, () => { state.step = 1; render(); });
-    later(1450, () => { state.step = 2; state.ready = true; render(); });
-    later(2250, () => { state.step = 3; state.phase = 'writing'; render(); });
-    [2500, 2720, 2940, 3160].forEach((time, index) => later(time, () => { state.chunks = index + 1; render(); }));
-    later(3250, () => { if (!state.manualOpen) { state.open = false; render(); } });
-    later(3300, () => { state.phase = 'done'; state.running = false; state.elapsed = Math.ceil((Date.now() - state.startedAt) / 1000); render(); });
-    // Wait for the final content entrance and process collapse before sliding.
-    later(3600, settleConversation);
+    const entering = document.body.classList.contains('portal-surface-transition');
+    const submittedDraft = state.draft;
+    state.awaiting = false; if (!entering) state.draft = '';
+    state.step = 0; state.running = true; state.startedAt = Date.now(); state.phase = 'processing'; render();
+    if (entering) later(520, () => {
+      // Clear only the submitted draft; preserve a new query typed mid-motion.
+      if (state.draft === submittedDraft) { state.draft = ''; renderComposer(); }
+    });
+    if (reduced()) { state.draft = ''; state.step = 3; state.ready = true; state.running = false; state.chunks = 4; state.phase = 'done'; render(); return; }
+    // These short stages visualize local prototype data, not network latency.
+    later(240, () => { state.step = 1; render(); });
+    later(600, () => { state.step = 2; state.ready = true; render(); });
+    later(760, () => { state.step = 3; state.phase = 'writing'; if (!state.manualOpen) state.open = false; render(); });
+    [800, 1020, 1240, 1460].forEach((time, index) => later(time, () => { state.chunks = index + 1; render(); }));
+    later(1580, () => { state.phase = 'done'; state.running = false; state.elapsed = Math.ceil((Date.now() - state.startedAt) / 1000); render(); });
   },
-  cancel() { stopTimers(); state.awaiting = false; state.running = false; state.mobileSourcesOpen = false; state.layout = 'centered'; state.sourcesVisible = false; render(); },
+  cancel() { stopTimers(); state.awaiting = false; state.running = false; state.mobileSourcesOpen = false; state.sourcesVisible = false; render(); },
 };
 document.addEventListener('portal-search-workspace-reveal', () => window.PortalAiSearch.begin());
 

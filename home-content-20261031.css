@@ -26,6 +26,9 @@
   padding: 0;
 }
 .research-home .mg-loop-section { padding-top: 112px; }
+@media (min-width: 901px) and (min-height: 900px) {
+  .research-home .mg-loop-section { padding-top: 80px; }
+}
 .research-home section + section { margin-top: 152px; }
 .research-home .mg-strategy-section { padding-bottom: 120px; }
 .research-home .mg-section-heading {

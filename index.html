@@ -3015,11 +3015,11 @@
   <link rel="stylesheet" href="home-section-fidelity.css?v=20261014-1">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261012-alert">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
-  <link rel="stylesheet" href="home-hero-20261029.css?v=20261031-portal-release-2">
-  <link rel="stylesheet" href="home-content-20261031.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="home-hero-20261029.css?v=20261031-home-spacing-1">
+  <link rel="stylesheet" href="home-content-20261031.css?v=20261031-home-spacing-1">
   <link rel="stylesheet" href="assets/vendor/portal-arco-search.css?v=20261031-portal-release-2">
   <link rel="stylesheet" href="search-results-fidelity.css?v=20261031-portal-release-2">
-  <link rel="stylesheet" href="ai-search-fidelity.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="ai-search-fidelity.css?v=20261031-motion-2">
   <link rel="stylesheet" href="portal-choice-controls.css?v=20261031-portal-release-2">
   <link rel="stylesheet" href="profile-content-preserved.css?v=20261031-entry-fix">
   <style>
@@ -5139,9 +5139,9 @@
   <script src="personal-resource-catalog.js?v=20261031-entry-fix"></script>
   <script src="personal-data-demo.js?v=20261031-entry-fix"></script>
   <script defer src="assets/vendor/gsap-3.15.0.min.js"></script>
-  <script src="search-results-motion.js?v=20261031-portal-release-2"></script>
+  <script src="search-results-motion.js?v=20261031-motion-2"></script>
   <script src="home-content-20261031.js?v=20261031-portal-release-2"></script>
-  <script src="assets/vendor/portal-arco-search.js?v=20261031-portal-release-2"></script>
+  <script src="assets/vendor/portal-arco-search.js?v=20261031-motion-2"></script>
   <script>
     (() => {
       "use strict";
@@ -6625,15 +6625,23 @@
       function renderHeroRecommendations(groupKey) {
         const group = HERO_RECOMMENDATION_GROUPS[groupKey] || HERO_RECOMMENDATION_GROUPS.simulation;
         activeHeroRecommendation = groupKey in HERO_RECOMMENDATION_GROUPS ? groupKey : "simulation";
+        const nextGroup = activeHeroRecommendation;
+        const changed = mgRecommendationPreview.dataset.recommendationGroup !== nextGroup;
         try {
           sessionStorage.setItem("portal-active-hero-recommendation", activeHeroRecommendation);
         } catch (error) { /* keep the current page state when storage is unavailable */ }
-        mgSmartRecommendationContext.textContent = group.label;
-        mgRecommendationMore.setAttribute("aria-label", `查看更多${group.itemLabel}`);
-        mgRecommendationPreview.setAttribute("aria-labelledby", "mgSmartRecommendationTitle");
-        mgRecommendationPreview.setAttribute("aria-label", `${group.label}智能推荐，共 ${group.items.length} 项`);
-        mgRecommendationPreview.dataset.recommendationGroup = activeHeroRecommendation;
-        mgRecommendationPreview.replaceChildren(...group.items.map((item, index) => createHeroRecommendationCard(item, activeHeroRecommendation, index)));
+        const commit = () => {
+          mgSmartRecommendationContext.textContent = group.label;
+          mgRecommendationMore.setAttribute("aria-label", `查看更多${group.itemLabel}`);
+          mgRecommendationPreview.setAttribute("aria-labelledby", "mgSmartRecommendationTitle");
+          mgRecommendationPreview.setAttribute("aria-label", `${group.label}智能推荐，共 ${group.items.length} 项`);
+          mgRecommendationPreview.dataset.recommendationGroup = nextGroup;
+          mgRecommendationPreview.replaceChildren(...group.items.map((item, index) => createHeroRecommendationCard(item, nextGroup, index)));
+        };
+        if (window.PortalSearchMotion) window.PortalSearchMotion.changeRecommendations(mgRecommendationPreview, commit, {
+          animate: changed && !homeContent.hidden && !homeEntranceRoot.dataset.homeEntrance
+        });
+        else commit();
       }
 
       function renderHeroIntent() {
@@ -6953,7 +6961,8 @@
 
       function runHomeEntrance(options = {}) {
         const root = homeEntranceRoot;
-        if (homeContent.hidden || !root.dataset.homeEntrance || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+        if (homeContent.hidden || !root.dataset.homeEntrance || motionPreference.matches) {
           delete root.dataset.homeEntrance;
           return;
         }
@@ -6961,6 +6970,7 @@
         // https://gsap.com/docs/v3/GSAP/Timeline/
         const heading = document.querySelector(".mg-hero-heading");
         const targets = [heading, mgHeroSearchForm, mgSmartRecommendations];
+        const returning = options.variant === "return";
         let timeline;
         let finished = false;
         const initialFocus = document.activeElement;
@@ -6974,6 +6984,8 @@
           document.removeEventListener("pointerdown", finish, true);
           document.removeEventListener("focusin", finish, true);
           document.removeEventListener("portal-search-transition-start", finish, true);
+          window.removeEventListener("resize", finish);
+          motionPreference.removeEventListener("change", finish);
           if (restoreFocus === true && options.focusTarget && !homeContent.hidden &&
             (document.activeElement === document.body || document.activeElement === initialFocus)) {
             options.focusTarget.focus({ preventScroll: true });
@@ -6982,32 +6994,30 @@
         document.addEventListener("pointerdown", finish, true);
         document.addEventListener("focusin", finish, true);
         document.addEventListener("portal-search-transition-start", finish, true);
+        window.addEventListener("resize", finish);
+        motionPreference.addEventListener("change", finish);
 
-        const start = async () => {
-          const background = new Image();
-          background.src = "assets/figma-home-20261029/background.png";
-          const images = [...root.querySelectorAll("img"), background];
-          await Promise.allSettled(images.map((image) => image.decode()));
+        // Start the usable surface without waiting for recommendation imagery.
+        const start = () => {
           requestAnimationFrame(() => requestAnimationFrame(() => {
             if (finished || homeContent.hidden || !root.dataset.homeEntrance || !window.gsap) {
               finish();
               return;
             }
-            const titleRise = Math.max(60, Math.min(180, mgHeroSearchForm.offsetTop - heading.offsetTop));
+            const titleRise = returning ? 8 : 20;
             root.style.setProperty("--mg-heading-rise", `${titleRise}px`);
-            window.gsap.set(mgHeroSearchForm, { opacity: 0, y: 22, scale: 0.98 });
+            window.gsap.set(mgHeroSearchForm, { opacity: 0, y: returning ? 6 : 12 });
             window.gsap.set(heading, { opacity: 0, y: titleRise });
-            window.gsap.set(mgSmartRecommendations, { opacity: 0, y: 18 });
+            window.gsap.set(mgSmartRecommendations, { opacity: 0, y: returning ? 6 : 12 });
             root.dataset.homeEntrance = "playing";
             timeline = window.gsap.timeline({ onComplete: () => finish(true) });
             timeline
               .addLabel("dialog", 0)
-              .addLabel("copy", 0.35)
-              .addLabel("recommendations", 1)
-              .to(mgHeroSearchForm, { opacity: 1, y: 0, scale: 1, duration: 0.95, ease: "power2.out", force3D: true }, "dialog")
-              .to(heading, { y: 0, duration: 1.45, ease: "power3.out", force3D: true }, "copy")
-              .to(heading, { opacity: 1, duration: 1.3, ease: "sine.out" }, "copy")
-              .to(mgSmartRecommendations, { opacity: 1, y: 0, duration: 1.55, ease: "sine.out", force3D: true }, "recommendations");
+              .addLabel("copy", returning ? 0 : 0.12)
+              .addLabel("recommendations", returning ? 0.04 : 0.3)
+              .to(mgHeroSearchForm, { opacity: 1, y: 0, duration: returning ? 0.28 : 0.55, ease: "power2.out", force3D: true }, "dialog")
+              .to(heading, { opacity: 1, y: 0, duration: returning ? 0.28 : 0.56, ease: "power2.out", force3D: true }, "copy")
+              .to(mgSmartRecommendations, { opacity: 1, y: 0, duration: returning ? 0.24 : 0.54, ease: "power2.out", force3D: true }, "recommendations");
           }));
         };
         if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
@@ -8753,6 +8763,9 @@
         onSearchReturn() {
           const button = document.getElementById("portalSearchReturn");
           button.classList.add("is-returning");
+          const url = new URL(window.location.href);
+          ["query", "mode", "type", "scope"].forEach(key => url.searchParams.delete(key));
+          history.replaceState(null, "", url);
           showSurface("home", { focusTarget: mgHeroSearchInput });
           window.setTimeout(() => button.classList.remove("is-returning"), 320);
         },
