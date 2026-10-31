@@ -8821,7 +8821,7 @@
       const entryType = entrySearchParams.get("type");
       if (entryQuery) {
         performSearch(entryQuery, {
-          mode: SEARCH_MODE_CONFIG[entryMode] ? entryMode : "全文",
+          mode: SEARCH_MODE_CONFIG[entryMode] ? entryMode : "关键词",
           resourceType: entryType || undefined,
           scope: entrySearchParams.get("scope") || undefined
         });
