@@ -1,0 +1,118 @@
+/* Shared filled radio/checkbox theme for portal dialogs, forms and filters. */
+:root {
+  --portal-choice-size: 14px;
+  --portal-choice-hit-size: 20px;
+  --portal-choice-primary: #165dff;
+  --portal-choice-border: #e5e6eb;
+  --portal-choice-hover-border: #c9cdd4;
+  --portal-choice-hover: #f2f3f5;
+  --portal-choice-disabled: #bedaff;
+}
+
+.arco-radio-icon-hover, .arco-checkbox-icon-hover {
+  display: inline-flex;
+  width: var(--portal-choice-hit-size);
+  height: var(--portal-choice-hit-size);
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+.arco-radio-mask-wrapper, .arco-checkbox-mask-wrapper { top: 0; line-height: 1; }
+.arco-radio-mask, .arco-checkbox-mask {
+  box-sizing: border-box;
+  width: var(--portal-choice-size);
+  height: var(--portal-choice-size);
+  border: 2px solid var(--portal-choice-border);
+  background: #fff;
+  transition: border-color 120ms ease, background-color 120ms ease, transform 120ms ease;
+}
+.arco-radio-mask { border-radius: 50%; }
+.arco-radio-mask::after {
+  top: 0; left: 0; width: 10px; height: 10px;
+  background: #fff; transform: scale(1);
+}
+.arco-radio:hover .arco-radio-mask, .arco-checkbox:hover .arco-checkbox-mask { border-color: var(--portal-choice-hover-border); }
+.arco-radio-checked .arco-radio-mask, .arco-radio-checked:hover .arco-radio-mask {
+  border-color: var(--portal-choice-primary); background: var(--portal-choice-primary);
+}
+.arco-radio-checked .arco-radio-mask::after { background: #fff; transform: scale(0.4); }
+.arco-checkbox-checked .arco-checkbox-mask, .arco-checkbox-indeterminate .arco-checkbox-mask,
+.arco-checkbox-checked:hover .arco-checkbox-mask, .arco-checkbox-indeterminate:hover .arco-checkbox-mask {
+  border-color: transparent; background: var(--portal-choice-primary);
+}
+.arco-checkbox-mask-icon { color: #fff; }
+.arco-checkbox-mask::after { background: #fff; }
+.arco-radio:not(.arco-radio-disabled):active .arco-radio-mask,
+.arco-checkbox:not(.arco-checkbox-disabled):active .arco-checkbox-mask { transform: scale(0.94); }
+.arco-radio-text, .arco-checkbox-text { margin-left: 4px; color: #4e5969; }
+.arco-radio:not(.arco-radio-disabled):hover .arco-radio-icon-hover::before,
+.arco-checkbox:not(.arco-checkbox-disabled):hover .arco-checkbox-icon-hover::before {
+  background: var(--portal-choice-hover); opacity: 1;
+}
+.arco-radio > input:focus-visible + .arco-radio-icon-hover .arco-radio-mask,
+.arco-checkbox > input:focus-visible + .arco-checkbox-icon-hover .arco-checkbox-mask {
+  outline: 2px solid var(--portal-choice-primary); outline-offset: 2px;
+}
+.arco-radio.arco-radio-disabled .arco-radio-mask, .arco-radio.arco-radio-disabled:hover .arco-radio-mask,
+.arco-checkbox.arco-checkbox-disabled .arco-checkbox-mask, .arco-checkbox.arco-checkbox-disabled:hover .arco-checkbox-mask {
+  border-color: var(--portal-choice-border); background: var(--portal-choice-hover);
+}
+.arco-radio-disabled .arco-radio-mask::after { background: var(--portal-choice-hover); }
+.arco-radio.arco-radio-disabled.arco-radio-checked .arco-radio-mask,
+.arco-radio.arco-radio-disabled.arco-radio-checked:hover .arco-radio-mask {
+  border-color: var(--portal-choice-disabled); background: var(--portal-choice-disabled);
+}
+.arco-radio-disabled.arco-radio-checked .arco-radio-mask::after { background: #fff; }
+.arco-checkbox.arco-checkbox-disabled.arco-checkbox-checked .arco-checkbox-mask,
+.arco-checkbox.arco-checkbox-disabled.arco-checkbox-checked:hover .arco-checkbox-mask,
+.arco-checkbox.arco-checkbox-disabled.arco-checkbox-indeterminate .arco-checkbox-mask,
+.arco-checkbox.arco-checkbox-disabled.arco-checkbox-indeterminate:hover .arco-checkbox-mask {
+  border-color: transparent; background: var(--portal-choice-disabled);
+}
+.arco-checkbox-disabled .arco-checkbox-mask-icon { color: #fff; }
+.arco-radio-disabled .arco-radio-icon-hover::before, .arco-checkbox-disabled .arco-checkbox-icon-hover::before { background: transparent; opacity: 0; }
+.arco-radio-disabled .arco-radio-text, .arco-checkbox-disabled .arco-checkbox-text { color: #c9cdd4; cursor: not-allowed; }
+
+/* Preserve native form behavior in the portal's older consent dialogs. */
+input[type="checkbox"]:not(.arco-checkbox > input), input[type="radio"]:not(.arco-radio > input) {
+  appearance: none; -webkit-appearance: none;
+  box-sizing: border-box; width: var(--portal-choice-size); height: var(--portal-choice-size);
+  flex: 0 0 auto; margin: 0 4px 0 0; padding: 0; vertical-align: middle;
+  border: 2px solid var(--portal-choice-border); border-radius: 2px; background-color: #fff;
+  background-position: center; background-repeat: no-repeat; cursor: pointer;
+}
+input[type="radio"]:not(.arco-radio > input) { border-radius: 50%; }
+input[type="checkbox"]:not(.arco-checkbox > input):not(:disabled):hover,
+input[type="radio"]:not(.arco-radio > input):not(:disabled):hover { border-color: var(--portal-choice-hover-border); }
+input[type="checkbox"]:not(.arco-checkbox > input):checked,
+input[type="checkbox"]:not(.arco-checkbox > input):checked:hover {
+  border-color: transparent; background-color: var(--portal-choice-primary); background-size: 8px 8px;
+  /* Arco Design IconCheck path. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='%23fff' stroke-width='4'%3E%3Cpath d='M41.678 11.05 19.05 33.678 6.322 20.95'/%3E%3C/svg%3E");
+}
+input[type="checkbox"]:not(.arco-checkbox > input):indeterminate,
+input[type="checkbox"]:not(.arco-checkbox > input):indeterminate:hover {
+  border-color: transparent; background-color: var(--portal-choice-primary); background-size: 6px 2px;
+  background-image: linear-gradient(#fff, #fff);
+}
+input[type="radio"]:not(.arco-radio > input):checked,
+input[type="radio"]:not(.arco-radio > input):checked:hover {
+  border-color: var(--portal-choice-primary); background-color: var(--portal-choice-primary);
+  background-image: radial-gradient(circle, #fff 2px, transparent 2px);
+}
+input[type="checkbox"]:not(.arco-checkbox > input):focus-visible,
+input[type="radio"]:not(.arco-radio > input):focus-visible { outline: 2px solid var(--portal-choice-primary); outline-offset: 2px; }
+input[type="checkbox"]:not(.arco-checkbox > input):not(:disabled):active,
+input[type="radio"]:not(.arco-radio > input):not(:disabled):active { transform: scale(0.94); }
+input[type="checkbox"]:not(.arco-checkbox > input):disabled,
+input[type="radio"]:not(.arco-radio > input):disabled { border-color: var(--portal-choice-border); background-color: var(--portal-choice-hover); cursor: not-allowed; }
+input[type="checkbox"]:not(.arco-checkbox > input):disabled:checked,
+input[type="checkbox"]:not(.arco-checkbox > input):disabled:indeterminate,
+input[type="radio"]:not(.arco-radio > input):disabled:checked { border-color: var(--portal-choice-disabled); background-color: var(--portal-choice-disabled); }
+
+@media (prefers-reduced-motion: reduce) {
+  .arco-radio-mask, .arco-radio-mask::after, .arco-checkbox-mask, .arco-checkbox-mask::after, .arco-checkbox-mask-icon { transition: none; }
+  .arco-radio:not(.arco-radio-disabled):active .arco-radio-mask,
+  .arco-checkbox:not(.arco-checkbox-disabled):active .arco-checkbox-mask,
+  input[type="checkbox"]:not(.arco-checkbox > input):active, input[type="radio"]:not(.arco-radio > input):active { transform: none; }
+}

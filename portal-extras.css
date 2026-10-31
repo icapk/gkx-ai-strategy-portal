@@ -3858,43 +3858,6 @@
   margin-top: 24px;
 }
 
-.portal-search-page-button {
-  display: inline-flex;
-  min-width: 34px;
-  min-height: 34px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #d6e0eb;
-  border-radius: 6px;
-  padding: 0 9px;
-  color: #5b6f86;
-  background: #ffffff;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.portal-search-page-button:hover:not(:disabled) {
-  border-color: #9fc2eb;
-  color: var(--portal-search-blue-strong);
-}
-
-.portal-search-page-button.is-active,
-.portal-search-page-button[aria-current="page"] {
-  border-color: var(--portal-search-blue-strong);
-  color: #ffffff;
-  background: var(--portal-search-blue-strong);
-}
-
-.portal-search-page-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.portal-search-page-button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(0, 110, 255, 0.14);
-  outline: none;
-}
-
 .portal-search-empty {
   display: grid;
   min-height: 320px;
@@ -5685,44 +5648,6 @@ body.has-message-center {
 .portal-search-type-tab::after {
   right: 8px;
   left: 8px;
-}
-
-.portal-active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  border-top: 1px solid #eef1f5;
-  padding: 10px 0 12px;
-}
-
-.portal-active-filters[hidden] {
-  display: none;
-}
-
-.portal-active-filters button {
-  display: inline-flex;
-  min-height: 27px;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid #dce3ec;
-  border-radius: 5px;
-  padding: 0 7px;
-  color: #5f7185;
-  background: #f8fafc;
-  cursor: pointer;
-  font-size: 10px;
-}
-
-.portal-active-filters button b {
-  color: #98a3af;
-  font-size: 14px;
-  font-weight: 450;
-}
-
-.portal-active-filters .portal-clear-filters {
-  border-color: transparent;
-  color: #5264cf;
-  background: transparent;
 }
 
 .portal-results-note {

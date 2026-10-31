@@ -1,0 +1,1051 @@
+/* Figma 官网 / 10-29. Preserve portal navigation and destination behavior. */
+#siteHeader.site-header {
+  --portal-tab-active-background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), #fff);
+  --portal-tab-bar-backdrop: blur(8px);
+}
+
+/* Preserve the shared header appearance when Arco button styles are loaded. */
+#siteHeader :is(.utility-trigger, .message-center-button) {
+  color: #4e5969;
+}
+
+#siteHeader :is(.utility-trigger, .message-center-button):is(:hover, :focus-visible, [aria-expanded="true"]) {
+  color: #165dff;
+  background: rgba(11, 94, 184, 0.08);
+}
+
+body:has(#homeContent:not([hidden])) #siteHeader.site-header {
+  --portal-tab-bar-background: transparent;
+}
+
+body:has(#homeContent:not([hidden])) #siteHeader::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: #f7f8fa url("assets/figma-home-20261029/background.png") center -156px / 2000px 1016px no-repeat;
+  -webkit-mask: url("assets/figma-home-20261029/background-mask.svg") center -198px / 2000px 1016px no-repeat;
+  mask: url("assets/figma-home-20261029/background-mask.svg") center -198px / 2000px 1016px no-repeat;
+  pointer-events: none;
+  content: "";
+}
+
+@media (min-width: 1280px) {
+  #siteHeader .header-inner {
+    gap: 16px;
+  }
+
+  #siteHeader .brand-lockup {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  #siteHeader .desktop-nav {
+    gap: 4px;
+  }
+
+  #siteHeader .nav-trigger {
+    width: 88px;
+    min-width: 88px;
+    height: 56px;
+    flex: 0 0 88px;
+    border-radius: 2px;
+  }
+
+  #siteHeader .nav-trigger:is(.is-active, .is-current, .is-open, [aria-expanded="true"]) {
+    border-radius: 0;
+    background: var(--portal-tab-active-background);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  #siteHeader .utility-trigger {
+    padding: 6px 11px;
+    border-radius: 22px;
+  }
+
+  #siteHeader .ticket-service-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #siteHeader .utility-nav .utility-group {
+    height: auto;
+    align-self: center;
+  }
+
+  #siteHeader .utility-menu::before {
+    position: absolute;
+    top: -5px;
+    right: 0;
+    left: 0;
+    height: 5px;
+    content: "";
+  }
+
+  #siteHeader .header-actions {
+    gap: 0;
+  }
+
+  #siteHeader .profile-wrap {
+    margin-left: 16px;
+  }
+
+  #siteHeader .message-center-button {
+    width: 100px;
+    min-width: 100px;
+    gap: 2px;
+    padding: 6px 11px;
+    border-radius: 22px;
+  }
+
+  /* Keep the existing hover, focus and expanded feedback after the layout pass. */
+  #siteHeader :is(.utility-trigger, .message-center-button):is(:hover, :focus-visible, [aria-expanded="true"]) {
+    border-radius: 4px;
+    color: #165dff;
+    background: rgba(11, 94, 184, 0.08);
+    outline: none;
+  }
+
+}
+
+/* Render the exported vectors directly: masks flatten their gradients and white details. */
+#siteHeader :is(.utility-nav .utility-trigger, .ticket-service-button, .message-center-button)::before {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  background-color: transparent;
+  background-position: center;
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  -webkit-mask: none;
+  mask: none;
+  content: "";
+}
+
+#siteHeader .utility-nav .utility-trigger::before {
+  background-image: url("assets/figma-home-20261029/header-workbench.svg?v=figma-original");
+}
+
+#siteHeader .ticket-service-button::before {
+  background-image: url("assets/figma-home-20261029/header-todo.svg?v=figma-original");
+}
+
+#siteHeader .message-center-button::before {
+  background-image: url("assets/figma-home-20261029/header-message.svg?v=figma-original");
+}
+
+#siteHeader .utility-nav .utility-trigger:is(:hover, :focus-visible, [aria-expanded="true"])::before {
+  background-image: url("assets/figma-home-20261029/header-workbench-hover.svg");
+}
+
+#siteHeader .ticket-service-button:is(:hover, :focus-visible, [aria-expanded="true"])::before {
+  background-image: url("assets/figma-home-20261029/header-todo-hover.svg");
+}
+
+#siteHeader .message-center-button:is(:hover, :focus-visible, [aria-expanded="true"])::before {
+  background-image: url("assets/figma-home-20261029/header-message-hover.svg");
+}
+
+@media (max-width: 1279px) {
+  body:has(#homeContent:not([hidden])) #siteHeader:has(#mobileMenuButton[aria-expanded="true"])::before {
+    display: none;
+  }
+}
+
+.mg-hero {
+  --mg-home-offset: var(--header-height);
+  --mg-first-screen-height: 100svh;
+  --mg-content-top-space: clamp(0px, calc((100svh - 800px) / 2), 48px);
+  min-height: calc(var(--mg-first-screen-height) - var(--mg-home-offset));
+  background: #f7f8fa;
+}
+
+body:has(#announcementBar:not([hidden])) .mg-hero {
+  --mg-home-offset: calc(var(--header-height) + 42px);
+}
+
+.mg-hero::before {
+  position: absolute;
+  top: calc(-156px - var(--mg-home-offset));
+  left: 50%;
+  width: 2000px;
+  height: 1016px;
+  background: url("assets/figma-home-20261029/background.png") center / cover no-repeat;
+  -webkit-mask: url("assets/figma-home-20261029/background-mask-smooth.svg") 0 -42px / 2000px 1016px no-repeat;
+  mask: url("assets/figma-home-20261029/background-mask-smooth.svg") 0 -42px / 2000px 1016px no-repeat;
+  pointer-events: none;
+  transform: translateX(-50%);
+  content: "";
+}
+
+/* Background-only coverage on ultra-wide home views; the original hero layout and motion stay intact. */
+@media (min-width: 2001px) {
+  body[data-portal-scene="search"]:has(#homeContent:not([hidden]))::before {
+    background-size: 100% 1016px;
+    -webkit-mask-size: 100% 1016px;
+    mask-size: 100% 1016px;
+  }
+  body:has(#homeContent:not([hidden])) .mg-hero::before {
+    width: 100%;
+    background-size: 100% 1016px;
+    -webkit-mask-size: 100% 1016px;
+    mask-size: 100% 1016px;
+  }
+  body:has(#homeContent:not([hidden])) #siteHeader::before {
+    background-size: 100% 1016px;
+    -webkit-mask-size: 100% 1016px;
+    mask-size: 100% 1016px;
+  }
+}
+
+.mg-hero .mg-hero-inner {
+  min-height: calc(var(--mg-first-screen-height) - var(--mg-home-offset));
+  justify-content: flex-start;
+  padding: calc(162px - var(--mg-home-offset) + var(--mg-content-top-space)) 0 41px;
+}
+
+/* The dialogue leads; the copy rises from behind its top edge. */
+.mg-hero[data-home-entrance] .mg-hero-heading {
+  position: relative;
+  z-index: 1;
+}
+
+.mg-hero[data-home-entrance] #mgHeroSearchForm {
+  z-index: 2;
+}
+
+.mg-hero[data-home-entrance="pending"] #mgHeroSearchForm {
+  opacity: 0;
+  transform: translateY(22px) scale(0.98);
+}
+
+.mg-hero[data-home-entrance="pending"] .mg-hero-heading {
+  opacity: 0;
+  transform: translateY(var(--mg-heading-rise, 112px));
+}
+
+.mg-hero[data-home-entrance="pending"] #mgSmartRecommendations {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.mg-hero[data-home-entrance] :is(.mg-hero-heading, #mgHeroSearchForm, #mgSmartRecommendations) {
+  will-change: opacity, transform;
+}
+
+/* A single animation engine owns entry; keep existing hover styles independent. */
+.mg-hero :is(.mg-simulation-card, .mg-recommendation-preview-card) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-hero[data-home-entrance="pending"] :is(.mg-hero-heading, #mgHeroSearchForm, #mgSmartRecommendations) {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mg-hero .mg-hero-heading h1 {
+  color: #1d2129;
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 44px;
+}
+
+.mg-hero .mg-hero-heading p {
+  margin-top: 16px;
+  color: #86909c;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+}
+
+.mg-hero .mg-search-card {
+  width: 100%;
+  height: 225px;
+  min-height: 225px;
+  margin-top: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: #e8f3ff;
+  box-shadow: 0 4px 12px rgba(76, 123, 165, 0.08);
+}
+
+.mg-search-surface {
+  display: none;
+  position: absolute;
+  top: -8px;
+  left: -12px;
+  width: calc(100% + 24px);
+  height: calc(100% + 24px);
+  max-width: none;
+  pointer-events: none;
+}
+
+/* The selected tab is content-sized rather than stretched with the SVG panel. */
+.mg-hero .mg-search-card::before {
+  position: absolute;
+  top: 50px;
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  content: "";
+}
+
+.mg-hero .mg-search-card[data-search-mode="keyword"]::before {
+  border-top-left-radius: 0;
+}
+
+/* Mantine Input: a 1px border changes color with a 100ms transition.
+   https://github.com/mantinedev/mantine/blob/master/packages/@mantine/core/src/components/Input/Input.module.css */
+.mg-search-focus-outline {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  border: 1px solid #fff;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: border-color 100ms ease;
+}
+
+.mg-search-card:has(#mgHeroSearchInput:focus) .mg-search-focus-outline {
+  border-color: #6aa1ff;
+}
+
+.mg-hero .mg-search-mode-row {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: calc(100% - 16px);
+  height: 42px;
+  overflow: visible;
+  padding: 0;
+}
+
+.mg-hero .mg-search-mode-tabs {
+  height: 42px;
+  gap: 0;
+  margin: 0;
+  overflow: visible;
+}
+
+.mg-hero .mg-search-mode-tab {
+  width: max-content;
+  height: 42px;
+  flex: 0 0 auto;
+  padding: 9px 16px;
+  border-radius: 12px 12px 0 0;
+  color: #86909c;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.mg-hero .mg-search-mode-tab.is-active {
+  background: rgba(255, 255, 255, 0.8);
+  color: #165dff;
+  font-weight: 500;
+}
+
+.mg-hero .mg-search-mode-tab::after {
+  content: none;
+}
+
+.mg-hero .mg-search-card[data-search-mode="keyword"] .mg-search-mode-tab[data-hero-search-mode="keyword"]::after {
+  position: absolute;
+  top: auto;
+  right: -12px;
+  bottom: 0;
+  left: auto;
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 0;
+  background: radial-gradient(circle at 100% 0, transparent 12px, rgba(255, 255, 255, 0.8) 12px);
+  opacity: 1;
+  pointer-events: none;
+  content: "";
+}
+
+.mg-hero .mg-search-mode-tab:focus-visible {
+  outline: 2px solid #165dff;
+  outline-offset: -4px;
+}
+
+/* Give the content panel its own 12px corner when the second tab is selected. */
+.mg-hero .mg-search-card[data-search-mode="ai"] {
+  background: #e8f3ff;
+  box-shadow: 0 4px 12px rgba(76, 123, 165, 0.08);
+}
+
+.mg-hero .mg-search-card[data-search-mode="ai"] .mg-search-surface {
+  visibility: hidden;
+}
+
+.mg-hero .mg-search-card[data-search-mode="ai"]::before {
+  position: absolute;
+  top: 50px;
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  content: "";
+}
+
+.mg-hero .mg-search-card[data-search-mode="ai"] .mg-search-mode-tab[data-hero-search-mode="keyword"] {
+  background: #e8f3ff;
+}
+
+.mg-hero .mg-search-card[data-search-mode="ai"] .mg-search-mode-tab[data-hero-search-mode="ai"] {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.mg-hero .mg-search-card[data-search-mode="ai"] .mg-search-mode-tab[data-hero-search-mode="ai"]::before,
+.mg-hero .mg-search-card[data-search-mode="ai"] .mg-search-mode-tab[data-hero-search-mode="ai"]::after {
+  position: absolute;
+  top: auto;
+  bottom: 0;
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 0;
+  opacity: 1;
+  pointer-events: none;
+  content: "";
+}
+
+.mg-hero .mg-search-card[data-search-mode="ai"] .mg-search-mode-tab[data-hero-search-mode="ai"]::before {
+  left: -12px;
+  background: radial-gradient(circle at 0 0, transparent 12px, rgba(255, 255, 255, 0.8) 12px);
+}
+
+.mg-hero .mg-search-card[data-search-mode="ai"] .mg-search-mode-tab[data-hero-search-mode="ai"]::after {
+  right: -12px;
+  left: auto;
+  background: radial-gradient(circle at 100% 0, transparent 12px, rgba(255, 255, 255, 0.8) 12px);
+}
+
+.mg-hero .mg-hero-query-row {
+  position: absolute;
+  top: 66px;
+  right: 25px;
+  left: 25px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.mg-hero #mgHeroSearchInput {
+  position: static;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  height: 26px;
+  min-height: 26px;
+  max-height: 90px;
+  margin: 0;
+  padding: 2px 0;
+  resize: none;
+  overflow-y: auto;
+  border: 0;
+  outline: none;
+  color: #1d2129;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.mg-hero #mgHeroSearchInput::placeholder {
+  color: #86909c;
+  opacity: 1;
+}
+
+.mg-hero .mg-hero-intent-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 26px;
+  align-items: center;
+  gap: 4px;
+  padding-left: 10px;
+  border-radius: 6px;
+  color: #4e5969;
+  background: #f2f3f5;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.mg-hero .mg-hero-intent-chip button {
+  display: inline-flex;
+  width: 28px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mg-hero .mg-hero-intent-chip button img {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+.mg-hero .mg-hero-intent-chip button:hover {
+  background: #e5e6eb;
+}
+
+.mg-hero .mg-hero-intent-chip button:focus-visible {
+  outline: 2px solid #165dff;
+  outline-offset: 2px;
+}
+
+.mg-hero .mg-search-intents {
+  position: absolute;
+  top: 168px;
+  left: 25px;
+  display: flex;
+  grid-template-columns: none;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.mg-hero .mg-search-intents button {
+  height: 32px;
+  min-height: 32px;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 16px;
+  border: 0;
+  border-radius: 8px;
+  color: #1d2129;
+  background: #f2f3f5;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  transform: none;
+}
+
+.mg-intent-icon {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mg-intent-icon-glyph {
+  position: absolute;
+  inset: 0;
+}
+
+.mg-intent-icon img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+/* Preserve the exported group bounds within each 16px Figma frame. */
+.mg-intent-icon--simulation .mg-intent-icon-glyph { inset: 12.5% 14.99%; }
+.mg-intent-icon--simulation img { top: -5%; left: -5.36%; width: 110.72%; height: 110%; }
+.mg-intent-icon--expert .mg-intent-icon-glyph { inset: 6.25% 13.13% 12.5% 13.12%; }
+.mg-intent-icon--expert img { top: -4.62%; left: -5.08%; width: 110.16%; height: 109.24%; }
+.mg-intent-icon--strategy .mg-intent-icon-glyph { inset: 15.63% 15.63% 13.61% 13.61%; }
+.mg-intent-icon--strategy img { top: -5.3%; left: -5.3%; width: 110.6%; height: 110.6%; }
+
+.mg-intent-icon .mg-intent-icon-active { opacity: 0; }
+.mg-search-intents button[aria-pressed="true"] .mg-intent-icon-default,
+.mg-search-intents button:hover .mg-intent-icon-default,
+.mg-search-intents button:focus-visible .mg-intent-icon-default { opacity: 0; }
+.mg-search-intents button[aria-pressed="true"] .mg-intent-icon-active,
+.mg-search-intents button:hover .mg-intent-icon-active,
+.mg-search-intents button:focus-visible .mg-intent-icon-active { opacity: 1; }
+
+.mg-hero .mg-search-intents button.is-active,
+.mg-hero .mg-search-intents button:hover {
+  color: #165dff;
+  background: #e8f3ff;
+  font-weight: 500;
+}
+
+.mg-hero .mg-search-intents button:focus-visible {
+  outline: 2px solid #165dff;
+  outline-offset: 2px;
+}
+
+.mg-hero .mg-search-actions {
+  top: 168px;
+  right: 23px;
+  gap: 16px;
+}
+
+.mg-hero .mg-search-actions button {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mg-hero .mg-search-actions img {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.mg-hero .mg-search-actions button:focus-visible,
+.mg-hero .mg-search-actions button:hover {
+  outline: 2px solid rgba(22, 93, 255, 0.32);
+  outline-offset: 2px;
+}
+
+/* VoiceButton's icon-to-waveform pattern, adapted to the existing 32px control:
+   https://github.com/elevenlabs/ui/blob/main/apps/www/registry/elevenlabs-ui/ui/voice-button.tsx */
+#mgVoiceInputButton {
+  transition: background-color 160ms ease;
+}
+
+#mgVoiceInputButton img {
+  transition: opacity 160ms ease;
+}
+
+#mgVoiceInputButton .mg-voice-wave {
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #165dff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+#mgVoiceInputButton .mg-voice-wave i {
+  width: 2px;
+  height: 6px;
+  flex: 0 0 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: center;
+}
+
+#mgVoiceInputButton .mg-voice-wave i:nth-child(2) { height: 14px; }
+#mgVoiceInputButton .mg-voice-wave i:nth-child(3) { height: 10px; }
+#mgVoiceInputButton .mg-voice-wave i:nth-child(4) { height: 8px; }
+
+#mgVoiceInputButton.is-listening {
+  border: 0;
+  color: #165dff;
+  background: #e8f3ff;
+  box-shadow: none;
+  transform: none;
+}
+
+#mgVoiceInputButton.is-listening img { opacity: 0; }
+#mgVoiceInputButton.is-listening .mg-voice-wave { opacity: 1; }
+
+#mgVoiceInputButton.is-listening .mg-voice-wave i {
+  animation: mg-voice-bar 1100ms ease-in-out infinite;
+}
+
+#mgVoiceInputButton.is-listening .mg-voice-wave i:nth-child(2) { animation-delay: -650ms; }
+#mgVoiceInputButton.is-listening .mg-voice-wave i:nth-child(3) { animation-delay: -350ms; }
+#mgVoiceInputButton.is-listening .mg-voice-wave i:nth-child(4) { animation-delay: -850ms; }
+
+/* Supersede the earlier red recording pulse without changing the toggle logic. */
+#mgVoiceInputButton::after {
+  animation: none;
+  content: none;
+}
+
+@keyframes mg-voice-bar {
+  0%, 100% { transform: scaleY(0.45); }
+  50% { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mgVoiceInputButton.is-listening .mg-voice-wave i {
+    animation: none;
+  }
+}
+
+.mg-hero .mg-smart-recommendations {
+  width: 100%;
+  margin-top: 56px;
+}
+
+.mg-hero .mg-smart-recommendation-header {
+  min-height: 24px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+.mg-hero .mg-smart-recommendation-title-row {
+  gap: 4px;
+}
+
+.mg-recommendation-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.mg-hero .mg-smart-recommendation-title-row h2 {
+  color: #000;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.mg-hero .mg-smart-recommendation-more {
+  min-height: 24px;
+  padding: 0;
+  color: #165dff;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+.mg-hero .mg-simulation-strip {
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.mg-hero .mg-simulation-card {
+  display: grid;
+  grid-template-rows: minmax(0, 3fr) minmax(0, 1fr);
+  height: 160px;
+  border: 1px solid #e1e5ea;
+  border-radius: 12px;
+  background: #f7f8fa;
+  box-shadow: none;
+  transform: none;
+  transition: border-color 160ms ease-out;
+}
+
+.mg-hero .mg-preview-simulation-caption {
+  position: static;
+  grid-area: 2 / 1;
+  z-index: auto;
+  inset: auto;
+  min-height: 0;
+  align-items: center;
+  padding: 0 16px;
+  border-top: 1px solid #edf0f3;
+  color: #343a43;
+  opacity: 1;
+  background: #f7f8fa;
+}
+
+.mg-hero .mg-preview-simulation-caption strong {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.mg-hero .mg-preview-simulation-caption small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #68717f;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  opacity: 1;
+}
+
+.mg-hero .mg-simulation-card:is(:hover, :focus-visible) .mg-preview-simulation-caption small {
+  color: #165dff;
+}
+
+.mg-hero .mg-preview-simulation-caption svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+
+.mg-hero .mg-simulation-card .mg-original-media {
+  position: static;
+  grid-area: 1 / 1;
+  z-index: auto;
+  inset: auto;
+  display: block;
+  min-height: 0;
+  object-fit: cover;
+  filter: none;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.mg-hero .mg-simulation-card:hover,
+.mg-hero .mg-simulation-card:focus-visible {
+  border-color: #c4ccd6;
+  transform: none;
+  box-shadow: none;
+}
+
+.mg-hero .mg-simulation-card::before {
+  content: none;
+}
+
+.mg-hero .mg-simulation-card::after {
+  position: relative;
+  z-index: 1;
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+  background: linear-gradient(180deg, rgba(218, 233, 255, 0.64) 4.687%, rgba(189, 221, 255, 0) 90%);
+  pointer-events: none;
+  content: "";
+}
+
+.mg-hero .mg-simulation-card:focus-visible {
+  border-color: #165dff;
+  outline: 2px solid #165dff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-hero .mg-simulation-card {
+    transition: none;
+  }
+}
+
+.mg-hero [hidden] {
+  display: none !important;
+}
+
+/* Preserve the full search-and-recommendation view in shorter desktop windows. */
+@media (min-width: 901px) and (max-height: 800px) {
+  .mg-hero .mg-hero-inner {
+    padding: max(12px, calc(112px - var(--mg-home-offset))) 0 24px;
+  }
+  .mg-hero .mg-hero-heading h1 { font-size: 32px; line-height: 40px; }
+  .mg-hero .mg-hero-heading p { margin-top: 12px; font-size: 18px; line-height: 26px; }
+  .mg-hero .mg-smart-recommendations { margin-top: 32px; }
+  .mg-hero .mg-smart-recommendation-header { margin-bottom: 16px; }
+}
+
+@media (min-width: 901px) and (max-height: 680px) {
+  .mg-hero .mg-hero-inner { padding-bottom: clamp(0px, calc(100svh - 600px), 16px); }
+  .mg-hero .mg-hero-heading h1 { font-size: 28px; line-height: 36px; }
+  .mg-hero .mg-hero-heading p { margin-top: 8px; font-size: 16px; line-height: 22px; }
+  .mg-hero .mg-search-card { margin-top: 20px; }
+  .mg-hero .mg-smart-recommendations { margin-top: 16px; }
+  .mg-hero .mg-smart-recommendation-header { margin-bottom: 12px; }
+  .mg-hero .mg-simulation-card { height: 124px; grid-template-rows: minmax(0, 1fr) 36px; }
+}
+
+@media (max-width: 900px) {
+  .mg-hero {
+    --mg-first-screen-height: 100svh;
+  }
+
+  .mg-hero .mg-hero-inner {
+    padding: 48px 0;
+  }
+
+  .mg-hero .mg-hero-heading h1 {
+    font-size: 30px;
+    line-height: 40px;
+  }
+
+  .mg-hero .mg-hero-heading p {
+    max-width: 500px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .mg-hero .mg-search-card {
+    background: #e8f3ff;
+    box-shadow: none;
+  }
+
+  .mg-hero .mg-search-card[data-search-mode="ai"] {
+    box-shadow: none;
+  }
+
+  .mg-hero #mgClassicSearchModeRow {
+    padding: 0;
+  }
+
+  .mg-hero .mg-search-card::before {
+    position: absolute;
+    top: 50px;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    content: "";
+  }
+
+  .mg-hero .mg-search-surface {
+    display: none;
+  }
+
+  .mg-hero .mg-search-mode-tab.is-active {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .mg-hero .mg-search-card[data-search-mode="keyword"]::before {
+    border-top-left-radius: 0;
+  }
+
+  .mg-hero .mg-search-card[data-search-mode="keyword"] .mg-search-mode-tab[data-hero-search-mode="keyword"]::after {
+    position: absolute;
+    top: auto;
+    right: -12px;
+    bottom: 0;
+    left: auto;
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 0;
+    background: radial-gradient(circle at 100% 0, transparent 12px, rgba(255, 255, 255, 0.8) 12px);
+    opacity: 1;
+    pointer-events: none;
+    content: "";
+  }
+
+  .mg-hero .mg-simulation-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    overflow: visible;
+    padding: 0;
+    scroll-snap-type: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .mg-hero .mg-hero-inner {
+    width: calc(100% - 32px);
+    padding: 36px 0;
+  }
+
+  .mg-hero .mg-hero-heading h1 {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .mg-hero .mg-hero-heading p {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .mg-hero .mg-search-card {
+    height: 265px;
+    min-height: 265px;
+  }
+
+  .mg-hero .mg-hero-query-row {
+    left: 17px;
+    right: 17px;
+  }
+
+  .mg-hero #mgHeroSearchInput {
+    max-height: 70px;
+  }
+
+  .mg-hero .mg-search-intents {
+    top: 146px;
+    left: 17px;
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 8px;
+  }
+
+  .mg-hero .mg-search-intents button {
+    padding: 5px 12px;
+  }
+
+  .mg-hero .mg-search-actions {
+    top: 224px;
+    right: 17px;
+  }
+
+  .mg-hero .mg-smart-recommendations {
+    margin-top: 56px;
+  }
+
+  .mg-hero .mg-simulation-card {
+    grid-template-rows: minmax(0, 1fr) 36px;
+    height: 118px;
+  }
+
+  .mg-hero .mg-preview-simulation-caption {
+    gap: 6px;
+    padding: 0 10px;
+  }
+
+  .mg-hero .mg-preview-simulation-caption strong {
+    font-size: 12px;
+  }
+
+  .mg-hero .mg-preview-simulation-caption small {
+    gap: 3px;
+  }
+
+  .mg-hero .mg-preview-simulation-caption svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (max-width: 359px) {
+  .mg-hero .mg-search-intents {
+    gap: 6px;
+  }
+
+  .mg-hero .mg-search-intents button {
+    padding: 5px 9px;
+  }
+
+  .mg-hero .mg-preview-simulation-caption {
+    gap: 2px;
+    padding: 0 4px;
+  }
+
+  .mg-hero .mg-preview-simulation-caption strong {
+    font-size: 11px;
+    line-height: 16px;
+  }
+
+  .mg-hero .mg-preview-simulation-caption small {
+    gap: 2px;
+  }
+
+  .mg-hero .mg-preview-simulation-caption svg {
+    width: 8px;
+    height: 8px;
+  }
+}

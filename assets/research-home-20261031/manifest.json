@@ -1,0 +1,239 @@
+{
+  "assets": [
+    {
+      "id": "agent",
+      "file": "assets/icons/agent.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 455,
+      "sha256": "90f18c65c7a6389be7c92e6d64458791f9110e9603845e740bb36efae45f49b7",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "analysis",
+      "file": "assets/icons/analysis.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 272,
+      "sha256": "56a39023babba1d05aadc8fb886b5ec8308716f3317966dbd472f0e480dfc6e7",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "arrow-right",
+      "file": "assets/icons/arrow-right.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 243,
+      "sha256": "8f3c1b4550d408974668631ab066a6974a0cd374e67f3afd01edf63f7fa021bc",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "book",
+      "file": "assets/icons/book.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 331,
+      "sha256": "0d0acba5687cd3e858c6d18a428ecb361dda45e9937296d645551367c9bafb17",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "chevron",
+      "file": "assets/icons/chevron.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 234,
+      "sha256": "4052afd40b05dc9fe8844c66ad0b648ccaf65be3bc9aa0d628c0f284ae1d78eb",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "database",
+      "file": "assets/icons/database.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 327,
+      "sha256": "cd98422b25d9516aec9c0ff821771745b5ec653ac8f3666b3f60b15f819fb47b",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "document",
+      "file": "assets/icons/document.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 316,
+      "sha256": "c1bffcc18f8a63e04574bbb08e626f210dff30ffd30cc882b4f2230e8a3a73c6",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "expert",
+      "file": "assets/icons/expert.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 341,
+      "sha256": "914b7d510ba189bd0e358c37b74384e2646f447cd26f0255416855b65a88bcb3",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "institution",
+      "file": "assets/icons/institution.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 285,
+      "sha256": "6b500d028eff04cdb7992da8c69237288871c11f799b66d5a693711fdfe40ce7",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "network",
+      "file": "assets/icons/network.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 339,
+      "sha256": "1e4f1b36db89bc774008d8f3f1a4b99e72e4916158d8297e97db036e0fb082d0",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "peer",
+      "file": "assets/icons/peer.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 317,
+      "sha256": "05823576f32c4c5887af68b99fe4fc0f2c213294731bf9684ec6965593eb2450",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "play",
+      "file": "assets/icons/play.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 267,
+      "sha256": "10e53be451dbe454338ddf876fcacd1de1b9a89f6dddf9a5c77bf05841f1d3ee",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "report",
+      "file": "assets/icons/report.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 327,
+      "sha256": "73ac35534d14a4865bf675062e3a698ff9d77e61b705697d753282287c1bd51c",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "send",
+      "file": "assets/icons/send.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 257,
+      "sha256": "0030d463373853e8aa55c0486f032871dddc6a42afd8520f55488be6750c483d",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "trophy",
+      "file": "assets/icons/trophy.svg",
+      "type": "svg",
+      "usage": "通用界面图标",
+      "bytes": 313,
+      "sha256": "f9a23f7a55d59d16503eb5e34ce47e4490139ceadd6b86b1be5880b5a2bb552a",
+      "viewBox": "0 0 24 24",
+      "editable": true
+    },
+    {
+      "id": "agent-build",
+      "file": "assets/illustrations/agent-build.png",
+      "type": "png",
+      "usage": "练｜构建点缀",
+      "bytes": 993550,
+      "sha256": "7fab7dfcd3a29eefb3ace13752d486358cfd8be6e802628accd65ef2f583d91a",
+      "width": 1448,
+      "height": 1086,
+      "transparent": true
+    },
+    {
+      "id": "competition",
+      "file": "assets/illustrations/competition.png",
+      "type": "png",
+      "usage": "赛｜体系点缀",
+      "bytes": 1007511,
+      "sha256": "82930b2acb16df2939d2a2de28435114fd2a0cd0c454d3b7d05731441f5c273d",
+      "width": 1254,
+      "height": 1254,
+      "transparent": true
+    },
+    {
+      "id": "course-learn",
+      "file": "assets/illustrations/course-learn.png",
+      "type": "png",
+      "usage": "学｜智启点缀",
+      "bytes": 973742,
+      "sha256": "b87cac50047f3632b0065e1dee4dc8efdca52e2e59c5df768a32f3e2600f17c8",
+      "width": 1448,
+      "height": 1086,
+      "transparent": true
+    },
+    {
+      "id": "lab-play",
+      "file": "assets/illustrations/lab-play.png",
+      "type": "png",
+      "usage": "玩｜灵动主图",
+      "bytes": 1321904,
+      "sha256": "84e9ce8943dd7b9ddfb57627f7b3ae8ee7cb992099530a046d3c3a765208e0c6",
+      "width": 1448,
+      "height": 1086,
+      "transparent": true
+    },
+    {
+      "id": "report-preview",
+      "file": "assets/illustrations/report-preview.png",
+      "type": "png",
+      "usage": "咨询报告版式示意（非真实报告）",
+      "bytes": 1376586,
+      "sha256": "d462be5ce336c4544860ddd7fef8d30b938c5e651f3c6b093b87cf10f94510ff",
+      "width": 1086,
+      "height": 1448,
+      "transparent": true
+    },
+    {
+      "id": "background",
+      "file": "assets/vectors/background.svg",
+      "type": "svg",
+      "usage": "全宽背景装饰",
+      "bytes": 1590,
+      "sha256": "5df564d49cad62ff5001622b83762cc1468e918fc84164aed3a693f24dea165f",
+      "viewBox": "0 0 1920 3600",
+      "editable": true
+    },
+    {
+      "id": "dry-wet-loop",
+      "file": "assets/vectors/dry-wet-loop.svg",
+      "type": "svg",
+      "usage": "闭环几何图，文字独立HTML",
+      "bytes": 1545,
+      "sha256": "e24c31a69684e4dfa3cb6a24f4aa4ac8565e9074675fd615bd6151f47da06183",
+      "viewBox": "0 0 720 320",
+      "editable": true
+    },
+    {
+      "id": "talent-network",
+      "file": "assets/vectors/talent-network.svg",
+      "type": "svg",
+      "usage": "人才关系示意（非真实数据）",
+      "bytes": 4865,
+      "sha256": "26f304e9f36adf7b30b150de22847c44251bc709a10d5956f7b579ed906d8eec",
+      "viewBox": "0 0 600 350",
+      "editable": true
+    }
+  ]
+}

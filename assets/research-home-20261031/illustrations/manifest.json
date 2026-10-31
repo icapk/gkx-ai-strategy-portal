@@ -1,0 +1,62 @@
+[
+  {
+    "id": "course-learn",
+    "file": "assets/illustrations/course-learn.png",
+    "width": 1448,
+    "height": 1086,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "bytes": 973742
+  },
+  {
+    "id": "lab-play",
+    "file": "assets/illustrations/lab-play.png",
+    "width": 1448,
+    "height": 1086,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "bytes": 1321904
+  },
+  {
+    "id": "agent-build",
+    "file": "assets/illustrations/agent-build.png",
+    "width": 1448,
+    "height": 1086,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "bytes": 993550
+  },
+  {
+    "id": "competition",
+    "file": "assets/illustrations/competition.png",
+    "width": 1254,
+    "height": 1254,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "bytes": 1007511
+  },
+  {
+    "id": "report-preview",
+    "file": "assets/illustrations/report-preview.png",
+    "width": 1086,
+    "height": 1448,
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "bytes": 1376586
+  }
+]

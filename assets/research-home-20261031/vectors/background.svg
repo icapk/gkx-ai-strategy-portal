@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 3600" width="1920" height="3600" fill="none" preserveAspectRatio="none" aria-hidden="true">
+<defs>
+  <linearGradient id="base" x1="960" y1="0" x2="960" y2="3600" gradientUnits="userSpaceOnUse"><stop stop-color="#F7FAFE"/><stop offset=".5" stop-color="#FAFCFF"/><stop offset="1" stop-color="#F1F7FF"/></linearGradient>
+  <radialGradient id="blue"><stop stop-color="#D6E9FF" stop-opacity=".65"/><stop offset="1" stop-color="#E6F1FF" stop-opacity="0"/></radialGradient>
+  <linearGradient id="wave" x1="0" y1="0" x2="1920" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#BEDCFF" stop-opacity=".14"/><stop offset=".55" stop-color="#A4CCFF" stop-opacity=".04"/><stop offset="1" stop-color="#BEDCFF" stop-opacity=".14"/></linearGradient>
+</defs>
+<path fill="url(#base)" d="M0 0h1920v3600H0z"/>
+<ellipse cx="150" cy="480" rx="860" ry="600" fill="url(#blue)"/>
+<ellipse cx="1820" cy="1600" rx="750" ry="720" fill="url(#blue)"/>
+<ellipse cx="150" cy="2980" rx="900" ry="600" fill="url(#blue)"/>
+<path d="M-150 320C400 420 480 790 1030 660S1690 440 2070 600" stroke="url(#wave)" stroke-width="48"/>
+<path d="M-150 362C400 462 480 832 1030 702S1690 482 2070 642" stroke="#B9D8FF" stroke-opacity=".14"/>
+<path d="M-160 1920C450 1790 600 2240 1200 2060S1760 1820 2110 1960" stroke="url(#wave)" stroke-width="42"/>
+<path d="M-160 1950C450 1820 600 2270 1200 2090S1760 1850 2110 1990" stroke="#B9D8FF" stroke-opacity=".14"/>
+<path d="M-80 3300C380 3100 860 3520 1430 3320S1780 3260 2040 3360" stroke="url(#wave)" stroke-width="72"/>
+</svg>

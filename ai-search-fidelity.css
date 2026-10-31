@@ -1,0 +1,204 @@
+/* AI Search keeps the portal header, backdrop, query container and Arco theme. */
+html:has(#searchResultsPage.is-ai:not([hidden])),
+body:has(#searchResultsPage.is-ai:not([hidden])) { height: 100%; overflow: hidden; overscroll-behavior: none; }
+body:has(#searchResultsPage.is-ai:not([hidden])) { min-width: 0; }
+.portal-search-page.is-ai { box-sizing: border-box; height: calc(100svh - var(--header-height)); min-height: 0; padding-bottom: 16px; overflow: hidden; }
+.portal-search-page.is-ai .portal-search-lead { display: none; }
+.portal-ai-workspace[hidden], #portalAiComposerMount[hidden] { display: none; }
+.portal-search-page.is-ai .portal-search-inner {
+  display: grid; grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-rows: auto minmax(0, 1fr); gap: 16px;
+  height: 100%; min-height: 0;
+}
+.portal-search-page.is-ai .portal-search-header { grid-column: 1 / -1; grid-row: 1; margin-bottom: 8px; }
+.portal-search-page.is-ai .portal-ai-workspace { display: contents; }
+.portal-ai-conversation, .portal-ai-citations {
+  min-width: 0; min-height: 0; border: 1px solid #f2f3f5; border-radius: 8px; background: #fff;
+}
+.portal-ai-conversation { grid-column: 1; grid-row: 2; overflow-y: auto; overscroll-behavior: contain; padding: 24px; padding-bottom: calc(max(var(--portal-ai-composer-height, 76px), 76px) + 32px); scrollbar-width: thin; scrollbar-color: #e5e6eb transparent; }
+.portal-ai-citations { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; overflow: hidden; }
+.portal-search-page.is-ai .portal-result-query { grid-column: 1; grid-row: 2; align-self: end; z-index: 3; width: calc(100% - 32px); margin: 0 16px 16px; padding: 8px; }
+.portal-surface-transition .is-ai .portal-result-query { overflow: hidden; }
+.portal-ai-user-message { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+.portal-ai-user-message p { max-width: 85%; margin: 0; border-radius: 12px; padding: 8px 12px; color: #1d2129; background: #e8f3ff; font-size: 14px; line-height: 22px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.portal-ai-process.arco-collapse { margin: 0 0 20px; border: 0; border-radius: 6px; background: #f7f8fa; }
+.portal-ai-process .arco-collapse-item { border: 0; }
+.portal-ai-process .arco-collapse-item-header { border: 0; border-radius: 6px; padding: 12px; color: #4e5969; background: transparent; }
+.portal-ai-process .arco-collapse-item-header:hover { background: #f2f3f5; }
+.portal-ai-process .arco-collapse-item-content { border: 0; padding: 0 12px 12px; background: transparent; }
+.portal-ai-process-heading { display: flex; width: 100%; min-width: 0; align-items: center; gap: 8px; }
+.portal-ai-process-summary { min-width: 0; flex: 1; font-size: 13px; font-weight: 500; line-height: 20px; }
+.portal-ai-process-meta { flex: none; color: #86909c; font-size: 12px; line-height: 20px; }
+.portal-ai-process-loading, .portal-ai-process-complete { width: 16px; height: 16px; flex: none; }
+.portal-ai-process-loading { color: #165dff; animation: portal-ai-spin 1s linear infinite; }
+.portal-ai-process-complete { color: #4e5969; }
+.portal-ai-pending-dot { width: 6px; height: 6px; flex: none; border-radius: 50%; margin: 0 5px; background: #c9cdd4; }
+.portal-ai-process-groups, .portal-ai-process-groups ol { margin: 0; padding: 0; list-style: none; }
+.portal-ai-process-groups { display: flex; flex-direction: column; gap: 12px; }
+.portal-ai-process-groups h3 { margin: 0 0 8px 28px; color: #4e5969; font-size: 12px; font-weight: 500; line-height: 20px; }
+.portal-ai-process-groups ol { display: flex; flex-direction: column; gap: 12px; }
+.portal-ai-step { position: relative; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: start; gap: 8px; color: #86909c; }
+.portal-ai-step:not(:last-child)::after { position: absolute; top: 23px; bottom: -9px; left: 9px; width: 1px; background: #e5e6eb; content: ''; }
+.portal-ai-step strong { font-size: 12px; font-weight: 500; line-height: 20px; }
+.portal-ai-step p { margin: 2px 0 0; color: #86909c; font-size: 12px; line-height: 20px; }
+.portal-ai-step.is-active { color: #1d2129; }
+.portal-ai-step.is-complete { color: #4e5969; }
+.portal-ai-step-marker { display: inline-flex; width: 20px; height: 20px; align-items: center; justify-content: center; }
+.portal-ai-step-marker > span { width: 5px; height: 5px; border-radius: 50%; background: #c9cdd4; }
+.portal-ai-step-marker svg { width: 14px; height: 14px; }
+.portal-ai-step.is-active .portal-ai-step-marker { color: #165dff; }
+.portal-ai-process .arco-collapse-item-active .portal-ai-step.is-active svg { animation: portal-ai-spin 1s linear infinite; }
+.portal-ai-step-status { color: #86909c; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.portal-ai-answer-content { color: #1d2129; font-size: 14px; line-height: 24px; }
+.portal-ai-answer-content p { margin: 0 0 12px; }
+.portal-ai-answer-content h2, .portal-ai-answer-empty h2 { margin: 20px 0 12px; color: #1d2129; font-size: 16px; font-weight: 500; line-height: 24px; }
+.portal-ai-answer-content ol { margin: 0 0 16px; padding-left: 22px; }
+.portal-ai-answer-content li { margin-bottom: 8px; }
+.portal-ai-answer-content strong { font-weight: 500; }
+.portal-ai-answer-block, .portal-ai-source-detail { animation: portal-ai-content-in 200ms ease; }
+.portal-ai-citation.arco-btn { width: 20px; min-width: 20px; height: 20px; border: 0; border-radius: 4px; margin-left: 4px; padding: 0; color: #165dff; background: #e8f3ff; font-size: 12px; vertical-align: baseline; }
+.portal-ai-citation.arco-btn:hover { color: #165dff; background: #bedaff; }
+.portal-ai-table-wrap { max-width: 100%; overflow-x: auto; }
+.portal-ai-answer-content table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; line-height: 22px; }
+.portal-ai-answer-content th, .portal-ai-answer-content td { border: 1px solid #e5e6eb; padding: 10px 12px; text-align: left; vertical-align: top; }
+.portal-ai-answer-content th { background: #f7f8fa; font-weight: 500; }
+.portal-ai-answer-content .portal-ai-reading-note { color: #86909c; font-size: 12px; line-height: 20px; }
+.portal-ai-answer-actions { display: flex; align-items: center; gap: 8px; margin-top: 16px; color: #86909c; font-size: 12px; }
+.portal-ai-answer-actions .arco-btn { padding: 0 8px; color: #4e5969; background: transparent; }
+.portal-ai-answer-actions .arco-btn:hover { background: #f2f3f5; }
+.portal-ai-followups { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.portal-ai-followups .arco-btn { height: auto; min-height: 28px; border: 1px solid #e5e6eb; border-radius: 4px; padding: 4px 8px; color: #4e5969; background: #fff; font-size: 12px; white-space: normal; }
+.portal-ai-followups .arco-btn:hover { border-color: #bedaff; color: #165dff; background: #e8f3ff; }
+.portal-ai-answer-skeleton, .portal-ai-citation-skeleton { display: flex; flex-direction: column; gap: 12px; padding: 8px 0; color: #86909c; font-size: 13px; line-height: 22px; }
+.portal-ai-answer-skeleton p, .portal-ai-citation-skeleton p { margin: 0; }
+.portal-ai-answer-skeleton i, .portal-ai-citation-skeleton i { position: relative; display: block; height: 12px; overflow: hidden; border-radius: 4px; background: #f2f3f5; }
+.portal-ai-answer-skeleton i:nth-child(2) { width: 86%; }
+.portal-ai-answer-skeleton i:nth-child(3) { width: 68%; }
+.portal-ai-citation-skeleton i { height: 64px; }
+.portal-ai-answer-skeleton i::after, .portal-ai-citation-skeleton i::after { position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent); transform: translateX(-100%); animation: portal-ai-skeleton 1.6s ease infinite; content: ''; }
+.portal-ai-answer-empty p { color: #86909c; }
+.portal-ai-sources-header { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; }
+.portal-ai-sources-header h2 { margin: 0; color: #1d2129; font-size: 14px; font-weight: 500; line-height: 22px; }
+.portal-ai-sources-header > span { color: #86909c; font-size: 12px; line-height: 20px; }
+.portal-ai-source-filters { flex: none; border-bottom: 1px solid #e5e6eb; padding: 0 16px 12px; }
+.portal-ai-source-filters .arco-radio-group { display: flex; flex-wrap: wrap; gap: 8px; border: 0; padding: 0; background: transparent; }
+.portal-ai-source-filters .arco-radio-group .arco-radio-button {
+  display: inline-flex; height: 28px; min-height: 28px; align-items: center;
+  margin: 0; border: 0; border-radius: 4px; padding: 0 10px;
+  color: #4e5969; background: #f2f3f5; font-size: 12px; font-weight: 400; line-height: 20px;
+  transition: color 140ms ease, background-color 140ms ease;
+}
+.portal-ai-source-filters .arco-radio-group .arco-radio-button::before { display: none; }
+.portal-ai-source-filters .arco-radio-group .arco-radio-button-inner { display: inline-flex; align-items: center; gap: 4px; padding: 0; }
+.portal-ai-source-filters .arco-radio-group .arco-radio-button:hover { color: #1d2129; background: #e5e6eb; }
+.portal-ai-source-filters .arco-radio-group .arco-radio-button.arco-radio-checked { color: #165dff; background: #e8f3ff; }
+.portal-ai-source-filters .arco-radio-group .arco-radio-button.arco-radio-checked:hover { background: #bedaff; }
+.portal-ai-source-filters .arco-radio-group .arco-radio-button:active { background: #d5e8ff; }
+.portal-ai-source-filters .arco-radio-group .arco-radio-button:has(input:focus-visible) { outline: 2px solid #bedaff; outline-offset: 2px; }
+.portal-ai-source-filters .arco-radio-group input:focus-visible + .arco-radio-button-inner { box-shadow: none; }
+.portal-ai-source-filters .arco-radio-button-inner > span { color: inherit; opacity: .8; }
+.portal-ai-source-list { flex: 1 1 auto; min-height: 0; overflow: hidden; padding: 0 16px; }
+.portal-ai-source-card { border-bottom: 1px solid #e5e6eb; padding: 16px 0; transition: background-color 160ms ease; }
+.portal-ai-source-card:last-child { border-bottom: 0; }
+.portal-ai-source-card.is-focused { border-radius: 4px; background: #e8f3ff; outline: 2px solid #bedaff; outline-offset: 4px; }
+.portal-ai-source-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #86909c; font-size: 12px; line-height: 20px; }
+.portal-ai-source-kicker time { margin-left: auto; }
+.portal-ai-source-type.arco-tag { height: 22px; border-radius: 4px; padding: 0 6px; color: #165dff; background: #e8f3ff; font-size: 12px; line-height: 22px; }
+.portal-ai-source-title.arco-btn { display: block; width: 100%; height: auto; min-height: 22px; border: 0; border-radius: 0; padding: 0; color: #1d2129; background: transparent; text-align: left; font-size: 14px; font-weight: 500; line-height: 22px; white-space: normal; overflow-wrap: anywhere; }
+.portal-ai-source-title.arco-btn:hover { color: #1d2129; background: transparent; text-decoration: underline; text-decoration-color: #bedaff; text-underline-offset: 3px; }
+.portal-ai-source-meta { margin: 8px 0; color: #86909c; font-size: 12px; line-height: 20px; }
+.portal-ai-source-summary { margin: 0; color: #4e5969; font-size: 13px; line-height: 22px; }
+.portal-ai-source-detail { border-left: 0; margin-top: 12px; padding: 10px; background: #f7f8fa; color: #4e5969; font-size: 12px; line-height: 20px; }
+.portal-ai-source-detail strong { font-weight: 500; }
+.portal-ai-source-detail p { margin: 6px 0; }
+.portal-ai-source-detail span { display: block; color: #86909c; }
+.portal-ai-source-detail a { display: inline-block; margin-top: 8px; color: #165dff; }
+.portal-ai-no-sources { padding: 24px 0; color: #86909c; font-size: 13px; }
+.portal-ai-composer { display: grid; grid-template-columns: minmax(0, 1fr) 32px; align-items: center; gap: 0 16px; border: 1px solid #fff; border-radius: 12px; padding: 12px 16px; background: rgba(255,255,255,.8); }
+.portal-ai-composer .arco-textarea { display: block; width: 100%; height: 32px; min-height: 32px; max-height: 32px; box-sizing: border-box; resize: none; border: 0; border-radius: 0; padding: 5px 0; outline: none; box-shadow: none; color: #1d2129; background: transparent; font-size: 14px; line-height: 22px; }
+.portal-ai-composer .arco-textarea { scrollbar-width: none; }
+.portal-ai-composer .arco-textarea::-webkit-scrollbar { display: none; }
+.portal-ai-composer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; color: #86909c; font-size: 12px; line-height: 20px; }
+.portal-ai-send.arco-btn { grid-column: 2; grid-row: 1; width: 32px; min-width: 32px; height: 32px; border: 0; border-radius: 50%; padding: 0; background: transparent; }
+.portal-ai-send.arco-btn:hover { background: transparent; opacity: .85; }
+.portal-ai-send img { display: block; width: 32px; height: 32px; }
+.portal-ai-send.is-processing.arco-btn { display: grid; place-items: center; color: #165dff; background: #e8f3ff; opacity: 1; }
+.portal-ai-send-loading { display: block; width: 18px; height: 18px; animation: portal-ai-spin 900ms linear infinite; }
+.portal-ai-composer-error { grid-column: 1 / -1; grid-row: 2; margin: 8px 0 0; color: #f53f3f; font-size: 12px; line-height: 20px; }
+@keyframes portal-ai-spin { to { transform: rotate(360deg); } }
+@keyframes portal-ai-skeleton { to { transform: translateX(100%); } }
+@keyframes portal-ai-content-in { from { opacity: .7; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+html[data-ai-motion-paused] .portal-ai-process-loading,
+html[data-ai-motion-paused] .portal-ai-send-loading,
+html[data-ai-motion-paused] .portal-ai-step svg,
+html[data-ai-motion-paused] .portal-ai-answer-skeleton i::after,
+html[data-ai-motion-paused] .portal-ai-citation-skeleton i::after { animation-play-state: paused; }
+.portal-search-page[hidden] .portal-ai-answer-skeleton i::after,
+.portal-ai-workspace[hidden] .portal-ai-answer-skeleton i::after,
+.portal-search-page[hidden] .portal-ai-citation-skeleton i::after,
+.portal-ai-workspace[hidden] .portal-ai-citation-skeleton i::after { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .portal-ai-process-loading, .portal-ai-send-loading, .portal-ai-process .arco-collapse-item-active .portal-ai-step.is-active svg,
+  .portal-ai-answer-skeleton i::after, .portal-ai-citation-skeleton i::after,
+  .portal-ai-answer-block, .portal-ai-source-detail { animation: none; }
+}
+
+
+.portal-ai-group-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.portal-ai-group-number { display: inline-flex; width: 20px; height: 20px; flex: none; align-items: center; justify-content: center; border-radius: 50%; color: #4e5969; background: #f2f3f5; font-size: 12px; }
+.portal-ai-group-heading h3 { flex: 1; margin: 0; }
+.portal-ai-group-heading > span:last-child { color: #86909c; font-size: 12px; line-height: 20px; }
+.portal-ai-process-groups > li > ol { margin-left: 28px; }
+.portal-result-query:has(.portal-ai-composer .arco-textarea:focus) { outline: 1px solid #bedaff; }
+.portal-result-query:has(.portal-ai-composer .arco-textarea-error) { outline-color: #f53f3f; }
+/* Reserve final column widths; move the actual left column from the centre. */
+.portal-search-page.is-ai[data-ai-stage="centered"] .portal-ai-conversation,
+.portal-search-page.is-ai[data-ai-stage="centered"] .portal-result-query { transform: translateX(168px); }
+.portal-search-page.is-ai[data-ai-stage="shifting"] .portal-ai-conversation,
+.portal-search-page.is-ai[data-ai-stage="shifting"] .portal-result-query {
+  transform: translateX(0); transition: transform 680ms cubic-bezier(.42, 0, .25, 1); will-change: transform;
+}
+.portal-search-page.is-ai[data-ai-sources="false"] .portal-ai-citations {
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+.portal-search-page.is-ai[data-ai-sources="true"] .portal-ai-citations { animation: portal-ai-sources-in 380ms cubic-bezier(.16, 1, .3, 1); }
+@keyframes portal-ai-sources-in { from { opacity: 0; } to { opacity: 1; } }
+.portal-ai-source-pagination { display: flex; flex: none; justify-content: flex-end; border-top: 1px solid #e5e6eb; padding: 12px 16px; }
+.portal-ai-source-pagination .arco-pagination { flex-wrap: wrap; justify-content: flex-end; }
+.portal-ai-source-title.arco-btn, .portal-ai-source-meta, .portal-ai-source-summary {
+  display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
+}
+.portal-ai-source-title.arco-btn { -webkit-line-clamp: 2; }
+.portal-ai-source-meta { -webkit-line-clamp: 2; }
+.portal-ai-source-summary { -webkit-line-clamp: 3; }
+.portal-ai-source-card:has(.portal-ai-source-detail) .portal-ai-source-summary { display: none; }
+#portalAiMobileSourcesMount { display: none; }
+.portal-ai-sources-drawer .arco-drawer-content { overflow: hidden; }
+@media (max-width: 900px) {
+  .portal-search-page.is-ai .portal-search-inner { grid-template-columns: minmax(0, 1fr); }
+  .portal-search-page.is-ai .portal-search-header { width: 100%; }
+  .portal-search-page.is-ai .portal-search-heading-row { width: 100%; }
+  .portal-search-page.is-ai #portalAiMobileSourcesMount { display: block; margin-left: auto; }
+  .portal-ai-mobile-citations.arco-btn { color: #165dff; animation: portal-ai-sources-in 380ms ease; }
+  .portal-ai-conversation { padding: 16px; padding-bottom: calc(max(var(--portal-ai-composer-height, 76px), 76px) + 32px); }
+  .portal-search-page.is-ai .portal-ai-citations { display: contents; visibility: visible; opacity: 1; animation: none; }
+  .portal-search-page.is-ai[data-ai-stage] .portal-ai-conversation,
+  .portal-search-page.is-ai[data-ai-stage] .portal-result-query { transform: none; transition: none; }
+  .portal-search-page.is-ai .portal-result-query { position: relative; bottom: auto; }
+}
+@media (max-width: 760px) {
+  .portal-ai-process .arco-collapse-item-header { padding: 10px; }
+  .portal-ai-step-status { font-size: 11px; }
+  .portal-ai-answer-content th, .portal-ai-answer-content td { padding: 8px; }
+  .portal-ai-answer-content table { min-width: 460px; }
+}
+@media (max-height: 650px) {
+  .portal-ai-source-card { padding: 12px 0; }
+  .portal-ai-source-detail { margin-top: 8px; padding: 8px; }
+  .portal-ai-source-detail p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-search-page.is-ai[data-ai-stage="shifting"] .portal-ai-conversation,
+  .portal-search-page.is-ai[data-ai-stage="shifting"] .portal-result-query { transition: none; }
+  .portal-search-page.is-ai .portal-ai-citations, .portal-ai-mobile-citations.arco-btn { animation: none; }
+}

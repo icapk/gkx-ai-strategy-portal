@@ -11,7 +11,7 @@
   --mg-line: #dfe6f4;
   --mg-surface: #f1f5fd;
   --mg-card: rgba(255, 255, 255, 0.84);
-  --mg-shell: 1264px;
+  --mg-shell: 1200px;
   color: var(--mg-ink);
   background: var(--mg-surface);
   font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
@@ -72,33 +72,7 @@
   position: relative;
   min-height: calc(100vh - var(--header-height));
   overflow: hidden;
-  background:
-    radial-gradient(circle at 15% 54%, rgba(125, 175, 255, 0.15), transparent 31%),
-    radial-gradient(circle at 83% 28%, rgba(169, 198, 255, 0.18), transparent 28%),
-    linear-gradient(145deg, #f0f4fc 0%, #eaf1fd 45%, #f3f6fc 100%);
-}
-
-.mg-hero::before,
-.mg-hero::after {
-  position: absolute;
-  border: 1px solid rgba(99, 125, 232, 0.08);
-  border-radius: 50%;
-  content: "";
-  pointer-events: none;
-}
-
-.mg-hero::before {
-  width: 720px;
-  height: 720px;
-  left: -420px;
-  bottom: -420px;
-}
-
-.mg-hero::after {
-  width: 560px;
-  height: 560px;
-  right: -280px;
-  top: -310px;
+  background: #eaf1fd url("assets/mastergo-v2/hero-background.png") center / cover no-repeat;
 }
 
 .mg-hero-inner {
@@ -318,66 +292,6 @@
 
 .mg-search-card input::placeholder {
   color: #919aaa;
-}
-
-#mgHeroSearchForm .mg-hero-query-row {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 10px;
-  padding-right: 92px;
-}
-
-#mgHeroSearchForm .mg-hero-query-row input {
-  width: auto;
-  min-width: 0;
-  flex: 1;
-  padding-right: 0;
-}
-
-#mgHeroSearchForm .mg-hero-scope-chip {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 7px 4px 12px;
-  border: 1px solid #bcd0ff;
-  border-radius: 18px;
-  color: #3c6de6;
-  background: #f0f5ff;
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: nowrap;
-}
-
-#mgHeroSearchForm .mg-hero-scope-chip[hidden] {
-  display: none;
-}
-
-#mgHeroSearchForm #mgHeroScopeClear {
-  display: inline-flex;
-  width: 21px;
-  height: 21px;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  color: #6789da;
-  background: transparent;
-  font-size: 17px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-#mgHeroSearchForm #mgHeroScopeClear:hover {
-  color: #244db8;
-  background: #dfe9ff;
-}
-
-#mgHeroSearchForm #mgHeroScopeClear:focus-visible {
-  outline: 2px solid #6789da;
-  outline-offset: 2px;
 }
 
 .mg-search-intents {
@@ -2152,6 +2066,65 @@ a.mg-partner-logo:focus-visible {
 
 @media (max-width: 1343px) {
   .mg-partners-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Compact desktop: fit search and recommendations in shorter/narrower windows. */
+@media (min-width: 901px) and (max-width: 1440px),
+       (min-width: 901px) and (max-height: 800px) {
+  .mg-hero,
+  .mg-hero-inner {
+    min-height: 0;
+  }
+
+  .mg-hero-inner {
+    padding: 40px 0 32px;
+  }
+
+  .mg-hero-heading h1 {
+    font-size: 32px;
+  }
+
+  .mg-hero-heading p {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .mg-hero .mg-search-card {
+    width: min(720px, 100%);
+    min-height: 184px;
+    margin-top: 28px;
+    padding: 12px 22px;
+  }
+
+  .mg-hero .mg-search-card input {
+    height: 40px;
+    padding-right: 96px;
+  }
+
+  .mg-hero .mg-search-card .search-service-path {
+    padding: 4px 10px;
+  }
+
+  .mg-search-actions {
+    top: 48px;
+  }
+
+  .mg-smart-recommendations {
+    width: min(720px, 100%);
+    margin-top: 24px;
+  }
+
+  .mg-simulation-card {
+    height: 176px;
+  }
+
+  .mg-portal .mg-loop-section,
+  .mg-portal .mg-education-section,
+  .mg-portal .mg-evaluation-section,
+  .mg-portal .mg-strategy-section,
+  .mg-portal .mg-partners-section {
+    padding: 72px 0 64px;
+  }
 }
 
 @media (max-width: 900px) {
