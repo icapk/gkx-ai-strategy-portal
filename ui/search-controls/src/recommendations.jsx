@@ -31,10 +31,7 @@ import { SearchReturn } from './search-return.jsx';
 
 const mount = (node, component) => createRoot(node).render(component);
 const sectionLinks = [...document.querySelectorAll('[data-section-link]')];
-mount(document.getElementById('recSearchReturnMount'), <SearchReturn id="recSearchReturn" onReturn={() => {
-  if (new URLSearchParams(location.search).get('source') === 'home' && history.length > 1) history.back();
-  else location.href = 'index.html?page=home';
-}} />);
+mount(document.getElementById('recSearchReturnMount'), <SearchReturn id="recSearchReturn" onReturn={() => window.PortalRecommendationReturnHome()} />);
 
 function NavigationGroup({ group, utility = false }) {
   const [open, setOpen] = useState(false);

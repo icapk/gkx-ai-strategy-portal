@@ -3130,12 +3130,22 @@
     });
   });
 
+  window.PortalRecommendationReturnHome = function () {
+    const home = new URL("index.html?page=home", window.location.href);
+    let enteredFromHome = false;
+    try {
+      const referrer = new URL(document.referrer);
+      enteredFromHome = referrer.origin === home.origin &&
+        [home.pathname, home.pathname.replace(/index\.html$/, "")].includes(referrer.pathname);
+    } catch (_error) { /* Direct links have no page referrer. */ }
+    if (enteredFromHome && new URLSearchParams(window.location.search).get("source") === "home" && window.history.length > 1) {
+      window.history.back();
+    } else window.location.href = home.href;
+  };
   document.querySelectorAll("[data-back-home]").forEach(function (link) {
     link.addEventListener("click", function (event) {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("source") !== "home" || window.history.length <= 1) return;
       event.preventDefault();
-      window.history.back();
+      window.PortalRecommendationReturnHome();
     });
   });
 
