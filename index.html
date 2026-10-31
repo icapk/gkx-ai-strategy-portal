@@ -3010,17 +3010,18 @@
     }
   </style>
   <link rel="stylesheet" href="home-additions.css">
-  <link rel="stylesheet" href="portal-extras.css?v=20261031-portal-release">
-  <link rel="stylesheet" href="mastergo-v2.css?v=20261031-portal-release">
+  <link rel="stylesheet" href="portal-extras.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="mastergo-v2.css?v=20261031-portal-release-2">
   <link rel="stylesheet" href="home-section-fidelity.css?v=20261014-1">
   <link rel="stylesheet" href="assets/header-tabs.css?v=20261012-alert">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
-  <link rel="stylesheet" href="home-hero-20261029.css?v=20261031-portal-release">
-  <link rel="stylesheet" href="home-content-20261031.css?v=20261031-portal-release">
-  <link rel="stylesheet" href="assets/vendor/portal-arco-search.css?v=20261031-portal-release">
-  <link rel="stylesheet" href="search-results-fidelity.css?v=20261031-portal-release">
-  <link rel="stylesheet" href="ai-search-fidelity.css?v=20261031-portal-release">
-  <link rel="stylesheet" href="portal-choice-controls.css?v=20261031-portal-release">
+  <link rel="stylesheet" href="home-hero-20261029.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="home-content-20261031.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="assets/vendor/portal-arco-search.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="search-results-fidelity.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="ai-search-fidelity.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="portal-choice-controls.css?v=20261031-portal-release-2">
+  <link rel="stylesheet" href="profile-content-preserved.css?v=20261031-entry-fix">
   <style>
     .search-service-path {
       display: flex;
@@ -3795,23 +3796,10 @@
             aria-expanded="false"
             aria-haspopup="menu"
           >
-            <span class="profile-avatar" aria-hidden="true">李</span>
+            <span class="profile-avatar" aria-hidden="true">q</span><span class="personal-trigger-label" data-personal-trigger-label>quan…</span>
           </button>
           <div class="profile-menu profile-account-menu" id="profileMenu" role="menu" aria-label="个人中心" hidden>
-            <button class="profile-menu-item" id="profileCenterOne" type="button" role="menuitem">
-              <span class="profile-menu-copy">
-                <strong>个人中心1</strong>
-                <small>统一用户中心</small>
-              </span>
-              <svg class="profile-menu-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 5.5 4.5 4.5-4.5 4.5"></path></svg>
-            </button>
-            <button class="profile-menu-item" id="profileCenterTwo" type="button" role="menuitem">
-              <span class="profile-menu-copy">
-                <strong>个人中心2</strong>
-                <small>我的内容记录</small>
-              </span>
-              <svg class="profile-menu-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 5.5 4.5 4.5-4.5 4.5"></path></svg>
-            </button>
+<button class="profile-menu-item personal-account-item" id="profileCenterOne" type="button" role="menuitem"><span class="personal-menu-avatar" aria-hidden="true">q</span><span class="profile-menu-copy"><strong data-personal-account-name>quan.song@aminer.cn</strong><small data-personal-account-email>quan.song@aminer.cn</small><span class="personal-menu-caption">进入个人中心 <span aria-hidden="true">›</span></span></span></button><button class="profile-menu-item personal-logout" id="profileCenterTwo" type="button" role="menuitem">退出登录</button>
           </div>
         </div>
       </div>
@@ -3905,8 +3893,8 @@
                 <div class="mg-search-mode-tabs" id="mgHeroSearchModes" role="tablist" aria-label="搜索方式">
                   <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="fulltext" hidden>全文搜索</button>
                   <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="association" hidden>智能关联搜索</button>
-                  <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="keyword">关键词搜索</button>
-                  <button class="mg-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-hero-search-mode="ai">AI搜索</button>
+                  <button class="mg-search-mode-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-hero-search-mode="keyword">关键词搜索</button>
+                  <button class="mg-search-mode-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-hero-search-mode="ai">AI搜索</button>
                 </div>
                 <button class="mg-v2-badge" id="mgV2ExperienceSwitch" type="button" aria-expanded="false" aria-controls="mgV2SearchModeRow" aria-label="体验 V2.0 智能搜索与智能问答" hidden>V2.0</button>
               </div>
@@ -5146,10 +5134,14 @@
     </section>
   </main>
 
+  <script src="search-recommend-remediation-fixtures.js?v=20261031-entry-fix"></script>
+  <script src="portal-search-recommend-adapter.js?v=20261031-entry-fix"></script>
+  <script src="personal-resource-catalog.js?v=20261031-entry-fix"></script>
+  <script src="personal-data-demo.js?v=20261031-entry-fix"></script>
   <script defer src="assets/vendor/gsap-3.15.0.min.js"></script>
-  <script src="search-results-motion.js?v=20261031-portal-release"></script>
-  <script src="home-content-20261031.js?v=20261031-portal-release"></script>
-  <script src="assets/vendor/portal-arco-search.js?v=20261031-portal-release"></script>
+  <script src="search-results-motion.js?v=20261031-portal-release-2"></script>
+  <script src="home-content-20261031.js?v=20261031-portal-release-2"></script>
+  <script src="assets/vendor/portal-arco-search.js?v=20261031-portal-release-2"></script>
   <script>
     (() => {
       "use strict";
@@ -5518,10 +5510,10 @@
       let recommendationBatch = 0;
       let activeSearchType = "全部";
       const sidebarFilterStates = new Map();
-      let activeHeroSearchMode = "ai";
+      let activeHeroSearchMode = "keyword";
       let activeHeroExperience = "classic";
       let activeV2HeroMode = "search";
-      let lastClassicHeroMode = "ai";
+      let lastClassicHeroMode = "keyword";
       let returnHeroExperience = "classic";
       let activeHeroRecommendation = "simulation";
       let selectedHeroIntent = "";
@@ -8155,6 +8147,12 @@
 
       function createSearchResultCard(item, index) {
         const article = document.createElement("article");
+        const catalogItem = (window.PortalPersonalCatalog || []).find(record =>
+          (record.title || record.name) === item.title && record.type === item.type);
+        article.__personalResource = { ...item, portalResourceId: item.portalResourceId || item.portalPaperId || item.id ||
+          catalogItem?.portalResourceId || catalogItem?.portalPaperId || catalogItem?.id ||
+          `resource-${window.PortalSearchRecommend?.normalizeKeyword(item.title) || item.title}` };
+        if (!catalogItem) window.PortalSearchRecommend?.registerResources([article.__personalResource]);
         article.className = "portal-search-card";
         article.dataset.type = item.type;
         article.dataset.date = item.date;
@@ -8701,6 +8699,11 @@
           window.PortalAiSearch.prepare(query, sources);
         }
         showSurface("search", { focusTarget: activeSearchMode === "AI 搜索" ? document.getElementById("portalAiQuery") : portalResultSearchInput });
+        const personalService = window.PortalSearchRecommend;
+        if (activeSearchMode === "关键词" && personalService?.snapshot().userId) {
+          personalService.recordBehavior({ eventType: "SEARCH", query, mode: "关键词",
+            domainTags: [...new Set(getFilteredSearchItems().flatMap(item => item.tags || []))] }).catch(() => {});
+        }
       }
 
       portalSearchTypeTabs.querySelectorAll("[data-search-type]").forEach((tab, index) => {
@@ -9033,7 +9036,8 @@
         setRecommendationType("为你推荐");
       });
       const openPersonalCenter = () => showSurface("iframe", {
-        iframeUrl: "https://edu.itic-sci.com/uc/portal/my-account",
+        iframeUrl: "personal-center.html?embedded=1&v=20261030-notification-email",
+        hideEmbeddedToolbar: true,
         embedTitle: "个人中心"
       });
       const openPersonalCenterTwo = () => showSurface("iframe", {
@@ -9071,9 +9075,13 @@
         closeProfileMenu();
         openPersonalCenter();
       });
-      profileCenterTwo.addEventListener("click", () => {
-        closeProfileMenu();
-        openPersonalCenterTwo();
+      profileCenterTwo.addEventListener("click", async () => {
+        try {
+          const service = window.PortalSearchRecommend;
+          await service.setDemoIdentity({userId: service.snapshot().userId ? null : 'demo-user', audience: 'research'});
+          closeProfileMenu();
+          showSurface('home');
+        } catch (error) { window.alert(error.message || '账号状态未更新，请重试'); }
       });
 
       portalResultSearchForm.addEventListener("submit", (event) => {
@@ -10279,8 +10287,12 @@
       embeddedSystem.addEventListener("load", persistPortalViewState);
       window.addEventListener("pagehide", persistPortalViewState);
       window.addEventListener("beforeunload", persistPortalViewState);
-      if (!openClusterServiceRoute()) restorePortalViewState();
+      const initialEntryPage = new URLSearchParams(window.location.search).get("page");
+      if (initialEntryPage === "personal-center") openPersonalCenter();
+      else if (initialEntryPage === "home") { clearPortalViewState(); showSurface("home"); }
+      else if (!openClusterServiceRoute() && !entryQuery) { clearPortalViewState(); showSurface("home"); }
     })();
   </script>
+  <script src="personal-entry.js?v=20261031-entry-fix"></script>
 </body>
 </html>

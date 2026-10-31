@@ -1,0 +1,15 @@
+/* Restore the existing account menu contents without changing the shared header layout. */
+#siteHeader .profile-button::before { display: none; }
+#siteHeader .personal-trigger-label { order: 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: inherit; }
+#profileMenu.profile-account-menu { width: min(350px, calc(100vw - 32px)); padding: 16px; border: 1px solid #e5e9f0; border-radius: 12px; background: #fff; box-shadow: 0 12px 36px rgba(35,56,97,.09); }
+#profileMenu .personal-account-item { display: flex; width: 100%; align-items: center; justify-content: flex-start; gap: 14px; border: 0; border-radius: 6px; padding: 10px 4px 14px; color: #1d2129; background: transparent; text-align: left; cursor: pointer; }
+#profileMenu .personal-account-item:hover { background: #f5f8fd; }
+#profileMenu .personal-menu-avatar { display: inline-flex; width: 44px; height: 44px; flex: 0 0 44px; align-items: center; justify-content: center; border-radius: 50%; background: #165dff; color: #fff; font: 500 24px/1 Arial; }
+#profileMenu .profile-menu-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 5px; }
+#profileMenu .personal-account-item strong { font-size: 17px; line-height: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#profileMenu .personal-account-item small { font-size: 14px; line-height: 22px; color: #4e5969; }
+#profileMenu .personal-menu-caption { font-size: 12px; line-height: 20px; color: #165dff; }
+#profileMenu .personal-logout { display: block; width: 100%; min-height: 42px; margin-top: 10px; border: 1px solid #f77; border-radius: 4px; padding: 8px; color: #f53f3f; background: #fff; text-align: center; justify-content: center; font: inherit; cursor: pointer; }
+#profileMenu .personal-logout:hover { background: #fff3f3; }
+#profileMenu .personal-account-item:focus-visible, #profileMenu .personal-logout:focus-visible { outline: 2px solid #165dff; outline-offset: 3px; }
+@media (max-width: 1279px) { #siteHeader .personal-trigger-label { display: none; } }
