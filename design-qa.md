@@ -44,6 +44,20 @@ Evidence: `artifacts/homepage-reference-20261101/loop-motion.jpg`. Original illu
 
 final result: passed
 
+## Recommendation content layout and Arco category icons — 2026-11-01
+
+Source truth: the user approves the recommendation-page UI audit with two explicit constraints: content titles remain16px, and the existing Arco component styles remain. A subsequent annotation authorizes replacing the eight sidebar category icons; publication to the existing online site is explicitly requested. Copy, fields, data, links and business behavior are preserved.
+
+Implementation: one new `recommendations-content-polish.css` handles the custom content surfaces and layout. The neutral#F7F9FC base retains the original top image/mask at.12 opacity. Custom panels/cards use subtle ice-gray-to-white surfaces,10–12px corners and faint borders; list rows remain white. Native content headings are16px/24px, weight600; native metadata uses13px/20px,#667085. Paper/talent primary metrics share one desktop row, and report metrics allow extra room for complete date/time. The mobile controls container wraps horizontally, the obsolete paper grid row is cleared, and narrow-tablet abstracts wrap naturally. Arco buttons, tabs, select, checkbox, tags, menu, switch, pagination and focus rules are unchanged; homepage and header sources are unchanged.
+
+Icons: the existing React renderer now uses eight official icons from the locked MIT-licensed Arco2.66.18 package. An icon-only prefix avoids the library's extra menu icon margin;16×16px dimensions, existing menu gap, labels, selected/hover states and click bridge remain. The official48-unit viewBox and4-unit stroke are preserved. A baseline build matches the preceding bundle after CRLF normalization; the final JS deterministically rebuilds from the scoped icon imports/map/renderer. Vendor CSS and both license notices retain their original bytes; package/lock and build configuration are unchanged.
+
+Verification: before/after desktop1651×871 and phone390×844 screenshots were opened separately and in `artifacts/recommendations-ui-polish-20261101/comparison.html`. Desktop paper metrics shrink88→42px, and the first row362.67→300.67px. Phone first row452.67→350.67px and begins at380px instead of443.17px. All eight desktop categories were visited; paper checks at320/375/390/768/1024/1651px report no document overflow, and checked native text has no horizontal clipping. The final content stylesheet's33 rules match no Arco node or descendant.79 desktop and74 phone Arco HTML elements retain all26 sampled style properties; SVG content is the authorized exception. Other category samples taken directly after switching show only the original selected-menu color transition's intermediate color/currentColor values; these are recorded separately, not asserted as stable differences. Stable selected menu colors remain brand blue.
+
+The native Arco dropdown opens, saved-only filtering produces the two saved papers and restores the normal list, and keyboard focus retains the original component outline. No saved/followed records, rating/comment actions or external business navigation were changed. Browser error log is empty. `source-check.json` confirms unchanged HTML fields/links, business scripts and all old CSS; `browser-check.json` records the runtime checks, and the icon build/source receipts are under `artifacts/recommendations-ui-20261101/`. Production build and response checks are recorded separately after publication.
+
+final result: passed
+
 ## Recommendation card accordion — 2026-11-01
 
 Source visual truth: Figma `3ONY69uOGJhsz8QWTLGch0`, node `1206:205`, high-fidelity design context and screenshot. Local source capture: `artifacts/recommendation-cards-20261101/reference.png` (1024×175). Implemented component: `#mgRecommendationPreview` for paper, expert and strategy only.

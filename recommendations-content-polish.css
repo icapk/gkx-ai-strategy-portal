@@ -1,0 +1,247 @@
+/* Custom content only. Component hosts, controls and their descendants keep their existing styles. */
+body:has(#recommendationMain) {
+  background: #f7f9fc;
+}
+
+/* Preserve the original top-only image, its dimensions and its smooth SVG mask. */
+body:has(#recommendationMain)::before {
+  opacity: .12;
+}
+
+#recommendationMain section.rec-panel {
+  border: 1px solid #e1e7ef;
+  border-radius: 12px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f3f6fa 0%, #fff 68%);
+  box-shadow: 0 4px 16px rgba(24, 34, 48, .025);
+}
+
+#recommendationMain article.rec-news-card,
+#recommendationMain article.rec-paper-card,
+#recommendationMain article.rec-report-card,
+#recommendationMain article.rec-conference-card,
+#recommendationMain article.rec-course-card,
+#recommendationMain article.rec-event-card {
+  border-bottom: 1px solid #e7ecf2;
+  border-radius: 0;
+  padding: 16px 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+#recommendationMain article.rec-news-card:hover,
+#recommendationMain article.rec-paper-card:hover {
+  transform: none;
+}
+
+#recommendationMain article.rec-talent-card,
+#recommendationMain article.rec-author-update-card,
+#recommendationMain article.rec-rising-star-card,
+#recommendationMain article.rec-follow-card {
+  border: 1px solid #e1e7ef;
+  border-radius: 10px;
+  padding: 18px;
+  background: linear-gradient(135deg, #f3f6fa 0%, #fff 72%);
+  box-shadow: none;
+}
+
+#recommendationMain article.rec-talent-card.is-following,
+#recommendationMain article.rec-follow-card:is(.is-following, .is-expanded) {
+  border-color: #b6cff5;
+}
+
+/* Native content headings only; no heading inside a component is selected. */
+#recommendationMain .rec-hot-heading > h3,
+#recommendationMain h3#recKeywordFollowTitle,
+#recommendationMain article.rec-news-card > .rec-news-content > h3,
+#recommendationMain article.rec-paper-card > .rec-paper-content > h3,
+#recommendationMain article:is(.rec-report-card, .rec-course-card) > div > h3,
+#recommendationMain article:is(.rec-conference-card, .rec-event-card) > h3,
+#recommendationMain article:is(.rec-talent-card, .rec-author-update-card, .rec-rising-star-card) > h4,
+#recommendationMain article.rec-follow-card > .rec-follow-card-heading > strong {
+  margin: 6px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+/* Explicit native metadata paths exclude status tags and every control host. */
+#recommendationMain article.rec-paper-card > .rec-paper-content > p:is(.rec-paper-author, .rec-paper-source),
+#recommendationMain article.rec-paper-card > .rec-paper-content > span.rec-recommendation-reason,
+#recommendationMain article.rec-news-card > .rec-news-content > .rec-news-source-line > span,
+#recommendationMain article.rec-news-card > .rec-news-content > .rec-news-meta > span,
+#recommendationMain article.rec-news-card > .rec-news-content > .rec-news-meta > span > :is(span, time),
+#recommendationMain article.rec-news-card > .rec-news-content > .rec-news-card-topline > span.rec-news-reason,
+#recommendationMain article.rec-report-card > div > p.rec-report-source,
+#recommendationMain article.rec-report-card > div > span.rec-report-reason,
+#recommendationMain article.rec-course-card > div > :is(time, span.rec-recommendation-reason),
+#recommendationMain article.rec-conference-card > span.rec-recommendation-reason,
+#recommendationMain article.rec-event-card > span.rec-event-reason,
+#recommendationMain article.rec-talent-card > span.rec-recommendation-reason,
+#recommendationMain article.rec-author-update-card > :is(time, span.rec-recommendation-reason),
+#recommendationMain article.rec-follow-card > p.rec-follow-meta {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+#recommendationMain article.rec-paper-card > .rec-paper-content > p:is(.rec-paper-author, .rec-paper-source),
+#recommendationMain article.rec-report-card > div > p.rec-report-source {
+  margin: 4px 0;
+}
+
+#recommendationMain article.rec-paper-card > .rec-paper-content > p.rec-paper-abstract {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Tighten custom action rows without styling the component buttons inside them. */
+#recommendationMain article.rec-news-card > .rec-news-content > .rec-news-actions,
+#recommendationMain article.rec-paper-card > .rec-paper-content > .rec-paper-actions,
+#recommendationMain article.rec-report-card > div > .rec-report-actions,
+#recommendationMain article.rec-course-card > div > .rec-course-actions,
+#recommendationMain article.rec-conference-card > .rec-conference-actions,
+#recommendationMain article.rec-event-card > .rec-event-actions,
+#recommendationMain article.rec-follow-card > .rec-follow-actions {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* All metric boxes are native dl/div/dt/dd markup; only spacing is shared. */
+#recommendationMain dl.rec-metric-grid {
+  gap: 8px 16px;
+  margin: 12px 0;
+  border: 1px solid #edf0f4;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #f7f9fc;
+}
+
+#recommendationMain dl.rec-metric-grid > div {
+  min-width: 0;
+  gap: 8px;
+}
+
+#recommendationMain dl.rec-metric-grid > div > dt {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#recommendationMain dl.rec-metric-grid > div > dd {
+  min-width: 0;
+  margin: 0;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+/* Only the three primary paper/talent metrics occupy a single desktop row. */
+#recommendationMain article.rec-paper-card > .rec-paper-content > dl.rec-metric-grid,
+#recommendationMain article.rec-talent-card > dl.rec-metric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* The report's first metric includes a complete date/time, so it gets a wider track. */
+#recommendationMain article.rec-report-card > div > dl.rec-report-metrics {
+  grid-template-columns: minmax(220px, 1.8fr) repeat(3, minmax(0, 1fr));
+}
+
+#recommendationMain article.rec-paper-card > .rec-paper-content > dl.rec-metric-grid > div,
+#recommendationMain article.rec-talent-card > dl.rec-metric-grid > div,
+#recommendationMain article.rec-report-card > div > dl.rec-report-metrics > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 6px;
+  row-gap: 2px;
+}
+
+/* Filter-row spacing stays on custom layout containers, outside the controls. */
+#recommendationMain section.rec-panel > .rec-module-toolbar,
+#recommendationMain section.rec-panel > .rec-news-toolbar {
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+#recommendationMain section.rec-panel > .rec-module-toolbar > .rec-module-controls {
+  gap: 8px 12px;
+}
+
+@media (max-width: 1023px) {
+  #recommendationMain article.rec-report-card > div > dl.rec-report-metrics {
+    grid-template-columns: minmax(220px, 1.6fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  #recommendationMain section.rec-panel {
+    padding: 16px;
+  }
+
+  #recommendationMain article.rec-news-card,
+  #recommendationMain article.rec-paper-card,
+  #recommendationMain article.rec-report-card,
+  #recommendationMain article.rec-conference-card,
+  #recommendationMain article.rec-course-card,
+  #recommendationMain article.rec-event-card {
+    padding: 14px 0;
+  }
+
+  #recommendationMain article.rec-talent-card,
+  #recommendationMain article.rec-author-update-card,
+  #recommendationMain article.rec-rising-star-card,
+  #recommendationMain article.rec-follow-card {
+    padding: 16px;
+  }
+
+  #recommendationMain article.rec-paper-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  #recommendationMain article.rec-paper-card > .rec-paper-content {
+    min-width: 0;
+    grid-row: auto;
+  }
+
+  #recommendationMain dl.rec-metric-grid {
+    gap: 8px 12px;
+    padding: 10px;
+  }
+
+  #recommendationMain section.rec-panel > .rec-module-toolbar,
+  #recommendationMain section.rec-panel > .rec-news-toolbar {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  #recommendationMain section.rec-panel > .rec-module-toolbar > .rec-module-controls {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  #recommendationMain article.rec-report-card > div > dl.rec-report-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #recommendationMain article.rec-report-card > div > dl.rec-report-metrics > div:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 380px) {
+  #recommendationMain article.rec-paper-card > .rec-paper-content > dl.rec-metric-grid,
+  #recommendationMain article.rec-talent-card > dl.rec-metric-grid,
+  #recommendationMain article.rec-report-card > div > dl.rec-report-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

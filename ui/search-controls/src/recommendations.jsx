@@ -13,6 +13,15 @@ import Progress from '@arco-design/web-react/es/Progress';
 import Input from '@arco-design/web-react/es/Input';
 import Radio from '@arco-design/web-react/es/Radio';
 import Empty from '@arco-design/web-react/es/Empty';
+import IconFire from '@arco-design/web-react/icon/react-icon/IconFire';
+import IconFile from '@arco-design/web-react/icon/react-icon/IconFile';
+import IconFilePdf from '@arco-design/web-react/icon/react-icon/IconFilePdf';
+import IconDashboard from '@arco-design/web-react/icon/react-icon/IconDashboard';
+import IconUserGroup from '@arco-design/web-react/icon/react-icon/IconUserGroup';
+import IconTrophy from '@arco-design/web-react/icon/react-icon/IconTrophy';
+import IconBook from '@arco-design/web-react/icon/react-icon/IconBook';
+import IconCalendar from '@arco-design/web-react/icon/react-icon/IconCalendar';
+import { IconContext } from '@arco-design/web-react/icon/react-icon/context';
 import '@arco-design/web-react/es/Button/style/css.js';
 import '@arco-design/web-react/es/Tabs/style/css.js';
 import '@arco-design/web-react/es/Menu/style/css.js';
@@ -31,6 +40,10 @@ import { SearchReturn } from './search-return.jsx';
 
 const mount = (node, component) => createRoot(node).render(component);
 const sectionLinks = [...document.querySelectorAll('[data-section-link]')];
+const categoryIcons = { hot: IconFire, news: IconFile, papers: IconFilePdf, reports: IconDashboard, talent: IconUserGroup, conferences: IconTrophy, courses: IconBook, events: IconCalendar };
+// Scope the official icons so Menu's default icon spacing preserves the existing gap.
+const categoryIconContext = { prefixCls: 'rec-category' };
+const categoryIconStyle = { fill: 'none', stroke: 'currentColor', strokeWidth: 4, strokeLinecap: 'butt', strokeLinejoin: 'miter' };
 mount(document.getElementById('recSearchReturnMount'), <SearchReturn id="recSearchReturn" onReturn={() => window.PortalRecommendationReturnHome()} />);
 
 function NavigationGroup({ group, utility = false }) {
@@ -74,7 +87,10 @@ function ContentNavigation() {
     return () => document.removeEventListener('rec-section-change', update);
   }, []);
   return <Menu selectedKeys={[active]} onClickMenuItem={key => sectionLinks.find(link => link.dataset.sectionLink === key)?.click()}>
-    {sectionLinks.map(link => <Menu.Item key={link.dataset.sectionLink}><svg aria-hidden="true"><use href={link.querySelector('use').getAttribute('href')} /></svg>{link.querySelector('span').textContent}</Menu.Item>)}
+    {sectionLinks.map(link => {
+      const Icon = categoryIcons[link.dataset.sectionLink] || IconFile;
+      return <Menu.Item key={link.dataset.sectionLink}><IconContext.Provider value={categoryIconContext}><Icon style={categoryIconStyle} /></IconContext.Provider>{link.querySelector('span').textContent}</Menu.Item>;
+    })}
   </Menu>;
 }
 mount(document.getElementById('recCategoryMenu'), <ContentNavigation />);
