@@ -1,287 +1,313 @@
-/* Evaluation cards share the education section's quiet ice-blue material. */
-.research-home .mg-evaluation-section .mg-evaluation-grid {
+/* Approved evaluation preview: compact headings and an edge-entering relation mesh.
+   Loaded after shared surfaces to replace the legacy ribbon and mobile styles. */
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
   gap: 24px;
 }
 
-.research-home .mg-evaluation-section .mg-evaluation-card {
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-card {
   position: relative;
   display: block;
   min-width: 0;
   min-height: 300px;
   overflow: hidden;
-  border: 1px solid rgba(148, 180, 226, .5);
-  border-radius: 16px;
-  padding: 80px 28px 28px;
-  color: #3e5578;
-  background: linear-gradient(115deg, rgba(219, 234, 255, .94) 0%, rgba(239, 247, 255, .93) 52%, rgba(255, 255, 255, .98) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 8px 24px rgba(69, 103, 153, .04);
+  border: 1px solid #e3e8ef;
+  border-radius: 12px;
+  padding: 28px;
+  color: #52627a;
+  background: linear-gradient(120deg, #f5f8fd 0%, #fbfcfe 48%, #fff 100%);
+  box-shadow: 0 6px 20px rgba(36, 54, 78, .035);
   text-decoration: none;
   filter: none;
   transform: none;
-  transition: none;
   animation: none;
 }
 
-.research-home .mg-evaluation-section a.mg-evaluation-card--talent {
-  transition: color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
-}
-
-.research-home .mg-evaluation-section .mg-evaluation-card--talent {
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-card--talent {
   grid-column: 1 / -1;
-  min-height: 240px;
-  padding: 76px 460px 28px 28px;
+  min-height: 256px;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 
-.research-home .mg-evaluation-section .mg-talent-copy {
+#mgResearchContent.research-home .mg-evaluation-section .mg-talent-copy {
   position: relative;
   z-index: 1;
+  width: max-content;
+  max-width: 70%;
   min-width: 0;
 }
 
-.research-home .mg-evaluation-section .mg-card-titlebar,
-.research-home .mg-evaluation-section .mg-evaluation-card:is(:hover, :focus-visible, :active) .mg-card-titlebar {
-  position: absolute;
-  z-index: 2;
-  top: 18px;
-  left: 0;
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-title {
+  position: relative;
   display: flex;
-  width: max-content;
-  min-width: 200px;
-  max-width: 100%;
-  height: 42px;
+  min-width: 0;
+  min-height: 32px;
   align-items: center;
-  gap: 10px;
-  margin: 0;
-  border-radius: 0 22px 22px 0;
-  padding: 0 24px;
-  color: #fff;
-  background: linear-gradient(100deg, #0a46ff 4%, #287eff 62%, #4dc3f0 100%);
-  font-size: 20px;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 0;
+  color: #29384d;
+  background: none;
+  font-size: 18px;
   font-weight: 600;
   line-height: 28px;
-  transition: none;
+  letter-spacing: normal;
 }
 
-.research-home .mg-evaluation-section .mg-talent-copy .mg-card-titlebar,
-.research-home .mg-evaluation-section .mg-evaluation-card:is(:hover, :focus-visible, :active) .mg-talent-copy .mg-card-titlebar {
-  top: -58px;
-  left: -28px;
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 7px;
+  color: #3974d8;
+  background: #f0f5fc;
 }
 
-.research-home .mg-evaluation-section .mg-card-titlebar .mg-content-icon {
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-icon::before {
+  display: block;
   width: 20px;
   height: 20px;
-  flex: 0 0 20px;
-  color: #fff;
-  background-color: currentColor;
+  background: currentColor;
+  -webkit-mask: var(--evaluation-icon) center / contain no-repeat;
+  mask: var(--evaluation-icon) center / contain no-repeat;
+  content: '';
 }
 
-.research-home .mg-evaluation-section .mg-evaluation-card p {
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-icon--network {
+  --evaluation-icon: url('assets/evaluation-icons-20261102/share.svg');
+}
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-icon--peer {
+  --evaluation-icon: url('assets/evaluation-icons-20261102/users.svg');
+}
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-icon--expert {
+  --evaluation-icon: url('assets/evaluation-icons-20261102/user-check.svg');
+}
+
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-card p {
   position: relative;
   z-index: 1;
   margin: 0;
-  color: #3e5578;
+  color: #52627a;
   font-size: 16px;
   line-height: 26px;
+  overflow-wrap: anywhere;
 }
 
-.research-home .mg-evaluation-section .mg-talent-art {
+#mgResearchContent.research-home .mg-evaluation-section .mg-talent-art {
   position: absolute;
   z-index: 0;
-  top: 0;
-  right: 28px;
-  bottom: 0;
-  left: auto;
+  inset: -1px -1px -1px auto;
   display: block;
-  width: 420px;
+  width: 58%;
   max-width: none;
-  height: 240px;
-  margin: auto 0;
+  height: calc(100% + 2px);
+  margin: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: right bottom;
+  opacity: .75;
   pointer-events: none;
   filter: none;
   transform: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%);
+  mask-image: linear-gradient(90deg, transparent, #000 30%);
 }
 
-.research-home .mg-evaluation-section .mg-tag-row {
+#mgResearchContent.research-home .mg-evaluation-section .mg-tag-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 20px;
 }
 
-.research-home .mg-evaluation-section .mg-tag-row span {
+#mgResearchContent.research-home .mg-evaluation-section .mg-tag-row span {
   margin: 0;
-  border: 1px solid rgba(164, 192, 232, .42);
-  border-radius: 999px;
+  border: 0;
+  border-radius: 5px;
   padding: 4px 12px;
-  color: #3e5578;
-  background: rgba(255, 255, 255, .64);
+  color: #526581;
+  background: #edf2fa;
   font-size: 14px;
   line-height: 22px;
 }
 
-.research-home .mg-evaluation-section .mg-proof-pair {
+#mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 0;
+  margin-top: 36px;
 }
 
-.research-home .mg-evaluation-section .mg-proof-pair > span {
+#mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair > span {
   display: flex;
   min-width: 0;
-  min-height: 104px;
+  min-height: 72px;
   flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  border: 1px solid rgba(185, 209, 240, .5);
-  border-radius: 12px;
-  padding: 18px;
+  justify-content: flex-start;
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  padding: 0 24px 0 0;
   text-align: left;
-  background: linear-gradient(130deg, rgba(232, 242, 255, .82), rgba(255, 255, 255, .72));
+  background: none;
 }
 
-.research-home .mg-evaluation-section .mg-proof-pair strong {
+#mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair > span + span {
+  border-left: 1px solid #e2e9f2;
+  padding: 0 0 0 24px;
+}
+
+#mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair strong {
   display: block;
   margin: 0;
-  color: var(--content-ink);
-  font-size: 18px;
+  color: #29384d;
+  font-size: 16px;
   font-weight: 600;
-  line-height: 26px;
+  line-height: 24px;
 }
 
-.research-home .mg-evaluation-section .mg-proof-pair small {
+#mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair small {
   display: block;
   margin: 0;
-  color: #4e6382;
+  color: #526581;
   font-size: 14px;
   line-height: 22px;
-  text-wrap: pretty;
+  overflow-wrap: anywhere;
 }
 
-.research-home .mg-evaluation-section .mg-proof-pair:not(.mg-peer-pair) > span {
-  justify-content: flex-start;
-}
-
-.research-home .mg-evaluation-section .mg-peer-pair > span {
-  text-align: center;
-}
-
-.research-home .mg-evaluation-section .mg-evaluation-entry {
-  position: absolute;
-  z-index: 3;
-  right: 20px;
-  bottom: 20px;
-  display: grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border: 1px solid rgba(138, 176, 233, .56);
-  border-radius: 50%;
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-entry {
+  position: static;
+  display: inline-flex;
+  width: auto;
+  min-height: 24px;
+  height: auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
   color: #165dff;
-  background: rgba(255, 255, 255, .8);
-  pointer-events: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
 }
 
-.research-home .mg-evaluation-section .mg-evaluation-entry-icon {
+#mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-entry-icon {
   display: block;
   width: 16px;
   height: 16px;
   background: currentColor;
-  -webkit-mask: url('assets/research-home-20261031/icons/arrow-right.svg') center / contain no-repeat;
-  mask: url('assets/research-home-20261031/icons/arrow-right.svg') center / contain no-repeat;
+  -webkit-mask: url('assets/evaluation-icons-20261102/arrow-right.svg') center / contain no-repeat;
+  mask: url('assets/evaluation-icons-20261102/arrow-right.svg') center / contain no-repeat;
 }
 
-.research-home .mg-evaluation-section a.mg-evaluation-card:is(:hover, :focus-visible, :active) {
-  color: #3e5578;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 8px 24px rgba(69, 103, 153, .04);
+#mgResearchContent.research-home .mg-evaluation-section a.mg-evaluation-card:is(:hover, :focus-visible, :active) {
+  color: #52627a;
+  border-color: #b8cce8;
+  background: linear-gradient(120deg, #f5f8fd 0%, #fbfcfe 48%, #fff 100%);
+  box-shadow: 0 6px 20px rgba(36, 54, 78, .05);
   filter: none;
   transform: none;
 }
 
-.research-home .mg-evaluation-section a.mg-evaluation-card:is(:hover, :focus-visible) {
-  border-color: #7da8ff;
+#mgResearchContent.research-home .mg-evaluation-section a.mg-evaluation-card:is(:hover, :focus-visible) .mg-evaluation-entry {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
-.research-home .mg-evaluation-section a.mg-evaluation-card:focus-visible {
+#mgResearchContent.research-home .mg-evaluation-section a.mg-evaluation-card:focus-visible {
   outline: 3px solid #165dff;
   outline-offset: 4px;
 }
 
-@media (max-width: 900px) {
-  .research-home .mg-evaluation-section .mg-evaluation-card--talent {
-    min-height: 0;
-    padding: 76px 28px 28px;
-  }
-
-  .research-home .mg-evaluation-section .mg-talent-art {
-    position: static;
-    width: min(420px, 100%);
-    max-width: 100%;
-    height: auto;
-    max-height: 240px;
-    aspect-ratio: 7 / 4;
-    margin: 24px auto 0;
+@media (max-width: 1024px) {
+  #mgResearchContent.research-home .mg-evaluation-section .mg-talent-copy { max-width: 82%; }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-talent-art {
+    width: 55%;
+    opacity: .72;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%);
+    mask-image: linear-gradient(90deg, transparent, #000 60%);
   }
 }
 
-@media (max-width: 700px) {
-  .research-home .mg-evaluation-section .mg-evaluation-grid {
+@media (max-width: 900px) {
+  #mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-card { min-height: 0; }
 }
 
-@media (max-width: 560px) {
-  .research-home .mg-evaluation-section .mg-evaluation-card,
-  .research-home .mg-evaluation-section .mg-evaluation-card--talent {
-    min-height: 0;
-    padding: 78px 20px 24px;
+@media (max-width: 600px) {
+  #mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-grid { gap: 16px; }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-card { padding: 24px 20px; }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-card--talent { padding-bottom: 116px; }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-talent-copy {
+    width: 100%;
+    max-width: none;
   }
-
-  .research-home .mg-evaluation-section .mg-talent-copy .mg-card-titlebar,
-  .research-home .mg-evaluation-section .mg-evaluation-card:is(:hover, :focus-visible, :active) .mg-talent-copy .mg-card-titlebar {
-    top: -60px;
-    left: -20px;
+  #mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-title {
+    gap: 10px;
+    margin-bottom: 18px;
   }
-
-  .research-home .mg-evaluation-section .mg-evaluation-card p {
+  #mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-card p {
     font-size: 15px;
     line-height: 25px;
   }
-
-  .research-home .mg-evaluation-section .mg-proof-pair {
-    gap: 12px;
-    margin-top: 22px;
-  }
-
-  .research-home .mg-evaluation-section .mg-tag-row {
+  #mgResearchContent.research-home .mg-evaluation-section .mg-tag-row {
     gap: 8px;
     margin-top: 18px;
   }
-
-  .research-home .mg-evaluation-section .mg-evaluation-entry {
-    right: 16px;
-    bottom: 16px;
+  #mgResearchContent.research-home .mg-evaluation-section .mg-tag-row span {
+    padding: 4px 10px;
+    font-size: 13px;
+  }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-talent-art {
+    top: auto;
+    right: -1px;
+    bottom: -1px;
+    width: 100%;
+    height: 100px;
+    max-height: none;
+    aspect-ratio: auto;
+    opacity: .7;
+    object-position: right 65%;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 35%);
+    mask-image: linear-gradient(90deg, transparent, #000 35%);
+  }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair { margin-top: 28px; }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair > span { padding-right: 16px; }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair > span + span {
+    padding-right: 0;
+    padding-left: 16px;
   }
 }
 
 @media (max-width: 380px) {
-  .research-home .mg-evaluation-section .mg-proof-pair {
+  #mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair {
     grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair > span {
+    min-height: 0;
+    padding: 0;
+  }
+  #mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair > span + span {
+    border-top: 1px solid #e2e9f2;
+    border-left: 0;
+    padding: 16px 0 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .research-home .mg-evaluation-section a.mg-evaluation-card--talent {
-    transition: none !important;
-  }
+  #mgResearchContent.research-home .mg-evaluation-section a.mg-evaluation-card--talent { transition: none; }
 }
