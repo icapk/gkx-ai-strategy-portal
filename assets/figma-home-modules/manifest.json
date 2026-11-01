@@ -1,0 +1,12 @@
+{
+  "source": "Figma 官网 / 3ONY69uOGJhsz8QWTLGch0",
+  "target": "User-supplied four-module reference, 2026-11-01",
+  "assets": [
+    { "file": "education-imgVector5.png", "node": "1283:412", "slot": "可视化仿真实验室" },
+    { "file": "education-imgVector12.png", "node": "1283:412", "slot": "学 / 智启" },
+    { "file": "education-imgVector17.png", "node": "1283:412", "slot": "练 / 构建" },
+    { "file": "education-imgVector18.png", "node": "1283:412", "slot": "赛 / 体系" },
+    { "file": "strategy-imgVector.png", "node": "61:363", "slot": "产业战略报告预览" },
+    { "file": "service-background.png", "source": "User attachment 2026-11-01", "slot": "四个内容模块的连续背景，顶部240px渐显" }
+  ]
+}

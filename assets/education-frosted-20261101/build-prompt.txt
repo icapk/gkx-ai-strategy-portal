@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: premium minimal 3D education service-card illustration, square 1:1 composition.
+Style: same family of frosted glass education objects, milky translucent ice-blue and white satin glass, soft internal light scattering, gently blurred contents behind thick rounded glass, restrained cobalt #165dff and pale cyan edge accents, matte rather than highly glossy, no chrome, no neon.
+Subject: a friendly minimal frosted-glass AI assistant robot head (no AI lettering), two understated cobalt eyes, emerging from three chunky interlocking rounded frosted-glass building blocks on a small low rounded rectangular glass plinth; communicates constructing an intelligent agent.
+Camera/composition: isometric 3/4 front view slightly above, camera elevation 25 degrees and turn 25 degrees. Subject fills the central 80% with a generous clear margin. Crisp silhouette readable at a small service-card size.
+Lighting: soft studio key light from upper-left, subtle ambient contact shadow.
+Background: isolated on a genuinely transparent background, preserve real alpha transparency; no opaque backdrop.
+Constraints: no letters, numbers, text, logos, or watermark. No sparkles, confetti, or decorative clutter.

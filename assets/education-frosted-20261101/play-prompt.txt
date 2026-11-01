@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: premium minimal 3D service-card illustration, a single landscape 4:3 PNG asset for the “Play / agile discovery” virtual science education card.
+Style: premium minimal 3D service-card illustration; same family of frosted glass education objects, milky translucent ice-blue and white satin glass, soft internal light scattering, gently blurred contents behind thick rounded glass, restrained cobalt #165dff and pale cyan edge accents, matte rather than highly glossy, no chrome, no neon.
+Camera and light: isometric 3/4 front view from slightly above (camera elevation 25°, turn 25°), soft studio key light upper-left, subtle ambient contact shadow.
+Subject: a playful modular virtual-science lab: one chunky frosted glass screen displaying abstract translucent molecule/simulation spheres (NO actual UI text), a few simple frosted building blocks and sphere on a low rounded rectangular glass plinth, coherent single composition.
+Composition: landscape 4:3. Subject fills central 80% with generous clear margin, crisp silhouette at small size.
+Background: isolated on genuinely transparent background, no opaque backdrop. Preserve real alpha transparency around the object and its subtle contact shadow; do not draw a checkerboard pattern.
+Constraints: no letters, numbers, text, logo or watermark; no sparkles, confetti or decorative clutter. No chrome, no neon, no highly glossy plastic. One asset, one coherent subject, no panels or collage.

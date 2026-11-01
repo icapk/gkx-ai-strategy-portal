@@ -1,0 +1,7 @@
+Use case: stylized-concept.
+Asset type: premium minimal 3D service-card illustration, square 1:1.
+Style: same family of frosted glass education objects, milky translucent ice-blue and white satin glass, soft internal light scattering, gently blurred contents behind thick rounded glass, restrained cobalt #165dff and pale cyan edge accents, matte rather than highly glossy, no chrome, no neon.
+Subject: a simple elegant trophy cup made of thick milky translucent frosted glass, rounded double handles, subtle cobalt inner stem and pale cyan edges, standing on a small low rounded rectangular frosted-glass plinth; no stars, confetti, medals, letters or numbers.
+Camera and lighting: isometric 3/4 front view slightly above (camera elevation 25 degrees, turn 25 degrees), soft studio key light upper-left, subtle ambient contact shadow.
+Composition: isolated on genuinely transparent background, no opaque backdrop; subject fills central 80% with generous clear margin, crisp silhouette at small size.
+Constraints: no letters, numbers, text, logo or watermark; no sparkles, confetti or decorative clutter. Generate a new image without any reference image. Preserve a real alpha channel.

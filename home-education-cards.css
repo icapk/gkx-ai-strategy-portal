@@ -1,0 +1,203 @@
+/* Education entries: one illustration family, one clear action per whole-card link. */
+.research-home .mg-education-section .mg-education-grid {
+  align-items: stretch;
+  gap: 28px;
+}
+
+.research-home .mg-education-section .mg-education-stack {
+  grid-template-rows: repeat(3, 184px);
+  gap: 20px;
+}
+
+.research-home .mg-education-section .mg-education-card {
+  border: 1px solid rgba(148, 180, 226, .5);
+  border-radius: 16px;
+  color: #394869;
+  background: linear-gradient(115deg, rgba(219, 234, 255, .94) 0%, rgba(239, 247, 255, .93) 52%, rgba(255, 255, 255, .98) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 8px 24px rgba(69, 103, 153, .04);
+  cursor: pointer;
+  transform: none;
+  transition: none;
+}
+
+.research-home .mg-education-section .mg-education-card::before,
+.research-home .mg-education-section .mg-education-card::after {
+  display: none;
+  content: none;
+}
+
+.research-home .mg-education-section .mg-learning-title,
+.research-home .mg-education-section .mg-education-card:is(:hover, :focus-visible, :active) .mg-learning-title {
+  top: 18px;
+  width: 208px;
+  min-height: 48px;
+  gap: 16px;
+  padding: 0 32px;
+  color: #fff;
+  font-size: 22px;
+  line-height: 30px;
+  transition: none;
+}
+
+.research-home .mg-education-section .mg-learning-title > :is(strong, span) {
+  color: inherit;
+}
+
+.research-home .mg-education-section .mg-learning-title > .mg-learning-divider {
+  color: rgba(255, 255, 255, .8);
+}
+
+.research-home .mg-education-section .mg-education-card p {
+  margin: 0;
+  color: #3e5578;
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.research-home .mg-education-section .mg-education-card--play {
+  display: flex;
+  min-height: 592px;
+  flex-direction: column;
+  padding: 92px 32px 24px;
+}
+
+.research-home .mg-education-section .mg-learning-visual {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  overflow: visible;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.research-home .mg-education-section .mg-education-card--play .mg-learning-visual {
+  min-height: 280px;
+  flex: 1 1 auto;
+  margin: 22px 0 20px;
+}
+
+.research-home .mg-education-section .mg-learning-visual .mg-learning-art {
+  position: static;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  object-fit: contain;
+}
+
+.research-home .mg-education-section .mg-education-card--play .mg-learning-art {
+  max-height: 340px;
+}
+
+.research-home .mg-education-section .mg-education-card--compact {
+  min-height: 184px;
+  padding: 78px 188px 58px 24px;
+}
+
+.research-home .mg-education-section .mg-education-card--compact .mg-learning-visual {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 144px;
+  height: 144px;
+}
+
+.research-home .mg-education-section .mg-education-card--play p {
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.research-home .mg-education-section .mg-learning-cta {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 34px;
+  flex: 0 0 auto;
+  align-items: center;
+  align-self: flex-start;
+  gap: 8px;
+  border: 1px solid #c9dcff;
+  border-radius: 8px;
+  padding: 5px 12px;
+  color: #165dff;
+  background: #f5f9ff;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+.research-home .mg-education-section .mg-education-card--compact .mg-learning-cta {
+  position: absolute;
+  bottom: 16px;
+  left: 24px;
+}
+
+.research-home .mg-education-section .mg-learning-cta-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: url('assets/research-home-20261031/icons/arrow-right.svg') center / contain no-repeat;
+  mask: url('assets/research-home-20261031/icons/arrow-right.svg') center / contain no-repeat;
+}
+
+.research-home .mg-education-section .mg-education-card:is(:hover, :focus-visible, :active) {
+  border-color: #7da8ff;
+  color: #394869;
+  background: linear-gradient(115deg, #d5e7ff 0%, #edf6ff 52%, #fff 100%);
+  box-shadow: 0 0 0 1px rgba(22, 93, 255, .12);
+  transform: none;
+}
+
+.research-home .mg-education-section .mg-education-card:is(:hover, :focus-visible, :active) .mg-learning-cta {
+  border-color: #165dff;
+  color: #fff;
+  background: #165dff;
+}
+
+.research-home .mg-education-section .mg-education-card:focus-visible {
+  outline: 3px solid #165dff;
+  outline-offset: 4px;
+}
+
+@media (min-width: 901px) and (max-width: 1199px) {
+  .research-home .mg-education-section .mg-education-grid { gap: 24px; }
+  .research-home .mg-education-section .mg-education-card--play { padding-right: 24px; padding-left: 24px; }
+  .research-home .mg-education-section .mg-education-card--compact { padding-right: 148px; }
+  .research-home .mg-education-section .mg-education-card--compact .mg-learning-visual { right: 14px; width: 120px; height: 144px; }
+}
+
+@media (max-width: 900px) {
+  .research-home .mg-education-section .mg-education-grid { grid-template-columns: 1fr; gap: 20px; }
+  .research-home .mg-education-section .mg-education-card--play { min-height: 0; }
+  .research-home .mg-education-section .mg-education-card--play .mg-learning-visual { height: 300px; min-height: 0; flex: 0 0 auto; }
+}
+
+@media (max-width: 560px) {
+  .research-home .mg-education-section .mg-learning-title,
+  .research-home .mg-education-section .mg-education-card:is(:hover, :focus-visible, :active) .mg-learning-title {
+    width: 180px;
+    min-height: 44px;
+    gap: 12px;
+    padding: 0 28px;
+    font-size: 20px;
+    line-height: 28px;
+  }
+  .research-home .mg-education-section .mg-education-card--play { padding: 84px 20px 20px; }
+  .research-home .mg-education-section .mg-education-card--play .mg-learning-visual { height: 220px; margin: 18px 0; }
+  .research-home .mg-education-section .mg-education-stack { grid-template-rows: repeat(3, minmax(208px, auto)); gap: 16px; }
+  .research-home .mg-education-section .mg-education-card--compact { min-height: 208px; padding: 82px 124px 64px 20px; }
+  .research-home .mg-education-section .mg-education-card--compact .mg-learning-visual { top: 78px; right: 12px; width: 100px; height: 100px; }
+  .research-home .mg-education-section .mg-education-card--compact .mg-learning-cta { left: 20px; bottom: 16px; }
+  .research-home .mg-education-section .mg-education-card p { font-size: 15px; line-height: 25px; }
+}
