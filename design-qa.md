@@ -112,3 +112,19 @@ Comparison history: desktop review found expert inner titles sat at different ve
 Release preparation: all155local references across the homepage, its styles and new script resolve to tracked nonempty files;28newPNG/SVG assets are tracked. Remote main052f995 was merged, preserving its keyword-search labels and vendor bundle update, together with the local loop-motion import. Inline JavaScript syntax and git diff whitespace checks pass. Publication is verified separately against the production HTML and asset responses after pushing.
 
 final result: passed
+
+## AI strategy static report presentation — 2026-11-01
+
+Source truth: the user's current strategy-module screenshot and final clarification: static demonstration, unchanged image assets, a separate report-page button, and a visual stack of many reports. Existing copy, section background and report destination are retained. The scope is the strategy section; earlier module interactions remain unchanged.
+
+Evidence: `artifacts/strategy-static-20261101/desktop-before.jpg` was captured from the existing local page before reload; `desktop-final.jpg` shows the updated implementation at the same1651×871 CSS viewport. `comparison-final.png` normalizes both captures to800px wide side by side. `mobile-top.jpg` and `mobile-report.jpg` show the390×844 responsive layout; measurements are saved in `responsive.json`.
+
+Fidelity and revisions: original report PNG is reused in five complete, contain-sized static layers, with no asset edit, filter, crop or generated replacement. Only the front layer is announced as an image. Original four70×73 capability images remain unchanged. Request/platform cards use an ice-blue-to-white gradient. Four capability icons and titles share the same desktop top coordinate; corrected inherited block align-content:center, which previously shifted shorter content downward. Balanced14/22 copy avoids isolated final characters. Flow labels use#616b78 for readable contrast, with small decorative arrows. No added business fields, counts, animations or hover movement.
+
+Verification: at1651px the strategy flow is1200px wide. At1024px and390px the document width equals its client width, all images load and no strategy descendant has visible overflow. Mobile capabilities and static labels use two columns; report sheets remain within the350px pane. The section contains exactly one focusable link and no buttons/inputs. Its44px-high standalone native link has a visible2px keyboard outline and retains the original target with noopener/noreferrer. Removed obsolete shortcut listeners and data attributes. Inline JavaScript parses; local CSS asset references and diff whitespace checks pass; browser error log is empty.
+
+Destination check: read-only HTTPS request returns200 and title“ZWrite 智库深度创作 MVP”. Browser click/Enter attempts did not provide a reliable external navigation result while the browser annotation surface was active; no end-to-end navigation claim is made. The rendered link's native href, target, semantics and focus state are verified. The external page is outside this module's changes.
+
+The combined comparison and both mobile regions were opened and inspected. No remaining P0/P1/P2 finding in the edited module.
+
+final result: passed

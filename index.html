@@ -3020,6 +3020,7 @@
   <link rel="stylesheet" href="home-content-figma.css?v=20261101">
   <link rel="stylesheet" href="home-education-cards.css?v=20261101-5">
   <link rel="stylesheet" href="home-evaluation-cards.css?v=20261101-2">
+  <link rel="stylesheet" href="home-strategy-cards.css?v=20261101-1">
   <link rel="stylesheet" href="home-loop-motion.css?v=20261101-1">
   <link rel="stylesheet" href="home-recommendation-cards.css?v=20261101-2">
   <link rel="stylesheet" href="assets/vendor/portal-arco-search.css?v=20261031-portal-release-2">
@@ -4166,15 +4167,15 @@
               <div class="mg-strategy-request">
                 <div class="mg-strategy-prompt">
                   <p>帮我产出关于细胞与基因战略报告</p>
-                  <div role="group" aria-label="科研服务快捷入口">
-                    <button type="button" data-mg-query="AI 仿真实验"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6m-7-4a7 7 0 1 1 8 0l-1 4H9zm2 7h4"></path></svg>练仿真</button>
-                    <button type="button" data-mg-query="论文"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zm9 0v5h4M9 12h7m-7 4h7"></path></svg>搜论文</button>
-                    <button type="button" data-mg-query="科研专家"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-4 9 4-9 4zm3 3v6c4 3 8 3 12 0v-6m3-3v8"></path></svg>找专家</button>
-                    <button class="is-active" type="button" data-mg-query="低空经济战略报告"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zm9 0v5h4M9 12h7m-7 4h7"></path></svg>看战略</button>
+                  <div class="mg-strategy-tags" aria-label="科研服务示意">
+                    <span class="mg-strategy-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6m-7-4a7 7 0 1 1 8 0l-1 4H9zm2 7h4"></path></svg>练仿真</span>
+                    <span class="mg-strategy-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zm9 0v5h4M9 12h7m-7 4h7"></path></svg>搜论文</span>
+                    <span class="mg-strategy-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-4 9 4-9 4zm3 3v6c4 3 8 3 12 0v-6m3-3v8"></path></svg>找专家</span>
+                    <span class="mg-strategy-tag is-active"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zm9 0v5h4M9 12h7m-7 4h7"></path></svg>看战略</span>
                   </div>
-                  <a href="https://effortless-licorice-cdaa9f.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="进入新型高端智库生成战略报告">
+                  <span class="mg-strategy-send" aria-hidden="true">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4.5 14-3-5.5Z"></path><path d="m11.5 13.5 3-3"></path></svg>
-                  </a>
+                  </span>
                 </div>
                 <div class="mg-flow-down" aria-hidden="true"><span>发送请求</span><i></i></div>
                 <div class="mg-strategy-engine">
@@ -4190,10 +4191,16 @@
 
               <div class="mg-flow-across"><span>生成报告</span><i aria-hidden="true"></i></div>
 
-              <a class="mg-report-preview" href="https://effortless-licorice-cdaa9f.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="查看产业战略报告示例">
-                <img src="assets/figma-home-modules/strategy-imgVector.png" width="421" height="508" alt="产业战略报告版式示意" loading="lazy" decoding="async">
-                <span class="mg-report-open">查看报告示例 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"></path></svg></span>
-              </a>
+              <div class="mg-strategy-reports">
+                <figure class="mg-report-stack" aria-label="产业战略报告展示">
+                  <img class="mg-report-sheet mg-report-sheet--back-left" src="assets/figma-home-modules/strategy-imgVector.png" width="421" height="508" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  <img class="mg-report-sheet mg-report-sheet--back-right" src="assets/figma-home-modules/strategy-imgVector.png" width="421" height="508" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  <img class="mg-report-sheet mg-report-sheet--middle-left" src="assets/figma-home-modules/strategy-imgVector.png" width="421" height="508" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  <img class="mg-report-sheet mg-report-sheet--middle-right" src="assets/figma-home-modules/strategy-imgVector.png" width="421" height="508" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  <img class="mg-report-sheet mg-report-sheet--front" src="assets/figma-home-modules/strategy-imgVector.png" width="421" height="508" alt="产业战略报告版式示意" loading="lazy" decoding="async">
+                </figure>
+                <a class="mg-strategy-report-link" href="https://effortless-licorice-cdaa9f.netlify.app" target="_blank" rel="noopener noreferrer" aria-label="查看战略报告（新窗口）">查看战略报告<span class="mg-strategy-report-link-icon" aria-hidden="true"></span></a>
+              </div>
             </div>
           </div>
         </section>
@@ -9020,22 +9027,6 @@
       mgHeroIntentRemove?.addEventListener("click", () => {
         setHeroIntent("");
         mgHeroSearchInput.focus({ preventScroll: true });
-      });
-      const strategyShortcuts = [...document.querySelectorAll(".mg-strategy-prompt [data-mg-query]")];
-      const strategyGroups = ["simulation", "paper", "expert", "strategy"];
-      strategyShortcuts.forEach((button, index) => {
-        button.setAttribute("aria-pressed", String(button.classList.contains("is-active")));
-        button.addEventListener("click", () => {
-          strategyShortcuts.forEach((item) => {
-            item.classList.toggle("is-active", item === button);
-            item.setAttribute("aria-pressed", String(item === button));
-          });
-          setHeroIntent(strategyGroups[index]);
-          if (mgHeroSearchInput) {
-            mgHeroSearchInput.focus({ preventScroll: true });
-            mgHeroSearchInput.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-          }
-        });
       });
       mgFulltextShortcuts?.addEventListener("keydown", (event) => {
         const tabs = [...mgFulltextShortcuts.querySelectorAll("[data-recommendation-group]")];
