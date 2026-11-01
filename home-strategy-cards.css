@@ -343,7 +343,7 @@
   text-decoration: none;
   cursor: pointer;
   transform: none;
-  transition: none;
+  transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease;
   animation: none;
 }
 
@@ -410,5 +410,11 @@
 
   .research-home .mg-strategy-section .mg-strategy-engine {
     padding: 18px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .research-home .mg-strategy-section a.mg-strategy-report-link {
+    transition: none !important;
   }
 }

@@ -25,6 +25,10 @@
   animation: none;
 }
 
+.research-home .mg-evaluation-section a.mg-evaluation-card--talent {
+  transition: color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
 .research-home .mg-evaluation-section .mg-evaluation-card--talent {
   grid-column: 1 / -1;
   min-height: 240px;
@@ -201,7 +205,6 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 8px 24px rgba(69, 103, 153, .04);
   filter: none;
   transform: none;
-  transition: none;
 }
 
 .research-home .mg-evaluation-section a.mg-evaluation-card:is(:hover, :focus-visible) {
@@ -274,5 +277,11 @@
 @media (max-width: 380px) {
   .research-home .mg-evaluation-section .mg-proof-pair {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .research-home .mg-evaluation-section a.mg-evaluation-card--talent {
+    transition: none !important;
   }
 }

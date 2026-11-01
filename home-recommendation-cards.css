@@ -13,6 +13,7 @@
   margin: 0;
   padding: 0;
   overflow: visible;
+  overflow-anchor: none;
   isolation: isolate;
 }
 
@@ -33,7 +34,7 @@
   box-shadow: none;
   transform: none;
   animation: none;
-  transition: none;
+  transition: flex-basis 260ms cubic-bezier(.2, .7, .2, 1), width 260ms cubic-bezier(.2, .7, .2, 1);
 }
 
 #mgRecommendationPreview.mg-recommendation-accordion .mg-recommendation-card.is-expanded {
@@ -163,13 +164,14 @@
   visibility: hidden;
   pointer-events: none;
   transform: none;
-  transition: none;
+  transition: opacity 150ms ease, visibility 0s linear 150ms;
 }
 
 #mgRecommendationPreview.mg-recommendation-accordion .mg-recommendation-card.is-expanded .mg-recommendation-card-details {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+  transition-delay: 90ms, 0s;
 }
 
 #mgRecommendationPreview.mg-recommendation-accordion .mg-recommendation-card-details p {
@@ -216,6 +218,13 @@
 
   #mgRecommendationPreview.mg-recommendation-accordion::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mgRecommendationPreview.mg-recommendation-accordion .mg-recommendation-card,
+  #mgRecommendationPreview.mg-recommendation-accordion .mg-recommendation-card-details {
+    transition: none;
   }
 }
 

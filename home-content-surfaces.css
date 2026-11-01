@@ -1,19 +1,22 @@
 /* Surface colors only: the hero, navigation, search and recommendations are outside this scope. */
 #mgResearchContent.research-home {
-  --home-card-bg: linear-gradient(115deg, #eaf3ff 0%, #f8fbff 56%, #fff 100%);
-  --home-card-border: #d7e4f3;
-  --home-card-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 8px 24px rgba(31, 66, 117, .055);
+  --content-ink: #28313d;
+  --content-body: #57616f;
+  --home-card-bg: linear-gradient(115deg, #f3f6fa 0%, #fcfdfe 56%, #fff 100%);
+  --home-card-border: #e1e5ea;
+  --home-card-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 8px 24px rgba(24, 34, 48, .04);
+  background: linear-gradient(180deg, rgba(250, 251, 252, 0) 0, #fafbfc 240px);
 }
 
 /* Keep the original continuous image and its 240px entrance mask. */
 #mgResearchContent.research-home::before {
-  opacity: .67;
+  opacity: .18;
 }
 
 #mgResearchContent.research-home .mg-education-section .mg-education-card--play,
 #mgResearchContent.research-home .mg-education-section .mg-education-card--play:is(:hover, :focus-visible, :active) {
-  background: linear-gradient(115deg, #e8f1ff 0%, #f7faff 56%, #fff 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 10px 28px rgba(31, 66, 117, .065);
+  background: linear-gradient(115deg, #f0f4f9 0%, #fbfcfe 56%, #fff 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 10px 28px rgba(24, 34, 48, .045);
 }
 
 #mgResearchContent.research-home .mg-education-section .mg-learning-title,
@@ -21,24 +24,35 @@
 #mgResearchContent.research-home .mg-evaluation-section .mg-card-titlebar,
 #mgResearchContent.research-home .mg-evaluation-section .mg-evaluation-card:is(:hover, :focus-visible, :active) .mg-card-titlebar {
   color: #fff;
-  background: linear-gradient(100deg, #165dff 0%, #367fff 68%, #54bdeb 100%);
+  background: linear-gradient(100deg, #165dff 0%, #367fff 100%);
 }
 
 #mgResearchContent.research-home .mg-education-section .mg-learning-title::after {
-  background: #b9cef3;
+  background: #cbd6e5;
 }
 
 #mgResearchContent.research-home .mg-evaluation-section .mg-proof-pair > span {
-  border-color: #e3ebf5;
-  background: linear-gradient(135deg, #fbfdff, #fff 70%);
+  border-color: #e6e9ee;
+  background: linear-gradient(135deg, #f8fafc, #fff 70%);
 }
 
 #mgResearchContent.research-home .mg-evaluation-section .mg-tag-row span {
-  border-color: #dce7f4;
+  border-color: #e1e6ec;
   background: rgba(255, 255, 255, .88);
 }
 
 #mgResearchContent.research-home .mg-strategy-section .mg-strategy-engine article {
-  border-color: #e3ebf5;
-  background: linear-gradient(135deg, #fbfdff, #fff 70%);
+  border-color: #e6e9ee;
+  background: linear-gradient(135deg, #f8fafc, #fff 70%);
+}
+
+#mgResearchContent.research-home .mg-section-heading h2 {
+  color: #28313d;
+}
+
+#mgResearchContent.research-home .mg-education-card p,
+#mgResearchContent.research-home .mg-evaluation-card p,
+#mgResearchContent.research-home .mg-strategy-prompt > p,
+#mgResearchContent.research-home .mg-strategy-engine small {
+  color: #57616f;
 }

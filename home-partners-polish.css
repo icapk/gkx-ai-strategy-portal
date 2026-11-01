@@ -76,6 +76,7 @@
 .research-home + .mg-partners-section a.mg-partner-logo--nscc {
   border-radius: 16px;
   cursor: pointer;
+  transition: box-shadow 140ms ease;
 }
 
 .research-home + .mg-partners-section a.mg-partner-logo--nscc:hover,
@@ -83,6 +84,10 @@
   background: transparent;
   box-shadow: none;
   transform: none;
+}
+
+.research-home + .mg-partners-section a.mg-partner-logo--nscc:hover {
+  box-shadow: 0 0 0 2px rgba(22, 93, 255, .18);
 }
 
 .research-home + .mg-partners-section a.mg-partner-logo--nscc:focus-visible {
@@ -195,5 +200,11 @@
   .research-home + .mg-partners-section + .mg-footer .mg-footer-bottom {
     gap: 10px;
     margin-top: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .research-home + .mg-partners-section a.mg-partner-logo--nscc {
+    transition: none !important;
   }
 }

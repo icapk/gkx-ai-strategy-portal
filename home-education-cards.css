@@ -20,6 +20,15 @@
   transition: none;
 }
 
+.research-home .mg-education-section a.mg-education-card {
+  filter: none;
+  transition: color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.research-home .mg-education-section a.mg-education-card .mg-learning-cta {
+  transition: color 140ms ease;
+}
+
 .research-home .mg-education-section .mg-education-card::before,
 .research-home .mg-education-section .mg-education-card::after {
   display: none;
@@ -124,11 +133,11 @@
   align-items: center;
   align-self: flex-start;
   gap: 8px;
-  border: 1px solid #c9dcff;
-  border-radius: 8px;
-  padding: 5px 12px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
   color: #165dff;
-  background: #f5f9ff;
+  background: transparent;
   font-size: 14px;
   font-weight: 500;
   line-height: 22px;
@@ -159,10 +168,12 @@
   transform: none;
 }
 
-.research-home .mg-education-section .mg-education-card:is(:hover, :focus-visible, :active) .mg-learning-cta {
-  border-color: #165dff;
-  color: #fff;
-  background: #165dff;
+.research-home .mg-education-section a.mg-education-card:is(:hover, :focus-visible) .mg-learning-cta {
+  border: 0;
+  color: #165dff;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .research-home .mg-education-section .mg-education-card:focus-visible {
@@ -200,4 +211,11 @@
   .research-home .mg-education-section .mg-education-card--compact .mg-learning-visual { top: 78px; right: 12px; width: 100px; height: 100px; }
   .research-home .mg-education-section .mg-education-card--compact .mg-learning-cta { left: 20px; bottom: 16px; }
   .research-home .mg-education-section .mg-education-card p { font-size: 15px; line-height: 25px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .research-home .mg-education-section a.mg-education-card,
+  .research-home .mg-education-section a.mg-education-card .mg-learning-cta {
+    transition: none !important;
+  }
 }

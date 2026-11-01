@@ -33,7 +33,8 @@
    inView = entry.isIntersecting;
    sync();
   }, { threshold: .05, rootMargin: '80px 0px' });
-  observer.observe(section.querySelector('.mg-loop-visual'));
+  // Keep the explanation steps running while any part of this section is visible.
+  observer.observe(section);
  } else {
   inView = true;
  }

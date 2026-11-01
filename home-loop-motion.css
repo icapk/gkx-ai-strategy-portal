@@ -59,16 +59,16 @@
 .research-home [data-loop-motion='running'] .mg-loop-steps h3 { animation-play-state:running; }
 @keyframes mg-ai-breathe {
  0% { opacity:0; transform:scale(.78); }
- 18% { opacity:.52; }
+ 18% { opacity:.30; }
  75%,100% { opacity:0; transform:scale(1.28); }
 }
 @keyframes mg-loop-step-node {
- 0%,14% { transform:scale(1.25); box-shadow:0 0 0 5px rgba(73,134,255,.12),0 0 16px rgba(49,118,255,.4); }
+ 0%,14% { transform:scale(1.08); box-shadow:0 0 0 4px rgba(73,134,255,.08),0 0 12px rgba(49,118,255,.24); }
  20%,100% { transform:scale(1); box-shadow:0 0 0 2px #d8e6ff,0 0 14px #b8d6ff; }
 }
 @keyframes mg-loop-step-label {
  0%,14% { color:#165dff; }
- 20%,100% { color:#101944; }
+ 20%,100% { color:var(--content-ink,#28313d); }
 }
 @media (max-width:600px) {
  .research-home .mg-loop-motion-toggle { top:-36px; right:0; bottom:auto; min-height:26px; padding:2px 9px; font-size:11px; }

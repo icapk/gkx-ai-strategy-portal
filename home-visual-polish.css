@@ -83,10 +83,11 @@
 
 .research-home .mg-education-section .mg-learning-cta {
   min-height: 36px;
-  border-color: #b8d0f5;
-  padding: 6px 12px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
   color: #165dff;
-  background: #f5f9ff;
+  background: transparent;
 }
 
 .research-home .mg-evaluation-section .mg-evaluation-entry {
@@ -228,7 +229,7 @@
 
   .research-home .mg-education-section .mg-learning-cta {
     min-height: 40px;
-    padding: 8px 12px;
+    padding: 0;
   }
 
   .research-home .mg-evaluation-section .mg-evaluation-grid {
