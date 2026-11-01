@@ -104,6 +104,10 @@ body:has(#recommendationMain)::before {
   margin: 0;
 }
 
+#recommendationMain article.rec-paper-card > .rec-paper-content > h3:first-child {
+  margin-top: 2px;
+}
+
 /* Explicit native metadata paths exclude status tags and every control host. */
 #recommendationMain article.rec-paper-card > .rec-paper-content > p:is(.rec-paper-author, .rec-paper-source),
 #recommendationMain article.rec-paper-card > .rec-paper-content > span.rec-recommendation-reason,
@@ -254,6 +258,10 @@ body:has(#recommendationMain)::before {
   #recommendationMain article.rec-paper-card > .rec-paper-content {
     min-width: 0;
     grid-row: auto;
+  }
+
+  #recommendationMain article.rec-paper-card > .rec-paper-content > h3:first-child {
+    margin-top: 0;
   }
 
   #recommendationMain dl.rec-metric-grid {

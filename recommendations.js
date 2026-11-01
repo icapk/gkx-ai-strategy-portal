@@ -1323,9 +1323,9 @@
     const content = createElement("div", "rec-paper-content");
     const reason = activePaperMode === "hot"
       ? "综合热度 " + Math.round(paperHotScore(item) * 100) + " 分"
-      : activePaperMode === "following" ? paperAuthorReason(item) : "按发表时间倒序";
+      : activePaperMode === "following" ? paperAuthorReason(item) : "";
+    if (reason) content.appendChild(createElement("span", "rec-recommendation-reason", reason));
     content.append(
-      createElement("span", "rec-recommendation-reason", reason),
       createElement("h3", "", item.title),
       createElement("p", "rec-paper-author", item.authors.join("、")),
       createElement("p", "rec-paper-source", item.venue + " · " + formatPrototypeDate(item.publishedAt, false)),
