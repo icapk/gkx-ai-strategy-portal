@@ -21,6 +21,16 @@ import IconUserGroup from '@arco-design/web-react/icon/react-icon/IconUserGroup'
 import IconTrophy from '@arco-design/web-react/icon/react-icon/IconTrophy';
 import IconBook from '@arco-design/web-react/icon/react-icon/IconBook';
 import IconCalendar from '@arco-design/web-react/icon/react-icon/IconCalendar';
+import IconStar from '@arco-design/web-react/icon/react-icon/IconStar';
+import IconStarFill from '@arco-design/web-react/icon/react-icon/IconStarFill';
+import IconQuote from '@arco-design/web-react/icon/react-icon/IconQuote';
+import IconEdit from '@arco-design/web-react/icon/react-icon/IconEdit';
+import IconMessage from '@arco-design/web-react/icon/react-icon/IconMessage';
+import IconThumbUp from '@arco-design/web-react/icon/react-icon/IconThumbUp';
+import IconThumbUpFill from '@arco-design/web-react/icon/react-icon/IconThumbUpFill';
+import IconUserAdd from '@arco-design/web-react/icon/react-icon/IconUserAdd';
+import IconSend from '@arco-design/web-react/icon/react-icon/IconSend';
+import IconEyeInvisible from '@arco-design/web-react/icon/react-icon/IconEyeInvisible';
 import { IconContext } from '@arco-design/web-react/icon/react-icon/context';
 import '@arco-design/web-react/es/Button/style/css.js';
 import '@arco-design/web-react/es/Tabs/style/css.js';
@@ -44,6 +54,34 @@ const categoryIcons = { hot: IconFire, news: IconFile, papers: IconFilePdf, repo
 // Scope the official icons so Menu's default icon spacing preserves the existing gap.
 const categoryIconContext = { prefixCls: 'rec-category' };
 const categoryIconStyle = { fill: 'none', stroke: 'currentColor', strokeWidth: 4, strokeLinecap: 'butt', strokeLinejoin: 'miter' };
+const paperActionRoles = { detail: 'read', citation: 'cite', rating: 'rate', comments: 'comment' };
+const saveActionSelector = '[data-paper-save], [data-report-save], [data-course-save], [data-save-button]';
+const resourceActionGroups = '.rec-news-actions, .rec-paper-actions, .rec-report-actions, .rec-conference-actions, .rec-course-actions, .rec-event-actions, .rec-author-update-actions, .rec-follow-actions';
+const resourceActionIcons = { read: IconBook, cite: IconQuote, rate: IconEdit, comment: IconMessage, like: IconThumbUp, follow: IconUserAdd, submit: IconSend, register: IconCalendar, dismiss: IconEyeInvisible };
+const resourceActionAttributes = [
+  ['[data-news-toggle], [data-report-toggle], [data-conference-toggle], [data-course-toggle], [data-event-toggle], [data-author-update-toggle], [data-watch-toggle]', 'read'],
+  ['[data-report-like]', 'like'],
+  ['[data-author-follow], [data-keyword-follow], [data-follow-button]', 'follow'],
+  ['[data-conference-submission]', 'submit'],
+  ['[data-event-register]', 'register'],
+  ['[data-author-dismiss]', 'dismiss']
+];
+function isResourceAction(source) {
+  return Boolean(source.closest(resourceActionGroups)
+    || (source.matches('[data-author-follow]') && source.closest('.rec-talent-card'))
+    || (source.matches('[data-author-update-toggle], [data-author-dismiss]') && source.closest('.rec-author-update-card')));
+}
+function getResourceActionRole(source) {
+  if (source.matches(saveActionSelector)) return 'save';
+  return paperActionRoles[source.getAttribute('data-paper-action')]
+    || resourceActionAttributes.find(([selector]) => source.matches(selector))?.[1];
+}
+function resourceActionMarkup(source) {
+  if (!source.querySelector('svg')) return source.innerHTML;
+  const copy = source.cloneNode(true);
+  copy.querySelectorAll('svg').forEach(icon => icon.remove());
+  return copy.innerHTML;
+}
 mount(document.getElementById('recSearchReturnMount'), <SearchReturn id="recSearchReturn" onReturn={() => window.PortalRecommendationReturnHome()} />);
 
 function NavigationGroup({ group, utility = false }) {
@@ -121,7 +159,16 @@ function mountControl(source, kind, hiddenNode = source) {
   const host = document.createElement('span');
   host.dataset.recArco = kind;
   host.className = `rec-arco-${kind}-host`;
-  hiddenNode.after(host);
+  const saveActions = kind === 'button' && source.matches(saveActionSelector) && source.closest(resourceActionGroups);
+  if (saveActions) {
+    saveActions.append(host);
+    const sourceFocus = source.focus.bind(source);
+    source.focus = options => {
+      const button = host.querySelector('button');
+      if (button) button.focus(options);
+      else sourceFocus(options);
+    };
+  } else hiddenNode.after(host);
   hiddenNode.dataset.recLegacyControl = kind;
   if (kind === 'input') {
     source.dataset.recRequired = String(source.required);
@@ -173,16 +220,26 @@ function Control({ source, kind }) {
     return <span className="rec-arco-check-control"><Component aria-label={source.getAttribute('aria-label') || text} checked={source.checked} disabled={source.disabled} onChange={checked => { source.checked = checked; source.dispatchEvent(new Event('change', { bubbles: true })); reconcile(); }}>{kind === 'check' ? text : null}</Component>{kind === 'switch' && <span>{text}</span>}</span>;
   }
   const selected = source.getAttribute('aria-pressed') === 'true';
+  const isSaveAction = source.matches(saveActionSelector);
+  const saveResource = source.hasAttribute('data-paper-save') ? '文献' : source.hasAttribute('data-report-save') ? '报告' : source.hasAttribute('data-course-save') ? '课程' : '';
+  const saveLabel = `${selected ? '取消收藏' : '收藏'}${saveResource}`;
+  const SaveIcon = selected ? IconStarFill : IconStar;
+  const saveIconStyle = selected ? { ...categoryIconStyle, fill: 'currentColor', stroke: 'none' } : categoryIconStyle;
+  const paperActionRole = source.closest('.rec-paper-actions') ? source.hasAttribute('data-paper-save') ? 'save' : paperActionRoles[source.getAttribute('data-paper-action')] : undefined;
+  const resourceAction = isResourceAction(source);
+  const resourceActionRole = resourceAction ? getResourceActionRole(source) : undefined;
+  const ResourceActionIcon = resourceActionRole === 'like' && selected ? IconThumbUpFill : resourceActionIcons[resourceActionRole];
+  const resourceActionIconStyle = resourceActionRole === 'like' && selected ? saveIconStyle : categoryIconStyle;
   const isHot = source.classList.contains('rec-hot-card');
-  const className = isHot ? source.className : `rec-action-button${selected ? ' is-selected' : ''}`;
+  const className = isHot ? source.className : `rec-action-button${selected ? ' is-selected' : ''}${paperActionRole ? ` rec-paper-action rec-paper-action--${paperActionRole}` : ''}${isSaveAction ? ' rec-save-action' : ''}${resourceAction ? ' rec-resource-action' : ''}${resourceActionRole ? ` rec-resource-action--${resourceActionRole}` : ''}`;
   const detailAction = source.matches('[data-conference-toggle], [data-course-toggle], [data-event-toggle], [data-report-toggle], [data-paper-action="detail"]');
-  return <Button type={isHot ? 'secondary' : source.type === 'submit' ? 'primary' : detailAction ? 'outline' : 'text'} className={className} disabled={source.disabled} role={source.getAttribute('role') || undefined} aria-label={source.getAttribute('aria-label') || undefined} aria-pressed={source.hasAttribute('aria-pressed') ? selected : undefined} aria-expanded={source.getAttribute('aria-expanded') || undefined} aria-controls={source.getAttribute('aria-controls') || undefined} aria-selected={source.getAttribute('aria-selected') || undefined} onClick={event => {
+  return <Button type={resourceAction ? 'text' : isHot ? 'secondary' : source.type === 'submit' ? 'primary' : detailAction ? 'outline' : 'text'} className={className} disabled={source.disabled} role={source.getAttribute('role') || undefined} aria-label={isSaveAction ? saveLabel : source.getAttribute('aria-label') || undefined} title={isSaveAction ? saveLabel : undefined} aria-pressed={source.hasAttribute('aria-pressed') ? selected : undefined} aria-expanded={source.getAttribute('aria-expanded') || undefined} aria-controls={source.getAttribute('aria-controls') || undefined} aria-selected={source.getAttribute('aria-selected') || undefined} onClick={event => {
     source.click();
     reconcile();
     // Legacy detail handlers may rerender the card. Restore focus to its Arco action.
     const host = event.currentTarget.closest('[data-rec-arco]');
     if (host?.isConnected) event.currentTarget.focus();
-  }}><span dangerouslySetInnerHTML={{ __html: source.innerHTML }} /></Button>;
+  }}>{isSaveAction ? <span><SaveIcon style={saveIconStyle} /></span> : ResourceActionIcon ? <span><ResourceActionIcon style={resourceActionIconStyle} /><span dangerouslySetInnerHTML={{ __html: resourceActionMarkup(source) }} /></span> : <span dangerouslySetInnerHTML={{ __html: source.innerHTML }} />}</Button>;
 }
 
 function reconcile() {

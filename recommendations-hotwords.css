@@ -1,0 +1,122 @@
+/* Local exception: only the six rendered hotword buttons and their existing content. */
+/* is-top already marks ranks 1–3; host scoping excludes the hidden legacy buttons. */
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card {
+  height: 100%;
+  border-color: #e1e7ef;
+  border-radius: 10px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+@media (max-width: 380px) {
+  #hot .rec-hot-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card.is-top {
+  border-color: #e6d6be;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px 12px;
+  white-space: normal;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span > strong {
+  min-width: 0;
+  grid-column: 1;
+  grid-row: 1;
+  color: #25334d;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span > em {
+  display: inline-flex;
+  min-width: 28px;
+  height: 24px;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  border: 1px solid #e0e6ed;
+  border-radius: 6px;
+  padding: 0 6px;
+  color: #667085;
+  background: #eef2f6;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card.is-top > span > em {
+  border-color: #f0d8b2;
+  color: #906020;
+  background: #fff0d9;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span > span,
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span > small {
+  min-width: 0;
+  grid-row: 2;
+  align-self: end;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span > span {
+  grid-column: 1;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span > small {
+  grid-column: 2;
+  text-align: right;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card:is(:hover, :focus-visible):not(:disabled) {
+  border-color: #94bfff;
+  background: #f7faff;
+  box-shadow: none;
+  transform: none;
+}
+
+#hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card:focus-visible {
+  outline: 2px solid #165dff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  #hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card {
+    padding: 12px;
+  }
+
+  #hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span {
+    grid-template-columns: minmax(0, 1fr) 28px;
+    gap: 6px 8px;
+  }
+
+  #hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span > span,
+  #hot .rec-hot-grid > .rec-arco-button-host .rec-hot-card > span > small {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    text-align: left;
+  }
+}

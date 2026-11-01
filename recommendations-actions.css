@@ -1,0 +1,110 @@
+/* Resource controls only; their original Arco focus and disabled states remain in charge. */
+#recommendationMain .rec-resource-action.rec-action-button.arco-btn {
+  display: inline-flex;
+  min-width: 0;
+  height: 32px;
+  min-height: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+#recommendationMain .rec-resource-action.arco-btn:not(:disabled) {
+  border: 0;
+  color: #667085;
+  background: transparent;
+  box-shadow: none;
+}
+
+#recommendationMain .rec-resource-action.arco-btn > span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+#recommendationMain .rec-resource-action.arco-btn svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  vertical-align: middle;
+}
+
+#recommendationMain .rec-resource-action--read.arco-btn:not(:disabled),
+#recommendationMain .rec-resource-action--register.arco-btn:not(:disabled),
+#recommendationMain .rec-resource-action:is(.rec-resource-action--save, .rec-resource-action--like, .rec-resource-action--follow).arco-btn.is-selected:not(:disabled) {
+  color: #165dff;
+  background: transparent;
+}
+
+#recommendationMain .rec-resource-action--save.rec-action-button.arco-btn {
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+}
+
+#recommendationMain .rec-resource-action--save.arco-btn > span {
+  width: 100%;
+  height: 100%;
+}
+
+#recommendationMain .rec-resource-action.arco-btn:is(:hover, :active):not(:disabled) {
+  color: #165dff;
+  background: #e8f3ff;
+}
+
+/* Visible DOM and tab order are provided by the renderer, never CSS order. */
+#recommendationMain :is(.rec-news-actions, .rec-paper-actions, .rec-report-actions, .rec-conference-actions, .rec-course-actions, .rec-event-actions, .rec-author-update-actions, .rec-follow-actions) {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+#recommendationMain :is(.rec-news-actions, .rec-paper-actions, .rec-report-actions, .rec-conference-actions, .rec-course-actions, .rec-event-actions, .rec-author-update-actions, .rec-follow-actions) > .rec-arco-button-host {
+  flex: 0 0 auto;
+}
+
+#recommendationMain :is(.rec-news-actions, .rec-paper-actions, .rec-report-actions, .rec-conference-actions, .rec-course-actions, .rec-event-actions, .rec-author-update-actions, .rec-follow-actions) > .rec-arco-button-host:has(> .rec-resource-action--save) {
+  margin-left: auto;
+}
+
+#recommendationMain article.rec-talent-card > .rec-arco-button-host:has(> .rec-resource-action--follow),
+#recommendationMain article.rec-author-update-card > .rec-arco-button-host:has(> .rec-resource-action) {
+  margin-top: 12px;
+}
+
+#recommendationMain article.rec-author-update-card > .rec-arco-button-host:has(> .rec-resource-action) {
+  margin-right: 8px;
+}
+
+@media (max-width: 767px) {
+  #recommendationMain .rec-resource-action.rec-action-button.arco-btn {
+    height: 40px;
+    min-height: 40px;
+    padding: 0 4px;
+    font-size: 12px;
+  }
+
+  #recommendationMain .rec-resource-action--save.rec-action-button.arco-btn {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+  }
+
+  #recommendationMain :is(.rec-news-actions, .rec-paper-actions, .rec-report-actions, .rec-conference-actions, .rec-course-actions, .rec-event-actions, .rec-author-update-actions, .rec-follow-actions) {
+    gap: 4px;
+  }
+
+  #recommendationMain article.rec-author-update-card > .rec-arco-button-host:has(> .rec-resource-action) {
+    margin-right: 4px;
+  }
+}

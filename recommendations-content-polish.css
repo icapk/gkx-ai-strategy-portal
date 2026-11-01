@@ -12,8 +12,34 @@ body:has(#recommendationMain)::before {
   border: 1px solid #e1e7ef;
   border-radius: 12px;
   padding: 20px;
-  background: linear-gradient(135deg, #f3f6fa 0%, #fff 68%);
+  background: #fff;
   box-shadow: 0 4px 16px rgba(24, 34, 48, .025);
+}
+
+/* Tabs supply their own vertical spacing; the rule spans the panel edge to edge. */
+#recommendationMain section.rec-panel:has(> .rec-arco-tabs-host) {
+  padding-top: 0;
+}
+
+#recommendationMain section.rec-panel > .rec-arco-tabs-host {
+  margin: 0 -20px 12px;
+}
+
+#recommendationMain section.rec-panel > .rec-arco-tabs-host .arco-tabs-header-nav {
+  height: 56px;
+  padding-inline: 20px;
+}
+
+#recommendationMain section.rec-panel > .rec-arco-tabs-host .arco-tabs-header-scroll {
+  height: 100%;
+}
+
+#recommendationMain section.rec-panel > .rec-arco-tabs-host .arco-tabs-header-wrapper {
+  height: 100%;
+}
+
+#recommendationMain section.rec-panel > .rec-arco-tabs-host .arco-tabs-header-title:first-of-type {
+  margin-left: 0;
 }
 
 #recommendationMain article.rec-news-card,
@@ -104,7 +130,6 @@ body:has(#recommendationMain)::before {
 #recommendationMain article.rec-conference-card > .rec-conference-actions,
 #recommendationMain article.rec-event-card > .rec-event-actions,
 #recommendationMain article.rec-follow-card > .rec-follow-actions {
-  gap: 8px;
   margin-top: 12px;
 }
 
@@ -163,9 +188,11 @@ body:has(#recommendationMain)::before {
 /* Filter-row spacing stays on custom layout containers, outside the controls. */
 #recommendationMain section.rec-panel > .rec-module-toolbar,
 #recommendationMain section.rec-panel > .rec-news-toolbar {
+  justify-content: flex-start;
   gap: 10px;
   margin-bottom: 12px;
   padding: 0;
+  background: transparent;
 }
 
 #recommendationMain section.rec-panel > .rec-module-toolbar > .rec-module-controls {
@@ -181,6 +208,14 @@ body:has(#recommendationMain)::before {
 @media (max-width: 767px) {
   #recommendationMain section.rec-panel {
     padding: 16px;
+  }
+
+  #recommendationMain section.rec-panel > .rec-arco-tabs-host {
+    margin-inline: -16px;
+  }
+
+  #recommendationMain section.rec-panel > .rec-arco-tabs-host .arco-tabs-header-nav {
+    padding-inline: 16px;
   }
 
   #recommendationMain article.rec-news-card,
