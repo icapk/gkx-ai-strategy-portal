@@ -128,3 +128,21 @@ Destination check: read-only HTTPS request returns200 and title“ZWrite 智库�
 The combined comparison and both mobile regions were opened and inspected. No remaining P0/P1/P2 finding in the edited module.
 
 final result: passed
+
+## Homepage visual polish and orbit removal — 2026-11-01
+
+Source truth: current homepage screenshots and the user's approved style-only review. All fields, wording, numbers, original images/marks, links and actions must remain. Additional instruction explicitly removes the three rolling balls and their trails from the research-loop illustration. Existing AI glow, step emphasis and pause behavior are retained.
+
+Evidence: `artifacts/homepage-polish-20261101/before-*.jpg` and `after-*.jpg`; combined `comparison-final.png` was opened and reviewed with source and implementation together. The source education capture is the accepted `artifacts/homepage-overall-audit-20261101/03-education.jpg`, copied as before-education because a rapid capture initially returned a stale compositor frame. Invalid captures were rejected and replaced. Both desktop sets use1651×871 CSS viewports and1636×862 screenshot pixels, normalized equally to800px wide in the comparison. The partner/footer frame ends at document bottom, so its title's viewport position changes with the approved shorter section heights; this is an expected layout change. Native focused screenshots were also opened for card copy, partner names and mobile entry details.
+
+Typography: all four primary titles32/42 desktop,28/38 tablet,24/34 mobile. Copy unchanged. Education ribbon text remains white in its interaction states. Existing pale hero/recommendation helper text is darker. Partner names remain15/22, small names improve from8px to12/18, footer helper copy13/22. Partner title32/40 with lighter weight than core titles.
+
+Layout and colors: common ice-blue-to-white gradient,16px corners, subtle border/shadow; existing grid hierarchy retained. Strategy width aligns to the other content edges, static labels have no button border or selected fill, talent's existing arrow is40px white-on-blue. Mobile section spacing is reduced and the existing single44px report link precedes the report stack, without changing its href or adding controls. Original artwork proportions and report-sheet rotations remain intact.
+
+Image/content verification: exact source comparison proves index.html differs only by two stylesheet imports and loop CSS/JS cache versions. Browser snapshots show identical text and link arrays. Illustration references are identical after accounting for the explicitly removed three moving decorative image instances; image files themselves are unchanged. Original loop layers and six fixed connector points remain. See `source-verification.json`, `content-before.json` and `content-after.json`.
+
+Responsive checks:1651,1280,1024,768,390 and375px widths have matching document/client widths and no measured text overflow. Existing strategy link count remains one at all sizes.390×844 mobile evidence includes education/evaluation/strategy/partners and focused `mobile-report-entry.jpg`; the report link has a visible focus outline and precedes a complete350px report stack. All partner small text is12px and unclipped. No browser errors. Removed actual `.mg-loop-motion`/`.mg-loop-signal` nodes are absent, six fixed `.mg-loop-pin` nodes remain. Pause/play was clicked successfully: running→paused→running. JS parsing and diff whitespace checks pass.
+
+Comparison history: peer review identified a lone final Chinese character in the first desktop partner name. Added balanced text wrapping without changing copy or size; the final capture shows natural multiline names. Added an80px anchor offset to prevent the partner title hiding under the fixed header. Initial stale screenshot frames were replaced before final comparison. No remaining P0/P1/P2 finding. Existing baked white backgrounds in the four strategy icon files are retained as required; they were not regenerated or filtered.
+
+final result: passed
