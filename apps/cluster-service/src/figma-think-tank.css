@@ -538,6 +538,7 @@
 .ttf-report-detail-meta > span:first-child { border-left: 0; }
 .ttf-report-detail-meta small { color: #7b899a; font-size: 10px; }
 .ttf-report-detail-content { padding: 28px 30px 38px; display: grid; grid-template-columns: 1fr 1fr; gap: 26px 32px; }
+.ttf-report-detail-content.is-report > section:first-child { grid-column: 1 / -1; }
 .ttf-report-detail-content section { min-width: 0; padding-top: 16px; border-top: 1px solid #dde5ed; }
 .ttf-report-detail-content h4 { position: relative; margin: 0 0 12px; padding-left: 13px; color: #2c4158; font-size: 16px; line-height: 24px; }
 .ttf-report-detail-content h4::before { position: absolute; top: 4px; left: 0; width: 3px; height: 16px; content: ""; background: #1877ff; }

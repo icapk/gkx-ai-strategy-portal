@@ -661,7 +661,7 @@ function downloadConsultingReport(report: ConsultingReport) {
 <body>
   <header><p>${reportType}</p><h1>${escapeHtml(report.title)}</h1></header>
   <dl>${metadata.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>
-  <section><h2>成果摘要</h2><p>${escapeHtml(report.summary)}</p></section>
+  <section><h2>${report.kind === "case" ? "成果摘要" : "报告摘要"}</h2><p>${escapeHtml(report.summary)}</p></section>
   <section><h2>技术发展方向</h2><p>${escapeHtml(report.direction)}</p></section>
   <section><h2>分析内容</h2><ul>${listItems(report.analysis)}</ul></section>
   <section><h2>技术建议</h2><ol>${listItems(report.recommendations)}</ol></section>
@@ -689,8 +689,8 @@ function ReportDetailPage({ report }: { report: ConsultingReport }) {
       <button className="ttf-report-detail-download" type="button" title="下载当前报告（HTML）" onClick={() => downloadConsultingReport(report)}><Download size={16} aria-hidden="true"/><span>下载报告</span></button>
     </header>
     <div className="ttf-report-detail-meta"><span><small>领域分类</small>{report.field}</span><span><small>主题分类</small>{report.topic}</span><span><small>所属机构</small>{report.institution}</span><span><small>发表年度</small>{report.year}</span></div>
-    <div className="ttf-report-detail-content">
-      <section><h4>成果摘要</h4><p>{report.summary}</p></section>
+    <div className={`ttf-report-detail-content${report.kind === "push" ? " is-report" : ""}`}>
+      {report.kind === "case" ? <section><h4>成果摘要</h4><p>{report.summary}</p></section> : null}
       <section><h4>技术发展方向</h4><p>{report.direction}</p></section>
       <section><h4>分析内容</h4><ul>{report.analysis.map((item) => <li key={item}>{item}</li>)}</ul></section>
       <section><h4>技术建议</h4><ol>{report.recommendations.map((item) => <li key={item}>{item}</li>)}</ol></section>
