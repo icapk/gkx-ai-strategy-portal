@@ -97,8 +97,9 @@
 
 .research-home + .mg-partners-section + .mg-footer {
   padding: 56px 0 28px;
-  color: #c4cbd7;
-  background: #14243f;
+  color: #57616f;
+  background: #fff url('assets/footer-itic-20261101/footer-bg.png') no-repeat center bottom;
+  background-size: 1742px 399px;
 }
 
 .research-home + .mg-partners-section + .mg-footer .mg-footer-grid {
@@ -112,7 +113,7 @@
 
 .research-home + .mg-partners-section + .mg-footer .mg-footer-column h2 {
   margin: 0 0 4px;
-  color: #f0f3f8;
+  color: #28313d;
   font-size: 15px;
   font-weight: 500;
   line-height: 22px;
@@ -120,7 +121,7 @@
 
 .research-home + .mg-partners-section + .mg-footer .mg-footer-column :is(a, span, p) {
   margin: 0;
-  color: #c4cbd7;
+  color: #57616f;
   font-size: 13px;
   line-height: 22px;
   overflow-wrap: anywhere;
@@ -130,7 +131,7 @@
   flex-wrap: wrap;
   gap: 12px 32px;
   margin-top: 48px;
-  color: #b5bfce;
+  color: #667085;
   font-size: 13px;
   line-height: 22px;
 }
