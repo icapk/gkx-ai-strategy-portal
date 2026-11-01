@@ -3946,7 +3946,7 @@
               </div>
               <div class="mg-ai-search-guide" id="mgKeywordSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">词</span>
-                <span>支持单个或多个关键词、精确查找、AND/OR组合，以及翻译、同义词与上下位概念的词位扩展</span>
+                <span>支持单个或多个关键词搜索、AND/OR组合，以及翻译、同义词与上下位概念的词位扩展</span>
               </div>
               <div class="mg-ai-search-guide" id="mgV2QaSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">问</span>
@@ -5142,7 +5142,7 @@
   <script defer src="assets/vendor/gsap-3.15.0.min.js"></script>
   <script src="search-results-motion.js?v=20261031-motion-2"></script>
   <script src="home-content-20261031.js?v=20261031-portal-release-2"></script>
-  <script src="assets/vendor/portal-arco-search.js?v=20261101-recommendations-release"></script>
+  <script src="assets/vendor/portal-arco-search.js?v=20261101-keyword-label"></script>
   <script>
     (() => {
       "use strict";
@@ -5483,7 +5483,7 @@
         },
         keyword: {
           mode: "关键词搜索",
-          features: ["精确查找", "词位扩展"]
+          features: ["关键词搜索", "词位扩展"]
         }
       };
       const RESULT_MODE_SERVICE_PATH = {
@@ -6912,7 +6912,7 @@
             label: "开始AI搜索"
           },
           keyword: {
-            placeholder: "输入单个或多个关键词，进行精确查找与词位扩展",
+            placeholder: "输入单个或多个关键词进行搜索，支持词位扩展",
             label: "开始关键词搜索"
           }
         };
