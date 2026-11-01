@@ -160,3 +160,15 @@ Color hierarchy: pale local115-degree ice-blue-to-white outer cards; slightly st
 Verification: desktop1651px, tablet1024px and phone390px have matching document/client widths, with no measured text clipping. The strategy section still has one report link. Mobile screenshots were opened and inspected; browser error log is empty. Source checks, CSS scope review and diff whitespace checks pass. Peer comparison found no P0/P1/P2 issue. Evidence receipts: `verification.json`, `responsive.json`, `baseline.json` and `after-state.json`.
 
 final result: passed
+
+## Original ITIC partner images — 2026-11-01
+
+Source truth: the user's follow-up explicitly points to https://itic-sci.com/ and clarifies that all partner content is images without separate captions. The original homepage partner array was inspected as text, without executing downloaded code. Its four original360×200 PNG assets were downloaded or decoded directly from the original PNG data URIs. All runtime files are byte-identical to those source files. Tracked provenance is in`assets/partners-itic-20261101/README.md`.
+
+Evidence: `artifacts/partners-refine-20261101/before-partners.jpg` and`after-partners.jpg` use the same1651×871 CSS viewport and1636×862 screenshot pixels. Both are shown equally at800px wide in`comparison-final.png`, which was opened and inspected. Captures end at document bottom, so the section heading moves vertically with its shorter image-only layout; the footer stays aligned in the comparison. Native desktop,1024×900 tablet and390×844 mobile top/bottom captures were opened and reviewed by two agents. No density mismatch is treated as a layout finding.
+
+Implementation: complete original artwork preserves its embedded names, backgrounds, rounded corners, colors and9:5 ratio. No filters, redraws, crops or extra visible captions. The old placeholder letters, simulated icons and double wrappers are removed. Desktop four equal columns have24px gaps; tablet has two columns; mobile has one centered column with300×166.67px images. Existing light section background and typography remain. Only the original supercomputing-center link is focusable, with unchanged href, target and rel attributes and a visible2px keyboard outline. Static images have institution alternative text. No added animation or business fields.
+
+Verification: source normalization confirms all index.html outside the partner section and stylesheet cache version is exactly unchanged. All10 footer CSS rules are unchanged. Four image files match the original SHA256 hashes, all load, and all checked sizes have zero horizontal overflow. Browser errors are empty. The combined comparison and focused mobile frames have no remaining P0/P1/P2 issue. `verification.json` records the passed source/asset/responsive checks. Publication is checked separately against the production responses.
+
+final result: passed
