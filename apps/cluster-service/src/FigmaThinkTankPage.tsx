@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Download,
   Heart,
   ListChecks,
   Minus,
@@ -634,6 +635,49 @@ function LegacyTechnologySection() {
   );
 }
 
+function downloadConsultingReport(report: ConsultingReport) {
+  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[character]!);
+  const reportType = report.kind === "push" ? "战略咨询研究报告" : "战略咨询成果案例";
+  const metadata = [["领域分类", report.field], ["主题分类", report.topic], ["所属机构", report.institution], ["发表年度", report.year]];
+  const listItems = (items: string[]) => items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const content = `<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(report.title)}</title>
+  <style>
+    body { max-width: 900px; margin: 48px auto; padding: 0 28px; color: #25374b; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.8; }
+    header > p { color: #2872b8; } h1 { font-size: 28px; line-height: 1.5; }
+    dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 20px; background: #f5f9ff; }
+    dt, footer { color: #687b8f; font-size: 13px; } dd { margin: 4px 0 0; }
+    section { margin-top: 28px; } h2 { padding-left: 12px; border-left: 3px solid #1877ff; font-size: 20px; }
+    footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #dde5ed; }
+    @media print { body { margin: 0; } section { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <header><p>${reportType}</p><h1>${escapeHtml(report.title)}</h1></header>
+  <dl>${metadata.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>
+  <section><h2>成果摘要</h2><p>${escapeHtml(report.summary)}</p></section>
+  <section><h2>技术发展方向</h2><p>${escapeHtml(report.direction)}</p></section>
+  <section><h2>分析内容</h2><ul>${listItems(report.analysis)}</ul></section>
+  <section><h2>技术建议</h2><ol>${listItems(report.recommendations)}</ol></section>
+  <footer>此文件由门户原型当前展示内容导出，使用演示数据，非正式报告原件。</footer>
+</body>
+</html>`;
+  const url = URL.createObjectURL(new Blob([content], { type: "text/html;charset=utf-8" }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${report.title.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "-")}.html`;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function ReportDetailPage({ report }: { report: ConsultingReport }) {
   const catalogUrl = new URL(window.location.href);
   catalogUrl.searchParams.delete("report");
@@ -642,6 +686,7 @@ function ReportDetailPage({ report }: { report: ConsultingReport }) {
     <header className="ttf-report-detail-header">
       <a className="ttf-report-detail-back" href={`${catalogUrl.pathname}${catalogUrl.search}${catalogUrl.hash}`}><ChevronLeft size={16}/><span>返回报告列表</span></a>
       <div><span>{report.kind === "push" ? "战略咨询研究报告" : "战略咨询成果案例"}</span><h3>{report.title}</h3><p>{report.summary}</p></div>
+      <button className="ttf-report-detail-download" type="button" title="下载当前报告（HTML）" onClick={() => downloadConsultingReport(report)}><Download size={16} aria-hidden="true"/><span>下载报告</span></button>
     </header>
     <div className="ttf-report-detail-meta"><span><small>领域分类</small>{report.field}</span><span><small>主题分类</small>{report.topic}</span><span><small>所属机构</small>{report.institution}</span><span><small>发表年度</small>{report.year}</span></div>
     <div className="ttf-report-detail-content">

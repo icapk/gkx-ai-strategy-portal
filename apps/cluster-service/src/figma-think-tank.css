@@ -525,8 +525,11 @@
 .ttf-report-standalone { min-height: 100vh; overflow: hidden; color: #262c36; background: #f3f6fb; }
 .ttf-report-standalone-shell { width: 1200px; margin: 0 auto; padding: 54px 0 72px; }
 .ttf-report-standalone .ttf-report-detail-page { margin-top: 0; }
-.ttf-report-detail-header { min-height: 210px; padding: 24px 30px; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 28px; align-items: start; background: linear-gradient(135deg, #f5f9ff 0%, #fff 68%); border-bottom: 1px solid #e5eaf0; }
+.ttf-report-detail-header { min-height: 210px; padding: 24px 30px; display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 28px; align-items: start; background: linear-gradient(135deg, #f5f9ff 0%, #fff 68%); border-bottom: 1px solid #e5eaf0; }
 .ttf-report-detail-header > button { display: flex; align-items: center; justify-content: center; gap: 5px; }
+.ttf-report-detail-download { min-height: 32px; padding: 0 14px; border: 1px solid #1877ff; border-radius: 2px; color: #fff; background: #1877ff; font-size: 12px; white-space: nowrap; cursor: pointer; }
+.ttf-report-detail-download:hover { border-color: #0e63db; background: #0e63db; }
+.ttf-report-detail-download:focus-visible { outline: 2px solid #1877ff; outline-offset: 3px; }
 .ttf-report-detail-header > div > span { color: #2872b8; font-size: 12px; }
 .ttf-report-detail-header h3 { max-width: 720px; margin: 10px 0 9px; color: #25374b; font-size: 25px; line-height: 36px; }
 .ttf-report-detail-header p { max-width: 800px; margin: 0; color: #5c6f84; font-size: 13px; line-height: 22px; }
