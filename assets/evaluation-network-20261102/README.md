@@ -18,3 +18,23 @@ Only 25 tiny pale-blue circular nodes plus 3 slightly larger nodes connected by 
 Composition: network occupies the right two-thirds, becoming denser at the far right. The left third is empty transparent space; the few leftmost dots and links are extra pale to fade away. Several links continue off the RIGHT and BOTTOM image edges and a few edge nodes are partially cropped. Match the reference's very restrained flat scientific network. No enclosing geometry.
 ABSOLUTELY NO white/card/page background, no gradient wash, no haze or fog, no blue/cyan/white fringe pixels or rough chalk lines, no glow, shadows, blur, 3D, people, pictograms, icons, text, numbers, frame, decoration or watermark. ONLY crisp small circles and SINGLE hairline links on empty transparent canvas.
 ```
+
+## 面形人才版本
+
+- 文件：`talent-network-solid.png`；生产使用此面形版本；原版 talent-network.png 保留原样。
+- 按用户最新要求，三个主人才节点由线性人形改成**浅蓝实心圆头与实心肩部剪影**，节点底为极浅蓝白；其余关系连接继续使用淡细线，不将整个网络改成面块。
+- 编辑目标：中间预览结果 `exec-52b3a43f-9bb5-40ad-a558-247ad4d84b9f`。工具为内置 Image Gen，`transparent_background: true`；本轮仅生成一次，没有程序图像编辑或后处理。
+- 原生生成结果 ID：`exec-b48df983-ac26-47b9-8170-761ac7ba668a`（2026-11-02）。
+- 真实尺寸：**1944 × 809**；8-bit RGBA，原生 Alpha 0–255。完全透明 1,440,249 像素，半透明 127,944 像素，不透明 4,503 像素。
+- SHA256：`9e5614f9be0105c9c518ffcdd5c4f9d4b5d137ace6ce9980a56c55272cfc4ee8`。
+- 原字节复制；无裁切、重采样、调色、Alpha 修复或拼图。主页面白卡上检查最终轻淡效果；未改页面代码。
+
+### 面形人才版本最终提示词
+
+```text
+Use case: precise-object-edit. Edit this exact transparent network image in place, preserving its1942x809 wide2.4:1 composition and graph.
+The user now specifically requires FILLED SHAPES rather than outline-only people. Modify ONLY the THREE existing person-symbol nodes: replace each thin-line head/shoulder drawing with a clearly SOLID FILLED abstract human bust glyph. Each person consists of one filled circular head and one filled broad rounded shoulder/bust shape below it, separated by a tiny clear gap. NO hollow head, NO outline-only shoulders. The person itself must be made of visible flat filled areas.
+Use low-saturation pale blue around #96BCEB for the SOLID glyph, slightly darker than its very pale blue-white or transparent circular node base. A light base tint such as #F0F7FF is allowed; no dark gray/navy or thick saturated circular plaque. Preserve the same small diameter around60px at original resolution (20–24px when displayed730px wide). Glyph about36–40px tall, simple crisp silhouette, no outline required around filled shapes. No face, eyes, hair, clothes, gender detail, realistic human, 3D, thick glass, gloss, gradients, highlights, glow or shadows.
+Keep every other part of the reference unchanged: all thin pale blue relationship CONNECTION LINES remain thin line art, existing small dot nodes, node centers, density increasing rightward, large empty transparent left, and cropped continuations beyond RIGHT and BOTTOM edges. The requested solid treatment applies ONLY to the three PERSON GLYPHS, not to the whole network.
+No new circles, icons, cards, text, labels, frame, page background or decorative objects. Genuine transparent PNG alpha background preserved. Return this single edited asset, not a UI mockup.
+```

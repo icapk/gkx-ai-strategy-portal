@@ -413,6 +413,27 @@
   }
 }
 
+/* Make the static output step legible without turning it into another button. */
+#mgResearchContent .mg-strategy-section .mg-flow-across {
+  height: 76px;
+  gap: 8px;
+}
+
+#mgResearchContent .mg-strategy-section .mg-flow-across span {
+  color: #165dff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+#mgResearchContent .mg-strategy-section .mg-flow-across i {
+  width: 36px;
+  height: 36px;
+  background: #165dff;
+  -webkit-mask-image: url('assets/evaluation-icons-20261102/arrow-right.svg');
+  mask-image: url('assets/evaluation-icons-20261102/arrow-right.svg');
+}
+
 @media (prefers-reduced-motion: reduce) {
   .research-home .mg-strategy-section a.mg-strategy-report-link {
     transition: none !important;
