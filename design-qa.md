@@ -53,4 +53,14 @@ All other homepage content and behavior stay unchanged.
 
 Additional device-specific visual checks can be repeated in a later UI iteration. No known desktop P0/P1/P2 issues remain.
 
+
+## Final detail follow-up
+
+The user's latest annotations additionally asked for clearer person nodes and an uncropped footer backdrop.
+
+- Final evaluation capture: `artifacts/evaluation-detail-20261102/evaluation-desktop.jpg`, compared with the preceding `artifacts/evaluation-feedback-20261102/evaluation-desktop.jpg` at the same 1651 × 871 CSS viewport. The three solid person nodes are individually larger and stronger; text, fine relation lines, card dimensions and approved edge-entering composition are retained.
+- Active image is now `talent-network-solid-emphasis.png`, 1945 × 809 original-alpha PNG, SHA256 `5aa50ce65ab90016ea8b4209cdd918354b041bf6c69b04960e07766c346d54c7`. No programmatic image editing or resampling.
+- Footer capture: `artifacts/evaluation-detail-20261102/footer-desktop.jpg`. Its natural 400px minimum height and `background-size: contain` preserve the complete city illustration; logo, all original text and copyright remain inside the footer. Copyright ends 28px above the footer bottom. On narrow screens the footer retains natural content height.
+- Browser measurements and source/local HTTP checks are saved in the same artifact folder. Full homepage HTML is identical to base `6ee3848` except the decorative image tag and footer stylesheet cache version. No new text or controls.
+- Final desktop image, footer, typography, spacing, color, image quality and copy checks found no P0/P1/P2 issue; no console errors were observed. Earlier responsive coverage and this follow-up's mobile coverage limitation remain as documented above.
 final result: passed

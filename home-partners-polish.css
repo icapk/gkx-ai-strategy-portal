@@ -96,10 +96,13 @@
 }
 
 .research-home + .mg-partners-section + .mg-footer {
+  display: flex;
+  min-height: 400px;
+  flex-direction: column;
   padding: 56px 0 28px;
   color: #57616f;
   background: #fff url('assets/footer-itic-20261101/footer-bg.png') no-repeat center bottom;
-  background-size: 1742px 399px;
+  background-size: contain;
 }
 
 .research-home + .mg-partners-section + .mg-footer .mg-footer-grid {
@@ -130,7 +133,8 @@
 .research-home + .mg-partners-section + .mg-footer .mg-footer-bottom {
   flex-wrap: wrap;
   gap: 12px 32px;
-  margin-top: 48px;
+  margin-top: auto;
+  padding-top: 48px;
   color: #667085;
   font-size: 13px;
   line-height: 22px;
@@ -191,6 +195,7 @@
   }
 
   .research-home + .mg-partners-section + .mg-footer {
+    min-height: 0;
     padding: 40px 0 24px;
   }
 
@@ -200,7 +205,7 @@
 
   .research-home + .mg-partners-section + .mg-footer .mg-footer-bottom {
     gap: 10px;
-    margin-top: 32px;
+    padding-top: 32px;
   }
 }
 

@@ -38,3 +38,12 @@ Use low-saturation pale blue around #96BCEB for the SOLID glyph, slightly darker
 Keep every other part of the reference unchanged: all thin pale blue relationship CONNECTION LINES remain thin line art, existing small dot nodes, node centers, density increasing rightward, large empty transparent left, and cropped continuations beyond RIGHT and BOTTOM edges. The requested solid treatment applies ONLY to the three PERSON GLYPHS, not to the whole network.
 No new circles, icons, cards, text, labels, frame, page background or decorative objects. Genuine transparent PNG alpha background preserved. Return this single edited asset, not a UI mockup.
 ```
+
+## 人物节点强调版（最终生成结果）
+
+- 文件：`talent-network-solid-emphasis.png`。
+- 编辑源：`talent-network-solid.png`；该源文件按原字节保留。
+- 最终生成结果 ID：`exec-7a8ec373-931e-4453-9da0-49f5639ae8b7`（2026-11-02），内置 Image Gen，`transparent_background: true`；本轮仅生成一次。
+- 生成指令：仅强调现有 3 个主人才节点，圆形节点目标约 96px、实心人物目标约 62px，人物采用低饱和稍深蓝 `#5389CC`；保留淡细关系连接、左透明留白及右下边缘延伸，不增加节点、文字、发光或阴影。
+- 真实输出尺寸：**1945 × 809**，8-bit RGBA，原生 Alpha 0–255；原字节复制，无程序图像编辑或后处理。
+- SHA256：`5aa50ce65ab90016ea8b4209cdd918354b041bf6c69b04960e07766c346d54c7`。
