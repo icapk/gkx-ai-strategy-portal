@@ -1598,10 +1598,14 @@
     const state = authorRecommendationState(author.id);
     const article = createElement("article", "rec-talent-card" + (state.following ? " is-following" : ""));
     article.dataset.authorId = author.id;
-    const stateLabel = state.following ? "已关注" : state.everFollowed ? (state.dismissed ? "曾关注 · 已停止据此推荐" : "曾关注") : "人才库推荐";
+    const heading = createElement("div", "rec-talent-heading");
+    heading.appendChild(createElement("h4", "", author.name));
+    if (state.following || state.everFollowed) {
+      const stateLabel = state.following ? "已关注" : state.dismissed ? "曾关注 · 已停止据此推荐" : "曾关注";
+      heading.appendChild(createElement("span", "rec-resource-status", stateLabel));
+    }
     article.append(
-      createElement("span", "rec-recommendation-reason", stateLabel),
-      createElement("h4", "", author.name),
+      heading,
       createElement("p", "", author.institution),
       createElement("p", "", "研究领域：" + author.field),
       createElement("p", "", "研究方向：" + author.direction),

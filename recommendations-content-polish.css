@@ -83,12 +83,25 @@ body:has(#recommendationMain)::before {
 #recommendationMain article.rec-paper-card > .rec-paper-content > h3,
 #recommendationMain article:is(.rec-report-card, .rec-course-card) > div > h3,
 #recommendationMain article:is(.rec-conference-card, .rec-event-card) > h3,
-#recommendationMain article:is(.rec-talent-card, .rec-author-update-card, .rec-rising-star-card) > h4,
+#recommendationMain article:is(.rec-author-update-card, .rec-rising-star-card) > h4,
+#recommendationMain article.rec-talent-card > .rec-talent-heading > h4,
 #recommendationMain article.rec-follow-card > .rec-follow-card-heading > strong {
   margin: 6px 0 8px;
   font-size: 16px;
   font-weight: 600;
   line-height: 24px;
+}
+
+#recommendationMain article.rec-talent-card > .rec-talent-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 6px 0 8px;
+}
+
+#recommendationMain article.rec-talent-card > .rec-talent-heading > h4 {
+  margin: 0;
 }
 
 /* Explicit native metadata paths exclude status tags and every control host. */
@@ -103,7 +116,6 @@ body:has(#recommendationMain)::before {
 #recommendationMain article.rec-course-card > div > :is(time, span.rec-recommendation-reason),
 #recommendationMain article.rec-conference-card > span.rec-recommendation-reason,
 #recommendationMain article.rec-event-card > span.rec-event-reason,
-#recommendationMain article.rec-talent-card > span.rec-recommendation-reason,
 #recommendationMain article.rec-author-update-card > :is(time, span.rec-recommendation-reason),
 #recommendationMain article.rec-follow-card > p.rec-follow-meta {
   color: #667085;
