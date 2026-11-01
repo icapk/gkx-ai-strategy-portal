@@ -25,7 +25,7 @@ let filterActionsRoot;
 function MatchControls({ model }) {
   return <Radio.Group name="portal-result-match" value={model.matchValue} onChange={value => handlers.onMatchChange(value)}>
     <Radio id="portalResultExact" value="exact">关键词搜索</Radio>
-    <Radio id="portalResultAssociation" value="association" disabled={model.associationDisabled} title={model.associationDisabled ? '全文范围使用关键词搜索，扩展词仅在正文内匹配' : undefined}>智能关联搜索</Radio>
+    <Radio id="portalResultAssociation" value="association">智能关联搜索</Radio>
   </Radio.Group>;
 }
 

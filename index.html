@@ -5197,7 +5197,7 @@
   <script src="search-results-motion.js?v=20261031-motion-2"></script>
   <script src="home-content-20261031.js?v=20261031-portal-release-2"></script>
   <script src="home-loop-motion.js?v=20261101-3"></script>
-  <script src="assets/vendor/portal-arco-search.js?v=20261101-keyword-label"></script>
+  <script src="assets/vendor/portal-arco-search.js?v=20261102-fulltext-association"></script>
   <script>
     (() => {
       "use strict";
@@ -6567,12 +6567,12 @@
         return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       }
 
-      function highlightResultText(value, query) {
-        const terms = [...new Set(getQueryTerms(query))]
+      function highlightResultText(value, query, effectiveTerms = null) {
+        const terms = [...new Set(effectiveTerms || getQueryTerms(query))]
           .map((term) => String(term).trim())
           .filter(Boolean)
           .sort((a, b) => b.length - a.length)
-          .slice(0, 8);
+          .slice(0, effectiveTerms ? undefined : 8);
         if (!terms.length) return escapeHtml(value);
         const pattern = new RegExp(`(${terms.map(escapeRegExp).join("|")})`, "gi");
         return String(value).split(pattern).map((part, index) => index % 2
@@ -7994,12 +7994,19 @@
       function syncSidebarUrl() {
         if (searchResultsPage.hidden) return;
         const url = new URL(window.location.href);
+        url.searchParams.set("query", portalResultSearchInput.value.trim());
+        url.searchParams.set("mode", activeSearchMode);
         if (activeSearchType === "全部") url.searchParams.delete("type");
         else url.searchParams.set("type", activeSearchType);
         const scope = sidebarValues().resourceScope;
         if (scope) url.searchParams.set("scope", scope);
         else url.searchParams.delete("scope");
-        if (isReportFulltext()) url.searchParams.set("mode", "关键词");
+        url.searchParams.delete("reportTypes");
+        url.searchParams.delete("expansionGroups");
+        if (activeSearchType === "报告") {
+          sidebarValues().reportTypes.forEach(type => url.searchParams.append("reportTypes", type));
+          if (resultExpansionSelectionMode === "groups") url.searchParams.set("expansionGroups", [...resultExpansionGroups].join(","));
+        }
         history.replaceState(null, "", url);
       }
 
@@ -8008,7 +8015,6 @@
         portalSearchSidebar.dataset.empty = String(!hasFilters);
         document.getElementById("portalFiltersEmpty").hidden = hasFilters;
         updateSidebarControls();
-        if (isReportFulltext() && activeSearchMode === "关联") setSearchMode("关键词");
         syncSidebarUrl();
       }
 
@@ -8057,7 +8063,6 @@
         window.PortalSearchControls?.update({
           matchValue: association ? "association" : "exact",
           ai,
-          associationDisabled: isReportFulltext(),
           groups,
           selectedGroups,
           allChecked: selectedGroups.length === groups.length,
@@ -8226,22 +8231,33 @@
         return window.PortalSearchControls.reportDocuments[item.title] || item.matches || [];
       }
 
+      function getReportSearchTerms() {
+        const query = portalResultSearchInput.value.trim();
+        if (!query) return [];
+        const additionalTerms = activeSearchMode === "关联" ? getSemanticTerms(query) : [...activeExpansionTerms];
+        return [...new Set([...getQueryTerms(query), ...additionalTerms]
+          .map(term => String(term).trim().toLocaleLowerCase("zh-CN")).filter(Boolean))];
+      }
+
       function getReportHits(item) {
         if (item.type !== "报告") return [];
-        const terms = [...new Set([...getQueryTerms(portalResultSearchInput.value), ...activeExpansionTerms])].map(term => term.toLocaleLowerCase("zh-CN")).filter(Boolean);
-        return getReportDocumentMatches(item).map((match, index) => ({ match, index })).filter(({ match }) => !terms.length || terms.some(term => match.text.toLocaleLowerCase("zh-CN").includes(term)));
+        const terms = getReportSearchTerms();
+        if (!terms.length) return [];
+        return getReportDocumentMatches(item).map((match, index) => ({ match, index })).filter(({ match }) => terms.some(term => match.text.toLocaleLowerCase("zh-CN").includes(term)));
       }
 
       function reportHitsMarkup(item) {
         const hits = getReportHits(item);
         const itemIndex = SEARCH_ITEMS.indexOf(item);
-        const markup = entries => entries.map(({ match, index }) => `<li><button class="portal-report-hit" type="button" data-open-fulltext="${itemIndex}" data-report-hit-index="${index}" aria-label="定位第 ${match.page} 页：${escapeHtml(match.text)}"><span class="portal-report-hit-page">第 ${match.page} 页</span><span class="portal-report-hit-sentence">${highlightResultText(match.text, portalResultSearchInput.value)}</span><span class="portal-report-hit-open" aria-hidden="true">定位全文</span></button></li>`).join("");
+        const terms = getReportSearchTerms();
+        const markup = entries => entries.map(({ match, index }) => `<li><button class="portal-report-hit" type="button" data-open-fulltext="${itemIndex}" data-report-hit-index="${index}" aria-label="定位第 ${match.page} 页：${escapeHtml(match.text)}"><span class="portal-report-hit-page">第 ${match.page} 页</span><span class="portal-report-hit-sentence">${highlightResultText(match.text, portalResultSearchInput.value, terms)}</span><span class="portal-report-hit-open" aria-hidden="true">定位全文</span></button></li>`).join("");
         const demo = Boolean(window.PortalSearchControls.reportDocuments[item.title]);
         return `<section class="portal-report-hits" aria-label="全文命中内容"><div class="portal-report-hits-heading"><strong>全文命中 ${hits.length} 处</strong>${demo ? '<span>原型示例正文（非报告原文）</span>' : ''}</div><ul>${markup(hits.slice(0, 3))}</ul>${hits.length > 3 ? `<div class="portal-report-hit-more"><ul class="portal-report-extra-hits" id="portal-report-extra-${itemIndex}" hidden>${markup(hits.slice(3))}</ul><button class="portal-report-more-toggle" type="button" data-report-more="${hits.length - 3}" aria-expanded="false" aria-controls="portal-report-extra-${itemIndex}"><img src="assets/figma-association-20261030/chevron-right.svg" width="14" height="14" alt="" aria-hidden="true"><span data-report-more-label>展开其余 ${hits.length - 3} 处命中</span></button></div>` : ''}</section>`;
       }
 
       function getFilteredSearchItems(options = {}) {
         const rawQuery = portalResultSearchInput.value.trim();
+        if (!rawQuery && (isReportFulltext() || activeSearchMode === "关联")) return [];
         const query = rawQuery.toLocaleLowerCase("zh-CN");
         const filterValues = new FormData(portalSearchFilters);
         const matchMode = String(filterValues.get("matchMode") || "智能匹配");
@@ -8458,7 +8474,7 @@
         portalDocumentPageContent.innerHTML = `
           <span class="portal-document-page-number">${match.page}</span>
           <p>研究背景与相关工作表明，跨来源科技信息需要在统一检索入口下保持原始证据位置。</p>
-          <p class="portal-document-highlight">${highlightResultText(match.text, portalResultSearchInput.value)}</p>
+          <p class="portal-document-highlight">${highlightResultText(match.text, portalResultSearchInput.value, activeDocumentItem.fulltextTerms || null)}</p>
           <p>本段内容为静态原型中的模拟原文，用于演示页码、段落锚点、高亮和多处命中导航。</p>`;
       }
 
@@ -8523,6 +8539,7 @@
 
         portalSearchPagination.hidden = items.length === 0;
         window.PortalSearchControls?.updatePagination({ current: activeSearchPage, pageSize: SEARCH_PAGE_SIZE, total: items.length });
+        syncSidebarUrl();
       }
 
       function showSurface(name, options = {}) {
@@ -8539,6 +8556,7 @@
         Object.entries(SURFACES).forEach(([key, node]) => {
           node.hidden = key !== name;
         });
+        if (name === "search") syncSidebarUrl();
         const isHome = name === "home";
         const isHomeArea = isHome || name === "search";
         homeNavTab.classList.toggle("is-active", isHomeArea);
@@ -8851,12 +8869,12 @@
 
       function performSearch(rawQuery, options = {}) {
         const query = String(rawQuery || "").trim();
-        if (!query) {
+        if (!query && !options.allowEmpty) {
           setPortalSearchFeedback("请输入要检索的研究主题、问题、成果或专家名称。", "error");
           (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
           return;
         }
-        if (!isUsableSearchQuery(query)) {
+        if (query && !isUsableSearchQuery(query)) {
           setPortalSearchFeedback("检索提问需包含文字或数字，请修改后重试。", "error");
           (options.focusTarget || mgHeroSearchInput || portalResultSearchInput)?.focus();
           return;
@@ -8872,9 +8890,16 @@
           const field = sidebarSchema().flatMap(group => group.fields).find(field => field.key === "resourceScope");
           if (field?.options.includes(scope)) sidebarValues().resourceScope = scope;
         }
-        if (isReportFulltext() && activeSearchMode === "关联") setSearchMode("关键词");
+        if (activeSearchType === "报告") {
+          if (Array.isArray(options.reportTypes)) sidebarValues().reportTypes = [...new Set(options.reportTypes.filter(type => ["1", "2", "3"].includes(type)))];
+          if (Array.isArray(options.expansionGroups)) {
+            resultExpansionSelectionMode = "groups";
+            resultExpansionGroups.clear();
+            options.expansionGroups.filter(group => ["automatic", "broader", "narrower", "translation"].includes(group)).forEach(group => resultExpansionGroups.add(group));
+          }
+        }
         if (activeSearchMode === "关键词") originalKeywordQuery = query;
-        if (activeSearchMode === "关联") {
+        if (activeSearchMode === "关联" && query) {
           resetAssociationSession(query);
           updateAssociationProfileFromQuery(query);
         }
@@ -8882,7 +8907,7 @@
         activeSearchPage = 1;
         searchResultQuery.textContent = `“${query}”`;
         renderSearchResults();
-        setPortalSearchFeedback(activeSearchMode === "关联"
+        setPortalSearchFeedback(!query ? "关键词已全部取消，请在上方输入关键词重新搜索。" : activeSearchMode === "关联"
           ? "知识检索已完成，可查看规范化过程、关联依据并采用有用信息。"
           : "检索已完成，可继续使用资源类型和筛选条件缩小范围。" );
         if (activeSearchMode === "AI 搜索") {
@@ -8939,7 +8964,6 @@
         onFiltersClear: resetSidebarFilters,
         onSidebarChange(key, value) {
           sidebarValues()[key] = value;
-          if (isReportFulltext() && activeSearchMode === "关联") setSearchMode("关键词");
           activeSearchPage = 1;
           renderSearchResults();
           syncSidebarUrl();
@@ -8966,6 +8990,7 @@
           searchResultQuery.textContent = "";
           activeSearchPage = 1;
           renderSearchResults();
+          setPortalSearchFeedback("关键词已全部取消，请在上方输入关键词重新搜索。");
           portalResultSearchInput.focus();
         },
         onResourceRemove() {
@@ -9016,11 +9041,16 @@
       const entryQuery = entrySearchParams.get("query");
       const entryMode = entrySearchParams.get("mode");
       const entryType = entrySearchParams.get("type");
-      if (entryQuery) {
+      const restoreEmptySearch = entrySearchParams.has("query") && !String(entryQuery || "").trim()
+        && (entryMode === "关联" || entryType === "报告" && ["全文", "全文检索"].includes(entrySearchParams.get("scope")));
+      if (entryQuery || restoreEmptySearch) {
         performSearch(entryQuery, {
           mode: SEARCH_MODE_CONFIG[entryMode] ? entryMode : "关键词",
           resourceType: entryType || undefined,
-          scope: entrySearchParams.get("scope") || undefined
+          scope: entrySearchParams.get("scope") || undefined,
+          allowEmpty: restoreEmptySearch,
+          reportTypes: entrySearchParams.getAll("reportTypes"),
+          expansionGroups: entrySearchParams.has("expansionGroups") ? entrySearchParams.get("expansionGroups").split(",") : undefined
         });
       }
 
@@ -9357,7 +9387,9 @@
         if (fulltextButton) {
           const item = SEARCH_ITEMS[Number(fulltextButton.dataset.openFulltext)];
           if (item && fulltextButton.hasAttribute("data-report-hit-index")) {
-            openDocumentViewer({ ...item, matches: getReportDocumentMatches(item) }, Number(fulltextButton.dataset.reportHitIndex), fulltextButton);
+            const hits = getReportHits(item);
+            const index = hits.findIndex(hit => hit.index === Number(fulltextButton.dataset.reportHitIndex));
+            if (index >= 0) openDocumentViewer({ ...item, matches: hits.map(hit => hit.match), fulltextTerms: getReportSearchTerms() }, index, fulltextButton);
           } else if (item?.matches?.length) openDocumentViewer(item, 0, fulltextButton);
           return;
         }
@@ -10520,7 +10552,7 @@
       const initialEntryPage = new URLSearchParams(window.location.search).get("page");
       if (initialEntryPage === "personal-center") openPersonalCenter();
       else if (initialEntryPage === "home") { clearPortalViewState(); showSurface("home"); }
-      else if (!openClusterServiceRoute() && !entryQuery) { clearPortalViewState(); showSurface("home"); }
+      else if (!openClusterServiceRoute() && !entryQuery && !restoreEmptySearch) { clearPortalViewState(); showSurface("home"); }
     })();
   </script>
   <script src="personal-entry.js?v=20261031-entry-fix"></script>
