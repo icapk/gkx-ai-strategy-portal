@@ -209,7 +209,7 @@ function Control({ source, kind }) {
   if (kind === 'select') {
     const label = source.closest('label');
     const name = source.getAttribute('aria-label') || (label ? [...label.childNodes].filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent.trim()).join(' ') : source.id === 'recReportRule' ? '报告排序' : '时间范围');
-    return <Select aria-label={name} value={source.value} disabled={source.disabled} onChange={value => { source.value = value; source.dispatchEvent(new Event('change', { bubbles: true })); reconcile(); }}>
+    return <Select aria-label={name} value={source.value} disabled={source.disabled} getPopupContainer={() => source.closest('dialog') || document.body} onChange={value => { source.value = value; source.dispatchEvent(new Event('change', { bubbles: true })); reconcile(); }}>
       {[...source.options].map(option => <Select.Option key={option.value} value={option.value}>{option.text}</Select.Option>)}
     </Select>;
   }
