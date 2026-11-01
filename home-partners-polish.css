@@ -1,6 +1,7 @@
 /* These two sections are adjacent siblings after .research-home in the existing DOM. */
 .research-home + .mg-partners-section {
   padding: 64px 0;
+  background: #f5f8fd;
 }
 
 .research-home + .mg-partners-section .mg-section-heading {
@@ -22,10 +23,10 @@
   grid-auto-rows: 1fr;
   align-items: stretch;
   gap: 16px;
-  border: 1px solid #e0e9f5;
+  border: 1px solid #e5ecf5;
   border-radius: 16px;
   padding: 24px;
-  background: rgba(255, 255, 255, .56);
+  background: #fbfdff;
 }
 
 .research-home + .mg-partners-section .mg-partner-logo {
@@ -39,10 +40,10 @@
   gap: 4px 14px;
   margin: 0;
   overflow: visible;
-  border: 1px solid #dfe8f4;
+  border: 1px solid #dce6f2;
   border-radius: 16px;
   padding: 20px;
-  background: linear-gradient(115deg, rgba(219, 234, 255, .76), rgba(239, 247, 255, .88) 52%, #fff);
+  background: linear-gradient(115deg, #f1f6ff, #fff);
   box-shadow: none;
   transform: none;
   transition: none;
@@ -113,6 +114,7 @@
 .research-home + .mg-partners-section + .mg-footer {
   padding: 56px 0 28px;
   color: #c4cbd7;
+  background: #14243f;
 }
 
 .research-home + .mg-partners-section + .mg-footer .mg-footer-grid {

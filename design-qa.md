@@ -146,3 +146,17 @@ Responsive checks:1651,1280,1024,768,390 and375px widths have matching document/
 Comparison history: peer review identified a lone final Chinese character in the first desktop partner name. Added balanced text wrapping without changing copy or size; the final capture shows natural multiline names. Added an80px anchor offset to prevent the partner title hiding under the fixed header. Initial stale screenshot frames were replaced before final comparison. No remaining P0/P1/P2 finding. Existing baked white backgrounds in the four strategy icon files are retained as required; they were not regenerated or filtered.
 
 final result: passed
+
+## Lower-content surface colors; hero preserved — 2026-11-01
+
+Source truth: the user's approved near-white background/local ice-blue gradient direction from the Fluent2/Carbon reference research, with the explicit constraint that the entire first screen remains unchanged. Current-page source captures are `artifacts/content-surfaces-20261101/before-*.jpg`; final captures are `after-*.jpg`. `comparison-final.png` contains both sets together and was opened and inspected, including a native-size evaluation capture and390×844 mobile evaluation/partners captures. All desktop frames share1651×871 CSS viewport and1636×862 screenshot pixels, normalized equally to800px in the combined image. No layout, route, content or selected-state differences were introduced.
+
+Fonts/copy: existing fonts, weights, sizes, line heights and all text/fields are unchanged. Exact source normalization proves index.html only changes the stylesheet imports; browser content and link arrays are identical. The144 hero descendants retain all18 checked computed style properties. Before/after first-screen JPEG SHA256 is identical: `0b47971c65240ec42aec7c2398f073db307636d80ee8484fa0d7bd14a6e654a1`.
+
+Layout/image fidelity: no dimensional or placement properties change in the new surface stylesheet. Original illustrations, report stack, fixed loop pins, background image and its240px entry mask remain. Only the background pseudo-element opacity changes to.67. Prior removal of rolling balls remains intact. No generated artwork, new animation or extra fields. Shadows remain low and do not obscure adjacent content.
+
+Color hierarchy: pale local115-degree ice-blue-to-white outer cards; slightly stronger main education card; nearly white inner evidence/capability panes; light gray-blue borders and subtle cold-gray shadows. Existing white title text uses a more restrained brand-blue-to-cyan band. Partner surfaces are lighter and the existing footer becomes navy#14243F, retaining the original light logo and text. Body text contrast remains strong against the lighter surfaces. All new core selectors are restricted to#mgResearchContent.research-home; partner/footer selectors are restricted to its existing adjacent siblings.
+
+Verification: desktop1651px, tablet1024px and phone390px have matching document/client widths, with no measured text clipping. The strategy section still has one report link. Mobile screenshots were opened and inspected; browser error log is empty. Source checks, CSS scope review and diff whitespace checks pass. Peer comparison found no P0/P1/P2 issue. Evidence receipts: `verification.json`, `responsive.json`, `baseline.json` and `after-state.json`.
+
+final result: passed
