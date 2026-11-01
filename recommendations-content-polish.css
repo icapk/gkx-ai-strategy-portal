@@ -22,7 +22,7 @@ body:has(#recommendationMain)::before {
 }
 
 #recommendationMain section.rec-panel > .rec-arco-tabs-host {
-  margin: 0 -20px 12px;
+  margin: 0 -20px 16px;
 }
 
 #recommendationMain section.rec-panel > .rec-arco-tabs-host .arco-tabs-header-nav {
@@ -53,6 +53,15 @@ body:has(#recommendationMain)::before {
   padding: 16px 0;
   background: #fff;
   box-shadow: none;
+}
+
+/* The list begins at the shared gap; only later rows keep top padding. */
+#recommendationMain section.rec-panel > :is(.rec-news-grid, .rec-paper-list, .rec-report-grid, .rec-conference-grid, .rec-event-grid) > article:first-child {
+  padding-top: 0;
+}
+
+#recommendationMain section.rec-panel > .rec-report-grid > article.rec-report-card:first-child > div {
+  padding-top: 0;
 }
 
 #recommendationMain article.rec-news-card:hover,
@@ -205,10 +214,15 @@ body:has(#recommendationMain)::before {
 #recommendationMain section.rec-panel > .rec-module-toolbar,
 #recommendationMain section.rec-panel > .rec-news-toolbar {
   justify-content: flex-start;
+  min-height: 0;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   padding: 0;
   background: transparent;
+}
+
+#recommendationMain section.rec-panel > .rec-filter-group {
+  margin: 0 0 16px;
 }
 
 #recommendationMain section.rec-panel > .rec-module-toolbar > .rec-module-controls {
@@ -272,7 +286,6 @@ body:has(#recommendationMain)::before {
   #recommendationMain section.rec-panel > .rec-module-toolbar,
   #recommendationMain section.rec-panel > .rec-news-toolbar {
     gap: 8px;
-    margin-bottom: 10px;
   }
 
   #recommendationMain section.rec-panel > .rec-module-toolbar > .rec-module-controls {
