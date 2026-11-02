@@ -3030,7 +3030,9 @@
   <link rel="stylesheet" href="search-results-fidelity.css?v=20261101-recommendations-release">
   <link rel="stylesheet" href="ai-search-fidelity.css?v=20261031-motion-2">
   <link rel="stylesheet" href="portal-choice-controls.css?v=20261031-portal-release-2">
-  <link rel="stylesheet" href="profile-content-preserved.css?v=20261031-entry-fix">
+  <link rel="stylesheet" href="profile-content-preserved.css?v=20261102-account-menu">
+  <link rel="stylesheet" href="assets/portal-page-heading.css?v=20261102-shared-heading">
+  <link rel="stylesheet" href="personal-account-menu.css?v=20261102-neutral-text">
   <style>
     .search-service-path {
       display: flex;
@@ -3810,7 +3812,12 @@
             <span class="profile-avatar" aria-hidden="true">q</span><span class="personal-trigger-label" data-personal-trigger-label>quan…</span>
           </button>
           <div class="profile-menu profile-account-menu" id="profileMenu" role="menu" aria-label="个人中心" hidden>
-<button class="profile-menu-item personal-account-item" id="profileCenterOne" type="button" role="menuitem"><span class="personal-menu-avatar" aria-hidden="true">q</span><span class="profile-menu-copy"><strong data-personal-account-name>quan.song@aminer.cn</strong><small data-personal-account-email>quan.song@aminer.cn</small><span class="personal-menu-caption">进入个人中心 <span aria-hidden="true">›</span></span></span></button><button class="profile-menu-item personal-logout" id="profileCenterTwo" type="button" role="menuitem">退出登录</button>
+<div class="personal-account-summary" role="presentation">
+              <span class="personal-menu-avatar" aria-hidden="true">q</span>
+              <span class="profile-menu-copy"><strong data-personal-account-name>quan.song@aminer.cn</strong><small data-personal-account-email>quan.song@aminer.cn</small></span>
+            </div>
+            <button class="profile-menu-item personal-center-entry" id="profileCenterOne" type="button" role="menuitem"><span>进入个人中心</span><svg class="personal-entry-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 18l6-6-6-6"></path></svg></button>
+            <div class="personal-account-actions" role="presentation"><button class="profile-menu-item personal-logout" id="profileCenterTwo" type="button" role="menuitem">退出登录</button></div>
           </div>
         </div>
       </div>
@@ -4699,13 +4706,13 @@
 
     <section class="search-results-page portal-search-page" id="searchResultsPage" aria-labelledby="searchResultsTitle" data-node-id="1246:439" hidden>
       <div class="portal-search-shell portal-search-inner">
-        <header class="portal-search-header" data-node-id="1246:446">
-          <div class="portal-search-heading-row">
+        <header class="portal-search-header portal-page-heading" data-node-id="1246:446">
+          <div class="portal-search-heading-row portal-page-heading-row">
             <span id="portalSearchReturnMount"></span>
-            <h1 class="portal-search-title" id="searchResultsTitle">关键词搜索</h1>
+            <h1 class="portal-search-title portal-page-title" id="searchResultsTitle">关键词搜索</h1>
             <span id="portalAiMobileSourcesMount"></span>
           </div>
-          <p class="portal-search-lead">按关键词和筛选条件查看资源</p>
+          <p class="portal-search-lead portal-page-description">按关键词和筛选条件查看资源</p>
           <span class="sr-only" id="searchResultQuery"></span>
         </header>
         <div class="portal-result-query" data-node-id="1246:450">

@@ -2,6 +2,26 @@
   'use strict';
   const SR = window.PortalSearchRecommend;
   const byId = id => document.getElementById(id);
+  // An embedded document has a narrower viewport; use the host search inset.
+  if (window.parent !== window) {
+    try {
+      const host = window.parent;
+      const lifetime = new AbortController();
+      const alignHeading = () => {
+        const shell = host.document.querySelector('.portal-search-inner');
+        const page = host.document.getElementById('searchResultsPage');
+        if (!shell || !page) return;
+        const shellStyle = host.getComputedStyle(shell);
+        const root = document.documentElement.style;
+        root.setProperty('--portal-page-shell-left', shellStyle.marginLeft);
+        root.setProperty('--portal-page-shell-width', shellStyle.width);
+        root.setProperty('--portal-page-top', host.getComputedStyle(page).paddingTop);
+      };
+      alignHeading();
+      host.addEventListener('resize', alignHeading, { signal: lifetime.signal });
+      window.addEventListener('pagehide', () => lifetime.abort(), { once: true });
+    } catch (_) { /* Standalone layout also supports cross-origin embedding. */ }
+  }
   const homeURL = new URL('index.html?page=home', location.href);
   let returnURL = homeURL.href;
   try {

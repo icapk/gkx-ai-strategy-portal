@@ -1,0 +1,78 @@
+/* Search is the reference for all portal page titles and their content inset. */
+html { scrollbar-gutter: stable; }
+:root {
+  --portal-page-shell-width: min(1200px, calc(100vw - 64px));
+  --portal-page-shell-left: max(32px, calc((100vw - 1200px) / 2));
+  --portal-page-header-height: 56px;
+  --portal-page-top: calc(96px - var(--portal-page-header-height));
+  --portal-page-title-indent: 24px;
+}
+
+#searchResultsPage .portal-search-inner,
+#recommendationMain > .rec-shell,
+.pc-shell {
+  box-sizing: border-box;
+  width: var(--portal-page-shell-width);
+  max-width: none;
+  margin: 0 0 0 var(--portal-page-shell-left);
+  padding-inline: 0;
+}
+
+#searchResultsPage.portal-search-page,
+#recommendationMain.rec-main,
+.pc-shell,
+.is-embedded .pc-shell { padding-top: var(--portal-page-top); }
+
+#recommendationMain.rec-main { padding-inline: 0; }
+.pc-page-heading { margin-bottom: 24px; }
+#recommendationMain .rec-hero { margin-bottom: 24px; }
+
+:is(#searchResultsPage, #recommendationMain, .pc-shell) .portal-page-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+:is(#searchResultsPage, #recommendationMain, .pc-shell) .portal-page-title {
+  margin: 0;
+  color: #1d2129;
+  font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0;
+}
+
+:is(#searchResultsPage, #recommendationMain, .pc-shell) .portal-page-description {
+  margin: 8px 0 0 var(--portal-page-title-indent);
+  color: #86909c;
+  font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+@media (max-width: 1279px) {
+  :root { --portal-page-header-height: 64px; }
+}
+
+@media (max-width: 1000px) {
+  :root {
+    --portal-page-shell-left: 20px;
+    --portal-page-shell-width: calc(100vw - 40px);
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --portal-page-shell-left: 16px;
+    --portal-page-shell-width: calc(100vw - 32px);
+    --portal-page-top: 24px;
+    --portal-page-title-indent: 28px;
+  }
+  :is(#searchResultsPage, #recommendationMain, .pc-shell) .portal-page-heading-row { gap: 4px; }
+  .portal-page-heading .portal-search-return { width: 44px; height: 44px; margin: -8px -10px; }
+  .portal-page-heading .portal-search-return::before { inset: 6px; }
+  .pc-page-heading, #recommendationMain .rec-hero { margin-bottom: 20px; }
+}

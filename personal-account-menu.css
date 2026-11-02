@@ -1,0 +1,117 @@
+/* Shared account popover: identity, personal-center action, sign-out action. */
+:is(#profileMenu, #personalRecMenu) {
+  box-sizing: border-box;
+  width: min(320px, calc(100vw - 32px));
+  padding: 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 36px rgba(35, 56, 97, 0.14);
+}
+
+:is(#profileMenu, #personalRecMenu) .personal-account-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 20px;
+  color: #1d2129;
+  text-align: left;
+}
+
+:is(#profileMenu, #personalRecMenu) .personal-menu-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 50%;
+  background: #165dff;
+  color: #fff;
+  font: 500 22px/1 Arial;
+}
+
+:is(#profileMenu, #personalRecMenu) .profile-menu-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+:is(#profileMenu, #personalRecMenu) .profile-menu-copy strong {
+  overflow: hidden;
+  color: #273142;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:is(#profileMenu, #personalRecMenu) .profile-menu-copy small {
+  color: #4e5969;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+:is(#profileMenu, #personalRecMenu) .personal-center-entry,
+:is(#profileMenu, #personalRecMenu) .personal-logout {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  gap: 12px;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:is(#profileMenu, #personalRecMenu) .personal-center-entry {
+  justify-content: space-between;
+  background: transparent;
+  color: #364152;
+  font-weight: 500;
+}
+
+:is(#profileMenu, #personalRecMenu) .personal-center-entry:is(:hover, :focus-visible) { background: #f2f3f5; color: #165dff; }
+:is(#profileMenu, #personalRecMenu) .personal-center-entry:active { background: #e5e6eb; color: #165dff; }
+
+.personal-entry-arrow {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:is(#profileMenu, #personalRecMenu) .personal-account-actions {
+  margin-top: 12px;
+  border-top: 1px solid #edf0f5;
+  padding-top: 8px;
+}
+
+:is(#profileMenu, #personalRecMenu) .personal-logout {
+  justify-content: flex-start;
+  background: transparent;
+  color: #4e5969;
+  font-weight: 400;
+}
+
+:is(#profileMenu, #personalRecMenu) .personal-logout:is(:hover, :focus-visible) { background: #fff3f3; color: #cb272d; }
+:is(#profileMenu, #personalRecMenu) .personal-logout:active { background: #ffe8e8; color: #cb272d; }
+:is(#profileMenu, #personalRecMenu) :is(.personal-center-entry, .personal-logout):focus-visible { outline: 2px solid #165dff; outline-offset: 2px; }

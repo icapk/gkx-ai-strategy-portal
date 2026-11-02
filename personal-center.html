@@ -4,7 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>个人中心 · 深圳国际科技信息中心</title>
-  <link rel="stylesheet" href="personal-center.css?v=20261102-personal-back">
+  <link rel="stylesheet" href="personal-center.css?v=20261102-title-alignment">
+  <link rel="stylesheet" href="assets/portal-search-return.css?v=20261102-personal-heading">
+  <link rel="stylesheet" href="assets/portal-page-heading.css?v=20261102-shared-heading">
   <link rel="stylesheet" href="assets/portal-back-to-top.css?v=20261101-1">
 </head>
 <body>
@@ -13,8 +15,13 @@
     <nav aria-label="门户导航"><a href="index.html?page=home" target="_top">返回首页</a><a href="recommendations.html" target="_top">智能推荐</a><span class="pc-header-avatar">q</span></nav>
   </header>
   <main class="pc-shell">
-    <div class="pc-breadcrumb"><a href="index.html?page=home" target="_top">首页</a><span>/</span><span>个人中心</span></div>
-    <div class="pc-title-row"><div><h1>个人中心</h1><p>管理通知设置，查看你的关注与内容记录。</p></div><button class="pc-back-button" id="pcBack" type="button" title="返回上一页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg>返回</button></div>
+    <header class="pc-page-heading portal-page-heading">
+      <div class="pc-title-row portal-page-heading-row">
+        <span class="pc-return-mount"><button class="portal-search-return" id="pcBack" type="button" aria-label="返回上一页" title="返回上一页"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></span>
+        <h1 class="portal-page-title">个人中心</h1>
+      </div>
+      <p class="portal-page-description">管理通知设置，查看你的关注与内容记录。</p>
+    </header>
     <section class="pc-overview" aria-label="个人资料与记录概览">
       <div class="pc-identity"><div class="pc-avatar" aria-hidden="true">q</div><div><strong id="pcAccountName">quan.song</strong><span id="pcAccountEmail">quan.song@aminer.cn</span><small id="pcAccountHint">个人账号 · 原型展示</small></div></div>
       <div class="pc-stats" id="pcStats"></div>
@@ -40,7 +47,7 @@
   <script src="personal-resource-catalog.js?v=20261030"></script>
   <script src="portal-search-recommend-adapter.js?v=20261102-independent-subscriptions"></script>
   <script src="personal-data-demo.js?v=20261030-notification-email"></script>
-  <script src="personal-center.js?v=20261102-personal-back"></script>
+  <script src="personal-center.js?v=20261102-heading-host"></script>
   <script defer src="assets/portal-back-to-top.js?v=20261101-1"></script>
 </body>
 </html>

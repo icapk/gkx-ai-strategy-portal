@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
   <link rel="stylesheet" href="recommendation-v1.css?v=20261102-independent-subscriptions">
   <link rel="stylesheet" href="portal-choice-controls.css?v=20261101-recommendations">
-  <link rel="stylesheet" href="personal-entry.css?v=20261030-personal-demo">
+  <link rel="stylesheet" href="personal-entry.css?v=20261102-account-menu">
+  <link rel="stylesheet" href="personal-account-menu.css?v=20261102-neutral-text">
   <link rel="stylesheet" href="assets/portal-search-return.css?v=20261101-recommendations-release">
   <link rel="stylesheet" href="recommendations-unified.css?v=20261101-recommendations-release">
   <link rel="stylesheet" href="recommendations-content-polish.css?v=20261101-5">
@@ -18,6 +19,7 @@
   <link rel="stylesheet" href="recommendations-actions.css?v=20261101-1">
   <link rel="stylesheet" href="assets/portal-header.css?v=20261101-recommendations-release">
   <link rel="stylesheet" href="assets/portal-back-to-top.css?v=20261101-1">
+  <link rel="stylesheet" href="assets/portal-page-heading.css?v=20261102-shared-heading">
 </head>
 <body>
   <a class="rec-skip-link" href="#recommendationMain">跳到主要内容</a>
@@ -62,7 +64,14 @@
         <button class="rec-header-action is-message" id="recMessageButton" type="button" aria-label="消息，5 条未读">
           <svg aria-hidden="true"><use href="#rec-icon-bell"></use></svg><span>消息中心</span><em id="recMessageCount">5</em>
         </button>
-        <div class="personal-rec-entry"><button class="personal-account-trigger" id="personalRecTrigger" type="button" aria-label="打开个人中心菜单" aria-controls="personalRecMenu" aria-expanded="false" aria-haspopup="menu"><span class="personal-menu-avatar" aria-hidden="true">q</span><span data-personal-trigger-label>quan…</span><span class="personal-caret" aria-hidden="true">▾</span></button><div class="personal-rec-menu" id="personalRecMenu" role="menu" hidden><a class="personal-account-item" href="personal-center.html?v=20261030-notification-email" role="menuitem"><span class="personal-menu-avatar" aria-hidden="true">q</span><span class="profile-menu-copy"><strong data-personal-account-name>quan.song@aminer.cn</strong><small data-personal-account-email>quan.song@aminer.cn</small><span class="personal-menu-caption">进入个人中心 ›</span></span></a><button class="personal-logout" id="personalRecLogout" type="button" role="menuitem">退出登录</button></div></div>
+        <div class="personal-rec-entry"><button class="personal-account-trigger" id="personalRecTrigger" type="button" aria-label="打开个人中心菜单" aria-controls="personalRecMenu" aria-expanded="false" aria-haspopup="menu"><span class="personal-menu-avatar" aria-hidden="true">q</span><span data-personal-trigger-label>quan…</span><span class="personal-caret" aria-hidden="true">▾</span></button><div class="personal-rec-menu" id="personalRecMenu" role="menu" hidden>
+            <div class="personal-account-summary" role="presentation">
+              <span class="personal-menu-avatar" aria-hidden="true">q</span>
+              <span class="profile-menu-copy"><strong data-personal-account-name>quan.song@aminer.cn</strong><small data-personal-account-email>quan.song@aminer.cn</small></span>
+            </div>
+            <a class="personal-center-entry" href="personal-center.html?v=20261102-personal-back" role="menuitem"><span>进入个人中心</span><svg class="personal-entry-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 18l6-6-6-6"></path></svg></a>
+            <div class="personal-account-actions" role="presentation"><button class="personal-logout" id="personalRecLogout" type="button" role="menuitem">退出登录</button></div>
+          </div></div>
         <button class="rec-mobile-menu" id="recMobileMenu" type="button" aria-label="打开导航" aria-expanded="false" aria-controls="recMainNav">
           <svg aria-hidden="true"><use href="#rec-icon-menu"></use></svg>
         </button>
@@ -73,9 +82,9 @@
   <main class="rec-main" id="recommendationMain">
     <div class="rec-shell">
       <section class="rec-hero" aria-labelledby="recPageTitle">
-        <header class="rec-hero-heading">
-          <div class="rec-page-title-row"><span id="recSearchReturnMount" data-rec-arco="return"></span><h1 id="recPageTitle">科研情报智能推荐</h1></div>
-          <p>解决科研情报痛点，提供深度学术生涯服务</p>
+        <header class="rec-hero-heading portal-page-heading">
+          <div class="rec-page-title-row portal-page-heading-row"><span id="recSearchReturnMount" data-rec-arco="return"></span><h1 class="portal-page-title" id="recPageTitle">科研情报智能推荐</h1></div>
+          <p class="portal-page-description">解决科研情报痛点，提供深度学术生涯服务</p>
         </header>
 
       </section>
