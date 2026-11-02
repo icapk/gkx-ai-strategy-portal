@@ -2,7 +2,7 @@
 (function (global) {
   'use strict';
   const F=global.PORTAL_REMEDIATION_FIXTURES, KEY='gkx-search-recommend-shared-v20261025';
-  const defaults=()=>({version:1,userContextVersion:'context-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),profileControl:null,personalDemoSeed:null,userId:'demo-user',audience:'research',events:[],follows:[],followsVersion:'1',followMutations:{},keywordWatchMigrationCompleted:false,autoFollowSearchKeywords:true,notificationEmail:null,weeklyEmail:{email:null,enabled:false,version:1},comments:[],resourceStates:{},talentContext:{contextType:'PERSON',fields:[],roleDirections:[]}});
+  const defaults=()=>({version:1,userContextVersion:'context-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),profileControl:null,personalDemoSeed:null,userId:'demo-user',audience:'research',events:[],follows:[],followsVersion:'1',followMutations:{},keywordWatchMigrationCompleted:false,independentSubscriptionsVersion:0,followUpdateHistory:{},autoFollowSearchKeywords:true,notificationEmail:null,weeklyEmail:{email:null,enabled:false,version:1},comments:[],resourceStates:{},talentContext:{contextType:'PERSON',fields:[],roleDirections:[]}});
   let state=defaults(),persistent=true,catalog=[],listeners=new Set(),exactEngine=null;
   try {state={...state,...JSON.parse(localStorage.getItem(KEY)||'{}')}} catch(e){persistent=false}
   const clone=x=>JSON.parse(JSON.stringify(x)),norm=x=>String(x||'').normalize('NFKC').toLocaleLowerCase('zh-CN').trim().replace(/\s+/g,' '),uid=p=>p+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8), now=()=>new Date().toISOString();
@@ -26,31 +26,192 @@
     if(!Array.isArray(words)){if(strict)throw error('INVALID_DOMAIN_HOT_WORDS','领域热词须为词汇列表');return []}
     const result=[],seen=new Set();
     for(const raw of words){
-      if(typeof raw!=='string'||!norm(raw)||Array.from(raw.trim()).length>200){if(strict)throw error('INVALID_DOMAIN_HOT_WORDS','每个领域热词应为1至200个字符');continue}
+      if(typeof raw!=='string'||!norm(raw)||Array.from(raw.trim()).length>200){if(strict)throw error('INVALID_DOMAIN_HOT_WORDS','每个关注词应为1至200个字符');continue}
       const key=norm(raw);if(!seen.has(key)){seen.add(key);result.push(raw.trim())}
     }
     return result;
   }
-  // Only explicit source domain relations qualify; topic/tag fallbacks are not classifications.
+  const keywordOrigins=['SEARCH','MANUAL','LEGACY_DOMAIN'];
+  const originList=(origins,fallback=['SEARCH'])=>[...new Set((Array.isArray(origins)?origins:fallback).filter(x=>keywordOrigins.includes(x)))];
+  const resourceTypeNames={PAPER:'论文',PATENT:'专利',REPORT:'报告',SCHOLAR:'人才',NEWS:'资讯',CONFERENCE:'会议',COURSE:'课程',ACTIVITY:'活动'};
+  const followKindNames={KEYWORD:'词汇',DOMAIN:'领域',JOURNAL:'期刊'};
+  const parsedTime=value=>typeof value==='string'&&Number.isFinite(Date.parse(value))?Date.parse(value):null;
+  // Domain subscriptions use only explicit source classification, never the subscribed words.
   function resourceFollowDomains(item){
     const id=item.portalPaperId||item.portalResourceId||item.id;
     const declared=Array.isArray(item.sourceDomainTags)?item.sourceDomainTags:(Array.isArray(item.domainTags)?item.domainTags:[]);
     return [...new Set([...(F.resourceDomains?.[id]||[]),...declared])].filter(name=>F.availableTargets.some(t=>t.kind==='DOMAIN'&&t.targetId===name));
   }
-  function matchesDomainFollow(item,follow){
-    const words=normalizeDomainHotWords(follow.hotWords||[],false);
-    if(!words.length||!resourceFollowDomains(item).includes(follow.targetId))return false;
+  function matchesDomainFollow(item,follow){return resourceFollowDomains(item).includes(follow.targetId)}
+  function matchesKeywordFollow(item,follow){
     const text=norm([item.title,item.summary,item.abstract,...(item.tags||[]),...(item.topics||[]),...(item.domainTags||[])].filter(Boolean).join(' '));
-    return words.some(word=>text.includes(norm(word)));
+    return !!norm(follow.targetId)&&text.includes(norm(follow.targetId));
   }
-  function normalizeKeywordFollows(items){const merged=[],keys=new Map();for(const input of items||[]){const retiredDomain=input.kind==='DOMAIN'&&!F.availableTargets.some(x=>x.kind==='DOMAIN'&&x.targetId===input.targetId);const value={...input,...(input.kind==='DOMAIN'?{hotWords:normalizeDomainHotWords(input.hotWords||[],false)}:{}),label:input.label||input.targetId,dismissed:!!input.dismissed,sourceQueryId:input.sourceQueryId??null,version:String(input.version||'1'),frequency:input.kind==='KEYWORD'?(['realtime','daily','weekly','page'].includes(input.frequency)?input.frequency:'daily'):null,readUpdateIds:[...new Set(input.readUpdateIds||[])]};if(value.kind!=='KEYWORD'){merged.push({...value,...(retiredDomain?{following:false,catalogStatus:'RETIRED',previousFollowing:value.previousFollowing??!!value.following}:{}),normalizedKey:null});continue}const key=norm(value.targetId);if(!key)continue;const existing=keys.get(key);if(!existing){const follow={...value,normalizedKey:key};keys.set(key,follow);merged.push(follow)}else{const latest=String(value.updatedAt||'')>String(existing.updatedAt||'')?value:existing;existing.following=!!latest.following;existing.frequency=latest.frequency;existing.readUpdateIds=[...new Set([...existing.readUpdateIds,...value.readUpdateIds])];existing.everFollowed=!!(existing.everFollowed||value.everFollowed);existing.createdAt=[existing.createdAt,value.createdAt].filter(Boolean).sort()[0];existing.updatedAt=[existing.updatedAt,value.updatedAt].filter(Boolean).sort().pop();existing.version=String(Math.max(Number(existing.version),Number(value.version)))}}return merged}
+  function matchesJournalFollow(item,follow){
+    return [item.venue,item.journalId,item.journalName,typeof item.journal==='string'?item.journal:null,...(item.journalIds||[]),...(item.sourceJournalIds||[])].includes(follow.targetId);
+  }
+  function matchesFollow(item,follow){return follow.kind==='DOMAIN'?matchesDomainFollow(item,follow):follow.kind==='KEYWORD'?matchesKeywordFollow(item,follow):follow.kind==='JOURNAL'&&matchesJournalFollow(item,follow)}
+  function normalizeKeywordFollows(items){
+    const merged=[],keys=new Map();
+    for(const input of items||[]){
+      const retiredDomain=input.kind==='DOMAIN'&&!F.availableTargets.some(x=>x.kind==='DOMAIN'&&x.targetId===input.targetId);
+      const value={...input,label:input.label||input.targetId,dismissed:!!input.dismissed,sourceQueryId:input.sourceQueryId??null,version:String(input.version||'1'),frequency:input.kind==='KEYWORD'?(['realtime','daily','weekly','page'].includes(input.frequency)?input.frequency:'daily'):null,readUpdateIds:[...new Set(input.readUpdateIds||[])]};
+      if(value.kind!=='KEYWORD'){merged.push({...value,...(retiredDomain?{following:false,catalogStatus:'RETIRED',previousFollowing:value.previousFollowing??!!value.following}:{}),normalizedKey:null});continue}
+      const key=norm(value.targetId);if(!key)continue;
+      value.origins=originList(value.origins);const existing=keys.get(key);
+      if(!existing){const follow={...value,normalizedKey:key};keys.set(key,follow);merged.push(follow)}
+      else{
+        const latest=String(value.updatedAt||'')>String(existing.updatedAt||'')?value:existing;
+        existing.following=!!latest.following;existing.frequency=latest.frequency;
+        existing.origins=originList([...(existing.origins||[]),...(value.origins||[])]);
+        existing.readUpdateIds=[...new Set([...existing.readUpdateIds,...value.readUpdateIds])];
+        existing.everFollowed=!!(existing.everFollowed||value.everFollowed);
+        existing.createdAt=[existing.createdAt,value.createdAt].filter(Boolean).sort()[0]||null;
+        existing.updatedAt=[existing.updatedAt,value.updatedAt].filter(Boolean).sort().pop()||null;
+        existing.version=String(Math.max(Number(existing.version),Number(value.version)));
+      }
+    }
+    return merged;
+  }
+  // Each old domain record is split once. Retaining its source words prevents accidental loss,
+  // while the per-record marker prevents a later cancelled keyword from being recreated.
+  function normalizeIndependentSubscriptions(candidate){
+    let changed=Number(candidate.independentSubscriptionsVersion||0)<1;
+    candidate.follows=normalizeKeywordFollows(candidate.follows);
+    for(const domain of candidate.follows.filter(f=>f.kind==='DOMAIN'&&!f.independentSubscriptionMigrated)){
+      const words=normalizeDomainHotWords(domain.hotWords||[],false);
+      domain.legacyHotWords=normalizeDomainHotWords([...(domain.legacyHotWords||[]),...words],false);
+      if(domain.following){for(const word of words){
+        let follow=candidate.follows.find(f=>f.kind==='KEYWORD'&&norm(f.targetId)===norm(word));
+        if(follow){follow.origins=originList([...(follow.origins||[]),'LEGACY_DOMAIN']);follow.following=true;follow.everFollowed=true;follow.legacyDomainIds=[...new Set([...(follow.legacyDomainIds||[]),domain.targetId])]}
+        else candidate.follows.push({followId:uid('follow'),kind:'KEYWORD',targetId:word,label:word,origins:['LEGACY_DOMAIN'],legacyDomainIds:[domain.targetId],sourceQueryId:null,normalizedKey:norm(word),following:true,everFollowed:true,dismissed:false,createdAt:domain.createdAt||null,updatedAt:domain.updatedAt||domain.createdAt||null,version:'1',frequency:'daily',readUpdateIds:[]});
+      }}
+      domain.hotWords=[];domain.independentSubscriptionMigrated=true;changed=true;
+    }
+    candidate.independentSubscriptionsVersion=1;
+    if(!candidate.autoFollowSearchKeywords){candidate.autoFollowSearchKeywords=true;changed=true}
+    candidate.followUpdateHistory=candidate.followUpdateHistory||{};
+    return changed;
+  }
+  function migrateIndependentSubscriptions(){
+    const candidate=clone(state);if(!normalizeIndependentSubscriptions(candidate))return true;
+    candidate.version=state.version+1;candidate.followsVersion=String(Number(candidate.followsVersion||'1')+1);
+    try{localStorage.setItem(KEY,JSON.stringify(candidate))}catch(_){persistent=false;return false}
+    state=candidate;persistent=true;return true;
+  }
   function followsVersion(){return String(state.followsVersion||'1')}
-  function updatesForFollow(f){if(!['KEYWORD','DOMAIN','JOURNAL'].includes(f.kind))return[];const read=new Set(f.readUpdateIds||[]);return catalog.filter(x=>['论文','专利','报告','人才','资讯','会议','课程','活动'].includes(x.type)&&Date.parse(x.updatedAt||x.publishedAt||x.date)>=Date.parse(f.createdAt)&&(f.kind==='DOMAIN'?matchesDomainFollow(x,f):(norm([x.title,...(x.domainTags||[])].join(' ')).includes(norm(f.targetId))||x.venue===f.targetId))).map(x=>{const resourceId=x.portalResourceId||x.portalPaperId||x.id,updatedAt=x.updatedAt||x.publishedAt||x.date,resourceVersion=String(x.resourceKey?.version??x.version??updatedAt),updateId=['follow-update',f.followId,resourceId,resourceVersion].map(encodeURIComponent).join(':');return{updateId,followId:f.followId,resourceId,type:x.type,resourceKey:{portalResourceId:resourceId,entityType:({'论文':'PAPER','专利':'PATENT','报告':'REPORT','人才':'SCHOLAR','资讯':'NEWS','会议':'CONFERENCE','课程':'COURSE','活动':'ACTIVITY'})[x.type],provider:'LOCAL_MOCK',sourceId:resourceId,version:resourceVersion},title:x.title,summary:x.summary||'',source:x.source||'本地演示资源',publishedAt:x.publishedAt||x.date,updatedAt,detailUrl:x.detailUrl||null,reason:'匹配当前关注：'+f.targetId,importanceEvidence:{available:false,source:'LOCAL_MOCK',description:'无重大突破或质量指标，不声明重大推送已执行'},read:read.has(updateId)}})}
-  function updatesSnapshot(options={}){const items=state.follows.filter(f=>f.following&&(!options.kind||f.kind===options.kind)&&(!options.followId||f.followId===options.followId)).flatMap(updatesForFollow).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt))||a.updateId.localeCompare(b.updateId));return{items,unreadCount:items.filter(x=>!x.read).length,cursor:null,version:followsVersion(),userContextVersion:userContextVersion(),serverTime:now()}}
-  function commitFollowState(candidate){try{localStorage.setItem(KEY,JSON.stringify(candidate))}catch(_){persistent=false;persistenceNotice();throw error('STORAGE_UNAVAILABLE','关注设置未保存，已保留更新前的稳定状态')};state=candidate;Promise.resolve().then(()=>listeners.forEach(fn=>fn(snapshot())))}
-  function saveFollowsSnapshot(request){requireUser();if(String(request.userContextVersion)!==userContextVersion())throw error('STALE_USER_CONTEXT','身份上下文已变化，请重新操作');const mutationId=String(request.clientMutationId||'');if(!mutationId)throw error('MUTATION_ID_REQUIRED','关注更新缺少幂等标识');if(typeof request.version!=='string'||typeof request.userContextVersion!=='string'||typeof request.clientMutationId!=='string')throw error('INVALID_MUTATION','关注版本、身份版本和幂等标识须为字符串');const fingerprint=commandFingerprint(request),prior=state.followMutations?.[mutationId];if(prior){if(prior.fingerprint!==fingerprint)throw error('IDEMPOTENCY_CONFLICT','同一操作标识不能用于不同关注更新');return clone(prior.response)}if(String(request.version)!==followsVersion())throw error('STALE_VERSION','关注状态已更新，请刷新后重试');const candidate=clone(state),changes=request.changes||[],changed=[];if(!changes.length&&request.autoFollowSearchKeywords===undefined&&!request.talentContext)throw error('INVALID_MUTATION','没有要保存的关注变更');if(!Array.isArray(changes)||request.autoFollowSearchKeywords!==undefined&&typeof request.autoFollowSearchKeywords!=='boolean')throw error('INVALID_MUTATION','关注更新字段类型无效');candidate.follows=normalizeKeywordFollows(candidate.follows);for(const patch of changes){if(!['KEYWORD','DOMAIN','JOURNAL','AUTHOR'].includes(patch.kind)||typeof patch.targetId!=='string'||!patch.targetId.trim()||['following','dismissed'].some(key=>patch[key]!==undefined&&typeof patch[key]!=='boolean'))throw error('INVALID_MUTATION','关注对象或状态字段无效');if(!['KEYWORD','AUTHOR'].includes(patch.kind)&&!F.availableTargets.some(x=>x.kind===patch.kind&&x.targetId===patch.targetId))throw error('INVALID_TARGET','请选择已接入的领域或期刊');if(patch.kind==='KEYWORD'&&(!norm(patch.targetId)||Array.from(String(patch.targetId).trim()).length>200))throw error('INVALID_TARGET','关注词应为1至200个字符');if(patch.hotWords!==undefined&&patch.kind!=='DOMAIN')throw error('INVALID_DOMAIN_HOT_WORDS','仅领域关注可保存领域热词');const hotWords=patch.hotWords===undefined?undefined:normalizeDomainHotWords(patch.hotWords);let follow=candidate.follows.find(x=>x.kind===patch.kind&&(patch.kind==='KEYWORD'?norm(x.targetId)===norm(patch.targetId):x.targetId===patch.targetId));if(patch.followId&&(!follow||follow.followId!==patch.followId))throw error('FOLLOW_NOT_OWNED','关注对象不属于当前主体或词键不一致');const wasFollowing=!!follow?.following;if(!follow){follow={followId:uid('follow'),kind:patch.kind,...(patch.kind==='DOMAIN'?{hotWords:[]}:{}),targetId:patch.targetId,label:patch.targetId,sourceQueryId:null,normalizedKey:patch.kind==='KEYWORD'?norm(patch.targetId):null,following:false,everFollowed:false,dismissed:false,createdAt:now(),updatedAt:now(),version:'0',frequency:patch.kind==='KEYWORD'?'daily':null,readUpdateIds:[]};candidate.follows.push(follow)}if(patch.frequency!==undefined&&(patch.kind!=='KEYWORD'||!['realtime','daily','weekly','page'].includes(patch.frequency)))throw error('INVALID_FREQUENCY','请选择现有四档词汇推送频率');if(patch.readUpdateIds!==undefined){if(patch.kind!=='KEYWORD'||!Array.isArray(patch.readUpdateIds)||patch.readUpdateIds.some(id=>typeof id!=='string'))throw error('INVALID_READ_IDS','已读标识格式无效');const allowed=new Set(updatesForFollow(follow).map(x=>x.updateId));if(patch.readUpdateIds.some(id=>!follow.readUpdateIds.includes(id)&&!allowed.has(id)))throw error('UPDATE_NOT_OWNED','已读动态不属于当前关注对象或版本');follow.readUpdateIds=[...new Set([...follow.readUpdateIds,...patch.readUpdateIds])]}if(hotWords!==undefined)follow.hotWords=hotWords;const nextFollowing=patch.following===undefined?follow.following:patch.following;if(patch.kind==='DOMAIN'&&nextFollowing&&(!wasFollowing||hotWords!==undefined)&&!follow.hotWords.length)throw error('DOMAIN_HOT_WORD_REQUIRED','请至少输入一个领域热词后再关注');for(const key of ['following','dismissed','sourceQueryId'])if(patch[key]!==undefined)follow[key]=patch[key];if(patch.frequency!==undefined)follow.frequency=patch.frequency;follow.everFollowed=!!(follow.everFollowed||patch.everFollowed||follow.following);follow.updatedAt=now();follow.version=String(Number(follow.version)+1);changed.push(follow);if(patch.kind==='KEYWORD'&&(patch.frequency!==undefined||patch.readUpdateIds!==undefined))candidate.keywordWatchMigrationCompleted=true}if(request.autoFollowSearchKeywords!==undefined)candidate.autoFollowSearchKeywords=!!request.autoFollowSearchKeywords;if(request.talentContext)candidate.talentContext={...candidate.talentContext,...request.talentContext};candidate.followsVersion=String(Number(followsVersion())+1);candidate.version=state.version+1;const distinctChanged=[...new Map(changed.map(f=>[f.followId,f])).values()],response={changedFollow:distinctChanged.length===1?clone(distinctChanged[0]):null,changedFollows:clone(distinctChanged),version:candidate.followsVersion,userContextVersion:userContextVersion(),talentContext:clone(candidate.talentContext),autoFollowSearchKeywords:candidate.autoFollowSearchKeywords};candidate.followMutations={...candidate.followMutations,[mutationId]:{fingerprint,response}};commitFollowState(candidate);return clone(response)}
+  function resourceUpdate(item){
+    const type=resourceTypeNames[item.type]||item.type;
+    if(!Object.values(resourceTypeNames).includes(type))return null;
+    const resourceId=item.portalPaperId||item.portalResourceId||item.id;if(!resourceId)return null;
+    const updatedAt=item.updatedAt||item.publishedAt||item.date||null;
+    const resourceVersion=String(item.resourceKey?.version??item.version??updatedAt??'unversioned');
+    const entityType=Object.keys(resourceTypeNames).find(key=>resourceTypeNames[key]===type);
+    const updateId=['subscription-update',entityType,resourceId,resourceVersion].map(encodeURIComponent).join(':');
+    return {updateId,resourceId,type,resourceKey:{portalResourceId:resourceId,entityType,provider:'LOCAL_MOCK',sourceId:resourceId,version:resourceVersion},title:item.title||item.name||'资源标题暂无',summary:item.summary||item.abstract||'',source:item.source||'本地演示资源',publishedAt:item.publishedAt||item.date||null,updatedAt,detailUrl:item.detailUrl||null,resourceSnapshot:clone(item),importanceEvidence:{available:false,source:'LOCAL_MOCK',description:'未取得真实重点标记，不声明重点推送已执行'}};
+  }
+  function followSource(f){return {followId:f.followId,kind:f.kind,targetId:f.targetId,label:f.label||f.targetId,...(f.kind==='KEYWORD'?{origins:originList(f.origins)}:{}),following:!!f.following}}
+  function legacyUpdateId(f,row){return ['follow-update',f.followId,row.resourceId,row.resourceKey.version].map(encodeURIComponent).join(':')}
+  function isNewForFollow(f,row){const start=parsedTime(f.createdAt),at=parsedTime(row.updatedAt);return start!==null&&at!==null&&at>start&&at<=Date.now()}
+  function updatesForFollow(f){
+    if(!['KEYWORD','DOMAIN','JOURNAL'].includes(f.kind))return [];
+    return catalog.filter(item=>matchesFollow(item,f)).map(item=>{
+      const row=resourceUpdate(item);if(!row)return null;
+      const source=followSource(f),legacyId=legacyUpdateId(f,row),legacyRead=(f.readUpdateIds||[]).some(id=>id===row.updateId||id===legacyId);
+      return {...row,followId:f.followId,followIds:[f.followId],sources:[source],legacyUpdateId:legacyId,legacyRead,reason:followKindNames[f.kind]+'：'+source.label,read:!isNewForFollow(f,row)||legacyRead};
+    }).filter(Boolean);
+  }
+  function collectUpdateHistory(candidate){
+    const history=candidate.followUpdateHistory||{},existingIds=new Set(Object.keys(history));
+    for(const follow of candidate.follows.filter(f=>f.following&&['KEYWORD','DOMAIN','JOURNAL'].includes(f.kind))){
+      for(const update of updatesForFollow(follow)){
+        const previous=history[update.updateId];
+        if(!previous){history[update.updateId]={...update,legacyReadSeen:update.legacyRead,read:!!update.read};continue}
+        const sources=new Map((previous.sources||[]).map(source=>[source.followId,source]));
+        for(const source of update.sources)sources.set(source.followId,source);
+        const {legacyUpdateId:ignored,...values}=update;
+        history[update.updateId]={...previous,...values,read:existingIds.has(update.updateId)?previous.read||update.legacyRead:previous.legacyReadSeen||update.legacyRead||previous.read&&update.read,legacyReadSeen:previous.legacyReadSeen||update.legacyRead,sources:[...sources.values()],followIds:[...sources.keys()]};
+      }
+    }
+    for(const row of Object.values(history)){
+      row.sources=(row.sources||[]).map(source=>{
+        const current=candidate.follows.find(f=>f.followId===source.followId);
+        return {...source,...(current?.kind==='KEYWORD'?{origins:originList(current.origins)}:{}),following:!!current?.following};
+      });
+      const active=row.sources.filter(source=>source.following),sources=active.length?active:row.sources;
+      row.followIds=row.sources.map(source=>source.followId);row.followId=(active[0]||row.sources[0])?.followId||null;
+      row.reason=(active.length?'':'历史关注：')+sources.map(source=>followKindNames[source.kind]+'：'+source.label).join('；');
+      delete row.legacyUpdateId;delete row.legacyRead;delete row.legacyReadSeen;
+    }
+    candidate.followUpdateHistory=history;
+  }
+  function updatesSnapshot(options={}){
+    if(!state.userId)return {items:[],unreadCount:0,cursor:null,version:followsVersion(),userContextVersion:userContextVersion(),serverTime:now()};
+    migrateIndependentSubscriptions();
+    const candidate=clone(state);collectUpdateHistory(candidate);
+    if(JSON.stringify(candidate.followUpdateHistory)!==JSON.stringify(state.followUpdateHistory||{})){
+      candidate.version=state.version+1;
+      try{localStorage.setItem(KEY,JSON.stringify(candidate));state=candidate;persistent=true}catch(_){persistent=false}
+    }
+    const history=state.followUpdateHistory||{};
+    const items=Object.values(history).filter(row=>(!options.kind||row.sources?.some(source=>source.kind===options.kind))&&(!options.followId||row.followIds?.includes(options.followId))).sort((a,b)=>(parsedTime(b.updatedAt)||0)-(parsedTime(a.updatedAt)||0)||a.updateId.localeCompare(b.updateId));
+    return {items:clone(items),unreadCount:items.filter(x=>!x.read).length,cursor:null,version:followsVersion(),userContextVersion:userContextVersion(),serverTime:now(),persistent};
+  }
+  function markUpdateReadSnapshot(request){
+    requireUser();if(String(request.userContextVersion)!==userContextVersion())throw error('STALE_USER_CONTEXT','身份上下文已变化，请重新操作');
+    updatesSnapshot();const candidate=clone(state),row=candidate.followUpdateHistory?.[request.updateId];
+    if(!row)throw error('UPDATE_NOT_OWNED','关注动态不存在或不属于当前账号');
+    if(row.read)return clone(row);
+    row.read=true;candidate.version=state.version+1;commitFollowState(candidate);return clone(row);
+  }
+  function commitFollowState(candidate){try{localStorage.setItem(KEY,JSON.stringify(candidate))}catch(_){persistent=false;persistenceNotice();throw error('STORAGE_UNAVAILABLE','关注设置未保存，已保留更新前的稳定状态')};state=candidate;persistent=true;Promise.resolve().then(()=>listeners.forEach(fn=>fn(snapshot())))}
+  function saveFollowsSnapshot(request){
+    requireUser();if(!migrateIndependentSubscriptions())throw error('STORAGE_UNAVAILABLE','旧关注记录尚未完成迁移，请允许浏览器存储后重试');
+    if(String(request.userContextVersion)!==userContextVersion())throw error('STALE_USER_CONTEXT','身份上下文已变化，请重新操作');
+    const mutationId=String(request.clientMutationId||'');if(!mutationId)throw error('MUTATION_ID_REQUIRED','关注更新缺少幂等标识');
+    if(typeof request.version!=='string'||typeof request.userContextVersion!=='string'||typeof request.clientMutationId!=='string')throw error('INVALID_MUTATION','关注版本、身份版本和幂等标识须为字符串');
+    const fingerprint=commandFingerprint(request),prior=state.followMutations?.[mutationId];if(prior){if(prior.fingerprint!==fingerprint)throw error('IDEMPOTENCY_CONFLICT','同一操作标识不能用于不同关注更新');return clone(prior.response)}
+    if(String(request.version)!==followsVersion())throw error('STALE_VERSION','关注状态已更新，请刷新后重试');
+    const candidate=clone(state),changes=request.changes||[],changed=[];
+    if(!changes.length&&request.autoFollowSearchKeywords===undefined&&!request.talentContext)throw error('INVALID_MUTATION','没有要保存的关注变更');
+    if(!Array.isArray(changes)||request.autoFollowSearchKeywords!==undefined&&typeof request.autoFollowSearchKeywords!=='boolean')throw error('INVALID_MUTATION','关注更新字段类型无效');
+    candidate.follows=normalizeKeywordFollows(candidate.follows);
+    for(const patch of changes){
+      if(!['KEYWORD','DOMAIN','JOURNAL','AUTHOR'].includes(patch.kind)||typeof patch.targetId!=='string'||!patch.targetId.trim()||['following','dismissed'].some(key=>patch[key]!==undefined&&typeof patch[key]!=='boolean'))throw error('INVALID_MUTATION','关注对象或状态字段无效');
+      if(!['KEYWORD','AUTHOR'].includes(patch.kind)&&!F.availableTargets.some(x=>x.kind===patch.kind&&x.targetId===patch.targetId))throw error('INVALID_TARGET','请选择已接入的领域或期刊');
+      if(patch.kind==='KEYWORD'&&(!norm(patch.targetId)||Array.from(String(patch.targetId).trim()).length>200))throw error('INVALID_TARGET','关注词应为1至200个字符');
+      if(patch.origins!==undefined&&(patch.kind!=='KEYWORD'||!Array.isArray(patch.origins)||!patch.origins.length||patch.origins.some(origin=>!keywordOrigins.includes(origin))))throw error('INVALID_ORIGIN','词汇关注来源无效');
+      if(patch.hotWords!==undefined&&patch.kind!=='DOMAIN')throw error('INVALID_DOMAIN_HOT_WORDS','旧领域词格式无效');
+      let follow=candidate.follows.find(x=>x.kind===patch.kind&&(patch.kind==='KEYWORD'?norm(x.targetId)===norm(patch.targetId):x.targetId===patch.targetId));
+      if(patch.followId&&(!follow||follow.followId!==patch.followId))throw error('FOLLOW_NOT_OWNED','关注对象不属于当前主体或词键不一致');
+      if(!follow){follow={followId:uid('follow'),kind:patch.kind,...(patch.kind==='DOMAIN'?{hotWords:[],independentSubscriptionMigrated:true}:{}),...(patch.kind==='KEYWORD'?{origins:originList(patch.origins,['MANUAL'])}:{}),targetId:patch.targetId.trim(),label:patch.targetId.trim(),sourceQueryId:null,normalizedKey:patch.kind==='KEYWORD'?norm(patch.targetId):null,following:false,everFollowed:false,dismissed:false,createdAt:now(),updatedAt:now(),version:'0',frequency:patch.kind==='KEYWORD'?'daily':null,readUpdateIds:[]};candidate.follows.push(follow)}
+      if(patch.frequency!==undefined&&(patch.kind!=='KEYWORD'||!['realtime','daily','weekly','page'].includes(patch.frequency)))throw error('INVALID_FREQUENCY','旧词汇推送频率无效');
+      if(patch.readUpdateIds!==undefined){
+        if(patch.kind!=='KEYWORD'||!Array.isArray(patch.readUpdateIds)||patch.readUpdateIds.some(id=>typeof id!=='string'))throw error('INVALID_READ_IDS','已读标识格式无效');
+        const allowed=new Set(updatesForFollow(follow).flatMap(x=>[x.updateId,x.legacyUpdateId]));
+        if(patch.readUpdateIds.some(id=>!follow.readUpdateIds.includes(id)&&!allowed.has(id)))throw error('UPDATE_NOT_OWNED','已读动态不属于当前关注对象或版本');
+        follow.readUpdateIds=[...new Set([...follow.readUpdateIds,...patch.readUpdateIds])];
+        for(const row of Object.values(candidate.followUpdateHistory||{}))if(row.followIds?.includes(follow.followId)&&patch.readUpdateIds.some(id=>id===row.updateId||id===legacyUpdateId(follow,row)))row.read=true;
+      }
+      // Previously cached clients may still send a domain's words; retain them as provenance
+      // without making them a requirement or changing the domain's matching scope.
+      if(patch.hotWords!==undefined)follow.legacyHotWords=normalizeDomainHotWords([...(follow.legacyHotWords||[]),...normalizeDomainHotWords(patch.hotWords)],false);
+      if(patch.kind==='KEYWORD'&&patch.origins)follow.origins=originList([...(follow.origins||[]),...patch.origins]);
+      for(const key of ['following','dismissed','sourceQueryId'])if(patch[key]!==undefined)follow[key]=patch[key];
+      if(patch.frequency!==undefined)follow.frequency=patch.frequency;
+      follow.everFollowed=!!(follow.everFollowed||patch.everFollowed||follow.following);follow.updatedAt=now();follow.version=String(Number(follow.version)+1);changed.push(follow);
+      if(patch.kind==='KEYWORD')candidate.keywordWatchMigrationCompleted=true;
+    }
+    candidate.autoFollowSearchKeywords=true;
+    if(request.talentContext)candidate.talentContext={...candidate.talentContext,...request.talentContext};
+    candidate.followsVersion=String(Number(followsVersion())+1);candidate.version=state.version+1;
+    collectUpdateHistory(candidate);
+    const distinctChanged=[...new Map(changed.map(f=>[f.followId,f])).values()],response={changedFollow:distinctChanged.length===1?clone(distinctChanged[0]):null,changedFollows:clone(distinctChanged),version:candidate.followsVersion,userContextVersion:userContextVersion(),talentContext:clone(candidate.talentContext),autoFollowSearchKeywords:true};
+    candidate.followMutations={...candidate.followMutations,[mutationId]:{fingerprint,response}};commitFollowState(candidate);return clone(response);
+  }
   function migrateKeywordWatchesSnapshot(legacy){if(state.userId!=='demo-user'||state.keywordWatchMigrationCompleted)return;const candidate=clone(state);candidate.follows=normalizeKeywordFollows(candidate.follows);for(const watch of legacy?.userId===state.userId?(legacy.watches||[]):[]){const key=norm(watch.keyword);if(!key)continue;let f=candidate.follows.find(x=>x.kind==='KEYWORD'&&norm(x.targetId)===key);if(!f){f={followId:uid('follow'),kind:'KEYWORD',targetId:watch.keyword,label:watch.keyword,dismissed:false,sourceQueryId:null,normalizedKey:key,following:true,everFollowed:true,createdAt:watch.createdAt||now(),updatedAt:watch.updatedAt||now(),version:'1',frequency:'daily',readUpdateIds:[]};candidate.follows.push(f)}if(f.frequency==='daily'&&['realtime','daily','weekly','page'].includes(watch.frequency))f.frequency=watch.frequency;const readable=updatesForFollow(f);for(const update of watch.updates||[]){if(!update.read)continue;for(const row of readable)if(row.updateId===update.id||((row.resourceId===update.resourceId||row.resourceId===update.id)&&row.updatedAt===update.createdAt))f.readUpdateIds.push(row.updateId)}f.readUpdateIds=[...new Set(f.readUpdateIds)]}candidate.keywordWatchMigrationCompleted=true;candidate.followsVersion=String(Number(followsVersion())+1);candidate.version=state.version+1;commitFollowState(candidate)}
   state.follows=normalizeKeywordFollows(state.follows);
+  migrateIndependentSubscriptions();
   function userContextVersion(){return String(state.userContextVersion)}
   function createSearchQueryState(initial=''){let submitted=String(initial).trim(),revision=0,suppressed=0;return{commit(value){submitted=String(value||'').trim();revision++;return submitted},read(){return suppressed?'':submitted},revision(){return revision},withSuppressedBase(read){suppressed++;try{return read()}finally{suppressed--}}}}
   function sameSearchContext(expected,response){return !!expected&&!!response&&['queryId','conditionVersion','userContextVersion'].every(key=>expected[key]!=null&&response[key]!=null&&String(expected[key])===String(response[key]))}
@@ -59,7 +220,7 @@
   if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',persistenceNotice);
   function save(){state.version++;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){persistent=false}persistenceNotice();listeners.forEach(f=>f(snapshot()))}
   function snapshot(){return clone({...state,persistent,executionKind:'LOCAL_MOCK',serverTime:now()})}
-  addEventListener('storage',e=>{if(e.key===KEY&&e.newValue){try{state={...defaults(),...JSON.parse(e.newValue)};state.follows=normalizeKeywordFollows(state.follows);migrateNotificationEmail();listeners.forEach(f=>f(snapshot()))}catch(_){}}});
+  addEventListener('storage',e=>{if(e.key===KEY&&e.newValue){try{state={...defaults(),...JSON.parse(e.newValue)};state.follows=normalizeKeywordFollows(state.follows);migrateNotificationEmail();migrateIndependentSubscriptions();listeners.forEach(f=>f(snapshot()))}catch(_){}}});
   function registerResources(items){items.forEach(x=>{if(x.type==='项目')return;const id=x.portalPaperId||x.portalResourceId||x.id||'resource-'+norm(x.title),index=catalog.findIndex(y=>y.id===id),incoming={...x,id,sourceDomainTags:Array.isArray(x.sourceDomainTags)?x.sourceDomainTags:(Array.isArray(x.domainTags)?x.domainTags:[]),domainTags:x.domainTags||x.tags||x.topics||x.themes||[]};if(index<0)catalog.push(incoming);else catalog[index]={...catalog[index],...incoming,sourceDomainTags:[...new Set([...(catalog[index].sourceDomainTags||[]),...incoming.sourceDomainTags])],domainTags:[...new Set([...(catalog[index].domainTags||[]),...incoming.domainTags])]}})}
   registerResources(F.searchResources);registerResources(F.recommendationSeeds.PAPER_ITEMS);
   function documentFor(id){return F.documents.find(x=>x.documentId===id)||null}
@@ -115,7 +276,7 @@
     if(type==='REPORT'){const at=request.serverTime||now(),scores=reportSnapshotScores(items,at);if(scene==='exclusive'){const preference=({GOVERNMENT:'government',RESEARCH_INSTITUTION:'research',INNOVATION_ENTITY:'innovation'})[request.portalContext?.audiencePreference];items=items.filter(x=>x.audiences?.includes(state.audience)&&(!preference||x.audiences.includes(preference)));if(p.hasEvidence)items=items.filter(x=>interest(x,p)>0);items.sort(dateSort)}else if(scene==='hot')items.sort((a,b)=>scores.hot(b)-scores.hot(a)||dateSort(a,b));else if(reportRule==='COMPOSITE')items.sort((a,b)=>scores.composite(b)-scores.composite(a)||dateSort(a,b));else items.sort(dateSort);return{items,profileVersion:p.profileVersion,serverTime:at,executionKind:'LOCAL_MOCK'}}
     if(type==='HOT_WORD')return{items:hotWords(),profileVersion:p.profileVersion,serverTime:now()};
     if(['NEWS','PAPER','REPORT','SCHOLAR'].includes(type)){
-      if(scene==='following'){items=items.filter(x=>type==='PAPER'?(x.authorIds||[]).some(id=>state.follows.some(f=>f.kind==='AUTHOR'&&f.targetId===id&&f.following)):state.follows.some(f=>f.following&&(f.kind==='DOMAIN'?matchesDomainFollow(x,f):f.kind==='JOURNAL'&&([...(x.tags||[]),...(x.topics||[]),...(x.domainTags||[]),...(x.topic?[x.topic]:[]),...(F.resourceDomains?.[x.id]||[])].includes(f.targetId)||x.venue===f.targetId))))}
+      if(scene==='following'){items=items.filter(x=>type==='PAPER'?(x.authorIds||[]).some(id=>state.follows.some(f=>f.kind==='AUTHOR'&&f.targetId===id&&f.following)):state.follows.some(f=>f.following&&(type==='NEWS'?f.kind==='DOMAIN'&&matchesDomainFollow(x,f):matchesFollow(x,f))))}
       else if(scene==='hot'){
         if(type==='PAPER'){const score=x=>(x.views||0)*.4+(x.saves||0)*.35+(x.citations||0)*.25;const sorted=items.slice().sort((a,b)=>score(b)-score(a));items=sorted.slice(0,Math.max(1,Math.ceil(items.length*.6)))}
         else if(type==='NEWS'){const top=hotWords().slice(0,3).map(x=>x.topic);items=items.filter(x=>[...(x.topics||[]),...(x.tags||[]),...(x.topic?[x.topic]:[])].some(t=>top.includes(t)))}
@@ -148,6 +309,7 @@
       if(!prior){candidate.follows.push(clone(input));followsAdded++;}
     }
     candidate.follows=normalizeKeywordFollows(candidate.follows);
+    normalizeIndependentSubscriptions(candidate);
     if(followsAdded)candidate.followsVersion=String(Number(candidate.followsVersion||'1')+1);
     const commentIds=new Set(candidate.comments.map(c=>c.commentId));
     for(const input of payload.comments||[])if(input.authorUserId==='demo-user'&&input.isDemo&&!commentIds.has(input.commentId)){candidate.comments.push(clone(input));commentIds.add(input.commentId)}
@@ -163,13 +325,28 @@
     return {seeded:true,marker:payload.marker};
   }
   function requireUser(){if(!state.userId)throw error('AUTH_REQUIRED','请先登录后操作')}
-  const A={seedPersonalDemoOnce,saveFollowsSnapshot,migrateKeywordWatchesSnapshot,updatesSnapshot,followsVersion,createSearchQueryState,profileControlSnapshot,migrateSearchPreferenceModel,applyProfileCommandSnapshot,async applyProfileCommand(request){return applyProfileCommandSnapshot(request)},userContextVersion,sameSearchContext,normalizeKeyword:norm,registerSearchEngine(engine){exactEngine=engine},executionKind:'LOCAL_MOCK',fixtures:F,now,snapshot,profile,searchQueryTopics,registerResources,documentFor,hitsFor,parseQueryCondition,matchesCondition,searchSnapshot,recommendSnapshot,commentsSnapshot,subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)},
+  const A={seedPersonalDemoOnce,saveFollowsSnapshot,migrateKeywordWatchesSnapshot,updatesSnapshot,markUpdateReadSnapshot,followsVersion,createSearchQueryState,profileControlSnapshot,migrateSearchPreferenceModel,applyProfileCommandSnapshot,async applyProfileCommand(request){return applyProfileCommandSnapshot(request)},userContextVersion,sameSearchContext,normalizeKeyword:norm,registerSearchEngine(engine){exactEngine=engine},executionKind:'LOCAL_MOCK',fixtures:F,now,snapshot,profile,searchQueryTopics,registerResources,documentFor,hitsFor,parseQueryCondition,matchesCondition,searchSnapshot,recommendSnapshot,commentsSnapshot,subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)},
     async querySearch(r){const context=r.userContextVersion||r.condition?.userContextVersion;if(r.userContextVersion&&r.condition?.userContextVersion&&String(r.userContextVersion)!==String(r.condition.userContextVersion))throw error('CONTEXT_MISMATCH','请求与查询条件的身份上下文不一致');if(context&&String(context)!==userContextVersion())throw error('STALE_USER_CONTEXT','身份上下文已变更，请重新查询');return clone(searchSnapshot(r))},async parseQuery(r){return clone(parseQueryCondition(r))},async getDocument(id,context={}){const d=documentFor(id);if(!d)throw error('DOCUMENT_UNAVAILABLE','暂无可用全文');return clone({...d,...context})},
     async getInterpretations({paperIds,queryId,conditionVersion='1',userContextVersion:contextVersion=userContextVersion()}){return{queryId,conditionVersion,userContextVersion:contextVersion,items:paperIds.map(id=>{const d=documentFor(id);return{paperId:id,documentVersion:d?.documentVersion,status:d?'COMPLETED':'INSUFFICIENT_EVIDENCE',corePoints:(d?.pages||[]).flatMap(page=>page.paragraphs.filter(p=>['QUESTION','METHOD','FINDING','LIMITATION'].includes(p.role)).map(p=>({kind:p.role,text:p.text,evidence:{documentId:id,documentVersion:d.documentVersion,pageNumber:page.pageNumber,paragraphId:p.paragraphId}})))}})}},
     async getExpansionCandidates({rawQuery,queryId=null,conditionVersion=null,userContextVersion:contextVersion=userContextVersion()}){const matches=catalog.filter(x=>norm([x.title,...x.domainTags].join(' ')).includes(norm(rawQuery)));const terms=[...new Set(matches.flatMap(x=>x.domainTags))].filter(t=>norm(t)!==norm(rawQuery));return{queryId,conditionVersion,userContextVersion:contextVersion,items:[...terms.slice(0,6).map((term,i)=>({candidateId:'auto-'+i,sourceTerm:rawQuery,term,group:'AUTOMATIC',relation:'CO_OCCURRENCE',evidence:'同一演示资源主题共现'})),...F.translationEvidence.flatMap((x,i)=>{if(norm(rawQuery).includes(norm(x.source)))return[{...x,candidateId:'translation-'+i,sourceTerm:x.source,term:x.target,group:'TRANSLATION'}];if(norm(rawQuery).includes(norm(x.target)))return[{...x,candidateId:'translation-reverse-'+i,sourceTerm:x.target,term:x.source,group:'TRANSLATION'}];return[]}),...F.broaderEvidence.filter(x=>norm(rawQuery).includes(norm(x.source))).map((x,i)=>({...x,candidateId:'broader-'+i,sourceTerm:x.source,term:x.target,group:'BROADER'}))],executionKind:'LOCAL_MOCK'}},
-    async recordBehavior(event){requireUser();if(state.events.some(x=>x.eventId===event.eventId))return{deduplicated:true};const e={eventId:event.eventId||uid('event'),userId:state.userId,occurredAt:now(),...event};if(e.eventType==='SEARCH')e.domainTags=searchQueryTopics(e.query);state.events.push(e);if(e.eventType==='SEARCH'&&state.autoFollowSearchKeywords&&e.query){const target=e.query.trim().replace(/\s+/g,' '),normalizedKey=norm(target);const prior=state.follows.find(x=>x.kind==='KEYWORD'&&norm(x.targetId)===normalizedKey);if(prior){prior.following=true;prior.everFollowed=true;prior.updatedAt=now();prior.version=String(Number(prior.version||'1')+1)}else state.follows.push({followId:uid('follow'),kind:'KEYWORD',targetId:target,label:target,dismissed:false,sourceQueryId:e.queryId||null,normalizedKey,following:true,everFollowed:true,createdAt:now(),updatedAt:now(),version:'1',frequency:'daily',readUpdateIds:[]});state.followsVersion=String(Number(followsVersion())+1)}save();return{accepted:true,profileVersion:String(state.version)}},
+    async recordBehavior(event){
+      requireUser();if(!migrateIndependentSubscriptions())throw error('STORAGE_UNAVAILABLE','关注记录尚未完成迁移，请允许浏览器存储后重试');
+      if(event.eventId&&state.events.some(x=>x.eventId===event.eventId))return {deduplicated:true};
+      const candidate=clone(state),e={eventId:event.eventId||uid('event'),userId:state.userId,occurredAt:now(),...event};
+      if(e.eventType==='SEARCH')e.domainTags=searchQueryTopics(e.query);
+      candidate.events.push(e);
+      if(e.eventType==='SEARCH'&&typeof e.query==='string'&&norm(e.query)&&Array.from(e.query.trim()).length<=200){
+        const target=e.query.trim().replace(/\s+/g,' '),normalizedKey=norm(target);
+        const prior=candidate.follows.find(x=>x.kind==='KEYWORD'&&norm(x.targetId)===normalizedKey);
+        if(prior){prior.following=true;prior.everFollowed=true;prior.origins=originList([...(prior.origins||[]),'SEARCH']);prior.updatedAt=now();prior.version=String(Number(prior.version||'1')+1)}
+        else candidate.follows.push({followId:uid('follow'),kind:'KEYWORD',targetId:target,label:target,origins:['SEARCH'],dismissed:false,sourceQueryId:e.queryId||null,normalizedKey,following:true,everFollowed:true,createdAt:now(),updatedAt:now(),version:'1',frequency:'daily',readUpdateIds:[]});
+        candidate.followsVersion=String(Number(followsVersion())+1);
+      }
+      candidate.autoFollowSearchKeywords=true;candidate.version=state.version+1;collectUpdateHistory(candidate);commitFollowState(candidate);
+      return {accepted:true,profileVersion:String(state.version)};
+    },
     migrateComments(records){let changed=false;for(const r of records){if(!state.comments.some(x=>x.commentId===r.commentId)){state.comments.push({...r,version:r.version||1});changed=true}}if(changed)save()},async getProfile(){return clone(profile())},async getFollows(options={}){requireUser();if(options.userContextVersion&&options.userContextVersion!==userContextVersion())throw error('STALE_USER_CONTEXT','身份上下文已变化');if(options.kind&&!['KEYWORD','DOMAIN','JOURNAL','AUTHOR'].includes(options.kind))throw error('INVALID_KIND','关注类型无效');return{items:clone(state.follows.filter(f=>!options.kind||f.kind===options.kind)),autoFollowSearchKeywords:state.autoFollowSearchKeywords,availableTargets:F.availableTargets,version:followsVersion(),userContextVersion:userContextVersion(),talentContext:clone(state.talentContext)}},
-    async setFollow(r){if(r.changes&&['kind','targetId','followId','following','dismissed','sourceQueryId','frequency','readUpdateIds','hotWords'].some(key=>r[key]!==undefined))throw error('INVALID_MUTATION','单条与批量关注格式不能混用');const changes=r.changes||(r.kind?[r]:[]);const reply=saveFollowsSnapshot({changes,autoFollowSearchKeywords:r.autoFollowSearchKeywords,talentContext:r.talentContext,version:r.version??followsVersion(),userContextVersion:r.userContextVersion||userContextVersion(),clientMutationId:r.clientMutationId||uid('follow-mutation')});return r.changes||!r.kind?reply:reply.changedFollow},
+    async setFollow(r){if(r.changes&&['kind','targetId','followId','following','dismissed','sourceQueryId','frequency','readUpdateIds','hotWords','origins'].some(key=>r[key]!==undefined))throw error('INVALID_MUTATION','单条与批量关注格式不能混用');const changes=r.changes||(r.kind?[r]:[]);const reply=saveFollowsSnapshot({changes,autoFollowSearchKeywords:r.autoFollowSearchKeywords,talentContext:r.talentContext,version:r.version??followsVersion(),userContextVersion:r.userContextVersion||userContextVersion(),clientMutationId:r.clientMutationId||uid('follow-mutation')});return r.changes||!r.kind?reply:reply.changedFollow},
     async getNotificationEmail(){return notificationEmailSnapshot()},
     async saveNotificationEmail(request){return saveNotificationEmailSnapshot(request)},
     // Compatibility for previously cached clients: frequency belongs to the business; there is no user switch.
@@ -181,7 +358,19 @@
     async withdrawComment(id){const c=state.comments.find(x=>x.commentId===id);if(c?.authorUserId!==state.userId)throw error('NOT_OWNER','只能撤回本人评论');state.comments=state.comments.filter(x=>x.commentId!==id);save()},async getAdminComments(r={}){return{items:clone(state.comments.filter(x=>!r.status||x.status===r.status)),total:state.comments.filter(x=>!r.status||x.status===r.status).length}},
     async decideComment(r){const c=state.comments.find(x=>x.commentId===r.commentId);if(!c)throw error('NOT_FOUND','评论不存在');if(c.version!==r.version)throw error('STALE_VERSION','评论已被处理，请刷新');if(c.status!=='PENDING')throw error('ALREADY_REVIEWED','评论已处理');if(r.decision!=='APPROVE'&&!String(r.reason||'').trim())throw error('REASON_REQUIRED','驳回或退回须填写审核意见');c.status={APPROVE:'APPROVED',REJECT:'REJECTED',RETURN:'RETURNED'}[r.decision];if(!c.status)throw error('INVALID_DECISION','无效审核操作');c.reason=r.reason||'';c.version++;c.updatedAt=now();save();return clone(c)},
     async setTalentContext(r){saveFollowsSnapshot({changes:[],talentContext:r,version:followsVersion(),userContextVersion:userContextVersion(),clientMutationId:uid('talent-mutation')});return clone(state.talentContext)},risingCandidates(){return F.authorCandidates.map(x=>{const start=x.firstPublicationAt?new Date(x.firstPublicationAt):null,today=new Date();const age=start?today.getFullYear()-start.getFullYear()-((today.getMonth()<start.getMonth()||(today.getMonth()===start.getMonth()&&today.getDate()<start.getDate()))?1:0):null;const currentYear=today.getFullYear(),records=(x.activityRecords||[]).filter(r=>Number.isInteger(r.year)&&r.year>=currentYear-2&&r.year<=currentYear&&Number.isFinite(r.outputs)&&r.outputs>=0),years=new Set(records.map(r=>r.year));const activity=records.length===3&&years.size===3?records.reduce((n,r)=>n+r.outputs,0)/3*10:null;return{...x,academicAge:age===null?null:Math.floor(age),activity,classificationEvidence:{academicAgeYears:age,activityScore:activity,ageThreshold:10,activityThreshold:80}}}).filter(x=>x.classificationEvidence.academicAgeYears!==null&&x.classificationEvidence.academicAgeYears>=0&&x.classificationEvidence.academicAgeYears<=10&&x.activity!==null&&x.activity>=80)},
-    async getPlayback(id){return{activityId:id,status:'AVAILABLE',isMock:true,...F.media}},async setDemoIdentity(r){const fields=['notificationEmail','personalDemoSeed','events','follows','followsVersion','followMutations','keywordWatchMigrationCompleted','autoFollowSearchKeywords','weeklyEmail','resourceStates','talentContext','profileControl'];state.accounts=state.accounts||{};if(state.userId)state.accounts[state.userId]=Object.fromEntries(fields.map(k=>[k,clone(state[k])]));const base=defaults(),next=state.accounts[r.userId]||base;fields.forEach(k=>state[k]=clone(next[k]===undefined?base[k]:next[k]));const contextChanged=state.userId!==r.userId||state.audience!==(r.audience||'research');state.userId=r.userId;state.audience=r.audience||'research';migrateNotificationEmail();state.follows=normalizeKeywordFollows(state.follows);if(contextChanged)state.userContextVersion=uid('context');save();return snapshot()}
+    async getPlayback(id){return{activityId:id,status:'AVAILABLE',isMock:true,...F.media}},async setDemoIdentity(r){
+      const fields=['notificationEmail','personalDemoSeed','events','follows','followsVersion','followMutations','keywordWatchMigrationCompleted','independentSubscriptionsVersion','followUpdateHistory','autoFollowSearchKeywords','weeklyEmail','resourceStates','talentContext','profileControl'];
+      const candidate=clone(state);candidate.accounts=candidate.accounts||{};
+      if(state.userId)candidate.accounts[state.userId]=Object.fromEntries(fields.map(key=>[key,clone(state[key])]));
+      const base=defaults(),next=candidate.accounts[r.userId]||base;
+      fields.forEach(key=>candidate[key]=clone(next[key]===undefined?base[key]:next[key]));
+      const contextChanged=state.userId!==r.userId||state.audience!==(r.audience||'research');
+      candidate.userId=r.userId;candidate.audience=r.audience||'research';
+      if(!candidate.notificationEmail){const legacy=candidate.weeklyEmail||{};candidate.notificationEmail={email:legacy.email||null,version:Math.max(1,Number(legacy.version)||1)}}
+      normalizeIndependentSubscriptions(candidate);
+      if(contextChanged)candidate.userContextVersion=uid('context');
+      candidate.version=state.version+1;commitFollowState(candidate);return snapshot();
+    }
   };
   const failures={};A.setDemoFailure=method=>{failures[method]=true};
   A.addDemoResourceUpdate=async()=>{requireUser();const f=state.follows.find(x=>x.following&&['KEYWORD','DOMAIN'].includes(x.kind));if(!f)return{message:'请先关注词汇或领域，再入库演示资源。'};const item={id:uid('demo-update'),type:'资讯',title:f.targetId+' · 新入库演示资料',summary:'本地评审操作实际入库的合成资源，不是自动生成的假动态。',domainTags:[f.targetId],date:now().slice(0,10),publishedAt:now(),updatedAt:now()};catalog.push(item);state.demoResources=state.demoResources||[];state.demoResources.push(item);save();return{message:'演示资源已入库，关注动态从同一资源产生。'}};

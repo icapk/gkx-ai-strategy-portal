@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="assets/vendor/portal-arco-recommendations.css?v=20261101-recommendations-release">
   <link rel="stylesheet" href="recommendations.css?v=20261101-recommendations-release">
   <link rel="stylesheet" href="assets/glass-tabs.css?v=20261011-unified-glass-2">
-  <link rel="stylesheet" href="recommendation-v1.css?v=20261030-domain-hotwords">
+  <link rel="stylesheet" href="recommendation-v1.css?v=20261102-independent-subscriptions">
   <link rel="stylesheet" href="portal-choice-controls.css?v=20261101-recommendations">
   <link rel="stylesheet" href="personal-entry.css?v=20261030-personal-demo">
   <link rel="stylesheet" href="assets/portal-search-return.css?v=20261101-recommendations-release">
@@ -98,7 +98,7 @@
         <section class="rec-panel rec-panel--hot" id="hot" data-rec-section="hot" aria-label="热词推荐">
           <div class="rec-hot-layout">
             <div class="rec-hot-main">
-              <div class="rec-hot-heading"><h3>热门词汇</h3><button class="rec-manage-interests" type="button" data-sr-follow-settings aria-haspopup="dialog">管理关注领域</button></div>
+              <div class="rec-hot-heading"><h3>热门词汇</h3><button class="rec-manage-interests" type="button" data-sr-follow-settings aria-haspopup="dialog">管理关注</button></div>
               <div class="rec-hot-grid">
                 <button class="rec-hot-card is-top" type="button" data-hot-query="ChatGPT"><strong>ChatGPT</strong><em>#1</em><span>28,500</span><small>+320%</small></button>
                 <button class="rec-hot-card is-top" type="button" data-hot-query="量子纠缠"><strong>量子纠缠</strong><em>#2</em><span>15,600</span><small>+156%</small></button>
@@ -117,25 +117,13 @@
               <section class="rec-keyword-follow" aria-labelledby="recKeywordFollowTitle">
                 <header class="rec-follow-heading">
                   <div>
-                    <h3 id="recKeywordFollowTitle">词汇关注</h3>
-                    <p>根据搜索词自动建立关注档案，持续汇集相关资讯、文献与报告动态。</p>
+                    <h3 id="recKeywordFollowTitle">关注动态</h3>
+                    <p>领域、词汇和期刊独立订阅，相关内容在这里统一展示。</p>
                   </div>
-                  <label class="rec-auto-follow" for="recAutoFollow">
-                    <input id="recAutoFollow" type="checkbox" checked aria-describedby="recAutoFollowHint">
-                    <span class="rec-auto-follow-track" aria-hidden="true"></span>
-                    <span>搜索后自动关注</span>
-                  </label>
                 </header>
-                <div class="rec-follow-status" id="recAutoFollowHint" role="status" aria-live="polite">
-                  <strong>自动关注已开启</strong><span>尚未关注词汇，可搜索或从下方推荐词开始。</span>
-                </div>
-                <div class="rec-follow-grid" id="recKeywordFollowGrid">
-                  <article class="rec-follow-card" data-keyword-suggestion="人工智能"><div class="rec-follow-card-heading"><strong title="人工智能">人工智能</strong><span>推荐关注</span></div><p class="rec-follow-meta">本周热度 +28%</p><div class="rec-follow-actions"><button type="button" aria-pressed="false" data-keyword-follow="人工智能">关注 <small>(234)</small></button></div></article>
-                  <article class="rec-follow-card" data-keyword-suggestion="量子计算"><div class="rec-follow-card-heading"><strong title="量子计算">量子计算</strong><span>推荐关注</span></div><p class="rec-follow-meta">本周热度 +19%</p><div class="rec-follow-actions"><button type="button" aria-pressed="false" data-keyword-follow="量子计算">关注 <small>(189)</small></button></div></article>
-                  <article class="rec-follow-card" data-keyword-suggestion="基因编辑"><div class="rec-follow-card-heading"><strong title="基因编辑">基因编辑</strong><span>推荐关注</span></div><p class="rec-follow-meta">本周热度 +17%</p><div class="rec-follow-actions"><button type="button" aria-pressed="false" data-keyword-follow="基因编辑">关注 <small>(156)</small></button></div></article>
-                  <article class="rec-follow-card" data-keyword-suggestion="固态电池"><div class="rec-follow-card-heading"><strong title="固态电池">固态电池</strong><span>推荐关注</span></div><p class="rec-follow-meta">本周热度 +14%</p><div class="rec-follow-actions"><button type="button" aria-pressed="false" data-keyword-follow="固态电池">关注 <small>(142)</small></button></div></article>
-                </div>
-                <p class="rec-source-note">⚡ 原型动态保存在当前浏览器；正式上线后将接入账号、站内信和真实数据源，实现跨设备推送。</p>
+                <div class="rec-follow-status" id="recAutoFollowHint" role="status" aria-live="polite"></div>
+                <div class="rec-follow-grid rec-subscription-updates" id="recKeywordFollowGrid" aria-live="polite"></div>
+                <p class="rec-source-note">关注与动态记录保存在当前浏览器。</p>
               </section>
             </div>
 
@@ -293,10 +281,10 @@
 
   <div class="rec-toast" id="recToast" role="status" aria-live="polite" hidden></div>
   <script src="search-recommend-remediation-fixtures.js?v=20261102-domain-37"></script>
-  <script src="portal-search-recommend-adapter.js?v=20261030-notification-email"></script>
+  <script src="portal-search-recommend-adapter.js?v=20261102-independent-subscriptions"></script>
   <script src="personal-resource-catalog.js?v=20261030-personal-demo"></script>
   <script src="personal-data-demo.js?v=20261030-notification-email"></script>
-  <script src="recommendations.js?v=20261101-paper-reason-1"></script>
+  <script src="recommendations.js?v=20261102-independent-subscriptions"></script>
   <script src="personal-entry.js?v=20261030-personal-demo"></script>
   <script src="assets/vendor/portal-arco-recommendations.js?v=20261102-domain-select"></script>
   <script defer src="assets/portal-back-to-top.js?v=20261101-1"></script>
