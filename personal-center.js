@@ -2,6 +2,20 @@
   'use strict';
   const SR = window.PortalSearchRecommend;
   const byId = id => document.getElementById(id);
+  const homeURL = new URL('index.html?page=home', location.href);
+  let returnURL = homeURL.href;
+  try {
+    const previous = new URL(document.referrer);
+    if (previous.origin === location.origin && !previous.pathname.endsWith('/personal-center.html') && previous.searchParams.get('page') !== 'personal-center') returnURL = previous.href;
+  } catch (_) { /* Direct visits return to the portal homepage. */ }
+  byId('pcBack')?.addEventListener('click', () => {
+    if (window.parent !== window) {
+      try {
+        if (typeof window.parent.PortalPersonalCenterReturn === 'function') { window.parent.PortalPersonalCenterReturn(); return; }
+      } catch (_) { /* A standalone destination also works outside the portal shell. */ }
+    }
+    window.top.location.assign(returnURL);
+  });
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const paths = {
     history:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/>',

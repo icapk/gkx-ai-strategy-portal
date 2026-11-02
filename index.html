@@ -9246,11 +9246,27 @@
         recommendationBatch = (recommendationBatch + 1) % 2;
         setRecommendationType("为你推荐");
       });
-      const openPersonalCenter = () => showSurface("iframe", {
-        iframeUrl: "personal-center.html?embedded=1&v=20261030-notification-email",
-        hideEmbeddedToolbar: true,
-        embedTitle: "个人中心"
-      });
+      let personalCenterReturnView = null;
+      window.PortalPersonalCenterReturn = () => {
+        const previous = personalCenterReturnView;
+        personalCenterReturnView = null;
+        showSurface(previous?.surface || "home", previous?.options || {});
+        if (previous) requestAnimationFrame(() => window.scrollTo({ top: previous.scrollY, behavior: "auto" }));
+      };
+      const openPersonalCenter = () => {
+        const surface = Object.entries(SURFACES).find(([, node]) => !node.hidden)?.[0] || "home";
+        const iframeUrl = surface === "iframe" ? getCurrentEmbeddedUrl() : "";
+        if (!iframeUrl.includes("personal-center.html")) personalCenterReturnView = {
+          surface,
+          options: surface === "iframe" ? { ...activePortalViewState, iframeUrl } : {},
+          scrollY: window.scrollY
+        };
+        showSurface("iframe", {
+          iframeUrl: "personal-center.html?embedded=1&v=20261102-personal-back",
+          hideEmbeddedToolbar: true,
+          embedTitle: "个人中心"
+        });
+      };
       const openPersonalCenterTwo = () => showSurface("iframe", {
         iframeUrl: "personal-center-2.html?v=cfafe29",
         embedTitle: "个人中心2",
