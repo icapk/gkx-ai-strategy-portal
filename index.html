@@ -4001,7 +4001,7 @@
                   </div>
                   <p class="sr-only">基于当前场景推荐可追溯的科研资源</p>
                 </div>
-                <button class="mg-smart-recommendation-more" id="mgRecommendationMore" type="button" aria-label="查看更多仿真实例">
+                <button class="mg-smart-recommendation-more" id="mgRecommendationMore" type="button" aria-label="查看更多智能推荐">
                   <span>查看更多</span>
                 </button>
               </header>
@@ -6801,7 +6801,7 @@
         } catch (error) { /* keep the current page state when storage is unavailable */ }
         const commit = () => {
           mgSmartRecommendationContext.textContent = group.label;
-          mgRecommendationMore.setAttribute("aria-label", `查看更多${group.itemLabel}`);
+          mgRecommendationMore.setAttribute("aria-label", "查看更多智能推荐");
           mgRecommendationPreview.setAttribute("aria-labelledby", "mgSmartRecommendationTitle");
           mgRecommendationPreview.setAttribute("aria-label", `${group.label}智能推荐，共 ${group.items.length} 项`);
           mgRecommendationPreview.dataset.recommendationGroup = nextGroup;
@@ -7004,9 +7004,9 @@
       function openHeroRecommendationLanding() {
         const recommendationRoutes = {
           simulation: "recommendations.html?source=home&from=simulation#hot",
-          paper: "recommendations.html?source=home#papers",
-          expert: "recommendations.html?source=home#talent",
-          strategy: "recommendations.html?source=home#reports"
+          paper: "recommendations.html?source=home#hot",
+          expert: "recommendations.html?source=home#hot",
+          strategy: "recommendations.html?source=home#hot"
         };
         const fallbackRoute = "recommendations.html?source=home#hot";
         const route = recommendationRoutes[activeHeroRecommendation] || fallbackRoute;
