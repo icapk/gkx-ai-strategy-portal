@@ -56,6 +56,23 @@
 .sr-subscription-word-name{overflow-wrap:anywhere;min-width:0}
 .sr-subscription-word small{color:#8a94a4;font-size:11px;flex-shrink:0}
 .sr-subscription-dialog .sr-subscription-word button{padding:0;width:21px;height:21px;border:0;background:transparent;font-size:17px;line-height:20px;color:#8a94a4}
+.sr-journal-search{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sr-journal-search input[type=search]{box-sizing:border-box;flex:1;min-width:0;height:34px;padding:0 11px;border:1px solid #e5e6eb;border-radius:4px;outline:none;background:#f2f3f5;font:inherit;font-size:13px;color:#1d2129}
+.sr-journal-search input[type=search]:focus{border-color:#165dff;background:#fff;box-shadow:0 0 0 2px #165dff12}
+.sr-journal-search button{white-space:nowrap}
+.sr-journal-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-bottom:10px;color:#86909c;font-size:12px;line-height:20px}
+.sr-journal-meta [data-sr-journal-selected]{color:#4e5969}
+.sr-follow-dialog .sr-journal-options{gap:8px 12px;min-height:40px}
+.sr-journal-issn{display:block;margin-top:2px;color:#86909c;font-size:11px;line-height:16px}
+.sr-journal-empty{grid-column:1/-1;margin:0;padding:20px 12px;background:#f7f8fa;border-radius:6px;text-align:center;color:#86909c;font-size:13px;line-height:22px}
+.sr-journal-pagination{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:12px;color:#86909c}
+.sr-journal-pagination nav{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.sr-journal-pagination button,.sr-journal-pagination .rec-arco-button-host button{min-width:28px;height:28px;padding:0 8px;font-size:12px}
+.sr-follow-dialog .sr-journal-pagination button[aria-pressed=true],.sr-follow-dialog .sr-journal-pagination .rec-arco-button-host button[aria-pressed=true]{color:#165dff;background:#e8f3ff;border-color:#e8f3ff}
+.sr-journal-pagination button:disabled{cursor:not-allowed}
+.sr-journal-ellipsis{padding:0 4px}
+.sr-follow-dialog .sr-journal-status{min-height:18px;margin-top:6px;color:#86909c;font-size:11px;line-height:18px}
+@media(max-width:620px){.sr-journal-pagination{align-items:flex-start;flex-direction:column}.sr-journal-search{gap:4px}.sr-journal-options{grid-template-columns:minmax(0,1fr)}}
 .rec-follow-grid.rec-subscription-updates{grid-template-columns:minmax(0,1fr);gap:0}
 .rec-subscription-update{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid #edf0f5;min-width:0}
 .rec-subscription-update:first-child{padding-top:4px}

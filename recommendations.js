@@ -3441,15 +3441,51 @@
   let srDialog=null;
   function srOpenFollowDialog(){
     if(!SR.snapshot().userId){showToast('请先登录后操作');return}
-    const current=SR.snapshot(),domainTargets=SR.fixtures.availableTargets.filter(t=>t.kind==='DOMAIN'),journalTargets=SR.fixtures.availableTargets.filter(t=>t.kind==='JOURNAL');
+    const current=SR.snapshot(),domainTargets=SR.fixtures.availableTargets.filter(t=>t.kind==='DOMAIN');
+    const draftJournals=new Set(current.follows.filter(f=>f.kind==='JOURNAL'&&f.following).map(f=>f.targetId));
     const draftWords=new Map(current.follows.filter(f=>f.kind==='KEYWORD'&&f.following).map(f=>[SR.normalizeKeyword(f.targetId),{targetId:f.targetId,origins:[...srKeywordOrigins(f)]}]));
     srDialog?.remove();const d=document.createElement('dialog');srDialog=d;d.className='sr-dialog sr-follow-dialog sr-subscription-dialog';
     function targetOptions(targets,name){return targets.map((target,index)=>`<label><input type="checkbox" name="${name}" value="${index}" ${current.follows.some(f=>f.kind===target.kind&&f.targetId===target.targetId&&f.following)?'checked':''}><span>${srSafe(target.label)}</span></label>`).join('')}
     d.setAttribute('aria-labelledby','sr-follow-dialog-title');
-    d.innerHTML=`<form novalidate><h3 id="sr-follow-dialog-title">管理关注</h3><div class="sr-follow-options"><fieldset><legend>关注领域</legend><p class="sr-subscription-hint">选择长期关注的领域，可多选，无须填写词汇。</p><div class="sr-target-options sr-subscription-domains">${targetOptions(domainTargets,'domain')}</div></fieldset><fieldset><legend>关注词汇</legend><p class="sr-subscription-hint">词汇跨领域匹配；搜索自动关注与手动添加共用一份记录。</p><div class="sr-subscription-word-entry"><label for="sr-follow-keyword">关注词汇<input id="sr-follow-keyword" name="hotWord" type="text" autocomplete="off" placeholder="输入要关注的词汇" aria-describedby="sr-follow-word-hint"></label><button type="button" data-sr-add-keyword>添加词汇</button></div><p class="sr-domain-word-hint" id="sr-follow-word-hint">每次添加一个完整词汇，1–200个字符。</p><div class="sr-subscription-word-list" data-sr-keyword-list></div></fieldset><fieldset class="sr-follow-journals"><legend>关注期刊</legend><div class="sr-target-options sr-journal-options">${targetOptions(journalTargets,'journal')}</div></fieldset></div><span class="sr-follow-status" role="status" aria-live="polite"></span><menu><button type="button" data-sr-cancel>取消</button><button type="submit">保存关注</button></menu></form>`;
-    const form=d.querySelector('form'),status=form.querySelector('[role=status]'),wordInput=form.elements.hotWord,list=form.querySelector('[data-sr-keyword-list]');
+    d.innerHTML=`<form novalidate><h3 id="sr-follow-dialog-title">管理关注</h3><div class="sr-follow-options"><fieldset><legend>关注领域</legend><p class="sr-subscription-hint">选择长期关注的领域，可多选，无须填写词汇。</p><div class="sr-target-options sr-subscription-domains">${targetOptions(domainTargets,'domain')}</div></fieldset><fieldset><legend>关注词汇</legend><p class="sr-subscription-hint">词汇跨领域匹配；搜索自动关注与手动添加共用一份记录。</p><div class="sr-subscription-word-entry"><label for="sr-follow-keyword">关注词汇<input id="sr-follow-keyword" name="hotWord" type="text" autocomplete="off" placeholder="输入要关注的词汇" aria-describedby="sr-follow-word-hint"></label><button type="button" data-sr-add-keyword>添加词汇</button></div><p class="sr-domain-word-hint" id="sr-follow-word-hint">每次添加一个完整词汇，1–200个字符。</p><div class="sr-subscription-word-list" data-sr-keyword-list></div></fieldset><fieldset class="sr-follow-journals"><legend>关注期刊</legend><div class="sr-journal-search"><input id="sr-journal-query" type="search" autocomplete="off" maxlength="200" placeholder="搜索期刊名称或 ISSN" aria-label="搜索期刊"><button type="button" data-sr-search-journals>搜索</button><button type="button" data-sr-clear-journals hidden>清空</button></div><div class="sr-journal-meta"><span data-sr-journal-source></span><span data-sr-journal-selected></span></div><div class="sr-target-options sr-journal-options" data-sr-journal-list aria-label="期刊列表" aria-busy="true"></div><div class="sr-journal-pagination" data-sr-journal-pagination></div><span class="sr-journal-status" role="status" aria-live="polite" data-sr-journal-status></span></fieldset></div><span class="sr-follow-status" role="status" aria-live="polite"></span><menu><button type="button" data-sr-cancel>取消</button><button type="submit">保存关注</button></menu></form>`;
+    const form=d.querySelector('form'),status=form.querySelector('.sr-follow-status'),wordInput=form.elements.hotWord,list=form.querySelector('[data-sr-keyword-list]');
     let saving=false;
     function setStatus(message,isSuccess=false){status.textContent=message;status.classList.toggle('is-success',isSuccess)}
+    const journalInput=form.querySelector('#sr-journal-query'),journalList=form.querySelector('[data-sr-journal-list]'),journalPager=form.querySelector('[data-sr-journal-pagination]'),journalStatus=form.querySelector('[data-sr-journal-status]'),journalSelected=form.querySelector('[data-sr-journal-selected]'),journalSource=form.querySelector('[data-sr-journal-source]'),journalClear=form.querySelector('[data-sr-clear-journals]');
+    let journalPage=1,journalQuery='',journalTotal=0,journalRequest=0,journalController=null;
+    function renderJournalSelection(){journalSelected.textContent='已选 '+draftJournals.size+' 本（跨页保留）'}
+    async function loadJournals(page=1,query=journalQuery){
+      journalController?.abort();journalController=new AbortController();const request=++journalRequest;
+      journalPage=page;journalQuery=query;journalClear.hidden=!journalInput.value&&!query;
+      journalList.setAttribute('aria-busy','true');journalList.innerHTML='<p class="sr-journal-empty">正在加载期刊…</p>';journalPager.replaceChildren();journalStatus.textContent='';
+      try{
+        const result=await window.PORTAL_JOURNAL_CATALOG.search({query,page,pageSize:10,signal:journalController.signal});
+        if(request!==journalRequest||!d.open)return;
+        const lastAvailablePage=Math.max(1,Math.ceil(result.total/10));
+        if(result.page>lastAvailablePage)return loadJournals(lastAvailablePage,query);
+        journalPage=result.page;journalTotal=result.total;
+        journalSource.textContent=result.executionKind==='REMOTE_API'?'数据来源：深势':'期刊目录示例';
+        journalList.innerHTML=result.items.length?result.items.map(target=>`<label><input type="checkbox" name="journal" value="${srSafe(target.targetId)}" ${draftJournals.has(target.targetId)?'checked':''} ${saving?'disabled':''}><span>${srSafe(target.label)}${target.issn?`<small class="sr-journal-issn">ISSN ${srSafe(target.issn)}</small>`:''}</span></label>`).join(''):'<p class="sr-journal-empty">'+(query?'未找到匹配期刊，请更换关键词。':'暂无可供关注的期刊。')+'</p>';
+        const pageCount=Math.max(1,Math.ceil(journalTotal/10)),from=journalTotal?(journalPage-1)*10+1:0,to=Math.min(journalPage*10,journalTotal);
+        const pageNumbers=[...new Set([1,journalPage-1,journalPage,journalPage+1,pageCount].filter(n=>n>=1&&n<=pageCount))].sort((a,b)=>a-b);
+        let lastPage=0;
+        journalPager.innerHTML=`<span class="sr-journal-total">共 ${journalTotal} 本 · 每页 10 条</span><nav aria-label="期刊分页"><button type="button" data-sr-journal-page="${journalPage-1}" aria-label="期刊上一页" ${journalPage<=1||saving?'disabled':''}>上一页</button>${pageNumbers.map(n=>{const gap=lastPage&&n>lastPage+1?'<span class="sr-journal-ellipsis" aria-hidden="true">…</span>':'';lastPage=n;return gap+`<button type="button" data-sr-journal-page="${n}" aria-label="期刊第 ${n} 页" aria-pressed="${n===journalPage}" ${saving?'disabled':''}>${n}</button>`}).join('')}<button type="button" data-sr-journal-page="${journalPage+1}" aria-label="期刊下一页" ${journalPage>=pageCount||saving?'disabled':''}>下一页</button></nav>`;
+        journalStatus.textContent=journalTotal?`第 ${journalPage} / ${pageCount} 页，显示第 ${from}–${to} 本期刊`:'共 0 本期刊';
+      }catch(err){
+        if(request!==journalRequest||!d.open||err.name==='AbortError')return;
+        journalList.innerHTML='<p class="sr-journal-empty">期刊加载失败，请重试。</p><button type="button" data-sr-retry-journals>重试</button>';
+        journalStatus.textContent='期刊目录暂不可用，已选期刊仍保留。';
+      }finally{if(request===journalRequest)journalList.setAttribute('aria-busy','false')}
+    }
+    function searchJournals(){if(!saving)loadJournals(1,journalInput.value.trim())}
+    form.querySelector('[data-sr-search-journals]').addEventListener('click',searchJournals);
+    journalInput.addEventListener('input',()=>{journalClear.hidden=!journalInput.value&&!journalQuery});
+    journalInput.addEventListener('search',()=>{if(!journalInput.value)searchJournals()});
+    journalInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();e.stopPropagation();searchJournals()}});
+    journalClear.addEventListener('click',()=>{if(saving)return;journalInput.value='';loadJournals(1,'');journalInput.focus()});
+    journalList.addEventListener('change',e=>{if(!e.target.matches('[name=journal]')||saving)return;e.target.checked?draftJournals.add(e.target.value):draftJournals.delete(e.target.value);renderJournalSelection();setStatus('有未保存的更改',true)});
+    journalList.addEventListener('click',e=>{if(e.target.closest('[data-sr-retry-journals]')&&!saving)loadJournals(journalPage)});
+    journalPager.addEventListener('click',e=>{const button=e.target.closest('[data-sr-journal-page]');if(!button||button.disabled||saving)return;loadJournals(Number(button.dataset.srJournalPage))});
     function renderDraftWords(){
       list.innerHTML=draftWords.size?[...draftWords].map(([key,word])=>`<span class="sr-subscription-word"><span class="sr-subscription-word-name">${srSafe(word.targetId)}</span><small>${srSafe(srOriginLabel(word.origins))}</small><button type="button" data-sr-remove-keyword="${srSafe(key)}" aria-label="移除关注词汇“${srSafe(word.targetId)}”">×</button></span>`).join(''):'<p class="sr-domain-word-empty">暂无关注词汇，可手动添加或在搜索后自动关注。</p>';
     }
@@ -3466,19 +3502,21 @@
     form.querySelector('[data-sr-add-keyword]').addEventListener('click',addKeyword);
     form.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229&&(e.target===wordInput||e.target.closest('label')?.querySelector('#sr-follow-keyword')===wordInput)){e.preventDefault();addKeyword()}});
     list.addEventListener('click',e=>{const button=e.target.closest('[data-sr-remove-keyword]');if(!button||saving)return;draftWords.delete(button.dataset.srRemoveKeyword);renderDraftWords();setStatus('有未保存的更改',true)});
-    document.body.append(d);renderDraftWords();d.showModal();
+    document.body.append(d);renderDraftWords();renderJournalSelection();d.showModal();loadJournals();
     form.querySelector('[data-sr-cancel]').addEventListener('click',()=>{if(!saving)d.close()});
     d.addEventListener('cancel',e=>{if(saving){e.preventDefault();setStatus('正在保存，请稍候')}});
-    d.addEventListener('close',()=>srInterestButton?.focus());
+    d.addEventListener('close',()=>{journalController?.abort();++journalRequest;srInterestButton?.focus()});
     form.onsubmit=async e=>{
       e.preventDefault();if(saving)return;
       if(String(wordInput.value||'').trim()){setStatus('请先添加当前词汇后再保存');wordInput.focus();return}
       if(current.userContextVersion!==SR.userContextVersion()){setStatus('身份已变化，请重新打开管理关注；本次草稿尚未保存');return}
       const changes=[];
-      for(const [targets,name] of [[domainTargets,'domain'],[journalTargets,'journal']]){
+      for(const [targets,name] of [[domainTargets,'domain']]){
         const checked=new Set([...form.querySelectorAll(`[name=${name}]:checked`)].map(x=>Number(x.value)));
         targets.forEach((target,index)=>{const before=current.follows.find(f=>f.kind===target.kind&&f.targetId===target.targetId),following=checked.has(index);if(!!before?.following!==following)changes.push({kind:target.kind,targetId:target.targetId,following})});
       }
+      const journalIds=new Set([...current.follows.filter(f=>f.kind==='JOURNAL'&&f.following).map(f=>f.targetId),...draftJournals]);
+      for(const targetId of journalIds){const before=current.follows.find(f=>f.kind==='JOURNAL'&&f.targetId===targetId),following=draftJournals.has(targetId);if(!!before?.following!==following)changes.push({kind:'JOURNAL',targetId,following})}
       for(const before of current.follows.filter(f=>f.kind==='KEYWORD')){
         const draft=draftWords.get(SR.normalizeKeyword(before.targetId));
         if(before.following&&!draft)changes.push({kind:'KEYWORD',targetId:before.targetId,following:false});
@@ -3491,7 +3529,7 @@
         if(current.userContextVersion!==SR.userContextVersion())throw new Error('身份已变化，请重新打开管理关注');
         d.close();srRenderInterests();renderNewsRecommendations();renderPapers();renderKeywordFollows();showToast(changes.length?'关注设置已保存':'关注设置未改变');
       }catch(err){setStatus('关注设置未保存：'+(err.message||'请稍后重试'))}
-      finally{saving=false;form.querySelectorAll('button,input,select').forEach(control=>{control.disabled=false})}
+      finally{saving=false;form.querySelectorAll('button,input,select').forEach(control=>{control.disabled=false});journalPager.querySelectorAll('[data-sr-journal-page]').forEach(button=>{const page=Number(button.dataset.srJournalPage);button.disabled=page<1||page>Math.max(1,Math.ceil(journalTotal/10))})}
     };
   }
 

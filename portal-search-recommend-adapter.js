@@ -48,6 +48,7 @@
     return !!norm(follow.targetId)&&text.includes(norm(follow.targetId));
   }
   function matchesJournalFollow(item,follow){
+    if(follow.journalId)return [item.journalId,...(item.journalIds||[]),...(item.sourceJournalIds||[])].includes(follow.journalId);
     return [item.venue,item.journalId,item.journalName,typeof item.journal==='string'?item.journal:null,...(item.journalIds||[]),...(item.sourceJournalIds||[])].includes(follow.targetId);
   }
   function matchesFollow(item,follow){return follow.kind==='DOMAIN'?matchesDomainFollow(item,follow):follow.kind==='KEYWORD'?matchesKeywordFollow(item,follow):follow.kind==='JOURNAL'&&matchesJournalFollow(item,follow)}
@@ -178,13 +179,16 @@
     candidate.follows=normalizeKeywordFollows(candidate.follows);
     for(const patch of changes){
       if(!['KEYWORD','DOMAIN','JOURNAL','AUTHOR'].includes(patch.kind)||typeof patch.targetId!=='string'||!patch.targetId.trim()||['following','dismissed'].some(key=>patch[key]!==undefined&&typeof patch[key]!=='boolean'))throw error('INVALID_MUTATION','关注对象或状态字段无效');
-      if(!['KEYWORD','AUTHOR'].includes(patch.kind)&&!F.availableTargets.some(x=>x.kind===patch.kind&&x.targetId===patch.targetId))throw error('INVALID_TARGET','请选择已接入的领域或期刊');
+      const existingFollow=candidate.follows.find(x=>x.kind===patch.kind&&(patch.kind==='KEYWORD'?norm(x.targetId)===norm(patch.targetId):x.targetId===patch.targetId));
+      const followTarget=F.availableTargets.find(x=>x.kind===patch.kind&&x.targetId===patch.targetId)||(patch.kind==='JOURNAL'?(global.PORTAL_JOURNAL_CATALOG?.getTarget(patch.targetId)||existingFollow):null);
+      if(!['KEYWORD','AUTHOR'].includes(patch.kind)&&!followTarget)throw error('INVALID_TARGET','请选择已接入的领域或期刊');
       if(patch.kind==='KEYWORD'&&(!norm(patch.targetId)||Array.from(String(patch.targetId).trim()).length>200))throw error('INVALID_TARGET','关注词应为1至200个字符');
       if(patch.origins!==undefined&&(patch.kind!=='KEYWORD'||!Array.isArray(patch.origins)||!patch.origins.length||patch.origins.some(origin=>!keywordOrigins.includes(origin))))throw error('INVALID_ORIGIN','词汇关注来源无效');
       if(patch.hotWords!==undefined&&patch.kind!=='DOMAIN')throw error('INVALID_DOMAIN_HOT_WORDS','旧领域词格式无效');
-      let follow=candidate.follows.find(x=>x.kind===patch.kind&&(patch.kind==='KEYWORD'?norm(x.targetId)===norm(patch.targetId):x.targetId===patch.targetId));
+      let follow=existingFollow;
       if(patch.followId&&(!follow||follow.followId!==patch.followId))throw error('FOLLOW_NOT_OWNED','关注对象不属于当前主体或词键不一致');
       if(!follow){follow={followId:uid('follow'),kind:patch.kind,...(patch.kind==='DOMAIN'?{hotWords:[],independentSubscriptionMigrated:true}:{}),...(patch.kind==='KEYWORD'?{origins:originList(patch.origins,['MANUAL'])}:{}),targetId:patch.targetId.trim(),label:patch.targetId.trim(),sourceQueryId:null,normalizedKey:patch.kind==='KEYWORD'?norm(patch.targetId):null,following:false,everFollowed:false,dismissed:false,createdAt:now(),updatedAt:now(),version:'0',frequency:patch.kind==='KEYWORD'?'daily':null,readUpdateIds:[]};candidate.follows.push(follow)}
+      if(patch.kind==='JOURNAL'&&followTarget){follow.label=followTarget.label||follow.label;if(followTarget.journalId)follow.journalId=followTarget.journalId;if(followTarget.provider)follow.provider=followTarget.provider}
       if(patch.frequency!==undefined&&(patch.kind!=='KEYWORD'||!['realtime','daily','weekly','page'].includes(patch.frequency)))throw error('INVALID_FREQUENCY','旧词汇推送频率无效');
       if(patch.readUpdateIds!==undefined){
         if(patch.kind!=='KEYWORD'||!Array.isArray(patch.readUpdateIds)||patch.readUpdateIds.some(id=>typeof id!=='string'))throw error('INVALID_READ_IDS','已读标识格式无效');
