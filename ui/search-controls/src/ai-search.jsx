@@ -17,6 +17,26 @@ import { normalizePaperCatalog, understandPaperQuery, retrievePaperCandidates, r
 
 // Interaction references: Vercel AI Elements reasoning and chain-of-thought.
 // Workflow descriptions and research samples are prototype data, not model reasoning.
+const topics = [
+  { key: 'evidence', name: '科研证据检索与核对', test: /证据|可追溯|科研智能体|文献/,
+    conclusion: '将检索、来源记录和结论核对串成可追溯流程，是这组资料共同关注的方向。',
+    paper: '论文侧重文献检索、来源记录与结论核对的工作流程。' },
+  { key: 'material', name: '多模态材料分析', test: /多模态|材料|电池/,
+    conclusion: '材料分析中的共同线索，是联合组织图像、文本和结构化实验资料。',
+    paper: '论文比较图像、文本和结构化资料的组织与核对方式。' },
+  { key: 'drug', name: '药物发现与候选排序', test: /药物|靶点|生物医学/,
+    conclusion: '药物发现资料主要围绕知识整合、候选排序和后续核对展开。',
+    paper: '论文介绍知识图谱、证据检索和人工复核的衔接。' },
+  { key: 'related', name: '相关研究' }
+];
+const topicFor = source => {
+  const demoTopic = /^ai-demo-paper-([1-3])$/.exec(source.id);
+  return demoTopic ? topics[Number(demoTopic[1]) - 1].key
+    : topics.find(topic => topic.test?.test(`${source.title} ${source.summary}`))?.key || 'related';
+};
+function sections() {
+  return topics.map(topic => ({ ...topic, sources: state.sources.filter(source => topicFor(source) === topic.key) })).filter(topic => topic.sources.length);
+}
 const questions = ['AI在药物靶点发现中有哪些研究？', 'AI在多模态材料分析中有哪些应用？', '科研智能体如何组织文献证据？'];
 const initialState = () => ({ query: '', draft: '', catalog: [], understanding: null, candidates: [], sources: [], step: -1, phase: 'idle', ready: false, chunks: 0,
   open: false, manualOpen: false, sourcePage: 1, expanded: new Set(), focused: '', copied: false,
@@ -83,25 +103,27 @@ function stepStatus(index) {
   if (state.step > index) return '已完成';
   return state.running && state.step === index ? '进行中' : '等待中';
 }
-function groupStatus(steps) {
-  const statuses = steps.map(stepStatus);
+function groupStatus(steps, statusFor = stepStatus) {
+  const statuses = steps.map(statusFor);
   if (statuses.includes('未完成')) return '未完成';
   if (statuses.every(status => status === '已完成')) return '已完成';
   if (statuses.includes('进行中')) return '进行中';
   if (statuses.every(status => status === '未执行')) return '未执行';
   return statuses.includes('未执行') ? '部分执行' : '等待中';
 }
+// Retain the original three visible steps. The ordinary retrieval and later
+// relevance screening both belong to the existing "精准匹配" display step.
+function displayStepStatus(index) {
+  if (index === 1 && state.emptyAfter === 1) return '已完成';
+  return groupStatus([[0], [1, 2], [3]][index]);
+}
 function Process() {
   const complete = state.step >= 4 && state.failedStep === null && state.emptyAfter === null;
-  const labels = ['AI理解问题 · 提取检索词', '普通论文检索中', 'AI筛选与排序中', 'AI解析 · 整理论文要点'];
-  const summary = state.failedStep !== null ? '处理暂未完成' : state.emptyAfter === 1 ? '未检索到匹配论文' : state.emptyAfter === 2 ? '没有符合问题的论文，未生成AI解析' : complete ? '已完成论文检索与AI解析' : labels[state.step] || '正在准备检索';
-  const descriptions = [
-    state.understanding ? `理解主题：${state.understanding.concepts.map(concept => concept.label).join('、')}；检索词：${state.understanding.terms.join('、')}` : '识别问题主题，生成用于普通论文检索的关键词',
-    state.step >= 2 ? `普通检索返回 ${state.candidates.length} 篇候选论文` : '使用检索词匹配论文标题、摘要等可用字段',
-    state.step >= 3 ? `按当前问题与论文内容筛选排序，保留 ${state.sources.length} 篇论文` : '根据当前问题与候选论文内容筛选、排序',
-    '基于本次论文集合的标题与摘要生成解析，并关联引用'
-  ];
-  const stepNames = ['AI理解问题', '普通论文检索', 'AI筛选与排序', 'AI解析'];
+  const displayStep = state.step < 0 ? -1 : state.step === 0 ? 0 : state.step < 3 ? 1 : state.step === 3 ? 2 : 3;
+  const labels = ['语义检索 · 深度解析中', '语义检索 · 正在匹配资料', 'AI解读 · 整理核心要点'];
+  const summary = state.failedStep !== null ? '处理暂未完成' : state.emptyAfter === 1 ? '未检索到匹配论文' : state.emptyAfter === 2 ? '没有符合问题的论文，未生成AI解析' : complete ? '已完成语义检索与AI解读' : labels[displayStep] || '正在准备检索';
+  const descriptions = ['运用自然语言处理（NLP）与机器学习技术，深度解析用户查询语义', displayStepStatus(1) === '已完成' ? '已完成学术文献匹配' : '正在匹配最具价值的学术文献', ''];
+  const stepNames = ['深度解析', '精准匹配', '自动提取论文核心要点'];
   return <Collapse bordered={false} lazyload={false} destroyOnHide={false} expandIconPosition="right"
     className="portal-ai-process" activeKey={state.open ? ['process'] : []}
     onChange={(_, keys) => { state.open = keys.includes('process'); state.manualOpen = true; render(); }}>
@@ -111,10 +133,10 @@ function Process() {
 
     </div>}>
       <ol className="portal-ai-process-groups" aria-label="检索与解读过程">
-        {[{ title: '问题理解与论文检索', steps: [0, 1] }, { title: '相关性筛选与AI解析', steps: [2, 3] }].map((group, groupIndex) => <li key={group.title}>
-          <div className="portal-ai-group-heading"><span className="portal-ai-group-number">{groupIndex + 1}</span><h3>{group.title}</h3><span>{groupStatus(group.steps)}</span></div>
+        {[{ title: '语义检索', steps: [0, 1] }, { title: 'AI解读', steps: [2] }].map((group, groupIndex) => <li key={group.title}>
+          <div className="portal-ai-group-heading"><span className="portal-ai-group-number">{groupIndex + 1}</span><h3>{group.title}</h3><span>{groupStatus(group.steps, displayStepStatus)}</span></div>
           <ol>{group.steps.map(index => {
-            const status = stepStatus(index);
+            const status = displayStepStatus(index);
             const done = status === '已完成';
             const active = status === '进行中';
             return <li className={`portal-ai-step${active ? ' is-active' : ''}${done ? ' is-complete' : ''}`} key={index}>
@@ -129,14 +151,15 @@ function Process() {
   </Collapse>;
 }
 function Answer() {
+  const groups = sections();
   if (state.failedStep !== null) return <div className="portal-ai-answer-empty"><h2>{state.failedStep < 2 ? '检索暂未完成' : 'AI解析暂未完成'}</h2><p>{state.failedStep < 2 ? '请稍后重试。' : '已保留本次检索论文，可继续查看右侧来源或重试解析。'}</p><Button type="secondary" size="small" onClick={retryProcessing}>{state.failedStep < 2 ? '重试检索' : '重试解析'}</Button></div>;
   if (!state.chunks) return <div className="portal-ai-answer-skeleton" role="status" aria-label="正在整理相关资料"><i /><i /><i /><p>正在整理与你的问题相关的资料</p></div>;
   if (!state.sources.length) return <div className="portal-ai-answer-empty"><h2>暂无可引用的论文</h2><p>可尝试更换主题词，或减少问题中的限定条件后重新检索。</p></div>;
   return <div className="portal-ai-answer-content" id="portalAiAnswerContent" aria-busy={state.phase !== 'done'}>
-    <section className="portal-ai-answer-block" key="intro"><p>围绕“{state.query}”，本次从检索结果中筛选出 {state.sources.length} 篇论文，依据其标题与摘要整理研究线索。</p></section>
-    {state.chunks >= 2 && <section className="portal-ai-answer-block" key="conclusions"><h2>一、研究要点</h2><ol>{state.sources.slice(0, 3).map(source => <li key={source.id}>{source.summary || `《${source.title}》与当前问题相关，但缺少摘要，暂不推断研究结论。`}<Citation source={source} /></li>)}</ol></section>}
-    {state.chunks >= 3 && <section className="portal-ai-answer-block" key="comparison"><h2>二、相关论文与研究内容</h2><div className="portal-ai-table-wrap"><table><thead><tr><th>论文</th><th>摘要线索</th></tr></thead><tbody>{state.sources.map(source => <tr key={source.id}><th scope="row">{source.title}<Citation source={source} /></th><td>{source.summary || '暂无摘要，需打开来源核对。'}</td></tr>)}</tbody></table></div></section>}
-    {state.chunks >= 4 && <section className="portal-ai-answer-block" key="next"><h2>三、后续阅读建议</h2><p>可按右侧论文顺序进一步查看研究方法、数据条件与适用范围，点击引用编号可定位到对应来源。<Citations sources={state.sources} /></p><p className="portal-ai-reading-note">本次引用 {state.sources.length} 篇论文，解析依据为标题与摘要，不代表已阅读全文；研究结论及验证情况需回到来源核对。</p></section>}
+    <section className="portal-ai-answer-block" key="intro"><p>围绕你的问题，当前资料可归纳为{groups.map(group => `“${group.name}”`).join('、')}等线索。下面结合论文研究，整理它们关注的问题和相互关系。</p></section>
+    {state.chunks >= 2 && <section className="portal-ai-answer-block" key="conclusions"><h2>一、结论概览</h2><ol>{groups.map(group => <li key={group.key}><strong>{group.name}：</strong>{group.conclusion && group.sources.every(source => source.id.startsWith('ai-demo-')) ? group.conclusion : group.sources[0].summary || '暂无摘要，需打开来源核对。'}<Citations sources={group.sources} /></li>)}</ol></section>}
+    {state.chunks >= 3 && <section className="portal-ai-answer-block" key="comparison"><h2>二、论文的主要线索</h2><div className="portal-ai-table-wrap"><table><thead><tr><th>研究方向</th><th>论文研究</th></tr></thead><tbody>{groups.map(group => <tr key={group.key}><th scope="row">{group.name}</th><td>{group.paper && group.sources.every(source => source.id.startsWith('ai-demo-')) ? group.paper : group.sources[0].summary || '暂无摘要，需打开来源核对。'}<Citations sources={group.sources} /></td></tr>)}</tbody></table></div></section>}
+    {state.chunks >= 4 && <section className="portal-ai-answer-block" key="next"><h2>三、如何结合这些资料继续研究</h2>{groups.map(group => <p key={group.key}><strong>{group.name}。</strong>可进入原始来源继续核对研究方法、数据条件和适用范围。<Citations sources={group.sources} /></p>)}<p className="portal-ai-reading-note">本次引用 {state.sources.length} 篇论文，解读依据为摘要，不代表已阅读全文；研究结论及验证情况需回到来源核对。</p></section>}
   </div>;
 }
 async function copyAnswer() {
