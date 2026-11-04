@@ -3955,7 +3955,7 @@
               </div>
               <div class="mg-ai-search-guide" id="mgAiSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">AI</span>
-                <span>输入关键词或完整研究问题，系统将进行语义检索并生成带引用的AI解读</span>
+                <span>输入关键词或完整研究问题，系统将检索相关论文并生成带引用的AI解析</span>
               </div>
               <div class="mg-ai-search-guide" id="mgAssociationSearchGuide" hidden>
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">联</span>
@@ -5205,7 +5205,7 @@
   <script src="search-results-motion.js?v=20261031-motion-2"></script>
   <script src="home-content-20261031.js?v=20261031-portal-release-2"></script>
   <script src="home-loop-motion.js?v=20261101-3"></script>
-  <script src="assets/vendor/portal-arco-search.js?v=20261102-fulltext-association"></script>
+  <script src="assets/vendor/portal-arco-search.js?v=20261104-ai-paper-analysis"></script>
   <script>
     (() => {
       "use strict";
@@ -8318,7 +8318,7 @@
             ? originalTerms.every((term) => scopedSearchable.includes(term))
             : originalTerms.some((term) => scopedSearchable.includes(term)));
           const expansionMatch = activeSearchMode !== "关联" && !(activeSearchMode === "关键词" && keywordExact) && expansionTerms.some((term) => scopedSearchable.includes(term));
-          const semanticMatch = (activeSearchMode === "AI 搜索" || activeSearchMode === "关联")
+          const semanticMatch = activeSearchMode === "关联"
             && semanticTerms.some((term) => fullSearchable.includes(term));
           const queryMatch = isReportFulltext()
             ? getReportHits(item).length > 0
@@ -8923,10 +8923,10 @@
           ? "知识检索已完成，可查看规范化过程、关联依据并采用有用信息。"
           : "检索已完成，可继续使用资源类型和筛选条件缩小范围。" );
         if (activeSearchMode === "AI 搜索") {
-          const sources = getFilteredSearchItems({ ignoreType: true, ignoreFacets: true, ignorePersonalization: true })
-            .filter(item => ["论文", "专利"].includes(item.type))
+          const sources = SEARCH_ITEMS
+            .filter(item => item.type === "论文")
             .map(item => ({ id: `local-${SEARCH_ITEMS.indexOf(item)}`, title: item.title, type: item.type, year: item.date.slice(0, 4), date: item.date,
-              meta: [item.author || item.applicant || item.source, item.venue || item.source].filter(Boolean).join(" · "), summary: item.summary, url: item.detailUrl || item.url || "" }));
+              doi: item.doi, tags: item.tags, meta: [item.author || item.source, item.venue || item.source].filter(Boolean).join(" · "), summary: item.summary, url: item.detailUrl || item.url || "" }));
           window.PortalAiSearch.prepare(query, sources);
         }
         showSurface("search", { focusTarget: activeSearchMode === "AI 搜索" ? document.getElementById("portalAiQuery") : portalResultSearchInput });
