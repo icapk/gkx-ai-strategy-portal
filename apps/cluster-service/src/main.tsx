@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import "@arco-design/web-react/dist/css/arco.css";
 import FigmaThinkTankPage from "./FigmaThinkTankPage";
@@ -11,6 +11,13 @@ import { buildPortalPageHref, isPortalPage, type PortalPage } from "./portalRout
 import "./portal-fidelity.css";
 import "./technology-topic-service.css";
 import "./responsive.css";
+import { requestPrototypeLogin, usePrototypeIdentity } from "./prototypeIdentity";
+
+function ProtectedThinkTankPage() {
+  const userId = usePrototypeIdentity();
+  useEffect(() => { if (!userId) requestPrototypeLogin(); }, [userId]);
+  return userId ? <FigmaThinkTankPage /> : null;
+}
 
 function notifyParentRoute() {
   if (window.parent === window) return;
@@ -52,7 +59,7 @@ if (requestedPage !== page) {
 const pageConfig = pageConfigs[page];
 
 document.title = `${pageConfig.title} - 深圳国际科技信息中心`;
-const RootPage = pageConfig.component;
+const RootPage = page === "think-tank" ? ProtectedThinkTankPage : pageConfig.component;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

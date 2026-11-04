@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录 - 深圳国际科技信息中心</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: #1d2129; background: #f5f7fb; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+    header { height: 72px; padding: 0 36px; display: flex; align-items: center; background: white; border-bottom: 1px solid #e5e8ef; }
+    header a { display: flex; align-items: center; gap: 12px; color: #1d2129; text-decoration: none; font-size: 19px; font-weight: 600; }
+    header img { width: 40px; height: 40px; }
+    main { width: 400px; max-width: calc(100vw - 40px); margin: 13vh auto 40px; padding: 36px; border: 1px solid #e5e8ef; border-radius: 8px; background: white; box-shadow: 0 8px 30px #203a6210; }
+    .eyebrow { margin: 0 0 8px; color: #165dff; font-size: 13px; }
+    h1 { margin: 0; font-size: 24px; font-weight: 600; }
+    p { color: #86909c; font-size: 14px; line-height: 1.7; }
+    label { margin: 28px 0 8px; display: block; font-size: 14px; }
+    input { width: 100%; height: 42px; padding: 0 12px; color: #4e5969; background: #f7f8fa; border: 1px solid #e5e6eb; border-radius: 4px; font-size: 14px; }
+    button { margin-top: 24px; width: 100%; height: 42px; color: white; background: #165dff; border: 0; border-radius: 4px; font-size: 15px; cursor: pointer; }
+    button:hover { background: #0e42d2; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #b8d4ff; outline-offset: 3px; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .back { display: block; margin-top: 20px; color: #4e5969; text-align: center; text-decoration: none; font-size: 13px; }
+    #error { color: #d83931; }
+  </style>
+</head>
+<body>
+  <header><a href="index.html"><img src="apps/cluster-service/dist/assets/gkx-logo.png" alt="">深圳国际科技信息中心</a></header>
+  <main>
+    <p class="eyebrow">高端智库服务</p>
+    <h1>请先登录</h1>
+    <p>登录后可查看高端智库板块及报告内容。</p>
+    <form id="loginForm">
+      <label for="account">账号</label>
+      <input id="account" value="演示用户" readonly>
+      <button type="submit" id="loginButton">登录</button>
+      <p id="error" role="alert" hidden></p>
+    </form>
+    <a class="back" href="index.html">返回门户首页</a>
+  </main>
+  <script src="search-recommend-remediation-fixtures.js"></script>
+  <script src="portal-search-recommend-adapter.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = document.getElementById('loginButton');
+      button.disabled = true;
+      button.textContent = '正在登录…';
+      try {
+        await window.PortalSearchRecommend.setDemoIdentity({ userId: 'demo-user', audience: 'research' });
+        const requested = new URLSearchParams(location.search).get('returnTo');
+        const target = new URL(requested || 'index.html?cluster=think-tank#reports', location.href);
+        const root = new URL('.', location.href);
+        if (target.origin !== root.origin || !target.pathname.startsWith(root.pathname) || target.pathname === location.pathname) throw new Error('登录返回地址无效，请从门户重新进入');
+        location.replace(target.href);
+      } catch (error) {
+        const message = document.getElementById('error');
+        message.hidden = false;
+        message.textContent = error.message || '登录失败，请重试';
+        button.disabled = false;
+        button.textContent = '登录';
+      }
+    });
+  </script>
+</body>
+</html>

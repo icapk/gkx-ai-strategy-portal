@@ -5197,7 +5197,8 @@
   </main>
 
   <script src="search-recommend-remediation-fixtures.js?v=20261102-domain-37"></script>
-  <script src="portal-search-recommend-adapter.js?v=20261103-journal-search-pagination"></script>
+  <script src="portal-search-recommend-adapter.js?v=20261104-thinktank-access"></script>
+  <script src="thinktank-prototype-access.js?v=20261104"></script>
   <script src="personal-resource-catalog.js?v=20261031-entry-fix"></script>
   <script src="personal-data-demo.js?v=20261031-entry-fix"></script>
   <script defer src="assets/vendor/gsap-3.15.0.min.js"></script>
@@ -8555,6 +8556,10 @@
       }
 
       function applySurface(name, options = {}) {
+        if (name === "iframe" && options.iframeUrl && window.PortalThinkTankAccess?.protectedUrl(options.iframeUrl) && !window.PortalThinkTankAccess.signedIn()) {
+          window.PortalThinkTankAccess.requestLogin();
+          return;
+        }
         document.body.dataset.portalScene = name === "home" || name === "search" ? "search" : "other";
         if (name !== "qa") window.clearTimeout(qaAnswerTimer);
         if (name !== "search") window.PortalAiSearch?.cancel();
@@ -9312,9 +9317,10 @@
       profileCenterTwo.addEventListener("click", async () => {
         try {
           const service = window.PortalSearchRecommend;
-          await service.setDemoIdentity({userId: service.snapshot().userId ? null : 'demo-user', audience: 'research'});
+          if (!service.snapshot().userId) { window.PortalThinkTankAccess.requestLogin(); return; }
+          await service.setDemoIdentity({userId: null, audience: 'research'});
           closeProfileMenu();
-          showSurface('home');
+          showHome();
         } catch (error) { window.alert(error.message || '账号状态未更新，请重试'); }
       });
 
@@ -9983,6 +9989,12 @@
       }
 
       function activateEmbeddedSystem(item, activeNavLabel = item.label) {
+        if (window.PortalThinkTankAccess?.protectedUrl(item.url) && !window.PortalThinkTankAccess.signedIn()) {
+          const returnTo = new URL(window.location.href);
+          returnTo.searchParams.set("cluster", "think-tank");
+          window.PortalThinkTankAccess.requestLogin(returnTo.href);
+          return;
+        }
         const clusterPage = activeNavLabel === "集群服务"
           ? new URL(item.url, window.location.href).searchParams.get("page")
           : null;
@@ -10016,7 +10028,13 @@
           return new URL(item.url, window.location.href).searchParams.get("page") === clusterPage;
         });
         if (!clusterGroup || !clusterItem) return false;
-        activateEmbeddedSystem(clusterItem, clusterGroup.label);
+        const entry = { ...clusterItem };
+        if (clusterPage === "think-tank" && ["#top", "#technology", "#reports", "#talent", "#mobility", "#news"].includes(window.location.hash)) {
+          const target = new URL(entry.url, window.location.href);
+          target.hash = window.location.hash;
+          entry.url = target.href;
+        }
+        activateEmbeddedSystem(entry, clusterGroup.label);
         return true;
       }
 
@@ -10085,6 +10103,11 @@
           });
         }
 
+        if (activeNavLabel === "集群服务" && window.PortalThinkTankAccess?.protectedUrl(item.url)) {
+          entry.dataset.thinkTankEntry = "";
+          entry.hidden = !window.PortalThinkTankAccess.signedIn();
+          if (entry.hidden) entry.style.display = "none";
+        }
         entry.appendChild(createEntryName(item));
 
         if (item.url) {

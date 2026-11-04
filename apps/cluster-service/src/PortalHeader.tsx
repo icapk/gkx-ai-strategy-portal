@@ -1,6 +1,7 @@
 import { ArrowLeft, ChevronDown, Search } from "lucide-react";
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { buildPortalPageHref, type PortalPage } from "./portalRoutes";
+import { requestPrototypeLogin, signOutPrototype, usePrototypeIdentity } from "./prototypeIdentity";
 
 type PortalHeaderProps = {
   currentPage: PortalPage;
@@ -69,6 +70,7 @@ function HeaderMenu({
 }
 
 export default function PortalHeader({ currentPage }: PortalHeaderProps) {
+  const userId = usePrototypeIdentity();
   const active = currentPage === "information-exchange" || currentPage === "technology-resource-service" || currentPage === "technology-decision-support" || currentPage === "scientific-data-center" ? "science" : "strategy";
   return (
     <>
@@ -93,7 +95,7 @@ export default function PortalHeader({ currentPage }: PortalHeaderProps) {
             </HeaderMenu>
             <span className="fp-nav-static is-disabled">未来教育</span>
             <HeaderMenu label="战略咨询" active={active === "strategy"}>
-              <a href={buildPortalPageHref("think-tank")} aria-current={currentPage === "think-tank" ? "page" : undefined}>新型高端智库</a>
+              {userId ? <a href={buildPortalPageHref("think-tank")} aria-current={currentPage === "think-tank" ? "page" : undefined}>新型高端智库</a> : null}
               <a href={buildPortalPageHref("technology-topic-service")} aria-current={currentPage === "technology-topic-service" ? "page" : undefined}>科技专题服务</a>
             </HeaderMenu>
             <span className="fp-nav-static is-disabled">科技评价</span>
@@ -104,7 +106,7 @@ export default function PortalHeader({ currentPage }: PortalHeaderProps) {
             <Search size={16} strokeWidth={1.8} aria-hidden="true" />
           </div>
           <span className="fp-header-link is-disabled">应用</span>
-          <span className="fp-header-link is-disabled">登录</span>
+          {userId ? <button className="fp-header-link ttf-session-action" type="button" onClick={() => void signOutPrototype()}>退出登录</button> : <button className="fp-header-link ttf-session-action" type="button" onClick={requestPrototypeLogin}>登录</button>}
           <span className="fp-register is-disabled">免费注册</span>
         </div>
       </header>

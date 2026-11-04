@@ -16,6 +16,7 @@ import {
   Star,
   Target,
   UserRound,
+  X,
 } from "lucide-react";
 import PortalHeader from "./PortalHeader";
 import PageSectionLocator from "./PageSectionLocator";
@@ -39,7 +40,7 @@ type ConsultingReport = {
 };
 
 const reportFields = ["全部领域", "机械运输", "信息电子", "化学与化学工程", "能源动力", "土木建筑", "环境与水利", "农业", "医药卫生"] as const;
-const reportTopics = ["全部专题", "新能源专题库", "数字基建专题库", "公共卫生专题库", "环境保护专题库", "人工智能专题库"] as const;
+const reportTopics = ["全部主题", "新能源专题库", "数字基建专题库", "公共卫生专题库", "环境保护专题库", "人工智能专题库"] as const;
 
 const consultingReports: ConsultingReport[] = [
   {
@@ -760,7 +761,8 @@ function ReportsSection() {
   const [field, setField] = useState<(typeof reportFields)[number]>("全部领域");
   const [institution, setInstitution] = useState("全部机构");
   const [year, setYear] = useState("全部年度");
-  const [topic, setTopic] = useState<(typeof reportTopics)[number]>("全部专题");
+  const [topic, setTopic] = useState<(typeof reportTopics)[number]>("全部主题");
+  const [queryDraft, setQueryDraft] = useState("");
   const [query, setQuery] = useState("");
   const [expandedCaseId, setExpandedCaseId] = useState<string | null>(null);
   const [recommendationOffset, setRecommendationOffset] = useState(0);
@@ -778,8 +780,8 @@ function ReportsSection() {
       const matchesField = field === "全部领域" || report.field === field;
       const matchesInstitution = institution === "全部机构" || report.institution === institution;
       const matchesYear = year === "全部年度" || report.year === year;
-      const matchesTopic = topic === "全部专题" || report.topic === topic;
-      const searchable = `${report.title}${report.summary}${report.direction}${report.analysis.join("")}${report.recommendations.join("")}`.toLocaleLowerCase();
+      const matchesTopic = topic === "全部主题" || report.topic === topic;
+      const searchable = report.title.toLocaleLowerCase();
       return matchesField && matchesInstitution && matchesYear && matchesTopic && (!normalizedQuery || searchable.includes(normalizedQuery));
     });
   }, [field, institution, query, topic, year]);
@@ -797,13 +799,14 @@ function ReportsSection() {
     url.searchParams.set("page", "think-tank");
     url.searchParams.set("report", report.id);
     url.hash = "reports";
-    window.location.assign(`${url.pathname}${url.search}${url.hash}`);
+    window.open(`${url.pathname}${url.search}${url.hash}`, "_blank", "noopener,noreferrer");
   };
   const clearFilters = () => {
     setField("全部领域");
     setInstitution("全部机构");
     setYear("全部年度");
-    setTopic("全部专题");
+    setTopic("全部主题");
+    setQueryDraft("");
     setQuery("");
   };
 
@@ -811,7 +814,7 @@ function ReportsSection() {
     <SectionHeading title="战略咨询报告" subtitle="领域定向推送｜成果案例分类｜报告详细内容" />
     <div className="ttf-strategy-report-surface">
       <section className="ttf-strategy-push" aria-labelledby="ttf-strategy-push-title">
-        <header className="ttf-strategy-subheading"><div><h3 id="ttf-strategy-push-title">定向推送</h3><p>根据用户已关注的领域，推送包含技术发展方向、分析内容与技术建议的研究报告。</p></div><button type="button" onClick={() => setRecommendationOffset((value) => (value + 1) % pushReports.length)}><RefreshCw size={15} aria-hidden="true" />换一批</button></header>
+        <header className="ttf-strategy-subheading"><div><h3 id="ttf-strategy-push-title">定向推送</h3><p>根据用户已关注的领域，推送包含技术发展方向、分析内容与技术建议的研究报告。</p></div><button type="button" disabled={pushReports.length <= 3} onClick={() => setRecommendationOffset((value) => (value + 1) % pushReports.length)}><RefreshCw size={15} aria-hidden="true" />换一批</button></header>
         <div className="ttf-strategy-push-grid">{recommendations.map((report) => <article className="ttf-strategy-push-card" key={report.id}>
           <header><span>匹配关注领域</span><h4>{report.title}</h4></header>
           <p>{report.summary}</p>
@@ -825,24 +828,39 @@ function ReportsSection() {
       </section>
 
       <section className="ttf-strategy-cases" aria-labelledby="ttf-strategy-cases-title">
-        <header className="ttf-strategy-subheading"><div><h3 id="ttf-strategy-cases-title">战略咨询成果案例</h3><p>对已完成成果按领域、标准和专题分类展示；可查看成果摘要与完整详细信息。</p></div><span>注册用户可查看完整报告</span></header>
+        <header className="ttf-strategy-subheading"><div><h3 id="ttf-strategy-cases-title">战略咨询成果案例</h3><p>按领域分类、标准分类（所属机构、发表年度）和主题分类展示已公开的成果案例。</p></div></header>
         <div className="ttf-strategy-filter-panel">
-          <label className="ttf-strategy-search"><Search size={16} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索成果标题、技术方向或建议" aria-label="搜索战略咨询成果案例" /></label>
+          <form className="ttf-strategy-search" role="search" aria-label="报告标题搜索" onSubmit={(event) => { event.preventDefault(); setQuery(queryDraft.trim()); setCurrentPage(1); setExpandedCaseId(null); }}>
+            <button className="ttf-title-search-submit" type="submit" aria-label="搜索报告标题"><Search size={16} aria-hidden="true" /></button>
+            <input value={queryDraft} onChange={(event) => { setQueryDraft(event.target.value); if (!event.target.value) setQuery(""); }} placeholder="搜索报告标题" aria-label="报告标题关键词" />
+            {queryDraft ? <button className="ttf-title-search-clear" type="button" aria-label="清空报告标题" onClick={() => { setQueryDraft(""); setQuery(""); }}><X size={14} aria-hidden="true" /></button> : null}
+          </form>
           <div className="ttf-strategy-filters">
-            <ArcoFilterSelect label="领域分类" value={field} options={reportFields} onChange={(value) => setField(value as (typeof reportFields)[number])} />
-            <ArcoFilterSelect label="所属机构" value={institution} options={institutions} onChange={setInstitution} />
-            <ArcoFilterSelect label="发表年度" value={year} options={years} onChange={setYear} />
-            <ArcoFilterSelect label="主题分类" value={topic} options={reportTopics} onChange={(value) => setTopic(value as (typeof reportTopics)[number])} />
+            <fieldset className="ttf-strategy-filter-group">
+              <legend>领域分类</legend>
+              <ArcoFilterSelect label="领域分类" value={field} options={reportFields} onChange={(value) => setField(value as (typeof reportFields)[number])} />
+            </fieldset>
+            <fieldset className="ttf-strategy-filter-group">
+              <legend>标准分类<small>所属机构 · 发表年度</small></legend>
+              <div className="ttf-strategy-standard-fields">
+                <ArcoFilterSelect label="所属机构" value={institution} options={institutions} onChange={setInstitution} />
+                <ArcoFilterSelect label="发表年度" value={year} options={years} onChange={setYear} />
+              </div>
+            </fieldset>
+            <fieldset className="ttf-strategy-filter-group">
+              <legend>主题分类</legend>
+              <ArcoFilterSelect label="主题分类" value={topic} options={reportTopics} onChange={(value) => setTopic(value as (typeof reportTopics)[number])} />
+            </fieldset>
           </div>
         </div>
         <div className="ttf-strategy-case-list">{paginatedCases.length ? paginatedCases.map((report) => { const expanded = expandedCaseId === report.id; const summaryId = `strategy-case-${report.id}`; return <article className="ttf-strategy-case-row" key={report.id}>
-          <div className="ttf-strategy-case-main"><header><span>成果案例</span><h4>{report.title}</h4></header><p>{report.summary}</p><div className="ttf-strategy-case-tags"><span>{report.field}</span><span>{report.topic}</span></div></div>
-          <dl><div><dt>所属机构</dt><dd>{report.institution}</dd></div><div><dt>发表年度</dt><dd>{report.year}</dd></div></dl>
+          <div className="ttf-strategy-case-main"><header><span>成果案例</span><h4>{report.title}</h4></header><p>{report.summary}</p><div className="ttf-strategy-case-tags"><span>领域：{report.field}</span><span>主题：{report.topic}</span></div></div>
+          <section className="ttf-strategy-case-standard" aria-label="标准分类"><h5>标准分类</h5><dl><div><dt>所属机构</dt><dd>{report.institution}</dd></div><div><dt>发表年度</dt><dd>{report.year}</dd></div></dl></section>
           <div className="ttf-strategy-case-actions"><button type="button" aria-expanded={expanded} aria-controls={summaryId} onClick={() => setExpandedCaseId((current) => current === report.id ? null : report.id)}>{expanded ? "收起成果摘要" : "查看成果摘要"}<ChevronDown size={14} aria-hidden="true" /></button><button className="is-primary" type="button" onClick={() => openReport(report)}>查看完整报告</button></div>
-          {expanded ? <div className="ttf-strategy-case-summary" id={summaryId}><section><h5>技术发展方向</h5><p>{report.direction}</p></section><section><h5>分析内容</h5><ul>{report.analysis.slice(0, 2).map((item) => <li key={item}>{item}</li>)}</ul></section><section><h5>技术建议</h5><ul>{report.recommendations.slice(0, 2).map((item) => <li key={item}>{item}</li>)}</ul></section></div> : null}
-        </article>; }) : <div className="ttf-strategy-empty"><strong>未找到符合条件的成果案例</strong><p>请调整领域、机构、年度、专题或搜索关键词。</p><button type="button" onClick={clearFilters}>清除筛选</button></div>}</div>
+          {expanded ? <div className="ttf-strategy-case-summary is-full-summary" id={summaryId}><section><h5>成果摘要</h5><p>{report.summary}</p></section></div> : null}
+        </article>; }) : <div className="ttf-strategy-empty"><strong>暂无符合条件的报告</strong><p>请调整领域、机构、年度、主题或报告标题。</p><button type="button" onClick={clearFilters}>清除筛选</button></div>}</div>
         <footer className="ttf-strategy-results">
-          <div><span>共 {filteredCases.length} 项成果案例</span>{field !== "全部领域" || institution !== "全部机构" || year !== "全部年度" || topic !== "全部专题" || query ? <button type="button" onClick={clearFilters}>清除筛选</button> : null}</div>
+          <div><span>共 {filteredCases.length} 项成果案例</span>{field !== "全部领域" || institution !== "全部机构" || year !== "全部年度" || topic !== "全部主题" || query ? <button type="button" onClick={clearFilters}>清除筛选</button> : null}</div>
           {filteredCases.length ? <nav className="ttf-strategy-pagination" aria-label="成果案例分页">
             <button type="button" aria-label="上一页" disabled={activePage === 1} onClick={() => { setCurrentPage((page) => Math.max(1, page - 1)); setExpandedCaseId(null); }}><ChevronLeft size={14} aria-hidden="true" /></button>
             {Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => <button type="button" className={activePage === page ? "is-active" : ""} aria-current={activePage === page ? "page" : undefined} onClick={() => { setCurrentPage(page); setExpandedCaseId(null); }} key={page}>{page}</button>)}

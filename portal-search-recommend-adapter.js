@@ -2,7 +2,7 @@
 (function (global) {
   'use strict';
   const F=global.PORTAL_REMEDIATION_FIXTURES, KEY='gkx-search-recommend-shared-v20261025';
-  const defaults=()=>({version:1,userContextVersion:'context-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),profileControl:null,personalDemoSeed:null,userId:'demo-user',audience:'research',events:[],follows:[],followsVersion:'1',followMutations:{},keywordWatchMigrationCompleted:false,independentSubscriptionsVersion:0,followUpdateHistory:{},autoFollowSearchKeywords:true,notificationEmail:null,weeklyEmail:{email:null,enabled:false,version:1},comments:[],resourceStates:{},talentContext:{contextType:'PERSON',fields:[],roleDirections:[]}});
+  const defaults=()=>({version:1,userContextVersion:'context-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),profileControl:null,personalDemoSeed:null,userId:null,audience:'research',events:[],follows:[],followsVersion:'1',followMutations:{},keywordWatchMigrationCompleted:false,independentSubscriptionsVersion:0,followUpdateHistory:{},autoFollowSearchKeywords:true,notificationEmail:null,weeklyEmail:{email:null,enabled:false,version:1},comments:[],resourceStates:{},talentContext:{contextType:'PERSON',fields:[],roleDirections:[]}});
   let state=defaults(),persistent=true,catalog=[],listeners=new Set(),exactEngine=null;
   try {state={...state,...JSON.parse(localStorage.getItem(KEY)||'{}')}} catch(e){persistent=false}
   const clone=x=>JSON.parse(JSON.stringify(x)),norm=x=>String(x||'').normalize('NFKC').toLocaleLowerCase('zh-CN').trim().replace(/\s+/g,' '),uid=p=>p+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8), now=()=>new Date().toISOString();
