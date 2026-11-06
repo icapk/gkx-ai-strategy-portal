@@ -389,11 +389,12 @@
 .ttf-strategy-search input { width: 100%; height: 100%; padding: 0 12px 0 36px; color: #1d2129; background: transparent; border: 0; outline: 0; font-size: 14px; }
 .ttf-strategy-search input::placeholder { color: #86909c; }
 .ttf-strategy-search:focus-within { border-color: #165dff; box-shadow: 0 0 0 2px rgba(22,93,255,.1); }
-.ttf-strategy-filters { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr) minmax(0,1fr); gap: 24px; }
+.ttf-strategy-filters { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr) minmax(0,1fr); align-items: end; gap: 24px; }
 .ttf-strategy-filter-group { min-width: 0; margin: 0; padding: 0; border: 0; }
 .ttf-strategy-filter-group legend { margin: 0 0 8px; padding: 0; color: #1d2129; font-size: 13px; line-height: 20px; font-weight: 500; }
-.ttf-strategy-filter-group legend small { margin-left: 8px; color: #86909c; font-size: 12px; font-weight: 400; }
 .ttf-strategy-standard-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.ttf-strategy-standard-field { min-width: 0; display: grid; gap: 8px; }
+.ttf-strategy-standard-field > span { color: #4e5969; font-size: 13px; line-height: 20px; }
 .ttf-arco-field { min-width: 0; }
 .ttf-arco-select { position: relative; min-width: 0; }
 .ttf-arco-select-trigger { width: 100%; height: 32px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #1d2129; background: #fff; border: 1px solid #e5e6eb; border-radius: 4px; font-size: 14px; line-height: 22px; text-align: left; cursor: pointer; transition: border-color 120ms ease, box-shadow 120ms ease; }

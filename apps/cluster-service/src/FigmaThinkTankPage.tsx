@@ -841,10 +841,16 @@ function ReportsSection() {
               <ArcoFilterSelect label="领域分类" value={field} options={reportFields} onChange={(value) => setField(value as (typeof reportFields)[number])} />
             </fieldset>
             <fieldset className="ttf-strategy-filter-group">
-              <legend>标准分类<small>所属机构 · 发表年度</small></legend>
+              <legend>标准分类</legend>
               <div className="ttf-strategy-standard-fields">
-                <ArcoFilterSelect label="所属机构" value={institution} options={institutions} onChange={setInstitution} />
-                <ArcoFilterSelect label="发表年度" value={year} options={years} onChange={setYear} />
+                <div className="ttf-strategy-standard-field">
+                  <span>所属机构</span>
+                  <ArcoFilterSelect label="所属机构" value={institution} options={institutions} onChange={setInstitution} />
+                </div>
+                <div className="ttf-strategy-standard-field">
+                  <span>发表年度</span>
+                  <ArcoFilterSelect label="发表年度" value={year} options={years} onChange={setYear} />
+                </div>
               </div>
             </fieldset>
             <fieldset className="ttf-strategy-filter-group">
