@@ -8387,7 +8387,6 @@
         const resultDetailUrl = item.type === "论文"
           ? item.detailUrl || PAPER_DETAIL_URL
           : item.detailUrl || item.url || "";
-        const resultDetailLabel = item.type === "论文" ? "查看论文详情" : "查看资源详情";
         const resultTitle = highlightResultText(item.title, query);
         const titleControl = resultDetailUrl
           ? `<a class="portal-result-detail-link" data-result-detail-link href="${escapeHtml(resultDetailUrl)}" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开 ${escapeHtml(item.title)}${item.type === "论文" ? " 论文详情" : " 资源详情"}">${resultTitle}</a>`
@@ -8421,15 +8420,10 @@
               <button type="button" data-association-feedback-cancel>取消</button>
             </div>
           </div>` : "";
-        const actionMenuId = `portal-result-actions-${itemIndex}`;
-        const actionsMarkup = `${associationActionsMarkup}
-          ${item.type === "论文" ? `<button class="portal-search-card-action portal-paper-comment-toggle" type="button" data-paper-comment-toggle aria-expanded="false">查看论文并评论</button>` : ""}
-          ${resultDetailUrl ? `<a class="portal-search-card-action is-primary" data-result-detail-link href="${escapeHtml(resultDetailUrl)}" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开 ${escapeHtml(item.title)}资源详情">${resultDetailLabel}</a>` : ""}`;
         article.innerHTML = `
           <div class="portal-result-content">
             <div class="portal-result-main">
               <h3 class="portal-search-card-title">${titleControl}</h3>
-              ${actionsMarkup.trim() ? `<button class="portal-result-action-toggle" type="button" data-result-menu-trigger popovertarget="${actionMenuId}" aria-expanded="false" aria-controls="${actionMenuId}">更多操作</button><div class="portal-result-action-menu" id="${actionMenuId}" popover="auto" role="group" aria-label="结果操作">${actionsMarkup}</div>` : ""}
               <dl class="portal-result-metadata">${metadata.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${highlightResultText(value, query)}</dd></div>`).join('<span class="portal-metadata-divider" aria-hidden="true"></span>')}</dl>
               ${isReportFulltext() && item.type === "报告" ? reportHitsMarkup(item) : `<p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>`}
             </div>
@@ -8439,33 +8433,11 @@
             </div>
             <div class="portal-result-supplemental">
               ${associationReasonMarkup}
+              ${associationActionsMarkup ? `<div class="portal-search-card-actions">${associationActionsMarkup}</div>` : ""}
               ${associationFeedbackMarkup}
               ${item.type === "论文" ? getPaperCommentPanelMarkup(item) : ""}
             </div>
           </div>`;
-        const menu = article.querySelector('.portal-result-action-menu');
-        const trigger = article.querySelector('[data-result-menu-trigger]');
-        if (menu && trigger) {
-          menu.addEventListener('beforetoggle', event => {
-            if (event.newState !== 'open') return;
-            const bounds = trigger.getBoundingClientRect();
-            const width = Math.min(240, document.documentElement.clientWidth - 32);
-            const idealHeight = menu.children.length * 28 + Math.max(0, menu.children.length - 1) * 6 + 26;
-            const below = window.innerHeight - bounds.bottom - 14;
-            const above = bounds.top - 14;
-            const upward = below < idealHeight && above > below;
-            const height = Math.min(idealHeight, 320, upward ? above : below);
-            Object.assign(menu.style, {
-              width: `${width}px`, maxHeight: `${Math.max(48, height)}px`,
-              left: `${Math.max(16, Math.min(bounds.right - width, document.documentElement.clientWidth - width - 16))}px`,
-              top: `${upward ? Math.max(8, bounds.top - height - 6) : bounds.bottom + 6}px`
-            });
-          });
-          menu.addEventListener('toggle', event => trigger.setAttribute('aria-expanded', String(event.newState === 'open')));
-          menu.addEventListener('click', event => {
-            if (event.target.closest('.portal-search-card-action') && menu.matches(':popover-open')) menu.hidePopover();
-          });
-        }
         return article;
       }
 
