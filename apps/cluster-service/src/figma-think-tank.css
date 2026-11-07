@@ -187,9 +187,9 @@
 .ttf-route-search:hover { border-color: #c9cdd4; }
 .ttf-route-select:focus-within,
 .ttf-route-search:focus-within { border-color: #165dff; box-shadow: 0 0 0 2px rgba(22,93,255,.1); }
-.ttf-route-content { display: grid; grid-template-rows: 446px auto 568px; gap: 16px; margin-top: 24px; }
-.ttf-route-overview { height: 446px; overflow: hidden; border-radius: 8px; }
-.ttf-route-metrics { height: 166px; padding: 24px 32px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); background: #fff; }
+.ttf-route-content { display: grid; grid-template-rows: auto auto auto 568px; gap: 16px; margin-top: 24px; }
+.ttf-route-overview { min-width: 0; overflow: hidden; background: #fff; border-radius: 8px; }
+.ttf-route-metrics { height: 166px; padding: 24px 32px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); background: #fff; }
 .ttf-route-metrics > div { position: relative; min-width: 0; padding: 24px 16px; display: flex; flex-direction: column; gap: 16px; background: #f7f8fa; }
 .ttf-route-metrics > div:first-child { border-radius: 4px 0 0 4px; }
 .ttf-route-metrics > div:last-child { border-radius: 0 4px 4px 0; }
@@ -198,6 +198,38 @@
 .ttf-route-metric-value { display: flex; align-items: flex-end; gap: 4px; }
 .ttf-route-metrics strong { color: #1d2129; font-size: 24px; line-height: 32px; font-weight: 500; }
 .ttf-route-metric-value img { display: block; width: 24px; height: 24px; margin-bottom: 1px; }
+.ttf-development-overview { min-width: 0; padding: 18px 24px 25px; background: #fff; border-radius: 8px; }
+.ttf-development-levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 20px; }
+.ttf-development-level { min-width: 0; padding: 0 25px; }
+.ttf-development-level:first-child { padding-left: 0; }
+.ttf-development-level:last-child { padding-right: 0; }
+.ttf-development-level + .ttf-development-level { border-left: 1px solid #e8edf3; }
+.ttf-development-label { display: flex; align-items: center; gap: 8px; color: #2868be; font-size: 14px; font-weight: 600; }
+.ttf-development-task .ttf-development-label { color: #397d77; }
+.ttf-development-safeguard .ttf-development-label { color: #82704c; }
+.ttf-development-level h4 { margin: 12px 0 8px; color: #2d3949; font-size: 16px; line-height: 25px; font-weight: 600; }
+.ttf-development-level p { margin: 0; color: #647184; font-size: 14px; line-height: 26px; }
+
+.ttf-publication-panel { margin: 0 24px; padding: 20px 0; border-top: 1px solid #e8edf3; }
+.ttf-paper-range-actions { display: flex; align-items: center; gap: 20px; }
+.ttf-paper-range-switch { display: inline-flex; padding: 3px; gap: 2px; background: #f1f4f8; border-radius: 5px; }
+.ttf-paper-range-switch button { min-width: 68px; height: 28px; padding: 0 12px; color: #69788d; background: transparent; border: 0; border-radius: 3px; font-size: 12px; cursor: pointer; }
+.ttf-paper-range-switch button[aria-pressed="true"] { color: #1877ff; background: #fff; font-weight: 600; box-shadow: 0 1px 3px rgba(40,62,90,.08); }
+.ttf-paper-range-switch button:hover { color: #1877ff; }
+.ttf-paper-range-switch button:focus-visible { outline: 2px solid #1877ff; outline-offset: 1px; }
+.ttf-paper-line-chart { display: block; width: 100%; height: auto; margin-top: 18px; overflow: visible; }
+.ttf-paper-line-chart text { fill: #7f8da0; font-size: 11px; }
+.ttf-paper-line-chart .ttf-paper-axis-title { font-size: 10px; }
+.ttf-paper-point { cursor: pointer; outline: none; }
+.ttf-paper-point > circle,
+.ttf-paper-point > text { pointer-events: none; }
+.ttf-paper-point text.is-up { fill: #bd645e; }
+.ttf-paper-point text.is-down { fill: #23826f; }
+.ttf-paper-point.is-selected .ttf-paper-month { fill: #1877ff; font-weight: 600; }
+.ttf-paper-point:focus-visible > rect { stroke: #1877ff; stroke-width: 1.5px; rx: 4px; }
+.ttf-publication-tooltip rect { fill: #fff; stroke: #dbe4ef; stroke-width: 1px; filter: drop-shadow(0 3px 7px rgba(32,58,90,.08)); }
+.ttf-publication-tooltip text { fill: #53667b; font-size: 11px; }
+.ttf-publication-tooltip text:first-of-type { fill: #2c4058; font-weight: 600; }
 .ttf-route-trend { height: 280px; padding: 24px; display: flex; flex-direction: column; gap: 32px; background: #fff; }
 .ttf-route-trend > header { position: relative; height: 32px; display: flex; align-items: center; justify-content: space-between; }
 .ttf-route-trend h3,

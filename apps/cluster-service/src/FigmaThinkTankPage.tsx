@@ -226,9 +226,9 @@ const technologyMilestones = [
 const roadmapLevels = [
   {
     id: "goal",
-    label: "发展目标",
-    title: "形成可持续演进的人工智能技术体系",
-    description: "围绕基础能力、前沿方向与行业应用构建可跟踪、可评估的发展目标。",
+    label: "领域发展目标",
+    title: "夯实基础能力，拓展行业应用",
+    description: "围绕基础模型、多模态智能、具身智能与行业智能体，提升自主创新和场景应用能力，逐步形成从基础研究、关键技术到核心产品的技术体系。",
     icon: Target,
     items: [
       { label: "发展方向", value: "基础模型、多模态智能、具身智能与行业智能体" },
@@ -239,8 +239,8 @@ const roadmapLevels = [
   {
     id: "task",
     label: "具体任务",
-    title: "将关键技术转化为可验证任务与核心产品",
-    description: "按技术攻关、产品形成和场景验证组织任务，避免路线只停留在名词清单。",
+    title: "推进关键技术攻关与场景验证",
+    description: "重点开展高效训练与推理、多模态融合、知识增强和智能体协同研究；推进模型工具链、行业智能体平台与评测服务建设，在科研、制造和公共服务等场景分阶段验证应用效果。",
     icon: ListChecks,
     items: [
       { label: "关键技术", value: "多模态理解、具身智能决策、行业知识增强" },
@@ -251,8 +251,8 @@ const roadmapLevels = [
   {
     id: "safeguard",
     label: "保障措施",
-    title: "建立数据、人才与治理协同保障",
-    description: "用可追溯的数据底座、跨团队协作和安全评测支撑技术路线持续推进。",
+    title: "完善资源供给与协同治理机制",
+    description: "加强高质量数据、算力平台与复合型人才支撑，组织高校、科研机构和企业协同攻关；配套数据授权、安全评测、标准规范与阶段复盘机制，保障技术研发和成果转化持续推进。",
     icon: ShieldCheck,
     items: [
       { label: "数据与算力", value: "建立数据质量、授权边界、算力调度和过程记录机制" },
@@ -397,11 +397,128 @@ function LineChart({ level = "goal", visibility = { total: true, breakthrough: t
   );
 }
 
+// Prototype: 60 complete months, plus October 2021 as the first comparison base.
+const recentPaperCounts = [800, 760, 855, 900, 855, 900, 956];
+const seasonalPaperOffsets = [0, 22, -8, 30, 12, -16, 38, 8, 28, -12, 14, 36];
+const monthlyPaperCounts: Array<{ period: string; label: string; month: string; count: number | null }> = Array.from({ length: 61 }, (_, index) => {
+  const date = new Date(Date.UTC(2021, 9 + index, 1));
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  return {
+    period: `${year}-${String(month).padStart(2, "0")}`,
+    label: `${year}年${month}月`,
+    month: `${month}月`,
+    count: index >= 54 ? recentPaperCounts[index - 54] : 420 + index * 7 + seasonalPaperOffsets[index % 12],
+  };
+});
+
+function calculatePaperRate(count: number | null, previousCount: number | null) {
+  if (count === null || previousCount === null || previousCount === 0) return null;
+  return (count - previousCount) / previousCount * 100;
+}
+
+const monthlyPaperChanges = monthlyPaperCounts.slice(1).map((item, index) => {
+  const previous = monthlyPaperCounts[index];
+  return { ...item, previousCount: previous.count, rate: calculatePaperRate(item.count, previous.count) };
+});
+const formatPaperRate = (rate: number | null) => {
+  if (rate === null) return "—";
+  const rounded = Number(rate.toFixed(1));
+  return `${rounded > 0 ? "+" : ""}${rounded.toFixed(1)}%`;
+};
+const formatPaperCount = (count: number | null) => count === null ? "—" : count.toLocaleString("zh-CN");
+
+function PaperPublicationChart() {
+  const [range, setRange] = useState<"6m" | "5y">("6m");
+  const series = range === "6m" ? monthlyPaperChanges.slice(-6) : monthlyPaperChanges;
+  const longRange = range === "5y";
+  const [selectedIndex, setSelectedIndex] = useState(5);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [compact, setCompact] = useState(() => window.matchMedia("(max-width: 768px)").matches);
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 768px)");
+    const update = () => setCompact(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  const selected = series[selectedIndex];
+  const rangeLabel = `${series[0].label}—${series[series.length - 1].label}`;
+  const changeRange = (nextRange: "6m" | "5y") => {
+    setRange(nextRange);
+    setSelectedIndex(nextRange === "6m" ? 5 : monthlyPaperChanges.length - 1);
+    setShowTooltip(false);
+  };
+  const showMonth = (index: number) => {
+    setSelectedIndex(index);
+    setShowTooltip(true);
+  };
+  const chartWidth = compact ? 360 : 880;
+  const chartLeft = compact ? 40 : 70;
+  const chartRight = compact ? 336 : 830;
+  const pointSpacing = (chartRight - chartLeft) / (series.length - 1);
+  const pointWidth = Math.min(compact ? 40 : 60, pointSpacing);
+  const chartX = (index: number) => chartLeft + index * pointSpacing;
+  const rates = series.flatMap((item) => item.rate === null ? [] : [item.rate]);
+  const minRate = Math.min(0, ...rates);
+  const maxRate = Math.max(0, ...rates);
+  const rawStep = (maxRate - minRate || 10) / 5;
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
+  const tickStep = ([1, 2, 5, 10].find((step) => step >= rawStep / magnitude) ?? 10) * magnitude;
+  const minTick = Math.floor(minRate / tickStep) * tickStep - (minRate < 0 && minRate % tickStep === 0 ? tickStep : 0);
+  const maxTick = Math.ceil(maxRate / tickStep) * tickStep + (maxRate % tickStep === 0 ? tickStep : 0);
+  const ticks = Array.from({ length: Math.round((maxTick - minTick) / tickStep) + 1 }, (_, index) => minTick + index * tickStep);
+  const chartY = (rate: number) => 24 + (maxTick - rate) / (maxTick - minTick) * 148;
+  const linePath = series.map((item, index) => item.rate === null ? "" : `${index === 0 || series[index - 1].rate === null ? "M" : "L"}${chartX(index)} ${chartY(item.rate)}`).join(" ");
+  const tooltipX = Math.min(chartWidth - 206, Math.max(8, chartX(selectedIndex) - 96));
+  return (
+    <div className="ttf-publication-chart">
+      <PanelTitle title="论文发表环比变化" aside={
+        <span className="ttf-paper-range-actions">
+          <span>{rangeLabel} · 人工智能领域演示数据</span>
+          <span className="ttf-paper-range-switch" role="group" aria-label="论文环比统计范围">
+            <button type="button" aria-pressed={range === "6m"} onClick={() => changeRange("6m")}>近6个月</button>
+            <button type="button" aria-pressed={range === "5y"} onClick={() => changeRange("5y")}>近5年</button>
+          </span>
+        </span>
+      } />
+      <svg className="ttf-paper-line-chart" viewBox={`0 0 ${chartWidth} 218`} role="group" aria-label={`${rangeLabel}人工智能领域论文发表月度环比，共${series.length}个月，演示数据。可悬停、点击或使用键盘查看各月数据。`} onMouseLeave={() => setShowTooltip(false)}>
+        <text className="ttf-paper-axis-title" x="16" y="12">环比（%）</text>
+        {ticks.map((rate) => <g key={rate}><line x1={chartLeft - 12} y1={chartY(rate)} x2={chartRight + 12} y2={chartY(rate)} stroke={rate === 0 ? "#a9b8c9" : "#e5eaf1"} strokeDasharray={rate === 0 ? undefined : "3 5"}/><text x={chartLeft - 20} y={chartY(rate) + 4} textAnchor="end">{Number(rate.toPrecision(8))}</text></g>)}
+        <line x1={chartX(selectedIndex)} y1="20" x2={chartX(selectedIndex)} y2="182" stroke="#c5d9f6" strokeDasharray="4 4"/>
+        <path d={linePath} fill="none" stroke="#1877ff" strokeWidth="2.5" strokeLinejoin="round"/>
+        {series.map((item, index) => <g
+          key={item.period}
+          className={`ttf-paper-point${selectedIndex === index ? " is-selected" : ""}`}
+          role="button"
+          tabIndex={0}
+          aria-pressed={selectedIndex === index}
+          aria-label={`${item.label}，论文${formatPaperCount(item.count)}篇，上月${formatPaperCount(item.previousCount)}篇，环比${formatPaperRate(item.rate)}`}
+          onMouseEnter={() => showMonth(index)}
+          onFocus={() => showMonth(index)}
+          onBlur={() => setShowTooltip(false)}
+          onClick={() => showMonth(index)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              showMonth(index);
+            }
+            if (event.key === "Escape") setShowTooltip(false);
+          }}
+        >
+          <rect x={chartX(index) - pointWidth / 2} y="18" width={pointWidth} height="166" fill="transparent"/>
+          {item.rate !== null ? <>{selectedIndex === index ? <circle cx={chartX(index)} cy={chartY(item.rate)} r={longRange ? 7 : 10} fill="#e5efff"/> : null}<circle cx={chartX(index)} cy={chartY(item.rate)} r={longRange ? 2.5 : 4.5} fill="#1877ff" stroke="#fff" strokeWidth={longRange ? 1 : 2}/></> : null}
+          {!longRange || selectedIndex === index ? <text className={item.rate !== null && item.rate < 0 ? "is-down" : "is-up"} x={chartX(index)} y={item.rate === null ? 35 : chartY(item.rate) + (item.rate < 0 ? 23 : -13)} textAnchor="middle">{formatPaperRate(item.rate)}</text> : null}
+          {!longRange || index === 0 || (index + 1) % 12 === 0 ? <text className="ttf-paper-month" x={chartX(index)} y="209" textAnchor="middle">{longRange ? item.period.replace("-", ".") : item.month}</text> : null}
+        </g>)}
+        {showTooltip ? <g className="ttf-publication-tooltip" transform={`translate(${tooltipX} 28)`} pointerEvents="none"><rect width="198" height="79" rx="5"/><text x="12" y="19">{selected.label}</text><text x="12" y="38">本月 {formatPaperCount(selected.count)} 篇 · 上月 {formatPaperCount(selected.previousCount)} 篇</text><text x="12" y="60">论文发表环比 {formatPaperRate(selected.rate)}</text></g> : null}
+      </svg>
+    </div>
+  );
+}
+
 function TechnologySection() {
   const [domain, setDomain] = useState("人工智能领域");
   const [query, setQuery] = useState("");
-  const [activeRoadmapLevel, setActiveRoadmapLevel] = useState<(typeof roadmapLevels)[number]["id"]>("goal");
-  const [trendVisibility, setTrendVisibility] = useState<TrendVisibility>({ total: true, breakthrough: true });
   const [activeYear, setActiveYear] = useState("2025年");
   const [selectedMilestoneId, setSelectedMilestoneId] = useState("m-2021");
   const [treeScale, setTreeScale] = useState(.64);
@@ -428,15 +545,11 @@ function TechnologySection() {
   const activeMilestone = technologyMilestones[activeMilestoneIndex];
   const milestoneGroups = Array.from(new Set(technologyMilestones.map((item) => item.year))).map((year) => ({ year, items: technologyMilestones.filter((item) => item.year === year) }));
   const activeMilestoneGroup = milestoneGroups.find((group) => group.year === activeMilestone.year) ?? milestoneGroups[0];
-  const toggleTrendMetric = (metric: TrendMetric) => setTrendVisibility((current) => {
-    if (current[metric] && Object.values(current).filter(Boolean).length === 1) return current;
-    return { ...current, [metric]: !current[metric] };
-  });
 
   return (
     <section id="technology" className="ttf-section ttf-tech ttf-route-section">
       <header className="ttf-route-heading">
-        <div className="ttf-route-heading-copy"><img src={`${assetRoot}/technology-route-icon-figma.png`} alt="" /><div><h2>领域技术路线</h2><p>总体画像｜发展目标｜具体任务｜保障措施</p></div></div>
+        <div className="ttf-route-heading-copy"><img src={`${assetRoot}/technology-route-icon-figma.png`} alt="" /><div><h2>领域技术路线</h2><p>总体画像｜领域发展目标｜具体任务｜保障措施</p></div></div>
         <div className="ttf-route-filters">
           <label className="ttf-route-select"><select value={domain} onChange={(event) => setDomain(event.target.value)} aria-label="选择技术领域"><option>人工智能领域</option><option>生物医药领域</option><option>新能源领域</option></select><img src={`${assetRoot}/technology-select-arrow.svg`} alt="" /></label>
           <label className="ttf-route-search"><img src={`${assetRoot}/technology-search.svg`} alt="" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索关键词" aria-label="搜索领域技术关键词" /></label>
@@ -444,18 +557,35 @@ function TechnologySection() {
       </header>
 
       <div className="ttf-route-content">
-        <article className="ttf-route-overview">
+        <article className="ttf-development-overview">
+          <PanelTitle title="近五年技术发展概览" aside="人工智能领域 · 2021—2025年 · 演示内容" />
+          <div className="ttf-development-levels">
+            {roadmapLevels.map(({ id, icon: Icon, label, title, description }) => (
+              <section className={`ttf-development-level ttf-development-${id}`} key={id}>
+                <div className="ttf-development-label"><Icon size={17} aria-hidden="true" /><span>{label}</span></div>
+                <h4>{title}</h4>
+                <p>{description}</p>
+              </section>
+            ))}
+          </div>
+        </article>
+
+        <article className="ttf-route-overview" aria-label="技术发展数据与论文发表环比">
           <div className="ttf-route-metrics">
-            {[{ label: "论文总数", value: "12,345" }, { label: "学者数量", value: "3,256" }, { label: "企业数量", value: "12,345" }, { label: "论文发表环比", value: "+ 6.2%", trend: true }].map((item) => <div key={item.label}><span>{item.label}</span><div className="ttf-route-metric-value"><strong>{item.value}</strong>{item.trend ? <img src={`${assetRoot}/technology-trend-up.svg`} alt="上升" /> : null}</div></div>)}
+            {[
+              { label: "论文总数", value: "12,345" },
+              { label: "学者数量", value: "3,256" },
+              { label: "企业数量", value: "12,345" },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <span>{label}</span>
+                <div className="ttf-route-metric-value"><strong>{value}</strong></div>
+              </div>
+            ))}
           </div>
-          <div className="ttf-route-trend">
-            <header>
-              <h3>近五年技术发展概览</h3>
-              <div className="ttf-route-legend" aria-label="图表指标显示控制"><button type="button" className={trendVisibility.total ? "" : "is-muted"} aria-pressed={trendVisibility.total} onClick={() => toggleTrendMetric("total")}><img src={`${assetRoot}/technology-legend-blue.svg`} alt="" />技术总量</button><button type="button" className={trendVisibility.breakthrough ? "" : "is-muted"} aria-pressed={trendVisibility.breakthrough} onClick={() => toggleTrendMetric("breakthrough")}><img src={`${assetRoot}/technology-legend-green.svg`} alt="" />突破性技术</button></div>
-              <div className="ttf-route-segments" role="tablist" aria-label="技术路线层级">{roadmapLevels.map((level) => <button type="button" role="tab" aria-selected={activeRoadmapLevel === level.id} className={activeRoadmapLevel === level.id ? "is-active" : ""} onClick={() => setActiveRoadmapLevel(level.id)} key={level.id}>{level.label}</button>)}</div>
-            </header>
-            <LineChart level={activeRoadmapLevel} visibility={trendVisibility} />
-          </div>
+          <section className="ttf-publication-panel" aria-label="论文发表环比变化">
+            <PaperPublicationChart />
+          </section>
         </article>
 
         <article className="ttf-route-insights">
@@ -564,7 +694,7 @@ function LegacyTechnologySection() {
   };
   return (
     <section id="technology" className="ttf-section ttf-tech">
-      <SectionHeading title="领域技术路线" subtitle="总体画像｜发展目标｜具体任务｜保障措施">
+      <SectionHeading title="领域技术路线" subtitle="总体画像｜领域发展目标｜具体任务｜保障措施">
         <span className="ttf-domain-label"><small>当前领域</small><b>人工智能</b></span>
         <label className="ttf-section-search"><input value={treeQuery} onChange={(event) => setTreeQuery(event.target.value)} placeholder="搜索技术分支" aria-label="搜索技术分支"/><Search size={16}/></label>
       </SectionHeading>

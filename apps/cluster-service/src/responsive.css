@@ -607,7 +607,7 @@ html.is-portal-embed .fp-site-header { display: none; }
   .ttf-route-metrics {
     height: auto;
     padding: 16px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1px;
   }
 
@@ -618,6 +618,20 @@ html.is-portal-embed .fp-site-header { display: none; }
   }
 
   .ttf-route-metrics > div + div::before { display: none; }
+
+  .ttf-development-overview { padding: 16px 18px 22px; }
+  .ttf-development-overview .ttf-panel-title,
+  .ttf-publication-panel .ttf-panel-title { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .ttf-development-overview .ttf-panel-title > span,
+  .ttf-publication-panel .ttf-panel-title > span { width: 100%; max-width: none; text-align: left; }
+  .ttf-development-levels { grid-template-columns: 1fr; margin-top: 18px; gap: 20px; }
+  .ttf-development-level { padding: 0; }
+  .ttf-development-level + .ttf-development-level { padding-top: 20px; border-top: 1px solid #e8edf3; border-left: 0; }
+  .ttf-development-level h4 { margin-top: 9px; }
+  .ttf-publication-panel { margin-inline: 16px; }
+  .ttf-paper-range-actions { flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+  .ttf-paper-point text.is-up,
+  .ttf-paper-point text.is-down { font-size: 9px; }
 
   .ttf-route-trend {
     height: auto;
