@@ -262,6 +262,84 @@ const roadmapLevels = [
   },
 ] as const;
 
+const developmentOverviews = [
+  {
+    year: 2025,
+    goal: {
+      title: "提升行业智能体协同能力",
+      description: "面向科研、制造和公共服务等场景，提升智能体处理复杂任务和协同作业的能力。",
+    },
+    task: {
+      title: "建设行业智能体协同平台",
+      description: "验证任务编排、工具调用和多智能体协作，选择典型场景开展应用试点。",
+    },
+    safeguard: {
+      title: "建立运行评测和反馈机制",
+      description: "完善工具权限、调用记录和运行评测，跟踪试点效果并根据反馈迭代。",
+    },
+  },
+  {
+    year: 2024,
+    goal: {
+      title: "提升具身智能决策与控制能力",
+      description: "面向真实环境中的操作任务，提升机器人感知、规划与执行的协同能力。",
+    },
+    task: {
+      title: "验证具身智能决策控制样机",
+      description: "研制决策控制样机，在仿真和实测场景中验证感知、规划与控制闭环。",
+    },
+    safeguard: {
+      title: "完善试验环境和安全要求",
+      description: "配置仿真与实测环境，明确操作安全边界、异常停机和试验复盘要求。",
+    },
+  },
+  {
+    year: 2023,
+    goal: {
+      title: "提高行业问答的准确性",
+      description: "将行业知识融入生成过程，提升回答质量并支持追溯引用证据。",
+    },
+    task: {
+      title: "验证检索增强生成方案",
+      description: "打通行业知识检索、答案生成和来源引用，选取典型问答场景验证效果。",
+    },
+    safeguard: {
+      title: "健全知识更新和评测机制",
+      description: "审核知识来源，明确内容更新要求，并评测答案与引用证据的一致性。",
+    },
+  },
+  {
+    year: 2022,
+    goal: {
+      title: "提升多模态信息融合能力",
+      description: "推动文本、图像与结构化数据的联合表征，为图文理解和生成提供基础。",
+    },
+    task: {
+      title: "验证多模态表征框架",
+      description: "构建图文联合表征方案，在跨模态检索、图文理解与生成任务中开展评测。",
+    },
+    safeguard: {
+      title: "统一样本和评测标准",
+      description: "建设图文配对数据集与统一测试集，明确标注规范、质量要求和数据授权。",
+    },
+  },
+  {
+    year: 2021,
+    goal: {
+      title: "夯实通用预训练模型基础",
+      description: "重点提升中文语义建模和通用迁移能力，形成可复用的模型训练与评测基础。",
+    },
+    task: {
+      title: "建设预训练模型工程平台",
+      description: "建立语料处理、模型训练与评测流程，验证模型在典型语言任务中的迁移效果。",
+    },
+    safeguard: {
+      title: "保障训练资源和实验质量",
+      description: "明确语料质量与授权要求，配套训练算力，记录实验配置和评测结果。",
+    },
+  },
+] as const;
+
 const thinkTankLocatorItems = [
   { id: "technology", label: "领域技术路线" },
   { id: "reports", label: "战略咨询报告" },
@@ -516,6 +594,41 @@ function PaperPublicationChart() {
   );
 }
 
+function TechnologyDevelopmentOverview() {
+  const [overview, setOverview] = useState<(typeof developmentOverviews)[number]>(developmentOverviews[0]);
+
+  return (
+    <article className="ttf-development-overview">
+      <PanelTitle title="近五年技术发展概览" aside={
+        <span className="ttf-development-actions">
+          <span>人工智能领域 · {overview.year}年 · 演示内容</span>
+          <span className="ttf-development-years" role="group" aria-label="技术发展概览年份">
+            {developmentOverviews.map((item) => (
+              <button
+                key={item.year}
+                type="button"
+                aria-pressed={overview.year === item.year}
+                onClick={() => setOverview(item)}
+              >
+                {item.year}年
+              </button>
+            ))}
+          </span>
+        </span>
+      } />
+      <div className="ttf-development-levels" aria-live="polite">
+        {roadmapLevels.map(({ id, label, icon: Icon }) => (
+          <section className={`ttf-development-level ttf-development-${id}`} key={id}>
+            <div className="ttf-development-label"><Icon size={17} aria-hidden="true" /><span>{label}</span></div>
+            <h4>{overview[id].title}</h4>
+            <p>{overview[id].description}</p>
+          </section>
+        ))}
+      </div>
+    </article>
+  );
+}
+
 function TechnologySection() {
   const [domain, setDomain] = useState("人工智能领域");
   const [query, setQuery] = useState("");
@@ -557,18 +670,7 @@ function TechnologySection() {
       </header>
 
       <div className="ttf-route-content">
-        <article className="ttf-development-overview">
-          <PanelTitle title="近五年技术发展概览" aside="人工智能领域 · 2021—2025年 · 演示内容" />
-          <div className="ttf-development-levels">
-            {roadmapLevels.map(({ id, icon: Icon, label, title, description }) => (
-              <section className={`ttf-development-level ttf-development-${id}`} key={id}>
-                <div className="ttf-development-label"><Icon size={17} aria-hidden="true" /><span>{label}</span></div>
-                <h4>{title}</h4>
-                <p>{description}</p>
-              </section>
-            ))}
-          </div>
-        </article>
+        <TechnologyDevelopmentOverview />
 
         <article className="ttf-route-overview" aria-label="技术发展数据与论文发表环比">
           <div className="ttf-route-metrics">

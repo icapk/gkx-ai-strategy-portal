@@ -199,6 +199,32 @@
 .ttf-route-metrics strong { color: #1d2129; font-size: 24px; line-height: 32px; font-weight: 500; }
 .ttf-route-metric-value img { display: block; width: 24px; height: 24px; margin-bottom: 1px; }
 .ttf-development-overview { min-width: 0; padding: 18px 24px 25px; background: #fff; border-radius: 8px; }
+.ttf-development-actions { display: flex; align-items: center; gap: 20px; }
+.ttf-development-actions > span:first-child { white-space: nowrap; }
+.ttf-development-years {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: min(100%, 308px);
+  gap: 2px;
+  padding: 3px;
+  background: #f1f4f8;
+  border-radius: 5px;
+}
+.ttf-development-years button {
+  min-width: 0;
+  min-height: 32px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #546579;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ttf-development-years button[aria-pressed="true"] { color: #165dff; background: #fff; font-weight: 600; box-shadow: 0 1px 3px rgba(40,62,90,.08); }
+.ttf-development-years button:hover { color: #165dff; }
+.ttf-development-years button:focus-visible { outline: 2px solid #165dff; outline-offset: -1px; }
 .ttf-development-levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 20px; }
 .ttf-development-level { min-width: 0; padding: 0 25px; }
 .ttf-development-level:first-child { padding-left: 0; }

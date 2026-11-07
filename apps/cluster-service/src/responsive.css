@@ -624,6 +624,8 @@ html.is-portal-embed .fp-site-header { display: none; }
   .ttf-publication-panel .ttf-panel-title { align-items: flex-start; flex-direction: column; gap: 7px; }
   .ttf-development-overview .ttf-panel-title > span,
   .ttf-publication-panel .ttf-panel-title > span { width: 100%; max-width: none; text-align: left; }
+  .ttf-development-actions { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .ttf-development-years button { min-height: 40px; }
   .ttf-development-levels { grid-template-columns: 1fr; margin-top: 18px; gap: 20px; }
   .ttf-development-level { padding: 0; }
   .ttf-development-level + .ttf-development-level { padding-top: 20px; border-top: 1px solid #e8edf3; border-left: 0; }
