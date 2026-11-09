@@ -45,7 +45,7 @@
 
   function matches(item, query) {
     const words = normalize(query).replace(/((?:19|20)\d{2})(?:\s*年)?/g, " $1 ").trim().split(/\s+/).filter(Boolean);
-    const searchable = normalize([item.name, item.fullNameEn, item.series, ...item.aliases, ...item.tags].join(" "));
+    const searchable = normalize([item.name, item.fullNameEn, item.series, ...item.aliases].join(" "));
     return words.every(word => {
       if (/^(?:19|20)\d{2}$/.test(word)) return String(item.year) === word;
       if (word === "ai") return searchable.includes("人工智能") || searchable.includes("artificial intelligence") || searchable.split(" ").includes("ai");
@@ -53,43 +53,39 @@
     });
   }
 
-  function hasMetrics(item) {
-    return [item.submissionCount, item.participantCount, item.heatValue]
-      .every(value => Number.isFinite(value) && value >= 0);
+  function hasCount(value) {
+    return Number.isFinite(value) && value >= 0;
   }
 
-  function rank(mode = "recent", combined = false, now = Date.now(), { includeEnded = false } = {}) {
+  function rankHot(candidates) {
+    const eligible = candidates.filter(item => hasCount(item.submissionCount) && hasCount(item.participantCount));
+    const usesHeat = eligible.length >= 3 && eligible.every(item => hasCount(item.heatValue))
+      && eligible.some(item => item.heatValue > 0);
+    const weights = [["submissionCount", 35], ["participantCount", 30]];
+    if (usesHeat) weights.push(["heatValue", 35]);
+    const metrics = weights.map(([key, weight]) => ({
+      key, weight, max: Math.max(1, ...eligible.map(item => item[key]))
+    }));
+    const totalWeight = usesHeat ? 100 : 65;
+    return eligible.map(item => ({
+      item,
+      usesHeat,
+      score: metrics.reduce((sum, { key, weight, max }) => sum + item[key] / max * weight, 0) / totalWeight
+    })).sort((a, b) => b.score - a.score || a.item.id.localeCompare(b.item.id));
+  }
+
+  function rank(mode = "recent", { includeEnded = false, now = Date.now() } = {}) {
     const candidates = items.filter(item => item.inRecommendationCatalog);
+    if (mode === "hot") return rankHot(candidates);
+
     const upcoming = candidates.filter(item => ["ongoing", "upcoming"].includes(status(item, now)));
     const ended = includeEnded ? candidates.filter(item => status(item, now) === "ended") : [];
-    if (mode === "recent" && !combined) {
-      upcoming.sort((a, b) =>
-        Number(status(b, now) === "ongoing") - Number(status(a, now) === "ongoing")
-        || a.startDate.localeCompare(b.startDate) || a.id.localeCompare(b.id)
-      );
-      ended.sort((a, b) => b.endDate.localeCompare(a.endDate) || a.id.localeCompare(b.id));
-      return [...upcoming, ...ended].map(item => ({ item, score: null }));
-    }
-
-    const complete = candidates.filter(hasMetrics);
-    const eligible = (mode === "recent" ? [...upcoming, ...ended].filter(hasMetrics) : complete)
-      .filter(item => !combined || status(item, now) !== "unknown");
-    if (eligible.length < 3) return [];
-    const maxima = ["submissionCount", "participantCount", "heatValue"]
-      .map(key => Math.max(1, ...complete.map(item => item[key])));
-
-    return eligible.map(item => {
-      const hot = item.submissionCount / maxima[0] * 0.35
-        + item.participantCount / maxima[1] * 0.30
-        + item.heatValue / maxima[2] * 0.35;
-      if (!combined) return { item, score: hot };
-      const state = status(item, now);
-      const today = localDate(now, item.timeZone);
-      const boundary = state === "ended" ? item.endDate : item.startDate;
-      const days = state === "ongoing" ? 0 : Math.abs(Date.parse(boundary) - Date.parse(today)) / dayMs;
-      const proximity = Math.max(0, 1 - days / 150);
-      return { item, score: mode === "hot" ? hot * 0.7 + proximity * 0.3 : proximity * 0.7 + hot * 0.3 };
-    }).sort((a, b) => b.score - a.score || a.item.id.localeCompare(b.item.id));
+    upcoming.sort((a, b) =>
+      Number(status(b, now) === "ongoing") - Number(status(a, now) === "ongoing")
+      || a.startDate.localeCompare(b.startDate) || a.id.localeCompare(b.id)
+    );
+    ended.sort((a, b) => b.endDate.localeCompare(a.endDate) || a.id.localeCompare(b.id));
+    return [...upcoming, ...ended].map(item => ({ item }));
   }
 
   function recordView(id) {
