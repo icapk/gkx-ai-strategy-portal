@@ -45,7 +45,7 @@
 
   function matches(item, query) {
     const words = normalize(query).replace(/((?:19|20)\d{2})(?:\s*年)?/g, " $1 ").trim().split(/\s+/).filter(Boolean);
-    const searchable = normalize([item.name, item.fullNameEn, item.series, ...item.aliases].join(" "));
+    const searchable = normalize([item.name, item.fullNameEn, item.series, ...item.aliases, ...item.tags].join(" "));
     return words.every(word => {
       if (/^(?:19|20)\d{2}$/.test(word)) return String(item.year) === word;
       if (word === "ai") return searchable.includes("人工智能") || searchable.includes("artificial intelligence") || searchable.split(" ").includes("ai");
