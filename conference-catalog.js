@@ -29,9 +29,13 @@
 
   function participantLabel(item) {
     if (Number.isFinite(item.participantCount)) return item.participantCount.toLocaleString("zh-CN");
+    const scope = item.participantCountScope ? "（" + item.participantCountScope + "）" : "";
+    if (Number.isFinite(item.participantCountOnsite)) {
+      const prefix = item.participantCountOnsiteApproximate ? "约 " : "";
+      return prefix + item.participantCountOnsite.toLocaleString("zh-CN") + scope;
+    }
     if (!Number.isFinite(item.participantCountLowerBound)) return null;
     const prefix = item.participantCountLowerBoundExclusive ? "超过 " : "至少 ";
-    const scope = item.participantCountScope ? "（" + item.participantCountScope + "）" : "";
     return prefix + item.participantCountLowerBound.toLocaleString("zh-CN") + scope;
   }
 
