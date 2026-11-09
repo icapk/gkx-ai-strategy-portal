@@ -341,6 +341,7 @@
   const risingStars = document.getElementById("recRisingStars");
   const conferenceTabs = Array.from(document.querySelectorAll("[data-conference-mode]"));
   const conferenceRule = document.getElementById("recConferenceRule");
+  const conferenceStatus = document.getElementById("recConferenceStatus");
   const conferenceGrid = document.getElementById("recConferenceGrid");
   const conferenceMoreButton = document.getElementById("recConferenceMore");
   const courseStatus = document.getElementById("recCourseStatus");
@@ -1763,13 +1764,14 @@
   }
 
   function getConferenceItems() {
-    return (conferenceCatalog?.rank(activeConferenceMode, conferenceRule.value === "combined") || [])
+    const combined = conferenceRule.value === "combined";
+    return (conferenceCatalog?.rank(activeConferenceMode, combined, Date.now(), { includeEnded: true }) || [])
       .map(({ item, score }) => ({ ...item, score }));
   }
 
   function conferenceDeadline(item) {
     if (item.submissionDeadlineDate) return item.submissionDeadlineDate + "（AoE）";
-    if (!item.submissionDeadline) return "待核验";
+    if (!item.submissionDeadline) return "未收录";
     const match = item.submissionDeadline.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):\d{2}-12:00$/);
     return match ? match[1] + " " + match[2] + "（AoE）" : formatPrototypeDate(item.submissionDeadline, true);
   }
@@ -1806,12 +1808,15 @@
       const details = createElement("div", "rec-conference-detail");
       details.id = "rec-conference-detail-" + item.id;
       const displayMetric = value => value === null ? "待公布" : formatPrototypeNumber(value);
+      details.append(createElement("h4", "", "会议信息"));
+      if (item.fullNameEn && item.fullNameEn !== item.name) {
+        details.append(createElement("p", "", item.fullNameEn));
+      }
       details.append(
-        createElement("h4", "", "会议信息"),
         createMetricGrid([
           ["投稿数", displayMetric(item.submissionCount)],
           ["参与人数", conferenceCatalog.participantLabel(item) || "待公布"],
-          ["会议热度", item.heatValue === null ? "待统计" : formatPrototypeNumber(item.heatValue)]
+          ["会议热度", item.heatValue === null ? "待统计" : formatPrototypeNumber(item.heatValue) + " 人"]
         ], "rec-conference-score")
       );
       if (item.note) details.append(createElement("small", "", item.note));
@@ -1842,17 +1847,22 @@
   function renderConferences() {
     const items = getConferenceItems();
     const visible = pageItems("conferences", items, MODULE_PAGE_SIZE);
+    const combined = conferenceRule.value === "combined";
+    const hasEnded = visible.some(item => conferenceCatalog.status(item) === "ended");
+    conferenceStatus.textContent = activeConferenceMode === "recent" && !combined && hasEnded
+      ? "已结束会议按结束时间由近到远展示。"
+      : "";
+    conferenceStatus.hidden = !conferenceStatus.textContent;
     conferenceGrid.setAttribute("aria-busy", "true");
     conferenceGrid.replaceChildren();
     if (visible.length) {
       visible.forEach(item => conferenceGrid.appendChild(createConferenceCard(item)));
     } else {
-      const combined = conferenceRule.value === "combined";
       const title = combined ? "暂无综合排序结果" : activeConferenceMode === "hot" ? "热门会议数据积累中" : "暂无最近会议";
       const empty = createElement("div", "rec-empty-state");
       empty.append(createElement("strong", "", title));
       if (combined || activeConferenceMode === "hot") {
-        empty.append(createElement("p", "", "具备投稿数、参与人数和会议热度的候选达到三条后展示。"));
+        empty.append(createElement("p", "", "会议热度按近 30 天全站打开该届会议详情的去重人数计算。至少 3 届的投稿数、参会总数和热度齐备后展示。"));
       }
       conferenceGrid.append(empty);
     }

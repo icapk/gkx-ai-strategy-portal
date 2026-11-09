@@ -58,18 +58,21 @@
       .every(value => Number.isFinite(value) && value >= 0);
   }
 
-  function rank(mode = "recent", combined = false, now = Date.now()) {
+  function rank(mode = "recent", combined = false, now = Date.now(), { includeEnded = false } = {}) {
     const candidates = items.filter(item => item.inRecommendationCatalog);
     const upcoming = candidates.filter(item => ["ongoing", "upcoming"].includes(status(item, now)));
+    const ended = includeEnded ? candidates.filter(item => status(item, now) === "ended") : [];
     if (mode === "recent" && !combined) {
-      return upcoming.slice().sort((a, b) =>
+      upcoming.sort((a, b) =>
         Number(status(b, now) === "ongoing") - Number(status(a, now) === "ongoing")
         || a.startDate.localeCompare(b.startDate) || a.id.localeCompare(b.id)
-      ).map(item => ({ item, score: null }));
+      );
+      ended.sort((a, b) => b.endDate.localeCompare(a.endDate) || a.id.localeCompare(b.id));
+      return [...upcoming, ...ended].map(item => ({ item, score: null }));
     }
 
     const complete = candidates.filter(hasMetrics);
-    const eligible = (mode === "recent" ? upcoming.filter(hasMetrics) : complete)
+    const eligible = (mode === "recent" ? [...upcoming, ...ended].filter(hasMetrics) : complete)
       .filter(item => !combined || status(item, now) !== "unknown");
     if (eligible.length < 3) return [];
     const maxima = ["submissionCount", "participantCount", "heatValue"]
