@@ -5206,6 +5206,8 @@
   <script src="home-content-20261031.js?v=20261031-portal-release-2"></script>
   <script src="home-loop-motion.js?v=20261101-3"></script>
   <script src="assets/vendor/portal-arco-search.js?v=20261104-ai-original-presentation"></script>
+  <script src="conference-seed.js?v=20261109-3"></script>
+  <script src="conference-catalog.js?v=20261109-3"></script>
   <script>
     (() => {
       "use strict";
@@ -5728,6 +5730,7 @@
       } catch (error) { /* keep the announcement available */ }
       applyPortalAnnouncement();
 
+      const conferenceCatalog = window.PortalConferenceCatalog;
       const RECOMMENDATION_ITEMS = [
         {
           type: "报告",
@@ -5759,16 +5762,11 @@
           date: "2024-10-09",
           url: "https://www.nobelprize.org/prizes/chemistry/2024/hassabis/facts/"
         },
-        {
-          type: "会议",
-          access: "公开",
-          title: "NeurIPS 2026 · 神经信息处理系统大会",
-          summary: "关注机器学习、计算神经科学、生成式模型与可信人工智能等前沿研究方向。",
-          tags: ["人工智能", "学术会议", "机器学习"],
-          source: "NeurIPS",
-          date: "2026-12-06",
-          url: "https://neurips.cc/Conferences/2026"
-        },
+        ...(conferenceCatalog?.rank("recent").slice(0, 1).map(({ item }) => ({
+          type: "会议", access: "公开", title: item.name, summary: item.location || item.fullNameEn || "",
+          tags: item.tags, source: item.series, dateLabel: conferenceCatalog.formatDates(item),
+          url: item.detailUrl, conference: item
+        })) || []),
         {
           type: "报告",
           access: "公开",
@@ -6100,7 +6098,12 @@
           source: "平台资讯", meta: "资源导航 · 32 个入口", accessible: true,
           detail: "所有入口均标注资源类型、访问条件与适用学科，便于研究者快速筛选。",
           fulltextStatus: "解析中", matchField: "标题与摘要", matches: []
-        }
+        },
+        ...(conferenceCatalog?.items || []).map(item => ({
+          type: "会议", id: item.id, title: item.name, summary: item.fullNameEn || "",
+          tags: item.tags, source: item.series, meta: item.level || "", accessible: true,
+          date: item.startDate || "", detailUrl: item.detailUrl, conference: item
+        }))
       ];
 
       const PAPER_COMMENT_SEEDS = {
@@ -6556,11 +6559,26 @@
         } else if (item.type === "人才") {
           if (item.institution) metadata.push(["机构", item.institution]);
           metadata.push(["研究方向", item.tags.slice(0, 2).join("、")]);
+        } else if (item.conference) {
+          const meeting = item.conference;
+          metadata.push(["地点", meeting.location || "待公布"]);
+          metadata.push(["举办状态", conferenceCatalog.statusLabel(meeting)]);
+          if (Number.isFinite(meeting.submissionCount)) {
+            metadata.push(["投稿数", meeting.submissionCount.toLocaleString("zh-CN"),
+              meeting.submissionSourceUrl || meeting.metricSourceUrl, meeting.metricNote]);
+          }
+          const participants = conferenceCatalog.participantLabel(meeting);
+          if (participants) {
+            metadata.push(["参与人数", participants, meeting.participantSourceUrl || meeting.metricSourceUrl, meeting.metricNote]);
+          }
+          if (Number.isFinite(meeting.heatValue)) {
+            metadata.push(["会议热度", meeting.heatValue.toLocaleString("zh-CN")]);
+          }
         } else {
           metadata.push(["来源", item.source]);
           metadata.push(["资源信息", item.meta.split("·")[0].trim()]);
         }
-        return metadata.slice(0, 3);
+        return item.conference ? metadata : metadata.slice(0, 3);
       }
 
       function getMatchFieldLabel(item, query) {
@@ -6975,6 +6993,11 @@
             resourceType: link.dataset.recommendationResourceType
           });
         });
+        if (item.conference && item.url) {
+          article.querySelector(".recommendation-card-title a")?.addEventListener("click", () => {
+            conferenceCatalog.recordView(item.conference.id);
+          });
+        }
         article.querySelector(".recommendation-card-action")?.addEventListener("click", () => {
           if (manageRecommendationProfile) manageRecommendationProfile.textContent = "登录后可收藏";
           window.setTimeout(() => { if (manageRecommendationProfile) manageRecommendationProfile.textContent = "完善兴趣画像"; }, 1800);
@@ -7936,7 +7959,7 @@
 
       function normalizeKeywordMatchMode(query) {
         const terms = getQueryTerms(query).map((term) => term.toLocaleLowerCase("zh-CN"));
-        const knownTerms = [...new Set(SEARCH_ITEMS.flatMap((item) => [item.title, ...item.tags, item.personName, item.author, item.institution, item.venue, item.ipc, item.applicant, item.inventor].filter(Boolean)))]
+        const knownTerms = [...new Set(SEARCH_ITEMS.filter(item => !item.conference).flatMap((item) => [item.title, ...item.tags, item.personName, item.author, item.institution, item.venue, item.ipc, item.applicant, item.inventor].filter(Boolean)))]
           .map((term) => String(term).toLocaleLowerCase("zh-CN"));
         const normalized = terms.map((term) => {
           if (knownTerms.some((known) => known.includes(term))) return term;
@@ -8322,15 +8345,17 @@
             && semanticTerms.some((term) => fullSearchable.includes(term));
           const queryMatch = isReportFulltext()
             ? getReportHits(item).length > 0
-            : activeSearchMode === "关键词" && (keywordExact || matchMode === "精确匹配")
-            ? exactPhraseMatch
-            : originalMatch || expansionMatch || semanticMatch;
+            : item.conference
+              ? conferenceCatalog.matches(item.conference, rawQuery)
+              : activeSearchMode === "关键词" && (keywordExact || matchMode === "精确匹配")
+                ? exactPhraseMatch
+                : originalMatch || expansionMatch || semanticMatch;
           const typeMatch = options.ignoreType || activeSearchType === "全部" || item.type === activeSearchType;
           const accessMatch = options.ignoreFacets || !document.getElementById("accessibleOnly")?.checked || item.accessible;
           const scopeMatch = options.ignoreFacets || scope !== "全文检索" || Boolean(getReportDocumentMatches(item).length);
           const publishTime = String(filterValues.get("publishTime") || "不限时间");
           const yearThreshold = publishTime === "近一年" ? 2025 : publishTime === "近三年" ? 2023 : publishTime === "近五年" ? 2021 : 0;
-          const itemYear = String(item.date || "").slice(0, 4);
+          const itemYear = item.conference ? String(item.conference.year || "") : String(item.date || "").slice(0, 4);
           const timeMatch = options.ignoreFacets || ((!publishedYearFrom || itemYear >= publishedYearFrom) && (!publishedYearTo || itemYear <= publishedYearTo) && (!yearThreshold || Number(itemYear) >= yearThreshold));
           const reportTypeMatch = options.ignoreFacets || !selectedReportTypes.length || (item.type === "报告" && selectedReportTypes.includes(getReportType(item).value));
           const disciplineText = [item.title, item.summary, ...item.tags].join(" ").toLocaleLowerCase("zh-CN");
@@ -8374,6 +8399,7 @@
         article.className = "portal-search-card";
         article.dataset.type = item.type;
         article.dataset.date = item.date;
+        if (item.conference) article.dataset.conferenceId = item.conference.id;
         const itemIndex = SEARCH_ITEMS.indexOf(item);
         article.dataset.resultId = `result-${itemIndex}`;
         const query = portalResultSearchInput.value.trim();
@@ -8393,7 +8419,10 @@
           : `<span>${resultTitle}</span>`;
         if (!resultDetailUrl) article.tabIndex = 0;
         const resourceLabel = item.type === "人才" ? "学者" : item.type;
-        const dateLabel = { "论文": "发表时间", "专利": "申请时间", "报告": "上传时间", "人才": "更新时间" }[item.type] || "发布时间";
+        const dateLabel = { "论文": "发表时间", "专利": "申请时间", "报告": "上传时间", "人才": "更新时间", "会议": "举办时间" }[item.type] || "发布时间";
+        const dateMarkup = item.conference
+          ? `<span>${escapeHtml(conferenceCatalog.formatDates(item.conference))}</span>`
+          : `<time datetime="${escapeHtml(item.date)}">${escapeHtml(formatDate(item.date))}</time>`;
         const associationReasonMarkup = associationProfile ? `
           <div class="portal-association-reason">
             <strong>${associationProfile.level}关联 · ${associationProfile.score}%</strong>
@@ -8420,16 +8449,23 @@
               <button type="button" data-association-feedback-cancel>取消</button>
             </div>
           </div>` : "";
+        const metadataMarkup = metadata.map(([label, value, source, note]) => {
+          const display = highlightResultText(value, query);
+          const linked = /^https:\/\//i.test(source || "")
+            ? `<a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(note || label + "来源")}">${display}</a>`
+            : display;
+          return `<div><dt>${escapeHtml(label)}</dt><dd>${linked}</dd></div>`;
+        }).join('<span class="portal-metadata-divider" aria-hidden="true"></span>');
         article.innerHTML = `
           <div class="portal-result-content">
             <div class="portal-result-main">
               <h3 class="portal-search-card-title">${titleControl}</h3>
-              <dl class="portal-result-metadata">${metadata.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${highlightResultText(value, query)}</dd></div>`).join('<span class="portal-metadata-divider" aria-hidden="true"></span>')}</dl>
+              <dl class="portal-result-metadata">${metadataMarkup}</dl>
               ${isReportFulltext() && item.type === "报告" ? reportHitsMarkup(item) : `<p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>`}
             </div>
             <div class="portal-result-bottomline">
               <div class="portal-search-card-tags"><span class="portal-search-card-tag portal-resource-tag">${escapeHtml(resourceLabel)}</span>${item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag portal-related-tag">${escapeHtml(tag)}</span>`).join("")}</div>
-              <div class="portal-result-date"><span>${dateLabel}</span><time datetime="${escapeHtml(item.date)}">${escapeHtml(formatDate(item.date))}</time></div>
+              <div class="portal-result-date"><span>${dateLabel}</span>${dateMarkup}</div>
             </div>
             <div class="portal-result-supplemental">
               ${associationReasonMarkup}
@@ -8735,7 +8771,7 @@
 
       function getQaSources(question) {
         const terms = getSemanticTerms(question).map((term) => term.toLocaleLowerCase("zh-CN"));
-        const scored = SEARCH_ITEMS.map((item) => {
+        const scored = SEARCH_ITEMS.filter(item => !item.conference).map((item) => {
           const searchable = [item.title, item.summary, item.source, item.author, item.personName, ...item.tags].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN");
           const score = terms.reduce((total, term) => total + (searchable.includes(term) ? 1 : 0), 0);
           return { item, score };
@@ -8924,6 +8960,8 @@
         renderSearchResults();
       });
       portalSearchResultList.addEventListener("click", event => {
+        const conferenceId = event.target.closest("[data-result-detail-link]")?.closest("[data-conference-id]")?.dataset.conferenceId;
+        if (conferenceId) conferenceCatalog.recordView(conferenceId);
         if (activeSearchMode !== "关联" || !compactAssociationPreferences.enabled) return;
         const open = event.target.closest("[data-result-detail-link], [data-open-fulltext], [data-paper-comment-toggle]");
         const card = open?.closest("[data-result-id]");

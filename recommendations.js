@@ -283,14 +283,8 @@
     { id: "report-bci-standard", title: "脑机接口评测规范研究（原型报告）", summary: "提炼跨机构评测、隐私保护和样本披露要求。", source: "未来技术报告库（原型）", publishedAt: "2026-08-11T16:00:00+08:00", topics: ["脑机接口", "评测规范"], audiences: ["research", "innovation"], views: 10800, saves: 880, likes: 920, relevance: 83 }
   ];
 
-  const CONFERENCE_ITEMS = [
-    { id: "conf-ai-science", title: "AI for Science Collaboration Forum 2026（原型）", level: "国际", startAt: "2026-09-12T09:00:00+08:00", endAt: "2026-09-14T18:00:00+08:00", deadlineAt: "2026-08-31T23:59:00+08:00", location: "深圳，中国", topics: ["科学智能体", "AI for Science"], submissions: 1860, attendees: 2400, heat: 92 },
-    { id: "conf-quantum-network", title: "Quantum Network Verification Symposium（原型）", level: "国际", startAt: "2026-09-28T09:00:00+08:00", endAt: "2026-09-30T17:00:00+08:00", deadlineAt: "2026-08-20T23:59:00+08:00", location: "北京，中国", topics: ["量子网络", "量子纠错"], submissions: 980, attendees: 1350, heat: 86 },
-    { id: "conf-energy-material", title: "Advanced Energy Materials Meeting（原型）", level: "领域顶会", startAt: "2026-10-18T09:00:00+08:00", endAt: "2026-10-21T17:00:00+08:00", deadlineAt: "2026-09-05T23:59:00+08:00", location: "新加坡", topics: ["固态电池", "界面材料"], submissions: 1560, attendees: 2100, heat: 84 },
-    { id: "conf-genomics", title: "Translational Genomics Congress（原型）", level: "领域顶会", startAt: "2026-11-06T09:00:00+08:00", endAt: "2026-11-09T17:00:00+08:00", deadlineAt: "2026-08-15T23:59:00+08:00", location: "苏州，中国", topics: ["基因治疗", "长期随访"], submissions: 1220, attendees: 1880, heat: 88 },
-    { id: "conf-climate-data", title: "Climate Data Methods Conference（原型）", level: "国际", startAt: "2026-07-10T09:00:00+08:00", endAt: "2026-07-12T17:00:00+08:00", deadlineAt: "2026-04-20T23:59:00+08:00", location: "线上与杭州", topics: ["碳监测", "多源数据"], submissions: 760, attendees: 1600, heat: 78 },
-    { id: "conf-neuro-governance", title: "Neurotechnology Governance Workshop（原型）", level: "专题会议", startAt: "2026-06-21T09:00:00+08:00", endAt: "2026-06-22T17:00:00+08:00", deadlineAt: "2026-05-10T23:59:00+08:00", location: "上海，中国", topics: ["脑机接口", "科技伦理"], submissions: 540, attendees: 820, heat: 74 }
-  ];
+  const conferenceCatalog = window.PortalConferenceCatalog;
+  const CONFERENCE_ITEMS = conferenceCatalog?.items || [];
 
   const COURSE_ITEMS = [
     { id: "course-agent", title: "科学智能体与可验证科研工作流（原型课程）", publishedAt: "2026-08-22T09:00:00+08:00", duration: "8 周", summary: "从任务拆解、知识检索到证据复核，建立可追溯的科研智能体工作流。", match: 96, dimensions: { "搜索关注": 98, "浏览主题": 94, "收藏偏好": 92 }, tags: ["人工智能", "科研工作流"] },
@@ -346,7 +340,7 @@
   const authorUpdates = document.getElementById("recAuthorUpdates");
   const risingStars = document.getElementById("recRisingStars");
   const conferenceTabs = Array.from(document.querySelectorAll("[data-conference-mode]"));
-  const conferenceStatus = document.getElementById("recConferenceStatus");
+  const conferenceRule = document.getElementById("recConferenceRule");
   const conferenceGrid = document.getElementById("recConferenceGrid");
   const conferenceMoreButton = document.getElementById("recConferenceMore");
   const courseStatus = document.getElementById("recCourseStatus");
@@ -389,7 +383,6 @@
   let activeTalentMode = "library";
   let expandedAuthorUpdateId = "";
   let activeConferenceMode = "recent";
-  let conferenceVisibleCount = MODULE_PAGE_SIZE;
   let expandedConferenceId = "";
   let courseVisibleCount = MODULE_PAGE_SIZE;
   let expandedCourseId = "";
@@ -1769,121 +1762,113 @@
     return true;
   }
 
-  function conferencePopularityScore(item) {
-    const maxSubmissions = Math.max.apply(null, CONFERENCE_ITEMS.map(function (entry) { return entry.submissions; }));
-    const maxAttendees = Math.max.apply(null, CONFERENCE_ITEMS.map(function (entry) { return entry.attendees; }));
-    const popularity = item.submissions / maxSubmissions * 0.35
-      + item.attendees / maxAttendees * 0.30
-      + item.heat / 100 * 0.35;
-    return popularity;
-  }
-
-  function conferenceProximityScore(item) {
-    const days = Math.abs(Date.parse(item.startAt) - PROTOTYPE_REFERENCE_TIME) / 86400000;
-    const proximity = Math.max(0, 1 - days / 150);
-    const futureBoost = Date.parse(item.endAt) >= PROTOTYPE_REFERENCE_TIME ? 1 : 0.7;
-    return proximity * futureBoost;
-  }
-
-  function conferenceScore(item, mode) {
-    const proximity = conferenceProximityScore(item);
-    const popularity = conferencePopularityScore(item);
-    return mode === "hot" ? popularity * 0.7 + proximity * 0.3 : proximity * 0.7 + popularity * 0.3;
-  }
-
-  function conferenceStateLabel(item) {
-    const start = Date.parse(item.startAt);
-    const end = Date.parse(item.endAt);
-    if (end < PROTOTYPE_REFERENCE_TIME) return "已结束";
-    if (start <= PROTOTYPE_REFERENCE_TIME) return "进行中";
-    if (Date.parse(item.deadlineAt) < PROTOTYPE_REFERENCE_TIME) return "即将举行 · 已截稿";
-    return "即将举行 · 征稿中";
-  }
-
   function getConferenceItems() {
-    return CONFERENCE_ITEMS.slice().sort(function (left, right) {
-      return conferenceScore(right, activeConferenceMode) - conferenceScore(left, activeConferenceMode)
-        || Date.parse(left.startAt) - Date.parse(right.startAt);
-    });
+    return (conferenceCatalog?.rank(activeConferenceMode, conferenceRule.value === "combined") || [])
+      .map(({ item, score }) => ({ ...item, score }));
+  }
+
+  function conferenceDeadline(item) {
+    if (item.submissionDeadlineDate) return item.submissionDeadlineDate + "（AoE）";
+    if (!item.submissionDeadline) return "待核验";
+    const match = item.submissionDeadline.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):\d{2}-12:00$/);
+    return match ? match[1] + " " + match[2] + "（AoE）" : formatPrototypeDate(item.submissionDeadline, true);
   }
 
   function createConferenceCard(item) {
     const expanded = expandedConferenceId === item.id;
-    const deadlinePassed = Date.parse(item.deadlineAt) < PROTOTYPE_REFERENCE_TIME;
-    const ended = Date.parse(item.endAt) < PROTOTYPE_REFERENCE_TIME;
-    const score = conferenceScore(item, activeConferenceMode);
     const article = createElement("article", "rec-conference-card" + (expanded ? " is-expanded" : ""));
     article.dataset.conferenceId = item.id;
     const header = createElement("header");
-    header.append(createElement("span", "", item.level), createElement("em", "", conferenceStateLabel(item)));
-    article.append(
-      header,
-      createElement("span", "rec-recommendation-reason", activeConferenceMode === "hot"
-        ? "热门优先：热门70% + 临近度30%"
-        : "最近优先：临近度70% + 热门30%"),
-      createElement("h3", "", item.title),
-      createElement("p", "", "适用人群：普通用户 / 访客")
-    );
-    appendTags(article, item.topics);
-    article.appendChild(createMetricGrid([
-      ["会议时间", formatPrototypeDate(item.startAt, false) + " — " + formatPrototypeDate(item.endAt, false)],
-      ["地点", item.location],
-      ["截稿", formatPrototypeDate(item.deadlineAt, true)],
-      ["推荐分", Math.round(score * 100) + " / 100"]
-    ], "rec-conference-metrics"));
-    const footer = createElement("footer", "rec-conference-actions");
+    header.append(createElement("span", "", item.level), createElement("em", "", conferenceCatalog.statusLabel(item)));
+    article.append(header, createElement("h3", "", item.name));
+    appendTags(article, item.tags);
+    const fields = [
+      ["会议时间", conferenceCatalog.formatDates(item)],
+      ["地点", item.location || "待公布"],
+      ["截稿", conferenceDeadline(item)]
+    ];
+    if (item.score !== null) fields.push(["推荐分", Math.round(item.score * 100) + " / 100"]);
+    article.appendChild(createMetricGrid(fields, "rec-conference-metrics"));
+    const footer = createElement("div", "rec-conference-actions");
     const detail = createElement("button", "", expanded ? "收起详情" : "查看详情");
     detail.type = "button";
     detail.dataset.conferenceToggle = item.id;
     detail.setAttribute("aria-expanded", String(expanded));
-    const submission = createElement("button", "", deadlinePassed || ended ? "已过截稿" : "查看投稿说明");
-    submission.type = "button";
-    submission.disabled = deadlinePassed || ended;
-    if (!submission.disabled) submission.dataset.conferenceSubmission = item.id;
-    footer.append(detail, submission);
+    footer.append(detail);
+    if (item.submissionGuideUrl) {
+      const submission = createElement("button", "", "查看投稿说明");
+      submission.type = "button";
+      submission.dataset.conferenceSubmission = item.id;
+      footer.append(submission);
+    }
     article.appendChild(footer);
     if (expanded) {
       const details = createElement("div", "rec-conference-detail");
       details.id = "rec-conference-detail-" + item.id;
+      const displayMetric = value => value === null ? "待公布" : formatPrototypeNumber(value);
       details.append(
-        createElement("h4", "", "评分依据与会议信息"),
+        createElement("h4", "", "会议信息"),
         createMetricGrid([
-          ["投稿量", formatPrototypeNumber(item.submissions)],
-          ["参与人数", formatPrototypeNumber(item.attendees)],
-          ["会议热度", item.heat + " / 100"],
-          ["临近度", Math.round(conferenceProximityScore(item) * 100) + " / 100"]
-        ], "rec-conference-score"),
-        createElement("p", "", "热门分 = 投稿量归一化×35% + 参与人数归一化×30% + 会议热度×35%。"),
-        createElement("small", "", deadlinePassed
-          ? "截稿时间已过，投稿操作已禁用。"
-          : "当前仅提供原型投稿说明，尚未接入可核验的官方投稿入口，不会伪装跳转。")
+          ["投稿数", displayMetric(item.submissionCount)],
+          ["参与人数", conferenceCatalog.participantLabel(item) || "待公布"],
+          ["会议热度", item.heatValue === null ? "待统计" : formatPrototypeNumber(item.heatValue)]
+        ], "rec-conference-score")
       );
+      if (item.note) details.append(createElement("small", "", item.note));
+      if (item.metricNote) details.append(createElement("small", "", item.metricNote));
+      const submissionSource = item.submissionSourceUrl || item.metricSourceUrl;
+      const sources = [[submissionSource, "查看统计来源"]];
+      if (item.participantSourceUrl && item.participantSourceUrl !== submissionSource) {
+        sources.push([item.participantSourceUrl, "查看参会统计来源"]);
+      }
+      for (const [url, label] of sources) {
+        if (!url) continue;
+        const source = createElement("a", "rec-subscription-source", label);
+        source.href = url;
+        source.target = "_blank";
+        source.rel = "noopener noreferrer";
+        details.append(source);
+      }
+      const link = createElement("a", "rec-subscription-source", "查看会议官网");
+      link.href = item.detailUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      details.append(link);
       article.appendChild(details);
     }
     return article;
   }
 
   function renderConferences() {
-    if (!conferenceGrid) return;
     const items = getConferenceItems();
     const visible = pageItems("conferences", items, MODULE_PAGE_SIZE);
     conferenceGrid.setAttribute("aria-busy", "true");
     conferenceGrid.replaceChildren();
-    visible.forEach(function (item) { conferenceGrid.appendChild(createConferenceCard(item)); });
-    const label = activeConferenceMode === "hot" ? "热门会议" : "最近会议";
-    const formula = activeConferenceMode === "hot" ? "热门70% + 临近度30%" : "临近度70% + 热门30%";
-    replaceModuleStatus(conferenceStatus, label, "当前显示 " + visible.length + " / 共 " + items.length + " 条 · " + formula + " · 适用普通用户 / 访客");
-    updateMoreButton(conferenceMoreButton, items.length, conferenceVisibleCount, "会议");
+    if (visible.length) {
+      visible.forEach(item => conferenceGrid.appendChild(createConferenceCard(item)));
+    } else {
+      const combined = conferenceRule.value === "combined";
+      const title = combined ? "暂无综合排序结果" : activeConferenceMode === "hot" ? "热门会议数据积累中" : "暂无最近会议";
+      const empty = createElement("div", "rec-empty-state");
+      empty.append(createElement("strong", "", title));
+      if (combined || activeConferenceMode === "hot") {
+        empty.append(createElement("p", "", "具备投稿数、参与人数和会议热度的候选达到三条后展示。"));
+      }
+      conferenceGrid.append(empty);
+    }
     conferenceGrid.setAttribute("aria-busy", "false");
+    conferenceMoreButton.hidden = true;
   }
 
   function setConferenceMode(mode, moveFocus) {
-    const next = ["recent", "hot"].includes(mode) ? mode : "recent";
+    const next = mode === "hot" ? "hot" : "recent";
     if (next !== activeConferenceMode) {
-      activeConferenceMode = next;
-      conferenceVisibleCount = MODULE_PAGE_SIZE;
+      conferenceRule.value = "default";
       expandedConferenceId = "";
+      delete recommendationPages.conferences;
     }
+    activeConferenceMode = next;
+    conferenceRule.options[0].textContent = next === "hot" ? "按热门分" : "按举办时间";
     updateDedicatedTabs(conferenceTabs, "conferenceMode", next, conferenceGrid, "rec-conference", moveFocus);
     renderConferences();
   }
@@ -3010,22 +2995,25 @@
   });
 
   bindDedicatedTabs(conferenceTabs, "conferenceMode", ["recent", "hot"], setConferenceMode);
-  conferenceMoreButton?.addEventListener("click", function () {
-    const items = getConferenceItems();
-    const showingAll = conferenceVisibleCount >= items.length;
-    conferenceVisibleCount = showingAll ? MODULE_PAGE_SIZE : Math.min(items.length, conferenceVisibleCount + MODULE_PAGE_SIZE);
+  conferenceRule.addEventListener("change", function () {
+    expandedConferenceId = "";
+    delete recommendationPages.conferences;
     renderConferences();
   });
-  conferenceGrid?.addEventListener("click", function (event) {
+  conferenceGrid.addEventListener("click", function (event) {
     const button = event.target.closest("button");
     if (!button || !conferenceGrid.contains(button)) return;
-    if (button.dataset.conferenceToggle || button.dataset.conferenceSubmission) {
-      const id = button.dataset.conferenceToggle || button.dataset.conferenceSubmission;
-      expandedConferenceId = button.dataset.conferenceToggle && expandedConferenceId === id ? "" : id;
-      renderConferences();
-      focusRenderedControl(conferenceGrid, "[data-conference-toggle='" + id + "']");
-      if (button.dataset.conferenceSubmission) showToast("当前仅展示投稿说明，未接入真实官方投稿入口");
+    if (button.dataset.conferenceSubmission) {
+      const item = CONFERENCE_ITEMS.find(item => item.id === button.dataset.conferenceSubmission);
+      if (item?.submissionGuideUrl) window.open(item.submissionGuideUrl, "_blank", "noopener,noreferrer");
+      return;
     }
+    const id = button.dataset.conferenceToggle;
+    if (!id) return;
+    expandedConferenceId = expandedConferenceId === id ? "" : id;
+    if (expandedConferenceId) conferenceCatalog.recordView(id);
+    renderConferences();
+    focusRenderedControl(conferenceGrid, "[data-conference-toggle='" + id + "']");
   });
 
   courseMoreButton?.addEventListener("click", function () {
@@ -3412,8 +3400,6 @@
   createCourseChart=function(item){const chart=createElement('div','rec-course-chart');chart.setAttribute('aria-label',item.title+'行为匹配维度');Object.entries(item.dimensions).forEach(([label,value])=>{const row=createElement('div','rec-chart-row');row.appendChild(createElement('span','',label));if(value===null||value===undefined){row.appendChild(createElement('span','rec-chart-no-evidence','暂无依据'))}else{const track=createElement('div','rec-chart-track');track.setAttribute('role','progressbar');track.setAttribute('aria-label',label+'匹配度');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','100');track.setAttribute('aria-valuenow',String(value));const fill=createElement('span','rec-chart-fill');fill.style.width=value+'%';track.appendChild(fill);row.append(track,createElement('strong','',value+'%'))}chart.appendChild(row)});return chart};
   const srCourseCard=createCourseCard;
   createCourseCard=function(item){const card=srCourseCard(item);if(!item.hasEvidence)card.querySelector('.rec-recommendation-reason').textContent='公共推荐 · 暂无行为依据';return card};
-  const srConferenceItems=getConferenceItems;
-  getConferenceItems=function(){const items=srConferenceItems();return activeConferenceMode==='recent'?items.filter(x=>Date.parse(x.endAt)>=PROTOTYPE_REFERENCE_TIME):items};
   const srGetEvents=getEventItems;getEventItems=function(){const items=srGetEvents();return activeEventMode==='archive'?items:srRecommend('ACTIVITY',activeEventMode,items)};
   const srEventCard=createEventCard;
   createEventCard=function(item){const copy={...item,record:item.record?.replace(/原型回放资源尚未接入，当前不可播放。/,'')};if(eventStatus(item)==='ended'&&!copy.record)copy.record='本地演示活动摘要：'+item.summary;const card=srEventCard(copy);const region=card.querySelector('.rec-event-records');if(region){region.querySelector('small')?.remove();const video=document.createElement('video');video.controls=true;video.preload='metadata';video.className='sr-media';video.setAttribute('aria-label','活动回放交互示例');const status=createElement('p','sr-note','正在加载回放描述…');region.append(video,status);SR.getPlayback(item.id).then(r=>{if(r.status==='AVAILABLE'){video.src=r.url;status.textContent=r.sourceTitle;video.addEventListener('error',()=>status.textContent='示例媒体加载失败，请重试');}else{video.hidden=true;status.textContent='回放暂不可用'}}).catch(err=>{video.hidden=true;status.textContent=err.message;const retry=createElement('button','','重试回放');retry.type='button';retry.onclick=()=>renderEvents();region.appendChild(retry)})}return card};
