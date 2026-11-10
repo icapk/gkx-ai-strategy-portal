@@ -341,7 +341,6 @@
   const risingStars = document.getElementById("recRisingStars");
   const conferenceTabs = Array.from(document.querySelectorAll("[data-conference-mode]"));
   const conferenceStatus = document.getElementById("recConferenceStatus");
-  const conferenceCombined = document.getElementById("recConferenceCombined");
   const conferenceGrid = document.getElementById("recConferenceGrid");
   const conferenceMoreButton = document.getElementById("recConferenceMore");
   const courseStatus = document.getElementById("recCourseStatus");
@@ -1773,7 +1772,7 @@
     return link;
   }
 
-  function createConferenceCard(item) {
+  function createConferenceCard({ item, isCombined }) {
     const article = createElement("article", "rec-conference-card");
     article.dataset.conferenceId = item.id;
     const header = createElement("header");
@@ -1785,6 +1784,9 @@
       title.append(official);
     } else {
       title.textContent = item.name;
+    }
+    if (isCombined) {
+      title.append(createElement("span", "rec-conference-pick", "综合推荐"));
     }
     header.append(title);
     if (conferenceCatalog.status(item) !== "unknown") {
@@ -1822,14 +1824,24 @@
 
   function renderConferences(appendFrom = 0) {
     if (!appendFrom) {
-      rankedConferences = conferenceCatalog?.rank(activeConferenceMode, { includeEnded: true }) || [];
+      const now = Date.now();
+      rankedConferences = conferenceCatalog?.rank(activeConferenceMode, { includeEnded: true, now }) || [];
+      const combined = conferenceCatalog?.combinedRecommendation(activeConferenceMode, { now });
+      const combinedIndex = rankedConferences.findIndex(({ item }) => item.id === combined?.id);
+      if (combinedIndex >= 0) {
+        const [entry] = rankedConferences.splice(combinedIndex, 1);
+        rankedConferences.unshift({ ...entry, isCombined: true });
+      }
     }
     const visible = rankedConferences.slice(0, conferenceVisibleCount);
     conferenceStatus.textContent = "";
     if (visible.length && activeConferenceMode === "hot") {
-      conferenceStatus.textContent = visible[0].usesHeat
-        ? "按综合热度排序"
+      const description = visible[0].usesHeat
+        ? "按热门分排序"
         : "按投稿与参会规模排序 · 热度积累中";
+      conferenceStatus.textContent = visible[0].isCombined ? "综合推荐优先 · 其余" + description : description;
+    } else if (visible[0]?.isCombined) {
+      conferenceStatus.textContent = "综合推荐优先 · 其余按会期排序";
     } else if (visible.some(({ item }) => conferenceCatalog.status(item) === "ended")) {
       conferenceStatus.textContent = "已结束会议按结束时间由近到远展示。";
     }
@@ -1837,7 +1849,7 @@
     conferenceGrid.setAttribute("aria-busy", "true");
     if (!appendFrom) conferenceGrid.replaceChildren();
     if (visible.length) {
-      conferenceGrid.append(...visible.slice(appendFrom).map(({ item }) => createConferenceCard(item)));
+      conferenceGrid.append(...visible.slice(appendFrom).map(createConferenceCard));
     } else {
       const title = activeConferenceMode === "hot" ? "暂无热门会议" : "暂无最近会议";
       const empty = createElement("div", "rec-empty-state");
@@ -1846,11 +1858,6 @@
     }
     conferenceGrid.setAttribute("aria-busy", "false");
     conferenceMoreButton.hidden = visible.length >= rankedConferences.length;
-    if (!appendFrom) {
-      conferenceCatalog?.renderCombinedRecommendation(
-        conferenceCombined, conferenceCatalog.combinedRecommendation(activeConferenceMode)
-      );
-    }
   }
 
   function setConferenceMode(mode, moveFocus) {

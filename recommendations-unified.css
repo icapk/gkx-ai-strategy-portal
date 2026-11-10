@@ -158,19 +158,19 @@ body:has(#recommendationMain) #recHeader::before { display: none; }
 .rec-report-card figure, .rec-course-card figure { display: none; }
 .rec-course-card { display: block; }
 .rec-course-card > div { padding: 0; }
-.rec-conference-overview {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  padding-top: 12px;
-}
-.rec-conference-overview:not(:has(> :not([hidden]))) { display: none; }
+.rec-conference-status { margin: 12px 0 0; }
 .rec-conference-more { text-align: center; }
 #recommendationMain .rec-conference-more .rec-action-button.arco-btn { margin: 16px 0; }
-.rec-conference-combined { margin: 0 0 0 auto; color: #4e5969; font-size: 14px; line-height: 20px; }
-.rec-conference-combined strong { margin-right: 8px; }
-.rec-conference-combined a { color: #165dff; text-decoration: underline; text-underline-offset: 2px; }
+.rec-conference-card > header .rec-conference-pick {
+  margin-inline-start: 8px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #e8f3ff;
+  color: #165dff;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
 .rec-conference-card > header h3 { margin: 0; }
 .rec-conference-card a { color: #165dff; text-decoration: underline; text-underline-offset: 2px; }
 .rec-module-metrics, .rec-conference-metrics { gap: 24px; padding: 12px 0; background: transparent; }
