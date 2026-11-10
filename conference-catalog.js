@@ -87,22 +87,21 @@
     return [...upcoming, ...ended].map(item => ({ item }));
   }
 
-  function combinedRecommendation(mode, { candidateIds, now = Date.now() } = {}) {
-    const hotScores = new Map(rank("hot").map(({ item, score }) => [item.id, score]));
+  function rankCombined(mode, { candidateIds, now = Date.now() } = {}) {
+    const hotEntries = new Map(rank("hot").map(entry => [entry.item.id, entry]));
     const eligible = rank("recent", { includeEnded: true, now })
-      .filter(({ item }) => hotScores.has(item.id) && (!candidateIds || candidateIds.has(item.id)));
+      .filter(({ item }) => hotEntries.has(item.id) && (!candidateIds || candidateIds.has(item.id)));
     const dateWeight = mode === "hot" ? 0.3 : 0.7;
-    let best = null;
-    let bestScore = -1;
-    eligible.forEach(({ item }, index) => {
+    return eligible.map(({ item }, index) => {
+      const hot = hotEntries.get(item.id);
       const dateScore = 1 - index / Math.max(1, eligible.length - 1);
-      const score = dateScore * dateWeight + hotScores.get(item.id) * (1 - dateWeight);
-      if (score > bestScore) {
-        best = item;
-        bestScore = score;
-      }
-    });
-    return best;
+      const score = dateScore * dateWeight + hot.score * (1 - dateWeight);
+      return { ...hot, score };
+    }).sort((a, b) => b.score - a.score);
+  }
+
+  function combinedRecommendation(mode, options) {
+    return rankCombined(mode, options)[0]?.item || null;
   }
 
   function renderCombinedRecommendation(row, item) {
@@ -153,6 +152,6 @@
 
   window.PortalConferenceCatalog = {
     items, matches, status, statusLabel: item => stateLabels[status(item)],
-    formatDates, participantLabel, rank, combinedRecommendation, renderCombinedRecommendation, recordView
+    formatDates, participantLabel, rank, rankCombined, combinedRecommendation, renderCombinedRecommendation, recordView
   };
 })();

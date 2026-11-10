@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="personal-entry.css?v=20261102-account-menu">
   <link rel="stylesheet" href="personal-account-menu.css?v=20261102-neutral-text">
   <link rel="stylesheet" href="assets/portal-search-return.css?v=20261101-recommendations-release">
-  <link rel="stylesheet" href="recommendations-unified.css?v=20261110-conference-first">
+  <link rel="stylesheet" href="recommendations-unified.css?v=20261110-conference-sort">
   <link rel="stylesheet" href="recommendations-content-polish.css?v=20261101-5">
   <link rel="stylesheet" href="recommendations-hotwords.css?v=20261101-1">
   <link rel="stylesheet" href="recommendations-actions.css?v=20261101-1">
@@ -245,7 +245,13 @@
             <button class="is-active" id="recConferenceTabRecent" type="button" role="tab" aria-selected="true" aria-controls="recConferenceGrid" tabindex="0" data-conference-mode="recent" disabled>最近会议</button>
             <button id="recConferenceTabHot" type="button" role="tab" aria-selected="false" aria-controls="recConferenceGrid" tabindex="-1" data-conference-mode="hot" disabled>热门会议</button>
           </div>
-          <div class="rec-module-status rec-conference-status" id="recConferenceStatus" role="status" hidden></div>
+          <div class="rec-conference-toolbar">
+            <div class="rec-module-status" id="recConferenceStatus" role="status" hidden></div>
+            <div class="rec-conference-sort" role="group" aria-label="会议排序">
+              <button type="button" id="recConferenceDefaultSort" aria-pressed="true" aria-controls="recConferenceGrid">按时间排序</button>
+              <button type="button" id="recConferenceCombinedSort" aria-pressed="false" aria-controls="recConferenceGrid">综合排序</button>
+            </div>
+          </div>
           <div class="rec-conference-grid" id="recConferenceGrid" role="tabpanel" aria-labelledby="recConferenceTabRecent" aria-busy="true" tabindex="0">
             <p class="rec-loading-state">正在加载顶会推荐…</p>
           </div>
@@ -296,8 +302,8 @@
   <script src="personal-resource-catalog.js?v=20261030-personal-demo"></script>
   <script src="personal-data-demo.js?v=20261030-notification-email"></script>
   <script src="conference-seed.js?v=20261109-4"></script>
-  <script src="conference-catalog.js?v=20261110-participant-label"></script>
-  <script src="recommendations.js?v=20261110-conference-first"></script>
+  <script src="conference-catalog.js?v=20261110-conference-sort"></script>
+  <script src="recommendations.js?v=20261110-conference-sort"></script>
   <script src="personal-entry.js?v=20261030-personal-demo"></script>
   <script src="assets/vendor/portal-arco-recommendations.js?v=20261102-domain-select"></script>
   <script defer src="assets/portal-back-to-top.js?v=20261101-1"></script>

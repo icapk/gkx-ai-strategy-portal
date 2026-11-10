@@ -158,19 +158,37 @@ body:has(#recommendationMain) #recHeader::before { display: none; }
 .rec-report-card figure, .rec-course-card figure { display: none; }
 .rec-course-card { display: block; }
 .rec-course-card > div { padding: 0; }
-.rec-conference-status { margin: 12px 0 0; }
+.rec-conference-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-top: 12px;
+}
+.rec-conference-sort {
+  display: flex;
+  margin-inline-start: auto;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 6px;
+  background: #f2f3f5;
+}
+.rec-conference-sort button {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #4e5969;
+  cursor: pointer;
+}
+.rec-conference-sort button[aria-pressed="true"] {
+  background: #fff;
+  color: #165dff;
+  box-shadow: 0 1px 2px #1d21291a;
+}
+.rec-conference-sort button:focus-visible { outline: 2px solid #165dff; outline-offset: 1px; }
 .rec-conference-more { text-align: center; }
 #recommendationMain .rec-conference-more .rec-action-button.arco-btn { margin: 16px 0; }
-.rec-conference-card > header .rec-conference-pick {
-  margin-inline-start: 8px;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: #e8f3ff;
-  color: #165dff;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-}
 .rec-conference-card > header h3 { margin: 0; }
 .rec-conference-card a { color: #165dff; text-decoration: underline; text-underline-offset: 2px; }
 .rec-module-metrics, .rec-conference-metrics { gap: 24px; padding: 12px 0; background: transparent; }
