@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="personal-entry.css?v=20261102-account-menu">
   <link rel="stylesheet" href="personal-account-menu.css?v=20261102-neutral-text">
   <link rel="stylesheet" href="assets/portal-search-return.css?v=20261101-recommendations-release">
-  <link rel="stylesheet" href="recommendations-unified.css?v=20261110-conference-combined">
+  <link rel="stylesheet" href="recommendations-unified.css?v=20261110-conference-load-more">
   <link rel="stylesheet" href="recommendations-content-polish.css?v=20261101-5">
   <link rel="stylesheet" href="recommendations-hotwords.css?v=20261101-1">
   <link rel="stylesheet" href="recommendations-actions.css?v=20261101-1">
@@ -249,6 +249,9 @@
           <div class="rec-conference-grid" id="recConferenceGrid" role="tabpanel" aria-labelledby="recConferenceTabRecent" aria-busy="true" tabindex="0">
             <p class="rec-loading-state">正在加载顶会推荐…</p>
           </div>
+          <div class="rec-conference-more">
+            <button class="rec-action-button arco-btn arco-btn-outline" id="recConferenceMore" type="button" aria-controls="recConferenceGrid" data-rec-arco="conference-more" hidden>加载更多</button>
+          </div>
           <p class="rec-conference-combined" id="recConferenceCombined" aria-live="polite" hidden></p>
         </section>
 
@@ -295,7 +298,7 @@
   <script src="personal-data-demo.js?v=20261030-notification-email"></script>
   <script src="conference-seed.js?v=20261109-4"></script>
   <script src="conference-catalog.js?v=20261110-participant-label"></script>
-  <script src="recommendations.js?v=20261110-conference-combined"></script>
+  <script src="recommendations.js?v=20261110-conference-load-more"></script>
   <script src="personal-entry.js?v=20261030-personal-demo"></script>
   <script src="assets/vendor/portal-arco-recommendations.js?v=20261102-domain-select"></script>
   <script defer src="assets/portal-back-to-top.js?v=20261101-1"></script>

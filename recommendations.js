@@ -343,6 +343,7 @@
   const conferenceStatus = document.getElementById("recConferenceStatus");
   const conferenceCombined = document.getElementById("recConferenceCombined");
   const conferenceGrid = document.getElementById("recConferenceGrid");
+  const conferenceMoreButton = document.getElementById("recConferenceMore");
   const courseStatus = document.getElementById("recCourseStatus");
   const courseGrid = document.getElementById("recCourseGrid");
   const courseMoreButton = document.getElementById("recCourseMore");
@@ -383,6 +384,9 @@
   let activeTalentMode = "library";
   let expandedAuthorUpdateId = "";
   let activeConferenceMode = "recent";
+  const CONFERENCE_BATCH_SIZE = 3;
+  let conferenceVisibleCount = CONFERENCE_BATCH_SIZE;
+  let rankedConferences = [];
   let courseVisibleCount = MODULE_PAGE_SIZE;
   let expandedCourseId = "";
   let activeEventMode = "combined";
@@ -404,7 +408,7 @@
     change: function (key, page) {
       if (!recommendationPages[key]) return;
       recommendationPages[key].current = page;
-      const render = { news: renderNewsRecommendations, papers: renderPapers, reports: renderReports, conferences: renderConferences, courses: renderCourses, events: renderEvents }[key];
+      const render = { news: renderNewsRecommendations, papers: renderPapers, reports: renderReports, courses: renderCourses, events: renderEvents }[key];
       render?.();
     }
   };
@@ -1816,22 +1820,24 @@
     return article;
   }
 
-  function renderConferences() {
-    const ranked = conferenceCatalog?.rank(activeConferenceMode, { includeEnded: true }) || [];
-    const visible = pageItems("conferences", ranked.map(({ item }) => item), MODULE_PAGE_SIZE);
+  function renderConferences(appendFrom = 0) {
+    if (!appendFrom) {
+      rankedConferences = conferenceCatalog?.rank(activeConferenceMode, { includeEnded: true }) || [];
+    }
+    const visible = rankedConferences.slice(0, conferenceVisibleCount);
     conferenceStatus.textContent = "";
     if (visible.length && activeConferenceMode === "hot") {
-      conferenceStatus.textContent = ranked[0].usesHeat
+      conferenceStatus.textContent = visible[0].usesHeat
         ? "按综合热度排序"
         : "按投稿与参会规模排序 · 热度积累中";
-    } else if (visible.some(item => conferenceCatalog.status(item) === "ended")) {
+    } else if (visible.some(({ item }) => conferenceCatalog.status(item) === "ended")) {
       conferenceStatus.textContent = "已结束会议按结束时间由近到远展示。";
     }
     conferenceStatus.hidden = !conferenceStatus.textContent;
     conferenceGrid.setAttribute("aria-busy", "true");
-    conferenceGrid.replaceChildren();
+    if (!appendFrom) conferenceGrid.replaceChildren();
     if (visible.length) {
-      visible.forEach(item => conferenceGrid.appendChild(createConferenceCard(item)));
+      conferenceGrid.append(...visible.slice(appendFrom).map(({ item }) => createConferenceCard(item)));
     } else {
       const title = activeConferenceMode === "hot" ? "暂无热门会议" : "暂无最近会议";
       const empty = createElement("div", "rec-empty-state");
@@ -1839,14 +1845,17 @@
       conferenceGrid.append(empty);
     }
     conferenceGrid.setAttribute("aria-busy", "false");
-    conferenceCatalog?.renderCombinedRecommendation(
-      conferenceCombined, conferenceCatalog.combinedRecommendation(activeConferenceMode)
-    );
+    conferenceMoreButton.hidden = visible.length >= rankedConferences.length;
+    if (!appendFrom) {
+      conferenceCatalog?.renderCombinedRecommendation(
+        conferenceCombined, conferenceCatalog.combinedRecommendation(activeConferenceMode)
+      );
+    }
   }
 
   function setConferenceMode(mode, moveFocus) {
     const next = mode === "hot" ? "hot" : "recent";
-    if (next !== activeConferenceMode) delete recommendationPages.conferences;
+    if (next !== activeConferenceMode) conferenceVisibleCount = CONFERENCE_BATCH_SIZE;
     activeConferenceMode = next;
     updateDedicatedTabs(conferenceTabs, "conferenceMode", next, conferenceGrid, "rec-conference", moveFocus);
     renderConferences();
@@ -2974,6 +2983,17 @@
   });
 
   bindDedicatedTabs(conferenceTabs, "conferenceMode", ["recent", "hot"], setConferenceMode);
+  conferenceMoreButton.addEventListener("click", event => {
+    if (conferenceMoreButton.hidden) return;
+    const appendFrom = conferenceVisibleCount;
+    conferenceVisibleCount += CONFERENCE_BATCH_SIZE;
+    renderConferences(appendFrom);
+    if (event.detail === 0 || conferenceMoreButton.hidden) {
+      const firstAddedCard = conferenceGrid.children[appendFrom];
+      firstAddedCard.tabIndex = -1;
+      firstAddedCard.focus({ preventScroll: event.detail !== 0 });
+    }
+  });
   function recordConferenceOpen(event) {
     const id = event.target.closest("[data-conference-official]")?.dataset.conferenceOfficial;
     if (id) conferenceCatalog.recordView(id);

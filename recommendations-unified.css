@@ -159,6 +159,8 @@ body:has(#recommendationMain) #recHeader::before { display: none; }
 .rec-course-card { display: block; }
 .rec-course-card > div { padding: 0; }
 .rec-conference-status { margin: 12px 0 0; }
+.rec-conference-more { text-align: center; }
+#recommendationMain .rec-conference-more .rec-action-button.arco-btn { margin: 16px 0; }
 .rec-conference-combined { margin: 0; padding: 12px 20px; border-top: 1px solid #f2f3f5; color: #4e5969; font-size: 14px; }
 .rec-conference-combined strong { margin-right: 8px; }
 .rec-conference-combined a { color: #165dff; text-decoration: underline; text-underline-offset: 2px; }
