@@ -3027,7 +3027,7 @@
   <link rel="stylesheet" href="home-content-surfaces.css?v=20261101-2">
   <link rel="stylesheet" href="home-evaluation-cards.css?v=20261102-2">
   <link rel="stylesheet" href="assets/vendor/portal-arco-search.css?v=20261031-portal-release-2">
-  <link rel="stylesheet" href="search-results-fidelity.css?v=20261101-recommendations-release">
+  <link rel="stylesheet" href="search-results-fidelity.css?v=20261110-conference-combined">
   <link rel="stylesheet" href="ai-search-fidelity.css?v=20261031-motion-2">
   <link rel="stylesheet" href="portal-choice-controls.css?v=20261031-portal-release-2">
   <link rel="stylesheet" href="profile-content-preserved.css?v=20261102-account-menu">
@@ -4868,6 +4868,7 @@
           </div>
         </section></div>
                 <div class="portal-search-result-list" id="portalSearchResultList" role="tabpanel" aria-labelledby="portalSearchTypeTabs" aria-live="polite" aria-busy="false"></div>
+                <p class="portal-conference-combined" id="portalConferenceCombined" aria-live="polite" hidden></p>
                 <div class="portal-search-empty" id="portalSearchEmpty" hidden>
               <span class="portal-empty-icon" aria-hidden="true">⌕</span>
               <h2>没有找到符合当前条件的结果</h2>
@@ -5207,7 +5208,7 @@
   <script src="home-loop-motion.js?v=20261101-3"></script>
   <script src="assets/vendor/portal-arco-search.js?v=20261104-ai-original-presentation"></script>
   <script src="conference-seed.js?v=20261109-4"></script>
-  <script src="conference-catalog.js?v=20261110-fixed-2"></script>
+  <script src="conference-catalog.js?v=20261110-combined"></script>
   <script>
     (() => {
       "use strict";
@@ -5425,6 +5426,7 @@
       window.PortalSearchControls.mountFilterActions();
       const portalSearchReset = document.getElementById("portalSearchReset");
       const portalSearchResultList = document.getElementById("portalSearchResultList");
+      const portalConferenceCombined = document.getElementById("portalConferenceCombined");
       const portalSearchResultCount = document.getElementById("portalSearchResultCount");
       const portalSearchResultRange = document.getElementById("portalSearchResultRange");
       const portalSearchPagination = document.getElementById("portalSearchPagination");
@@ -6561,8 +6563,10 @@
           metadata.push(["研究方向", item.tags.slice(0, 2).join("、")]);
         } else if (item.conference) {
           const meeting = item.conference;
-          metadata.push(["地点", meeting.location || "待公布"]);
-          metadata.push(["举办状态", conferenceCatalog.statusLabel(meeting)]);
+          if (meeting.location) metadata.push(["地点", meeting.location]);
+          if (conferenceCatalog.status(meeting) !== "unknown") {
+            metadata.push(["举办状态", conferenceCatalog.statusLabel(meeting)]);
+          }
           if (Number.isFinite(meeting.submissionCount)) {
             metadata.push(["投稿数", meeting.submissionCount.toLocaleString("zh-CN"),
               meeting.submissionSourceUrl || meeting.metricSourceUrl, meeting.metricNote]);
@@ -6572,7 +6576,7 @@
             metadata.push(["参与人数", participants, meeting.participantSourceUrl || meeting.metricSourceUrl, meeting.metricNote]);
           }
           if (Number.isFinite(meeting.heatValue)) {
-            metadata.push(["会议热度", meeting.heatValue.toLocaleString("zh-CN")]);
+            metadata.push(["会议热度", meeting.heatValue.toLocaleString("zh-CN") + " 人"]);
           }
         } else {
           metadata.push(["来源", item.source]);
@@ -8461,11 +8465,12 @@
             <div class="portal-result-main">
               <h3 class="portal-search-card-title">${titleControl}</h3>
               <dl class="portal-result-metadata">${metadataMarkup}</dl>
-              ${isReportFulltext() && item.type === "报告" ? reportHitsMarkup(item) : `<p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>`}
+              ${item.conference ? "" : isReportFulltext() && item.type === "报告" ? reportHitsMarkup(item) : `<p class="portal-search-card-summary">${highlightResultText(item.summary, query)}</p>`}
             </div>
             <div class="portal-result-bottomline">
               <div class="portal-search-card-tags"><span class="portal-search-card-tag portal-resource-tag">${escapeHtml(resourceLabel)}</span>${item.conference ? "" : item.tags.slice(0, 3).map((tag) => `<span class="portal-search-card-tag portal-related-tag">${escapeHtml(tag)}</span>`).join("")}</div>
-              <div class="portal-result-date"><span>${dateLabel}</span>${dateMarkup}</div>
+              ${!item.conference || (item.conference.startDate && item.conference.endDate)
+                ? `<div class="portal-result-date"><span>${dateLabel}</span>${dateMarkup}</div>` : ""}
             </div>
             <div class="portal-result-supplemental">
               ${associationReasonMarkup}
@@ -8547,6 +8552,10 @@
         portalSearchResultList.replaceChildren(...visibleItems.map(createSearchResultCard));
         portalSearchResultList.setAttribute("aria-busy", "false");
         portalSearchResultList.hidden = visibleItems.length === 0;
+        const conferenceRecommendation = activeSearchType === "会议" && items.length
+          ? conferenceCatalog?.combinedRecommendation("recent", { candidateIds: new Set(items.map(item => item.id)) })
+          : null;
+        conferenceCatalog?.renderCombinedRecommendation(portalConferenceCombined, conferenceRecommendation);
         portalSearchEmpty.hidden = visibleItems.length !== 0;
         updateSearchModePanels({ candidates: associationCandidates, items, visibleItems });
         renderResultQueryControls();

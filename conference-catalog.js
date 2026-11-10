@@ -88,6 +88,42 @@
     return [...upcoming, ...ended].map(item => ({ item }));
   }
 
+  function combinedRecommendation(mode, { candidateIds, now = Date.now() } = {}) {
+    const hotScores = new Map(rank("hot").map(({ item, score }) => [item.id, score]));
+    const eligible = rank("recent", { includeEnded: true, now })
+      .filter(({ item }) => hotScores.has(item.id) && (!candidateIds || candidateIds.has(item.id)));
+    const dateWeight = mode === "hot" ? 0.3 : 0.7;
+    let best = null;
+    let bestScore = -1;
+    eligible.forEach(({ item }, index) => {
+      const dateScore = 1 - index / Math.max(1, eligible.length - 1);
+      const score = dateScore * dateWeight + hotScores.get(item.id) * (1 - dateWeight);
+      if (score > bestScore) {
+        best = item;
+        bestScore = score;
+      }
+    });
+    return best;
+  }
+
+  function renderCombinedRecommendation(row, item) {
+    row.replaceChildren();
+    row.hidden = !item;
+    if (!item) return;
+
+    const label = document.createElement("strong");
+    label.textContent = "综合推荐";
+    const name = item.detailUrl ? document.createElement("a") : document.createElement("span");
+    name.textContent = item.name;
+    if (item.detailUrl) {
+      name.href = item.detailUrl;
+      name.target = "_blank";
+      name.rel = "noopener noreferrer";
+      name.addEventListener("click", () => recordView(item.id));
+    }
+    row.append(label, " ", name);
+  }
+
   function recordView(id) {
     if (!ids.has(id)) return;
     try {
@@ -118,6 +154,6 @@
 
   window.PortalConferenceCatalog = {
     items, matches, status, statusLabel: item => stateLabels[status(item)],
-    formatDates, participantLabel, rank, recordView
+    formatDates, participantLabel, rank, combinedRecommendation, renderCombinedRecommendation, recordView
   };
 })();

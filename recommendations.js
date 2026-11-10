@@ -341,6 +341,7 @@
   const risingStars = document.getElementById("recRisingStars");
   const conferenceTabs = Array.from(document.querySelectorAll("[data-conference-mode]"));
   const conferenceStatus = document.getElementById("recConferenceStatus");
+  const conferenceCombined = document.getElementById("recConferenceCombined");
   const conferenceGrid = document.getElementById("recConferenceGrid");
   const courseStatus = document.getElementById("recCourseStatus");
   const courseGrid = document.getElementById("recCourseGrid");
@@ -1838,6 +1839,9 @@
       conferenceGrid.append(empty);
     }
     conferenceGrid.setAttribute("aria-busy", "false");
+    conferenceCatalog?.renderCombinedRecommendation(
+      conferenceCombined, conferenceCatalog.combinedRecommendation(activeConferenceMode)
+    );
   }
 
   function setConferenceMode(mode, moveFocus) {

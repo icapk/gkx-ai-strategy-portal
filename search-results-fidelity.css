@@ -446,6 +446,9 @@ body:has(#searchResultsPage:not([hidden])) #siteHeader::before {
 }
 @media (prefers-reduced-motion: reduce) { .portal-result-action-menu:popover-open { animation: none; } }
 .portal-search-page .portal-search-card-action { min-height: 28px; border-color: #e5e6eb; border-radius: 4px; color: #165dff; background: #fff; font-size: 12px; }
+.portal-search-page .portal-conference-combined { margin: 0; padding: 12px 24px; border-top: 1px solid #f2f3f5; color: #4e5969; font-size: 14px; }
+.portal-search-page .portal-conference-combined strong { margin-right: 8px; }
+.portal-search-page .portal-conference-combined a { color: #165dff; text-decoration: underline; text-underline-offset: 2px; }
 .portal-search-page .portal-search-pagination { justify-content: flex-end; margin: 0; padding: 16px 24px; }
 .portal-search-page .portal-search-pagination[hidden] { display: none; }
 .portal-search-page .portal-search-pagination .arco-pagination { flex-wrap: wrap; justify-content: flex-end; }
