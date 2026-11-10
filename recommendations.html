@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="personal-entry.css?v=20261102-account-menu">
   <link rel="stylesheet" href="personal-account-menu.css?v=20261102-neutral-text">
   <link rel="stylesheet" href="assets/portal-search-return.css?v=20261101-recommendations-release">
-  <link rel="stylesheet" href="recommendations-unified.css?v=20261110-conference-load-more">
+  <link rel="stylesheet" href="recommendations-unified.css?v=20261110-conference-overview">
   <link rel="stylesheet" href="recommendations-content-polish.css?v=20261101-5">
   <link rel="stylesheet" href="recommendations-hotwords.css?v=20261101-1">
   <link rel="stylesheet" href="recommendations-actions.css?v=20261101-1">
@@ -245,14 +245,16 @@
             <button class="is-active" id="recConferenceTabRecent" type="button" role="tab" aria-selected="true" aria-controls="recConferenceGrid" tabindex="0" data-conference-mode="recent" disabled>最近会议</button>
             <button id="recConferenceTabHot" type="button" role="tab" aria-selected="false" aria-controls="recConferenceGrid" tabindex="-1" data-conference-mode="hot" disabled>热门会议</button>
           </div>
-          <div class="rec-module-status rec-conference-status" id="recConferenceStatus" role="status" hidden></div>
+          <div class="rec-conference-overview">
+            <div class="rec-module-status rec-conference-status" id="recConferenceStatus" role="status" hidden></div>
+            <p class="rec-conference-combined" id="recConferenceCombined" aria-live="polite" hidden></p>
+          </div>
           <div class="rec-conference-grid" id="recConferenceGrid" role="tabpanel" aria-labelledby="recConferenceTabRecent" aria-busy="true" tabindex="0">
             <p class="rec-loading-state">正在加载顶会推荐…</p>
           </div>
           <div class="rec-conference-more">
             <button class="rec-action-button arco-btn arco-btn-outline" id="recConferenceMore" type="button" aria-controls="recConferenceGrid" data-rec-arco="conference-more" hidden>加载更多</button>
           </div>
-          <p class="rec-conference-combined" id="recConferenceCombined" aria-live="polite" hidden></p>
         </section>
 
         <section class="rec-panel rec-panel--courses" id="courses" data-rec-section="courses" aria-label="课程推荐">

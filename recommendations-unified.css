@@ -158,10 +158,17 @@ body:has(#recommendationMain) #recHeader::before { display: none; }
 .rec-report-card figure, .rec-course-card figure { display: none; }
 .rec-course-card { display: block; }
 .rec-course-card > div { padding: 0; }
-.rec-conference-status { margin: 12px 0 0; }
+.rec-conference-overview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding-top: 12px;
+}
+.rec-conference-overview:not(:has(> :not([hidden]))) { display: none; }
 .rec-conference-more { text-align: center; }
 #recommendationMain .rec-conference-more .rec-action-button.arco-btn { margin: 16px 0; }
-.rec-conference-combined { margin: 0; padding: 12px 20px; border-top: 1px solid #f2f3f5; color: #4e5969; font-size: 14px; }
+.rec-conference-combined { margin: 0 0 0 auto; color: #4e5969; font-size: 14px; line-height: 20px; }
 .rec-conference-combined strong { margin-right: 8px; }
 .rec-conference-combined a { color: #165dff; text-decoration: underline; text-underline-offset: 2px; }
 .rec-conference-card > header h3 { margin: 0; }
