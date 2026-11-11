@@ -56,6 +56,117 @@ export default [
             { label: "示例系统" }
           ]
         },
+        // 本地导航演示项，复用现有页面以查看菜单溢出样式。
+        {
+          "label": "语音模块",
+          "demo": true,
+          "items": [
+            {
+              "label": "语音增强与适配工作台",
+              "url": "apps/voice-enhancement/index.html",
+              "action": "embed",
+              "embedTitle": "语音增强与适配工作台"
+            }
+          ]
+        },
+        {
+          "label": "关键数据更新订阅推送系统",
+          "demo": true,
+          "items": [
+            {
+              "label": "科研情报智能推荐",
+              "url": "recommendations.html"
+            },
+            {
+              "label": "个人订阅与关注",
+              "url": "personal-center.html"
+            }
+          ]
+        },
+        {
+          "label": "科技情报挖掘",
+          "demo": true,
+          "items": [
+            {
+              "label": "科技信息交流",
+              "url": "apps/cluster-service/dist/index.html?page=information-exchange&embed=portal",
+              "action": "embed",
+              "embedTitle": "科技信息交流",
+              "hideEmbeddedToolbar": true
+            }
+          ]
+        },
+        {
+          "label": "AI战略咨询",
+          "demo": true,
+          "items": [
+            {
+              "label": "科技决策支持",
+              "url": "apps/cluster-service/dist/index.html?page=technology-decision-support&embed=portal",
+              "action": "embed",
+              "embedTitle": "科技决策支持",
+              "hideEmbeddedToolbar": true
+            }
+          ]
+        },
+        {
+          "label": "AI教育",
+          "demo": true,
+          "items": [
+            {
+              "label": "未来教育服务",
+              "url": "education.html"
+            }
+          ]
+        },
+        {
+          "label": "AI科研",
+          "demo": true,
+          "items": [
+            {
+              "label": "智能科研",
+              "url": "apps/research-reading/dist/index.html?view=research&v=20260919-local-candidate",
+              "action": "embed",
+              "embedTitle": "智能科研",
+              "hideEmbeddedToolbar": true
+            },
+            {
+              "label": "智能阅读",
+              "url": "apps/research-reading/dist/index.html?view=reading&v=20260919-local-candidate",
+              "action": "embed",
+              "embedTitle": "智能阅读",
+              "hideEmbeddedToolbar": true
+            }
+          ]
+        },
+        {
+          "label": "权限管理",
+          "demo": true,
+          "items": [
+            {
+              "label": "管理后台",
+              "url": "apps/portal-admin/dist/index.html?v=20260826-user-data-api",
+              "action": "embed",
+              "embedTitle": "后台管理一",
+              "hideEmbeddedToolbar": true,
+              "hideEmbeddedHeader": true,
+              "headerCropPx": 64
+            }
+          ]
+        },
+        {
+          "label": "审核工作台",
+          "demo": true,
+          "items": [
+            {
+              "label": "门户数据运营",
+              "url": "portal-admin-2.html",
+              "action": "embed",
+              "embedTitle": "门户数据运营",
+              "hideEmbeddedToolbar": true
+            }
+          ]
+        },
         {
           label: "集群服务",
           items: [

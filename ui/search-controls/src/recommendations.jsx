@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Button from '@arco-design/web-react/es/Button';
 import Tabs from '@arco-design/web-react/es/Tabs';
@@ -86,14 +86,18 @@ mount(document.getElementById('recSearchReturnMount'), <SearchReturn id="recSear
 
 function NavigationGroup({ group, utility = false }) {
   const [open, setOpen] = useState(false);
+  const scrollUntil = useRef(0);
   useEffect(() => {
     const close = event => { if (event.detail !== group.label) setOpen(false); };
     const escape = event => { if (event.key === 'Escape') setOpen(false); };
+    const scrolling = () => { scrollUntil.current = performance.now() + 400; setOpen(false); };
     document.addEventListener('rec-header-menu-open', close);
     document.addEventListener('keydown', escape);
-    return () => { document.removeEventListener('rec-header-menu-open', close); document.removeEventListener('keydown', escape); };
+    document.addEventListener('portal-navigation-scroll', scrolling);
+    return () => { document.removeEventListener('rec-header-menu-open', close); document.removeEventListener('keydown', escape); document.removeEventListener('portal-navigation-scroll', scrolling); };
   }, [group.label]);
   const changeOpen = value => {
+    if (value && performance.now() < scrollUntil.current) return;
     setOpen(value);
     if (value) document.dispatchEvent(new CustomEvent('rec-header-menu-open', { detail: group.label }));
   };

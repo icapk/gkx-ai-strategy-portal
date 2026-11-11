@@ -1,0 +1,82 @@
+/* Overflow controls inherit the portal header's glass treatment. */
+.portal-nav-scroll { display: contents; }
+.portal-nav-scroll-button { display: none; }
+
+:is(#siteHeader, #recHeader, .lp-header) .portal-nav-scroll.is-desktop {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  align-self: stretch;
+}
+
+:is(#siteHeader, #recHeader, .lp-header) .portal-nav-scroll.is-desktop > nav {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.portal-nav-scroll.is-desktop > nav::-webkit-scrollbar { display: none; }
+.portal-nav-scroll.is-desktop > nav > * { flex: 0 0 auto; }
+
+:is(#siteHeader, #recHeader, .lp-header) .portal-nav-scroll.is-desktop :is(.nav-trigger, .portal-glass-tab) {
+  width: auto;
+  min-width: var(--portal-tab-width, 88px);
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.portal-nav-scroll.is-desktop.is-overflowing > nav {
+  padding-inline: 40px;
+  scroll-padding-inline: 40px;
+  --nav-fade-start: 0px;
+  --nav-fade-end: 0px;
+  --nav-mask-start: 0px;
+  --nav-mask-end: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent var(--nav-mask-start), #000 var(--nav-fade-start), #000 calc(100% - var(--nav-fade-end)), transparent calc(100% - var(--nav-mask-end)));
+  mask-image: linear-gradient(to right, transparent var(--nav-mask-start), #000 var(--nav-fade-start), #000 calc(100% - var(--nav-fade-end)), transparent calc(100% - var(--nav-mask-end)));
+}
+
+/* Keep all text out of the 40px arrow area; fade only in the next 24px. */
+.portal-nav-scroll.is-desktop.is-overflowing[data-can-scroll-left="true"] > nav { --nav-mask-start: 40px; --nav-fade-start: 64px; }
+.portal-nav-scroll.is-desktop.is-overflowing[data-can-scroll-right="true"] > nav { --nav-mask-end: 40px; --nav-fade-end: 64px; }
+
+.portal-nav-scroll.is-desktop .portal-nav-scroll-button {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .8);
+  border-radius: 50%;
+  padding: 0;
+  color: #165dff;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 2px 6px rgba(52, 84, 127, .1);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.portal-nav-scroll-button[hidden] { display: none !important; }
+.portal-nav-scroll-button[data-direction="left"] { left: 4px; }
+.portal-nav-scroll-button[data-direction="right"] { right: 4px; }
+.portal-nav-scroll.is-desktop .portal-nav-scroll-button:is(:hover, :focus-visible) { color: #165dff; background: #fff; }
+.portal-nav-scroll.is-desktop .portal-nav-scroll-button:active { background: #e8f3ff; }
+.portal-nav-scroll.is-desktop .portal-nav-scroll-button:focus-visible { outline: 2px solid rgba(22, 93, 255, .4); outline-offset: 2px; }
+.portal-nav-scroll-chevron { width: 7px; height: 7px; border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor; transform: translateX(-1px) rotate(45deg); }
+.portal-nav-scroll-button[data-direction="left"] .portal-nav-scroll-chevron { transform: translateX(1px) rotate(-135deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-nav-scroll.is-desktop .portal-nav-scroll-button { transition: none; }
+}

@@ -38,6 +38,8 @@ export function TopicOutlineSelect<T extends string>({
 
 type TopicOutlineInputProps = {
   ariaLabel: string;
+  ariaControls?: string;
+  ariaExpanded?: boolean;
   className?: string;
   maxLength?: number;
   onChange: (value: string) => void;
@@ -50,6 +52,8 @@ type TopicOutlineInputProps = {
 
 export function TopicOutlineInput({
   ariaLabel,
+  ariaControls,
+  ariaExpanded,
   className = "",
   maxLength,
   onChange,
@@ -61,6 +65,11 @@ export function TopicOutlineInput({
 }: TopicOutlineInputProps) {
   return <Input
     aria-label={ariaLabel}
+    aria-controls={ariaControls}
+    aria-expanded={ariaExpanded}
+    aria-haspopup={ariaExpanded === undefined ? undefined : "dialog"}
+    aria-autocomplete={ariaExpanded === undefined ? undefined : "none"}
+    role={ariaExpanded === undefined ? undefined : "combobox"}
     className={`tp-arco-outline tp-arco-outline-input is-${size} ${className}`.trim()}
     maxLength={maxLength}
     onChange={onChange}

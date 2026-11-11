@@ -38,7 +38,6 @@ import {
   Newspaper,
   RotateCcw,
   Search,
-  SearchCheck,
   Send,
   ShieldCheck,
   Upload,
@@ -229,7 +228,6 @@ const moduleDefinitions: ModuleDefinition[] = [
     icon: FileSearch2,
     subs: [
       { id: "portal-search", label: "门户全文检索查询" },
-      { id: "search-results", label: "检索结果展示" },
     ],
   },
 ];
@@ -2853,92 +2851,107 @@ function PlatformContent({ subId, showToast, onNavigate }: { subId: string; show
   return <PlatformPositionContent onNavigate={onNavigate} />;
 }
 
-type SearchRecord = { id: string; module: ModuleId; sub: string; section: string; title: string; content: string };
-
-const searchableRecords: SearchRecord[] = [
-  { id: "s1", module: "panorama", sub: "chain", section: "专题全景", title: "产业链全景与细分产业节点", content: "展示上游产业、下游产业、细分产业、主流工艺、产业环节和依赖关系。" },
-  { id: "s2", module: "frontier", sub: "tech-overview", section: "科技前沿", title: "未来产业总体技术概况", content: "展示论文数量、专利数量、区域分布、机构主体与技术资讯统计。" },
-  { id: "s3", module: "enterprise", sub: "enterprise-map", section: "企业发展", title: "重点企业全景图", content: "按产业分类展示全产业链重点企业、规模类型与领域分布。" },
-  { id: "s4", module: "research", sub: "leading-research", section: "科研力量", title: "专题产业领先科研机构", content: "依据论文、专利、人数等指标展示科研机构评价结构。" },
-  { id: "s5", module: "talent", sub: "talent-domain", section: "领军人才", title: "人才领域分布", content: "结合产业链及技术链展示产业人才和技术人才分布。" },
-  { id: "s6", module: "service", sub: "service-capability", section: "专题服务", title: "服务机构技术能力", content: "按固定指标维度评价各产业服务机构技术能力。" },
-  { id: "s7", module: "policy", sub: "policy-coverage", section: "政策扶持", title: "政策产业覆盖", content: "结合产业链展示各产业链节点的政策覆盖情况。" },
-  { id: "s8", module: "one-map", sub: "map-tools", section: "专题一张图", title: "地图分析工具", content: "支持行政区边界切换、下拉切换和重点企业科研机构要素定位。" },
-  { id: "s9", module: "reports", sub: "report-catalog", section: "专题研究报告", title: "产研报告目录", content: "根据产业类型、发布时间和研究机构对产业报告进行分类筛选。" },
-  { id: "s10", module: "platform", sub: "platform-feedback", section: "平台介绍", title: "问题咨询反馈", content: "支持文字、图片和附件咨询，查看运营团队回复与新回复提醒。" },
-];
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function HighlightText({ text, query, regexMode }: { text: string; query: string; regexMode: boolean }) {
-  if (!query) return <>{text}</>;
-  try {
-    const source = regexMode ? query : escapeRegExp(query);
-    const regex = new RegExp(`(${source})`, "gi");
-    return <>{text.split(regex).map((part, index) => regex.test(part) ? <mark key={`${part}-${index}`}>{part}</mark> : <span key={`${part}-${index}`}>{part}</span>)}</>;
-  } catch {
-    return <>{text}</>;
-  }
-}
-
-function SearchContent({ subId, onNavigate }: { subId: string; onNavigate: (module: ModuleId, sub: string) => void }) {
+function SearchContent({ showToast }: { showToast: (message: string) => void }) {
   const [query, setQuery] = useState("产业链");
-  const [submittedQuery, setSubmittedQuery] = useState("产业链");
   const [mode, setMode] = useState<"fuzzy" | "regex">("fuzzy");
-  const [sectionFilter, setSectionFilter] = useState("全部板块");
   const [error, setError] = useState("");
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const inputArea = useRef<HTMLDivElement>(null);
+  const skipAssistantFocus = useRef(false);
   const [history, setHistory] = useState<string[]>(() => {
     try {
       const parsed = JSON.parse(window.localStorage.getItem("tp-search-history") ?? "[]");
       return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string").slice(0, 6) : [];
     } catch { return []; }
   });
-  useEffect(() => { window.localStorage.setItem("tp-search-history", JSON.stringify(history)); }, [history]);
-  const runSearch = (value = query, nextMode = mode) => {
+  useEffect(() => {
+    try { window.localStorage.setItem("tp-search-history", JSON.stringify(history)); } catch { /* Retain history for this session. */ }
+  }, [history]);
+  useEffect(() => {
+    if (!assistantOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (!inputArea.current?.contains(event.target as Node)) setAssistantOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
+  }, [assistantOpen]);
+  const focusQuery = (keepAssistantClosed = false) => {
+    const field = inputArea.current?.querySelector<HTMLInputElement>('input[aria-label="全文检索关键词"]');
+    if (field && document.activeElement !== field) {
+      skipAssistantFocus.current = keepAssistantClosed;
+      field.focus({ preventScroll: true });
+    }
+  };
+  const chooseQuery = (value: string) => {
+    setQuery(value);
+    setError("");
+    setAssistantOpen(false);
+    focusQuery(true);
+  };
+  const changeMode = (nextMode: "fuzzy" | "regex") => {
+    setMode(nextMode);
+    setError("");
+    setAssistantOpen(false);
+  };
+  const runSearch = (value = query) => {
+    setAssistantOpen(false);
     const normalized = value.trim();
     if (!normalized) { setError("请输入需要检索的关键词或关联表达式。"); return; }
     if (normalized.length > 80) { setError("检索内容请控制在 80 个字符以内。"); return; }
-    if (nextMode === "regex") {
+    if (mode === "regex") {
       try { new RegExp(normalized, "i"); } catch { setError("关联搜索表达式无法解析，请检查正则语法。"); return; }
     }
-    setError(""); setSubmittedQuery(normalized); setQuery(normalized);
+    setError("");
+    setQuery(normalized);
     setHistory((current) => [normalized, ...current.filter((item) => item !== normalized)].slice(0, 6));
+    showToast(`已更新检索条件：“${normalized}”`);
   };
-  const results = useMemo(() => {
-    if (!submittedQuery) return searchableRecords;
-    try {
-      const matcher = mode === "regex" ? new RegExp(submittedQuery, "i") : null;
-      return searchableRecords.filter((item) => {
-        const haystack = `${item.title}${item.content}${item.section}`;
-        const matches = matcher ? matcher.test(haystack) : haystack.toLocaleLowerCase().includes(submittedQuery.toLocaleLowerCase());
-        return matches && (sectionFilter === "全部板块" || item.section === sectionFilter);
-      });
-    } catch { return []; }
-  }, [mode, sectionFilter, submittedQuery]);
-  const counts = searchableRecords.reduce<Record<string, number>>((acc, item) => { acc[item.section] = (acc[item.section] ?? 0) + Number(results.some((result) => result.id === item.id)); return acc; }, {});
-  const searchForm = <>
-    <form className="tp-global-search" onSubmit={(event) => { event.preventDefault(); runSearch(); }}>
-      <div className="tp-search-mode" role="group" aria-label="检索方式"><button className={mode === "fuzzy" ? "active" : ""} type="button" aria-pressed={mode === "fuzzy"} onClick={() => setMode("fuzzy")}>模糊搜索</button><button className={mode === "regex" ? "active" : ""} type="button" aria-pressed={mode === "regex"} onClick={() => setMode("regex")}>关联搜索</button></div>
-      <label><TopicOutlineInput ariaLabel="全文检索关键词" value={query} onChange={setQuery} placeholder={mode === "regex" ? "输入正则表达式，如 产业链|技术链" : "输入标题或正文关键词"} prefix={<Search size={20} aria-hidden="true" />} size="regular" /><button type="submit">开始检索<SearchCheck size={17} /></button></label>
-      {error && <p role="alert"><CircleAlert size={15} />{error}</p>}
-    </form>
-    <div className="tp-search-shortcuts">
-      <section><header><History size={15} /><strong>历史搜索</strong>{history.length > 0 && <button type="button" onClick={() => setHistory([])}>清除</button>}</header><div>{history.length ? history.map((item) => <button type="button" onClick={() => runSearch(item)} key={item}>{item}</button>) : <small>暂无本机历史搜索记录</small>}</div></section>
-      <section><header><Flame size={15} /><strong>演示热词</strong><DemoBadge>非真实用户统计</DemoBadge></header><div>{["产业链", "技术链", "深圳", "科研机构", "政策", "研究报告"].map((item) => <button type="button" onClick={() => runSearch(item)} key={item}>{item}</button>)}</div></section>
-    </div>
-  </>;
-  if (subId === "portal-search") return <Panel title="门户全文检索查询" description="支持模糊搜索、关联搜索、历史搜索与热词搜索" action={<DemoBadge>检索数据集为演示</DemoBadge>}>{searchForm}</Panel>;
-  return <>
-    <Panel title="门户全文检索查询" description="修改检索条件后即时更新结果">{searchForm}</Panel>
-    <Panel title="检索结果展示" description={`“${submittedQuery}”的演示检索结果`} action={<span className="tp-result-count">共 <strong>{results.length}</strong> 条</span>}>
-      <div className="tp-search-results-layout">
-        <aside><button className={sectionFilter === "全部板块" ? "active" : ""} type="button" onClick={() => setSectionFilter("全部板块")}><span>全部板块</span><b>{results.length}</b></button>{Array.from(new Set(searchableRecords.map((item) => item.section))).map((section) => <button className={sectionFilter === section ? "active" : ""} type="button" onClick={() => setSectionFilter(section)} key={section}><span>{section}</span><b>{counts[section] ?? 0}</b></button>)}</aside>
-        <div>{results.length ? results.map((item) => <article key={item.id}><span>{item.section}</span><h4><HighlightText text={item.title} query={submittedQuery} regexMode={mode === "regex"} /></h4><p><HighlightText text={item.content} query={submittedQuery} regexMode={mode === "regex"} /></p><button type="button" onClick={() => onNavigate(item.module, item.sub)}>前往对应内容<ArrowRight size={15} /></button></article>) : <div className="tp-empty-state"><FileSearch2 size={30} /><strong>未找到匹配内容</strong><p>请尝试更换关键词、检索方式或板块筛选。</p></div>}</div>
+  return <div className="tp-fulltext-search">
+    <form className="tp-global-search tp-fulltext-search-form" onSubmit={(event) => { event.preventDefault(); runSearch(); }}>
+      <div className="tp-fulltext-query-panel">
+        <div className="tp-fulltext-search-row">
+          <div className="tp-fulltext-input-area" ref={inputArea}
+            onPointerDown={(event) => { if (event.target instanceof HTMLInputElement) setAssistantOpen(true); }}
+            onFocus={(event) => {
+              if (event.target instanceof HTMLElement && event.target.closest(".tp-fulltext-mode-picker")) {
+                setAssistantOpen(false);
+                return;
+              }
+              if (!(event.target instanceof HTMLInputElement)) return;
+              if (skipAssistantFocus.current) { skipAssistantFocus.current = false; return; }
+              setAssistantOpen(true);
+            }}
+            onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setAssistantOpen(false); }}
+            onKeyDown={(event) => {
+              if (event.target instanceof HTMLElement && event.target.closest(".tp-fulltext-mode-picker")) return;
+              if (event.key === "Escape") {
+                event.preventDefault(); event.stopPropagation(); setAssistantOpen(false); focusQuery(true);
+              } else if (event.key === "ArrowDown" && event.target instanceof HTMLInputElement) {
+                event.preventDefault(); setAssistantOpen(true);
+                window.requestAnimationFrame(() => inputArea.current?.querySelector<HTMLButtonElement>(".tp-search-shortcuts section > div button")?.focus());
+              }
+            }}>
+            <div className="tp-fulltext-mode-picker" onPointerDown={() => setAssistantOpen(false)}>
+              <TopicOutlineSelect ariaLabel="检索方式" className="tp-fulltext-mode-select" value={mode === "fuzzy" ? "模糊搜索" : "关联搜索"} options={["模糊搜索", "关联搜索"]} onChange={(value) => changeMode(value === "模糊搜索" ? "fuzzy" : "regex")} size="regular" />
+            </div>
+            <TopicOutlineInput ariaLabel="全文检索关键词" ariaExpanded={assistantOpen} ariaControls={assistantOpen ? "tp-search-assistant" : undefined} value={query} onChange={(value) => { setQuery(value); setAssistantOpen(true); }} placeholder={mode === "regex" ? "输入关联表达式，如 产业链|技术链" : "输入标题或正文关键词"} prefix={<Search size={18} aria-hidden="true" />} size="regular" />
+            {assistantOpen && <div id="tp-search-assistant" className="tp-search-shortcuts" role="dialog" aria-label="历史搜索" aria-modal="false">
+              <section aria-labelledby="tp-fulltext-history-title">
+                <header><History size={16} aria-hidden="true" /><h3 id="tp-fulltext-history-title">历史搜索</h3>{history.length > 0 && <button type="button" onClick={() => { setHistory([]); focusQuery(); }}>清除</button>}</header>
+                <div>{history.length ? history.map((item) => <button type="button" onClick={() => chooseQuery(item)} key={item}>{item}</button>) : <small>暂无本机历史搜索记录</small>}</div>
+              </section>
+            </div>}
+          </div>
+          <button className="tp-fulltext-submit" type="submit">开始检索</button>
+        </div>
+        <section className="tp-fulltext-hotwords" aria-labelledby="tp-fulltext-hotwords-title">
+          <h3 id="tp-fulltext-hotwords-title"><Flame size={14} aria-hidden="true" />热词搜索</h3>
+          <div>{["产业链", "技术链", "深圳", "科研机构", "政策", "研究报告"].map((item) => <button type="button" onClick={() => chooseQuery(item)} key={item}>{item}</button>)}</div>
+        </section>
+        {error && <p className="tp-fulltext-error" role="alert"><CircleAlert size={15} aria-hidden="true" />{error}</p>}
       </div>
-    </Panel>
-  </>;
+    </form>
+  </div>;
 }
 
 function renderModuleContent({ moduleId, subId, industry, openDialog, showToast, onNavigate, selectedReportId, onSelectReport }: {
@@ -2962,7 +2975,7 @@ function renderModuleContent({ moduleId, subId, industry, openDialog, showToast,
     case "one-map": return <OneMapModule subId={subId} industry={industry} />;
     case "reports": return <ReportsContent subId={subId} industry={industry} selectedReportId={selectedReportId} onSelectReport={onSelectReport} showToast={showToast} />;
     case "platform": return <PlatformContent subId={subId} showToast={showToast} onNavigate={onNavigate} />;
-    case "search": return <SearchContent subId={subId} onNavigate={onNavigate} />;
+    case "search": return <SearchContent showToast={showToast} />;
   }
 }
 
@@ -2978,9 +2991,7 @@ export default function TechnologyTopicServicePage() {
   const activeDefinition = moduleById.get(activeModule) ?? moduleDefinitions[0];
   const ActiveIcon = activeDefinition.icon;
   const moduleContextLabel = activeModule === "platform" ? "门户公共信息" : `${industry}专题`;
-  const flatSubItems = activeModule === "search"
-    ? [{ ...activeDefinition.subs[0], label: "门户全文检索与结果展示", renderSub: "search-results" }]
-    : activeDefinition.subs.map((sub) => ({ ...sub, renderSub: sub.id }));
+  const flatSubItems = activeDefinition.subs.map((sub) => ({ ...sub, renderSub: sub.id }));
 
   useEffect(() => {
     if (activeModule !== "reports") return;
@@ -3103,6 +3114,25 @@ export default function TechnologyTopicServicePage() {
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => document.getElementById("tp-subsection-report-view")?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" })));
   };
 
+  if (activeModule === "search") return <main className="tp-page tp-one-map-figma-page tp-fulltext-page">
+    <div id="tp-workspace" className="tp-one-map-figma">
+      <nav className="tp-one-map-directory" aria-label="科技专题服务一级功能">
+        {moduleDefinitions.map((item) => <button className={item.id === "search" ? "active" : ""} type="button" aria-current={item.id === "search" ? "page" : undefined} onClick={() => selectModule(item.id, true)} key={item.id}>{item.label}</button>)}
+      </nav>
+      <section className="tp-one-map-glass" aria-labelledby="tp-fulltext-title">
+        <div className="tp-one-map-content tp-fulltext-content">
+          <section id="tp-subsection-portal-search" className="tp-fulltext-section">
+            <header className="tp-fulltext-intro">
+              <div><h2 id="tp-fulltext-title">门户全文检索查询</h2><p>支持模糊搜索、关联搜索、历史搜索与热词搜索。</p></div>
+            </header>
+            <SearchContent key={industry} showToast={showToast} />
+          </section>
+        </div>
+      </section>
+    </div>
+    {toast && <div className="tp-toast" role="status"><CheckCircle2 size={17} aria-hidden="true" />{toast}</div>}
+  </main>;
+
   if (activeModule === "one-map") return <main className="tp-page tp-one-map-figma-page">
     <div id="tp-workspace" className="tp-one-map-figma" data-node-id="1162:2016">
       <nav className="tp-one-map-directory" aria-label="科技专题服务一级功能" data-node-id="1162:2091">
@@ -3157,7 +3187,7 @@ export default function TechnologyTopicServicePage() {
 
         <div className="tp-workspace">
           <div id="tp-module-panel" className="tp-module-content tp-module-content-flat" key={`${activeModule}-${industry}`}>
-            {flatSubItems.map((sub) => <section id={`tp-subsection-${sub.id}`} className={`tp-flat-subsection${activeLocator === sub.id || activeModule === "search" ? " is-target" : ""}`} aria-labelledby={`tp-subsection-title-${sub.id}`} key={sub.id}>
+            {flatSubItems.map((sub) => <section id={`tp-subsection-${sub.id}`} className={`tp-flat-subsection${activeLocator === sub.id ? " is-target" : ""}`} aria-labelledby={`tp-subsection-title-${sub.id}`} key={sub.id}>
               <header className="tp-flat-subsection-header"><h3 id={`tp-subsection-title-${sub.id}`}>{sub.label}</h3><span>{moduleContextLabel} · {activeDefinition.label}</span></header>
               {renderModuleContent({ moduleId: activeModule, subId: sub.renderSub, industry, openDialog: setDialog, showToast, onNavigate: navigateToContent, selectedReportId, onSelectReport: selectReport })}
             </section>)}
