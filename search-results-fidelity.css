@@ -4,9 +4,14 @@ html { scrollbar-gutter: stable; }
 body[data-portal-scene="search"] { position: relative; isolation: isolate; background: #f7f8fa; }
 body[data-portal-scene="search"]::before {
   position: absolute; z-index: -1; top: -156px; left: 0; width: 100%; height: 1016px;
-  background: url("assets/figma-search-20261030/background.png") center / 2000px 1016px no-repeat;
-  -webkit-mask: url("assets/figma-search-20261030/background-mask-smooth.svg") center -42px / 2000px 1016px no-repeat;
-  mask: url("assets/figma-search-20261030/background-mask-smooth.svg") center -42px / 2000px 1016px no-repeat;
+  background-image: url("assets/figma-search-20261030/background.webp"), linear-gradient(110deg, #d5e7fc, #e8f1fe 50%, #e0e5fc);
+  background-position: center;
+  background-size: 2000px 1016px;
+  background-repeat: no-repeat;
+  /* Match the original SVG mask's alpha stops without a separate request. */
+  --portal-search-background-fade: linear-gradient(white 195px, rgba(255, 255, 255, 0.72) 289.05px, white 628.85px, transparent 1004px);
+  -webkit-mask: var(--portal-search-background-fade) center -42px / 2000px 1016px no-repeat;
+  mask: var(--portal-search-background-fade) center -42px / 2000px 1016px no-repeat;
   pointer-events: none; content: "";
 }
 body[data-portal-scene="search"] .site-main,

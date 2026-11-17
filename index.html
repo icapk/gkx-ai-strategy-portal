@@ -7,6 +7,7 @@
   <meta name="color-scheme" content="light">
   <meta name="description" content="深圳国际科技信息中心门户，连接 AI 科研、战略咨询、未来教育与科技评价核心服务。">
   <title>深圳国际科技信息中心｜科技创新服务门户</title>
+  <link rel="preload" as="image" href="assets/figma-search-20261030/background.webp" fetchpriority="high">
   <style>
     :root {
       --header-height: 68px;
@@ -3027,7 +3028,7 @@
   <link rel="stylesheet" href="home-content-surfaces.css?v=20261101-2">
   <link rel="stylesheet" href="home-evaluation-cards.css?v=20261102-2">
   <link rel="stylesheet" href="assets/vendor/portal-arco-search.css?v=20261031-portal-release-2">
-  <link rel="stylesheet" href="search-results-fidelity.css?v=20261110-conference-combined">
+  <link rel="stylesheet" href="search-results-fidelity.css?v=20261117-search-background">
   <link rel="stylesheet" href="ai-search-fidelity.css?v=20261031-motion-2">
   <link rel="stylesheet" href="portal-choice-controls.css?v=20261031-portal-release-2">
   <link rel="stylesheet" href="profile-content-preserved.css?v=20261102-account-menu">
@@ -3906,7 +3907,7 @@
               <p>跨论文、专利、专家与科技报告，快速发现可信科研知识</p>
             </header>
 
-            <form class="mg-search-card" id="mgHeroSearchForm" role="search" data-search-mode="ai" data-search-experience="classic" data-node-id="1202:329">
+            <form class="mg-search-card" id="mgHeroSearchForm" role="search" data-search-mode="keyword" data-search-experience="classic" data-node-id="1202:329">
               <img class="mg-search-surface" src="assets/figma-home-20261029/search-surface.svg" alt="" aria-hidden="true">
               <span class="mg-search-focus-outline" aria-hidden="true"></span>
               <div class="mg-search-mode-row" id="mgClassicSearchModeRow">
@@ -3935,9 +3936,9 @@
                     <img src="assets/announcement-close-figma.svg" width="12" height="12" alt="" aria-hidden="true">
                   </button>
                 </span>
-                <textarea id="mgHeroSearchInput" rows="1" wrap="soft" autocomplete="off" placeholder="输入关键词或完整研究问题，AI 将检索并解读相关科技资源"></textarea>
+                <textarea id="mgHeroSearchInput" rows="1" wrap="soft" autocomplete="off" placeholder="输入单个或多个关键词进行搜索，支持词位扩展"></textarea>
               </div>
-              <div class="mg-search-intents" id="mgFulltextShortcuts" role="group" aria-label="科研资源快捷入口" hidden>
+              <div class="mg-search-intents" id="mgFulltextShortcuts" role="group" aria-label="科研资源快捷入口">
                 <button id="mgRecommendationTabSimulation" type="button" aria-pressed="false" aria-controls="mgHeroIntentChip mgRecommendationPreview" data-recommendation-group="simulation">
                   <span class="mg-intent-icon mg-intent-icon--simulation" aria-hidden="true" data-node-id="1226:194"><span class="mg-intent-icon-glyph"><img class="mg-intent-icon-default" src="assets/figma-home-20261029/intent-simulation-idle.svg" alt=""><img class="mg-intent-icon-active" src="assets/figma-home-20261029/intent-simulation.svg" alt=""></span></span>
                   练仿真
@@ -3975,7 +3976,7 @@
                 <span class="mg-ai-search-guide-icon" aria-hidden="true">问</span>
                 <span>从可访问的论文、专利、专家与报告中检索证据，生成带编号引用和边界说明的回答</span>
               </div>
-              <div class="search-service-path" data-search-service-path="hero" aria-label="当前功能路径：基础服务，智能搜索，全文搜索；服务能力：信息搜索、搜索结果展示、搜索结果定位">
+              <div class="search-service-path" data-search-service-path="hero" aria-label="当前功能路径：基础服务，智能搜索，全文搜索；服务能力：信息搜索、搜索结果展示、搜索结果定位" hidden>
                 <span class="search-service-path-label">服务能力</span>
                 <span class="search-service-path-route">
                   <span class="search-service-path-node">基础服务</span>
@@ -3995,7 +3996,7 @@
                   <img src="assets/figma-home-20261029/voice.svg" alt="" aria-hidden="true">
                   <span class="mg-voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
                 </button>
-                <button class="mg-search-submit" type="submit" aria-label="开始全文搜索">
+                <button class="mg-search-submit" type="submit" aria-label="开始关键词搜索">
                   <img src="assets/figma-home-20261029/send.svg" alt="" aria-hidden="true">
                 </button>
               </div>
