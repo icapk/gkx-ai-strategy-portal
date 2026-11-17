@@ -378,17 +378,21 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
 .mg-hero .mg-search-intents {
   position: absolute;
   top: 168px;
+  right: 115px;
   left: 25px;
   display: flex;
+  flex-wrap: wrap;
   grid-template-columns: none;
   gap: 12px;
   margin: 0;
   padding: 0;
 }
 
-.mg-hero .mg-search-intents button {
+.mg-hero .mg-search-intents :is(button, a) {
+  display: inline-flex;
   height: 32px;
   min-height: 32px;
+  align-items: center;
   justify-content: center;
   gap: 4px;
   padding: 5px 16px;
@@ -399,6 +403,7 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
   font-size: 14px;
   font-weight: 400;
   line-height: 22px;
+  white-space: nowrap;
   transform: none;
 }
 
@@ -444,13 +449,13 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
 .mg-search-intents button:focus-visible .mg-intent-icon-active { opacity: 1; }
 
 .mg-hero .mg-search-intents button.is-active,
-.mg-hero .mg-search-intents button:hover {
+.mg-hero .mg-search-intents :is(button, a):hover {
   color: #165dff;
   background: #e8f3ff;
   font-weight: 500;
 }
 
-.mg-hero .mg-search-intents button:focus-visible {
+.mg-hero .mg-search-intents :is(button, a):focus-visible {
   outline: 2px solid #165dff;
   outline-offset: 2px;
 }
@@ -809,6 +814,12 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
   }
 }
 
+@media (max-width: 735px) {
+  .mg-hero .mg-search-card:has(.mg-search-intents:not([hidden])) {
+    height: 265px;
+  }
+}
+
 @media (max-width: 560px) {
   .mg-hero .mg-hero-inner {
     width: calc(100% - 32px);
@@ -831,6 +842,10 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
     min-height: 265px;
   }
 
+  .mg-hero .mg-search-card:has(.mg-search-intents:not([hidden])) {
+    height: 274px;
+  }
+
   .mg-hero .mg-hero-query-row {
     left: 17px;
     right: 17px;
@@ -842,13 +857,14 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
 
   .mg-hero .mg-search-intents {
     top: 146px;
+    right: auto;
     left: 17px;
     display: grid;
     grid-template-columns: repeat(2, max-content);
     gap: 8px;
   }
 
-  .mg-hero .mg-search-intents button {
+  .mg-hero .mg-search-intents :is(button, a) {
     padding: 5px 12px;
   }
 
@@ -890,7 +906,7 @@ body:has(#announcementBar:not([hidden])) .mg-hero {
     gap: 6px;
   }
 
-  .mg-hero .mg-search-intents button {
+  .mg-hero .mg-search-intents :is(button, a) {
     padding: 5px 9px;
   }
 
